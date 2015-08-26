@@ -4,14 +4,15 @@
 
 
 #include <stdint.h>
+#include <limits>
 
 template <class T>
 class stats
 {
     public:
     stats()
-        : m_min(tools::max_value<T>()),
-        m_max(-tools::max_value<T>()),
+    : m_min(numeric_limits<T>::max_value()),
+        m_max(numeric_limits<T>::min_value()),
         m_total(0),
         m_squared_total(0),
         m_count(0)
@@ -39,9 +40,7 @@ class stats
     }
     T rms()const
     {
-        BOOST_MATH_STD_USING
-
-            return sqrt(m_squared_total / static_cast<T>(m_count));
+        return sqrt(m_squared_total / static_cast<T>(m_count));
     }
     stats& operator+=(const stats& s)
     {

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3416C7C41B8DEB0000282C98 /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3416C7BD1B8DE86900282C98 /* libgtest_main.a */; };
+		3416C7C51B8DEB1100282C98 /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3416C7BE1B8DE86900282C98 /* libgtest.a */; };
 		3426448D1B867F5A000A3137 /* lineseg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3426448B1B867F5A000A3137 /* lineseg.cpp */; };
 		34A6D0AD1B6D0DDF0059FFFC /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A6D0AC1B6D0DDF0059FFFC /* main.cpp */; };
 		34A6D0B81B6D0E640059FFFC /* edgel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A6D0B31B6D0E640059FFFC /* edgel.cpp */; };
@@ -19,8 +21,6 @@
 		34A6D0C31B6D25120059FFFC /* registration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A6D0C11B6D25120059FFFC /* registration.cpp */; };
 		34A6D0C41B6D25120059FFFC /* rowfunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A6D0C21B6D25120059FFFC /* rowfunc.cpp */; };
 		34A6D0DB1B6D35D60059FFFC /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 34A6D0DA1B6D35D60059FFFC /* libboost_filesystem.a */; };
-		34A6D0E21B6D3B530059FFFC /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 34A6D0E01B6D3B530059FFFC /* libgtest_main.a */; };
-		34A6D0E31B6D3B530059FFFC /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 34A6D0E11B6D3B530059FFFC /* libgtest.a */; };
 		34A6D0E51B6F4F770059FFFC /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 34A6D0E41B6F4F770059FFFC /* libboost_system.a */; };
 		34BCB71D1B72FC3C0047A658 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34CF7AF41B6FA50B00D497D1 /* GLUT.framework */; };
 		34BCB7211B72FC7E0047A658 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34BCB7201B72FC7E0047A658 /* OpenGL.framework */; };
@@ -42,6 +42,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3416C7BB1B8DDD2D00282C98 /* gtest_image_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = gtest_image_utils.hpp; path = patterns/gtest_image_utils.hpp; sourceTree = "<group>"; };
+		3416C7BD1B8DE86900282C98 /* libgtest_main.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest_main.a; path = local/gtest/lib/Release/libgtest_main.a; sourceTree = "<group>"; };
+		3416C7BE1B8DE86900282C98 /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = local/gtest/lib/Release/libgtest.a; sourceTree = "<group>"; };
 		3426448B1B867F5A000A3137 /* lineseg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lineseg.cpp; path = patterns/lineseg.cpp; sourceTree = "<group>"; };
 		3426448C1B867F5A000A3137 /* lineseg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lineseg.hpp; path = patterns/lineseg.hpp; sourceTree = "<group>"; };
 		3426448E1B868D8D000A3137 /* vector2d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = vector2d.hpp; path = patterns/vector2d.hpp; sourceTree = "<group>"; };
@@ -79,9 +82,6 @@
 		34A6D0D81B6D34750059FFFC /* rowfunc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rowfunc.h; path = patterns/vision/rowfunc.h; sourceTree = "<group>"; };
 		34A6D0D91B6D34750059FFFC /* sparsehist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sparsehist.h; path = patterns/vision/sparsehist.h; sourceTree = "<group>"; };
 		34A6D0DA1B6D35D60059FFFC /* libboost_filesystem.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_filesystem.a; path = local/boost/lib/libboost_filesystem.a; sourceTree = "<group>"; };
-		34A6D0DE1B6D36EB0059FFFC /* gtest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = gtest.framework; path = local/gtest/lib/Release/gtest.framework; sourceTree = "<group>"; };
-		34A6D0E01B6D3B530059FFFC /* libgtest_main.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest_main.a; path = local/gtest/lib/Debug/libgtest_main.a; sourceTree = "<group>"; };
-		34A6D0E11B6D3B530059FFFC /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = local/gtest/lib/Debug/libgtest.a; sourceTree = "<group>"; };
 		34A6D0E41B6F4F770059FFFC /* libboost_system.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_system.a; path = local/boost/lib/libboost_system.a; sourceTree = "<group>"; };
 		34BCB71E1B72FC3D0047A658 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		34BCB7201B72FC7E0047A658 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -100,9 +100,9 @@
 				34BCB7211B72FC7E0047A658 /* OpenGL.framework in Frameworks */,
 				34BCB71D1B72FC3C0047A658 /* GLUT.framework in Frameworks */,
 				34A6D0E51B6F4F770059FFFC /* libboost_system.a in Frameworks */,
-				34A6D0E21B6D3B530059FFFC /* libgtest_main.a in Frameworks */,
-				34A6D0E31B6D3B530059FFFC /* libgtest.a in Frameworks */,
 				34A6D0DB1B6D35D60059FFFC /* libboost_filesystem.a in Frameworks */,
+				3416C7C51B8DEB1100282C98 /* libgtest.a in Frameworks */,
+				3416C7C41B8DEB0000282C98 /* libgtest_main.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +112,9 @@
 		34A6D0A01B6D0DDF0059FFFC = {
 			isa = PBXGroup;
 			children = (
+				3416C7BD1B8DE86900282C98 /* libgtest_main.a */,
+				3416C7BE1B8DE86900282C98 /* libgtest.a */,
+				3416C7BB1B8DDD2D00282C98 /* gtest_image_utils.hpp */,
 				3426448E1B868D8D000A3137 /* vector2d.hpp */,
 				3426448B1B867F5A000A3137 /* lineseg.cpp */,
 				3426448C1B867F5A000A3137 /* lineseg.hpp */,
@@ -123,9 +126,6 @@
 				34CF7AF81B6FA56200D497D1 /* tinyGLManager.cpp */,
 				34CF7AF41B6FA50B00D497D1 /* GLUT.framework */,
 				34A6D0E41B6F4F770059FFFC /* libboost_system.a */,
-				34A6D0E01B6D3B530059FFFC /* libgtest_main.a */,
-				34A6D0E11B6D3B530059FFFC /* libgtest.a */,
-				34A6D0DE1B6D36EB0059FFFC /* gtest.framework */,
 				34A6D0DA1B6D35D60059FFFC /* libboost_filesystem.a */,
 				34A6D0C51B6D34750059FFFC /* angle_units.hpp */,
 				34A6D0C61B6D34750059FFFC /* corners.hpp */,
@@ -292,7 +292,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -328,6 +328,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -335,7 +336,7 @@
 		34A6D0B11B6D0DDF0059FFFC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -355,9 +356,9 @@
 					"$(LOCAL_gtest)/lib/Debug",
 					"$(LOCAL_3rdParty)/boost/lib",
 					"$(LOCAL_CINDER)/lib",
-					"$(PROJECT_DIR)/local/gtest/lib/Debug",
 					"$(PROJECT_DIR)/local/boost/lib",
 					"$(PROJECT_DIR)/local/cinder/cinder_0.8-2.6_mac/lib",
+					"$(PROJECT_DIR)/local/gtest/lib/Release",
 				);
 				LOCAL_3rdParty = "$(SRCROOT)/local";
 				LOCAL_BOOST = "$(LOCAL_3rdParty)/boost/include";
@@ -372,7 +373,7 @@
 		34A6D0B21B6D0DDF0059FFFC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -392,9 +393,9 @@
 					"$(LOCAL_gtest)/lib/Release",
 					"$(LOCAL_3rdParty)/boost/lib",
 					"$(LOCAL_CINDER)/lib",
-					"$(PROJECT_DIR)/local/gtest/lib/Debug",
 					"$(PROJECT_DIR)/local/boost/lib",
 					"$(PROJECT_DIR)/local/cinder/cinder_0.8-2.6_mac/lib",
+					"$(PROJECT_DIR)/local/gtest/lib/Release",
 				);
 				LOCAL_3rdParty = "$(SRCROOT)/local";
 				LOCAL_BOOST = "$(LOCAL_3rdParty)/boost/include";

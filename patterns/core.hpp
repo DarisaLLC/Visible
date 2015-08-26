@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <atomic>
+#include <cmath>
 # include <assert.h> // .h to support old libraries w/o <cassert> - effect is the same
 
 namespace core  // protection from unintended ADL
@@ -111,18 +112,17 @@ namespace core  // protection from unintended ADL
         }
         return val;
     }
-#ifdef _WIN32
-    // EG: Commented out for Linux build. Someone please fix 
+
     inline bool RealEq(double x, double y, double epsilon = 1.e-15)
     {
-        return std::abs(x - y) <= epsilon;
+        return std::fabs(x - y) <= epsilon;
     }
 
     inline bool RealEq(float x, float y, float epsilon = 1.e-10)
     {
-        return std::abs(x - y) <= epsilon;
+        return std::fabs(x - y) <= epsilon;
     }
-#endif
+
 #define MedOf3(a, b, c)                                       \
 ((a) > (b) ? ((a) < (c) ? (a) : ((b) < (c) ? (c) : (b))) :    \
  ((a) > (c) ? (a) : ((b) < (c) ? (b) : (c))))

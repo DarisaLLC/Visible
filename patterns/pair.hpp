@@ -1,6 +1,7 @@
 #ifndef __TPAIR_H
 #define __TPAIR_H
 
+#include <assert.h>
 
 using namespace std;
 
