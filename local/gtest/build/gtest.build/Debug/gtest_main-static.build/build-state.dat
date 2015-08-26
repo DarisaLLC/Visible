@@ -1,0 +1,264 @@
+Tgtest_main-static
+v6
+r1
+cCheck dependencies
+cCompileC build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/gtest_main.o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc normal x86_64 c++ com.apple.compilers.llvm.clang.1_0.compiler
+cCompileC build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/gtest_main.o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc normal i386 c++ com.apple.compilers.llvm.clang.1_0.compiler
+cLibtool /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/libgtest_main.a normal i386
+cLibtool /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/libgtest_main.a normal x86_64
+cCreateUniversalBinary /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a normal x86_64\ i386
+
+N/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk
+c00000000534D925B00000000000000AA
+t1397592667
+s170
+
+N/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/SDKSettings.plist
+c0000000052694773000000000000044C
+t1382631283
+s1100
+
+N/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/System/Library/CoreServices/SystemVersion.plist
+c000000005333BEE700000000000001DE
+t1395900135
+s478
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-death-test.h
+c00000000535961ED0000000000002B65
+t1398366701
+s11109
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-message.h
+c00000000535961ED00000000000020CB
+t1398366701
+s8395
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-param-test.h
+c00000000535961ED0000000000012859
+t1398366701
+s75865
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-printers.h
+c00000000535961ED000000000000769B
+t1398366701
+s30363
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-test-part.h
+c00000000535961ED0000000000001945
+t1398366701
+s6469
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-typed-test.h
+c00000000535961ED0000000000002802
+t1398366701
+s10242
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest.h
+c00000000535961ED0000000000014212
+t1398366701
+s82450
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_pred_impl.h
+c00000000535961ED0000000000003B24
+t1398366701
+s15140
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_prod.h
+c00000000535961ED0000000000000914
+t1398366701
+s2324
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-death-test-internal.h
+c00000000535961ED0000000000003265
+t1398366701
+s12901
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-filepath.h
+c00000000535961ED00000000000025E1
+t1398366701
+s9697
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-internal.h
+c00000000535961ED000000000000B8DD
+t1398366701
+s47325
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-linked_ptr.h
+c00000000535961ED0000000000001F7F
+t1398366701
+s8063
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util-generated.h
+c00000000535961ED0000000000029508
+t1398366701
+s169224
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util.h
+c00000000535961ED0000000000005EAA
+t1398366701
+s24234
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-port.h
+c00000000535961ED000000000000F892
+t1398366701
+s63634
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-string.h
+c00000000535961ED000000000000351B
+t1398366701
+s13595
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-type-util.h
+c00000000535961ED000000000002D53C
+t1398366701
+s185660
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc
+c00000000535961ED00000000000006EC
+t1398366701
+s1772
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a
+t1398368764
+s133544
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/gtest_main.LinkFileList
+c0000000053596A320000000000000088
+t1398368818
+s136
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/gtest_main.o
+t1398368818
+s65800
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/libgtest_main.a
+t1398368818
+s66224
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/gtest_main.LinkFileList
+c00000000535962E1000000000000008A
+t1398366945
+s138
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/gtest_main.o
+t1398366945
+s66844
+
+N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/libgtest_main.a
+t1398368818
+s67272
+
+CCheck dependencies
+r0
+lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection18"Check dependencies18"Check dependencies842916b2a109b941^7c8016b2a109b941^---0#1#1#--18"Check dependencies36"E09EEF6C-1329-440B-A9FA-9ACF4B2157E1-
+
+CCompileC build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/gtest_main.o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc normal i386 c++ com.apple.compilers.llvm.clang.1_0.compiler
+s420061618.090219
+e420061618.746010
+r1
+xCompileC
+xbuild/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/gtest_main.o
+x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc
+xnormal
+xi386
+xc++
+xcom.apple.compilers.llvm.clang.1_0.compiler
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-internal.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-port.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-string.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-filepath.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-type-util.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-death-test.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-death-test-internal.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-message.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-param-test.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-linked_ptr.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-printers.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util-generated.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_prod.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-test-part.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-typed-test.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_pred_impl.h
+lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection74"Compile /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc232"[1mCompileC[0m build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/gtest_main.o [1m/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc[0m normal i386 c++ com.apple.compilers.llvm.clang.1_0.compiler0e3017b2a109b941^9cfcbeb2a109b941^---0#0#1#-19%DVTDocumentLocation2@82"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc0000000000000000^2948"[1mCompileC[0m build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/gtest_main.o [1m/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc[0m normal i386 c++ com.apple.compilers.llvm.clang.1_0.compiler    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    export LANG=en_US.US-ASCII    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x c++ -arch i386 -fmessage-length=162 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -fcolor-diagnostics -std=c++11 -stdlib=libc++ -Wno-trigraphs -fpascal-strings -O0 -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-shorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -fasm-blocks -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -g -Wno-sign-conversion -iquote /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/gtest_main-generated-files.hmap -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/gtest_main-own-target-headers.hmap -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/gtest_main-all-target-headers.hmap -iquote /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/gtest_main-project-headers.hmap -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/include -I.. -I../include -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/DerivedSources/i386 -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/DerivedSources -Wall -Werror -Wendif-labels -Wnewline-eof -Wno-sign-compare -Wshadow -F/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug -DDEBUG=1 -MMD -MT dependencies -MF /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/gtest_main.d --serialize-diagnostics /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/gtest_main.dia -c /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc -o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/gtest_main.o36"282B542A-4937-42B6-A249-70FB8E2BF529-
+bA948AC80-D873-4B5D-ABB5-3319672E2FC5
+
+CCompileC build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/gtest_main.o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc normal x86_64 c++ com.apple.compilers.llvm.clang.1_0.compiler
+s420059745.117216
+e420059745.728960
+r1
+xCompileC
+xbuild/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/gtest_main.o
+x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc
+xnormal
+xx86_64
+xc++
+xcom.apple.compilers.llvm.clang.1_0.compiler
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-internal.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-port.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-string.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-filepath.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-type-util.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-death-test.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-death-test-internal.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-message.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-param-test.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-linked_ptr.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-printers.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util-generated.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_prod.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-test-part.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-typed-test.h
+d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_pred_impl.h
+lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection74"Compile /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc236"[1mCompileC[0m build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/gtest_main.o [1m/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc[0m normal x86_64 c++ com.apple.compilers.llvm.clang.1_0.compiler59141e619a09b941^419dba619a09b941^---0#0#1#-19%DVTDocumentLocation2@82"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc0000000000000000^2962"[1mCompileC[0m build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/gtest_main.o [1m/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc[0m normal x86_64 c++ com.apple.compilers.llvm.clang.1_0.compiler    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    export LANG=en_US.US-ASCII    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x c++ -arch x86_64 -fmessage-length=162 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -fcolor-diagnostics -std=c++11 -stdlib=libc++ -Wno-trigraphs -fpascal-strings -O0 -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-shorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -fasm-blocks -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -g -Wno-sign-conversion -iquote /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/gtest_main-generated-files.hmap -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/gtest_main-own-target-headers.hmap -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/gtest_main-all-target-headers.hmap -iquote /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/gtest_main-project-headers.hmap -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/include -I.. -I../include -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/DerivedSources/x86_64 -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/DerivedSources -Wall -Werror -Wendif-labels -Wnewline-eof -Wno-sign-compare -Wshadow -F/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug -DDEBUG=1 -MMD -MT dependencies -MF /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/gtest_main.d --serialize-diagnostics /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/gtest_main.dia -c /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest_main.cc -o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/gtest_main.o36"B7463EF1-3543-449E-A4FB-B8FE007D2270-
+b51AF12D0-686B-4C79-9667-8A2029058353
+
+CCreateUniversalBinary /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a normal x86_64\ i386
+s420061618.774505
+e420061618.802034
+r1
+xCreateUniversalBinary
+x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a
+xnormal
+xx86_64 i386
+lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection106"Create universal binary /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a85"[1mCreateUniversalBinary[0m [1mbuild/Debug/libgtest_main.a[0m normal x86_64\ i3867a56c6b2a109b941^4c52cdb2a109b941^---0#0#1#-19%DVTDocumentLocation2@98"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a0000000000000000^621"[1mCreateUniversalBinary[0m [1mbuild/Debug/libgtest_main.a[0m normal x86_64\ i386    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -static /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/libgtest_main.a /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/libgtest_main.a -o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a36"94BBB1A9-5DFF-4A02-BADC-3B1F1AF141D4-
+bA948AC80-D873-4B5D-ABB5-3319672E2FC5
+
+CLibtool /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a normal x86_64
+s420059745.737230
+e420059745.763052
+r1
+xLibtool
+x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a
+xnormal
+xx86_64
+lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection57"[1mLibtool[0m build/Debug/libgtest_main.a normal x86_6457"[1mLibtool[0m build/Debug/libgtest_main.a normal x86_647ac8bc619a09b941^c158c3619a09b941^---0#0#1#--670"[1mLibtool[0m build/Debug/libgtest_main.a normal x86_64    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -static -arch_only x86_64 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -L/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug -filelist /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/gtest_main.LinkFileList -o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a36"D6FACB5E-2E78-45BC-8355-DF629CDCD1E8-
+b51AF12D0-686B-4C79-9667-8A2029058353
+
+CLibtool /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/libgtest_main.a normal i386
+s420061618.754348
+e420061618.766157
+r1
+xLibtool
+x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/libgtest_main.a
+xnormal
+xi386
+lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection111"[1mLibtool[0m build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/libgtest_main.a normal i386111"[1mLibtool[0m build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/libgtest_main.a normal i3861b2fc1b2a109b941^8523c4b2a109b941^---0#0#1#--776"[1mLibtool[0m build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/libgtest_main.a normal i386    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -static -arch_only i386 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -L/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug -filelist /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/gtest_main.LinkFileList -o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/i386/libgtest_main.a36"A70DCD89-9B33-4792-AC8F-6FDAF8EA64CF-
+bA948AC80-D873-4B5D-ABB5-3319672E2FC5
+
+CLibtool /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/libgtest_main.a normal x86_64
+s420061618.754353
+e420061618.765468
+r1
+xLibtool
+x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/libgtest_main.a
+xnormal
+xx86_64
+lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection115"[1mLibtool[0m build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/libgtest_main.a normal x86_64115"[1mLibtool[0m build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/libgtest_main.a normal x86_645e2fc1b2a109b941^3cf6c3b2a109b941^---0#0#1#--786"[1mLibtool[0m build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/libgtest_main.a normal x86_64    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -static -arch_only x86_64 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -L/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug -filelist /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/gtest_main.LinkFileList -o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest_main-static.build/Objects-normal/x86_64/libgtest_main.a36"478292DF-2481-4573-A1A8-67AF69EBCFB6-
+bA948AC80-D873-4B5D-ABB5-3319672E2FC5
+
