@@ -274,6 +274,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DSTROOT = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -294,6 +295,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
+				SYMROOT = "$(SRCROOOT)/build/$(CONFIGURATION)";
 			};
 			name = Debug;
 		};
@@ -316,6 +318,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DSTROOT = "";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -330,6 +333,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
+				SYMROOT = "$(SRCROOOT)/build/$(CONFIGURATION)";
 			};
 			name = Release;
 		};
@@ -338,6 +342,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				DSTROOT = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/local/gtest/lib/Release",
@@ -366,6 +371,7 @@
 				LOCAL_gtest = "$(LOCAL_3rdParty)/gtest";
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SYMROOT = "$(SRCROOOT)/build/$(CONFIGURATION)";
 				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
@@ -375,6 +381,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				DSTROOT = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/local/gtest/lib/Release",
@@ -403,6 +410,7 @@
 				LOCAL_gtest = "$(LOCAL_3rdParty)/gtest";
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SYMROOT = "$(SRCROOOT)/build/$(CONFIGURATION)";
 				VALID_ARCHS = x86_64;
 			};
 			name = Release;
