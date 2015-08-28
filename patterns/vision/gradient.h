@@ -8,6 +8,7 @@
 #include "pair.hpp"
 #include <tuple>
 #include "edgel.h"
+#include "boost/math/constants/constants.hpp"
 
 unsigned int SpatialEdge(const roiWindow<P8U> & magImage, const roiWindow<P8U> & angleImage, roiWindow<P8U> & peaks, uint8_t threshold, bool angleLabeled = false);
 void Gradient(const roiWindow<P8U> & image, roiWindow<P8U> & magnitudes, roiWindow<P8U> & angles);

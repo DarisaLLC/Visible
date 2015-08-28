@@ -10,6 +10,90 @@ using namespace tinyGL;
 using namespace DS;
 
 
+static void crossproduct(
+                         double ax, double ay, double az,
+                         double bx, double by, double bz,
+                         double *rx, double *ry, double *rz )
+{
+    *rx = ay*bz - az*by;
+    *ry = az*bx - ax*bz;
+    *rz = ax*by - ay*bx;
+}
+
+static void crossproduct_v(
+                           double const * const a,
+                           double const * const b,
+                           double * const c )
+{
+    crossproduct(
+                 a[0], a[1], a[2],
+                 b[0], b[1], b[2],
+                 c, c+1, c+2 );
+}
+
+static double scalarproduct(
+                            double ax, double ay, double az,
+                            double bx, double by, double bz )
+{
+    return ax*bx + ay*by + az*bz;
+}
+
+static double scalarproduct_v(
+                              double const * const a,
+                              double const * const b )
+{
+    return scalarproduct(
+                         a[0], a[1], a[2],
+                         b[0], b[1], b[2] );
+}
+
+static double length(
+                     double ax, double ay, double az )
+{
+    return sqrt(
+                scalarproduct(
+                              ax, ay, az,
+                              ax, ay, az ) );
+}
+
+static double length_v( double const * const a )
+{
+    return sqrt( scalarproduct_v(a, a) );
+}
+
+static void normalize(
+                      double *x, double *y, double *z)
+{
+    double const k = 1./length(*x, *y, *z);
+    
+    *x *= k;
+    *y *= k;
+    *z *= k;
+}
+
+static void normalize_v( double *a )
+{
+    double const k = 1./length_v(a);
+    a[0] *= k;
+    a[1] *= k;
+    a[2] *= k;
+}
+
+/* == annotation drawing functions == */
+
+void draw_strokestring(void *font, float const size, char const *string)
+{
+    glPushMatrix();
+    float const scale = size * 0.01; /* GLUT character base size is 100 units */
+    glScalef(scale, scale, scale);
+    
+    char const *c = string;
+    for(; c && *c; c++) {
+        glutStrokeCharacter(font, *c);
+    }
+    glPopMatrix();
+}
+
 template <typename P>
 DisplayImage<P>::DisplayImage(int posX, int posY, int width, int height, const char * title, roiWindow<P> & image)
 : Display(posX, posY, width, height, title)
@@ -285,58 +369,133 @@ void DisplayImage<P>::gl_line(fVector_2d& f, fVector_2d& s)
     glEnd();
 }
 
+
+
+void draw_arrow(
+                float ax, float ay, float az,  /* starting point in local space */
+                float bx, float by, float bz,  /* starting point in local space */
+                float ah, float bh,            /* arrow head size start and end */
+                char const * const annotation, /* annotation string */
+                float annot_size,              /* annotation string height (local units) */
+                bool both_end = false)
+{
+    int i;
+    
+    GLdouble mv[16];
+    glGetDoublev(GL_MODELVIEW_MATRIX, mv);
+    
+    /* We're assuming the modelview RS part is (isotropically scaled)
+     * orthonormal, so the inverse is the transpose.
+     * The local view direction vector is the 3rd column of the matrix;
+     * assuming the view direction to be the normal on the arrows tangent
+     * space  taking the cross product of this with the arrow direction
+     * yields the binormal to be used as the orthonormal base to the
+     * arrow direction to be used for drawing the arrowheads */
+    
+    double d[3] = {
+        bx - ax,
+        by - ay,
+        bz - az
+    };
+    normalize_v(d);
+    
+    double r[3] = { mv[0], mv[4], mv[8] };
+    int rev = scalarproduct_v(d, r) < 0.;
+    
+    double n[3] = { mv[2], mv[6], mv[10] };
+    {
+        double const s = scalarproduct_v(d,n);
+        for(int i = 0; i < 3; i++)
+            n[i] -= d[i]*s;
+    }
+    normalize_v(n);
+    
+    double b[3];
+    crossproduct_v(n, d, b);
+    
+    /* Make a 60° arrowhead ( sin(60°) = 0.866... ) */
+    GLfloat const pos[][3] = {
+        {ax, ay, az},
+        {bx, by, bz},
+        { static_cast<GLfloat>(ax + (0.866*d[0] + 0.5*b[0])*ah),
+            static_cast<GLfloat>(ay + (0.866*d[1] + 0.5*b[1])*ah),
+            static_cast<GLfloat>(az + (0.866*d[2] + 0.5*b[2])*ah) },
+        { static_cast<GLfloat>(ax + (0.866*d[0] - 0.5*b[0])*ah),
+            static_cast<GLfloat>(ay + (0.866*d[1] - 0.5*b[1])*ah),
+            static_cast<GLfloat>(az + (0.866*d[2] - 0.5*b[2])*ah) },
+        { static_cast<GLfloat>(bx + (-0.866*d[0] + 0.5*b[0])*bh),
+            static_cast<GLfloat>(by + (-0.866*d[1] + 0.5*b[1])*bh),
+            static_cast<GLfloat>(bz + (-0.866*d[2] + 0.5*b[2])*bh) },
+        { static_cast<GLfloat>(bx + (-0.866*d[0] - 0.5*b[0])*bh),
+            static_cast<GLfloat>(by + (-0.866*d[1] - 0.5*b[1])*bh),
+            static_cast<GLfloat>(bz + (-0.866*d[2] - 0.5*b[2])*bh) }
+    };
+    GLushort const idx[][2] = {
+        {0, 1},
+        {0, 2}, {0, 3},
+        {1, 4}, {1, 5}
+    };
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, pos);
+    
+    int lines = both_end ? 5 : 3;
+    glDrawElements(GL_LINES, 2*lines, GL_UNSIGNED_SHORT, idx);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    
+    if(annotation) {
+        float w = 0;
+        for(char const *c = annotation; *c; c++)
+            w += glutStrokeWidth(GLUT_STROKE_ROMAN, *c);
+        w *= annot_size / 100.;
+        
+        float tx = (ax + bx)/2.;
+        float ty = (ay + by)/2.;
+        float tz = (az + bz)/2.;
+        
+        GLdouble r[16] = {
+            d[0], d[1], d[2], 0,
+            b[0], b[1], b[2], 0,
+            n[0], n[1], n[2], 0,
+            0,    0,    0, 1
+        };
+        glPushMatrix();
+        glTranslatef(tx, ty, tz);
+        glMultMatrixd(r);
+        if(rev)
+            glScalef(-1, -1, 1);
+        glTranslatef(-w/2., annot_size*0.1, 0);
+        draw_strokestring(GLUT_STROKE_ROMAN, annot_size, annotation);
+        glPopMatrix();
+    }
+}
+
 template<typename P>
 void DisplayImage<P>::gl_arrow (const fVector_2d& pos, uAngle8 gradient_angle)
 {
-    float w = 0.01;
-    uDegree ga (gradient_angle);
+    float r = 100;
+    float sides = 0.0005;
     glPushMatrix();
-    //Set Position and Rotation
     glTranslated(pos.x(), pos.y(), 0.0);
-    glRotated(ga.Double() - 180.0, 0.0, 0.0, 1.0);
-    glBegin(GL_LINES);
-    glVertex2d(-w, 0);
-    glVertex2d(w, 0);
-    glVertex2d(0, -w);
-    glVertex2d(0, w);
-    glEnd();
-
+    draw_arrow(- cos(gradient_angle)/r, sin(gradient_angle)/r,0, 0.0,0.0, 0.0, sides, sides, 0, 0);
     glPopMatrix();
 #if 0
     
-    int line_thickness = 1;
+    uDegree ga (gradient_angle);
+    uDegree offset (180.0);
+    ga = (ga - offset).normSigned();
+    glPushMatrix();
     
-    fVector_2d p = pos;
-    fVector_2d q (3.0f, uRadian(gradient_angle));
-    q = p + q;
-    
-    double angle = atan2((double) p.y() - q.y(), (double) p.x() - q.x());
-    
-    double hypotenuse = sqrt( (double)(p.y() - q.y())*(p.y() - q.y()) + (double)(p.x() - q.x() )*(p.x() - q.x()) );
-    
-    if (hypotenuse < 0.1)
-        return;
-    
-    // Here we lengthen the arrow by a factor of three.
-  //  q.x(p.x() - 3 * hypotenuse * cos(angle));
-//    q.y(p.y() - 3 * hypotenuse * sin(angle));
-    
-    // Now we draw the main line of the arrow.
-    image2display(p);
-    image2display(q);
-    gl_line(p, q);
-    
-    // Now draw the tips of the arrow. I do some scaling so that the
-    // tips look proportional to the main line of the arrow.
-    
-    p.x (q.x() + 9 * cos(angle + M_PI / 4));
-    p.y (q.y() + 9 * sin(angle + M_PI / 4));
-    gl_line(p, q);
-    
-    p.x (q.x() + 9 * cos(angle - M_PI / 4));
-    p.y (q.y() + 9 * sin(angle - M_PI / 4));
-    gl_line(p, q);
+    //Set Position and Rotation
+    glTranslated(pos.x(), pos.y(), 0.0);
+    glRotated(ga.Double(), 0.0, 0.0, 1.0);
+    gl_cross(0,0,r);
+    glPopMatrix();
 #endif
+    
 }
 
 
@@ -374,14 +533,15 @@ void tinyGL::DisplayImage<P>::drawData()
     for (int i = 0; i < m_data.size(); i++)
     {
         glDisable(GL_TEXTURE_2D);
-        pSetHSV((i * 720.0f) / 256.0f, 1.0f, 1.0f);
+        pSetHSV((i * 128.0f) / 256.0f, 1.0f, 1.0f);
         glBegin(GL_POINTS);
         
         // Draw mid points of isoclines sloped at this direction
         isocline_vector_t  on_direction = m_data[i];
-        for (unsigned k = 0; k < on_direction.size(); k++)
+        
+        if (m_options[m_options_dict["Segment Centers"]])
         {
-            if (m_options[m_options_dict["Segment Centers"]])
+            for (unsigned k = 0; k < on_direction.size(); k++)
             {
                 fVector_2d mid = on_direction[k].mid();
                 image2display(mid);
@@ -392,7 +552,10 @@ void tinyGL::DisplayImage<P>::drawData()
                 image2display(last);
                 gl_line(first, last);
             }
-            
+        }
+        
+        for (unsigned k = 0; k < on_direction.size(); k++)
+        {
             const std::vector<protuple>& container = on_direction[k].container();
             
             if (m_options[m_options_dict["Edges"]])
@@ -403,11 +566,12 @@ void tinyGL::DisplayImage<P>::drawData()
                     uAngle8 ang (std::get<2>(container[ee]));
                     image2display(loc);
                     gl_arrow(loc, ang);
-//                    gl_cross(loc.x(), loc.y(), 0.01);
+                    //                    gl_cross(loc.x(), loc.y(), 0.01);
                     ecount++;
                 }
             }
         }
+        
         
         if (m_options[m_options_dict["Index Locations"]])
         {

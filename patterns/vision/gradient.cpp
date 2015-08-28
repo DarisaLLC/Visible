@@ -4,11 +4,13 @@
 #include "pair.hpp"
 #include "rowfunc.h"
 #include <assert.h>
+#include "boost/math/constants/constants.hpp"
 
 using namespace std;
 
 
 static EdgeTables sEdgeTables;
+static double pi = boost::math::constants::pi<double>();
 
 /*
  *  Does not respect the IplROI
@@ -44,6 +46,7 @@ static void sobelEdgeProcess_b(const roiWindow<P8U> & image, roiWindow<P8U> & ma
     const int normBits = 3;
 
     const uint8_t * magTable = sEdgeTables.magnitudeTable();
+    const uint8_t * angTable = sEdgeTables.angleTable();
 
     // Sobel kernels are symertic. We use a L C R roll over algorithm
 
@@ -67,30 +70,30 @@ static void sobelEdgeProcess_b(const roiWindow<P8U> & image, roiWindow<P8U> & ma
             int yKernelRight(-src[0] + src[2 * srcUpdate]);
 
             // Calculate x and y magnitudes
-            left = right - left;
             int product = yKernelLeft + 2 * yKernelCenter + yKernelRight;
-            uint8_t x = (uint8_t)(std::abs(left) >> normBits);
-            uint8_t y = (uint8_t)(std::abs(product) >> normBits);
-            int index = (x << EdgeTables::eMagPrecision) | y;
+            
+            int8_t xmag (right >= left ? ((right - left + 3) >> 3) : ((right - left + 4) >> 3));
+            
+            int8_t ymag (product >= 0 ? ((product + 3) >> 3) : ((product + 4) >> 3));
+
+            
+            int index = (xmag << EdgeTables::eMagPrecision) | std::abs(ymag);
 
             if (index >= EdgeTables::eMagTableSize)
             {
-                std::cerr << index << (int)x << "," << (int)y << "," << w << "," << h << "," << right << "," << left << endl;
+                std::cerr << index << (int)xmag << "," << (int)ymag << "," << w << "," << h << "," << right << "," << left << endl;
             }
             assert(index < EdgeTables::eMagTableSize);
 
             *m = magTable[index];
             m++;
-
-            // Angle Table
-            // if both x and y gradient are less than 5 (1 gray level edge)
-            // then set the angle to zero.
-
-            // @note add angle threshold
-            //      if (rmABS(product) < 3 && rmABS(left) < 3)
-            //	*a++ = dummy;
-            //      else
-            *a++ = sEdgeTables.binAtan(product, left);
+            
+            uint32_t angleIndex;
+            angleIndex = uint8_t(xmag);
+            angleIndex <<= 8;
+            angleIndex |= uint8_t(ymag);
+            *a++ = angTable[angleIndex];
+           
 
             left = center;
             center = right;
@@ -114,6 +117,12 @@ static void sobelEdgeProcess_b(const roiWindow<P8U> & image, roiWindow<P8U> & ma
  * This is fairly inefficient implementation.
  */
 
+static inline uint8_t& angleIndex(uint8_t *start,uint32_t x,uint32_t y)
+{
+    uint32_t index = (uint8_t)(x) << 8;
+    index |= (uint8_t)y;
+    return start[index];
+}
 
 // Max Magnitude from one of the kernels is ([1 2 1] * 255) / 4 or 255
 // We are using 7bits for magnitude and 16 bits for precision for angle.
@@ -138,19 +147,24 @@ void EdgeTables::init()
             *atIndex++ = uint8_t(mapped);
         }
 
-    for (int i = 0; i <= eAtanRange; ++i)
-    {
-        uRadian rd(atan((double)i / eAtanRange));
-        uAngle8 r8(rd);
-
-        mThetaTable[i] = r8.basic();
-    }
+    const double ascale(256.0 / (2 * pi));
+    uint8_t* a = &mThetaTable[0];
+    for(x = -127; x <= 127; x++)
+        for(y = -127; y <= 127; y++)
+        {
+            int32_t val;
+            double angle(atan2((double)y,(double)x));
+            if(angle < 0)
+                angle += 2*pi;
+            val = ((int32_t)(ascale*angle + 0.5)) % 256;
+            angleIndex(a,x,y) = uint8_t(val);
+        }
 }
 
 
 inline uint8_t EdgeTables::binAtan(int y, int x) const
 {
-    static uint8_t mPIover2(1 << ((sizeof(uint8_t) * 8) - 2)), mPI(1 << ((sizeof(uint8_t) * 8) - 1)), m3PIover2(mPIover2 + mPI);
+    static uint8_t piover2(1 << ((sizeof(uint8_t) * 8) - 2)), pi(1 << ((sizeof(uint8_t) * 8) - 1)), m3PIover2(piover2 + pi);
     static int precision(eAtanPrecision);
 
     const uint8_t * ThetaTable = angleTable();
@@ -169,7 +183,7 @@ inline uint8_t EdgeTables::binAtan(int y, int x) const
         {
             x = -x;
             if (y <= x)
-                return (mPI + ThetaTable[(y << precision) / x]);
+                return (pi + ThetaTable[(y << precision) / x]);
             else
                 return (m3PIover2 - ThetaTable[(x << precision) / y]);
         }
@@ -183,15 +197,15 @@ inline uint8_t EdgeTables::binAtan(int y, int x) const
             if (y <= x)
                 return ThetaTable[(y << precision) / x];
             else
-                return (mPIover2 - ThetaTable[(x << precision) / y]);
+                return (piover2 - ThetaTable[(x << precision) / y]);
         }
         else
         {
             x = -x;
             if (y <= x)
-                return (mPI - ThetaTable[(y << precision) / x]);
+                return (pi - ThetaTable[(y << precision) / x]);
             else
-                return (mPIover2 + ThetaTable[(x << precision) / y]);
+                return (piover2 + ThetaTable[(x << precision) / y]);
         }
     }
 }

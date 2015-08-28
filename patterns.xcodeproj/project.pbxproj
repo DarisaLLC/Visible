@@ -27,6 +27,8 @@
 		34CF7AF91B6FA56300D497D1 /* tinyGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CF7AF61B6FA56200D497D1 /* tinyGL.cpp */; };
 		34CF7AFA1B6FA56300D497D1 /* tinyGLImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CF7AF71B6FA56200D497D1 /* tinyGLImage.cpp */; };
 		34CF7AFB1B6FA56300D497D1 /* tinyGLManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CF7AF81B6FA56200D497D1 /* tinyGLManager.cpp */; };
+		C2BA0AE01B90861A00AD156C /* PngIO.CPP in Sources */ = {isa = PBXBuildFile; fileRef = C2BA0ADF1B90861A00AD156C /* PngIO.CPP */; };
+		C2BA0AE21B9088CB00AD156C /* libpng15.15.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA0AE11B9088CB00AD156C /* libpng15.15.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -90,6 +92,8 @@
 		34CF7AF71B6FA56200D497D1 /* tinyGLImage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyGLImage.cpp; path = patterns/tinyGL/tinyGLImage.cpp; sourceTree = "<group>"; };
 		34CF7AF81B6FA56200D497D1 /* tinyGLManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyGLManager.cpp; path = patterns/tinyGL/tinyGLManager.cpp; sourceTree = "<group>"; };
 		34CF7AFC1B6FA8FE00D497D1 /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = System/Library/Frameworks/AGL.framework; sourceTree = SDKROOT; };
+		C2BA0ADF1B90861A00AD156C /* PngIO.CPP */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PngIO.CPP; path = patterns/shmem_io/PngIO.CPP; sourceTree = "<group>"; };
+		C2BA0AE11B9088CB00AD156C /* libpng15.15.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng15.15.dylib; path = ../../../../../opt/X11/lib/libpng15.15.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +101,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2BA0AE21B9088CB00AD156C /* libpng15.15.dylib in Frameworks */,
 				34BCB7211B72FC7E0047A658 /* OpenGL.framework in Frameworks */,
 				34BCB71D1B72FC3C0047A658 /* GLUT.framework in Frameworks */,
 				34A6D0E51B6F4F770059FFFC /* libboost_system.a in Frameworks */,
@@ -112,6 +117,8 @@
 		34A6D0A01B6D0DDF0059FFFC = {
 			isa = PBXGroup;
 			children = (
+				C2BA0AE11B9088CB00AD156C /* libpng15.15.dylib */,
+				C2BA0ADF1B90861A00AD156C /* PngIO.CPP */,
 				3416C7BD1B8DE86900282C98 /* libgtest_main.a */,
 				3416C7BE1B8DE86900282C98 /* libgtest.a */,
 				3416C7BB1B8DDD2D00282C98 /* gtest_image_utils.hpp */,
@@ -244,6 +251,7 @@
 				34CF7AFB1B6FA56300D497D1 /* tinyGLManager.cpp in Sources */,
 				34A6D0C01B6D230A0059FFFC /* PnmIO.cpp in Sources */,
 				34A6D0B91B6D0E640059FFFC /* gradient.cpp in Sources */,
+				C2BA0AE01B90861A00AD156C /* PngIO.CPP in Sources */,
 				34CF7AF91B6FA56300D497D1 /* tinyGL.cpp in Sources */,
 				34A6D0B81B6D0E640059FFFC /* edgel.cpp in Sources */,
 				3426448D1B867F5A000A3137 /* lineseg.cpp in Sources */,
@@ -291,6 +299,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/opt/X11/include,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = NO;
@@ -329,6 +342,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/opt/X11/include,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = NO;
@@ -364,6 +382,7 @@
 					"$(PROJECT_DIR)/local/boost/lib",
 					"$(PROJECT_DIR)/local/cinder/cinder_0.8-2.6_mac/lib",
 					"$(PROJECT_DIR)/local/gtest/lib/Release",
+					/opt/X11/lib,
 				);
 				LOCAL_3rdParty = "$(SRCROOT)/local";
 				LOCAL_BOOST = "$(LOCAL_3rdParty)/boost/include";
@@ -403,6 +422,7 @@
 					"$(PROJECT_DIR)/local/boost/lib",
 					"$(PROJECT_DIR)/local/cinder/cinder_0.8-2.6_mac/lib",
 					"$(PROJECT_DIR)/local/gtest/lib/Release",
+					/opt/X11/lib,
 				);
 				LOCAL_3rdParty = "$(SRCROOT)/local";
 				LOCAL_BOOST = "$(LOCAL_3rdParty)/boost/include";
