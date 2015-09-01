@@ -38,7 +38,6 @@ public:
     roiWindow()
         : m_frame_buf(0), m_bounds()
     {
-        update_ipl_roi();
     }
 
 
@@ -51,7 +50,6 @@ public:
     roiWindow(const roiWindow & other)
         : m_frame_buf(other.frameBuf()), m_bounds(other.m_bounds)
     {
-        update_ipl_roi();
     }
 
 
@@ -67,7 +65,6 @@ public:
 
         m_frame_buf = rhs.frameBuf();
         m_bounds = rhs.bound();
-        update_ipl_roi();
         return *this;
     }
 
@@ -85,7 +82,6 @@ public:
             sharedRoot<T> ptr = new root<T>(w, h, im);
             m_frame_buf = ptr;
             m_bounds = iRect(bound.ul().first, bound.ul().second, w, h);
-            update_ipl_roi();
         }
         else
         {
@@ -98,7 +94,6 @@ public:
         sharedRoot<T> ptr = new root<T>(w, h, im);
         m_frame_buf = ptr;
         m_bounds = iRect(0, 0, w, h);
-        update_ipl_roi();
     }
 
     roiWindow(sharedRoot<T> ptr, const iRect & Rect)
@@ -107,7 +102,6 @@ public:
         if (ptr->bounds().contains(m_bounds))
         {
             m_frame_buf = ptr;
-            update_ipl_roi();
         }
     }
 
@@ -118,7 +112,6 @@ public:
         if (ptr->bounds().contains(m_bounds))
         {
             m_frame_buf = ptr;
-            update_ipl_roi();
         }
     }
 
@@ -130,7 +123,7 @@ public:
     {
         m_frame_buf = ptr;
         m_bounds = iRect(0, 0, ptr->width(), ptr->height());
-        update_ipl_roi();
+        
     }
 
 
@@ -264,7 +257,7 @@ public:
     void entire()
     {
         m_bounds = m_frame_buf->bounds();
-        update_ipl_roi();
+        
     }
 
     roiWindow<T> window(int32_t tl_x, int32_t tl_y, int32_t width, int32_t height);
@@ -362,11 +355,7 @@ public:
 
 protected:
     sharedRoot<T> m_frame_buf; // Ref-counted pointer to frame buffer
-
     iRect m_bounds;
-    void update_ipl_roi()
-    {
-    }
 
 
 };

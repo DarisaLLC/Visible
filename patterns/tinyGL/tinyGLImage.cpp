@@ -171,6 +171,20 @@ DisplayImage<P>::~DisplayImage()
     glDeleteTextures(1, &mImageTexture);
 }
 
+inline int
+pow2roundup (int x)
+{
+    if (x < 0)
+        return 0;
+    --x;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    return x+1;
+}
+
 template <typename P>
 void DisplayImage<P>::init()
 {
@@ -240,7 +254,7 @@ template <typename P>
 void DisplayImage<P>::display()
 {
     drawImage();
-    gl_cross(0.0f, 0.0f, 0.2);
+    gl_cross(0.0f, 0.0f, 1.1);
     if (doDrawData())
         drawData();
     
@@ -280,6 +294,9 @@ void DisplayImage<P>::keyboard(unsigned char key, int x, int y)
             break;
         case 'i':
             m_options[m_options_dict["Index Locations"]] = ! m_options[m_options_dict["Index Locations"]];
+            break;
+        case 'q':
+            exit(EXIT_SUCCESS);
             break;
             
             
@@ -482,20 +499,6 @@ void DisplayImage<P>::gl_arrow (const fVector_2d& pos, uAngle8 gradient_angle)
     glTranslated(pos.x(), pos.y(), 0.0);
     draw_arrow(- cos(gradient_angle)/r, sin(gradient_angle)/r,0, 0.0,0.0, 0.0, sides, sides, 0, 0);
     glPopMatrix();
-#if 0
-    
-    uDegree ga (gradient_angle);
-    uDegree offset (180.0);
-    ga = (ga - offset).normSigned();
-    glPushMatrix();
-    
-    //Set Position and Rotation
-    glTranslated(pos.x(), pos.y(), 0.0);
-    glRotated(ga.Double(), 0.0, 0.0, 1.0);
-    gl_cross(0,0,r);
-    glPopMatrix();
-#endif
-    
 }
 
 
@@ -538,7 +541,8 @@ void tinyGL::DisplayImage<P>::drawData()
         
         // Draw mid points of isoclines sloped at this direction
         isocline_vector_t  on_direction = m_data[i];
-        
+      
+#if 0
         if (m_options[m_options_dict["Segment Centers"]])
         {
             for (unsigned k = 0; k < on_direction.size(); k++)
@@ -553,7 +557,7 @@ void tinyGL::DisplayImage<P>::drawData()
                 gl_line(first, last);
             }
         }
-        
+#endif
         for (unsigned k = 0; k < on_direction.size(); k++)
         {
             const std::vector<protuple>& container = on_direction[k].container();
@@ -582,9 +586,9 @@ void tinyGL::DisplayImage<P>::drawData()
                 gl_rect(tmp);
             }
         }
+        glEnd();
     }
     
-    glEnd();
     std::cout << "rendered " << ecount << " edges " << std::endl;
 }
 

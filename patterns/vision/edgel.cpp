@@ -6,6 +6,62 @@
 using namespace std;
 using namespace DS;
 
+size_t isocline::add(const feature& tup)
+{
+    if (check(tup))
+    {
+        m_probes.push_back(tup);
+        update ();
+    }
+    return m_probes.size();
+}
+
+void isocline::clear()
+{
+    m_probes.resize(0);
+    m_sum = fVector_2d ();
+    m_anchor = fRect ();
+    m_enclosing = fRect();
+    m_ends[0] = m_ends[1] = fVector_2d ();
+    m_a8_sum = 0;
+}
+
+void isocline::update()
+{
+    
+}
+bool isocline::check(const feature& newf)
+{
+    bool  is_in = m_anchor.contains(newf.position().x(), newf.position().y());
+    
+     // check if this is our first or second point - no segment constructed yet
+    if (m_probes.size() < 2)
+        return is_in;
+
+    // check to see if this feature passes our
+    if (m_seg.isValid())
+    {
+
+        
+    }
+    
+           if (m_probes.size() > 1)
+           {
+           if (m_probes.size() == 2)
+           m_enclosing = fRect(fPair(m_ends[0].x(), m_ends[0].y()),
+                               fPair(m_ends[1].x(), m_ends[1].y()));
+           else
+           m_enclosing.include(m_ends[1].x(), m_ends[1].y());
+           m_seg = fLineSegment2d(m_ends[0], m_ends[1]);
+           }
+           
+           protuple newp;
+           make_probe(x, y, a8, newp);
+           m_sum += fVector_2d(x, y);
+           m_a8_sum += a8;
+           m_probes.push_back(newp);
+           
+}
 
 // Computes the 8-connected direction from the 8 bit angle
 
@@ -78,7 +134,9 @@ unsigned int edge_count (const chains_directed_t& data)
     return count;
 }
 
-void extract(roiWindow<P8U> & mag, roiWindow<P8U> & angle, roiWindow<P8U> & peaks,  std::vector< std::vector<isocline> >& directed, int low_threshold)
+
+
+void extract(roiWindow<P8U> & mag, roiWindow<P8U> & angle, roiWindow<P8U> & peaks, directed_isoclines_t& directed, int low_threshold)
 {
     directed.resize(256);
     
@@ -206,6 +264,8 @@ void extract(roiWindow<P8U> & mag, roiWindow<P8U> & angle, roiWindow<P8U> & peak
                 // The chain may include segments with differnt direction.
                 // break them in to equivalent direction segments
                 // add them to segment dictionary by direction
+//                newisocline.mid
+                
                 chains_directed_t tmp;
                 tmp.resize(256);
                 break_chains_by_angle(newisocline, tmp);

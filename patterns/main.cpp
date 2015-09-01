@@ -141,7 +141,7 @@ char * pi341234[] =
 
 TEST(edgelinking, timing)
 {
-    std::string filename = "synthetic-checker.png";
+    std::string filename = "Checkerboard_pattern.png";
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
     if (res.second)
     {

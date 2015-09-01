@@ -40,6 +40,7 @@ public:
    vector_2d (T x, T y)   {mX[0] = x ;         mX[1] = y; }
    vector_2d (T r, uRadian t)   {mX[0] = r * cos(t); mX[1] = r * sin(t);}
 
+     
    // Future constructors for radians, etc
 
    T x () const      { return mX[0]; }

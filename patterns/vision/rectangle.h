@@ -16,7 +16,10 @@ template <class T>
 class tRectangle
 {
 public:
+    typedef T value_t;
     typedef tpair<T> point_t;
+    typedef tRectangle<value_t> self_t;
+    
 
     tRectangle();
     /*
@@ -51,6 +54,12 @@ public:
 	       of the indicated two points.
   */
 
+    template<typename U>
+    tRectangle<U> cast_value_type_to() const;
+    /*
+        Return a copy of this rectangle in the given type
+     */
+    
 
     /* default copy ctor, assignment, dtor OK */
 
@@ -270,6 +279,15 @@ protected:
     tpair<T> mUpperLeft;
     tpair<T> mLowerRight;
 };
+
+
+// .tamplate keyword make cast_value_type_to a dependent tempalate type
+template<class T>
+template<typename U>
+tRectangle<U> tRectangle<T>::cast_value_type_to() const
+{
+   return tRectangle<U> ( mUpperLeft.template cast_value_type_to<U>(), mLowerRight.template cast_value_type_to<U>() );
+}
 
 template<class T>
 inline void tRectangle<T>::include(const tpair<T>& point)
@@ -595,6 +613,7 @@ template <>
 void tRectangle<uint32_t>::normalize();
 template <>
 tRectangle<uint32_t> tRectangle<uint32_t>::trim(uint32_t left, uint32_t right, uint32_t top, uint32_t bottom, bool &) const;
+
 
 
 #endif

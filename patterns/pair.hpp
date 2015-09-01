@@ -36,6 +36,14 @@ public:
 
   /* default copy ctor, assign, dtor OK */
 
+    template<typename U>
+    tpair<U> cast_value_type_to() const;
+
+    /*
+     Return a copy of this rectangle in the given type
+     */
+
+    
 #if defined (_OPENCV_INC_)
 	tpair (const CvPoint& r)
 	{
@@ -100,6 +108,14 @@ typedef tpair<short> sPair;
 typedef tpair<float> fPair;
 typedef tpair<double> dPair;
 typedef tpair<bool> bPair;
+
+
+template<class T>
+template<typename U>
+tpair<U> tpair<T>::cast_value_type_to() const
+{
+    return tpair<U> ((U)x(), (U)y() );
+}
 
 
 template<class T>
