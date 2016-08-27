@@ -1,0 +1,30 @@
+//
+//  svl.xcconfig
+//  patterns
+//
+//  Created by Arman Garakani on 10/13/15.
+//  Copyright © 2015 Arman Garakani. All rights reserved.
+//
+
+//:configuration = Debug or Release
+ARCHS = $(ARCHS_STANDARD_64_BIT)
+
+//:configuration = Debug or Release
+SDKROOT = macosx
+
+SRCROOT = $(PROJECT_DIR)/../svl
+
+PROVISIONING_PROFILE = 
+
+
+//:configuration = Debug
+LOCAL_3rdParty = $(SRCROOT)/local
+LOCAL_BOOST = $(LOCAL_3rdParty)/boost
+LOCAL_CINDER = $(LOCAL_3rdParty)/cinder/cinder_0.9
+LOCAL_PNG = $(LOCAL_3rdParty)/png/include
+LOCAL_gtest = $(LOCAL_3rdParty)/gtest
+LOCAL_OCV = $(LOCAL_CINDER)/blocks/OpenCV3
+LOCAL_GLM = $(LOCAL_3rdParty)/glm/glm
+
+
+HEADER_SEARCH_PATHS = $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include
