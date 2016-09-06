@@ -30,9 +30,6 @@ using namespace svl;
 using namespace ci;
 
 
-template svl::roiWindow<P8U> svl::image_io_read(const boost::filesystem::path & pp);
-
-
 static test_utils::genv * dgenv_ptr;
 
 
@@ -106,7 +103,8 @@ TEST(basicU8, png_io)
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
     EXPECT_TRUE(res.second);
     {
-        roiWindow<P8U> rootwin = svl::image_io_read<P8U>(res.first);
+        std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
+        roiWindow<P8U> rootwin = svl::NewFromChannel(*wp.second);
         EXPECT_EQ(rootwin.width(), 512);
         EXPECT_EQ(rootwin.height(), 512);
     }
@@ -122,7 +120,8 @@ TEST(basicU8, jpg_io)
         std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
         EXPECT_TRUE(res.second);
         {
-            roiWindow<P8U> rootwin = svl::image_io_read<P8U>(res.first);
+            std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
+            roiWindow<P8U> rootwin = svl::NewFromChannel(*wp.second);
             EXPECT_EQ(rootwin.width(), 962);
             EXPECT_EQ(rootwin.height(), 602);
         }
@@ -133,7 +132,8 @@ TEST(basicU8, jpg_io)
         std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
         EXPECT_TRUE(res.second);
         {
-            roiWindow<P8UC4> rootwin = svl::image_io_read<P8UC4>(res.first);
+            std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
+            roiWindow<P8UC4> rootwin = svl::NewFromSurface(wp.first.get());
             EXPECT_EQ(rootwin.width(), 962);
             EXPECT_EQ(rootwin.height(), 602);
         }
@@ -302,7 +302,8 @@ TEST(basicip, timing)
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
     if (res.second)
     {
-        roiWindow<P8U> rootwin = svl::image_io_read<P8U>(res.first);
+        std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
+        roiWindow<P8U> rootwin = svl::NewFromChannel(*wp.second);
         int width = rootwin.width();
         int height = rootwin.height();
         
