@@ -105,40 +105,38 @@ namespace svl
         return chP;
     }
     
-    
-#if 0
-    template<typename P, class pixel_t = typename PixelType<P>::pixel_t>
-    roiWindow<P> image_io_read(const boost::filesystem::path & pp)
+    std::pair<Surface8uRef, Channel8uRef> image_io_read_surface (const boost::filesystem::path & pp)
     {
-        
         cinder_startup::instance();
         const std::string extension = pp.extension().string();
         ImageSource::Options opt;
-        auto ir = loadImage (pp, opt, extension ); //"png");
-        roiWindow<P> retp;
-        if (ir->getDataType() == PixelType<P>::ct() && ir->getColorModel() == PixelType<P>::cm() )
-        {
-            switch (ir->getChannelOrder())
-            {
-                case ci::ImageIo::ChannelOrder::Y:
-                {
-                    ci::ChannelT<pixel_t> cir (ir);
-                    retp = svl::NewFromChannel<P> (cir);
-                    break;
-                }
-                case ci::ImageIo::ChannelOrder::RGBX:
-                {
-                    ci::SurfaceT<pixel_t> sur (ir);
-                    retp = svl::NewFromSurface<P> (sur);
-                    break;
-                }
-            }
-            
-        }
+        auto ir = loadImage (pp, opt, extension );
+        std::pair<Surface8uRef, Channel8uRef> wp;
+
+       
+        if (ir->getDataType() != PixelType<P8U>::ct() || ir->getColorModel() != PixelType<P8U>::cm() )
+            return wp;
         
-        return retp;
+        switch (ir->getChannelOrder())
+        {
+            case ci::ImageIo::ChannelOrder::Y:
+            {
+                wp.second = ci::ChannelT<uint8_t>::create (ir);
+                break;
+            }
+            case ci::ImageIo::ChannelOrder::RGBX:
+            {
+                wp.first = ci::SurfaceT<uint8_t>::create (ir);
+                break;
+            }
+            default:
+                assert(false);
+        }
+
+        return wp;
+
     }
-#endif
+
       
     
 }
