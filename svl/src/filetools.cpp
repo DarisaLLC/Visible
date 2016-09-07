@@ -13,7 +13,7 @@ const std::string dirsep("/");
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/convenience.hpp"
 #include "boost/version.hpp"
-#include "boost/regex.hpp"
+//#include "boost/regex.hpp"
 #include <stdio.h>
 #include <fcntl.h>
 #include <iostream>
@@ -217,57 +217,57 @@ namespace svl
   }
 
 
-//---------------------------------------------------------------------------
-  bool copyDirectory(
-    const std::string &source,
-    const std::string &target,
-    const std::string &name,
-    bool recurse,
-    bool overwrite,
-    bool copyAttributes)
-  {
-    //Check source
-    if (!dirExists(source))
-      return false;
-
-    //Check target
-    if (!dirExists(target))
-    {
-      if (!createDirectory(target))
-      {
-        return false;
-      }
-    }
-    else if (!overwrite)
-    {
-      if (!emptyDir(target))
-        return false;
-    }
-
-
-    //Get source files
-    std::vector<std::string> files;
-    getFiles(source, name, files, recurse);
-
-    if (files.empty())
-      return true;
-
-    //Copy files
-    std::string sourceFile, targetFile;
-    const size_t sourceSize = source.size();
-
-    for (std::vector<std::string>::iterator iter = files.begin(); iter != files.end(); ++iter)
-    {
-      sourceFile = (*iter);
-      targetFile = target + sourceFile.substr(sourceSize, (*iter).size());
-      if (!copyFile(sourceFile, targetFile, overwrite, copyAttributes))
-        return false;
-    }
-
-    return true;
-
-  }
-
+////---------------------------------------------------------------------------
+//  bool copyDirectory(
+//    const std::string &source,
+//    const std::string &target,
+//    const std::string &name,
+//    bool recurse,
+//    bool overwrite,
+//    bool copyAttributes)
+//  {
+//    //Check source
+//    if (!dirExists(source))
+//      return false;
+//
+//    //Check target
+//    if (!dirExists(target))
+//    {
+//      if (!createDirectory(target))
+//      {
+//        return false;
+//      }
+//    }
+//    else if (!overwrite)
+//    {
+//      if (!emptyDir(target))
+//        return false;
+//    }
+//
+//
+//    //Get source files
+//    std::vector<std::string> files;
+//    getFiles(source, name, files, recurse);
+//
+//    if (files.empty())
+//      return true;
+//
+//    //Copy files
+//    std::string sourceFile, targetFile;
+//    const size_t sourceSize = source.size();
+//
+//    for (std::vector<std::string>::iterator iter = files.begin(); iter != files.end(); ++iter)
+//    {
+//      sourceFile = (*iter);
+//      targetFile = target + sourceFile.substr(sourceSize, (*iter).size());
+//      if (!copyFile(sourceFile, targetFile, overwrite, copyAttributes))
+//        return false;
+//    }
+//
+//    return true;
+//
+//  }
+//
 
 
 //---------------------------------------------------------------------------
@@ -657,101 +657,101 @@ namespace svl
 //---------------------------------------------------------------------------
 //MN: WARNING, THIS FUNCTION HAS BEEN OBSERVED TO GENERATE FILESYSTEM EXCEPTIONS
 //    IN THE WILD.
-  void getFiles(
-    const string &thepath,
-    const string &name,
-    vector<string> &v,
-    bool recurse)
-  {
-    v.clear();
-    string pa(thepath);
-    if (pa.empty()) pa = ".";
-    cleanDirName(pa);
-#ifdef WIN32
-    replaceAll(pa, "/", "\\");
-    if (pa.empty()) pa = ".";
-    if (pa[pa.size()-1] != '\\') pa += "\\";
-#else
-    replaceAll(pa, "\\", "/");
-    if (pa.empty()) pa = ".";
-    if (pa[pa.size()-1] != '/') pa += "/";
-#endif
-    if (!dirExists(pa)) return;
-
-    vector<path> vp;
-    vp.push_back(path(pa));
-    unsigned int i = 0;
-
-    //to create a proper regular expression, any non literal should be preceded by \:
-    //All characters are literals except: ".", "|", "*", "?", "+", "(", ")", "{", "}",
-    //"[", "]", "^", "$" and "\".
-    //some of these characters are not allowed in filenames, ...
-    //and * should be replaced by .* and ? should be replaced by .?
-    string filename = name;
-    if (filename.empty()) filename = "*";
-    replaceAll(filename, ".", "\\.");
-    replaceAll(filename, "|", "\\|");
-    replaceAll(filename, "+", "\\+");
-    replaceAll(filename, "(", "\\(");
-    replaceAll(filename, ")", "\\)");
-    replaceAll(filename, "[", "\\[");
-    replaceAll(filename, "]", "\\]");
-    replaceAll(filename, "{", "\\{");
-    replaceAll(filename, "}", "\\}");
-    replaceAll(filename, "$", "\\$");
-    replaceAll(filename, "^", "\\^");
-    replaceAll(filename, "*", ".*");
-    replaceAll(filename, "?", ".?");
-    boost::regex e(filename, boost::regbase::normal | boost::regbase::icase);
-
-    while (i < vp.size())
-    {
-      //now we collect all files in the directory and check if they match the pattern
-      directory_iterator end_itr; // default construction yields past-the-end
-      string p = vp[i].string();
-#ifdef WIN32
-      if (p[p.size()-1] != '\\') p += "\\";
-#else
-      if (p[p.size()-1] != '/') p += "/";
-#endif
-      for (directory_iterator itr(vp[i]); itr != end_itr; ++itr)
-      {
-        //BvG: the call to is_directory could raise an exception if
-        //the directory is not accessible
-        bool b;
-        try
-        {
-          b = is_directory(*itr);
-        }
-        catch ( ... )
-        {
-          // handler for any C++ exception
-          b = true; // so we skip this one
-          //libReport(eError,"Error in getFiles: is_directory %s\n",itr->string().c_str());
-        }
-        if ( !b )
-        {
-          string f = itr->path().filename().string();
-          if (regex_match(f, e)) v.push_back(p + f);
-        }
-        else if (recurse)
-        {
-
-#if BOOST_VERSION <= 103301
-          string subdir = itr->string() + dirsep;
-#else
-          string subdir = itr->path().string() + dirsep;
-#endif
-          vp.push_back(path(subdir));
-        }
-      }
-      ++i; // move to the next directory to process
-    }
-
-    //BvG: it seems some systems do not return files in alphabetical order (samba?)
-    //so we sort the file names here
-    sort(v.begin(), v.end());
-  }
+//  void getFiles(
+//    const string &thepath,
+//    const string &name,
+//    vector<string> &v,
+//    bool recurse)
+//  {
+//    v.clear();
+//    string pa(thepath);
+//    if (pa.empty()) pa = ".";
+//    cleanDirName(pa);
+//#ifdef WIN32
+//    replaceAll(pa, "/", "\\");
+//    if (pa.empty()) pa = ".";
+//    if (pa[pa.size()-1] != '\\') pa += "\\";
+//#else
+//    replaceAll(pa, "\\", "/");
+//    if (pa.empty()) pa = ".";
+//    if (pa[pa.size()-1] != '/') pa += "/";
+//#endif
+//    if (!dirExists(pa)) return;
+//
+//    vector<path> vp;
+//    vp.push_back(path(pa));
+//    unsigned int i = 0;
+//
+//    //to create a proper regular expression, any non literal should be preceded by \:
+//    //All characters are literals except: ".", "|", "*", "?", "+", "(", ")", "{", "}",
+//    //"[", "]", "^", "$" and "\".
+//    //some of these characters are not allowed in filenames, ...
+//    //and * should be replaced by .* and ? should be replaced by .?
+//    string filename = name;
+//    if (filename.empty()) filename = "*";
+//    replaceAll(filename, ".", "\\.");
+//    replaceAll(filename, "|", "\\|");
+//    replaceAll(filename, "+", "\\+");
+//    replaceAll(filename, "(", "\\(");
+//    replaceAll(filename, ")", "\\)");
+//    replaceAll(filename, "[", "\\[");
+//    replaceAll(filename, "]", "\\]");
+//    replaceAll(filename, "{", "\\{");
+//    replaceAll(filename, "}", "\\}");
+//    replaceAll(filename, "$", "\\$");
+//    replaceAll(filename, "^", "\\^");
+//    replaceAll(filename, "*", ".*");
+//    replaceAll(filename, "?", ".?");
+//    boost::regex e(filename, boost::regbase::normal | boost::regbase::icase);
+//
+//    while (i < vp.size())
+//    {
+//      //now we collect all files in the directory and check if they match the pattern
+//      directory_iterator end_itr; // default construction yields past-the-end
+//      string p = vp[i].string();
+//#ifdef WIN32
+//      if (p[p.size()-1] != '\\') p += "\\";
+//#else
+//      if (p[p.size()-1] != '/') p += "/";
+//#endif
+//      for (directory_iterator itr(vp[i]); itr != end_itr; ++itr)
+//      {
+//        //BvG: the call to is_directory could raise an exception if
+//        //the directory is not accessible
+//        bool b;
+//        try
+//        {
+//          b = is_directory(*itr);
+//        }
+//        catch ( ... )
+//        {
+//          // handler for any C++ exception
+//          b = true; // so we skip this one
+//          //libReport(eError,"Error in getFiles: is_directory %s\n",itr->string().c_str());
+//        }
+//        if ( !b )
+//        {
+//          string f = itr->path().filename().string();
+//          if (regex_match(f, e)) v.push_back(p + f);
+//        }
+//        else if (recurse)
+//        {
+//
+//#if BOOST_VERSION <= 103301
+//          string subdir = itr->string() + dirsep;
+//#else
+//          string subdir = itr->path().string() + dirsep;
+//#endif
+//          vp.push_back(path(subdir));
+//        }
+//      }
+//      ++i; // move to the next directory to process
+//    }
+//
+//    //BvG: it seems some systems do not return files in alphabetical order (samba?)
+//    //so we sort the file names here
+//    sort(v.begin(), v.end());
+//  }
 
 //---------------------------------------------------------------------------
   void getSubdirectories(
