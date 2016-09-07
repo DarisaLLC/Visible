@@ -114,7 +114,8 @@ namespace svl
         std::pair<Surface8uRef, Channel8uRef> wp;
 
        
-        if (ir->getDataType() != PixelType<P8U>::ct() || ir->getColorModel() != PixelType<P8U>::cm() )
+        if ( (ir->getDataType() != PixelType<P8U>::ct() || ir->getColorModel() != PixelType<P8U>::cm()) &&
+        (ir->getDataType() != PixelType<P8UC4>::ct() || ir->getColorModel() != PixelType<P8UC4>::cm()) )
             return wp;
         
         switch (ir->getChannelOrder())

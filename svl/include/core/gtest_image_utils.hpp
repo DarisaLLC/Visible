@@ -118,12 +118,24 @@ static std::shared_ptr<uint8_t> create_trig(int w, int h)
 
 namespace fs=boost::filesystem;
 
-    struct null_deleter
+struct null_deleter
+{
+    void operator()(void const *) const
     {
-        void operator()(void const *) const
-        {
-        }
-    };
+    }
+};
+
+struct recursive_directory_range
+{
+    typedef fs::recursive_directory_iterator iterator;
+    recursive_directory_range(fs::path p) : p_(p) {}
+    
+    iterator begin() { return fs::recursive_directory_iterator(p_); }
+    iterator end() { return fs::recursive_directory_iterator(); }
+    
+    fs::path p_;
+};
+
     
 class genv : public testing::Environment
 {
@@ -190,10 +202,18 @@ public:
  
     std::pair<path_t, bool> asset_path(const std::string& file_name)
     {
-        std::vector<boost::filesystem::path> nameFiles = getFilesFromDirectory(file_name);
-        if (nameFiles.size() == 1)
-            return std::make_pair(nameFiles[0], true);
+        if (m_content_paths.size() != 2)
+             return std::make_pair(path_t (), false);
         
+        // In the future this can be a simple cache 
+        for (auto it : recursive_directory_range(m_content_paths[1]))
+        {
+            if (it.path().filename ().compare (file_name) == 0)
+            {
+               return std::make_pair(it.path(), true);
+            }
+        }
+
         return std::make_pair(path_t (), false);
     }
 
@@ -221,6 +241,7 @@ private:
             if( p.filename().string().find( strBase ) != std::string::npos )
             {
                 // select by file extension
+                std::cout << "Asset File: " << p.string() << std::endl;
                 nameFiles.push_back(p);
             }
         }

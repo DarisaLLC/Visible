@@ -90,7 +90,7 @@ TEST(basic, self_registration)
 }
 TEST(basic, image_txt_io)
 {
-    std::string filename ("txt/small_read_ut.txt");
+    std::string filename ("small_read_ut.txt");
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
     roiWindow<P8U> r8 (res.first.string());
     EXPECT_EQ(r8.width(), 20);
@@ -99,7 +99,7 @@ TEST(basic, image_txt_io)
 
 TEST(basicU8, png_io)
 {
-    std::string name = "checker/checkerboard_u8.png";
+    std::string name = "checkerboard_u8.png";
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
     EXPECT_TRUE(res.second);
     {
@@ -116,7 +116,7 @@ TEST(basicU8, png_io)
 TEST(basicU8, jpg_io)
 {
     {
-        std::string name = "checker/check_u8.jpg";
+        std::string name = "check_u8.jpg";
         std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
         EXPECT_TRUE(res.second);
         {
@@ -128,11 +128,11 @@ TEST(basicU8, jpg_io)
     }
     
     {
-        std::string name = "checker/check_rgb8.jpg";
+        std::string name = "check_rgb8.jpg";
         std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
         EXPECT_TRUE(res.second);
         {
-            std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
+            std::pair<Surface8uRef, Channel8uRef> wp (svl::image_io_read_surface(res.first));
             roiWindow<P8UC4> rootwin = svl::NewFromSurface(wp.first.get());
             EXPECT_EQ(rootwin.width(), 962);
             EXPECT_EQ(rootwin.height(), 602);
@@ -175,7 +175,7 @@ TEST(basicU8, localvar)
 TEST(basicU8, gradient)
 {
     
-    std::string filename ("txt/small_read_ut.txt");
+    std::string filename ("small_read_ut.txt");
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
     roiWindow<P8U> pels (res.first.string());
     
@@ -191,7 +191,7 @@ TEST(basicU8, gradient)
     EXPECT_EQ(pks, 26);
     
     
-    std::string afilename ("txt/small_mag_ut.txt");
+    std::string afilename ("small_mag_ut.txt");
     std::pair<test_utils::genv::path_t, bool> ares = dgenv_ptr->asset_path(afilename);
     roiWindow<P8U> au_mag (ares.first.string());
     
@@ -202,7 +202,7 @@ TEST(basicU8, gradient)
             EXPECT_EQ(mag.getPixel(i,j), au_mag.getPixel(i,j));
         }
     
-    std::string mfilename ("txt/small_ang_ut.txt");
+    std::string mfilename ("small_ang_ut.txt");
     std::pair<test_utils::genv::path_t, bool> mres = dgenv_ptr->asset_path(mfilename);
     roiWindow<P8U> au_ang (mres.first.string());
     
@@ -214,7 +214,7 @@ TEST(basicU8, gradient)
         }
     
 #ifdef NOTYET
-    std::string pfilename ("txt/small_peak_ut.txt");
+    std::string pfilename ("small_peak_ut.txt");
     std::pair<test_utils::genv::path_t, bool> pres = dgenv_ptr->asset_path(pfilename);
     roiWindow<P8U> au_peaks (pres.first.string());
     au_peaks.output();
@@ -298,7 +298,7 @@ TEST(synth, basic)
 
 TEST(basicip, timing)
 {
-    std::string name = "checker/checkerboard_u8.png";
+    std::string name = "checkerboard_u8.png";
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
     if (res.second)
     {
@@ -608,7 +608,6 @@ int main(int argc, char ** argv)
     
     for (unsigned ac = 0; ac < all_args.size(); ac++)
     {
-        std::cout << all_args[ac] << std::endl;
         if (!got_input)
         {
             std::size_t found = all_args.at(ac).find(input_marker);
