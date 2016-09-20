@@ -26,6 +26,6 @@ LOCAL_gtest = $(LOCAL_3rdParty)/gtest
 LOCAL_OCV = $(LOCAL_CINDER)/blocks/OpenCV3
 LOCAL_GLM = $(LOCAL_3rdParty)/glm/glm
 LOCAL_PUGIXML = $(LOCAL_3rdParty)/pugixml/1.7
+LOCAL_EIGEN = $(LOCAL_3rdParty)/Eigen
+LOCAL_CEREAL = $(LOCAL_3rdParty)/cereal-1.1.1/include
 
-
-HEADER_SEARCH_PATHS = $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_PUGIXML)/include
