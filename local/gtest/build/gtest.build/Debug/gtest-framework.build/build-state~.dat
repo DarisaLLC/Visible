@@ -1,707 +1,0 @@
-Tgtest-framework
-v6
-r1
-cCheck dependencies
-cPreprocess /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/Resources/Info.plist
-cProcessInfoPlistFile /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/Info.plist /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist
-cCompileC build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest_vers.o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/DerivedSources/gtest_vers.c normal x86_64 c com.apple.compilers.llvm.clang.1_0.compiler
-cCompileC build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest-all.o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-all.cc normal x86_64 c++ com.apple.compilers.llvm.clang.1_0.compiler
-cLd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/gtest normal x86_64
-cCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-message.h build/Debug/gtest.framework/Versions/A/Headers/gtest-message.h
-cCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-death-test.h build/Debug/gtest.framework/Versions/A/Headers/gtest-death-test.h
-cCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-param-test.h build/Debug/gtest.framework/Versions/A/Headers/gtest-param-test.h
-cCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-printers.h build/Debug/gtest.framework/Versions/A/Headers/gtest-printers.h
-cCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-typed-test.h build/Debug/gtest.framework/Versions/A/Headers/gtest-typed-test.h
-cCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-spi.h build/Debug/gtest.framework/Versions/A/Headers/gtest-spi.h
-cCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest.h build/Debug/gtest.framework/Versions/A/Headers/gtest.h
-cCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_pred_impl.h build/Debug/gtest.framework/Versions/A/Headers/gtest_pred_impl.h
-cCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_prod.h build/Debug/gtest.framework/Versions/A/Headers/gtest_prod.h
-cCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-test-part.h build/Debug/gtest.framework/Versions/A/Headers/gtest-test-part.h
-cPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-filepath.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-filepath.h
-cPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-death-test-internal.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-death-test-internal.h
-cPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-internal.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-internal.h
-cPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-linked_ptr.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-linked_ptr.h
-cPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util-generated.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util-generated.h
-cPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util.h
-cPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-port.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-port.h
-cPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-string.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-string.h
-cPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-tuple.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-tuple.h
-cPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-type-util.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-type-util.h
-cCpResource /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/README build/Debug/gtest.framework/Versions/A/Resources/README
-cCpResource /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CHANGES build/Debug/gtest.framework/Versions/A/Resources/CHANGES
-cCpResource /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CONTRIBUTORS build/Debug/gtest.framework/Versions/A/Resources/CONTRIBUTORS
-cCpResource /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/COPYING build/Debug/gtest.framework/Versions/A/Resources/COPYING
-cCpResource build/Debug/libgtest_main.a build/Debug/gtest.framework/Versions/A/Resources/libgtest_main.a
-cTouch /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework
-
-N/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk
-c00000000534D925B00000000000000AA
-t1397592667
-s170
-
-N/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/SDKSettings.plist
-c0000000052694773000000000000044C
-t1382631283
-s1100
-
-N/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/System/Library/CoreServices/SystemVersion.plist
-c000000005333BEE700000000000001DE
-t1395900135
-s478
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CHANGES
-c00000000535961ED0000000000001534
-t1398366701
-s5428
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CONTRIBUTORS
-c00000000535961ED000000000000054E
-t1398366701
-s1358
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/COPYING
-c00000000535961ED00000000000005C3
-t1398366701
-s1475
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/README
-c00000000535961ED0000000000003C5A
-t1398366701
-s15450
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-death-test.h
-c00000000535961ED0000000000002B65
-t1398366701
-s11109
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-message.h
-c00000000535961ED00000000000020CB
-t1398366701
-s8395
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-param-test.h
-c00000000535961ED0000000000012859
-t1398366701
-s75865
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-printers.h
-c00000000535961ED000000000000769B
-t1398366701
-s30363
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-spi.h
-c00000000535961ED00000000000026DF
-t1398366701
-s9951
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-test-part.h
-c00000000535961ED0000000000001945
-t1398366701
-s6469
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-typed-test.h
-c00000000535961ED0000000000002802
-t1398366701
-s10242
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest.h
-c00000000535961ED0000000000014212
-t1398366701
-s82450
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_pred_impl.h
-c00000000535961ED0000000000003B24
-t1398366701
-s15140
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_prod.h
-c00000000535961ED0000000000000914
-t1398366701
-s2324
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-death-test-internal.h
-c00000000535961ED0000000000003265
-t1398366701
-s12901
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-filepath.h
-c00000000535961ED00000000000025E1
-t1398366701
-s9697
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-internal.h
-c00000000535961ED000000000000B8DD
-t1398366701
-s47325
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-linked_ptr.h
-c00000000535961ED0000000000001F7F
-t1398366701
-s8063
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util-generated.h
-c00000000535961ED0000000000029508
-t1398366701
-s169224
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util.h
-c00000000535961ED0000000000005EAA
-t1398366701
-s24234
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-port.h
-c00000000535961ED000000000000F892
-t1398366701
-s63634
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-string.h
-c00000000535961ED000000000000351B
-t1398366701
-s13595
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-tuple.h
-c00000000535961ED0000000000006DDB
-t1398366701
-s28123
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-type-util.h
-c00000000535961ED000000000002D53C
-t1398366701
-s185660
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-all.cc
-c00000000535961ED0000000000000871
-t1398366701
-s2161
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/Resources/Info.plist
-c00000000535961ED00000000000003F2
-t1398366701
-s1010
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework
-t1398366945
-s204
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-death-test.h
-t1398366948
-s11109
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-message.h
-t1398366948
-s8395
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-param-test.h
-t1398366948
-s75865
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-printers.h
-t1398366948
-s30363
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-spi.h
-t1398366948
-s9951
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-test-part.h
-t1398366948
-s6469
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-typed-test.h
-t1398366948
-s10242
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest.h
-t1398366948
-s82450
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest_pred_impl.h
-t1398366948
-s15140
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest_prod.h
-t1398366948
-s2324
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-death-test-internal.h
-t1398366948
-s12901
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-filepath.h
-t1398366948
-s9697
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-internal.h
-t1398366948
-s47325
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-linked_ptr.h
-t1398366948
-s8063
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util-generated.h
-t1398366948
-s169224
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util.h
-t1398366948
-s24234
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-port.h
-t1398366948
-s63634
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-string.h
-t1398366948
-s13595
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-tuple.h
-t1398366948
-s28123
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-type-util.h
-t1398366948
-s185660
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/CHANGES
-t1398366948
-s5428
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/CONTRIBUTORS
-t1398366948
-s1358
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/COPYING
-t1398366948
-s1475
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/Info.plist
-t1398366945
-s1288
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/README
-t1398366948
-s15450
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/libgtest_main.a
-t1398366943
-s5784
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/gtest
-t1398366948
-s707012
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a
-c00000000535962E100000000000106C8
-t1398366945
-s67272
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/DerivedSources/gtest_vers.c
-c00000000535962E100000000000000B2
-t1398366945
-s178
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest-all.o
-t1398366947
-s1938388
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest.LinkFileList
-c00000000535962E1000000000000010F
-t1398366945
-s271
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest_vers.o
-t1398366945
-s2620
-
-N/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist
-t1398366945
-s956
-
-CCheck dependencies
-r0
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection18"Check dependencies18"Check dependenciesd57ac7619a09b941^e1b8c8619a09b941^---0#1#1#--18"Check dependencies36"3DE7C0AE-9D3B-41FB-AB09-87E3BC492406-
-
-CCompileC build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest-all.o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-all.cc normal x86_64 c++ com.apple.compilers.llvm.clang.1_0.compiler
-s420059745.832240
-e420059747.836841
-r1
-xCompileC
-xbuild/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest-all.o
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-all.cc
-xnormal
-xx86_64
-xc++
-xcom.apple.compilers.llvm.clang.1_0.compiler
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-all.cc
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-internal.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-port.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-string.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-filepath.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-type-util.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-death-test.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-death-test-internal.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-message.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-param-test.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-linked_ptr.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-printers.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util-generated.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_prod.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-test-part.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-typed-test.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_pred_impl.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest.cc
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-spi.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-internal-inl.h
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-death-test.cc
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-filepath.cc
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-port.cc
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-printers.cc
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-test-part.cc
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-typed-test.cc
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection73"Compile /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-all.cc232"[1mCompileC[0m build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest-all.o [1m/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-all.cc[0m normal x86_64 c++ com.apple.compilers.llvm.clang.1_0.compiler4f23d5619a09b941^583bd6639a09b941^---0#0#1#-19%DVTDocumentLocation2@81"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-all.cc0000000000000000^2970"[1mCompileC[0m build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest-all.o [1m/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-all.cc[0m normal x86_64 c++ com.apple.compilers.llvm.clang.1_0.compiler    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    export LANG=en_US.US-ASCII    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x c++ -arch x86_64 -fmessage-length=162 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -fcolor-diagnostics -std=c++11 -stdlib=libc++ -Wno-trigraphs -fpascal-strings -O0 -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-shorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -fasm-blocks -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -mmacosx-version-min=10.7 -g -fvisibility-inlines-hidden -Wno-sign-conversion -iquote /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/gtest-generated-files.hmap -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/gtest-own-target-headers.hmap -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/gtest-all-target-headers.hmap -iquote /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/gtest-project-headers.hmap -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/include -I.. -I../include -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/DerivedSources/x86_64 -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/DerivedSources -Wall -Werror -Wendif-labels -Wnewline-eof -Wno-sign-compare -Wshadow -F/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug -DDEBUG=1 -MMD -MT dependencies -MF /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest-all.d --serialize-diagnostics /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest-all.dia -c /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/src/gtest-all.cc -o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest-all.o36"BC84BB2F-6252-4B4F-A8D9-17201FB083C1-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCompileC build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest_vers.o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/DerivedSources/gtest_vers.c normal x86_64 c com.apple.compilers.llvm.clang.1_0.compiler
-s420059745.832238
-e420059745.848717
-r1
-xCompileC
-xbuild/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest_vers.o
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/DerivedSources/gtest_vers.c
-xnormal
-xx86_64
-xc
-xcom.apple.compilers.llvm.clang.1_0.compiler
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/DerivedSources/gtest_vers.c
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection136"Compile /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/DerivedSources/gtest_vers.c239"[1mCompileC[0m build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest_vers.o [1mbuild/gtest.build/Debug/gtest-framework.build/DerivedSources/gtest_vers.c[0m normal x86_64 c com.apple.compilers.llvm.clang.1_0.compiler2d23d5619a09b941^c845d9619a09b941^---0#0#1#-19%DVTDocumentLocation2@144"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/DerivedSources/gtest_vers.c0000000000000000^2897"[1mCompileC[0m build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest_vers.o [1mbuild/gtest.build/Debug/gtest-framework.build/DerivedSources/gtest_vers.c[0m normal x86_64 c com.apple.compilers.llvm.clang.1_0.compiler    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    export LANG=en_US.US-ASCII    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x c -arch x86_64 -fmessage-length=162 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -fcolor-diagnostics -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-shorten-64-to-32 -Wpointer-sign -Wno-newline-eof -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -fasm-blocks -fstrict-aliasing -Wdeprecated-declarations -mmacosx-version-min=10.7 -g -Wno-sign-conversion -iquote /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/gtest-generated-files.hmap -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/gtest-own-target-headers.hmap -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/gtest-all-target-headers.hmap -iquote /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/gtest-project-headers.hmap -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/include -I.. -I../include -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/DerivedSources/x86_64 -I/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/DerivedSources -Wall -Werror -Wendif-labels -Wnewline-eof -Wno-sign-compare -Wshadow -F/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug -DDEBUG=1 -MMD -MT dependencies -MF /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest_vers.d --serialize-diagnostics /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest_vers.dia -c /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/DerivedSources/gtest_vers.c -o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest_vers.o36"56AFE408-435C-4173-8330-AC2131EFDA7D-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-death-test.h build/Debug/gtest.framework/Versions/A/Headers/gtest-death-test.h
-s420059748.075658
-e420059748.077999
-r1
-xCpHeader
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-death-test.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/gtest-death-test.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection70"Copy build/Debug/gtest.framework/Versions/A/Headers/gtest-death-test.h164"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-death-test.h build/Debug/gtest.framework/Versions/A/Headers/gtest-death-test.h697413649a09b941^12f813649a09b941^---0#0#1#-19%DVTDocumentLocation2@136"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-death-test.h0038d076dcffdf42^649"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-death-test.h build/Debug/gtest.framework/Versions/A/Headers/gtest-death-test.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-death-test.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers36"A1A25929-0361-4843-BC5B-58A53B29A480-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-message.h build/Debug/gtest.framework/Versions/A/Headers/gtest-message.h
-s420059748.075640
-e420059748.078838
-r1
-xCpHeader
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-message.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/gtest-message.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection67"Copy build/Debug/gtest.framework/Versions/A/Headers/gtest-message.h158"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-message.h build/Debug/gtest.framework/Versions/A/Headers/gtest-message.hc97513649a09b941^402f14649a09b941^---0#0#1#-19%DVTDocumentLocation2@133"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-message.h0038d076dcffdf42^640"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-message.h build/Debug/gtest.framework/Versions/A/Headers/gtest-message.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-message.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers36"7DE7AE16-D750-4D1A-B36A-385FB41B2E75-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-param-test.h build/Debug/gtest.framework/Versions/A/Headers/gtest-param-test.h
-s420059748.075664
-e420059748.081086
-r1
-xCpHeader
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-param-test.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/gtest-param-test.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection70"Copy build/Debug/gtest.framework/Versions/A/Headers/gtest-param-test.h164"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-param-test.h build/Debug/gtest.framework/Versions/A/Headers/gtest-param-test.hb77d13649a09b941^83c214649a09b941^---0#0#1#-19%DVTDocumentLocation2@136"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-param-test.h0038d076dcffdf42^649"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-param-test.h build/Debug/gtest.framework/Versions/A/Headers/gtest-param-test.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-param-test.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers36"9B26D637-5780-4240-9017-3FE421D2665D-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-printers.h build/Debug/gtest.framework/Versions/A/Headers/gtest-printers.h
-s420059748.075769
-e420059748.080064
-r1
-xCpHeader
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-printers.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/gtest-printers.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection68"Copy build/Debug/gtest.framework/Versions/A/Headers/gtest-printers.h160"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-printers.h build/Debug/gtest.framework/Versions/A/Headers/gtest-printers.hb77913649a09b941^aa7f14649a09b941^---0#0#1#-19%DVTDocumentLocation2@134"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-printers.h0038d076dcffdf42^643"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-printers.h build/Debug/gtest.framework/Versions/A/Headers/gtest-printers.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-printers.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers36"57FA9A6B-EE5A-4B5E-BE4C-534A0BE87146-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-spi.h build/Debug/gtest.framework/Versions/A/Headers/gtest-spi.h
-s420059748.079444
-e420059748.083160
-r1
-xCpHeader
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-spi.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/gtest-spi.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection63"Copy build/Debug/gtest.framework/Versions/A/Headers/gtest-spi.h150"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-spi.h build/Debug/gtest.framework/Versions/A/Headers/gtest-spi.h996414649a09b941^6f4a15649a09b941^---0#0#1#-19%DVTDocumentLocation2@129"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-spi.h0038d076dcffdf42^628"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-spi.h build/Debug/gtest.framework/Versions/A/Headers/gtest-spi.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-spi.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers36"7ED14E7D-7743-4494-8ECC-08D8A231AD05-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-test-part.h build/Debug/gtest.framework/Versions/A/Headers/gtest-test-part.h
-s420059748.083476
-e420059748.087690
-r1
-xCpHeader
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-test-part.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/gtest-test-part.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection69"Copy build/Debug/gtest.framework/Versions/A/Headers/gtest-test-part.h162"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-test-part.h build/Debug/gtest.framework/Versions/A/Headers/gtest-test-part.hdf6a15649a09b941^ab7516649a09b941^---0#0#1#-19%DVTDocumentLocation2@135"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-test-part.h0038d076dcffdf42^646"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-test-part.h build/Debug/gtest.framework/Versions/A/Headers/gtest-test-part.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-test-part.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers36"F8D82EAC-A9C8-42E3-9326-A5F4AFE544DD-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-typed-test.h build/Debug/gtest.framework/Versions/A/Headers/gtest-typed-test.h
-s420059748.079164
-e420059748.082072
-r1
-xCpHeader
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-typed-test.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/gtest-typed-test.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection70"Copy build/Debug/gtest.framework/Versions/A/Headers/gtest-typed-test.h164"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-typed-test.h build/Debug/gtest.framework/Versions/A/Headers/gtest-typed-test.h265414649a09b941^970315649a09b941^---0#0#1#-19%DVTDocumentLocation2@136"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest-typed-test.h0038d076dcffdf42^649"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-typed-test.h build/Debug/gtest.framework/Versions/A/Headers/gtest-typed-test.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest-typed-test.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers36"BB46F31F-C905-4BB2-8FCF-1B8C51A44261-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest.h build/Debug/gtest.framework/Versions/A/Headers/gtest.h
-s420059748.081325
-e420059748.084305
-r1
-xCpHeader
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/gtest.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection59"Copy build/Debug/gtest.framework/Versions/A/Headers/gtest.h142"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest.h build/Debug/gtest.framework/Versions/A/Headers/gtest.ha8e014649a09b941^899515649a09b941^---0#0#1#-19%DVTDocumentLocation2@125"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest.h0038d076dcffdf42^616"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest.h build/Debug/gtest.framework/Versions/A/Headers/gtest.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers36"CF8239B8-8B53-4536-925A-B4EF93C40FAE-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_pred_impl.h build/Debug/gtest.framework/Versions/A/Headers/gtest_pred_impl.h
-s420059748.081463
-e420059748.085298
-r1
-xCpHeader
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_pred_impl.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/gtest_pred_impl.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection69"Copy build/Debug/gtest.framework/Versions/A/Headers/gtest_pred_impl.h162"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_pred_impl.h build/Debug/gtest.framework/Versions/A/Headers/gtest_pred_impl.h10e814649a09b941^9dd615649a09b941^---0#0#1#-19%DVTDocumentLocation2@135"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest_pred_impl.h0038d076dcffdf42^646"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_pred_impl.h build/Debug/gtest.framework/Versions/A/Headers/gtest_pred_impl.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_pred_impl.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers36"7B5040AC-5A22-4921-A7AF-21B9B9C1DF47-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpHeader /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_prod.h build/Debug/gtest.framework/Versions/A/Headers/gtest_prod.h
-s420059748.083316
-e420059748.086541
-r1
-xCpHeader
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_prod.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/gtest_prod.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection64"Copy build/Debug/gtest.framework/Versions/A/Headers/gtest_prod.h152"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_prod.h build/Debug/gtest.framework/Versions/A/Headers/gtest_prod.h246315649a09b941^a03216649a09b941^---0#0#1#-19%DVTDocumentLocation2@130"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/gtest_prod.h0038d076dcffdf42^631"[1mCpHeader[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_prod.h build/Debug/gtest.framework/Versions/A/Headers/gtest_prod.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/gtest_prod.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers36"158327AA-ED87-45BA-99AA-6515D29C8D17-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpResource /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CHANGES build/Debug/gtest.framework/Versions/A/Resources/CHANGES
-s420059748.142028
-e420059748.152921
-r1
-xCpResource
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CHANGES
-xbuild/Debug/gtest.framework/Versions/A/Resources/CHANGES
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection61"Copy build/Debug/gtest.framework/Versions/A/Resources/CHANGES132"[1mCpResource[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CHANGES build/Debug/gtest.framework/Versions/A/Resources/CHANGES4c6e24649a09b941^a16727649a09b941^---0#0#1#-19%DVTDocumentLocation2@127"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/CHANGES0038d076dcffdf42^594"[1mCpResource[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CHANGES build/Debug/gtest.framework/Versions/A/Resources/CHANGES    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CHANGES /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources36"C3B6F03E-3046-4120-BAC6-98C990964E9E-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpResource /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CONTRIBUTORS build/Debug/gtest.framework/Versions/A/Resources/CONTRIBUTORS
-s420059748.142031
-e420059748.151784
-r1
-xCpResource
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CONTRIBUTORS
-xbuild/Debug/gtest.framework/Versions/A/Resources/CONTRIBUTORS
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection66"Copy build/Debug/gtest.framework/Versions/A/Resources/CONTRIBUTORS142"[1mCpResource[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CONTRIBUTORS build/Debug/gtest.framework/Versions/A/Resources/CONTRIBUTORSec6c24649a09b941^425e27649a09b941^---0#0#1#-19%DVTDocumentLocation2@132"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/CONTRIBUTORS0038d076dcffdf42^609"[1mCpResource[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CONTRIBUTORS build/Debug/gtest.framework/Versions/A/Resources/CONTRIBUTORS    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/CONTRIBUTORS /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources36"47AA2922-6740-4FD7-A9E9-D19E43CBB525-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpResource /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/COPYING build/Debug/gtest.framework/Versions/A/Resources/COPYING
-s420059748.142351
-e420059748.153166
-r1
-xCpResource
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/COPYING
-xbuild/Debug/gtest.framework/Versions/A/Resources/COPYING
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection61"Copy build/Debug/gtest.framework/Versions/A/Resources/COPYING132"[1mCpResource[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/COPYING build/Debug/gtest.framework/Versions/A/Resources/COPYINGae7e24649a09b941^7e6f27649a09b941^---0#0#1#-19%DVTDocumentLocation2@127"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/COPYING0038d076dcffdf42^594"[1mCpResource[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/COPYING build/Debug/gtest.framework/Versions/A/Resources/COPYING    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/COPYING /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources36"4CD8050C-2069-4C54-9478-7516C8D3EE21-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpResource /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/README build/Debug/gtest.framework/Versions/A/Resources/README
-s420059748.142026
-e420059748.151237
-r1
-xCpResource
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/README
-xbuild/Debug/gtest.framework/Versions/A/Resources/README
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection60"Copy build/Debug/gtest.framework/Versions/A/Resources/README130"[1mCpResource[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/README build/Debug/gtest.framework/Versions/A/Resources/README226c24649a09b941^feb726649a09b941^---0#0#1#-19%DVTDocumentLocation2@126"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/README0038d076dcffdf42^591"[1mCpResource[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/README build/Debug/gtest.framework/Versions/A/Resources/README    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/README /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources36"49E8C7F3-0F74-4CAC-8DB0-035706734121-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CCpResource build/Debug/libgtest_main.a build/Debug/gtest.framework/Versions/A/Resources/libgtest_main.a
-s420059748.152533
-e420059748.165746
-r1
-xCpResource
-xbuild/Debug/libgtest_main.a
-xbuild/Debug/gtest.framework/Versions/A/Resources/libgtest_main.a
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection69"Copy build/Debug/gtest.framework/Versions/A/Resources/libgtest_main.a111"[1mCpResource[0m build/Debug/libgtest_main.a build/Debug/gtest.framework/Versions/A/Resources/libgtest_main.a581b27649a09b941^b77e2a649a09b941^-302"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -S /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a -o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/libgtest_main.a-0#0#1#-19%DVTDocumentLocation2@135"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/libgtest_main.a0038d076dcffdf42^599"[1mCpResource[0m build/Debug/libgtest_main.a build/Debug/gtest.framework/Versions/A/Resources/libgtest_main.a    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/libgtest_main.a /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources36"706A0942-6631-4460-8766-0CFA641074FB-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CLd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/gtest normal x86_64
-s420059747.845531
-e420059748.067037
-r1
-xLd
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/gtest
-xnormal
-xx86_64
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest.LinkFileList
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest-all.o
-d/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest_vers.o
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libc++.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libSystem.dylib
-d/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/5.1/lib/darwin/libclang_rt.osx.a
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libcache.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libcommonCrypto.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libcompiler_rt.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libcopyfile.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libcorecrypto.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libdispatch.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libdyld.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libkeymgr.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/liblaunch.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libmacho.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libquarantine.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libremovefile.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_asl.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_blocks.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_c.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_configuration.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_dnssd.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_info.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_kernel.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_m.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_malloc.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_network.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_notify.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_platform.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_pthread.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_sandbox.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libsystem_stats.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libunc.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libunwind.dylib
-d/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/system/libxpc.dylib
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection104"Link /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/gtest69"[1mLd[0m build/Debug/gtest.framework/Versions/A/gtest normal x86_64be86d8639a09b941^ed2911649a09b941^---0#0#1#--1150"[1mLd[0m build/Debug/gtest.framework/Versions/A/gtest normal x86_64    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    export MACOSX_DEPLOYMENT_TARGET=10.7    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ -arch x86_64 -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -L/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug -F/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug -filelist /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest.LinkFileList -install_name /Library/Frameworks/gtest.framework/Versions/A/gtest -mmacosx-version-min=10.7 -stdlib=libc++ -single_module -compatibility_version 1 -current_version 1 -Xlinker -dependency_info -Xlinker /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Objects-normal/x86_64/gtest_dependency_info.dat -o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/gtest36"6A3D6F0E-74DB-477A-B8A3-B30E652715CE-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-death-test-internal.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-death-test-internal.h
-s420059748.095992
-e420059748.100553
-r1
-xPBXCp
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-death-test-internal.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/internal/gtest-death-test-internal.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection88"Copy build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-death-test-internal.h197"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-death-test-internal.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-death-test-internal.hf7ab18649a09b941^a9c019649a09b941^---0#0#1#-19%DVTDocumentLocation2@154"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-death-test-internal.h0038d076dcffdf42^709"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-death-test-internal.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-death-test-internal.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-death-test-internal.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal36"F42AE657-2E1E-4CDC-B165-404BB00B90BF-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-filepath.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-filepath.h
-s420059748.095976
-e420059748.098063
-r1
-xPBXCp
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-filepath.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/internal/gtest-filepath.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection77"Copy build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-filepath.h175"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-filepath.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-filepath.h01a218649a09b941^4c1c19649a09b941^---0#0#1#-19%DVTDocumentLocation2@143"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-filepath.h0038d076dcffdf42^676"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-filepath.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-filepath.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-filepath.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal36"4B621A84-C271-4A58-BCFD-2DA4D22566D8-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-internal.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-internal.h
-s420059748.095998
-e420059748.099193
-r1
-xPBXCp
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-internal.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/internal/gtest-internal.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection77"Copy build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-internal.h175"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-internal.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-internal.ha8aa18649a09b941^126719649a09b941^---0#0#1#-19%DVTDocumentLocation2@143"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-internal.h0038d076dcffdf42^676"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-internal.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-internal.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-internal.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal36"6408A9A5-6FEF-419C-BD6E-C7102AD3231B-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-linked_ptr.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-linked_ptr.h
-s420059748.096356
-e420059748.102253
-r1
-xPBXCp
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-linked_ptr.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/internal/gtest-linked_ptr.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection79"Copy build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-linked_ptr.h179"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-linked_ptr.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-linked_ptr.ha2b718649a09b941^925c1a649a09b941^---0#0#1#-19%DVTDocumentLocation2@145"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-linked_ptr.h0038d076dcffdf42^682"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-linked_ptr.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-linked_ptr.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-linked_ptr.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal36"4D81CFBB-D715-4623-814D-7177683E1C1E-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util-generated.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util-generated.h
-s420059748.099547
-e420059748.103866
-r1
-xPBXCp
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util-generated.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util-generated.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection89"Copy build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util-generated.h199"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util-generated.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util-generated.h3d9b19649a09b941^39971a649a09b941^---0#0#1#-19%DVTDocumentLocation2@155"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util-generated.h0038d076dcffdf42^712"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util-generated.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util-generated.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util-generated.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal36"A8E9A72D-E6D1-4AB2-8688-CF27119498AF-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util.h
-s420059748.099555
-e420059748.102968
-r1
-xPBXCp
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection79"Copy build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util.h179"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util.h2a8c19649a09b941^3d641a649a09b941^---0#0#1#-19%DVTDocumentLocation2@145"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util.h0038d076dcffdf42^682"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-param-util.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-param-util.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal36"4C4280EF-C9C0-4EEF-BBFD-F5440D0E7D61-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-port.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-port.h
-s420059748.101787
-e420059748.105068
-r1
-xPBXCp
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-port.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/internal/gtest-port.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection73"Copy build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-port.h167"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-port.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-port.h2a1f1a649a09b941^8df01a649a09b941^---0#0#1#-19%DVTDocumentLocation2@139"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-port.h0038d076dcffdf42^664"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-port.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-port.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-port.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal36"BE25DE52-BF55-4A53-82EA-F0EC206E9478-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-string.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-string.h
-s420059748.103456
-e420059748.112765
-r1
-xPBXCp
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-string.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/internal/gtest-string.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection75"Copy build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-string.h171"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-string.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-string.h868d1a649a09b941^c2de1c649a09b941^---0#0#1#-19%DVTDocumentLocation2@141"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-string.h0038d076dcffdf42^670"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-string.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-string.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-string.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal36"597E3562-5007-4F59-A8B1-EBF4C8ABF2EF-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-tuple.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-tuple.h
-s420059748.103960
-e420059748.134375
-r1
-xPBXCp
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-tuple.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/internal/gtest-tuple.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection74"Copy build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-tuple.h169"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-tuple.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-tuple.h4caa1a649a09b941^5e6822649a09b941^---0#0#1#-19%DVTDocumentLocation2@140"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-tuple.h0038d076dcffdf42^667"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-tuple.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-tuple.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-tuple.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal36"04C6B8B8-F1DF-4F7B-A5C7-684A4C1E64C9-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CPBXCp /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-type-util.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-type-util.h
-s420059748.106041
-e420059748.112766
-r1
-xPBXCp
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-type-util.h
-xbuild/Debug/gtest.framework/Versions/A/Headers/internal/gtest-type-util.h
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection78"Copy build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-type-util.h177"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-type-util.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-type-util.h4c351b649a09b941^13ef1c649a09b941^---0#0#1#-19%DVTDocumentLocation2@144"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-type-util.h0038d076dcffdf42^679"[1mPBXCp[0m /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-type-util.h build/Debug/gtest.framework/Versions/A/Headers/internal/gtest-type-util.h    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-debug-symbols -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/include/gtest/internal/gtest-type-util.h /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Headers/internal36"5FDFB314-4AC2-4C2A-B76E-700057E70E3A-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CPreprocess /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/Resources/Info.plist
-s420059745.786325
-e420059745.813177
-r1
-xPreprocess
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/Resources/Info.plist
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection117"[1mPreprocess[0m build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist [1mResources/Info.plist[0m117"[1mPreprocess[0m build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist [1mResources/Info.plist[0mdd5bc9619a09b941^e42cd0619a09b941^---0#0#1#-19%DVTDocumentLocation2@91"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/Resources/Info.plist0000000000000000^665"[1mPreprocess[0m build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist [1mResources/Info.plist[0m    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -E -P -x c -Wno-trigraphs /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/Resources/Info.plist -F/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug -include /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Version.h -o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist36"F2772688-9BBB-405B-B7A9-4B4C4EF72E1E-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CProcessInfoPlistFile /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/Info.plist /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist
-s420059745.821410
-e420059745.824446
-r1
-xProcessInfoPlistFile
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/Info.plist
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection132"Process /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist166"[1mProcessInfoPlistFile[0m build/Debug/gtest.framework/Versions/A/Resources/Info.plist [1mbuild/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist[0mfb5bd2619a09b941^7c0fd3619a09b941^---0#0#1#-19%DVTDocumentLocation2@140"file://localhost/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist0000000000000000^539"[1mProcessInfoPlistFile[0m build/Debug/gtest.framework/Versions/A/Resources/Info.plist [1mbuild/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist[0m    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    builtin-infoPlistUtility /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/gtest.build/Debug/gtest-framework.build/Preprocessed-Info.plist -expandbuildsettings -platform macosx -o /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework/Versions/A/Resources/Info.plist36"55CF7722-F46B-4DB3-AD34-1EDA9C333609-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
-CTouch /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework
-s420059748.175140
-e420059748.180671
-r1
-xTouch
-x/Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework
-lSLF06#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection88"Touch /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework41"[1mTouch[0m build/Debug/gtest.framework79eb2c649a09b941^c8402e649a09b941^---0#0#1#--209"[1mTouch[0m build/Debug/gtest.framework    cd /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode    /usr/bin/touch -c /Volumes/1tb5400rmhst/hgits/couchdeveloper_gtest/xcode/build/Debug/gtest.framework36"23F615A9-6F5E-494A-8FB2-8795E9070803-
-b37D245DD-5C1D-4B9B-80D1-D3EB47507A02
-
