@@ -70,7 +70,7 @@ public:
 
 
     /*
-         * Create a qWindow with an underlying frame using location and size of the
+         * Create a roiWindow with an underlying frame using location and size of the
          * supplied rectangle
          */
     roiWindow(iRect & bound, image_memory_alignment_policy im = image_memory_alignment_policy::align_every_row)
