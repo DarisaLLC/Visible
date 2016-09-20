@@ -23,11 +23,15 @@
 #include "ut_localvar.hpp"
 #include "core/cv_gabor.hpp"
 #include "opencv2/highgui.hpp"
-#include "vision/colorhistogram.hpp"
 #include "ut_similarity.hpp"
+#include "otherIO/lifImage.hpp"
+#include "core/gtest_image_utils.hpp"
+#include "ut_units.hpp"
+#include "cardio_model/cardiomyocyte_model.hpp"
 
 using namespace svl;
 using namespace ci;
+using namespace cm;
 
 
 static test_utils::genv * dgenv_ptr;
@@ -77,7 +81,57 @@ const char * pi341234[] =
 //}
 //
 
+TEST (ut_units, basic)
+{
+    eigen_ut::run();
+    units_ut::run();
+    
+    double epsilon = 1e-5;
+    cardio_model cmm;
+    EXPECT_NEAR(cmm.result().length.value(), 0.01, epsilon);
+    EXPECT_NEAR(cmm.result().width.value(), 0.003, epsilon);
+    EXPECT_NEAR(cmm.result().thickness.value(), 0.00020, epsilon);
+    EXPECT_NEAR(cmm.result().elongation.value(), 0.01, epsilon);
+    EXPECT_NEAR(cmm.result().total_simple_dipole.value(), 3.39292, epsilon);
+    EXPECT_NEAR(cmm.result().total_reactive.value (), 2.57928, epsilon);
+    EXPECT_NEAR(cmm.result().average_contact_stress.value ()*1e-6, 0.17195, epsilon);
+    EXPECT_NEAR(cmm.result().average_contraction_strain, 1.0, epsilon);
+    EXPECT_NEAR(cmm.result().moment_arm_fraction, 0.66667, epsilon);
+    EXPECT_NEAR(cmm.result().moment_of_dipole, 0.01720, epsilon);
+    
+    std::stringstream ss;
+    {
+        cereal::JSONOutputArchive ar(ss);
+        cardio_model cmm;
+        ar( CEREAL_NVP(cmm.result()) );
+    }
+    std::cout << ss.str() << std::endl;
+}
 
+TEST (ut_lifImage, basic)
+{
+    std::shared_ptr<baseImage> img;
+    std::string filename ("Sample1.lif");
+    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
+    EXPECT_TRUE(res.second);
+    img = baseImage::open(res.first.string());
+    EXPECT_FALSE(!img);
+    EXPECT_EQ(0, img->getDataType());
+    EXPECT_EQ(1, img->getSamplesPerPixel());
+    EXPECT_EQ(14, ((lifImage*) img.get())->series ());
+    
+    vector<unsigned long long> dims = img->getDimensions();
+    EXPECT_EQ(512, dims[0]);
+    EXPECT_EQ(128, dims[1]);
+    
+    unsigned long long zero (0);
+    std::shared_ptr<uint8_t> buffer = test_utils::create<uint8_t> (dims[0], dims[1]);
+    uint8_t* pptr = buffer.get();
+    img->getRawRegion(zero, zero, dims[0], dims[1], pptr);
+    std::cout << "test Done" << std::endl;
+}
+
+#if 0
 TEST (ut_similarity, run)
 {
     UT_similarity tester;
@@ -581,6 +635,7 @@ TEST(timing16, corr)
     std::cout << " Correlation: 1920 * 1080 * 16 bit " << endtime * scale << " millieseconds per " << std::endl;
 }
 
+#endif
 
 /***
  **  Use --gtest-filter=*NULL*.*shared" to select https://code.google.com/p/googletest/wiki/V1_6_AdvancedGuide#Running_Test_Programs%3a_Advanced_Options

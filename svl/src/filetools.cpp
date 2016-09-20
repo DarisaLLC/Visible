@@ -1,19 +1,19 @@
 
 #pragma hdrstop
 
-#include "lifIO/filetools.h"
+#include "otherIO/filetools.h"
 
 const std::string dirsep("/");
 #define MAX_PATH PATH_MAX
 
 #define BOOST_FILESYSTEM_VERSION 3
 
-#include "lifIO/stringconversion.h"
+#include "otherIO/stringconversion.h"
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/convenience.hpp"
 #include "boost/version.hpp"
-//#include "boost/regex.hpp"
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <iostream>
