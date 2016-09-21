@@ -4,41 +4,53 @@
 #include <memory>
 #include <mutex>
 #include "otherIO/lif.h"
-#include "otherIO/TileCache.h"
-#include "otherIO/imageData.h"
-#include "otherIO/Patch.h"
 #include "vision/roiWindow.h"
 
 
 
-class baseImage : public imageData
+class baseImage 
 {
 
 public :
   baseImage();
   virtual ~baseImage();
 
-  static std::shared_ptr<baseImage> open(const std::string& fileName);
     
-  //! Load the image, returns whether a valid image is obtained
+    virtual bool valid() const {return _isValid;}
+    
+    //! Gets the dimensions of the base level of the pyramid
+    virtual const std::vector<unsigned long long> getDimensions() const = 0;
+    
+    //! Returns the color type
+    virtual const lif::ColorType getColorType() const;
+    
+    //! Returns the data type
+    virtual const lif::DataType getDataType() const;
+    
+    //! Returns the number of samples per pixel
+    virtual const int getSamplesPerPixel() const;
+    
+    //! Returns the pixel spacing meta-data (um per pixel)
+    virtual const std::vector<double> getSpacing() const;
+    
+    //! Gets the minimum value for a channel. If no channel is specified, default to overall minimum
+    virtual double getMinValue(int channel = -1) = 0;
+    
+    //! Gets the maximum value for a channel. If no channel is specified, default to overall maximum
+    virtual double getMaxValue(int channel = -1) = 0;
+    
+//    void swap(imageData& first, imageData& second);
+    
+    //! Load the image, returns whether a valid image is obtained
   virtual bool initialize(const std::string& imagePath) = 0;
 
-  //! Gets/Sets the maximum size of the cache
-  virtual const unsigned long long getCacheSize();
-  virtual void setCacheSize(const unsigned long long cacheSize);
 
-  //! Gets the minimum value for a channel. If no channel is specified, default to the first channel
-  virtual double getMinValue(int channel = -1) = 0;
-  
-  //! Gets the maximum value for a channel. If no channel is specified, default to the first channel
-  virtual double getMaxValue(int channel = -1) = 0;
-
-
+#if 0
   //! Obtains pixel data for a requested region. The user is responsible for allocating
   //! enough memory for the data to fit the array and clearing the memory. Please note that in case of int32 ARGB data,  
   //! like in OpenSlide, the order of the colors depends on the endianness of your machine (Windows typically BGRA)
   template <typename T> 
-  void getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, const unsigned long long& height, T*& data)
+    void getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, const unsigned long long& height, std::shared_ptr<T>& data)
     {
 
       unsigned int nrSamples = getSamplesPerPixel();
@@ -63,18 +75,21 @@ public :
         delete[] temp;
       }
     }
+#endif
     
     
 
 protected :
 
-  //! To make baseImage thread-safe
-  std::unique_ptr<std::mutex> _openCloseMutex;
-  std::unique_ptr<std::mutex> _cacheMutex;
-  std::shared_ptr<void> _cache;
+    // Properties of an image
+    std::vector<double> _spacing;
+    unsigned int _samplesPerPixel;
+    lif::ColorType _colorType;
+    lif::DataType _dataType;
+    bool _isValid;
+
   std::vector<unsigned long long> _dims;
 
-  // Properties of the loaded slide
   unsigned long long _cacheSize;
   std::string _fileType;
 
@@ -85,23 +100,10 @@ protected :
   virtual void* readDataFromImage(const long long& startX, const long long& startY, const unsigned long long& width, 
     const unsigned long long& height) = 0;
 
-  template <typename T> void createCache() {
-    if (_isValid) {
-      _cache.reset(new TileCache<T>(_cacheSize));
-    }
-  }
+  // Reads the actual data from the image
+  virtual void* readAllImageData() = 0;
 };
 
-template <> void  baseImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
-  const unsigned long long& height, unsigned char*& data);
 
-template <> void  baseImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
-  const unsigned long long& height, unsigned short*& data);
-
-template <> void  baseImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
-  const unsigned long long& height, unsigned int*& data);
-
-template <> void  baseImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
-  const unsigned long long& height, float*& data);
 
 #endif

@@ -26,6 +26,9 @@ public:
    lifImage();
     ~lifImage();
     
+    static lifImage* open(const std::string& fileName);
+    
+
     bool initialize(const std::string& imagePath);
     
     double fileTimestamp () const;
@@ -47,9 +50,14 @@ public:
     bool isTrippleByteChannel () const;
 
     
+    template<typename P>
+    roiWindow<P> getRoiWindow ();
+    
     protected :
     
     void cleanup();
+    
+    void* readAllImageData ();
     
     void* readDataFromImage(const long long& startX, const long long& startY, const unsigned long long& width,
                             const unsigned long long& height);

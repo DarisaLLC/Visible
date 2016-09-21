@@ -9,6 +9,9 @@
 #ifndef lif_
 #define lif_
 
+#include "cinder/ImageIo.h"
+
+
 namespace lif
 {
     enum ColorType {
@@ -20,11 +23,10 @@ namespace lif
     };
     
     enum DataType {
-        InvalidDataType = -1,
-        UChar,
-        UInt16,
-        UInt32,
-        Float
+        InvalidDataType = ci::ImageIo::DataType::DATA_UNKNOWN,
+        UChar = ci::ImageIo::DataType::UINT8,
+        UInt16 = ci::ImageIo::DataType::UINT16,
+        Float = ci::ImageIo::DataType::FLOAT32
     };
     
     enum Compression {

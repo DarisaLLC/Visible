@@ -4,20 +4,52 @@
 #include <mutex>
 #include <cmath>
 
-std::shared_ptr<baseImage> baseImage::open(const std::string& fileName)
-{
-    std::string ext = svl::extractFileExtension(fileName);
-    std::shared_ptr<baseImage> rtn;
-    if (ext == "lif") {
-        
-        std::shared_ptr<baseImage> img (new lifImage);
-        if (img->initialize(fileName))
-        {
-            rtn = img;
-        }
-        
+
+//
+//void baseImage::swap(imageData& first, imageData& second) {
+//    std::swap(first._colorType, second._colorType);
+//    std::swap(first._dataType, second._dataType);
+//    std::swap(first._spacing, second._spacing);
+//    std::swap(first._samplesPerPixel, second._samplesPerPixel);
+//    std::swap(first._isValid, second._isValid);
+//}
+//
+const int baseImage::getSamplesPerPixel() const {
+    if (_isValid) {
+        return _samplesPerPixel;
+    } else {
+        return -1;
     }
-    return rtn;
+}
+
+const ColorType baseImage::getColorType() const {
+    if (_isValid) {
+        return _colorType;
+    } else {
+        return InvalidColorType;
+    }
+}
+
+const std::vector<double> baseImage::getSpacing() const {
+    return _spacing;
+}
+
+const DataType baseImage::getDataType() const {
+    if (_isValid) {
+        return _dataType;
+    } else {
+        return InvalidDataType;
+    }
+}
+
+#if 0
+template<>
+roiWindow<P8U> baseImage::getRoiWindow ()
+{
+    if (this->getDataType() != lif::UChar)
+        return roiWindow<P8U> ();
+    
+    
 }
 
 // Subsequent specialization to not re-copy data when datatypes are the same
@@ -47,7 +79,7 @@ template <> void baseImage::getRawRegion(const long long& startX, const long lon
 }
 
 template <> void baseImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
-  const unsigned long long& height, unsigned char*& data) {
+                                         const unsigned long long& height, std::shared_ptr<uint8_t>& data) {
 
     unsigned int nrSamples = getSamplesPerPixel();
     if (this->getDataType()==lif::Float) {
@@ -56,8 +88,7 @@ template <> void baseImage::getRawRegion(const long long& startX, const long lon
       delete[] temp;
     }
     else if (this->getDataType()==lif::UChar) {
-      delete[] data;
-      data = (unsigned char*)readDataFromImage(startX, startY, width, height);
+        data = std::shared_ptr<uint8_t> ((unsigned char*)readDataFromImage(startX, startY, width, height));
     }
     else if (this->getDataType()==lif::UInt16) {
       unsigned short * temp = (unsigned short*)readDataFromImage(startX, startY, width, height);
@@ -121,20 +152,24 @@ template <> void baseImage::getRawRegion(const long long& startX, const long lon
     }
 }
 
+#endif
+
 baseImage::baseImage() :
-  imageData(),
-  _cacheSize(0),
-  _cache()
+
+_spacing(),
+_samplesPerPixel(0),
+_colorType(InvalidColorType),
+_dataType(InvalidDataType),
+_isValid(false)
 {
-  _cacheMutex.reset(new std::mutex());
-  _openCloseMutex.reset(new std::mutex());
+
 }
 
 
 
 
 baseImage::~baseImage() {
-    std::unique_lock<std::mutex> l(*_openCloseMutex);
+
   cleanup();
 }
 
@@ -148,42 +183,3 @@ void baseImage::cleanup() {
   _isValid = false;
 }
 
-const unsigned long long baseImage::getCacheSize() {
-  unsigned long long cacheSize = 0;
-  _cacheMutex->lock();
-  if (_cache && _isValid) {
-    if (_dataType == UInt32) {
-      cacheSize = (std::static_pointer_cast<TileCache<unsigned int> >(_cache))->maxCacheSize();
-    }
-    else if (_dataType == UInt16) {
-      cacheSize = (std::static_pointer_cast<TileCache<unsigned short> >(_cache))->maxCacheSize();
-    }
-    else if (_dataType == UChar) {
-      cacheSize = (std::static_pointer_cast<TileCache<unsigned char> >(_cache))->maxCacheSize();
-    }
-    else if (_dataType == Float) {
-      cacheSize = (std::static_pointer_cast<TileCache<float> >(_cache))->maxCacheSize();
-    }
-  _cacheMutex->unlock();
-  }
-  return cacheSize;
-}
-
-void baseImage::setCacheSize(const unsigned long long cacheSize) {
-  _cacheMutex->lock();
-  if (_cache && _isValid) {
-    if (_dataType == UInt32) {
-      (std::static_pointer_cast<TileCache<unsigned int> >(_cache))->setMaxCacheSize(cacheSize);
-    }
-    else if (_dataType == UInt16) {
-      (std::static_pointer_cast<TileCache<unsigned short> >(_cache))->setMaxCacheSize(cacheSize);
-    }
-    else if (_dataType == UChar) {
-      (std::static_pointer_cast<TileCache<unsigned char> >(_cache))->setMaxCacheSize(cacheSize);
-    }
-    else if (_dataType == Float) {
-      (std::static_pointer_cast<TileCache<float> >(_cache))->setMaxCacheSize(cacheSize);
-    }
-  _cacheMutex->unlock();
-  }
-}

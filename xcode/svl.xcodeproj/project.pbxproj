@@ -130,18 +130,12 @@
 		C24B1FC31D8DADF400292F85 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBF1D8DADF400292F85 /* libz.a */; };
 		C27881461D80FFCF00D0F473 /* TIFFImage.h in Headers */ = {isa = PBXBuildFile; fileRef = C27881451D80FFCF00D0F473 /* TIFFImage.h */; };
 		C27C764C1D80E043000D9C9B /* baseImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27C764B1D80E043000D9C9B /* baseImage.cpp */; };
-		C27C764E1D80E1E1000D9C9B /* TileCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27C764D1D80E1E1000D9C9B /* TileCache.cpp */; };
 		C27C76501D80E237000D9C9B /* TileCache.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C764F1D80E237000D9C9B /* TileCache.h */; };
 		C27C76561D80E24F000D9C9B /* filetools.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C76511D80E24F000D9C9B /* filetools.h */; };
 		C27C76571D80E24F000D9C9B /* baseImage.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C76521D80E24F000D9C9B /* baseImage.h */; };
-		C27C76581D80E24F000D9C9B /* Patch.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C76531D80E24F000D9C9B /* Patch.h */; };
-		C27C76591D80E24F000D9C9B /* Patch.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C27C76541D80E24F000D9C9B /* Patch.hpp */; };
 		C27C765A1D80E24F000D9C9B /* stringconversion.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C76551D80E24F000D9C9B /* stringconversion.h */; };
 		C27C765D1D80E2C5000D9C9B /* lif.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C765C1D80E2C5000D9C9B /* lif.h */; };
 		C27C765F1D80E5FE000D9C9B /* ImageData.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C765E1D80E5FE000D9C9B /* ImageData.h */; };
-		C27C76611D80E614000D9C9B /* ImageData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27C76601D80E614000D9C9B /* ImageData.cpp */; };
-		C27C76621D80EB3A000D9C9B /* ImageData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27C76601D80E614000D9C9B /* ImageData.cpp */; };
-		C27C76631D80EB3E000D9C9B /* TileCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27C764D1D80E1E1000D9C9B /* TileCache.cpp */; };
 		C27C76641D80EB41000D9C9B /* baseImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27C764B1D80E043000D9C9B /* baseImage.cpp */; };
 		C2B6E6681D060A7400235FB7 /* vImageRef.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E6671D060A7400235FB7 /* vImageRef.mm */; };
 		C2B6E6691D060A7400235FB7 /* vImageRef.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E6671D060A7400235FB7 /* vImageRef.mm */; };
@@ -822,7 +816,6 @@
 				C20E3E621CF378470074C47A /* affine_rectangle.h in Headers */,
 				C20E3E921CF378470074C47A /* roiRoot.h in Headers */,
 				C20E3E791CF378470074C47A /* singleton.hpp in Headers */,
-				C27C76581D80E24F000D9C9B /* Patch.h in Headers */,
 				C20E3E651CF378470074C47A /* opencv_utils.hpp in Headers */,
 				C27C765F1D80E5FE000D9C9B /* ImageData.h in Headers */,
 				C20E3E6A1CF378470074C47A /* angle_units.h in Headers */,
@@ -876,7 +869,6 @@
 				C27C765A1D80E24F000D9C9B /* stringconversion.h in Headers */,
 				C20E3E7D1CF378470074C47A /* svl_exception.hpp in Headers */,
 				C20E3E961CF378470074C47A /* sample.hpp in Headers */,
-				C27C76591D80E24F000D9C9B /* Patch.hpp in Headers */,
 				C20E3E941CF378470074C47A /* rowfunc.h in Headers */,
 				C2B6E66F1D060FF600235FB7 /* vImageRef.h in Headers */,
 				C27881461D80FFCF00D0F473 /* TIFFImage.h in Headers */,
@@ -982,10 +974,8 @@
 				C21B27231D7E5FC2002485AB /* stringconversion.cpp in Sources */,
 				C21B27221D7E5FBF002485AB /* lifImage.cpp in Sources */,
 				C20E941D1CF386A80074C47A /* ut.cpp in Sources */,
-				C27C76621D80EB3A000D9C9B /* ImageData.cpp in Sources */,
 				C27C76641D80EB41000D9C9B /* baseImage.cpp in Sources */,
 				C21B27211D7E5FBC002485AB /* filetools.cpp in Sources */,
-				C27C76631D80EB3E000D9C9B /* TileCache.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1009,8 +999,6 @@
 				C20E93601CF3786F0074C47A /* edgel.cpp in Sources */,
 				C20E93671CF3786F0074C47A /* localvariance.cpp in Sources */,
 				C21B27061D7E52F8002485AB /* filetools.cpp in Sources */,
-				C27C76611D80E614000D9C9B /* ImageData.cpp in Sources */,
-				C27C764E1D80E1E1000D9C9B /* TileCache.cpp in Sources */,
 				C20E93611CF3786F0074C47A /* exception.cpp in Sources */,
 				C20E936A1CF3786F0074C47A /* registration.cpp in Sources */,
 			);

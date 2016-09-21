@@ -110,24 +110,23 @@ TEST (ut_units, basic)
 
 TEST (ut_lifImage, basic)
 {
-    std::shared_ptr<baseImage> img;
+
     std::string filename ("Sample1.lif");
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
     EXPECT_TRUE(res.second);
-    img = baseImage::open(res.first.string());
-    EXPECT_FALSE(!img);
+    lifImage* img = lifImage::open(res.first.string());
+    EXPECT_TRUE(img != nullptr );
     EXPECT_EQ(0, img->getDataType());
     EXPECT_EQ(1, img->getSamplesPerPixel());
-    EXPECT_EQ(14, ((lifImage*) img.get())->series ());
+    EXPECT_EQ(14, img->series ());
     
     vector<unsigned long long> dims = img->getDimensions();
     EXPECT_EQ(512, dims[0]);
     EXPECT_EQ(128, dims[1]);
+
+    roiWindow<P8U> ri = img->getRoiWindow<P8U>();
     
-    unsigned long long zero (0);
-    std::shared_ptr<uint8_t> buffer = test_utils::create<uint8_t> (dims[0], dims[1]);
-    uint8_t* pptr = buffer.get();
-    img->getRawRegion(zero, zero, dims[0], dims[1], pptr);
+//    img->getRawRegion(zero, zero, dims[0], dims[1], pptr);
     std::cout << "test Done" << std::endl;
 }
 

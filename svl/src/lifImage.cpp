@@ -20,6 +20,23 @@ const char lifImage::LIF_MAGIC_BYTE = 0x70;
 const char lifImage::LIF_MEMORY_BYTE = 0x2a;
 const long COBOL_EPOCH = 11644473600000L;
 
+
+
+
+lifImage* lifImage::open(const std::string& fileName)
+{
+    std::string ext = svl::extractFileExtension(fileName);
+    if (ext == "lif") {
+        
+        lifImage* img = new lifImage;
+        if (img && img->initialize(fileName))
+        {
+            return img;
+        }
+    }
+        return nullptr;
+}
+
 /**
  * Converts from two-word tick representation to milliseconds. Mainly useful
  * in conjunction with COBOL date conversion.
@@ -388,6 +405,11 @@ int lifImage::getTileIndex(int index) {
 
 //  std::vector<uint32_t> lifImage::xySize () const
 
+void* lifImage::readAllImageData()
+{
+    return readDataFromImage(0, 0, _dims[0],_dims[1]);
+}
+
 void*lifImage::readDataFromImage(const long long& startX, const long long& startY, const unsigned long long& width,
                                   const unsigned long long& height) {
     
@@ -745,4 +767,17 @@ void lifImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
 }
 
 
+template<>
+roiWindow<P8U> lifImage::getRoiWindow ()
+{
+    typedef typename PixelType<P8U>::pixel_ptr_t pixel_ptr_t;
+    typedef typename PixelType<P8U>::pixel_t pixel_t;
+    if (PixelType<P8U>::ct() == _dataTypes[_selectedSeries] && _dataTypes[_selectedSeries] == UChar)
+    {
+        uint8_t* pixels = static_cast<uint8_t*> (readAllImageData());
+        sharedRoot<P8U> root (new svl::root<P8U>(pixels, _dims[0], _dims[0],_dims[1], image_memory_alignment_policy::align_first_row));
+        return roiWindow<P8U> (root);
+    }
+    return roiWindow<P8U> ();
+}
 
