@@ -389,20 +389,36 @@ const lif_serie& lifImage::info (unsigned index) const
     return clearLif;
 }
 
+
+uint32_t lifImage::plane_size (unsigned index)
+{
+    return _seriesInfo[index].x * _seriesInfo[index].y * pixel_size(index);
+}
+
+uint32_t lifImage::pixel_size (unsigned index)
+{
+    int bytes = 4;
+    if (_dataTypes[index] == ci::ImageIo::DataType::UINT16) {
+        bytes = 2;
+    } else if (_dataTypes[index] == ci::ImageIo::DataType::UINT8) {
+        bytes = 1;
+    }
+    return bytes;
+}
+
+uint32_t lifImage::channels(unsigned index)
+{
+   return _seriesInfo[index].c;
+}
+
 void*lifImage::readDataFromImage(const uint32_t& startX, const uint32_t& startY, const uint32_t& width, const  uint32_t& height)
 {
     
-    unsigned int nrChannels = _seriesInfo[_selectedSeries].c;
     unsigned long long offset = _offsets[_selectedSeries];
-    int bytes = 4;
-    if (_dataTypes[_selectedSeries] == ci::ImageIo::DataType::UINT16) {
-        bytes = 2;
-    } else if (_dataTypes[_selectedSeries] == ci::ImageIo::DataType::UINT8) {
-        bytes = 1;
-    }
-    int bpp = bytes;
+    uint32_t bpp = pixel_size(_selectedSeries);
+    uint32_t planeSize = plane_size(_selectedSeries);
+    uint32_t nrChannels = channels (_selectedSeries);
     
-    long planeSize = _seriesInfo[_selectedSeries].x * _seriesInfo[_selectedSeries].y * bpp;
     int64_t nextOffset = (_selectedSeries + 1 < _offsets.size())  ? _offsets[_selectedSeries + 1] : _fileSize;
     int bytesToSkip = (int) (nextOffset - offset - planeSize * _imageCount[_selectedSeries]);
     bytesToSkip /= _seriesInfo[_selectedSeries].y;
@@ -418,13 +434,13 @@ void*lifImage::readDataFromImage(const uint32_t& startX, const uint32_t& startY,
     in.open(_fileName.c_str(), std::ios::in | std::ios::binary);
     in.seekg(offset);
     
-    char* buf = new char[width*height*bpp*nrChannels];
+    char* buf = new char[width*height*bpp*channels(_selectedSeries)];
     in.seekg((planeSize * _imageCount[_selectedSeries]), std::ios::cur);
     in.seekg(bytesToSkip * _seriesDimensions[_selectedSeries]["y"], std::ios::cur);
     
     if (bytesToSkip == 0) {
-        int seriesWidth = _seriesDimensions[_selectedSeries]["x"];
-        for (int channel=0; channel < nrChannels; channel++) {
+        auto seriesWidth = _seriesDimensions[_selectedSeries]["x"];
+        for (int channel=0; channel < nrChannels ; channel++) {
             in.seekg(startY * seriesWidth * bpp, std::ios::cur);
             for (int row=0; row < height; row++) {
                 in.seekg(startX * bpp, std::ios::cur);

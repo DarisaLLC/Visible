@@ -68,6 +68,11 @@ public:
     static const char LIF_MEMORY_BYTE;
 
 
+    uint32_t plane_size (unsigned);
+    uint32_t pixel_size (unsigned );
+    uint32_t channels (unsigned);
+    
+    
     std::vector<std::vector<int> > _realChannel;
     int _lastChannel;
     mutable int _selectedSeries;
