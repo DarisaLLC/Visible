@@ -134,12 +134,12 @@ void self_similarity_producer<P>::setMask(const roiWindow<P8U>& mask)
     _mask.copy_pixels_from(mask.rowPointer(0), mask.height(), mask.width(), mask.rowUpdate());
   _maskN = 0;
   uint32_t allOnes = 0xFF;
-  if (_depth == DS_16U)
+  if (_depth == D_16U)
     allOnes = 0xFFFF;
-  else if (_depth == DS_32S)
+  else if (_depth == D_32S)
     allOnes = 0xFFFFFFFF;
   else
-    assert(_depth == DS_8U);
+    assert(_depth == D_8U);
   
   _maskN = 0;
   for (int32_t y = 0; y < _mask.height(); y++)

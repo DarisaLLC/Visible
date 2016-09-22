@@ -43,66 +43,67 @@ using namespace ci;
 #define IPL_DEPTH_32S (IPL_DEPTH_SIGN | 32)
 
 
-#define DS_CN_SHIFT 3
-#define DS_DEPTH_MAX (1 << DS_CN_SHIFT)
+#define D_CN_SHIFT 3
+#define D_DEPTH_MAX (1 << D_CN_SHIFT)
 
-#define DS_8U 0
-#define DS_8S 1
-#define DS_16U 2
-#define DS_16S 3
-#define DS_32S 4
-#define DS_32F 5
-#define DS_64F 6
-#define DS_USRTYPE1 7
+#define D_8U 0
+#define D_8S 1
+#define D_16U 2
+#define D_16S 3
+#define D_32S 4
+#define D_32F 5
+#define D_64F 6
+#define D_USRTYPE1 7
 
-#define DS_MAT_DEPTH_MASK (DS_DEPTH_MAX - 1)
-#define DS_MAT_DEPTH(flags) ((flags)&DS_MAT_DEPTH_MASK)
+#define D_MAT_DEPTH_MASK (D_DEPTH_MAX - 1)
+#define D_MAT_DEPTH(flags) ((flags)&D_MAT_DEPTH_MASK)
 
-#define DS_MAKETYPE(depth, cn) (DS_MAT_DEPTH(depth) + (((cn)-1) << DS_CN_SHIFT))
-#define DS_MAKE_TYPE DS_MAKETYPE
+#define D_MAKETYPE(depth, cn) (D_MAT_DEPTH(depth) + (((cn)-1) << D_CN_SHIFT))
+#define D_MAKE_TYPE D_MAKETYPE
 
-#define DS_8UC1 DS_MAKETYPE(DS_8U, 1)
-#define DS_8UC2 DS_MAKETYPE(DS_8U, 2)
-#define DS_8UC3 DS_MAKETYPE(DS_8U, 3)
-#define DS_8UC4 DS_MAKETYPE(DS_8U, 4)
-#define DS_8UC(n) DS_MAKETYPE(DS_8U, (n))
+#define D_8UC1 D_MAKETYPE(D_8U, 1)
+#define D_8UC2 D_MAKETYPE(D_8U, 2)
+#define D_8UC3 D_MAKETYPE(D_8U, 3)
+#define D_8UC4 D_MAKETYPE(D_8U, 4)
+#define D_8UC(n) D_MAKETYPE(D_8U, (n))
 
-#define DS_8SC1 DS_MAKETYPE(DS_8S, 1)
-#define DS_8SC2 DS_MAKETYPE(DS_8S, 2)
-#define DS_8SC3 DS_MAKETYPE(DS_8S, 3)
-#define DS_8SC4 DS_MAKETYPE(DS_8S, 4)
-#define DS_8SC(n) DS_MAKETYPE(DS_8S, (n))
+#define D_8SC1 D_MAKETYPE(D_8S, 1)
+#define D_8SC2 D_MAKETYPE(D_8S, 2)
+#define D_8SC3 D_MAKETYPE(D_8S, 3)
+#define D_8SC4 D_MAKETYPE(D_8S, 4)
+#define D_8SC(n) D_MAKETYPE(D_8S, (n))
 
-#define DS_16UC1 DS_MAKETYPE(DS_16U, 1)
-#define DS_16UC2 DS_MAKETYPE(DS_16U, 2)
-#define DS_16UC3 DS_MAKETYPE(DS_16U, 3)
-#define DS_16UC4 DS_MAKETYPE(DS_16U, 4)
-#define DS_16UC(n) DS_MAKETYPE(DS_16U, (n))
+#define D_16UC1 D_MAKETYPE(D_16U, 1)
+#define D_16UC2 D_MAKETYPE(D_16U, 2)
+#define D_16UC3 D_MAKETYPE(D_16U, 3)
+#define D_16UC4 D_MAKETYPE(D_16U, 4)
+#define D_16UC(n) D_MAKETYPE(D_16U, (n))
 
-#define DS_16SC1 DS_MAKETYPE(DS_16S, 1)
-#define DS_16SC2 DS_MAKETYPE(DS_16S, 2)
-#define DS_16SC3 DS_MAKETYPE(DS_16S, 3)
-#define DS_16SC4 DS_MAKETYPE(DS_16S, 4)
-#define DS_16SC(n) DS_MAKETYPE(DS_16S, (n))
+#define D_16SC1 D_MAKETYPE(D_16S, 1)
+#define D_16SC2 D_MAKETYPE(D_16S, 2)
+#define D_16SC3 D_MAKETYPE(D_16S, 3)
+#define D_16SC4 D_MAKETYPE(D_16S, 4)
+#define D_16SC(n) D_MAKETYPE(D_16S, (n))
 
-#define DS_32SC1 DS_MAKETYPE(DS_32S, 1)
-#define DS_32SC2 DS_MAKETYPE(DS_32S, 2)
-#define DS_32SC3 DS_MAKETYPE(DS_32S, 3)
-#define DS_32SC4 DS_MAKETYPE(DS_32S, 4)
-#define DS_32SC(n) DS_MAKETYPE(DS_32S, (n))
+#define D_32SC1 D_MAKETYPE(D_32S, 1)
+#define D_32SC2 D_MAKETYPE(D_32S, 2)
+#define D_32SC3 D_MAKETYPE(D_32S, 3)
+#define D_32SC4 D_MAKETYPE(D_32S, 4)
+#define D_32SC(n) D_MAKETYPE(D_32S, (n))
 
-#define DS_32FC1 DS_MAKETYPE(DS_32F, 1)
-#define DS_32FC2 DS_MAKETYPE(DS_32F, 2)
-#define DS_32FC3 DS_MAKETYPE(DS_32F, 3)
-#define DS_32FC4 DS_MAKETYPE(DS_32F, 4)
-#define DS_32FC(n) DS_MAKETYPE(DS_32F, (n))
+#define D_32FC1 D_MAKETYPE(D_32F, 1)
+#define D_32FC2 D_MAKETYPE(D_32F, 2)
+#define D_32FC3 D_MAKETYPE(D_32F, 3)
+#define D_32FC4 D_MAKETYPE(D_32F, 4)
+#define D_32FC(n) D_MAKETYPE(D_32F, (n))
 
-#define DS_64FC1 DS_MAKETYPE(DS_64F, 1)
-#define DS_64FC2 DS_MAKETYPE(DS_64F, 2)
-#define DS_64FC3 DS_MAKETYPE(DS_64F, 3)
-#define DS_64FC4 DS_MAKETYPE(DS_64F, 4)
-#define DS_64FC(n) DS_MAKETYPE(DS_64F, (n))
+#define D_64FC1 D_MAKETYPE(D_64F, 1)
+#define D_64FC2 D_MAKETYPE(D_64F, 2)
+#define D_64FC3 D_MAKETYPE(D_64F, 3)
+#define D_64FC4 D_MAKETYPE(D_64F, 4)
+#define D_64FC(n) D_MAKETYPE(D_64F, (n))
 
+#define D_8UP3 D_MAKE_TYPE(D_USRTYPE1, 1)
 
 typedef unsigned int GLenum;
 typedef unsigned char GLboolean;
@@ -171,7 +172,7 @@ namespace svl
     
     
     template <typename T, int Planes = 1, int Components = 1>
-    struct dsPixelTraits
+    struct dPixelTraits
     {
         static bool is_floating_point() = 0;
         static bool is_integral() = 0;
@@ -189,7 +190,7 @@ namespace svl
     
     
     template <>
-    struct dsPixelTraits<uint8_t, 1, 1>
+    struct dPixelTraits<uint8_t, 1, 1>
     {
         typedef uint8_t value_type;
         
@@ -199,7 +200,7 @@ namespace svl
         static int planes() { return 1; }
         static int components() { return 1; }
         static int cv() { return IPL_DEPTH_8U; }
-        static int depth() { return DS_8U; }
+        static int depth() { return D_8U; }
         static int bytes() { return 1; }
         static int bits() { return 8; }
         static int origin_style() { return 0; }
@@ -210,7 +211,7 @@ namespace svl
     };
     
     template <>
-    struct dsPixelTraits<uint16_t, 1, 1>
+    struct dPixelTraits<uint16_t, 1, 1>
     {
         typedef uint16_t value_type;
         static bool is_floating_point() { return false; }
@@ -219,7 +220,7 @@ namespace svl
         static int planes() { return 1; }
         static int components() { return 1; }
         static int cv() { return IPL_DEPTH_16U; }
-        static int depth() { return DS_16U; }
+        static int depth() { return D_16U; }
         static int bytes() { return 2; }
         static int bits() { return 16; }
         static int origin_style() { return 0; }
@@ -230,7 +231,7 @@ namespace svl
     };
     
     template <>
-    struct dsPixelTraits<int8_t, 1, 1>
+    struct dPixelTraits<int8_t, 1, 1>
     {
         
         typedef int8_t value_type;
@@ -240,7 +241,7 @@ namespace svl
         static int planes() { return 1; }
         static int components() { return 1; }
         static int cv() { return IPL_DEPTH_8S; }
-        static int depth() { return DS_8S; }
+        static int depth() { return D_8S; }
         static int bytes() { return 1; }
         static int bits() { return 8; }
         static int origin_style() { return 0; }
@@ -251,7 +252,7 @@ namespace svl
     };
     
     template <>
-    struct dsPixelTraits<int16_t, 1, 1>
+    struct dPixelTraits<int16_t, 1, 1>
     {
         
         typedef int16_t value_type;
@@ -261,7 +262,7 @@ namespace svl
         static int planes() { return 1; }
         static int components() { return 1; }
         static int cv() { return IPL_DEPTH_16S; }
-        static int depth() { return DS_16S; }
+        static int depth() { return D_16S; }
         static int bytes() { return 2; }
         static int bits() { return 16; }
         static int origin_style() { return 0; }
@@ -272,7 +273,7 @@ namespace svl
     };
     
     template <>
-    struct dsPixelTraits<int32_t, 1, 1>
+    struct dPixelTraits<int32_t, 1, 1>
     {
         
         typedef int32_t value_type;
@@ -282,7 +283,7 @@ namespace svl
         static int planes() { return 1; }
         static int components() { return 1; }
         static int cv() { return IPL_DEPTH_32S; }
-        static int depth() { return DS_32S; }
+        static int depth() { return D_32S; }
         static int bytes() { return 4; }
         static int bits() { return 32; }
         static int origin_style() { return 0; }
@@ -293,7 +294,7 @@ namespace svl
     };
     
     template <>
-    struct dsPixelTraits<float, 1, 1>
+    struct dPixelTraits<float, 1, 1>
     {
         
         typedef float value_type;
@@ -303,7 +304,7 @@ namespace svl
         static int planes() { return 1; }
         static int components() { return 1; }
         static int cv() { return IPL_DEPTH_32F; }
-        static int depth() { return DS_32F; }
+        static int depth() { return D_32F; }
         static int bytes() { return 4; }
         static int bits() { return 32; }
         static int origin_style() { return 0; }
@@ -314,7 +315,7 @@ namespace svl
     };
     
     template <>
-    struct dsPixelTraits<uint8_t, 1, 3>
+    struct dPixelTraits<uint8_t, 1, 3>
     {
         
         typedef uint8_t value_type;
@@ -324,7 +325,7 @@ namespace svl
         static int planes() { return 1; }
         static int components() { return 3; }
         static int cv() { return IPL_DEPTH_8U; }
-        static int depth() { return DS_8UC3; }
+        static int depth() { return D_8UC3; }
         static int bytes() { return 3; }
         static int bits() { return 24; }
         static int origin_style() { return 0; }
@@ -335,7 +336,7 @@ namespace svl
     };
     
     template <>
-    struct dsPixelTraits<uint8_t, 1, 4>
+    struct dPixelTraits<uint8_t, 1, 4>
     {
         
         typedef uint8_t value_type;
@@ -345,7 +346,7 @@ namespace svl
         static int planes() { return 1; }
         static int components() { return 4; }
         static int cv() { return IPL_DEPTH_8U; }
-        static int depth() { return DS_8UC4; }
+        static int depth() { return D_8UC4; }
         static int bytes() { return 4; }
         static int bits() { return 32; }
         static int origin_style() { return 0; }
@@ -355,14 +356,37 @@ namespace svl
         static uint8_t maximum() { return numeric_limits<uint8_t>::max(); }
     };
     
-    typedef dsPixelTraits<int8_t, 1, 1> P8S;
-    typedef dsPixelTraits<uint8_t, 1, 1> P8U;
-    typedef dsPixelTraits<uint16_t, 1, 1> P16U;
-    typedef dsPixelTraits<int16_t, 1, 1> P16S;
-    typedef dsPixelTraits<int32_t, 1, 1> P32S;
-    typedef dsPixelTraits<float, 1, 1> P32F;
-    typedef dsPixelTraits<uint8_t, 1, 3> P8UC3;
-    typedef dsPixelTraits<uint8_t, 1, 4> P8UC4;
+    template <>
+    struct dPixelTraits<uint8_t, 3, 1>
+    {
+        
+        typedef uint8_t value_type;
+        static bool is_floating_point() { return false; }
+        static bool is_integral() { return std::is_integral<uint8_t>::value; }
+        static bool is_signed() { return std::is_signed<uint8_t>::value; }
+        static int planes() { return 3; }
+        static int components() { return 1; }
+        static int cv() { return IPL_DEPTH_8U; }
+        static int depth() { return D_8UP3; }
+        static int bytes() { return 1; }
+        static int bits() { return 8; }
+        static int origin_style() { return 0; }
+        static int data_order() { return 0; }
+        static GLenum gl_type() { return GL_BYTE; }
+        static uint8_t minimum() { return numeric_limits<uint8_t>::min(); }
+        static uint8_t maximum() { return numeric_limits<uint8_t>::max(); }
+    };
+
+    
+    typedef dPixelTraits<int8_t, 1, 1> P8S;
+    typedef dPixelTraits<uint8_t, 1, 1> P8U;
+    typedef dPixelTraits<uint16_t, 1, 1> P16U;
+    typedef dPixelTraits<int16_t, 1, 1> P16S;
+    typedef dPixelTraits<int32_t, 1, 1> P32S;
+    typedef dPixelTraits<float, 1, 1> P32F;
+    typedef dPixelTraits<uint8_t, 1, 3> P8UC3;
+    typedef dPixelTraits<uint8_t, 1, 4> P8UC4;
+    typedef dPixelTraits<uint8_t, 3, 1> P8UP3;
     
     // Primary template class
     template <typename P>
@@ -472,7 +496,25 @@ namespace svl
         
     };
     
-    
+    template <>
+    class PixelType<P8UP3>
+    {
+    public:
+        static enum ci::ImageIo::ColorModel cm () { return ci::ImageIo::ColorModel::CM_GRAY; }
+        static enum ci::ImageIo::DataType ct () { return ci::ImageIo::DataType::UINT8; }
+        static enum ci::ImageIo::ChannelOrder co () { return ci::ImageIo::ChannelOrder::Y; }
+        
+        
+        typedef uint8_t pixel_t;
+        typedef uint8_t * pixel_ptr_t;
+        
+        static GLenum data_type () { return GL_UNSIGNED_BYTE; }
+        static GLenum display_type () { return GL_LUMINANCE; }
+        
+        typedef std::pair<pixel_t, uint16_t> run_t;
+        
+    };
+
 }
 
 

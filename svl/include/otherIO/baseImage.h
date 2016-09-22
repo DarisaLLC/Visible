@@ -19,13 +19,13 @@ public :
     virtual bool valid() const {return _isValid;}
     
     //! Gets the dimensions of the base level of the pyramid
-    virtual const std::vector<unsigned long long> getDimensions() const = 0;
+    virtual const tpair<uint32_t> getDimensions() const = 0;
     
     //! Returns the color type
     virtual const lif::ColorType getColorType() const;
     
     //! Returns the data type
-    virtual const lif::DataType getDataType() const;
+    virtual const cinder::ImageIo::DataType getDataType() const;
     
     //! Returns the number of samples per pixel
     virtual const int getSamplesPerPixel() const;
@@ -85,7 +85,7 @@ protected :
     std::vector<double> _spacing;
     unsigned int _samplesPerPixel;
     lif::ColorType _colorType;
-    lif::DataType _dataType;
+    cinder::ImageIo::DataType _dataType;
     bool _isValid;
 
   std::vector<unsigned long long> _dims;
@@ -97,8 +97,7 @@ protected :
   virtual void cleanup();
 
   // Reads the actual data from the image
-  virtual void* readDataFromImage(const long long& startX, const long long& startY, const unsigned long long& width, 
-    const unsigned long long& height) = 0;
+  virtual void* readDataFromImage(const uint32_t& startX, const uint32_t& startY, const uint32_t& width, const  uint32_t& height) = 0;
 
   // Reads the actual data from the image
   virtual void* readAllImageData() = 0;

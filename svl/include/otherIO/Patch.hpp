@@ -33,7 +33,7 @@ inline const lif::DataType Patch<double>::getDataType() const {
 
 template<typename T>
 const lif::DataType Patch<T>::getDataType() const {
-  return lif::InvalidDataType;
+  return lif::ci::ImageIo::DataType::DATA_UNKNOWN;
 }
 
 template<typename T>

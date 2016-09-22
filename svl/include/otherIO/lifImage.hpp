@@ -34,21 +34,19 @@ public:
     double fileTimestamp () const;
     double acquiredDate () const;
 
-    const std::vector<unsigned long long> getDimensions() const;
-    
     size_t series () const { return _series_count; }
     unsigned selectedSeries () const { return _selectedSeries; }
     void selectedSeries (unsigned s) const;
-    
-    const std::vector<std::map<std::string, unsigned long long> >& seriesDimensions () const;
+
+    const tpair<uint32_t> getDimensions() const;
+    const std::vector<std::map<std::string, int64_t> >& seriesDimensions () const;
     const std::vector<std::string >& seriesOrder () const;
     const std::vector<ColorType>& seriesColorTypes () const;
-    const std::vector<lif::DataType>& seriesDataTypes () const;
+    const std::vector<ci::ImageIo::DataType>& seriesDataTypes () const;
     const std::vector<unsigned int>& seriesCounts () const;
+    const std::vector<std::string >& seriesNames () const;
     
-    bool isSingleByteChannel () const;
-    bool isTrippleByteChannel () const;
-
+    const lif_serie& info (unsigned index) const;
     
     template<typename P>
     roiWindow<P> getRoiWindow ();
@@ -59,8 +57,7 @@ public:
     
     void* readAllImageData ();
     
-    void* readDataFromImage(const long long& startX, const long long& startY, const unsigned long long& width,
-                            const unsigned long long& height);
+    void* readDataFromImage(const uint32_t& startX, const uint32_t& startY, const uint32_t& width, const  uint32_t& height);
     
     double getMinValue(int channel = -1) { return 0.; } // Not yet implemented
     double getMaxValue(int channel = -1) { return 3072; } // Not yet implemented
@@ -75,7 +72,7 @@ public:
     int _lastChannel;
     mutable int _selectedSeries;
     size_t _series_count;
-    unsigned long long _fileSize;
+    int64_t _fileSize;
     std::string _fileName;
     double _capture_timestamp;
     
@@ -105,17 +102,18 @@ public:
     bool _alternateCenter;
     std::vector<std::string> _imageNames;
     std::vector<double> _acquiredDate;
-    std::vector<int> _tileCount;
   
     std::vector<std::string > _dimensionOrder;
     std::vector<ColorType> _colorTypes;
-    std::vector<lif::DataType> _dataTypes;
+    std::vector<ci::ImageIo::DataType> _dataTypes;
     std::vector<unsigned int> _imageCount;
-    std::vector<unsigned long long> _offsets;
-    std::vector<unsigned long long> _dims;
+    std::vector<int64_t> _offsets;
+    tpair<uint32_t> _dims;
 
+    std::vector<lif_serie> _seriesInfo;
+    
     // Note a vector of Maps
-    std::vector<std::map<std::string, unsigned long long> > _seriesDimensions;
+    std::vector<std::map<std::string, int64_t> > _seriesDimensions;
       
     void translateMetaData(pugi::xml_document& doc);
     void translateImageNames(pugi::xpath_node& imageNode, int imageNr);

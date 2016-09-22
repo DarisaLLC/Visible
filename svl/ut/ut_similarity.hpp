@@ -73,7 +73,7 @@ public:
                          0,
                          tiny);
         
-        EXPECT_EQ(sm.depth() , DS_8U);
+        EXPECT_EQ(sm.depth() , D_8U);
         EXPECT_EQ(sm.matrixSz() , images.size());
         EXPECT_EQ(sm.cacheSz() , 0);
         EXPECT_EQ(sm.aborted() , false);

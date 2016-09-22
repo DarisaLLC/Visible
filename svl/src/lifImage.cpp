@@ -18,9 +18,6 @@
 
 const char lifImage::LIF_MAGIC_BYTE = 0x70;
 const char lifImage::LIF_MEMORY_BYTE = 0x2a;
-const long COBOL_EPOCH = 11644473600000L;
-
-
 
 
 lifImage* lifImage::open(const std::string& fileName)
@@ -94,7 +91,7 @@ void lifImage::cleanup() {
     _physicalSizeYs.clear();
     _fieldPosX.clear();
     _fieldPosY.clear();
-    
+    _seriesInfo.clear ();
     _descriptions.clear();
     _microscopeModels.clear();
     _serialNumber.clear();
@@ -129,7 +126,6 @@ void lifImage::cleanup() {
     _alternateCenter = false;
     _imageNames.clear();
     _acquiredDate.clear();
-    _tileCount.clear();
     _dataTypes.clear();
     _colorTypes.clear();
     _dimensionOrder.clear();
@@ -244,7 +240,7 @@ bool lifImage::initialize(const std::string& imagePath) {
         }
         _colorType = _colorTypes[_selectedSeries];
         _dataType = _dataTypes[_selectedSeries];
-        _samplesPerPixel = _seriesDimensions[_selectedSeries]["c"];
+        _samplesPerPixel = static_cast<uint32_t> (_seriesDimensions[_selectedSeries]["c"]);
         _isValid = true;
         
         return _isValid;
@@ -259,7 +255,6 @@ void lifImage::translateMetaData(pugi::xml_document& doc)
     pugi::xpath_node_set images = doc.select_nodes("//Image");
     
     // Initialize variables based on the image size
-    _tileCount = std::vector<int>(images.size(), 1);
     _acquiredDate = std::vector<double>(images.size(), 0);
     _descriptions = std::vector<std::string>(images.size(), "");
     _laserWavelength = std::vector<int>(images.size(), 0);
@@ -287,11 +282,11 @@ void lifImage::translateMetaData(pugi::xml_document& doc)
     _pinholes = std::vector<double>(images.size(), 0);
     _zooms = std::vector<double>(images.size(), 0);
     _imageCount = std::vector<unsigned int>(images.size(), 0);
-    _seriesDimensions = std::vector<std::map<std::string, unsigned long long> >(images.size(), std::map<std::string, unsigned long long>());
+    _seriesDimensions = std::vector<std::map<std::string, int64_t> >(images.size(), std::map<std::string, int64_t>());
     _dimensionOrder = std::vector<std::string >(images.size(), "");
     _colorTypes = std::vector<ColorType>(images.size(), ColorType::InvalidColorType);
-    _dataTypes = std::vector<DataType>(images.size(), DataType::InvalidDataType);
-    
+    _dataTypes = std::vector<ci::ImageIo::DataType>(images.size(), ci::ImageIo::DataType::DATA_UNKNOWN);
+     _seriesInfo.resize (_dataTypes.size());
     _expTimes = std::vector<std::vector<double> >(images.size(), std::vector<double>());
     _gains = std::vector<std::vector<double> >(images.size(), std::vector<double>());
     _detectorOffsets = std::vector<std::vector<double> >(images.size(), std::vector<double>());
@@ -315,25 +310,19 @@ void lifImage::translateMetaData(pugi::xml_document& doc)
         ++imageNr;
     }
     
-    int totalSeries = 0;
-    for (std::vector<int>::const_iterator it = _tileCount.begin(); it != _tileCount.end(); ++it) {
-        totalSeries += *it;
-    }
-    
-    std::vector<std::map<std::string, unsigned long long> > _newSeriesDimensions;
+    std::vector<std::map<std::string, int64_t> > _newSeriesDimensions;
     std::vector<std::string > _newDimensionOrder;
     std::vector<ColorType> _newColorTypes;
-    std::vector<DataType> _newDataTypes;
+    std::vector<ci::ImageIo::DataType> _newDataTypes;
     std::vector<unsigned int> _newImageCount;
     
-    for (int i = 0; i < _dataTypes.size(); ++i) {
-        for (int tile = 0; tile < _tileCount[i]; ++tile) {
+    for (int i = 0; i < _dataTypes.size(); ++i)
+    {
             _newSeriesDimensions.push_back(_seriesDimensions[i]);
             _newDimensionOrder.push_back(_dimensionOrder[i]);
             _newColorTypes.push_back(_colorTypes[i]);
             _newImageCount.push_back(_imageCount[i]);
             _newDataTypes.push_back(_dataTypes[i]);
-        }
     }
     
     _seriesDimensions = _newSeriesDimensions;
@@ -341,32 +330,28 @@ void lifImage::translateMetaData(pugi::xml_document& doc)
     _colorTypes = _newColorTypes;
     _dataTypes = _newDataTypes;
     _imageCount = _newImageCount;
+   
     
-    // Determine which series to use:
-    int index = 0;
-    unsigned long long maxPixels = 0;
-    for (std::vector<std::map<std::string, unsigned long long> >::iterator it = _seriesDimensions.begin(); it != _seriesDimensions.end(); ++it, ++index) {
-        unsigned long long nPixels = (*it)["x"] * (*it)["y"];
-        if (nPixels > maxPixels) {
-            _selectedSeries = index;
-            maxPixels = nPixels;
-        }
-    }
+    _selectedSeries = 0;
     
-    _dims.clear();
-    _dims.push_back(_seriesDimensions[_selectedSeries]["x"]);
-    _dims.push_back(_seriesDimensions[_selectedSeries]["y"]);
+    _dims.first = static_cast<uint32_t> (_seriesDimensions[_selectedSeries]["x"]);
+    _dims.second = static_cast<uint32_t> (_seriesDimensions[_selectedSeries]["y"]);
 }
 
 void lifImage::selectedSeries (unsigned s) const
 {
-    if (s >= 0 && s < series())
+    if (s < series())
         _selectedSeries = s;
 }
 
-const std::vector<std::map<std::string, unsigned long long> >& lifImage::seriesDimensions () const
+const std::vector<std::map<std::string, int64_t> >& lifImage::seriesDimensions () const
 {
     return _seriesDimensions;
+}
+
+const std::vector<std::string >& lifImage::seriesNames () const
+{
+    return _imageNames;
 }
 
 const std::vector<std::string >& lifImage::seriesOrder () const
@@ -377,7 +362,7 @@ const std::vector<ColorType>& lifImage::seriesColorTypes () const
 {
     return _colorTypes;
 }
-const std::vector<DataType>& lifImage::seriesDataTypes () const
+const std::vector<ci::ImageIo::DataType>& lifImage::seriesDataTypes () const
 {
     return _dataTypes;
 }
@@ -386,56 +371,46 @@ const std::vector<unsigned int>& lifImage::seriesCounts () const
     return _imageCount;
 }
 
-const std::vector<unsigned long long> lifImage::getDimensions() const
+const tpair<uint32_t> lifImage::getDimensions() const
 {
     return _dims;
 }
-
-
-int lifImage::getTileIndex(int index) {
-    int count = 0;
-    for (int tile=0; tile < _tileCount.size(); ++tile) {
-        if (index < count + _tileCount[tile]) {
-            return tile;
-        }
-        count += _tileCount[tile];
-    }
-    return -1;
-}
-
-//  std::vector<uint32_t> lifImage::xySize () const
 
 void* lifImage::readAllImageData()
 {
     return readDataFromImage(0, 0, _dims[0],_dims[1]);
 }
 
-void*lifImage::readDataFromImage(const long long& startX, const long long& startY, const unsigned long long& width,
-                                  const unsigned long long& height) {
+const lif_serie& lifImage::info (unsigned index) const
+{
+    static lif_serie clearLif;
+    if (index < _imageNames.size())
+        return _seriesInfo[index];
+    return clearLif;
+}
+
+void*lifImage::readDataFromImage(const uint32_t& startX, const uint32_t& startY, const uint32_t& width, const  uint32_t& height)
+{
     
-    int index = getTileIndex(_selectedSeries);
-    if (index < 0) {
-        return NULL;
-    }
-    unsigned int nrChannels = _seriesDimensions[_selectedSeries]["c"];
-    unsigned long long offset = _offsets[index];
+    unsigned int nrChannels = _seriesInfo[_selectedSeries].c;
+    unsigned long long offset = _offsets[_selectedSeries];
     int bytes = 4;
-    if (_dataTypes[_selectedSeries] == UInt16) {
+    if (_dataTypes[_selectedSeries] == ci::ImageIo::DataType::UINT16) {
         bytes = 2;
-    } else if (_dataTypes[_selectedSeries] == UChar) {
+    } else if (_dataTypes[_selectedSeries] == ci::ImageIo::DataType::UINT8) {
         bytes = 1;
     }
     int bpp = bytes;
     
-    long planeSize = _seriesDimensions[_selectedSeries]["x"] * _seriesDimensions[_selectedSeries]["y"] * bpp;
-    unsigned long long nextOffset = index + 1 < _offsets.size() ? _offsets[index + 1] : _fileSize;
+    long planeSize = _seriesInfo[_selectedSeries].x * _seriesInfo[_selectedSeries].y * bpp;
+    int64_t nextOffset = (_selectedSeries + 1 < _offsets.size())  ? _offsets[_selectedSeries + 1] : _fileSize;
     int bytesToSkip = (int) (nextOffset - offset - planeSize * _imageCount[_selectedSeries]);
-    bytesToSkip /= _seriesDimensions[_selectedSeries]["y"];
-    if ((_seriesDimensions[_selectedSeries]["x"] % 4) == 0) {
+    bytesToSkip /= _seriesInfo[_selectedSeries].y;
+    if ((_seriesInfo[_selectedSeries].x % 4) == 0) {
         bytesToSkip = 0;
     }
     
-    if (offset + (planeSize + bytesToSkip * _seriesDimensions[_selectedSeries]["y"]) >= _fileSize) {
+    if (offset + (planeSize + bytesToSkip * _seriesInfo[_selectedSeries].y) >= _fileSize) {
         return NULL;
     }
     
@@ -443,13 +418,8 @@ void*lifImage::readDataFromImage(const long long& startX, const long long& start
     in.open(_fileName.c_str(), std::ios::in | std::ios::binary);
     in.seekg(offset);
     
-    int tile = _selectedSeries;
-    for (int i=0; i<index; i++) {
-        tile -= _tileCount[i];
-    }
-    
     char* buf = new char[width*height*bpp*nrChannels];
-    in.seekg((tile * planeSize * _imageCount[_selectedSeries]), std::ios::cur);
+    in.seekg((planeSize * _imageCount[_selectedSeries]), std::ios::cur);
     in.seekg(bytesToSkip * _seriesDimensions[_selectedSeries]["y"], std::ios::cur);
     
     if (bytesToSkip == 0) {
@@ -567,18 +537,7 @@ void lifImage::translateAttachmentNodes(pugi::xpath_node&  imageNode, int imageN
             _descriptions[imageNr] = attachment.node().attribute("Content").value();
         }
         else if (attachmentName == "TileScanInfo") {
-            pugi::xpath_node_set tiles = attachment.node().select_nodes("Tile");
-            for (int tile=0; tile<tiles.size(); tile++) {
-                pugi::xpath_node tileNode = tiles[tile];
-                std::string posX = tileNode.node().attribute("PosX").value();
-                std::string posY = tileNode.node().attribute("PosY").value();
-                if (!posX.empty()) {
-                    _fieldPosX.push_back(svl::fromstring<double>(posX));
-                }
-                if (!posY.empty()) {
-                    _fieldPosY.push_back(svl::fromstring<double>(posY));
-                }
-            }
+            assert(false);
         }
     }
 }
@@ -588,8 +547,9 @@ void lifImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
     pugi::xpath_node_set channels = imageNode.node().child("ImageDescription").child("Channels").select_nodes("ChannelDescription");
     pugi::xpath_node_set dimensions = imageNode.node().child("ImageDescription").child("Dimensions").select_nodes("DimensionDescription");
     
+    lif_serie linfo;
     std::map<long, std::string> bytesPerAxis;
-    std::map<std::string, unsigned long long> serieDimensions;
+    std::map<std::string, int64_t> serieDimensions;
     serieDimensions["x"]=0;
     serieDimensions["y"]=0;
     serieDimensions["z"]=0;
@@ -600,7 +560,7 @@ void lifImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
     double physicalSizeY = 0.0;
     double physicalSizeZ = 0.0;
     
-    serieDimensions["c"]=channels.size();
+    serieDimensions["c"]=linfo.c = channels.size();
     for (int ch=0; ch < channels.size(); ch++) {
         const pugi::xpath_node channel = channels[ch];
         
@@ -632,6 +592,7 @@ void lifImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
         switch (id) {
             case 1: // X axis
                 serieDimensions["x"] = len;
+                linfo.x = len;
                 if ((nBytes % 3) == 0) {
                     _colorTypes[imageNr] = RGB;
                 } else {
@@ -641,11 +602,11 @@ void lifImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
                     nBytes /= 3;
                 }
                 if (nBytes == 1) {
-                    _dataTypes[imageNr] = UChar;
+                    _dataTypes[imageNr] = ci::ImageIo::DataType::UINT8;
                 } else if (nBytes == 2) {
-                    _dataTypes[imageNr] = UInt16;
+                    _dataTypes[imageNr] = cinder::ImageIo::UINT16;
                 } else if(nBytes == 4) {
-                    _dataTypes[imageNr] = Float;
+                    _dataTypes[imageNr] = cinder::ImageIo::FLOAT32;
                 }
                 physicalSizeX = physicalLen;
                 break;
@@ -658,11 +619,13 @@ void lifImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
                     }
                     else if (serieDimensions["t"] == 1) {
                         serieDimensions["t"] = len;
+                        linfo.t = len;
                         bytesPerAxis[nBytes] =  "t";
                     }
                 }
                 else {
                     serieDimensions["y"] = len;
+                    linfo.y = len;
                     physicalSizeY = physicalLen;
                 }
                 break;
@@ -670,11 +633,14 @@ void lifImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
                 if (serieDimensions["y"] == 0) {
                     // XZ scan - swap Y and Z
                     serieDimensions["y"] = len;
+                    linfo.y = len;
+                    linfo.z = 1;
                     serieDimensions["z"] = 1;
                     bytesPerAxis[nBytes] =  "y";
                     physicalSizeY = physicalLen;
                 }
                 else {
+                    serieDimensions["z"] = len;
                     serieDimensions["z"] = len;
                     bytesPerAxis[nBytes] =  "z";
                     physicalSizeZ = (physicalLen * len) / (len - 1);
@@ -684,17 +650,17 @@ void lifImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
                 if (serieDimensions["y"] == 0) {
                     // XT scan - swap Y and T
                     serieDimensions["y"] = len;
+                    linfo.y = len;
+                    linfo.t = 1;
                     serieDimensions["t"] = 1;
                     bytesPerAxis[nBytes] = "y";
                     physicalSizeY = physicalLen;
                 }
                 else {
                     serieDimensions["t"] = len;
+                    linfo.t = len;
                     bytesPerAxis[nBytes] = "t";
                 }
-                break;
-            case 10: // tile axis
-                _tileCount[imageNr] *= len;
                 break;
             default:
                 extras *= len;
@@ -711,28 +677,31 @@ void lifImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
     if (extras > 1) {
         if (serieDimensions["z"] == 1) {
             serieDimensions["z"] = extras;
+            linfo.z = extras;
         }
         else {
             if (serieDimensions["t"] == 0) {
                 serieDimensions["t"] = extras;
+                linfo.t = extras;
             }
             else {
                 serieDimensions["t"] *= extras;
+                linfo.t *= extras;
             }
         }
     }
     
     if (serieDimensions["c"] == 0) {
-        serieDimensions["c"] = 1;
+        serieDimensions["c"] = 1; linfo.c = 1;
     }
     if (serieDimensions["z"] == 0) {
-        serieDimensions["z"] = 1;
+        serieDimensions["z"] = 1; linfo.z = 1;
     }
     if (serieDimensions["t"] == 0) {
-        serieDimensions["t"] = 1;
+        serieDimensions["t"] = 1; linfo.t = 1;
     }
     
-    _imageCount[imageNr] = serieDimensions["z"] * serieDimensions["t"];
+    _imageCount[imageNr] = static_cast<uint32_t> (serieDimensions["z"] * serieDimensions["t"]);
     if (_colorTypes[imageNr] != RGB) {
         _imageCount[imageNr] *= serieDimensions["c"];
     }
@@ -762,8 +731,16 @@ void lifImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
     if (dimensionOrder.find("t") == std::string::npos) {
         dimensionOrder += "t";
     }
+    
+    assert(linfo.x == serieDimensions["x"]);
+    assert(linfo.y == serieDimensions["y"]);
+    assert(linfo.c == serieDimensions["c"]);
+    assert(linfo.z == serieDimensions["z"]); 
+    assert(linfo.t == serieDimensions["t"]);
+    
     _dimensionOrder[imageNr] = dimensionOrder;
     _seriesDimensions[imageNr] = serieDimensions;
+    _seriesInfo[imageNr] = linfo;
 }
 
 
@@ -772,7 +749,7 @@ roiWindow<P8U> lifImage::getRoiWindow ()
 {
     typedef typename PixelType<P8U>::pixel_ptr_t pixel_ptr_t;
     typedef typename PixelType<P8U>::pixel_t pixel_t;
-    if (PixelType<P8U>::ct() == _dataTypes[_selectedSeries] && _dataTypes[_selectedSeries] == UChar)
+    if (PixelType<P8U>::ct() == _dataTypes[_selectedSeries] && _dataTypes[_selectedSeries] == cinder::ImageIo::UINT8)
     {
         uint8_t* pixels = static_cast<uint8_t*> (readAllImageData());
         sharedRoot<P8U> root (new svl::root<P8U>(pixels, _dims[0], _dims[0],_dims[1], image_memory_alignment_policy::align_first_row));

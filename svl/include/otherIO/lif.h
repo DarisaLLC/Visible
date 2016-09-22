@@ -22,12 +22,7 @@ namespace lif
         Indexed
     };
     
-    enum DataType {
-        InvalidDataType = ci::ImageIo::DataType::DATA_UNKNOWN,
-        UChar = ci::ImageIo::DataType::UINT8,
-        UInt16 = ci::ImageIo::DataType::UINT16,
-        Float = ci::ImageIo::DataType::FLOAT32
-    };
+ 
     
     enum Compression {
         RAW,
@@ -40,6 +35,20 @@ namespace lif
     enum Interpolation {
         NearestNeighbor,
         Linear
+    };
+    
+    struct lif_serie
+    {
+        lif_serie ()
+        {
+            x = y = c = t = z = 0;
+        }
+        
+        uint32_t x;
+        uint32_t y;
+        uint32_t c;
+        uint32_t z;
+        uint32_t t;
     };
 }
 

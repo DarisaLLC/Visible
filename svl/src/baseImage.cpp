@@ -34,11 +34,11 @@ const std::vector<double> baseImage::getSpacing() const {
     return _spacing;
 }
 
-const DataType baseImage::getDataType() const {
+const cinder::ImageIo::DataType baseImage::getDataType() const {
     if (_isValid) {
         return _dataType;
     } else {
-        return InvalidDataType;
+        return ci::ImageIo::DataType::DATA_UNKNOWN;
     }
 }
 
@@ -159,7 +159,7 @@ baseImage::baseImage() :
 _spacing(),
 _samplesPerPixel(0),
 _colorType(InvalidColorType),
-_dataType(InvalidDataType),
+_dataType(ci::ImageIo::DataType::DATA_UNKNOWN),
 _isValid(false)
 {
 
@@ -179,7 +179,7 @@ void baseImage::cleanup() {
   _samplesPerPixel = 0;
 
   _colorType = InvalidColorType;
-  _dataType = InvalidDataType;
+  _dataType = ci::ImageIo::DataType::DATA_UNKNOWN;
   _isValid = false;
 }
 

@@ -109,7 +109,7 @@ bool TIFFImage::initialize(const std::string& imagePath) {
     } else if (bitsPerSample==32) {
       _dataType =  UInt32;
     } else {
-      _dataType =  InvalidDataType;
+      _dataType =  ci::ImageIo::DataType::DATA_UNKNOWN;
     }
   }
 

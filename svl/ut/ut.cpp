@@ -28,6 +28,7 @@
 #include "core/gtest_image_utils.hpp"
 #include "ut_units.hpp"
 #include "cardio_model/cardiomyocyte_model.hpp"
+#include "vision/histo.h"
 
 using namespace svl;
 using namespace ci;
@@ -36,7 +37,23 @@ using namespace cm;
 
 static test_utils::genv * dgenv_ptr;
 
-
+std::string  expectedNames []
+{
+    "Series003"
+    , "Series007"
+    , "Series010"
+    , "Series013"
+    , "Series016"
+    , "Series019"
+    , "Series022"
+    , "Series026"
+    , "Series029"
+    , "Series032"
+    , "Series035"
+    , "Series038"
+    , "Series041"
+    , "Series045"
+};
 
 const char * pi341[] =
 {
@@ -119,14 +136,28 @@ TEST (ut_lifImage, basic)
     EXPECT_EQ(0, img->getDataType());
     EXPECT_EQ(1, img->getSamplesPerPixel());
     EXPECT_EQ(14, img->series ());
+    EXPECT_EQ(14, img->seriesCounts ().size());
     
-    vector<unsigned long long> dims = img->getDimensions();
+    auto dims = img->getDimensions();
     EXPECT_EQ(512, dims[0]);
     EXPECT_EQ(128, dims[1]);
+    
+    std::vector<std::string> series = img->seriesNames ();
+    EXPECT_EQ(sizeof(expectedNames)/sizeof(std::string), series.size ());
+    
+    for (auto sn = 0; sn < series.size(); sn++)
+    {
+        EXPECT_EQ(0, expectedNames[sn].compare(series[sn]));
+        EXPECT_EQ(250, img->seriesCounts()[sn]);
+        EXPECT_EQ(1, img->info(sn).c);
+        EXPECT_EQ(250, img->info(sn).t);
+    }
 
     roiWindow<P8U> ri = img->getRoiWindow<P8U>();
+    histoStats h;
+    h.from_image(ri);
+    std::cout << h << std::endl;
     
-//    img->getRawRegion(zero, zero, dims[0], dims[1], pptr);
     std::cout << "test Done" << std::endl;
 }
 
