@@ -48,6 +48,8 @@ public:
     
     const lif_serie& info (unsigned index) const;
     
+    void slicesForSerie(const unsigned index, std::vector<roiWindow<P8U> >& slices);
+    
     template<typename P>
     roiWindow<P> getRoiWindow ();
     

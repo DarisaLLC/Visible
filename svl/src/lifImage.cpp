@@ -774,3 +774,75 @@ roiWindow<P8U> lifImage::getRoiWindow ()
     return roiWindow<P8U> ();
 }
 
+#if 0
+void lifImage::slicesForSerie(const unsigned index, std::vector<roiWindow<P8U> >& slices)
+{
+    
+    unsigned long long offset = _offsets[index];
+    uint32_t bpp = pixel_size(index);
+    uint32_t planeSize = plane_size(index);
+    uint32_t nrChannels = channels (index);
+    uint32_t width = _seriesInfo[index].x;
+    uint32_t height = _seriesInfo[index].x;
+    
+    int64_t nextOffset = (index + 1 < _offsets.size())  ? _offsets[index + 1] : _fileSize;
+    int bytesToSkip = (int) (nextOffset - offset - planeSize * _imageCount[index]);
+    bytesToSkip /= _seriesInfo[index].y;
+    if ((_seriesInfo[index].x % 4) == 0) {
+        bytesToSkip = 0;
+    }
+    
+    if (offset + (planeSize + bytesToSkip * _seriesInfo[index].y) >= _fileSize) {
+        return;
+    }
+
+    // Open the file and go to the offset for this serie
+    std::ifstream in;
+    in.open(_fileName.c_str(), std::ios::in | std::ios::binary);
+    in.seekg(offset);
+    
+    
+    
+    char* buf = new char[width*height*bpp*channels(index)];
+    roiWindow<P8U> roi (width, height);
+    
+    
+    
+    in.seekg((planeSize * _imageCount[index]), std::ios::cur);
+    in.seekg(bytesToSkip * _seriesDimensions[index]["y"], std::ios::cur);
+    
+    if (bytesToSkip == 0) {
+        auto seriesWidth = _seriesDimensions[index]["x"];
+        for (int channel=0; channel < nrChannels ; channel++) {
+            for (int row=0; row < height; row++) {
+                in.read(  (char*) roi.rowPointer(row), width * bpp);
+               }
+            }
+        }
+    }
+    else {
+        in.seekg(startY * (_seriesDimensions[index]["x"] * bpp + bytesToSkip));
+        for (int row=0; row < height; row++) {
+            in.seekg(startX * bpp, std::ios::cur);
+            in.read(buf + (row * width * bpp), width * bpp);
+            in.seekg(bpp * (_seriesDimensions[index]["x"] - width - startX) + bytesToSkip, std::ios::cur);
+        }
+    }
+    in.close();
+    
+    // Change planar to interleaved
+    char* interLeavedbuf = new char[width*height*bpp*nrChannels];
+    for (unsigned int i = 0; i < width*height; ++i) {
+        for (unsigned int c = 0; c < nrChannels; ++c) {
+            unsigned int cStride = width*height*bpp*c;
+            for (unsigned int b = 0; b < bpp; ++b) {
+                interLeavedbuf[i*bpp*nrChannels+c*bpp+b] = buf[i*bpp + cStride + b];
+            }
+        }
+    }
+    delete[] buf;
+    return interLeavedbuf;
+}
+
+#endif
+
