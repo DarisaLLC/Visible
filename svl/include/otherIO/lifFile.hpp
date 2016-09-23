@@ -1,20 +1,5 @@
 /**
-    Copyright 2008,2009 Mathieu Leocmach
 
-    This file is part of Colloids.
-
-    Colloids is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Colloids is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Colloids.  If not, see <http://www.gnu.org/licenses/>.
 
  * \file lifFile.cpp
  * \brief Define classes to read directly from Leica .lif file
@@ -29,6 +14,7 @@
 #ifndef lif_reader_H
 #define lif_reader_H
 
+#include "core/core.hpp"
 #include "tinyxml.h"
 #include <string>
 #include <iostream>
@@ -42,7 +28,8 @@
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-namespace svl 
+
+namespace lifIO
 {
 struct ChannelData;
 struct DimensionData;

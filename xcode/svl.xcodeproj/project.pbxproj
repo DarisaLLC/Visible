@@ -90,15 +90,6 @@
 		C20E94591CF3935F0074C47A /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C20E94581CF3935E0074C47A /* IOSurface.framework */; };
 		C20E945B1CF3937C0074C47A /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C20E945A1CF3937C0074C47A /* IOKit.framework */; };
 		C20E945D1CF393950074C47A /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C20E945C1CF393950074C47A /* CoreAudio.framework */; };
-		C21B27021D7E5280002485AB /* lifImage.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C21B27011D7E5280002485AB /* lifImage.hpp */; };
-		C21B27061D7E52F8002485AB /* filetools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21B27031D7E52F8002485AB /* filetools.cpp */; };
-		C21B27071D7E52F8002485AB /* lifImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21B27041D7E52F8002485AB /* lifImage.cpp */; };
-		C21B27081D7E52F8002485AB /* stringconversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21B27051D7E52F8002485AB /* stringconversion.cpp */; };
-		C21B27211D7E5FBC002485AB /* filetools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21B27031D7E52F8002485AB /* filetools.cpp */; };
-		C21B27221D7E5FBF002485AB /* lifImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21B27041D7E52F8002485AB /* lifImage.cpp */; };
-		C21B27231D7E5FC2002485AB /* stringconversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21B27051D7E52F8002485AB /* stringconversion.cpp */; };
-		C21B27251D7E6AEE002485AB /* libpugixml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B27241D7E6AEE002485AB /* libpugixml.a */; };
-		C21B272D1D7E6BA6002485AB /* libcinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B272C1D7E6BA6002485AB /* libcinder.a */; };
 		C21B27301D7E6C1E002485AB /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B272E1D7E6BE4002485AB /* libopencv_core.a */; };
 		C21B27431D7E6C20002485AB /* libippicv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B27311D7E6C1F002485AB /* libippicv.a */; };
 		C21B27441D7E6C20002485AB /* libopencv_calib3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B27321D7E6C1F002485AB /* libopencv_calib3d.a */; };
@@ -120,6 +111,14 @@
 		C21B27541D7E6C20002485AB /* libopencv_videostab.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B27421D7E6C20002485AB /* libopencv_videostab.a */; };
 		C21B27581D7E6CA8002485AB /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B27561D7E6CA8002485AB /* libgtest_main.a */; };
 		C21B27591D7E6CA8002485AB /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B27571D7E6CA8002485AB /* libgtest.a */; };
+		C22293081D949CA900F978DC /* lifFile.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C22293071D949CA900F978DC /* lifFile.hpp */; };
+		C222930A1D949CBD00F978DC /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22293091D949CBD00F978DC /* lifFile.cpp */; };
+		C222930F1D949CE100F978DC /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C222930B1D949CE100F978DC /* tinystr.cpp */; };
+		C22293101D949CE100F978DC /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C222930C1D949CE100F978DC /* tinyxml.cpp */; };
+		C22293111D949CE100F978DC /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C222930D1D949CE100F978DC /* tinyxmlerror.cpp */; };
+		C22293121D949CE100F978DC /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C222930E1D949CE100F978DC /* tinyxmlparser.cpp */; };
+		C22293131D949F1400F978DC /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22293091D949CBD00F978DC /* lifFile.cpp */; };
+		C22293141D94C4F800F978DC /* libcinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B272C1D7E6BA6002485AB /* libcinder.a */; };
 		C24B1FB41D8B54E700292F85 /* cerruti_rectangle_integral.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C24B1FB31D8B54E700292F85 /* cerruti_rectangle_integral.hpp */; };
 		C24B1FB61D8B55E500292F85 /* cardiomyocyte_model.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C24B1FB51D8B55E500292F85 /* cardiomyocyte_model.hpp */; };
 		C24B1FB91D8B590100292F85 /* metric.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C24B1FB81D8B590100292F85 /* metric.hpp */; };
@@ -128,15 +127,6 @@
 		C24B1FC11D8DADF400292F85 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBD1D8DADF400292F85 /* libboost_system.a */; };
 		C24B1FC21D8DADF400292F85 /* libboost_thread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBE1D8DADF400292F85 /* libboost_thread.a */; };
 		C24B1FC31D8DADF400292F85 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBF1D8DADF400292F85 /* libz.a */; };
-		C27881461D80FFCF00D0F473 /* TIFFImage.h in Headers */ = {isa = PBXBuildFile; fileRef = C27881451D80FFCF00D0F473 /* TIFFImage.h */; };
-		C27C764C1D80E043000D9C9B /* baseImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27C764B1D80E043000D9C9B /* baseImage.cpp */; };
-		C27C76501D80E237000D9C9B /* TileCache.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C764F1D80E237000D9C9B /* TileCache.h */; };
-		C27C76561D80E24F000D9C9B /* filetools.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C76511D80E24F000D9C9B /* filetools.h */; };
-		C27C76571D80E24F000D9C9B /* baseImage.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C76521D80E24F000D9C9B /* baseImage.h */; };
-		C27C765A1D80E24F000D9C9B /* stringconversion.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C76551D80E24F000D9C9B /* stringconversion.h */; };
-		C27C765D1D80E2C5000D9C9B /* lif.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C765C1D80E2C5000D9C9B /* lif.h */; };
-		C27C765F1D80E5FE000D9C9B /* ImageData.h in Headers */ = {isa = PBXBuildFile; fileRef = C27C765E1D80E5FE000D9C9B /* ImageData.h */; };
-		C27C76641D80EB41000D9C9B /* baseImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27C764B1D80E043000D9C9B /* baseImage.cpp */; };
 		C2B6E6681D060A7400235FB7 /* vImageRef.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E6671D060A7400235FB7 /* vImageRef.mm */; };
 		C2B6E6691D060A7400235FB7 /* vImageRef.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E6671D060A7400235FB7 /* vImageRef.mm */; };
 		C2B6E66B1D060E0E00235FB7 /* GLMmath.h in Headers */ = {isa = PBXBuildFile; fileRef = C2B6E66A1D060E0E00235FB7 /* GLMmath.h */; };
@@ -300,10 +290,6 @@
 		C20EDC751CF3780F0074C47A /* self_similarity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = self_similarity.h; sourceTree = "<group>"; };
 		C20EDC761CF3780F0074C47A /* sparsehist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sparsehist.h; sourceTree = "<group>"; };
 		C20EDC771CF3780F0074C47A /* ss_segmenter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ss_segmenter.hpp; sourceTree = "<group>"; };
-		C21B27011D7E5280002485AB /* lifImage.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lifImage.hpp; path = otherIO/lifImage.hpp; sourceTree = "<group>"; };
-		C21B27031D7E52F8002485AB /* filetools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = filetools.cpp; sourceTree = "<group>"; };
-		C21B27041D7E52F8002485AB /* lifImage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = lifImage.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
-		C21B27051D7E52F8002485AB /* stringconversion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stringconversion.cpp; sourceTree = "<group>"; };
 		C21B27241D7E6AEE002485AB /* libpugixml.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpugixml.a; path = ../svl/local/pugixml/1.7/lib/libpugixml.a; sourceTree = "<group>"; };
 		C21B27261D7E6B86002485AB /* libboost_filesystem.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_filesystem.a; path = ../svl/local/cinder/cinder_0.9/lib/macosx/libboost_filesystem.a; sourceTree = "<group>"; };
 		C21B27271D7E6B86002485AB /* libboost_system.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_system.a; path = ../svl/local/cinder/cinder_0.9/lib/macosx/libboost_system.a; sourceTree = "<group>"; };
@@ -330,6 +316,12 @@
 		C21B27421D7E6C20002485AB /* libopencv_videostab.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_videostab.a; path = ../svl/local/cinder/cinder_0.9/blocks/OpenCV3/lib/macosx/libopencv_videostab.a; sourceTree = "<group>"; };
 		C21B27561D7E6CA8002485AB /* libgtest_main.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest_main.a; path = ../svl/local/gtest/lib/Release/libgtest_main.a; sourceTree = "<group>"; };
 		C21B27571D7E6CA8002485AB /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = ../svl/local/gtest/lib/Release/libgtest.a; sourceTree = "<group>"; };
+		C22293071D949CA900F978DC /* lifFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lifFile.hpp; path = otherIO/lifFile.hpp; sourceTree = "<group>"; };
+		C22293091D949CBD00F978DC /* lifFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lifFile.cpp; sourceTree = "<group>"; };
+		C222930B1D949CE100F978DC /* tinystr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinystr.cpp; path = ../local/tinyxml/tinystr.cpp; sourceTree = "<group>"; };
+		C222930C1D949CE100F978DC /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../local/tinyxml/tinyxml.cpp; sourceTree = "<group>"; };
+		C222930D1D949CE100F978DC /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../local/tinyxml/tinyxmlerror.cpp; sourceTree = "<group>"; };
+		C222930E1D949CE100F978DC /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
 		C24B1FB31D8B54E700292F85 /* cerruti_rectangle_integral.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cerruti_rectangle_integral.hpp; sourceTree = "<group>"; };
 		C24B1FB51D8B55E500292F85 /* cardiomyocyte_model.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model.hpp; sourceTree = "<group>"; };
 		C24B1FB81D8B590100292F85 /* metric.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = metric.hpp; sourceTree = "<group>"; };
@@ -338,19 +330,6 @@
 		C24B1FBD1D8DADF400292F85 /* libboost_system.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_system.a; path = ../svl/local/boost/lib/libboost_system.a; sourceTree = "<group>"; };
 		C24B1FBE1D8DADF400292F85 /* libboost_thread.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_thread.a; path = ../svl/local/boost/lib/libboost_thread.a; sourceTree = "<group>"; };
 		C24B1FBF1D8DADF400292F85 /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = ../svl/local/boost/lib/libz.a; sourceTree = "<group>"; };
-		C27881451D80FFCF00D0F473 /* TIFFImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TIFFImage.h; path = otherIO/TIFFImage.h; sourceTree = "<group>"; };
-		C27881471D80FFDE00D0F473 /* TIFFImage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 2; path = TIFFImage.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
-		C27C764B1D80E043000D9C9B /* baseImage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 2; path = baseImage.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
-		C27C764D1D80E1E1000D9C9B /* TileCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TileCache.cpp; sourceTree = "<group>"; };
-		C27C764F1D80E237000D9C9B /* TileCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TileCache.h; path = otherIO/TileCache.h; sourceTree = "<group>"; };
-		C27C76511D80E24F000D9C9B /* filetools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = filetools.h; path = otherIO/filetools.h; sourceTree = "<group>"; };
-		C27C76521D80E24F000D9C9B /* baseImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = baseImage.h; path = otherIO/baseImage.h; sourceTree = "<group>"; };
-		C27C76531D80E24F000D9C9B /* Patch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Patch.h; path = otherIO/Patch.h; sourceTree = "<group>"; };
-		C27C76541D80E24F000D9C9B /* Patch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; name = Patch.hpp; path = otherIO/Patch.hpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
-		C27C76551D80E24F000D9C9B /* stringconversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stringconversion.h; path = otherIO/stringconversion.h; sourceTree = "<group>"; };
-		C27C765C1D80E2C5000D9C9B /* lif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = lif.h; path = otherIO/lif.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
-		C27C765E1D80E5FE000D9C9B /* ImageData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImageData.h; path = otherIO/ImageData.h; sourceTree = "<group>"; };
-		C27C76601D80E614000D9C9B /* ImageData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 2; path = ImageData.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C2B6E6671D060A7400235FB7 /* vImageRef.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = vImageRef.mm; sourceTree = "<group>"; };
 		C2B6E66A1D060E0E00235FB7 /* GLMmath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLMmath.h; sourceTree = "<group>"; };
 		C2B6E66C1D060F7000235FB7 /* coreGLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coreGLM.h; sourceTree = "<group>"; };
@@ -362,6 +341,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C22293141D94C4F800F978DC /* libcinder.a in Frameworks */,
 				C24B1FC01D8DADF400292F85 /* libboost_filesystem.a in Frameworks */,
 				C24B1FC11D8DADF400292F85 /* libboost_system.a in Frameworks */,
 				C24B1FC21D8DADF400292F85 /* libboost_thread.a in Frameworks */,
@@ -387,8 +367,6 @@
 				C21B27531D7E6C20002485AB /* libopencv_videoio.a in Frameworks */,
 				C21B27541D7E6C20002485AB /* libopencv_videostab.a in Frameworks */,
 				C21B27301D7E6C1E002485AB /* libopencv_core.a in Frameworks */,
-				C21B272D1D7E6BA6002485AB /* libcinder.a in Frameworks */,
-				C21B27251D7E6AEE002485AB /* libpugixml.a in Frameworks */,
 				C20E94461CF390880074C47A /* OpenCL.framework in Frameworks */,
 				C20E941E1CF38A020074C47A /* libsvl.a in Frameworks */,
 				C20E944D1CF392DC0074C47A /* AudioToolbox.framework in Frameworks */,
@@ -418,13 +396,11 @@
 		C20E3D031CF378450074C47A /* src */ = {
 			isa = PBXGroup;
 			children = (
-				C27881471D80FFDE00D0F473 /* TIFFImage.cpp */,
-				C27C76601D80E614000D9C9B /* ImageData.cpp */,
-				C27C764D1D80E1E1000D9C9B /* TileCache.cpp */,
-				C27C764B1D80E043000D9C9B /* baseImage.cpp */,
-				C21B27031D7E52F8002485AB /* filetools.cpp */,
-				C21B27041D7E52F8002485AB /* lifImage.cpp */,
-				C21B27051D7E52F8002485AB /* stringconversion.cpp */,
+				C222930B1D949CE100F978DC /* tinystr.cpp */,
+				C222930C1D949CE100F978DC /* tinyxml.cpp */,
+				C222930D1D949CE100F978DC /* tinyxmlerror.cpp */,
+				C222930E1D949CE100F978DC /* tinyxmlparser.cpp */,
+				C22293091D949CBD00F978DC /* lifFile.cpp */,
 				C2B6E6671D060A7400235FB7 /* vImageRef.mm */,
 				C20E3D041CF378460074C47A /* edgel.cpp */,
 				C20E3D051CF378460074C47A /* exception.cpp */,
@@ -781,16 +757,7 @@
 		C27C765B1D80E25A000D9C9B /* otherIO */ = {
 			isa = PBXGroup;
 			children = (
-				C27881451D80FFCF00D0F473 /* TIFFImage.h */,
-				C27C765E1D80E5FE000D9C9B /* ImageData.h */,
-				C27C76511D80E24F000D9C9B /* filetools.h */,
-				C27C76521D80E24F000D9C9B /* baseImage.h */,
-				C27C76531D80E24F000D9C9B /* Patch.h */,
-				C27C76541D80E24F000D9C9B /* Patch.hpp */,
-				C27C76551D80E24F000D9C9B /* stringconversion.h */,
-				C27C764F1D80E237000D9C9B /* TileCache.h */,
-				C21B27011D7E5280002485AB /* lifImage.hpp */,
-				C27C765C1D80E2C5000D9C9B /* lif.h */,
+				C22293071D949CA900F978DC /* lifFile.hpp */,
 			);
 			name = otherIO;
 			sourceTree = "<group>";
@@ -817,11 +784,11 @@
 				C20E3E921CF378470074C47A /* roiRoot.h in Headers */,
 				C20E3E791CF378470074C47A /* singleton.hpp in Headers */,
 				C20E3E651CF378470074C47A /* opencv_utils.hpp in Headers */,
-				C27C765F1D80E5FE000D9C9B /* ImageData.h in Headers */,
 				C20E3E6A1CF378470074C47A /* angle_units.h in Headers */,
 				C20E3E811CF378470074C47A /* colorhistogram.hpp in Headers */,
 				C20E3E981CF378470074C47A /* sparsehist.h in Headers */,
 				C2B6E66D1D060F7000235FB7 /* coreGLM.h in Headers */,
+				C22293081D949CA900F978DC /* lifFile.hpp in Headers */,
 				C20E3E751CF378470074C47A /* rectangle.h in Headers */,
 				C20E3E711CF378470074C47A /* gtest_image_utils.hpp in Headers */,
 				C20E3E8F1CF378470074C47A /* median_t.hpp in Headers */,
@@ -832,8 +799,6 @@
 				C20E3E6D1CF378470074C47A /* ConcurrentQueue.h in Headers */,
 				C20E3E8E1CF378470074C47A /* localvariance.h in Headers */,
 				C20E3E8C1CF378470074C47A /* ipUtils.h in Headers */,
-				C27C765D1D80E2C5000D9C9B /* lif.h in Headers */,
-				C27C76561D80E24F000D9C9B /* filetools.h in Headers */,
 				C20E3E641CF378470074C47A /* editableRectangle.hpp in Headers */,
 				C20E93891CF3786F0074C47A /* ut_localvar.hpp in Headers */,
 				C20E3E7E1CF378470074C47A /* timestamp.h in Headers */,
@@ -849,7 +814,6 @@
 				C20E3E7F1CF378470074C47A /* timing.hpp in Headers */,
 				C20E3E731CF378470074C47A /* pair.hpp in Headers */,
 				C20E3E701CF378470074C47A /* fit.hpp in Headers */,
-				C27C76501D80E237000D9C9B /* TileCache.h in Headers */,
 				C24B1FB61D8B55E500292F85 /* cardiomyocyte_model.hpp in Headers */,
 				C20E3E881CF378470074C47A /* gmorph.hpp in Headers */,
 				C20E3E781CF378470074C47A /* simple_timing.hpp in Headers */,
@@ -861,17 +825,13 @@
 				C20E3E771CF378470074C47A /* shared_queue.hpp in Headers */,
 				C20E3E761CF378470074C47A /* scope_thread.hpp in Headers */,
 				C20E3E7B1CF378470074C47A /* stats.hpp in Headers */,
-				C27C76571D80E24F000D9C9B /* baseImage.h in Headers */,
 				C20E3E901CF378470074C47A /* pixel_traits.h in Headers */,
 				C24B1FB41D8B54E700292F85 /* cerruti_rectangle_integral.hpp in Headers */,
-				C21B27021D7E5280002485AB /* lifImage.hpp in Headers */,
 				C20E3E911CF378470074C47A /* registration.h in Headers */,
-				C27C765A1D80E24F000D9C9B /* stringconversion.h in Headers */,
 				C20E3E7D1CF378470074C47A /* svl_exception.hpp in Headers */,
 				C20E3E961CF378470074C47A /* sample.hpp in Headers */,
 				C20E3E941CF378470074C47A /* rowfunc.h in Headers */,
 				C2B6E66F1D060FF600235FB7 /* vImageRef.h in Headers */,
-				C27881461D80FFCF00D0F473 /* TIFFImage.h in Headers */,
 				C20E3E6E1CF378470074C47A /* core.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -971,11 +931,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C2B6E6691D060A7400235FB7 /* vImageRef.mm in Sources */,
-				C21B27231D7E5FC2002485AB /* stringconversion.cpp in Sources */,
-				C21B27221D7E5FBF002485AB /* lifImage.cpp in Sources */,
+				C22293131D949F1400F978DC /* lifFile.cpp in Sources */,
 				C20E941D1CF386A80074C47A /* ut.cpp in Sources */,
-				C27C76641D80EB41000D9C9B /* baseImage.cpp in Sources */,
-				C21B27211D7E5FBC002485AB /* filetools.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -983,22 +940,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C21B27081D7E52F8002485AB /* stringconversion.cpp in Sources */,
+				C222930F1D949CE100F978DC /* tinystr.cpp in Sources */,
+				C22293121D949CE100F978DC /* tinyxmlparser.cpp in Sources */,
 				C20E936D1CF3786F0074C47A /* time_spec.cpp in Sources */,
 				C20E93641CF3786F0074C47A /* ip_utils.cpp in Sources */,
+				C22293101D949CE100F978DC /* tinyxml.cpp in Sources */,
 				C20E93621CF3786F0074C47A /* gradient.cpp in Sources */,
 				C20E93631CF3786F0074C47A /* histo.cpp in Sources */,
 				C20E93651CF3786F0074C47A /* labelconnect.cpp in Sources */,
 				C20E936B1CF3786F0074C47A /* rowfunc.cpp in Sources */,
 				C20E936C1CF3786F0074C47A /* self_similarity.cpp in Sources */,
+				C22293111D949CE100F978DC /* tinyxmlerror.cpp in Sources */,
 				C20E93681CF3786F0074C47A /* matpixel.cpp in Sources */,
 				C2B6E6681D060A7400235FB7 /* vImageRef.mm in Sources */,
-				C21B27071D7E52F8002485AB /* lifImage.cpp in Sources */,
-				C27C764C1D80E043000D9C9B /* baseImage.cpp in Sources */,
+				C222930A1D949CBD00F978DC /* lifFile.cpp in Sources */,
 				C20E93661CF3786F0074C47A /* lineseg.cpp in Sources */,
 				C20E93601CF3786F0074C47A /* edgel.cpp in Sources */,
 				C20E93671CF3786F0074C47A /* localvariance.cpp in Sources */,
-				C21B27061D7E52F8002485AB /* filetools.cpp in Sources */,
 				C20E93611CF3786F0074C47A /* exception.cpp in Sources */,
 				C20E936A1CF3786F0074C47A /* registration.cpp in Sources */,
 			);
@@ -1028,7 +986,6 @@
 					"$(LOCAL_BOOST)/lib",
 					"$(LOCAL_gtest)/lib/Release",
 					"$(LOCAL_OCV)/lib/macosx",
-					"$(LOCAL_PUGIXML)/lib",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1055,7 +1012,6 @@
 					"$(LOCAL_BOOST)/lib",
 					"$(LOCAL_gtest)/lib/Release",
 					"$(LOCAL_OCV)/lib/macosx",
-					"$(LOCAL_PUGIXML)/lib",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1164,6 +1120,7 @@
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_PUGIXML)/include",
 					"$(LOCAL_EIGEN)/",
+					"$(LOCAL_TINYXML)/",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -1192,6 +1149,7 @@
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_PUGIXML)/include",
 					"$(LOCAL_EIGEN)/",
+					"$(LOCAL_TINYXML)/",
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

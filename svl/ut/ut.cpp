@@ -130,12 +130,12 @@ TEST (ut_lifFile, basic)
     std::string filename ("Sample1.lif");
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
     EXPECT_TRUE(res.second);
-    LifReader lif(res.first.string());
+    lifIO::LifReader lif(res.first.string());
     cout << "LIF version "<<lif.getVersion() << endl;
     EXPECT_EQ(14, lif.getNbSeries() );
     size_t serie = 0;
     size_t frame = 0;
-    LifSerie& se0 = lif.getSerie(serie);
+    lifIO::LifSerie& se0 = lif.getSerie(serie);
     const std::vector<size_t>& dims = se0.getSpatialDimensions();
     EXPECT_EQ(512, dims[0]);
     EXPECT_EQ(128, dims[1]);
