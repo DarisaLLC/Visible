@@ -28,4 +28,4 @@ LOCAL_GLM = $(LOCAL_3rdParty)/glm/glm
 LOCAL_PUGIXML = $(LOCAL_3rdParty)/pugixml/1.7
 LOCAL_EIGEN = $(LOCAL_3rdParty)/Eigen
 LOCAL_CEREAL = $(LOCAL_3rdParty)/cereal-1.1.1/include
-
+LOCAL_TINYXML = $(LOCAL_3rdParty)/tinyxml

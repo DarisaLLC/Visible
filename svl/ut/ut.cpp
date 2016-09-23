@@ -24,7 +24,7 @@
 #include "core/cv_gabor.hpp"
 #include "opencv2/highgui.hpp"
 #include "ut_similarity.hpp"
-#include "otherIO/lifImage.hpp"
+#include "otherIO/lifFile.hpp"
 #include "core/gtest_image_utils.hpp"
 #include "ut_units.hpp"
 #include "cardio_model/cardiomyocyte_model.hpp"
@@ -125,40 +125,49 @@ TEST (ut_units, basic)
     std::cout << ss.str() << std::endl;
 }
 
-TEST (ut_lifImage, basic)
+TEST (ut_lifFile, basic)
 {
-
     std::string filename ("Sample1.lif");
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
     EXPECT_TRUE(res.second);
-    lifImage* img = lifImage::open(res.first.string());
-    EXPECT_TRUE(img != nullptr );
-    EXPECT_EQ(0, img->getDataType());
-    EXPECT_EQ(1, img->getSamplesPerPixel());
-    EXPECT_EQ(14, img->series ());
-    EXPECT_EQ(14, img->seriesCounts ().size());
-    
-    auto dims = img->getDimensions();
+    LifReader lif(res.first.string());
+    cout << "LIF version "<<lif.getVersion() << endl;
+    EXPECT_EQ(14, lif.getNbSeries() );
+    size_t serie = 0;
+    size_t frame = 0;
+    LifSerie& se0 = lif.getSerie(serie);
+    const std::vector<size_t>& dims = se0.getSpatialDimensions();
     EXPECT_EQ(512, dims[0]);
     EXPECT_EQ(128, dims[1]);
+    std::vector<std::string> series;
+    for (auto ss = 0; ss < lif.getNbSeries(); ss++)
+        series.push_back (lif.getSerie(ss).getName());
     
-    std::vector<std::string> series = img->seriesNames ();
     EXPECT_EQ(sizeof(expectedNames)/sizeof(std::string), series.size ());
     
     for (auto sn = 0; sn < series.size(); sn++)
     {
         EXPECT_EQ(0, expectedNames[sn].compare(series[sn]));
-        EXPECT_EQ(250, img->seriesCounts()[sn]);
-        EXPECT_EQ(1, img->info(sn).c);
-        EXPECT_EQ(250, img->info(sn).t);
+        EXPECT_EQ(250, lif.getSerie(sn).getNbTimeSteps());
+        EXPECT_EQ(65536, lif.getSerie(sn).getNbPixelsInOneTimeStep ());
+        EXPECT_EQ(1, lif.getSerie(sn).getChannels().size());
     }
 
-    roiWindow<P8U> ri = img->getRoiWindow<P8U>();
+#if DEBUGGING
+    std::cout << "Spatial Dimensions " << se0.getSpatialDimensions()[0] <<  ", " << se0.getSpatialDimensions()[1] << endl;
+    std::cout << "Number of Time Steps "<< se0.getNbTimeSteps()  << endl;
+    std::cout << "Number of Pixels in One Slice " << se0.getNbPixelsInOneSlice() << endl;
+    std::cout << "Number of Pixels in One Time Point " << se0.getNbPixelsInOneTimeStep() << endl;
+#endif
+    roiWindow<P8U> slice (dims[0], dims[1]);
+    lif.getSerie(0).fill2DBuffer(slice.rowPointer(0));
     histoStats h;
-    h.from_image(ri);
-    std::cout << h << std::endl;
-    
-    std::cout << "test Done" << std::endl;
+    h.from_image(slice);
+    EXPECT_NEAR(h.mean(), 114.271, 0.001);
+    EXPECT_NEAR(h.median(), 114.0, 0.001);
+    EXPECT_NEAR(h.min(), 44.0, 0.001);
+    EXPECT_NEAR(h.max(), 255.0, 0.001);
+
 }
 
 #if 0
@@ -238,7 +247,7 @@ TEST(basiccv, histogram_display)
     cv::Mat histimage = ch.graphic ();
     
     
-  //  cv::namedWindow( "H-S Histogram", 1 );
+    //  cv::namedWindow( "H-S Histogram", 1 );
     imshow( "Gaborfilter", histimage );
     
     // Wait for a key press
