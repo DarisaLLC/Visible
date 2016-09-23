@@ -172,9 +172,11 @@ void lifIO::LifSerieHeader::parseTimeStampList(TiXmlNode *elementTimeStampList)
     {
         int NumberOfTimeStamps = 0;
         //new way to store timestamps
-        if (elementTimeStampList->ToElement()->Attribute("NumberOfTimeStamps", &NumberOfTimeStamps) != 0)
+        if (elementTimeStampList->ToElement()->Attribute("NumberOfTimeStamps", &NumberOfTimeStamps) != 0 && NumberOfTimeStamps != 0)
         {
             this->timeStamps.resize(NumberOfTimeStamps);
+            std::cout << NumberOfTimeStamps << std::endl;
+            
             //timestamps are stored in the text of the node as 16bits hexadecimal separated by spaces
             //transform this node text in a stream
             std::istringstream in(elementTimeStampList->ToElement()->GetText());
@@ -399,11 +401,11 @@ lifIO::LifReader::LifReader(const string &filename) : file(filename.c_str(), ios
     // Read and parse xml header
     string xmlString;
     xmlString.reserve(xmlChars/2);
-	char *xmlHeader = new char[xmlChars];
-    file.read(xmlHeader,xmlChars);
+    std::shared_ptr<char> xmlHeader (new char[xmlChars]);
+    file.read(xmlHeader.get(),xmlChars);
     for(unsigned int p=0;p<xmlChars/2;++p)
-        xmlString.push_back(xmlHeader[2*p]);
-    delete[] xmlHeader;
+        xmlString.push_back(xmlHeader.get()[2*p]);
+//    delete[] xmlHeader;
 
     header.reset(new LifHeader(xmlString));
 

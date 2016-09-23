@@ -55,6 +55,24 @@ std::string  expectedNames []
     , "Series045"
 };
 
+std::string  expected3Names []
+{
+    "Series006"
+    , "Series007"
+    , "Series009"
+    , "Series012"
+    , "Series014"
+    , "Series018"
+    , "Series023"
+    , "Series024"
+    , "Series027"
+    , "Series029"
+    , "Series035"
+    , "Series037"
+    , "Preview038"
+};
+
+
 const char * pi341[] =
 {
     "0000000000000000",
@@ -125,7 +143,7 @@ TEST (ut_units, basic)
     std::cout << ss.str() << std::endl;
 }
 
-TEST (ut_lifFile, basic)
+TEST (ut_lifFile, single_channel)
 {
     std::string filename ("Sample1.lif");
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
@@ -152,13 +170,8 @@ TEST (ut_lifFile, basic)
         EXPECT_EQ(65536, lif.getSerie(sn).getNbPixelsInOneTimeStep ());
         EXPECT_EQ(1, lif.getSerie(sn).getChannels().size());
     }
+    
 
-#if DEBUGGING
-    std::cout << "Spatial Dimensions " << se0.getSpatialDimensions()[0] <<  ", " << se0.getSpatialDimensions()[1] << endl;
-    std::cout << "Number of Time Steps "<< se0.getNbTimeSteps()  << endl;
-    std::cout << "Number of Pixels in One Slice " << se0.getNbPixelsInOneSlice() << endl;
-    std::cout << "Number of Pixels in One Time Point " << se0.getNbPixelsInOneTimeStep() << endl;
-#endif
     roiWindow<P8U> slice (dims[0], dims[1]);
     lif.getSerie(0).fill2DBuffer(slice.rowPointer(0));
     histoStats h;
@@ -167,6 +180,57 @@ TEST (ut_lifFile, basic)
     EXPECT_NEAR(h.median(), 114.0, 0.001);
     EXPECT_NEAR(h.min(), 44.0, 0.001);
     EXPECT_NEAR(h.max(), 255.0, 0.001);
+    
+}
+
+TEST (ut_lifFile, triple_channel)
+{
+    std::string filename ("3channels.lif");
+    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
+    EXPECT_TRUE(res.second);
+    lifIO::LifReader lif(res.first.string());
+    cout << "LIF version "<<lif.getVersion() << endl;
+    EXPECT_EQ(13, lif.getNbSeries() );
+    size_t serie = 0;
+    size_t frame = 0;
+    lifIO::LifSerie& se0 = lif.getSerie(serie);
+    const std::vector<size_t>& dims = se0.getSpatialDimensions();
+    EXPECT_EQ(512, dims[0]);
+    EXPECT_EQ(128, dims[1]);
+    std::vector<std::string> series;
+    for (auto ss = 0; ss < lif.getNbSeries(); ss++)
+        series.push_back (lif.getSerie(ss).getName());
+    
+    EXPECT_EQ(sizeof(expected3Names)/sizeof(std::string), series.size ());
+    
+    {
+        EXPECT_EQ(0, expected3Names[0].compare(series[0]));
+        EXPECT_EQ(31, lif.getSerie(0).getNbTimeSteps());
+        EXPECT_EQ(65536, lif.getSerie(0).getNbPixelsInOneTimeStep ());
+        EXPECT_EQ(3, lif.getSerie(0).getChannels().size());
+    }
+    for (auto sn = 1; sn < (series.size()-1); sn++)
+    {
+        EXPECT_EQ(0, expected3Names[sn].compare(series[sn]));
+        EXPECT_EQ(500, lif.getSerie(sn).getNbTimeSteps());
+        EXPECT_EQ(65536, lif.getSerie(sn).getNbPixelsInOneTimeStep ());
+        EXPECT_EQ(3, lif.getSerie(sn).getChannels().size());
+    }
+    {
+        EXPECT_EQ(0, expected3Names[series.size()-1].compare(series[series.size()-1]));
+        EXPECT_EQ(1, lif.getSerie(series.size()-1).getNbTimeSteps());
+        EXPECT_EQ(262144, lif.getSerie(series.size()-1).getNbPixelsInOneTimeStep ());
+        EXPECT_EQ(3, lif.getSerie(series.size()-1).getChannels().size());
+    }
+
+    roiWindow<P8U> slice (dims[0], dims[1]);
+    lif.getSerie(0).fill2DBuffer(slice.rowPointer(0));
+    histoStats h;
+    h.from_image(slice);
+    EXPECT_NEAR(h.mean(), 5.82, 0.001);
+    EXPECT_NEAR(h.median(), 0.0, 0.001);
+    EXPECT_NEAR(h.min(), 0.0, 0.001);
+    EXPECT_NEAR(h.max(), 205.0, 0.001);
 
 }
 
