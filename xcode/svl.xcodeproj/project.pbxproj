@@ -127,6 +127,7 @@
 		C24B1FC11D8DADF400292F85 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBD1D8DADF400292F85 /* libboost_system.a */; };
 		C24B1FC21D8DADF400292F85 /* libboost_thread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBE1D8DADF400292F85 /* libboost_thread.a */; };
 		C24B1FC31D8DADF400292F85 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBF1D8DADF400292F85 /* libz.a */; };
+		C29854281D95E147005F59EF /* roiMultiWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = C29854271D95E147005F59EF /* roiMultiWindow.h */; };
 		C2B6E6681D060A7400235FB7 /* vImageRef.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E6671D060A7400235FB7 /* vImageRef.mm */; };
 		C2B6E6691D060A7400235FB7 /* vImageRef.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E6671D060A7400235FB7 /* vImageRef.mm */; };
 		C2B6E66B1D060E0E00235FB7 /* GLMmath.h in Headers */ = {isa = PBXBuildFile; fileRef = C2B6E66A1D060E0E00235FB7 /* GLMmath.h */; };
@@ -330,6 +331,7 @@
 		C24B1FBD1D8DADF400292F85 /* libboost_system.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_system.a; path = ../svl/local/boost/lib/libboost_system.a; sourceTree = "<group>"; };
 		C24B1FBE1D8DADF400292F85 /* libboost_thread.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_thread.a; path = ../svl/local/boost/lib/libboost_thread.a; sourceTree = "<group>"; };
 		C24B1FBF1D8DADF400292F85 /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = ../svl/local/boost/lib/libz.a; sourceTree = "<group>"; };
+		C29854271D95E147005F59EF /* roiMultiWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = roiMultiWindow.h; sourceTree = "<group>"; };
 		C2B6E6671D060A7400235FB7 /* vImageRef.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = vImageRef.mm; sourceTree = "<group>"; };
 		C2B6E66A1D060E0E00235FB7 /* GLMmath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLMmath.h; sourceTree = "<group>"; };
 		C2B6E66C1D060F7000235FB7 /* coreGLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coreGLM.h; sourceTree = "<group>"; };
@@ -703,6 +705,7 @@
 				C20EDC6F1CF3780F0074C47A /* registration.h */,
 				C20EDC701CF3780F0074C47A /* roiRoot.h */,
 				C20EDC711CF3780F0074C47A /* roiWindow.h */,
+				C29854271D95E147005F59EF /* roiMultiWindow.h */,
 				C20EDC721CF3780F0074C47A /* rowfunc.h */,
 				C20EDC731CF3780F0074C47A /* rowfunc.hpp */,
 				C20EDC741CF3780F0074C47A /* sample.hpp */,
@@ -781,6 +784,7 @@
 				C20E3E991CF378470074C47A /* ss_segmenter.hpp in Headers */,
 				C20E3E8B1CF378470074C47A /* histogram.h in Headers */,
 				C20E3E621CF378470074C47A /* affine_rectangle.h in Headers */,
+				C29854281D95E147005F59EF /* roiMultiWindow.h in Headers */,
 				C20E3E921CF378470074C47A /* roiRoot.h in Headers */,
 				C20E3E791CF378470074C47A /* singleton.hpp in Headers */,
 				C20E3E651CF378470074C47A /* opencv_utils.hpp in Headers */,

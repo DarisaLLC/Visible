@@ -10,6 +10,8 @@
 #include "vision/pixel_traits.h"
 #include "vision/roiRoot.h"
 #include "vision/roiWindow.h"
+#include "vision/roiMultiWindow.h"
+
 #include <assert.h>
 #include "core/stl_utils.hpp"
 #include "core/timestamp.h"
@@ -425,6 +427,8 @@ namespace svl
     template class roiWindow<P32S>;
     template class roiWindow<P8UC3>;
     template class roiWindow<P8UC4>;
+    
+    template class roiMultiWindow<P8UP3>;    
 }
 //
 //   |                      /----------------

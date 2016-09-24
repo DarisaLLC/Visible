@@ -174,6 +174,9 @@ namespace svl
     template <typename T, int Planes = 1, int Components = 1>
     struct dPixelTraits
     {
+        const static int planes_c = Planes;
+        const static int components_c = Components;
+        
         static bool is_floating_point() = 0;
         static bool is_integral() = 0;
         static bool is_signed() = 0;
@@ -359,7 +362,9 @@ namespace svl
     template <>
     struct dPixelTraits<uint8_t, 3, 1>
     {
-        
+        const static int planes_c = 3;
+        const static int components_c = 1;
+
         typedef uint8_t value_type;
         static bool is_floating_point() { return false; }
         static bool is_integral() { return std::is_integral<uint8_t>::value; }
@@ -391,6 +396,10 @@ namespace svl
     // Primary template class
     template <typename P>
     class PixelType;
+
+    // Primary template class
+    template <typename P>
+    class PixelPlane;
     
     template <>
     class PixelType<P8U>
@@ -504,9 +513,9 @@ namespace svl
         static enum ci::ImageIo::DataType ct () { return ci::ImageIo::DataType::UINT8; }
         static enum ci::ImageIo::ChannelOrder co () { return ci::ImageIo::ChannelOrder::Y; }
         
-        
-        typedef uint8_t pixel_t;
-        typedef uint8_t * pixel_ptr_t;
+        typedef P8U pixel_trait_t;
+        typedef PixelType<pixel_trait_t>::pixel_t pixel_t;
+        typedef PixelType<pixel_trait_t>::pixel_ptr_t pixel_ptr_t;
         
         static GLenum data_type () { return GL_UNSIGNED_BYTE; }
         static GLenum display_type () { return GL_LUMINANCE; }
@@ -515,6 +524,7 @@ namespace svl
         
     };
 
+  
 }
 
 
