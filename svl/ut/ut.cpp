@@ -27,12 +27,13 @@
 #include "otherIO/lifFile.hpp"
 #include "core/gtest_image_utils.hpp"
 #include "ut_units.hpp"
-#include "cardio_model/cardiomyocyte_model.hpp"
+#include "ut_cardio.hpp"
 #include "vision/histo.h"
+#include "vision/roiMultiWindow.h"
+#include "vision/sample.hpp"
 
 using namespace svl;
 using namespace ci;
-using namespace cm;
 
 
 static test_utils::genv * dgenv_ptr;
@@ -116,32 +117,19 @@ const char * pi341234[] =
 //}
 //
 
+TEST (ut_roiMultiWindow, basic)
+{
+    roiMultiWindow<P8UP3> wide3;
+    EXPECT_EQ(3*128, wide3.height());
+}
+
 TEST (ut_units, basic)
 {
     eigen_ut::run();
     units_ut::run();
+    cardio_ut::run();
     
-    double epsilon = 1e-5;
-    cardio_model cmm;
-    EXPECT_NEAR(cmm.result().length.value(), 0.01, epsilon);
-    EXPECT_NEAR(cmm.result().width.value(), 0.003, epsilon);
-    EXPECT_NEAR(cmm.result().thickness.value(), 0.00020, epsilon);
-    EXPECT_NEAR(cmm.result().elongation.value(), 0.01, epsilon);
-    EXPECT_NEAR(cmm.result().total_simple_dipole.value(), 3.39292, epsilon);
-    EXPECT_NEAR(cmm.result().total_reactive.value (), 2.57928, epsilon);
-    EXPECT_NEAR(cmm.result().average_contact_stress.value ()*1e-6, 0.17195, epsilon);
-    EXPECT_NEAR(cmm.result().average_contraction_strain, 1.0, epsilon);
-    EXPECT_NEAR(cmm.result().moment_arm_fraction, 0.66667, epsilon);
-    EXPECT_NEAR(cmm.result().moment_of_dipole, 0.01720, epsilon);
-    
-    std::stringstream ss;
-    {
-        cereal::JSONOutputArchive ar(ss);
-        cardio_model cmm;
-        ar( CEREAL_NVP(cmm.result()) );
-    }
-    std::cout << ss.str() << std::endl;
-}
+ }
 
 TEST (ut_lifFile, single_channel)
 {
@@ -232,6 +220,19 @@ TEST (ut_lifFile, triple_channel)
     EXPECT_NEAR(h.min(), 0.0, 0.001);
     EXPECT_NEAR(h.max(), 205.0, 0.001);
 
+    std::vector<std::string> names { "green", "red", "gray" };
+    
+    roiMultiWindow<P8UP3> oneBy3 (names);
+    lif.getSerie(0).fill2DBuffer(oneBy3.plane(0).rowPointer(0), 0);
+
+    {
+        histoStats h;
+        h.from_image(oneBy3.plane(0));
+        EXPECT_NEAR(h.mean(), 5.82, 0.001);
+        EXPECT_NEAR(h.median(), 0.0, 0.001);
+        EXPECT_NEAR(h.min(), 0.0, 0.001);
+        EXPECT_NEAR(h.max(), 205.0, 0.001);
+    }
 }
 
 #if 0

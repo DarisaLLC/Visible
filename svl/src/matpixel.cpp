@@ -405,6 +405,106 @@ sharedRoot<T>::~sharedRoot()
         mFrameBuf->remRef();
 }
 
+
+ template <typename T, typename trait_t, int W, int H>
+roiMultiWindow<T,trait_t,W,H>::roiMultiWindow ()
+{
+    
+}
+
+ template <typename T, typename trait_t, int W, int H>
+roiMultiWindow<T,trait_t,W,H>::roiMultiWindow(const std::vector<std::string>& names_l2r,
+               image_memory_alignment_policy im )
+: roiWindow<trait_t> (W, T::planes_c * H, im)
+{
+    static std::string defaults [3] { "left", "center", "right" };
+    static uint32_t default_ids [3] { 0, 1, 2 };
+    if (names_l2r.size() == T::planes_c)
+    {
+         for (unsigned ww = 0; ww < T::planes_c; ww++)
+         {
+             m_names[ww] = names_l2r[ww];
+             m_indexes[ww] = ww;
+         }
+    }
+    else
+    {
+        for (uint32_t i : default_ids)
+        {
+            m_names[i] = defaults[i];
+            m_indexes[i] = i;
+        }
+    }
+    
+    iPair spacing (0, H);
+    iPair msize (W, H);
+    m_bounds[0].size (msize);
+    m_bounds[1] = m_bounds[0];
+    m_bounds[1].translate (spacing);
+    m_bounds[2] = m_bounds[1];
+    m_bounds[2].translate (spacing);
+    
+    auto allr = m_bounds[0] | m_bounds[1] | m_bounds[2];
+    assert (allr == this->bound ());
+    
+    for (unsigned ww = 0; ww < T::planes_c; ww++)
+    {
+        m_planes[ww] = roiWindow<trait_t>(this->frameBuf(),m_bounds[ww]);
+        assert(m_planes[ww].width() == W);
+        assert(m_planes[ww].height() == H);
+    }
+    
+}
+
+ template <typename T, typename trait_t, int W, int H>
+roiMultiWindow<T,trait_t,W,H>::roiMultiWindow(const roiMultiWindow<T,trait_t,W,H> & other)
+{
+    for (unsigned ww = 0; ww < T::planes_c; ww++)
+    {
+        m_planes[ww] = other.m_planes[ww];
+        m_bounds[ww] = other.m_bounds [ww];
+        m_names[ww] = other.m_names [ww];
+        m_indexes[ww] = other.m_indexes [ww];
+    }
+}
+
+template <typename T, typename trait_t, int W, int H>
+bool roiMultiWindow<T,trait_t,W,H>::operator==(const roiMultiWindow<T,trait_t,W,H> & other) const
+{
+    for (unsigned ww = 0; ww < T::planes_c; ww++)
+    {
+        if (m_planes[ww] != other.m_planes[ww]) return false;
+        if (m_bounds[ww] != other.m_bounds [ww]) return false;
+        if (m_names[ww] != other.m_names [ww]) return false;
+        if (m_indexes[ww] != other.m_indexes [ww]) return false;
+    }
+    return true;
+}
+
+
+
+template <typename T, typename trait_t, int W, int H>
+bool roiMultiWindow<T,trait_t,W,H>::operator!=(const roiMultiWindow<T,trait_t,W,H> & other) const
+{
+    return !operator==(other);
+}
+
+
+template <typename T, typename trait_t, int W, int H>
+const roiMultiWindow<T,trait_t,W,H> & roiMultiWindow<T,trait_t,W,H>::operator=(const roiMultiWindow<T,trait_t,W,H> & rhs)
+{
+    if (*this == rhs) return *this;
+    for (unsigned ww = 0; ww < T::planes_c; ww++)
+    {
+        m_planes[ww] = rhs.m_planes[ww];
+        m_bounds[ww] = rhs.m_bounds [ww];
+        m_names[ww] = rhs.m_names [ww];
+        m_indexes[ww] = rhs.m_indexes [ww];
+    }
+    return *this;
+
+}
+
 namespace svl
 {
     template class root<P8U>;

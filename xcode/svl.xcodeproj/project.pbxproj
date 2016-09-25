@@ -74,8 +74,6 @@
 		C20E936B1CF3786F0074C47A /* rowfunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20E3D0F1CF378460074C47A /* rowfunc.cpp */; };
 		C20E936C1CF3786F0074C47A /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20E3D101CF378460074C47A /* self_similarity.cpp */; };
 		C20E936D1CF3786F0074C47A /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20E3D111CF378460074C47A /* time_spec.cpp */; };
-		C20E93891CF3786F0074C47A /* ut_localvar.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C20E3D351CF378460074C47A /* ut_localvar.hpp */; };
-		C20E938A1CF3786F0074C47A /* ut_similarity.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C20E3D361CF378460074C47A /* ut_similarity.hpp */; };
 		C20E941D1CF386A80074C47A /* ut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20E3D341CF378460074C47A /* ut.cpp */; };
 		C20E941E1CF38A020074C47A /* libsvl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C20EDBE81CF3773C0074C47A /* libsvl.a */; };
 		C20E94461CF390880074C47A /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C20E94451CF390880074C47A /* OpenCL.framework */; };
@@ -90,6 +88,7 @@
 		C20E94591CF3935F0074C47A /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C20E94581CF3935E0074C47A /* IOSurface.framework */; };
 		C20E945B1CF3937C0074C47A /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C20E945A1CF3937C0074C47A /* IOKit.framework */; };
 		C20E945D1CF393950074C47A /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C20E945C1CF393950074C47A /* CoreAudio.framework */; };
+		C212EF0E1D979CDA009F5F1A /* ip_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20E3D081CF378460074C47A /* ip_utils.cpp */; };
 		C21B27301D7E6C1E002485AB /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B272E1D7E6BE4002485AB /* libopencv_core.a */; };
 		C21B27431D7E6C20002485AB /* libippicv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B27311D7E6C1F002485AB /* libippicv.a */; };
 		C21B27441D7E6C20002485AB /* libopencv_calib3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B27321D7E6C1F002485AB /* libopencv_calib3d.a */; };
@@ -122,7 +121,6 @@
 		C24B1FB41D8B54E700292F85 /* cerruti_rectangle_integral.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C24B1FB31D8B54E700292F85 /* cerruti_rectangle_integral.hpp */; };
 		C24B1FB61D8B55E500292F85 /* cardiomyocyte_model.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C24B1FB51D8B55E500292F85 /* cardiomyocyte_model.hpp */; };
 		C24B1FB91D8B590100292F85 /* metric.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C24B1FB81D8B590100292F85 /* metric.hpp */; };
-		C24B1FBB1D8B627800292F85 /* ut_units.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C24B1FBA1D8B627800292F85 /* ut_units.hpp */; };
 		C24B1FC01D8DADF400292F85 /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBC1D8DADF400292F85 /* libboost_filesystem.a */; };
 		C24B1FC11D8DADF400292F85 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBD1D8DADF400292F85 /* libboost_system.a */; };
 		C24B1FC21D8DADF400292F85 /* libboost_thread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBE1D8DADF400292F85 /* libboost_thread.a */; };
@@ -331,6 +329,7 @@
 		C24B1FBD1D8DADF400292F85 /* libboost_system.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_system.a; path = ../svl/local/boost/lib/libboost_system.a; sourceTree = "<group>"; };
 		C24B1FBE1D8DADF400292F85 /* libboost_thread.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_thread.a; path = ../svl/local/boost/lib/libboost_thread.a; sourceTree = "<group>"; };
 		C24B1FBF1D8DADF400292F85 /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = ../svl/local/boost/lib/libz.a; sourceTree = "<group>"; };
+		C287BD6B1D96E887001F1E3B /* ut_cardio.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_cardio.hpp; sourceTree = "<group>"; };
 		C29854271D95E147005F59EF /* roiMultiWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = roiMultiWindow.h; sourceTree = "<group>"; };
 		C2B6E6671D060A7400235FB7 /* vImageRef.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = vImageRef.mm; sourceTree = "<group>"; };
 		C2B6E66A1D060E0E00235FB7 /* GLMmath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLMmath.h; sourceTree = "<group>"; };
@@ -427,6 +426,7 @@
 			isa = PBXGroup;
 			children = (
 				C24B1FBA1D8B627800292F85 /* ut_units.hpp */,
+				C287BD6B1D96E887001F1E3B /* ut_cardio.hpp */,
 				C20E3D341CF378460074C47A /* ut.cpp */,
 				C20E3D351CF378460074C47A /* ut_localvar.hpp */,
 				C20E3D361CF378460074C47A /* ut_similarity.hpp */,
@@ -774,7 +774,6 @@
 			files = (
 				C20E3E871CF378470074C47A /* genHistogram.h in Headers */,
 				C20E3E841CF378470074C47A /* drawUtils.hpp in Headers */,
-				C20E938A1CF3786F0074C47A /* ut_similarity.hpp in Headers */,
 				C20E3E861CF378470074C47A /* gauss.hpp in Headers */,
 				C24B1FB91D8B590100292F85 /* metric.hpp in Headers */,
 				C20E3E721CF378470074C47A /* lineseg.hpp in Headers */,
@@ -804,14 +803,12 @@
 				C20E3E8E1CF378470074C47A /* localvariance.h in Headers */,
 				C20E3E8C1CF378470074C47A /* ipUtils.h in Headers */,
 				C20E3E641CF378470074C47A /* editableRectangle.hpp in Headers */,
-				C20E93891CF3786F0074C47A /* ut_localvar.hpp in Headers */,
 				C20E3E7E1CF378470074C47A /* timestamp.h in Headers */,
 				C20E3E851CF378470074C47A /* edgel.h in Headers */,
 				C20E3E7C1CF378470074C47A /* stl_utils.hpp in Headers */,
 				C20E3E891CF378470074C47A /* gradient.h in Headers */,
 				C2B6E66B1D060E0E00235FB7 /* GLMmath.h in Headers */,
 				C20E3E8A1CF378470074C47A /* histo.h in Headers */,
-				C24B1FBB1D8B627800292F85 /* ut_units.hpp in Headers */,
 				C20E3E691CF378470074C47A /* Resources.h in Headers */,
 				C20E3E821CF378470074C47A /* corners.hpp in Headers */,
 				C20E3E7A1CF378470074C47A /* static.hpp in Headers */,
@@ -936,6 +933,7 @@
 			files = (
 				C2B6E6691D060A7400235FB7 /* vImageRef.mm in Sources */,
 				C22293131D949F1400F978DC /* lifFile.cpp in Sources */,
+				C212EF0E1D979CDA009F5F1A /* ip_utils.cpp in Sources */,
 				C20E941D1CF386A80074C47A /* ut.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
