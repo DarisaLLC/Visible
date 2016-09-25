@@ -119,7 +119,8 @@ const char * pi341234[] =
 
 TEST (ut_roiMultiWindow, basic)
 {
-    roiMultiWindow<P8UP3> wide3;
+    std::vector<std::string> names { "green", "red", "gray" };
+    roiMultiWindow<P8UP3> wide3 (names);
     EXPECT_EQ(3*128, wide3.height());
 }
 

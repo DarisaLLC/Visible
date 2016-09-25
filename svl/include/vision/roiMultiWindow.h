@@ -19,15 +19,26 @@ using namespace std;
 namespace svl
 {
     
+    /* +---------------+---------------+---------------+ */
+    /* |               |               |               | */
+    /* |               |               |               | */
+    /* |               |               |               | */
+    /* |               |               |               | */
+    /* |               |               |               | */
+    /* |      Left     |   Center      |    Right      | */
+    /* |               |               |               | */
+    /* +---------------+---------------+---------------+ */
     
-    template <typename T, int W = 512, int H = 128>
-    class roiMultiWindow
+
+    
+    template <typename T, typename trait_t = typename PixelType<T>::pixel_trait_t , int W = 512, int H = 128>
+    class roiMultiWindow    : public roiWindow<trait_t>
     {
         
     public:
         typedef iRect rect_t;
         typedef rect_t::point_t point_t;
-        typedef typename PixelType<T>::pixel_trait_t trait_t;
+        
         typedef typename PixelType<T>::pixel_t pixel_t;
         typedef pixel_t * pixel_ptr_t;
         typedef int64_t timestamp_t;
@@ -37,47 +48,49 @@ namespace svl
         // Constructors
         roiMultiWindow();
         roiMultiWindow(const std::vector<std::string>& names_l2r,
-                       image_memory_alignment_policy im = image_memory_alignment_policy::align_first_row)
-        : m_all (W * T::planes_c,H)
-        {
-            static std::string defaults [3] { "left", "center", "right" };
-            if (names_l2r.size() == T::planes_c)
-            {
-                m_name2index[names_l2r[0]] = 0;
-                m_name2index[names_l2r[1]] = 1;
-                m_name2index[names_l2r[2]] = 2;
-            }
-            else
-            {
-                m_name2index[defaults[0]] = 0;
-                m_name2index[defaults[1]] = 1;
-                m_name2index[defaults[2]] = 2;
-            }
-
-            iPair spacing (W, 0);
-            iPair msize (W, H);
-            m_bounds[0].size (msize);
-            m_bounds[1] = m_bounds[0];
-            m_bounds[1].translate (spacing);
-            m_bounds[2] = m_bounds[1];
-            m_bounds[2].translate (spacing);
-            
-            auto allr = m_bounds[0] | m_bounds[1] | m_bounds[2];
-            assert (allr == m_all.bound ());
-            
-            for (unsigned ww = 0; ww < T::planes_c; ww++)
-            {
-                m_planes[ww] = roiWindow<trait_t>(m_all.frameBuf(),m_bounds[ww]);
-            }
-            
-        }
+                       image_memory_alignment_policy im = image_memory_alignment_policy::align_first_row);
         
         
         //! copy / assignment  takes one arguments
         roiMultiWindow(const roiMultiWindow & other);
         const roiMultiWindow & operator=(const roiMultiWindow & rhs);
+      
+        // Comparison Functions
+        /*
+         effect     Returns true if the two windows have the same frameBuf
+         and have the same size, offset and root-offset.
+         note       If both windows are unbound, but have the same offset,
+         root-offset and size, returns true.
+         */
+        bool operator==(const roiMultiWindow & other) const;
+        bool operator!=(const roiMultiWindow & other) const;
+ 
+        const roiWindow<trait_t>& plane (const std::string& name)
+        {
+            int idx = index ( name );
+            if (idx < 0)
+                return roiWindow<trait_t> ();
+            return plane (idx);
+        }
         
-
+        const roiWindow<trait_t>& plane (const uint32_t index)
+        {
+            uint32_t idx = index % T::planes_c;
+            return m_planes[idx];
+        }
+        
+        const std::string& name (const uint32_t& index)
+        {
+            return m_names[index];
+        }
+        
+        int32_t index (const std::string& name)
+        {
+            for (uint32_t i = 0; i < T::planes_c; i++)
+                if (m_names[i].compare(name) == 0) return i;
+            return -1;
+        }
+        
         // Destructor
         virtual ~roiMultiWindow() {}
         
@@ -85,10 +98,10 @@ namespace svl
         
     protected:
         
-        window_t m_all;
         window_t m_planes [T::planes_c];
-        std::map<std::string, uint32_t> m_name2index;
         iRect m_bounds [T::planes_c];
+        std::string m_names [T::planes_c];
+        uint32_t m_indexes [T::planes_c];
         
         
     };

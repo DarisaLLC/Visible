@@ -1,3 +1,6 @@
+#ifndef __SAMPLE__
+#define __SAMPLE__
+
 #include "vision/roiWindow.h"
 
 
@@ -175,3 +178,5 @@ std::pair<roiWindow<P8U>, roiWindow<P8U> > GeneratePyramid(roiWindow<P>& bottom,
         midtop.second = top;
     }
 }
+
+#endif
