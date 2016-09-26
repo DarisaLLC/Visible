@@ -222,11 +222,12 @@ TEST (ut_lifFile, triple_channel)
     EXPECT_NEAR(h.max(), 205.0, 0.001);
 
     std::vector<std::string> names { "green", "red", "gray" };
-    
-    roiMultiWindow<P8UP3> oneBy3 (names);
-    lif.getSerie(0).fill2DBuffer(oneBy3.plane(0).rowPointer(0), 0);
 
     {
+        roiMultiWindow<P8UP3> oneBy3 (names);
+        lif.getSerie(0).fill2DBuffer(oneBy3.rowPointer(0), 0);
+
+
         histoStats h;
         h.from_image(oneBy3.plane(0));
         EXPECT_NEAR(h.mean(), 5.82, 0.001);
@@ -234,6 +235,21 @@ TEST (ut_lifFile, triple_channel)
         EXPECT_NEAR(h.min(), 0.0, 0.001);
         EXPECT_NEAR(h.max(), 205.0, 0.001);
     }
+    
+    {
+        roiMultiWindow<P8UP3> oneBy3 (names);
+        lif.getSerie(0).fill2DBuffer(oneBy3.rowPointer(0), 30);
+        
+        
+        histoStats h;
+        h.from_image(oneBy3.plane(2));
+        EXPECT_NEAR(h.mean(), 125.4625, 0.001);
+        EXPECT_NEAR(h.median(), 126.0, 0.001);
+        EXPECT_NEAR(h.min(), 88.0, 0.001);
+        EXPECT_NEAR(h.max(), 165.0, 0.001);
+        EXPECT_NEAR(h.mode(), 125.0, 0.001);
+    }
+    
 }
 
 #if 0
