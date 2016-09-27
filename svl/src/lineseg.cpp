@@ -163,3 +163,90 @@ bool fLineSegment2d::operator==(const fLineSegment2d& ls) const
 bool fLineSegment2d::operator!=(const fLineSegment2d& ls) const
      { return !(*this == ls); }
 
+
+
+
+inline lineInf lineInf::parallel(const fVector_2d& p) const
+{ return lineInf(dir(), p); }
+
+inline lineInf lineInf::normal(const fVector_2d& p) const
+{ return lineInf(fVector_2d(-dir().y(), dir().x()), p); }
+
+inline bool lineInf::operator==(const lineInf& l) const
+{ return mDir == l.mDir && mPos == l.mPos; }
+
+inline bool lineInf::operator!=(const lineInf& l) const
+{ return !(*this == l); }
+
+
+lineInf::lineInf (const fVector_2d& dir, const fVector_2d& pos)
+: mDir(dir),  mPos(pos)
+{
+    if (mDir.x() == 0 && mDir.y() == 0)
+        throw svl::singular_error(__FILE__ + to_string(__LINE__));
+}
+
+lineInf::lineInf (const uRadian& t, const fVector_2d& pos)
+: mDir(cos(t),sin(t)),  mPos(pos)
+{
+}
+
+lineInf::lineInf (const fVector_2d& v)
+: mDir(v.unit()), mPos(v)
+{
+    if (mDir.x() == 0 && mDir.y() == 0)
+        throw svl::singular_error(__FILE__ + to_string(__LINE__));
+}
+
+//lineInf lineInf::transform(const rc2Xform& c) const
+//{
+//    return lineInf(c.mapVector(dir()).unit(), c.mapPoint(pos()));
+//}
+//
+//void lineInf::transform(const rc2Xform& c, lineInf& result) const
+//{
+//    result.dir() = c.mapVector(dir()).unit();
+//    result.pos() = c.mapPoint(pos());
+//}
+
+double lineInf::toPoint(const fVector_2d& p) const
+{
+    return std::fabs ((p.x()-pos().x()) * -dir().y() +
+                      (p.y()-pos().y()) *  dir().x());
+}
+
+uRadian lineInf::angle (const lineInf& l) const
+{
+    return (l.angle() - angle()).normSigned();
+}
+
+fVector_2d lineInf::intersect(const lineInf& l, bool isPar) const
+{
+    isPar = false;
+    double d = dir().x() * l.dir().y() - dir().y() * l.dir().x();
+    
+    isPar = svl::equal (d, 0.0);
+    
+    if (isPar) return fVector_2d ();
+    
+    double s = ((l.pos().x() - pos().x()) * l.dir().y() -
+                (l.pos().y() - pos().y()) * l.dir().x()) / d;
+    return fVector_2d((dir() * s) + pos());
+}
+
+bool lineInf::isParallel(const lineInf& l) const
+{
+    double d = dir().x() * l.dir().y() - dir().y() * l.dir().x();
+    return std::fabs (d) < 1e-12;
+}
+
+fVector_2d lineInf::project(const fVector_2d& p) const
+{
+    return (dir() * ((p - pos()) * dir())) + pos();
+}
+
+double lineInf::offset(const fVector_2d& p) const
+{
+    return (p - pos()) * dir();
+}
+

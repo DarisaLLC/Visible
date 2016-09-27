@@ -252,7 +252,7 @@ TEST (ut_lifFile, triple_channel)
     
 }
 
-#if 0
+#if 1
 TEST (ut_similarity, run)
 {
     UT_similarity tester;

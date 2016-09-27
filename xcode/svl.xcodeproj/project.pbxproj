@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C2060FC41D9AF39F008A2F21 /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C21B272E1D7E6BE4002485AB /* libopencv_core.a */; };
+		C2060FC51D9B0FCA008A2F21 /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20E3D0B1CF378460074C47A /* localvariance.cpp */; };
+		C2060FC61D9B10DB008A2F21 /* lineseg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20E3D0A1CF378460074C47A /* lineseg.cpp */; };
 		C20E3E621CF378470074C47A /* affine_rectangle.h in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC3D1CF3780E0074C47A /* affine_rectangle.h */; };
 		C20E3E631CF378470074C47A /* cinder_xchg.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC3E1CF3780E0074C47A /* cinder_xchg.hpp */; };
 		C20E3E641CF378470074C47A /* editableRectangle.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC3F1CF3780E0074C47A /* editableRectangle.hpp */; };
@@ -289,7 +292,6 @@
 		C20EDC751CF3780F0074C47A /* self_similarity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = self_similarity.h; sourceTree = "<group>"; };
 		C20EDC761CF3780F0074C47A /* sparsehist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sparsehist.h; sourceTree = "<group>"; };
 		C20EDC771CF3780F0074C47A /* ss_segmenter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ss_segmenter.hpp; sourceTree = "<group>"; };
-		C21B27241D7E6AEE002485AB /* libpugixml.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpugixml.a; path = ../svl/local/pugixml/1.7/lib/libpugixml.a; sourceTree = "<group>"; };
 		C21B27261D7E6B86002485AB /* libboost_filesystem.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_filesystem.a; path = ../svl/local/cinder/cinder_0.9/lib/macosx/libboost_filesystem.a; sourceTree = "<group>"; };
 		C21B27271D7E6B86002485AB /* libboost_system.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_system.a; path = ../svl/local/cinder/cinder_0.9/lib/macosx/libboost_system.a; sourceTree = "<group>"; };
 		C21B27281D7E6B86002485AB /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = ../svl/local/cinder/cinder_0.9/lib/macosx/libz.a; sourceTree = "<group>"; };
@@ -342,6 +344,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C20E941E1CF38A020074C47A /* libsvl.a in Frameworks */,
 				C22293141D94C4F800F978DC /* libcinder.a in Frameworks */,
 				C24B1FC01D8DADF400292F85 /* libboost_filesystem.a in Frameworks */,
 				C24B1FC11D8DADF400292F85 /* libboost_system.a in Frameworks */,
@@ -369,7 +372,6 @@
 				C21B27541D7E6C20002485AB /* libopencv_videostab.a in Frameworks */,
 				C21B27301D7E6C1E002485AB /* libopencv_core.a in Frameworks */,
 				C20E94461CF390880074C47A /* OpenCL.framework in Frameworks */,
-				C20E941E1CF38A020074C47A /* libsvl.a in Frameworks */,
 				C20E944D1CF392DC0074C47A /* AudioToolbox.framework in Frameworks */,
 				C20E94531CF393030074C47A /* AudioUnit.framework in Frameworks */,
 				C20E945D1CF393950074C47A /* CoreAudio.framework in Frameworks */,
@@ -388,6 +390,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2060FC41D9AF39F008A2F21 /* libopencv_core.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -742,7 +745,6 @@
 				C21B27261D7E6B86002485AB /* libboost_filesystem.a */,
 				C21B27271D7E6B86002485AB /* libboost_system.a */,
 				C21B27281D7E6B86002485AB /* libz.a */,
-				C21B27241D7E6AEE002485AB /* libpugixml.a */,
 			);
 			name = "other libs";
 			sourceTree = "<group>";
@@ -934,6 +936,8 @@
 				C2B6E6691D060A7400235FB7 /* vImageRef.mm in Sources */,
 				C22293131D949F1400F978DC /* lifFile.cpp in Sources */,
 				C212EF0E1D979CDA009F5F1A /* ip_utils.cpp in Sources */,
+				C2060FC61D9B10DB008A2F21 /* lineseg.cpp in Sources */,
+				C2060FC51D9B0FCA008A2F21 /* localvariance.cpp in Sources */,
 				C20E941D1CF386A80074C47A /* ut.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1124,6 +1128,7 @@
 					"$(LOCAL_EIGEN)/",
 					"$(LOCAL_TINYXML)/",
 				);
+				LIBRARY_SEARCH_PATHS = "$(LOCAL_OCV)/lib/osx";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 			};
@@ -1149,10 +1154,10 @@
 					"$(LOCAL_BOOST)/include",
 					"$(SRCROOT)/include",
 					"$(LOCAL_OCV)/include",
-					"$(LOCAL_PUGIXML)/include",
 					"$(LOCAL_EIGEN)/",
 					"$(LOCAL_TINYXML)/",
 				);
+				LIBRARY_SEARCH_PATHS = "$(LOCAL_OCV)/lib/osx";
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

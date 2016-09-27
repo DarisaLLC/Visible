@@ -9,6 +9,7 @@
 #include <opencv2/imgproc/imgproc.hpp>  // cvtColor
 #include "opencv2/core/core_c.h"
 #include "vision/localvariance.h"
+using namespace svl;
 
 
 void free_print_image_float (const IplImage* src)
@@ -55,7 +56,7 @@ public:
         cv::Mat result;
 
         cv::Size ap (3, 3);
-        cv::localVAR tv (ap);
+        svl::localVAR tv (ap);
         tv.operator () (src1, src1, result);
         IplImage ires = result;
         
@@ -115,7 +116,7 @@ public:
 
             // Test with 1,1
         cv::Size ap (1,1);
-        cv::localVAR tv (ap);
+        svl::localVAR tv (ap);
         tv.operator () (src1, src1, result);
         IplImage ires = result;
 //        free_print_image_float(&ires);
@@ -125,7 +126,7 @@ public:
                EXPECT_EQ(result.at<float>(rows, cols), 0);
         
         cv::Size app (3, 3);
-        cv::localVAR tv2 (app);
+        svl::localVAR tv2 (app);
         tv2.operator () (src1, src1, result);
         ires = result;
 //        free_print_image_float(&ires);

@@ -17,9 +17,10 @@
 #include "vision/localvariance.h"
 #include <opencv2/imgproc/imgproc.hpp>  // cvtColor
 #include "opencv2/core/core_c.h"
+using namespace cv;
 
 
-namespace cv
+namespace svl
 {
     localVAR::localVAR (Size filter_size)
     {
