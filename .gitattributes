@@ -63,3 +63,5 @@ MAINTAINERS.txt export-ignore
 INSTALL*.txt export-ignore
 
 
+*.mov filter=lfs diff=lfs merge=lfs -text
+*.lif filter=lfs diff=lfs merge=lfs -text
