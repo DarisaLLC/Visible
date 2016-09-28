@@ -1,0 +1,65 @@
+# gitattributes
+
+# Use native line endings for configuration and plain text files, for easier editing on any platform.
+*.cfg text=auto
+* text=auto
+
+
+
+*.doc diff=astextplain
+*.DOC diff=astextplain
+*.docx diff=astextplain
+*.DOCX diff=astextplain
+*.dot diff=astextplain
+*.DOT diff=astextplain
+*.pdf diff=astextplain
+*.PDF diff=astextplain
+*.rtf diff=astextplain
+*.RTF diff=astextplain
+
+# Force all source and data files to LF, for hash consistency.
+*.h text eol=lf
+*.hxx text eol=lf
+*.hpp text eol=lf
+*.in text eol=lf
+*.c text eol=lf
+*.cxx text eol=lf
+*.cpp text eol=lf
+*.txt text eol=lf
+*.wav -diff binary sound
+*.gif -diff binary image
+*.jpg -diff binary image
+*.jpeg -diff binary image
+*.pbm -diff binary image
+*.mov -diff binary 
+*.avi -diff binary 
+*.lif -diff binary 
+
+# used to remove files from deployment using `git archive`
+# git files
+.gitattributes export-ignore
+.gitignore export-ignore
+# general text files
+*README.txt export-ignore
+*readme.md export-ignore
+*README.md export-ignore
+*README export-ignore
+*LICENSE.txt export-ignore
+*license.txt export-ignore
+*LICENSE.html export-ignore
+COPYRIGHT.txt export-ignore
+CHANGELOG.txt export-ignore
+*changelog.txt export-ignore
+*changelog.html export-ignore
+*CHANGES.html export-ignore
+*INSTALL.html export-ignore
+*TODO.txt export-ignore
+*API.txt export-ignore
+*api.html export-ignore
+*KNOWN_ISSUES.txt export-ignore
+UPGRADE.txt export-ignore
+web.config export-ignore
+MAINTAINERS.txt export-ignore
+INSTALL*.txt export-ignore
+
+
