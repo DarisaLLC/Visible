@@ -1,100 +1,62 @@
-#ifndef __BOOST_UNITS__
-#define __BOOST_UNITS__
+#ifndef __UT_TIME_BUFFER__
+#define __UT_TIME_BUFFER__
 
-#include <complex>
+#include <boost/circular_buffer.hpp>
+#include <algorithm>
 #include <iostream>
 
-#include <boost/typeof/std/complex.hpp>
 
-#include <boost/units/systems/si/energy.hpp>
-#include <boost/units/systems/si/force.hpp>
-#include <boost/units/systems/si/length.hpp>
-#include <boost/units/systems/si/electric_potential.hpp>
-#include <boost/units/systems/si/current.hpp>
-#include <boost/units/systems/si/resistance.hpp>
-#include <boost/units/systems/si/io.hpp>
-#include <Eigen/Dense>
 #include <cassert>
 #include "core/pair.hpp"
 
 using namespace svl;
-using Eigen::MatrixXd;
-using namespace boost::units;
-using namespace boost::units::si;
+
 using namespace std;
-namespace bi=boost::units;
 
-quantity<energy>
-work(const quantity<force>& F, const quantity<bi::si::length>& dx)
-{
-    return F * dx; // Defines the relation: work = force * distance.
-}
-
-namespace units_ut
+namespace time_buffer_ut
 {
     static void run ()
     {
-        /// Test calculation of work.
-        quantity<force>     F(2.0 * bi::si::newton); // Define a quantity of force.
-        quantity<bi::si::length>    dx(2.0 * bi::si::meter); // and a distance,
-        quantity<bi::si::energy>    E(work(F,dx));  // and calculate the work done.
         
-        std::cout << "F  = " << F << std::endl
-        << "dx = " << dx << std::endl
-        << "E  = " << E << std::endl
-        << std::endl;
+            //[circular_buffer_example_2
+            // Create a circular buffer with a capacity for 3 integers.
+            boost::circular_buffer<int> cb(3);
+            
+            // Insert threee elements into the buffer.
+            cb.push_back(1);
+            cb.push_back(2);
+            cb.push_back(3);
         
-        /// Test and check complex quantities.
-        typedef std::complex<double> complex_type; // double real and imaginary parts.
+            for (auto bc : cb) std::cout  << " : " << bc << std::endl;
+            int a = cb[0];  // a == 1
+            int b = cb[1];  // b == 2
+            int c = cb[2];  // c == 3
+            
+            // The buffer is full now, so pushing subsequent
+            // elements will overwrite the front-most elements.
+            
+            cb.push_back(4);  // Overwrite 1 with 4.
+            cb.push_back(5);  // Overwrite 2 with 5.
         
-        // Define some complex electrical quantities.
-        quantity<electric_potential, complex_type> v = complex_type(12.5, 0.0) * volts;
-        quantity<current, complex_type>            i = complex_type(3.0, 4.0) * amperes;
-        quantity<resistance, complex_type>         z = complex_type(1.5, -2.0) * ohms;
+            for (auto bc : cb) std::cout  << " : " << bc << std::endl;
         
-        std::cout << "V   = " << v << std::endl
-        << "I   = " << i << std::endl
-        << "Z   = " << z << std::endl
-        // Calculate from Ohm's law voltage = current * resistance.
-        << "I * Z = " << i * z << std::endl
-        // Check defined V is equal to calculated.
-        << "I * Z == V? " << std::boolalpha << (i * z == v) << std::endl
-        << std::endl;
-    }
-};
+            // The buffer now contains 3, 4 and 5.
+            a = cb[0];  // a == 3
+            b = cb[1];  // b == 4
+            c = cb[2];  // c == 5
 
-namespace eigen_ut
-{
-    static void clone_column (Eigen::ArrayXXd& F)
-    {
-        for (auto i = 0; i < F.rows(); i++)
-            for (auto j = 0; j < F.cols() - i; j++)
+            for (int i = 6; i < 20; i++)
             {
-                F(i+j,j) = F(i,0);
-                F(j,i+j) = F(i+j,j);
-                
+                cb.pop_front();
+                cb.push_back (i);
+                for (auto bc : cb) std::cout  << " : " << bc;
+                std::cout << std::endl;
             }
-        for (auto i = 0; i < F.rows(); i++)
-            F(0,i) = F(i,0);
- 
-    }
-    
-    static void run ()
-    {
-        Eigen::ArrayXXd F_(8,8);
+            // Elements can be popped from either the front or the back.
+
+
+        }
         
-        F_.setZero ();
-        
-        for (auto i = 0; i < F_.rows(); i++)
-            F_(i,0) = i+1;
-        
-        
-        std::cout << F_ << std::endl;
-        
-        clone_column (F_);
-        
-        std::cout << F_ << std::endl;
-        
-    }
-}
+ };
+
 #endif
