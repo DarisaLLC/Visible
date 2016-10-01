@@ -413,12 +413,15 @@ roiMultiWindow<T,trait_t,W,H>::roiMultiWindow ()
 }
 
  template <typename T, typename trait_t, int W, int H>
-roiMultiWindow<T,trait_t,W,H>::roiMultiWindow(const std::vector<std::string>& names_l2r,
+roiMultiWindow<T,trait_t,W,H>::roiMultiWindow(const std::vector<std::string>& names_l2r, int64_t timestamp,
                image_memory_alignment_policy im )
 : roiWindow<trait_t> (W, T::planes_c * H, im)
 {
     static std::string defaults [3] { "left", "center", "right" };
     static uint32_t default_ids [3] { 0, 1, 2 };
+    
+    this->frameBuf ()->setTimestamp (timestamp);
+    
     if (names_l2r.size() == T::planes_c)
     {
          for (unsigned ww = 0; ww < T::planes_c; ww++)

@@ -1,4 +1,3 @@
-// PatternsTest.cpp : Defines the entry point for the console application.
 
 #include <iostream>
 #include "gtest/gtest.h"
@@ -16,7 +15,6 @@
 #include "vision/gmorph.hpp"
 #include "vision/sample.hpp"
 #include "core/stl_utils.hpp"
-#include "core/gtest_image_utils.hpp"
 #include "vision/labelconnect.hpp"
 #include "vision/registration.h"
 #include "cinder/cinder_xchg.hpp"
@@ -31,6 +29,7 @@
 #include "vision/histo.h"
 #include "vision/roiMultiWindow.h"
 #include "vision/sample.hpp"
+#include "cinder/opencv_utils.hpp"
 
 using namespace svl;
 using namespace ci;
@@ -224,10 +223,11 @@ TEST (ut_lifFile, triple_channel)
     std::vector<std::string> names { "green", "red", "gray" };
 
     {
-        roiMultiWindow<P8UP3> oneBy3 (names);
-        lif.getSerie(0).fill2DBuffer(oneBy3.rowPointer(0), 0);
+        lifIO::LifSerie& lls = lif.getSerie(0);
+        roiMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[0]);
+        lls.fill2DBuffer(oneBy3.rowPointer(0), 0);
 
-
+        EXPECT_EQ(oneBy3.timestamp(),lls.getTimestamps()[0] );
         histoStats h;
         h.from_image(oneBy3.plane(0));
         EXPECT_NEAR(h.mean(), 5.82, 0.001);
@@ -237,9 +237,10 @@ TEST (ut_lifFile, triple_channel)
     }
     
     {
-        roiMultiWindow<P8UP3> oneBy3 (names);
+        lifIO::LifSerie& lls = lif.getSerie(0);
+        roiMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[30]);
         lif.getSerie(0).fill2DBuffer(oneBy3.rowPointer(0), 30);
-        
+        EXPECT_EQ(oneBy3.timestamp(),lls.getTimestamps()[30] );
         
         histoStats h;
         h.from_image(oneBy3.plane(2));
@@ -250,9 +251,31 @@ TEST (ut_lifFile, triple_channel)
         EXPECT_NEAR(h.mode(), 125.0, 0.001);
     }
     
+    {
+        
+        cv::namedWindow( "Voxel View", 1 );
+
+
+         lifIO::LifSerie& lls = lif.getSerie(series.size()-2);
+        std::vector<roiMultiWindow<P8UP3> > voxel;
+        for (auto tt = 0; tt < lls.getNbTimeSteps(); tt++)
+        {
+            roiMultiWindow<P8UP3> oneBy3 (names,lls.getTimestamps()[tt]);
+            lls.fill2DBuffer(oneBy3.rowPointer(0), tt);
+            voxel.emplace_back(oneBy3);
+            cv::Mat mv;
+            NewFromSVL (voxel.back().plane(2), mv);
+            imshow( "Voxel View", mv );
+            // Wait for a key press
+            int key = cvWaitKey( 25 );
+             std::cout << tt << std::endl;
+        }
+        std::cout << voxel.size () << std::endl;
+    }
+    
 }
 
-#if 1
+#if 0
 TEST (ut_similarity, run)
 {
     UT_similarity tester;

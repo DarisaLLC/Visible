@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <numeric>
 #include <sstream>
+#include "core/stl_utils.hpp"
 
 using namespace std;
 
@@ -175,7 +176,7 @@ void lifIO::LifSerieHeader::parseTimeStampList(TiXmlNode *elementTimeStampList)
         if (elementTimeStampList->ToElement()->Attribute("NumberOfTimeStamps", &NumberOfTimeStamps) != 0 && NumberOfTimeStamps != 0)
         {
             this->timeStamps.resize(NumberOfTimeStamps);
-            std::cout << NumberOfTimeStamps << std::endl;
+
             
             //timestamps are stored in the text of the node as 16bits hexadecimal separated by spaces
             //transform this node text in a stream
@@ -185,6 +186,9 @@ void lifIO::LifSerieHeader::parseTimeStampList(TiXmlNode *elementTimeStampList)
                 std::istream_iterator<unsigned long long>(in >> std::hex),
                 std::istream_iterator<unsigned long long>(),
                 this->timeStamps.begin());
+            
+          //  copy (this->timeStamps.begin(), this->timeStamps.end(), ostream_iterator<unsigned long long>(cout, " , "));
+            
         }
         
         //old way to store time stamps
