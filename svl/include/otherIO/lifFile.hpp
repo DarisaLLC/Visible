@@ -60,6 +60,7 @@ class LifSerieHeader
         double getZXratio() const;
         const std::map<std::string, DimensionData>& getDimensionsData() const {return dimensions;};
         const std::vector<ChannelData>& getChannels() const {return channels;};
+        const std::vector<unsigned long long>& getTimestamps () const { return timeStamps; }
 
     private:
         void parseImage(TiXmlNode *elementImage);

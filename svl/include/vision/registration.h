@@ -11,7 +11,10 @@
 #include <queue>
 #include <bitset>
 #include <map>
+#include <Eigen/Dense>
+#include <cassert>
 
+using Eigen::MatrixXd;
 using namespace svl;
 
 
@@ -83,6 +86,20 @@ template <typename P>
 bool area_translation(const roiWindow<P> & moving, const roiWindow<P> & fixed, spaceResult& );
 }
 
+namespace MutualInfo
+{
+
+    struct Parts8U
+    {
+        typedef Eigen::MatrixXd jointProbs;
+        jointProbs joint;
+        double iH, mH, mi, nmi;
+        double acos_nmi;
+        bool valid;
+    };
+    void getMI(const roiWindow<P8U> &I, const roiWindow<P8U> &M, struct Parts8U& out);
+
+}
 
 template <typename P>
 class imageTranslation

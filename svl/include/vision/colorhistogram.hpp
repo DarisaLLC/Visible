@@ -18,7 +18,7 @@ class ColorHistogram
 public:
     ColorHistogram(const cv::Mat& src) : histSize (256), uniform(true), accumulate(false)
     {
-        vector<cv::Mat> bgr_planes;
+        vector<cv::Mat> bgr_planes(src.channels());
         /// Separate the image in 3 places ( B, G and R )
         split( src, bgr_planes );
         run (bgr_planes);
@@ -38,14 +38,12 @@ public:
         return mhists[index];
     }
     
-    const cv::Mat channel_overexposed (int index)
+
+    
+    const cv::Mat display_image () const
     {
-        assert(!mhists.empty());
-        index = index % mhists.size();        
-        return mOver_hists[index];
+        return mHistImage;
     }
-    
-    
     
 private:
     cv::Size mBounds;
@@ -54,8 +52,6 @@ private:
     bool accumulate;
     std::vector<cv::Mat> mhists;
     cv::Mat mHistImage;
-    std::vector<cv::Mat> mOver_planes;
-    std::vector<cv::Mat> mOver_hists;
 
     float entropy (int index)
     {
@@ -78,17 +74,7 @@ private:
     
     void run (const vector<Mat> bgr_planes)
     {
-        for (auto cc = 0; cc < bgr_planes.size(); cc++)
-        {
-            // hist for the channel
-            mhists.push_back(get_channel_hist(bgr_planes[cc]));
-            // Mat for over plane
-            mOver_planes.push_back(cv::Mat());
-            // hist for the over
-            cv::inRange (255, 255, bgr_planes[cc], mOver_planes[cc]);
-            mOver_hists.push_back(get_channel_hist(mOver_planes[cc]));
-        }
-        
+
         /// Set the ranges ( for B,G,R) )
         float range[] = { 0, 256 } ;
         const float* histRange = { range };
