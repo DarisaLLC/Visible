@@ -4,8 +4,87 @@
 #include "vision/pixel_traits.h"
 #include "vision/ipUtils.h"
 #include "vision/registration.h"
+#include "vision/histo.h"
 
 using namespace svl;
+
+void MutualInfo::getMI(const roiWindow<P8U> &I, const roiWindow<P8U> &M, struct Parts8U& out)
+{
+    // ? Use overlap rect ?
+    // if size are different
+    out.valid = false;
+    if (I.size() != M.size()) return;
+    
+    out.joint = Eigen::MatrixXd (256,256);
+    out.joint.setZero();
+    Eigen::MatrixXd iH(1,256), mH(1,256);
+    
+    size_t width = I.width();
+    size_t height = I.height ();
+
+    // Accumulate separate and joint histograms
+    uint32_t curRow = 0;
+    do
+    {
+        const uint8_t* iPtr = I.rowPointer(curRow);
+        const uint8_t* mPtr = M.rowPointer(curRow);
+        
+        uint32_t curCol = 0;
+        do
+        {
+            uint8_t iPel = *iPtr++;
+            uint8_t mPel = *mPtr++;
+            iH(iPel) += 1;
+            mH (mPel) += 1;
+            out.joint(iPel, mPel) += 1;
+        } while (++curCol && curCol < width);
+        curRow++;
+    } while (curRow < height);
+    
+    // Normalize all by number of samples
+    out.joint=out.joint/I.n();
+    iH = iH / I.n();
+    mH = mH / M.n();
+    
+    // Accumulate for separate entropies
+    double MI = 0, h_i = 0, h_m = 0;
+
+    // I (c,c') = H(c) + H(c') - H(c,c')
+
+    for(unsigned int t=0;t<256;t++)
+    {
+        for(unsigned int r=0;r<256;r++)
+        {
+            if(std::fabs(out.joint(r,t)) > std::numeric_limits<double>::epsilon())
+                MI+= out.joint(r,t)*log(out.joint(r,t));
+        }
+        if(std::fabs(iH(t)) > std::numeric_limits<double>::epsilon())
+        {
+            auto e = - iH(t)*log(iH(t));
+            MI += e;
+            h_i += e;
+        }
+        if(std::fabs(mH(t)) > std::numeric_limits<double>::epsilon())
+        {
+            auto e = - mH(t)*log(mH(t));
+            MI += e;
+            h_m += e;
+        }
+    }
+    out.mi = MI;
+    out.iH = h_i;
+    out.mH = h_m;
+    
+    // Normalized MI = I(X,Y) / (H(X)H(Y))^0.5
+    double denom = std::sqrt (out.iH * out.mH);
+    out.valid = denom != 0;
+    if (out.valid)
+    {
+        out.nmi = MI / denom;
+        out.acos_nmi = std::acos(out.nmi);
+    }
+}
+
 
 
 /*

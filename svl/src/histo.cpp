@@ -115,6 +115,27 @@ double histoStats::var() const
     return var_;
 }
 
+double histoStats::entropy () const
+{
+    double Sum (n_);
+    
+    double Entropy = 0.0;
+    
+    long tooHiSub = histogram_.size();
+    long i;
+    for(i=0; i<tooHiSub; i++ )
+    {
+        const double probability = histogram_[i] / Sum;
+        
+        if( probability > 1e-16 )
+        {
+            Entropy += - probability * log( probability ) / log( 2.0 );
+        }
+    }
+    
+    return Entropy;
+}
+
 
 long histoStats::computeInverseCum(int p)
 {

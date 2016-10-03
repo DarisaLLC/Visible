@@ -116,6 +116,18 @@ const char * pi341234[] =
 //}
 //
 
+
+TEST (ut_mi, basic)
+{
+    MutualInfo::Parts8U outp;
+    roiWindow<P8U> img1 (1920, 1080);
+    img1.randomFill(321000);
+    roiWindow<P8U> img2 (1920, 1080);
+    img2.randomFill(900000);
+
+    MutualInfo::getMI(img1, img2, outp);
+    
+}
 TEST (ut_roiMultiWindow, basic)
 {
     std::vector<std::string> names { "green", "red", "gray" };
