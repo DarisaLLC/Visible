@@ -89,15 +89,18 @@ bool area_translation(const roiWindow<P> & moving, const roiWindow<P> & fixed, s
 namespace MutualInfo
 {
 
-    struct Parts8U
+    typedef struct
     {
         typedef Eigen::MatrixXd jointProbs;
         jointProbs joint;
-        double iH, mH, mi, nmi;
+        double iH, mH, mi, nmi, icv;
         double acos_nmi;
         bool valid;
-    };
-    void getMI(const roiWindow<P8U> &I, const roiWindow<P8U> &M, struct Parts8U& out);
+    }  Parts8U;
+    
+    void getMI(const roiWindow<P8U> &I, const roiWindow<P8U> &M, Parts8U& out);
+    ostream & operator<<(ostream & o, const MutualInfo::Parts8U & p);
+
 
 }
 

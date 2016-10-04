@@ -5,10 +5,11 @@
 #include "vision/ipUtils.h"
 #include "vision/registration.h"
 #include "vision/histo.h"
+#include <cmath> // log
 
 using namespace svl;
 
-void MutualInfo::getMI(const roiWindow<P8U> &I, const roiWindow<P8U> &M, struct Parts8U& out)
+void MutualInfo::getMI(const roiWindow<P8U> &I, const roiWindow<P8U> &M, Parts8U& out)
 {
     // ? Use overlap rect ?
     // if size are different
@@ -18,6 +19,8 @@ void MutualInfo::getMI(const roiWindow<P8U> &I, const roiWindow<P8U> &M, struct 
     out.joint = Eigen::MatrixXd (256,256);
     out.joint.setZero();
     Eigen::MatrixXd iH(1,256), mH(1,256);
+    iH.setZero();
+    mH.setZero();
     
     size_t width = I.width();
     size_t height = I.height ();
@@ -56,17 +59,17 @@ void MutualInfo::getMI(const roiWindow<P8U> &I, const roiWindow<P8U> &M, struct 
         for(unsigned int r=0;r<256;r++)
         {
             if(std::fabs(out.joint(r,t)) > std::numeric_limits<double>::epsilon())
-                MI+= out.joint(r,t)*log(out.joint(r,t));
+                MI+= out.joint(r,t)*std::log2(out.joint(r,t));
         }
         if(std::fabs(iH(t)) > std::numeric_limits<double>::epsilon())
         {
-            auto e = - iH(t)*log(iH(t));
+            auto e = - iH(t)*std::log2(iH(t));
             MI += e;
             h_i += e;
         }
         if(std::fabs(mH(t)) > std::numeric_limits<double>::epsilon())
         {
-            auto e = - mH(t)*log(mH(t));
+            auto e = - mH(t)*std::log2(mH(t));
             MI += e;
             h_m += e;
         }
@@ -74,18 +77,29 @@ void MutualInfo::getMI(const roiWindow<P8U> &I, const roiWindow<P8U> &M, struct 
     out.mi = MI;
     out.iH = h_i;
     out.mH = h_m;
+    double him = (h_i + h_m) - out.mi;
+    out.icv = (2*him - h_i - h_m) / std::log2(I.n());
     
     // Normalized MI = I(X,Y) / (H(X)H(Y))^0.5
     double denom = std::sqrt (out.iH * out.mH);
     out.valid = denom != 0;
     if (out.valid)
     {
-        out.nmi = MI / denom;
+        out.nmi = out.icv / denom;
         out.acos_nmi = std::acos(out.nmi);
     }
 }
 
-
+ostream & MutualInfo::operator<<(ostream & o, const MutualInfo::Parts8U & p)
+{
+    o << " H(I)             : " << p.iH << std::endl;
+    o << " H(M)             : " << p.mH << std::endl;
+    o << " I(I,M)           : " << p.mi << std::endl;
+    o << " VI(I,M)          : " << p.icv << std::endl;
+    o << " NMI(I,M)         :" << p.nmi << std::endl;
+    o << " acos(NMI(I,M))   :" << p.acos_nmi << std::endl;
+    return o;
+}
 
 /*
  * Slide the smaller image over the larger one, computer normalized correlation and return the max peak information

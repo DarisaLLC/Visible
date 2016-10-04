@@ -116,16 +116,65 @@ const char * pi341234[] =
 //}
 //
 
-
+void fillramp (roiWindow<P8U>& img)
+{
+    
+    for (auto index = 0; index < img.n(); index++)
+    {
+        img.setPixel(index / img.width(), index % img.height(), (uint8_t)(index % 256));
+    }
+    
+}
 TEST (ut_mi, basic)
 {
-    MutualInfo::Parts8U outp;
-    roiWindow<P8U> img1 (1920, 1080);
-    img1.randomFill(321000);
-    roiWindow<P8U> img2 (1920, 1080);
-    img2.randomFill(900000);
+    cv::namedWindow( "Image View", 1 );
+    
+ 
+//    NewFromSVL (img3, mv);
+//    imshow( "Image View", mv );
+//    key = cvWaitKey( -1);
+    
+//    Gauss3by3(img1, img3);
+    
+ 
+    roiWindow<P8U> img1;
+    roiWindow<P8U> img2;
+    std::string name = "meena.png";
+    std::string name2 = "meena.1.png";
+    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
+    std::pair<test_utils::genv::path_t, bool> res2 = dgenv_ptr->asset_path(name2);
+    if (res.second)
+    {
+        std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
+        img1 = svl::NewFromChannel(*wp.second);
+        cv::Mat mv;
+            NewFromSVL (img1, mv);
+            imshow( "Image View", mv );
+            int key = cvWaitKey( -1);
+        
+    }
+    if (res2.second)
+    {
+        std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res2.first);
+        img2 = svl::NewFromChannel(*wp.second);
+        cv::Mat mv;
+            NewFromSVL (img2, mv);
+            imshow( "Image View", mv );
+            int key = cvWaitKey( -1);
+    }
 
-    MutualInfo::getMI(img1, img2, outp);
+    if (res.second && res2.second)
+    {
+        MutualInfo::Parts8U outp;
+        MutualInfo::getMI(img1, img2, outp);
+        std::cout << outp;
+    
+        MutualInfo::getMI(img2, img1, outp);
+        std::cout << outp;
+    }
+    
+    
+    
     
 }
 TEST (ut_roiMultiWindow, basic)
@@ -278,9 +327,6 @@ TEST (ut_lifFile, triple_channel)
             cv::Mat mv;
             NewFromSVL (voxel.back().plane(2), mv);
             imshow( "Voxel View", mv );
-            // Wait for a key press
-            int key = cvWaitKey( 25 );
-             std::cout << tt << std::endl;
         }
         std::cout << voxel.size () << std::endl;
     }

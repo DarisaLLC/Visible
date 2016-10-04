@@ -134,6 +134,8 @@
 		C2B6E66B1D060E0E00235FB7 /* GLMmath.h in Headers */ = {isa = PBXBuildFile; fileRef = C2B6E66A1D060E0E00235FB7 /* GLMmath.h */; };
 		C2B6E66D1D060F7000235FB7 /* coreGLM.h in Headers */ = {isa = PBXBuildFile; fileRef = C2B6E66C1D060F7000235FB7 /* coreGLM.h */; };
 		C2B6E66F1D060FF600235FB7 /* vImageRef.h in Headers */ = {isa = PBXBuildFile; fileRef = C2B6E66E1D060FF600235FB7 /* vImageRef.h */; };
+		C2EDE0941DA2F84D005AF917 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20E3D0D1CF378460074C47A /* opencv_utils.cpp */; };
+		C2EDE0951DA2F84E005AF917 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20E3D0D1CF378460074C47A /* opencv_utils.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -937,6 +939,7 @@
 				C22293131D949F1400F978DC /* lifFile.cpp in Sources */,
 				C212EF0E1D979CDA009F5F1A /* ip_utils.cpp in Sources */,
 				C2060FC61D9B10DB008A2F21 /* lineseg.cpp in Sources */,
+				C2EDE0951DA2F84E005AF917 /* opencv_utils.cpp in Sources */,
 				C2060FC51D9B0FCA008A2F21 /* localvariance.cpp in Sources */,
 				C20E941D1CF386A80074C47A /* ut.cpp in Sources */,
 			);
@@ -954,6 +957,7 @@
 				C20E93621CF3786F0074C47A /* gradient.cpp in Sources */,
 				C20E93631CF3786F0074C47A /* histo.cpp in Sources */,
 				C20E93651CF3786F0074C47A /* labelconnect.cpp in Sources */,
+				C2EDE0941DA2F84D005AF917 /* opencv_utils.cpp in Sources */,
 				C20E936B1CF3786F0074C47A /* rowfunc.cpp in Sources */,
 				C20E936C1CF3786F0074C47A /* self_similarity.cpp in Sources */,
 				C22293111D949CE100F978DC /* tinyxmlerror.cpp in Sources */,
