@@ -30,6 +30,7 @@
 #include "vision/roiMultiWindow.h"
 #include "vision/sample.hpp"
 #include "cinder/opencv_utils.hpp"
+#include "CImg/CImg.h"
 
 using namespace svl;
 using namespace ci;
@@ -136,47 +137,61 @@ TEST (ut_mi, basic)
     
 //    Gauss3by3(img1, img3);
     
- 
-    roiWindow<P8U> img1;
-    roiWindow<P8U> img2;
-    std::string name = "meena.png";
-    std::string name2 = "meena.1.png";
-    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
-    std::pair<test_utils::genv::path_t, bool> res2 = dgenv_ptr->asset_path(name2);
-    if (res.second)
+
+    std::vector<std::string> names = {"meena_mp67_mp67.png", "meena.png", "meena_pp67_pp67.png", "meena_p1p3_p1p3.png"};
+    std::vector<roiWindow<P8U> > images;
+    std::vector<std::pair<test_utils::genv::path_t, bool> > results;
+    std::vector<MutualInfo::Parts8U> outputs;
+
+    for (auto name : names)
     {
-        std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
-        img1 = svl::NewFromChannel(*wp.second);
-        cv::Mat mv;
-            NewFromSVL (img1, mv);
-            imshow( "Image View", mv );
-            int key = cvWaitKey( -1);
-        
-    }
-    if (res2.second)
-    {
-        std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res2.first);
-        img2 = svl::NewFromChannel(*wp.second);
-        cv::Mat mv;
-            NewFromSVL (img2, mv);
-            imshow( "Image View", mv );
-            int key = cvWaitKey( -1);
+        results.push_back(dgenv_ptr->asset_path(name));
     }
 
-    if (res.second && res2.second)
+    for (auto res : results)
+    {
+        if (res.second)
+        {
+            std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
+            images.push_back (svl::NewFromChannel(*wp.second));
+         //   cv::Mat mv;
+         //   NewFromSVL (images.back(), mv);
+         //   imshow( "Image View", mv );
+         //   int key = cvWaitKey( -1);
+            
+        }
+    }
+  
+    if (results[1].second)
     {
         MutualInfo::Parts8U outp;
-        MutualInfo::getMI(img1, img2, outp);
-        std::cout << outp;
-    
-        MutualInfo::getMI(img2, img1, outp);
+        MutualInfo::getMI(images[1], images[1], outp);
         std::cout << outp;
     }
     
+    if (results[1].second && results[0].second)
+    {
+        MutualInfo::Parts8U outp;
+        MutualInfo::getMI(images[1], images[0], outp);
+        std::cout << outp;
+    }
     
+    if (results[1].second && results[2].second)
+    {
+        MutualInfo::Parts8U outp;
+        MutualInfo::getMI(images[1], images[2], outp);
+        std::cout << outp;
+    }
     
+    if (results[1].second && results[3].second)
+    {
+        MutualInfo::Parts8U outp;
+        MutualInfo::getMI(images[1], images[3], outp);
+        std::cout << outp;
+    }
     
 }
+
 TEST (ut_roiMultiWindow, basic)
 {
     std::vector<std::string> names { "green", "red", "gray" };

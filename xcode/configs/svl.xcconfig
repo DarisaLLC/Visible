@@ -29,3 +29,11 @@ LOCAL_PUGIXML = $(LOCAL_3rdParty)/pugixml/1.7
 LOCAL_EIGEN = $(LOCAL_3rdParty)/Eigen
 LOCAL_CEREAL = $(LOCAL_3rdParty)/cereal-1.1.1/include
 LOCAL_TINYXML = $(LOCAL_3rdParty)/tinyxml
+LOCAL_CIMG = $(LOCAL_3rdParty)/cImg
+
+// X11
+SVL_X11_ROOT = /opt/X11
+
+GCC_PREPROCESSOR_DEFINITIONS[arch=*] = cimg_use_opencv=1 cimg_display=0
+
+

@@ -9,7 +9,7 @@
 #include "svl.xcconfig"
 
 
-HEADER_SEARCH_PATHS =  $(inherited) $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_PUGIXML)/include $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML)
+HEADER_SEARCH_PATHS =  $(inherited) $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_PUGIXML)/include $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG) $(SVL_X11_ROOT)/include
 
 
 LIBRARY_SEARCH_PATHS = $(inherited) $(LOCAL_CINDER)/lib $(LOCAL_BOOST)/lib $(LOCAL_gtest)/lib/Release $(LOCAL_OCV)/lib/macosx
