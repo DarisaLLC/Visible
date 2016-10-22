@@ -33,7 +33,7 @@
 #include "CImg/CImg.h"
 
 using namespace svl;
-using namespace ci;
+
 
 
 static test_utils::genv * dgenv_ptr;
@@ -244,6 +244,25 @@ TEST (ut_lifFile, single_channel)
     EXPECT_NEAR(h.median(), 114.0, 0.001);
     EXPECT_NEAR(h.min(), 44.0, 0.001);
     EXPECT_NEAR(h.max(), 255.0, 0.001);
+    
+    cimg_library::CImg<uint8_t> vol (dims[0], dims[1], lif.getSerie(0).getNbTimeSteps());
+    
+    lif.getSerie(0).fill2DBuffer(vol.data());
+   // cimg_library::CImgDisplay disp (vol);
+    
+    EXPECT_EQ(vol.depth(), lif.getSerie(0).getNbTimeSteps());
+    EXPECT_EQ(vol.width(), dims[0]);
+    EXPECT_EQ(vol.height(), dims[1]);
+    
+    cimg_library::CImgDisplay dsp (512, 128);
+    
+    cimg_library::CImg<uint8_t> z0 = vol.get_slice(0);
+    z0.display(dsp);
+    uint8_t min_p(255), max_p(0);
+    const cimg_library::CImg<float> img = z0.histogram(256, min_p, max_p);
+    EXPECT_EQ(min_p, 44);
+    EXPECT_EQ(max_p, 255);
+    img.display_graph(0,3);
     
 }
 

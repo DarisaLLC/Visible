@@ -34,6 +34,6 @@ LOCAL_CIMG = $(LOCAL_3rdParty)/cImg
 // X11
 SVL_X11_ROOT = /opt/X11
 
-GCC_PREPROCESSOR_DEFINITIONS[arch=*] = cimg_use_opencv=1 cimg_display=0
+GCC_PREPROCESSOR_DEFINITIONS[arch=*] = cimg_use_opencv=1 cimg_display=1
 
 

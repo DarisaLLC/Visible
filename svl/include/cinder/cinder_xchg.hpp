@@ -12,11 +12,9 @@
 #include <fstream>
 #include "core/singleton.hpp"
 #include "cinder/ImageSourcePng.h"
-#include "cinder/ImageSourceFileQuartz.h"
 #include "cinder/ip/Grayscale.h"
 
-using namespace ci;
-using namespace ci::ip;
+
 using namespace std;
 using namespace svl;
 
@@ -35,19 +33,7 @@ namespace svl
         return fVector_2d ( point.x, point.y );
     }
 
-    
-    // A onetime initiation of anything in cinder that needs it
-    class cinder_startup : public internal_singleton<cinder_startup>
-    {
-    public:
-        cinder_startup ()
-        {
-          //  ci::ImageSourcePng::registerSelf();
-            ci::ImageSourceFileQuartz::registerSelf();
-        }
-    };
-    
-
+ 
     template<typename D>
     struct fromSurface8UCloner
     {
@@ -75,13 +61,9 @@ namespace svl
     static roiWindow<P8U> NewGrayFromSurface (const Surface8uRef& src)
     {
         Channel8uRef ci8 = ChannelT<uint8_t>::create(src->getWidth(), src->getHeight());
-        grayscale (*src, ci8.get());
+        ci::ip::grayscale (*src, ci8.get());
         return NewFromChannel (*ci8);
     }
-    
-    
-     
-    
     
     template<typename P, class pixel_t = typename PixelType<P>::pixel_t>
     static std::shared_ptr<ChannelT<pixel_t> >  newCiChannel (const roiWindow<P>& w)
@@ -105,39 +87,7 @@ namespace svl
         return chP;
     }
     
-    std::pair<Surface8uRef, Channel8uRef> image_io_read_surface (const boost::filesystem::path & pp)
-    {
-        cinder_startup::instance();
-        const std::string extension = pp.extension().string();
-        ImageSource::Options opt;
-        auto ir = loadImage (pp, opt, extension );
-        std::pair<Surface8uRef, Channel8uRef> wp;
-
-       
-        if ( (ir->getDataType() != PixelType<P8U>::ct() || ir->getColorModel() != PixelType<P8U>::cm()) &&
-        (ir->getDataType() != PixelType<P8UC4>::ct() || ir->getColorModel() != PixelType<P8UC4>::cm()) )
-            return wp;
-        
-        switch (ir->getChannelOrder())
-        {
-            case ci::ImageIo::ChannelOrder::Y:
-            {
-                wp.second = ci::ChannelT<uint8_t>::create (ir);
-                break;
-            }
-            case ci::ImageIo::ChannelOrder::RGBX:
-            {
-                wp.first = ci::SurfaceT<uint8_t>::create (ir);
-                break;
-            }
-            default:
-                assert(false);
-        }
-
-        return wp;
-
-    }
-
+    std::pair<Surface8uRef, Channel8uRef> image_io_read_surface (const boost::filesystem::path & pp);
       
     
 }
