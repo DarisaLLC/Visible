@@ -254,15 +254,16 @@ TEST (ut_lifFile, single_channel)
     EXPECT_EQ(vol.width(), dims[0]);
     EXPECT_EQ(vol.height(), dims[1]);
     
-    cimg_library::CImgDisplay dsp (512, 128);
-    
+ 
     cimg_library::CImg<uint8_t> z0 = vol.get_slice(0);
-    z0.display(dsp);
-    uint8_t min_p(255), max_p(0);
-    const cimg_library::CImg<float> img = z0.histogram(256, min_p, max_p);
-    EXPECT_EQ(min_p, 44);
-    EXPECT_EQ(max_p, 255);
-    img.display_graph(0,3);
+    const auto stats = z0.get_stats();
+    EXPECT_NEAR(stats.at(0), 44.0, 0.001);
+    EXPECT_NEAR(stats.at(1), 255.0, 0.001);
+    EXPECT_NEAR(stats.at(2), 114.271, 0.001);
+
+    cimg_library::CImg<float> project = vol.cumulate("z");
+    cimg_library::CImgDisplay dsp (512, 128);
+    project.display(dsp, True);
     
 }
 
