@@ -55,11 +55,15 @@ int movContext::getIndex ()
     return mMovieIndexPosition;
 }
 
+void movContext::onMarked ( uint32_t t)
+{
+    std::cout << " mov <- " << t << std::endl;
+}
 void movContext::setIndex (int mark)
 {
     if( m_movie->isPlaying() )
         m_movie->stop();
-    
+   	mType = Type::qtime_viewer;
     mMovieIndexPosition = (mark % m_fc);
     m_movie->seekToFrame(mMovieIndexPosition);
 }

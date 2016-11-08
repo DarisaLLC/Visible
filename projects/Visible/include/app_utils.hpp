@@ -303,11 +303,26 @@ using namespace boost;
             if (rows.size () < 1) return false;
             const csv::row_type& row = rows[0];
             bool is_visible = false;
+            bool is_timestamp = false;
+            bool is_millisecond = false;
+            bool is_seconds = false;
+            bool is_accel_data = false;
+            int is_X(0), is_Y(0), is_Z(0);
+            
             for (int i = 0; i < row.size(); i++)
             {
+                if (row[i].find ("Timestamp") != string::npos ) { is_timestamp = true; }
+                if (row[i].find ("(ms)") != string::npos ) { is_millisecond = true; }
+                if (row[i].find ("(g)") != string::npos ) { is_accel_data = true; }
+                if (row[i].find ("X") != string::npos ) { is_X++; }
+                if (row[i].find ("Y") != string::npos ) { is_Y++; }
+                if (row[i].find ("Z") != string::npos ) { is_Z++; }
                 if (row[i].find ("Visible") != string::npos ) { is_visible = true; break; }
             }
-            if (! is_visible ) return -1 * rows.size ();
+            if (! is_visible )
+            {
+                return (is_timestamp) ? 1 : -1;
+            }
             int last_row = -1;
             for (int rr = 1; rr < rows.size(); rr++)
             {
@@ -346,7 +361,7 @@ using namespace boost;
         }
         
         
-        static bool csv2vectors ( const std::string &csv_file, std::vector<vector<float> >& m_results, bool only_visible_format, bool columns_if_possible, bool verbose = false)
+        static bool csv2vectors ( const std::string &csv_file, matf_t& m_results, bool only_visible_format, bool columns_if_possible, bool verbose = false)
         {
             {
                 m_results.resize (0);
@@ -359,8 +374,8 @@ using namespace boost;
                 
                 
                 
-                std::vector<vector<float> > datas;
-                std::vector<vector<float> > column_wise;
+                matf_t datas;
+                matf_t column_wise;
                 datas.resize (0);
                 column_wise.resize (0);
                 

@@ -1,5 +1,3 @@
-
-
 #ifndef __ui_contexts___h
 #define __ui_contexts___h
 
@@ -14,6 +12,8 @@
 #include "cinder/ImageIo.h"
 #include "cinder/Thread.h"
 #include "cinder/ConcurrentCircularBuffer.h"
+#include "cinder/Signals.h"
+#include "cinder/Cinder.h"
 #include "iclip.hpp"
 #include "app_utils.hpp"
 #include "timestamp.h"
@@ -41,6 +41,8 @@ using namespace boost;
 using namespace boost::filesystem;
 using namespace ci;
 using namespace ci::app;
+using namespace ci::signals;
+
 using namespace params;
 
 using namespace std;
@@ -70,6 +72,10 @@ class viewCentral : internal_singleton<viewCentral>
 class uContext
 {
 public:
+	
+
+    typedef void (sig_cb_marker) (uint32_t);
+	
     uContext (ci::app::WindowRef window) : mWindow (window)
     {
        mSelected = false;
@@ -79,7 +85,9 @@ public:
        m_uniqueId = m_unique_id;
         
     }
-    
+
+	Signal <void(  uint32_t )> signalMarker;
+	
     virtual ~uContext ()
     {
         std::cout << "uContext Base Dtor is called " << std::endl;
@@ -113,9 +121,10 @@ public:
         viewer_types = clip_viewer+1
     };
     
-	
+//	virtual void onMarked (  uint32_t );
 
-
+	Type context_type () const { return mType; }
+	bool is_context_type (Type t) const { return mType == t; }
 	
   protected:
     int m_uniqueId;
@@ -130,119 +139,14 @@ public:
 	std::shared_ptr<std::thread>		mThread;
 	gl::TextureRef			mTexture, mLastTexture;
 	ConcurrentCircularBuffer<gl::TextureRef>	*mImages;
-	Anim<float>				mFade;
+	
 	double					mLastTime;
 	
+	Type mType;
+
 };
 
 
-
-class idirContext : public uContext
-{
-public:
-	
-	typedef std::function <boost::filesystem::path ()> getFolderPathFunc_t;
-	
-	idirContext(ci::app::WindowRef window) : uContext(window)
-	{
-		mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &idirContext::mouseDown, this, std::placeholders::_1 ) );
-		mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &idirContext::mouseDrag, this, std::placeholders::_1 ) );
-		mCbMouseUp = mWindow->getSignalMouseUp().connect( std::bind( &idirContext::mouseUp, this, std::placeholders::_1 ) );
-		mCbMouseMove = mWindow->getSignalMouseMove().connect( std::bind( &idirContext::mouseMove, this, std::placeholders::_1 ) );
-		mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &idirContext::keyDown, this, std::placeholders::_1 ) );
-		
-		mWindow->setTitle (idirContext::caption ());
-		setup ();
-	}
-	
-	static const std::string& caption () { static std::string cp ("Image Directory Viewer # "); return cp; }
-	virtual const std::string & name() const { return mName; }
-	virtual void name (const std::string& name) { mName = name; }
-	virtual void draw ();
-	virtual void setup ();
-	virtual bool is_valid ();
-	virtual void update ();
-	void draw_window ();
-	
-	
-	
-	virtual void mouseDown( MouseEvent event );
-	virtual void mouseMove( MouseEvent event );
-	virtual void mouseUp( MouseEvent event );
-	virtual void mouseDrag( MouseEvent event );
-	virtual void keyDown( KeyEvent event );
-	
-	const params::InterfaceGl& ui_params ()
-	{
-		return mMovieParams;
-	}
-	
-	
-	
-	int getIndex ();
-	
-	void setIndex (int mark);
-	
-
-	static boost::filesystem::path browseToFolder ()
-	{
-		return Platform::get()->getFolderPath (Platform::get()->getHomeDirectory());
-	}
-
-	
-private:
-	void handleTime( vec2 pos );
-	void loadImageDirectory( const filesystem::path &moviePat);
-	bool have_images () { return m_images_valid; }
-	void seek( size_t xPos );
-	void clear_movie_params ();
-	vec2 texture_to_display_zoom ();
-	vec2 mScreenSize;
-	gl::TextureRef mImage;
-	std::vector<std::string> mSupportedExtensions;
-	
-	
-	bool m_images_valid;
-	size_t m_fc;
-	std::string mName;
-	params::InterfaceGl         mMovieParams;
-	float mMoviePosition, mPrevMoviePosition;
-	size_t mMovieIndexPosition, mPrevMovieIndexPosition;
-	float mMovieRate, mPrevMovieRate;
-	bool mMoviePlay, mPrevMoviePlay;
-	bool mMovieLoop, mPrevMovieLoop;
-	vec2 m_zoom;
-	Rectf m_display_rect;
-	float mMovieCZoom;
-	boost::filesystem::path mPath;
-	vec2		mMousePos;
-	std::shared_ptr<qTimeFrameCache> mFrameSet;
-	directoryPlayer mDirPlayer;
-	SurfaceRef  mSurface;
-	vec2 mCom;
-	vec2 m_prev_com;
-	roiWindow<P8U> mModel;
-	vec2 m_max_motion;
-	int64_t m_index;
-	bool movie_error_do_flip;
-	std::vector<filesystem::path> mImageFiles;
-	std::vector<Surface8uRef> mImages;
-	
-	
-	bool mMouseIsDown;
-	bool mMouseIsMoving;
-	bool mMouseIsDragging;
-	bool mMetaDown;
-	
-	
-	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
-	{
-		size_t xScaled = (pos * wave) / box.getWidth();
-		xScaled = svl::math<size_t>::clamp( xScaled, 0, wave );
-		return xScaled;
-	}
-	
-};
 
 
 
@@ -251,6 +155,8 @@ class matContext : public uContext
 public:
     matContext(ci::app::WindowRef window) : uContext(window)
     {
+		mType = Type::matrix_viewer;
+		
        mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &matContext::mouseDown, this, std::placeholders::_1 ) );
        mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &matContext::mouseDrag, this, std::placeholders::_1 ) );
        mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &matContext::keyDown, this, std::placeholders::_1 ) );
@@ -268,7 +174,8 @@ public:
     virtual void mouseDrag( MouseEvent event );
     virtual void mouseDown( MouseEvent event );
     void draw_window ();
-    
+    virtual void onMarked ( uint32_t);
+	
 private:
 
     void internal_setupmat_from_file (const boost::filesystem::path &);
@@ -284,6 +191,8 @@ private:
     
     boost::filesystem::path mPath;
     std::string mName;
+	
+
 };
 
 
@@ -311,6 +220,7 @@ public:
     virtual void update ();
     void draw_window ();
 
+	virtual void onMarked ( uint32_t);
     
 
     virtual void mouseDown( MouseEvent event );
@@ -368,7 +278,6 @@ private:
 	int64_t m_index;
 	bool movie_error_do_flip;
 	
-	
     bool mMouseIsDown;
     bool mMouseIsMoving;
     bool mMouseIsDragging;
@@ -388,6 +297,8 @@ private:
 class clipContext : public uContext
 {
 public:
+	
+
     clipContext(ci::app::WindowRef window) : uContext(window)
     {
         mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &clipContext::mouseDown, this, std::placeholders::_1 ) );
@@ -412,9 +323,14 @@ public:
     virtual void mouseMove( MouseEvent event );
     virtual void mouseDown( MouseEvent event );
     virtual void mouseUp( MouseEvent event );
-    void draw_window ();
+	void normalize (const bool do_normalize = false){m_normalize = do_normalize; }
+	bool normalize_option () const { return m_normalize; }
+	
+	void draw_window ();
     void receivedEvent ( InteractiveObjectEvent event );
-	void loadAll (const std::vector<float>& src);
+	void loadAll (const csv::matf_t& src);
+	
+	virtual void onMarked ( uint32_t);
 	
 private:
   
@@ -429,10 +345,12 @@ private:
     Graph1DRef mGraph1D;
     boost::filesystem::path mPath;
     std::string mName;
-    std::vector<vector<float> > mdat;
+	csv::matf_t mdat;
     int m_column_select;
+	bool m_normalize;
     size_t m_frames, m_file_frames, m_read_pos;
     size_t m_rows, m_columns;
+	
 };
 
 

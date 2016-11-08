@@ -19,7 +19,7 @@ class InteractiveObject;
 class InteractiveObjectEvent: public ci::app::Event
 {
 public:
-    enum EventType{ Pressed, PressedOutside, Released, ReleasedOutside, RolledOut, RolledOver, Dragged, Changed};
+    enum EventType{Pressed, PressedOutside, Released, ReleasedOutside, RolledOut, RolledOver, Dragged, Changed};
     
     InteractiveObjectEvent( InteractiveObject *sender, EventType type )
     {

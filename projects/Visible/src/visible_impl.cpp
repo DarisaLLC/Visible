@@ -137,6 +137,11 @@ void matContext::update()
 }
 
 
+void matContext::onMarked ( uint32_t)
+{
+    
+}
+
 bool matContext::is_valid ()
 {
     return m_valid;
@@ -152,12 +157,13 @@ bool matContext::is_valid ()
 void clipContext::draw ()
 {
     mGraph1D->rect = getWindowBounds();
-    // time cycles every 1 / TWEEN_SPEED seconds, with a 50% pause at the end
-    float time = svl::math<float>::clamp( fmod( ci_getElapsedSeconds() * 0.5, 1 ) * 1.5f, 0, 1 );
-    if (mGraph1D) mGraph1D->draw ( time );
+    if (mGraph1D) mGraph1D->draw ( );
 }
 
-
+void clipContext::onMarked ( uint32_t t)
+{
+   std::cout << " clip <- " << t << std::endl;
+}
 
 void clipContext::update ()
 {
@@ -167,18 +173,22 @@ bool clipContext::is_valid () { return m_valid; }
 
 void clipContext::setup()
 {
+    mType = Type::clip_viewer;
+    
+    normalize(true);
+    
     // Browse for the result file
     mPath = getOpenFilePath();
     m_valid = false;
   	getWindow()->setTitle( mPath.filename().string() );
     const std::string& fqfn = mPath.string ();
     m_columns = m_rows = 0;
-    mdat.resize (0);
+    mdat.clear ();
     bool c2v_ok = csv::csv2vectors ( fqfn, mdat, false, true, true);
     if ( c2v_ok )
         m_columns = mdat.size ();
     
-      m_rows = mdat[0].size();
+    m_rows = mdat[0].size();
     // only handle case of long columns of data
     m_column_select = 1;
     if (m_columns < m_rows)
@@ -189,34 +199,48 @@ void clipContext::setup()
         m_valid = true;
     }
     
-    loadAll(mdat[0]);
+    loadAll(mdat);
 
 }
 
-void clipContext::loadAll (const std::vector<float>& src)
+void clipContext::loadAll (const  std::vector<vector<float> > & src)
 {
+    // Assumptions: Col 0 is X axis, Col 1,... are separate graphs
     // Normalize to 0 - 1
-    std::pair<std::vector<float>::const_iterator, std::vector<float>::const_iterator> p =
-    boost::minmax_element(src.begin(), src.end());
-    std::pair<float,float> minmax_val (*p.first, *p.second);
-    std::vector<float> out (src.size());
-    
-    std::vector<float>::const_iterator di = src.begin();
-    std::vector<float>::iterator dout = out.begin();
-    float scale = minmax_val.second - minmax_val.first;
-    for (; di < src.end(); di++, dout++)
-    {
-        *dout = (*di - minmax_val.first) / scale;
-    }
-    
-    if (m_valid)
-    {
-        mGraph1D = Graph1DRef (new graph1D ("signature", getWindowBounds() ) );
-        mGraph1D->addListener( this, &clipContext::receivedEvent );
-        mGraph1D->load_vector(out);
 
-    }
+    mGraph1D = Graph1DRef (new graph1D ("signature", getWindowBounds() ) );
+    mGraph1D->addListener( this, &clipContext::receivedEvent );
     
+    for (unsigned ii = 1; ii < src.size(); ii++)
+    {
+        const std::vector<float>& coi = src[ii];
+        std::vector<float> out;
+        
+        if (normalize_option ())
+        {
+            std::pair<std::vector<float>::const_iterator, std::vector<float>::const_iterator> p =
+            boost::minmax_element(coi.begin(), coi.end());
+            std::pair<float,float> minmax_val (*p.first, *p.second);
+            out.resize (coi.size());
+            
+            std::vector<float>::const_iterator di = coi.begin();
+            std::vector<float>::iterator dout = out.begin();
+            float scale = minmax_val.second - minmax_val.first;
+            for (; di < coi.end(); di++, dout++)
+            {
+                *dout = (*di - minmax_val.first) / scale;
+            }
+        }
+        
+        if (m_valid)
+        {
+            if (!normalize_option())
+                mGraph1D->load_vector(coi);
+            else if (coi.size() == out.size())
+                mGraph1D->load_vector(out);
+        }
+    
+    }
     
     mClipParams = params::InterfaceGl (" Clip ", vec2( 200, 400) );
 
@@ -260,7 +284,15 @@ void clipContext::receivedEvent( InteractiveObjectEvent event )
 
 void clipContext::mouseMove( MouseEvent event )
 {
-   if (mGraph1D) mGraph1D->mouseMove( event );
+   if (mGraph1D)
+   {
+       // Call base mouse move to update
+       mGraph1D->mouseMove( event );
+       int ii = mGraph1D->get_marker_position();
+       if (ii >= 0)
+           signalMarker.emit(static_cast<uint32_t>(ii));
+       
+   }
 }
 
 
@@ -272,7 +304,13 @@ void clipContext::mouseDrag( MouseEvent event )
 
 void clipContext::mouseDown( MouseEvent event )
 {
-   if (mGraph1D) mGraph1D->mouseDown( event );
+   if (mGraph1D)
+   {
+       mGraph1D->mouseDown( event );
+       int ii = mGraph1D->get_marker_position();
+       if (ii >= 0)
+           signalMarker.emit(static_cast<uint32_t>(ii));
+   }
 }
 
 

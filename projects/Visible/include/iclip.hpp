@@ -23,87 +23,92 @@ class graph1D:  public InteractiveObject
 {
 public:
     
-	graph1D( std::string name, const ci::Rectf& display_box) : InteractiveObject(display_box)
-	{
-		// create label
-		TextLayout text; text.clear( cinder::Color::white() ); text.setColor( Color(0.5f, 0.5f, 0.5f) );
-		try { text.setFont( Font( "Futura-CondensedMedium", 18 ) ); } catch( ... ) { text.setFont( Font( "Arial", 18 ) ); }
-		text.addLine( name );
-        mLabelTex = cinder::gl::Texture::create(text.render( true ) );
-        mContentScale = vec2(0.9, 0.8);
-	}
-    
-	void load_vector (const std::vector<float>& buffer)
+    graph1D( std::string name, const ci::Rectf& display_box) : InteractiveObject(display_box)
     {
-        std::unique_lock<std::mutex> lock (mutex_);
+        // create label
+        mTextLayout.clear( cinder::Color::white() ); mTextLayout.setColor( Color(0.5f, 0.5f, 0.5f) );
+        try { mTextLayout.setFont( Font( "Futura-CondensedMedium", 18 ) ); } catch( ... ) { mTextLayout.setFont( Font( "Arial", 18 ) ); }
+        TextLayout tmp (mTextLayout);
+        tmp.addLine( name );
+        mLabelTex = cinder::gl::Texture::create(tmp.render( true ) );
+    }
+    
+    // load the data and bind a function to access it
+    void load_vector (const std::vector<float>& buffer)
+    {
         mBuffer.clear ();
         std::vector<float>::const_iterator reader = buffer.begin ();
         while (reader != buffer.end())
         {
             mBuffer.push_back (*reader++);
         }
-        
         mFn = bind (&graph1D::get, std::placeholders::_1, std::placeholders::_2);
-        lock.unlock();
-        cond_.notify_one ();
     }
     
-    //  bool is_valid () const { return (mFn != std::function<float (float)> () ); }
-    
+    // a NN fetch function using the bound function
     float get (float tnormed) const
     {
         const std::vector<float>& buf = buffer();
         if (empty()) return -1.0;
-        
-        // NN
         int32_t x = floor (tnormed * (buf.size()-1));
-        if (x >= 0 && x < buf.size())
-            return buf[x];
-        else
-            return -1.0f;
-    }
-	void draw( float t ) const
-	{
-        Rectf content = rect.scaledCentered(mContentScale.x);
-        
-		// draw box and frame
-		cinder::gl::color( ci::ColorA( 0.5f, 0.5f, 0.5f, 0.5f) );
-		cinder::gl::drawSolidRect( content );
-		cinder::gl::color( ci::Color( 0.0f, 0.0f, 0.0f ) );
-        ci::gl::drawStrokedRect( content, 3.0f);
-        ci::gl::color( ci::Color::white() );
-        ci::gl::draw( mLabelTex, vec2(content.getCenter()[0] - mLabelTex->getSize()[0] / 2, rect.getHeight() - mLabelTex->getSize()[1] ));
-        
-		// draw graph
-		gl::color( ColorA( 0.0f, 0.0f, 1.0f, 1.0f ) );
-        gl::begin( GL_LINE_STRIP );
-		for( float x = 0; x < content.getWidth(); x += 0.25f ) {
-			float y = 1.0f - mFn ( this, x / content.getWidth() );
-            ci::gl::vertex(vec2( x, y * content.getHeight() ) + content.getUpperLeft() );
-		}
-        gl::end();
-		
-		// draw animating circle
-		gl::color( Color( 0.75f, 0.5f, 0.25f ) );
-		//gl::drawSolidCircle( rect.getUpperLeft() + mFn ( this, t ) * rect.getSize(), 5.0f );
-        glLineWidth(25.f);
-        float px = norm_pos().x * rect.getWidth();
-        vec2 mid (px, rect.getHeight()/2.0);
-        if (content.contains(mid))
-            ci::gl::drawLine (vec2(px, 0.f), vec2(px, rect.getHeight()));
-        
+        return (x >= 0 && x < buf.size()) ? buf[x] : -1.0f;
     }
     
+    int32_t get_marker_position ()
+    {
+        return (int32_t) mPx;
+    }
+    
+    void draw_value_label (float v, float x, float y) const
+    {
+        TextLayout tmp (mTextLayout);
+        tmp.addLine(to_string(v));
+        auto counter = cinder::gl::Texture::create(tmp.render( true ) );
+        
+        ci::gl::color( ci::Color::white() );
+        ci::gl::draw( counter, vec2(x, y));
+    }
+    
+    void draw() const
+    {
+        Rectf content = rect;
+        float scale = content.getWidth() /(float)(mBuffer.size());
+        
+        // draw graph
+        gl::color( ColorA( 0.0f, 0.0f, 1.0f, 1.0f ) );
+        gl::begin( GL_LINE_STRIP );
+        for( float x = 0; x < content.getWidth(); x ++ )
+        {
+            float y = mFn ( this, x / content.getWidth());
+            if (y < 0) continue;
+            y = 1.0f - y;
+            ci::gl::vertex(vec2( x , y * content.getHeight() ) + content.getUpperLeft() );
+        }
+        gl::end();
+        
+        gl::color( Color( 0.75f, 0.5f, 0.25f ) );
+        glLineWidth(25.f);
+        mPx = norm_pos().x * rect.getWidth();
+        float val = mFn (this, norm_pos().x);
+        
+        vec2 mid (mPx, rect.getHeight()/2.0);
+        if (content.contains(mid))
+        {
+            ci::gl::drawLine (vec2(mPx, 0.f), vec2(mPx, rect.getHeight()));
+            draw_value_label (val, mPx, rect.getHeight()/2.0f);
+            
+        }
+    }
+    
+    mutable float mPx;
+    TextLayout mTextLayout;
+    
+    std::vector<float>                   mBuffer;
     const std::vector<float>&       buffer () const { return mBuffer; }
     bool empty () const { return mBuffer.empty (); }
-    vec2 mContentScale;
-	
-    std::vector<float>                   mBuffer;
-	cinder::gl::TextureRef						mLabelTex;
-    std::function<float (const graph1D*, float)> mFn;
-    std::condition_variable cond_;
-    mutable std::mutex mutex_;
     
+    cinder::gl::TextureRef						mLabelTex;
+    std::function<float (const graph1D*, float)> mFn;
 };
 
 
@@ -151,7 +156,7 @@ public:
     {
         InteractiveObject::dragged();
         
-      vec2 mousePos = App::get()->getMousePos();
+        vec2 mousePos = App::get()->getMousePos();
         setValue( (mousePos.x - rect.x1) / rect.getWidth() );
     }
     

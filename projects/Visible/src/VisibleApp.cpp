@@ -6,6 +6,7 @@
 #include "cinder/Rand.h"
 #include "ui_contexts.h"
 #include "boost/filesystem.hpp"
+#include <functional>
 
 using namespace ci;
 using namespace ci::app;
@@ -22,12 +23,12 @@ class VisibleApp : public App
 {
 public:
     
+  
     void prepareSettings( Settings *settings );
     void setup();
     void create_matrix_viewer ();
     void create_clip_viewer ();
     void create_qmovie_viewer ();
-    void create_imageFolder_viewer ();
     
     void mouseDown( MouseEvent event );
     void mouseMove( MouseEvent event );
@@ -126,17 +127,29 @@ void VisibleApp::create_matrix_viewer ()
 }
 void VisibleApp::create_clip_viewer ()
 {
-    mContexts.push_back(std::shared_ptr<uContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
+    std::shared_ptr<uContext> mw(std::shared_ptr<uContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
+    for (std::shared_ptr<uContext> uip : mContexts)
+    {
+        if (uip->is_context_type(clipContext::Type::qtime_viewer))
+        {
+            uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(mw.get()), std::placeholders::_1));
+        }
+    }
+    mContexts.push_back(mw);
 }
 void VisibleApp::create_qmovie_viewer ()
 {
-    mContexts.push_back(std::shared_ptr<uContext>(new movContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize())))));
+    std::shared_ptr<uContext> mw(new movContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize()))));
+    for (std::shared_ptr<uContext> uip : mContexts)
+    {
+        if (uip->is_context_type(clipContext::Type::clip_viewer))
+        {
+            uip->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(mw.get()), std::placeholders::_1));
+        }
+    }
+    mContexts.push_back(mw);
 }
 
-void VisibleApp::create_imageFolder_viewer ()
-{
-    mContexts.push_back(std::shared_ptr<uContext>(new idirContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize())))));
-}
 
 void VisibleApp::setup()
 {
@@ -153,8 +166,6 @@ void VisibleApp::setup()
     mTopParams = params::InterfaceGl::create( "Visible Options", ivec2( 250, 300 ) );
 //	mTopParams = params::InterfaceGl::create( getWindow(), "Select", toPixels( vec2( 200, 400)), color );
 
-    mTopParams->addSeparator();
-    mTopParams->addButton( "Import Image Folder", std::bind( &VisibleApp::create_imageFolder_viewer, this ) );
     mTopParams->addSeparator();
 	mTopParams->addButton( "Import Quicktime Movie", std::bind( &VisibleApp::create_qmovie_viewer, this ) );
   //  mTopParams->addSeparator();
