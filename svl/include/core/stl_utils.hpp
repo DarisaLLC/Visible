@@ -37,16 +37,21 @@ inline PT align(PT val, std::size_t alignment)
 template<typename PT>
 struct iBuffer
    {
+       typedef std::shared_ptr<PT> PTRef;
+       
+       PTRef _base;
+       std::ptrdiff_t _diff;
+       
+
    iBuffer (int capture_size, int alignment)
       {  
-      _base  = shared_ptr<PT>(new PT [capture_size] );
+      _base  = PTRef (new PT [capture_size] );
       unsigned char* tmp=(alignment>0) ? (unsigned char*)align((std::size_t) _base.get(),alignment) : _base.get();
       _diff = (std::size_t)(tmp) -  (std::size_t) _base.get();
       assert (_diff >= 0);
       }
 
-   shared_ptr<PT> _base;
-   std::ptrdiff_t _diff;
+ 
    };
 
 

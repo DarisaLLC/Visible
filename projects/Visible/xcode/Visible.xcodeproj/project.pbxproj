@@ -244,7 +244,6 @@
 		C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069701CED3E2C0045FF57 /* rowfunc.cpp */; };
 		C2606E721CED44370045FF57 /* qtime_frame_cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */; };
 		C2606EA51CEE0E660045FF57 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
-		C26207021D10A9FE007DA78A /* visible_idir_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */; };
 		C27221161D1C912E008EF8B2 /* histo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069681CED3E2C0045FF57 /* histo.cpp */; };
 		C276EC831C72971400242CDB /* cvcapture.icns in Resources */ = {isa = PBXBuildFile; fileRef = C276EC821C72971400242CDB /* cvcapture.icns */; };
 		C276EC851C72988200242CDB /* cp-visible_release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */; };
@@ -25972,7 +25971,6 @@
 				C2B6E6701D0618E400235FB7 /* AVReader.mm in Sources */,
 				C2B005821CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm in Sources */,
 				C2606DB01CED3E2E0045FF57 /* opencv_utils.cpp in Sources */,
-				C26207021D10A9FE007DA78A /* visible_idir_impl.cpp in Sources */,
 				C219467E1CE4DC7100976025 /* InteractiveObject.cpp in Sources */,
 				C20EDBC31CF277130074C47A /* time_spec.cpp in Sources */,
 				C21946871CE4DC7100976025 /* visible_impl.cpp in Sources */,
@@ -26040,6 +26038,7 @@
 					"$(SRCROOT)/include/**",
 					"$(LOCAL_CINDER)/include",
 					"$(LOCAL_OCV)/include",
+					"$(LOCAL_EIGEN)",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -26084,6 +26083,7 @@
 					"$(SRCROOT)/include/**",
 					"$(LOCAL_CINDER)/include",
 					"$(LOCAL_OCV)/include",
+					"$(LOCAL_EIGEN)",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -26177,6 +26177,7 @@
 					"$(LOCAL_gtest)/include",
 					"$(LOCAL_BOOST)/include",
 					"$(LOCAL_OCV)/include",
+					"$(LOCAL_EIGEN)/",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(LOCAL_gtest)/lib/Release",
@@ -26227,6 +26228,7 @@
 					"$(LOCAL_gtest)/include",
 					"$(LOCAL_BOOST)/include",
 					"$(LOCAL_OCV)/include",
+					"$(LOCAL_EIGEN)/",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(LOCAL_gtest)/lib/Release",
