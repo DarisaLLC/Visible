@@ -74,15 +74,11 @@ public:
 	typedef marker_info marker_info_t;
     typedef void (sig_cb_marker) (marker_info_t&);
 	
-    uContext (ci::app::WindowRef window) : mWindow (window)
-    {
-       mSelected = false;
-       mWindow->setUserData(this);
-       int m_unique_id = getNumWindows();
-       mWindow->getSignalClose().connect([m_unique_id,this] { std::cout << "You closed window #" << m_unique_id << std::endl; });
-       m_uniqueId = m_unique_id;
-        
-    }
+	uContext () : mSelected (false), m_valid (false), mType (null_viewer) {}
+	
+	uContext (ci::app::WindowRef window);
+	
+ 
 
 	Signal <void(marker_info_t&)> signalMarker;
 	
@@ -90,14 +86,14 @@ public:
     {
         std::cout << "uContext Base Dtor is called " << std::endl;
     }
-    virtual const std::string & name() const = 0;
-    virtual void name (const std::string& ) = 0;
+    virtual const std::string & name() const;
+    virtual void name (const std::string& );
     
-    virtual void draw () = 0;
-    virtual void update () = 0;
+    virtual void draw ();
+    virtual void update ();
     //    virtual void resize () = 0;
-    virtual void setup () = 0;
-    virtual bool is_valid () = 0;
+    virtual void setup ();
+    virtual bool is_valid ();
     
     // u implementation does nothing
     virtual void mouseDown( MouseEvent event ) {}
@@ -108,12 +104,13 @@ public:
 	virtual void keyDown( KeyEvent event ) {}
 	void normalize_point (vec2& pos, const ivec2& size)
 	{
-		pos.x *= (getWindowWidth () ) / size.x;
-		pos.y *= (getWindowHeight () ) / size.y;
+		pos.x = pos.x / size.x;
+		pos.y = pos.y / size.y;
 	}
 	
     enum Type {
-        matrix_viewer = 0,
+		null_viewer = 0,
+        matrix_viewer = null_viewer+1,
         qtime_viewer = matrix_viewer+1,
         clip_viewer = qtime_viewer+1,
         viewer_types = clip_viewer+1
@@ -121,10 +118,10 @@ public:
 	
 
 	Type context_type () const { return mType; }
-	bool is_context_type (Type t) const { return mType == t; }
+	bool is_context_type (const Type t) const { return mType == t; }
 	
   protected:
-    int m_uniqueId;
+    size_t m_uniqueId;
     bool m_valid;
     bool			mSelected;
     ci::app::WindowRef				mWindow;
@@ -142,8 +139,6 @@ public:
 	Type mType;
 
 };
-
-
 
 
 
@@ -198,18 +193,8 @@ class movContext : public uContext
 public:
 	
 	Signal <void(bool)> signalShowMotioncenter;
+	movContext(ci::app::WindowRef window);
 	
-    movContext(ci::app::WindowRef window) : uContext(window)
-    {
-        mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &movContext::mouseDown, this, std::placeholders::_1 ) );
-        mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &movContext::mouseDrag, this, std::placeholders::_1 ) );
-        mCbMouseUp = mWindow->getSignalMouseUp().connect( std::bind( &movContext::mouseUp, this, std::placeholders::_1 ) );
-        mCbMouseMove = mWindow->getSignalMouseMove().connect( std::bind( &movContext::mouseMove, this, std::placeholders::_1 ) );
-        mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &movContext::keyDown, this, std::placeholders::_1 ) );
-        
-        mWindow->setTitle (movContext::caption ());
-        setup ();
-    }
     
     static const std::string& caption () { static std::string cp ("Qtime Viewer # "); return cp; }
     virtual const std::string & name() const { return mName; }
@@ -306,18 +291,7 @@ class clipContext : public uContext
 {
 public:
 	
-
-    clipContext(ci::app::WindowRef window) : uContext(window)
-    {
-        mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &clipContext::mouseDown, this, std::placeholders::_1 ) );
-        mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &clipContext::mouseDrag, this, std::placeholders::_1 ) );
-        mCbMouseUp = mWindow->getSignalMouseUp().connect( std::bind( &clipContext::mouseUp, this, std::placeholders::_1 ) );
-        mCbMouseDrag = mWindow->getSignalMouseMove().connect( std::bind( &clipContext::mouseMove, this, std::placeholders::_1 ) );
-        mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &clipContext::keyDown, this, std::placeholders::_1 ) );
-        
-        mWindow->setTitle (clipContext::caption ());
-        setup ();
-    }
+	clipContext(ci::app::WindowRef window);
     
     clipContext(const std::string& name);
     static const std::string& caption () { static std::string cp ("Result Clip Viewer # "); return cp; }    

@@ -50,6 +50,26 @@ namespace
 
 /////////////  movContext Implementation  ////////////////
 
+movContext::movContext(ci::app::WindowRef window)
+{
+    setup ();
+    if (is_valid ())
+    {
+        uContext(window);
+        mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &movContext::mouseDown, this, std::placeholders::_1 ) );
+        mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &movContext::mouseDrag, this, std::placeholders::_1 ) );
+        mCbMouseUp = mWindow->getSignalMouseUp().connect( std::bind( &movContext::mouseUp, this, std::placeholders::_1 ) );
+        mCbMouseMove = mWindow->getSignalMouseMove().connect( std::bind( &movContext::mouseMove, this, std::placeholders::_1 ) );
+        mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &movContext::keyDown, this, std::placeholders::_1 ) );
+        getWindow()->setTitle( mPath.filename().string() );
+    }
+    
+}
+
+
+
+
+
 void movContext::play ()
 {
     if (! have_movie() || m_movie->isPlaying() ) return;
@@ -165,6 +185,12 @@ void movContext::loadMovieFile( const boost::filesystem::path &moviePath )
 {
     m_valid = false;
     
+    // Browse for the result file
+    mPath = getOpenFilePath();
+    if (mPath.string().empty() || ! exists(mPath) )
+    {
+        std::cout << mPath.string() << " Does not exist Or User cancelled " << std::endl;
+    }
     
     if ( ! moviePath.empty () )
     {
@@ -199,7 +225,8 @@ void movContext::loadMovieFile( const boost::filesystem::path &moviePath )
                 m_fc = m_movie->getNumFrames ();
                 m_movie->setLoop( true, false);
                 m_movie->seekToStart();
-                play();
+                // Do not play at start 
+                //play();
                 
                 // Percent trim from all sides.
                 m_max_motion.x = m_max_motion.y = 0.1;
@@ -351,7 +378,11 @@ void movContext::draw ()
     mImage = gl::Texture::create(*mSurface);
     mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
     gl::draw (mImage, getWindowBounds());
-    vec2 mid = (mCom + m_max_motion) / vec2(2.0f,2.0f);
+
+    vec2 com = mCom * vec2(getWindowSize().x,getWindowSize().y);
+    vec2 mmm = m_max_motion * vec2(getWindowSize().x,getWindowSize().y);
+    vec2 mid = (com + mmm) / vec2(2.0f,2.0f);
+    
     float len = distance(mCom, m_max_motion);
     
     if (m_index < 1) return;

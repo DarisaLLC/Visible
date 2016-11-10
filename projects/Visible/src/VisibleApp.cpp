@@ -8,6 +8,8 @@
 #include "boost/filesystem.hpp"
 #include <functional>
 #include <list>
+#include "core/stl_utils.hpp"
+
 
 using namespace ci;
 using namespace ci::app;
@@ -16,6 +18,9 @@ using namespace std;
 
 
 
+
+static uContext sNullViewer;
+std::shared_ptr<uContext> sNullViewerRef (&sNullViewer, null_deleter ());
 
 
 
@@ -133,18 +138,31 @@ void VisibleApp::create_matrix_viewer ()
 }
 
 
+//////
+// Remove existing viewers. Needs better design & implementation
+//    auto new_end = std::remove_if(mContexts.begin(), mContexts.end(),
+//                                  [](const std::shared_ptr<uContext>& cx)
+//                                 { return cx->is_context_type(uContext::Type::qtime_viewer); });
+//    mContexts.erase (new_end, mContexts.end());
+
+
+
 // Create a clip viewer. Go through container of viewers, if there is a movie view, connect onMarked signal to it
 void VisibleApp::create_clip_viewer ()
 {
-    std::shared_ptr<uContext> mw(std::shared_ptr<uContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
+    std::shared_ptr<uContext> cw(std::shared_ptr<uContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
+    
+    if (! cw->is_valid()) return;
+    
     for (std::shared_ptr<uContext> uip : mContexts)
     {
         if (uip->is_context_type(uContext::Type::qtime_viewer))
         {
-            uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(mw.get()), std::placeholders::_1));
+            uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
+            cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
         }
     }
-    mContexts.push_back(mw);
+    mContexts.push_back(cw);
 }
 
 // Create a movie viewer. Go through container of viewers, if there is a clip view, connect onMarked signal to it
@@ -152,21 +170,14 @@ void VisibleApp::create_qmovie_viewer ()
 {
     std::shared_ptr<uContext> mw(new movContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize()))));
     
-    // remove any existing movie viewers if any
-    for (std::shared_ptr<uContext> uip : mContexts)
-    {
-        if (uip->is_context_type(uContext::Type::qtime_viewer))
-        {
-            mContexts.remove(uip);
-            break;
-        }
-    }
+    if (! mw->is_valid()) return;
     
     for (std::shared_ptr<uContext> uip : mContexts)
     {
         if (uip->is_context_type(uContext::Type::clip_viewer))
         {
             uip->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(mw.get()), std::placeholders::_1));
+            mw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
         }
     }
     mContexts.push_back(mw);
@@ -184,7 +195,7 @@ void VisibleApp::setup()
   
     
      // Setup the parameters
-    mTopParams = params::InterfaceGl::create( "Visible Options", ivec2( 250, 300 ) );
+    mTopParams = params::InterfaceGl::create( "Visible", ivec2( 250, 300 ) );
 //	mTopParams = params::InterfaceGl::create( getWindow(), "Select", toPixels( vec2( 200, 400)), color );
 
     mTopParams->addSeparator();
@@ -197,13 +208,9 @@ void VisibleApp::setup()
     
     mTopParams->addSeparator();
     
-    mTopParams->addParam( "Image Sequence Loaded", &mImageSequenceDataLoaded );
-    mTopParams->addParam( "Image Data Loaded", &mImageDataLoaded );
-
-    mTopParams->addParam( "Show Multi Snap Shot ", &mShowMultiSnapShot);
-    mTopParams->addParam( "Show Multi Snap Shot and Data ", &mShowMultiSnapShotAndData);
-    
-    mTopParams->addParam( "Pause ", &mPaused );
+//    mTopParams->addParam( "Show Multi Snap Shot ", &mShowMultiSnapShot);
+//    mTopParams->addParam( "Show Multi Snap Shot and Data ", &mShowMultiSnapShotAndData);
+//    mTopParams->addParam( "Pause ", &mPaused );
 
     getWindow()->getSignalDraw().connect(std::bind( &VisibleApp::draw, this) );
     getWindow()->getSignalClose().connect(std::bind( &VisibleApp::window_close, this) );
@@ -297,7 +304,9 @@ void VisibleApp::draw ()
     
     uContext  *data = getWindow()->getUserData<uContext>();
     
-    if (data) data->draw();
+    bool valid_data = data != nullptr && data->context_type() != uContext::null_viewer;
+    
+    if (valid_data) data->draw();
     else
         mTopParams->draw ();
     

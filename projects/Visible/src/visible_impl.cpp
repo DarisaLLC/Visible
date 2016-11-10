@@ -28,27 +28,34 @@ namespace
     {
         return AppBase::get()->getElapsedSeconds();
     }
-    
-    
-#if 0
-    void copy_to_vector (const ci::audio2::BufferRef &buffer, std::vector<float>& mBuffer)
-    {
-        mBuffer.clear ();
-        const float *reader = buffer->getChannel( 0 );
-        for( size_t i = 0; i < buffer->getNumFrames(); i++ )
-            mBuffer.push_back (*reader++);
-    }
-    size_t Wave2Index (const Rectf& box, const size_t& pos, const Waveform& wave)
-    {
-        size_t xScaled = (pos * wave.sections()) / box.getWidth();
-        xScaled *= wave.section_size ();
-        xScaled = math<size_t>::clamp( xScaled, 0, wave.samples () );
-    }
-    
-#endif
+
 
   }
 
+/////////////// Null Viewer ///////////////////////
+
+const std::string & uContext::name() const
+{
+    static std::string sNullName = "nullViewer";
+    return sNullName;
+}
+void uContext::name (const std::string& ) {}
+
+void uContext::draw () {}
+void uContext::update () {}
+//    virtual void resize () = 0;
+void uContext::setup () {}
+bool uContext::is_valid () { return m_valid; }
+
+uContext::uContext (ci::app::WindowRef window) : mWindow (window)
+{
+    mSelected = false;
+    mWindow->setUserData(this);
+    size_t m_unique_id = getNumWindows();
+    mWindow->getSignalClose().connect([m_unique_id,this] { std::cout << "You closed window #" << m_unique_id << std::endl; });
+    m_uniqueId = m_unique_id;
+    
+}
 
 ///////////////  Matrix Viewer ////////////////////
 
@@ -76,6 +83,14 @@ void matContext::setup ()
     
     // Browse for a matrix file
     mPath = getOpenFilePath();
+    
+    // Browse for the result file
+    mPath = getOpenFilePath();
+    if (mPath.string().empty() || ! exists(mPath) )
+    {
+        std::cout << mPath.string() << " Does not exist Or User cancelled " << std::endl;
+    }
+    
     if(! mPath.empty() ) internal_setupmat_from_file(mPath);
 }
 
@@ -153,6 +168,21 @@ bool matContext::is_valid ()
 ////////////////// ClipContext  ///////////////////
 
 
+clipContext::clipContext(ci::app::WindowRef window)
+{
+    setup ();
+    if (is_valid())
+    {
+        uContext(window);
+        mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &clipContext::mouseDown, this, std::placeholders::_1 ) );
+        mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &clipContext::mouseDrag, this, std::placeholders::_1 ) );
+        mCbMouseUp = mWindow->getSignalMouseUp().connect( std::bind( &clipContext::mouseUp, this, std::placeholders::_1 ) );
+        mCbMouseDrag = mWindow->getSignalMouseMove().connect( std::bind( &clipContext::mouseMove, this, std::placeholders::_1 ) );
+        mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &clipContext::keyDown, this, std::placeholders::_1 ) );
+        getWindow()->setTitle( mPath.filename().string() );
+    }
+    
+}
 
 void clipContext::draw ()
 {
@@ -174,13 +204,18 @@ bool clipContext::is_valid () { return m_valid; }
 void clipContext::setup()
 {
     mType = Type::clip_viewer;
-    
+    m_valid = false;
     normalize(true);
     
     // Browse for the result file
     mPath = getOpenFilePath();
-    m_valid = false;
-  	getWindow()->setTitle( mPath.filename().string() );
+    if (mPath.string().empty() || ! exists(mPath) )
+    {
+        std::cout << mPath.string() << " Does not exist Or User cancelled " << std::endl;
+        return;
+    }
+    
+
     const std::string& fqfn = mPath.string ();
     m_columns = m_rows = 0;
     mdat.clear ();
@@ -199,7 +234,8 @@ void clipContext::setup()
         m_valid = true;
     }
     
-    loadAll(mdat);
+    if (m_valid)
+        loadAll(mdat);
 
 }
 

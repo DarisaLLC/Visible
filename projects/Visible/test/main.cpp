@@ -58,6 +58,7 @@ TEST(CacheTexture, basic)
 {
      Surface8uRef s8 = ci::Surface8u::create(3, 7, true);
 }
+
 #if 1
 
 TEST (UT_SimilarityProducer, run)
@@ -336,6 +337,7 @@ TEST (UT_QtimeCache, run)
 }
 
 #endif
+
 
 
 /***
