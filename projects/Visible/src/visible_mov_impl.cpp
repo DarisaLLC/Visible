@@ -50,23 +50,63 @@ namespace
 
 /////////////  movContext Implementation  ////////////////
 
+void movContext::play ()
+{
+    if (! have_movie() || m_movie->isPlaying() ) return;
+    m_movie->play ();
+}
+
+void movContext::pause ()
+{
+    if (! have_movie() || ! m_movie->isPlaying() ) return;
+    m_movie->stop ();
+}
+
+void movContext::play_pause_button ()
+{
+    if (! have_movie () ) return;
+    if (m_movie->isPlaying())
+        pause ();
+    else
+        play ();
+}
+
+bool movContext::have_movie ()
+{
+    return m_movie != nullptr && m_valid;
+}
+
 int movContext::getIndex ()
 {
     return mMovieIndexPosition;
 }
 
-void movContext::onMarked ( uint32_t t)
+void movContext::onMarked ( marker_info& t)
 {
-    std::cout << " mov <- " << t << std::endl;
+    pause ();
+    setIndex((int)(t.norm_pos.x *= m_fc));
+    
+
 }
 void movContext::setIndex (int mark)
 {
-    if( m_movie->isPlaying() )
-        m_movie->stop();
+    pause ();
    	mType = Type::qtime_viewer;
     mMovieIndexPosition = (mark % m_fc);
     m_movie->seekToFrame(mMovieIndexPosition);
 }
+
+float movContext::getZoom ()
+{
+    return mMovieCZoom;
+}
+
+void movContext::setZoom (float nv)
+{
+    mMovieCZoom = nv;
+    update ();
+}
+
 
 void movContext::setup()
 {
@@ -77,12 +117,29 @@ void movContext::setup()
     
     if( m_valid )
     {
+        mButton_title_index = 0;
         string max = to_string( m_movie->getDuration() );
+        {
         const std::function<void (int)> setter = std::bind(&movContext::setIndex, this, std::placeholders::_1);
         const std::function<int ()> getter = std::bind(&movContext::getIndex, this);
         mMovieParams.addParam ("Mark", setter, getter);
+        }
         mMovieParams.addSeparator();
-        mMovieParams.addParam( "Zoom", &mMovieCZoom, "min=0.1 max=+10 step=0.1" );
+        {
+            const std::function<void (bool)> setter = std::bind(&movContext::setShowMotionCenter, this, std::placeholders::_1);
+            const std::function<bool (void)> getter = std::bind(&movContext::getShowMotionCenter, this);
+
+            mMovieParams.addParam( "Show Mc", setter, getter);
+        }
+        
+        mMovieParams.addSeparator();
+        mMovieParams.addButton("Play / Pause ", bind( &movContext::play_pause_button, this ) );
+        
+//        {
+//            const std::function<void (float)> setter = std::bind(&movContext::setZoom, this, std::placeholders::_1);
+//            const std::function<float (void)> getter = std::bind(&movContext::getZoom, this);
+//            mMovieParams.addParam( "Zoom", setter, getter);
+//        }
         
     }
 }
@@ -101,6 +158,8 @@ void movContext::clear_movie_params ()
     mPrevMovieLoop = mMovieLoop;
     mMovieCZoom=1.0f;
 }
+
+
 
 void movContext::loadMovieFile( const boost::filesystem::path &moviePath )
 {
@@ -132,17 +191,15 @@ void movContext::loadMovieFile( const boost::filesystem::path &moviePath )
 
                 
                 mScreenSize = vec2(std::fabs(m_movie->getWidth()), std::fabs(m_movie->getHeight()));
-//                getWindow()->getApp()->setWindowSize(mScreenSize.x, mScreenSize.y);
                 mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
                 
                 mS = cv::Mat(mScreenSize.x, mScreenSize.y, CV_32F);
                 mSS = cv::Mat(mScreenSize.x, mScreenSize.y, CV_32F);
                 
-                
                 m_fc = m_movie->getNumFrames ();
                 m_movie->setLoop( true, false);
                 m_movie->seekToStart();
-                m_movie->play();
+                play();
                 
                 // Percent trim from all sides.
                 m_max_motion.x = m_max_motion.y = 0.1;
@@ -166,20 +223,14 @@ void movContext::mouseDown( MouseEvent event )
 void movContext::mouseMove( MouseEvent event )
 {
     mMousePos = event.getPos();
-    //    handleTime(mMousePos);
 }
 
 void movContext::mouseDrag( MouseEvent event )
 {
     mMousePos = event.getPos();
     mMouseIsDragging  = true;
-    //    handleTime(mMousePos);
 }
 
-void movContext::handleTime( vec2 pos )
-{
-    m_movie->seekToTime( (m_movie->getDuration() * (float)pos.x ) / (float)getWindowWidth () );
-}
 
 void movContext::keyDown( KeyEvent event )
 {
@@ -193,33 +244,17 @@ void movContext::keyDown( KeyEvent event )
     // these keys only make sense if there is an active movie
     if( m_movie ) {
         if( event.getCode() == KeyEvent::KEY_LEFT ) {
-            
-            if( m_movie->isPlaying() )
-                m_movie->stop();
+            pause();
             setIndex (mMovieIndexPosition - 1);
         }
         if( event.getCode() == KeyEvent::KEY_RIGHT ) {
-            if( m_movie->isPlaying() )
-                m_movie->stop();
-            
+            pause ();
             setIndex (mMovieIndexPosition + 1);
         }
         
-        //        else if( event.getChar() == 's' ) {
-        //            if( mSurface ) {
-        //                fs::path savePath = getSaveFilePath();
-        //                if( ! savePath.empty() ) {
-        //                    writeImage( savePath, *mSurface );
-        //                }
-        //            }
-        //        }
-        
         
         if( event.getChar() == ' ' ) {
-            if( m_movie->isPlaying() )
-                m_movie->stop();
-            else
-                m_movie->play();
+            play_pause_button();
         }
         
     }
@@ -242,9 +277,6 @@ vec2 movContext::texture_to_display_zoom()
 
 void movContext::seek( size_t xPos )
 {
-    //  auto waves = mWaveformPlot.getWaveforms ();
-    //	if (have_sampler () ) mSamplePlayer->seek( waves[0].sections() * xPos / mGraphDisplayRect.getWidth()() );
-    
     if (is_valid()) mMovieIndexPosition = movContext::Normal2Index ( getWindowBounds(), xPos, m_fc);
 }
 
@@ -254,26 +286,13 @@ bool movContext::is_valid ()
     return m_valid;
 }
 
-static void channelMaskImage( const Channel8uRef &mask, SurfaceRef target )
-{
-    float val;
-    auto maskIter = mask->getIter(); // using const because we're not modifying it
-    Surface::Iter targetIter( target->getIter() ); // not using const because we are modifying it
-    while( maskIter.line() && targetIter.line() ) { // line by line
-        while( maskIter.pixel() && targetIter.pixel() ) { // pixel by pixel
-            {
-                auto mv = maskIter.v();
-                auto rv = targetIter.r();
-                if (mv > 64)
-                    targetIter.r() = 255; //rv + ((255 - rv) * mv) / 255;
-            }
-        }
-    }
-}
 
 
 void movContext::update ()
 {
+    if (! have_movie () )
+        return;
+    
     time_spec_t new_time = qtimeAvfLink::MovieBaseGetCurrentTime(m_movie);
     
     fPair trim (10, 10);
@@ -284,14 +303,8 @@ void movContext::update ()
         ip::flipVertical(*m_movie->getSurface(), mSurface.get());
         ip::flipHorizontal(mSurface.get());
         
-        bool missOrHit = mFrameSet->loadFrame(mSurface, new_time);
+        mFrameSet->loadFrame(mSurface, new_time);
         m_index = mFrameSet->currentIndex(new_time);
-        
-        //    if (missOrHit)
-        //   std::cout << "L @" << new_time.secs() << std::endl;
-        //    else
-        //       std::cout << "H @" << new_time.secs() << std::boolalpha <<  mFrameSet->checkFrame(new_time) << std::endl;
-        
         
         mSurface = mFrameSet->getFrame(new_time);
         cv::Mat surfm = toOcv( *mSurface);
@@ -319,13 +332,6 @@ void movContext::update ()
             normalize_point(m, mSurface->getSize());
             m = m - (mCom - m_prev_com);
             m_max_motion = m;
-
-//            Channel8uRef mask = Channel8u::create(fromOcv(mS));
-//            channelMaskImage(mask, mSurface);
-//            cv_drawCross(mS, com, Scalar(255,0,0),24);
-//            cv_drawCross(mS, dcom, Scalar(255,0,0),16);
-//            imshow("Diff", mS);
-//            std::cout << center << std::endl;
         }
         
           mS = gm;
@@ -339,11 +345,8 @@ void movContext::update ()
 
 void movContext::draw ()
 {
-//	gl::ScopedModelMatrix matScope;
-    
-    if( ( ! m_movie ) || ( ! mSurface ) )
+    if( ! have_movie()  || ( ! mSurface ) )
         return;
-//    gl::clear(Color::gray (0.1f));
     
     mImage = gl::Texture::create(*mSurface);
     mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
@@ -353,16 +356,12 @@ void movContext::draw ()
     
     if (m_index < 1) return;
     
-//    gl::pushModelView();
+    if (getShowMotionCenter ())
     {
         gl::ScopedColor color (ColorA(0.5f, 0.5f, 1.0f, 0.5f));
         gl::drawSolidEllipse(mid, len, len / 2.0f);
-//        gl::drawStrokedCircle( m_max_motion, 8);
-//        gl::drawStrokedCircle( mCom, 8);
-//        gl::drawStrokedCircle( mid, 24);
     }
-//    gl::popModelView();
-//    mMovieParams.draw();
+    mMovieParams.draw();
     
 }
 

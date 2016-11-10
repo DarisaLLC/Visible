@@ -137,9 +137,9 @@ void matContext::update()
 }
 
 
-void matContext::onMarked ( uint32_t)
+void matContext::onMarked (marker_info& t)
 {
-    
+    std::cout << " clip <- " << t.norm_time << std::endl;
 }
 
 bool matContext::is_valid ()
@@ -160,9 +160,9 @@ void clipContext::draw ()
     if (mGraph1D) mGraph1D->draw ( );
 }
 
-void clipContext::onMarked ( uint32_t t)
+void clipContext::onMarked ( marker_info_t& t)
 {
-   std::cout << " clip <- " << t << std::endl;
+    std::cout << " clip <- " << t.norm_time << std::endl;
 }
 
 void clipContext::update ()
@@ -288,9 +288,10 @@ void clipContext::mouseMove( MouseEvent event )
    {
        // Call base mouse move to update
        mGraph1D->mouseMove( event );
-       int ii = mGraph1D->get_marker_position();
-       if (ii >= 0)
-           signalMarker.emit(static_cast<uint32_t>(ii));
+       marker_info tt;
+       mGraph1D->get_marker_position(tt);
+       tt.et = marker_info::event_type::move;
+       signalMarker.emit(tt);
        
    }
 }
@@ -307,9 +308,10 @@ void clipContext::mouseDown( MouseEvent event )
    if (mGraph1D)
    {
        mGraph1D->mouseDown( event );
-       int ii = mGraph1D->get_marker_position();
-       if (ii >= 0)
-           signalMarker.emit(static_cast<uint32_t>(ii));
+       marker_info tt;
+       mGraph1D->get_marker_position(tt);
+       tt.et = marker_info::event_type::down;
+       signalMarker.emit(tt);
    }
 }
 

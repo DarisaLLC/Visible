@@ -50,13 +50,15 @@ public:
     {
         const std::vector<float>& buf = buffer();
         if (empty()) return -1.0;
-        int32_t x = floor (tnormed * (buf.size()-1));
-        return (x >= 0 && x < buf.size()) ? buf[x] : -1.0f;
+        int32_t mIndex = floor (tnormed * (buf.size()-1));
+        return (mIndex >= 0 && mIndex < buf.size()) ? buf[mIndex] : -1.0f;
     }
     
-    int32_t get_marker_position ()
+    void get_marker_position (marker_info& t) const
     {
-        return (int32_t) mPx;
+        t.norm_pos = norm_pos();
+        t.val = mVal;
+        t.index = mIndex;
     }
     
     void draw_value_label (float v, float x, float y) const
@@ -72,9 +74,8 @@ public:
     void draw() const
     {
         Rectf content = rect;
-        float scale = content.getWidth() /(float)(mBuffer.size());
-        
-        // draw graph
+
+       // draw graph
         gl::color( ColorA( 0.0f, 0.0f, 1.0f, 1.0f ) );
         gl::begin( GL_LINE_STRIP );
         for( float x = 0; x < content.getWidth(); x ++ )
@@ -88,21 +89,21 @@ public:
         
         gl::color( Color( 0.75f, 0.5f, 0.25f ) );
         glLineWidth(25.f);
-        mPx = norm_pos().x * rect.getWidth();
-        float val = mFn (this, norm_pos().x);
+        float px = norm_pos().x * rect.getWidth();
+        float mVal = mFn (this, norm_pos().x);
         
-        vec2 mid (mPx, rect.getHeight()/2.0);
+        vec2 mid (px, rect.getHeight()/2.0);
         if (content.contains(mid))
         {
-            ci::gl::drawLine (vec2(mPx, 0.f), vec2(mPx, rect.getHeight()));
-            draw_value_label (val, mPx, rect.getHeight()/2.0f);
+            ci::gl::drawLine (vec2(px, 0.f), vec2(px, rect.getHeight()));
+            draw_value_label (mVal, px, rect.getHeight()/2.0f);
             
         }
     }
     
-    mutable float mPx;
     TextLayout mTextLayout;
-    
+    mutable float mVal;
+    mutable int32_t mIndex;
     std::vector<float>                   mBuffer;
     const std::vector<float>&       buffer () const { return mBuffer; }
     bool empty () const { return mBuffer.empty (); }

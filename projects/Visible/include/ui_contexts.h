@@ -22,7 +22,6 @@
 #include "roiWindow.h"
 #include <memory>
 #include <utility>
-
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
@@ -48,7 +47,6 @@ using namespace params;
 using namespace std;
 namespace fs = boost::filesystem;
 
-
 class uContext;
 
 /*
@@ -73,8 +71,8 @@ class uContext
 {
 public:
 	
-
-    typedef void (sig_cb_marker) (uint32_t);
+	typedef marker_info marker_info_t;
+    typedef void (sig_cb_marker) (marker_info_t&);
 	
     uContext (ci::app::WindowRef window) : mWindow (window)
     {
@@ -86,7 +84,7 @@ public:
         
     }
 
-	Signal <void(  uint32_t )> signalMarker;
+	Signal <void(marker_info_t&)> signalMarker;
 	
     virtual ~uContext ()
     {
@@ -120,8 +118,7 @@ public:
         clip_viewer = qtime_viewer+1,
         viewer_types = clip_viewer+1
     };
-    
-//	virtual void onMarked (  uint32_t );
+	
 
 	Type context_type () const { return mType; }
 	bool is_context_type (Type t) const { return mType == t; }
@@ -174,7 +171,7 @@ public:
     virtual void mouseDrag( MouseEvent event );
     virtual void mouseDown( MouseEvent event );
     void draw_window ();
-    virtual void onMarked ( uint32_t);
+    virtual void onMarked (marker_info_t&);
 	
 private:
 
@@ -199,6 +196,9 @@ private:
 class movContext : public uContext
 {
 public:
+	
+	Signal <void(bool)> signalShowMotioncenter;
+	
     movContext(ci::app::WindowRef window) : uContext(window)
     {
         mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &movContext::mouseDown, this, std::placeholders::_1 ) );
@@ -220,9 +220,7 @@ public:
     virtual void update ();
     void draw_window ();
 
-	virtual void onMarked ( uint32_t);
-    
-
+	virtual void onMarked (marker_info_t&);
     virtual void mouseDown( MouseEvent event );
     virtual void mouseMove( MouseEvent event );
   	virtual void mouseUp( MouseEvent event );
@@ -234,25 +232,31 @@ public:
         return mMovieParams;
     }
     
-    
+	void setShowMotionCenter (bool b)  { mShowMotionCenter = b; }
+	bool getShowMotionCenter ()  { return mShowMotionCenter; }
+	void setZoom (float);
+	float getZoom ();
 
     int getIndex ();
     
     void setIndex (int mark);
 	
+	void play_pause_button ();
+	
 	void loadImagesThreadFn( gl::ContextRef sharedGlContext );	
     
 private:
-    void handleTime( vec2 pos );
     void loadMovieFile( const boost::filesystem::path &moviePath );
-    bool have_movie () { return m_movie_valid; }
+	bool have_movie ();
+	void play ();
+	void pause ();
+	
     void seek( size_t xPos );
     void clear_movie_params ();
     vec2 texture_to_display_zoom ();
     vec2 mScreenSize;
     gl::TextureRef mImage;
     ci::qtime::MovieSurfaceRef m_movie;
-    bool m_movie_valid;
     size_t m_fc;
     std::string mName;
     params::InterfaceGl         mMovieParams;
@@ -282,8 +286,12 @@ private:
     bool mMouseIsMoving;
     bool mMouseIsDragging;
     bool mMetaDown;
-
-    
+	
+	bool mShowMotionCenter;
+	std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
+	int mButton_title_index;
+	std::string mButton_title;
+	
     static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
     {
         size_t xScaled = (pos * wave) / box.getWidth();
@@ -330,7 +338,7 @@ public:
     void receivedEvent ( InteractiveObjectEvent event );
 	void loadAll (const csv::matf_t& src);
 	
-	virtual void onMarked ( uint32_t);
+	virtual void onMarked (marker_info_t&);
 	
 private:
   

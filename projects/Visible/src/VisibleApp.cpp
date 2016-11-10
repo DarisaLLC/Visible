@@ -7,6 +7,7 @@
 #include "ui_contexts.h"
 #include "boost/filesystem.hpp"
 #include <functional>
+#include <list>
 
 using namespace ci;
 using namespace ci::app;
@@ -52,7 +53,7 @@ public:
     Rectf                       mLogDisplayRect;
     CameraPersp				mCam;
     
-    std::vector<std::shared_ptr<uContext> > mContexts;
+    std::list <std::shared_ptr<uContext> > mContexts;
     bool mImageSequenceDataLoaded;
     bool mImageDataLoaded;
     bool mShowCenterOfMotionSignal;
@@ -121,28 +122,49 @@ void VisibleApp::resize ()
 {
 }
 
+
+//
+// We allow one movie and multiple clips or matrix view.
+//
+//
 void VisibleApp::create_matrix_viewer ()
 {
     mContexts.push_back(std::shared_ptr<uContext>(new matContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize())))));
 }
+
+
+// Create a clip viewer. Go through container of viewers, if there is a movie view, connect onMarked signal to it
 void VisibleApp::create_clip_viewer ()
 {
     std::shared_ptr<uContext> mw(std::shared_ptr<uContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
     for (std::shared_ptr<uContext> uip : mContexts)
     {
-        if (uip->is_context_type(clipContext::Type::qtime_viewer))
+        if (uip->is_context_type(uContext::Type::qtime_viewer))
         {
             uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(mw.get()), std::placeholders::_1));
         }
     }
     mContexts.push_back(mw);
 }
+
+// Create a movie viewer. Go through container of viewers, if there is a clip view, connect onMarked signal to it
 void VisibleApp::create_qmovie_viewer ()
 {
     std::shared_ptr<uContext> mw(new movContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize()))));
+    
+    // remove any existing movie viewers if any
     for (std::shared_ptr<uContext> uip : mContexts)
     {
-        if (uip->is_context_type(clipContext::Type::clip_viewer))
+        if (uip->is_context_type(uContext::Type::qtime_viewer))
+        {
+            mContexts.remove(uip);
+            break;
+        }
+    }
+    
+    for (std::shared_ptr<uContext> uip : mContexts)
+    {
+        if (uip->is_context_type(uContext::Type::clip_viewer))
         {
             uip->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(mw.get()), std::placeholders::_1));
         }
@@ -159,7 +181,6 @@ void VisibleApp::setup()
     ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
     // Setup our default camera, looking down the z-axis
     mCam.lookAt( vec3( -20, 0, 0 ), vec3(0.0f,0.0f,0.0f) );
-    const ColorA &color = ColorA( 0.3f, 0.3f, 0.3f, 0.4f );
   
     
      // Setup the parameters
@@ -167,7 +188,7 @@ void VisibleApp::setup()
 //	mTopParams = params::InterfaceGl::create( getWindow(), "Select", toPixels( vec2( 200, 400)), color );
 
     mTopParams->addSeparator();
-	mTopParams->addButton( "Import Quicktime Movie", std::bind( &VisibleApp::create_qmovie_viewer, this ) );
+	mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this ) );
   //  mTopParams->addSeparator();
   // 	mTopParams->addButton( "Import SS Matrix", std::bind( &VisibleApp::create_matrix_viewer, this ) );
     mTopParams->addSeparator();
@@ -178,7 +199,7 @@ void VisibleApp::setup()
     
     mTopParams->addParam( "Image Sequence Loaded", &mImageSequenceDataLoaded );
     mTopParams->addParam( "Image Data Loaded", &mImageDataLoaded );
-    mTopParams->addParam( "Show Motion Center", &mShowCenterOfMotionSignal);
+
     mTopParams->addParam( "Show Multi Snap Shot ", &mShowMultiSnapShot);
     mTopParams->addParam( "Show Multi Snap Shot and Data ", &mShowMultiSnapShotAndData);
     
