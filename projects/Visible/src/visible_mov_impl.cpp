@@ -50,12 +50,11 @@ namespace
 
 /////////////  movContext Implementation  ////////////////
 
-movContext::movContext(ci::app::WindowRef window)
+movContext::movContext(ci::app::WindowRef window) : uContext(window)
 {
     setup ();
     if (is_valid ())
     {
-        uContext(window);
         mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &movContext::mouseDown, this, std::placeholders::_1 ) );
         mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &movContext::mouseDrag, this, std::placeholders::_1 ) );
         mCbMouseUp = mWindow->getSignalMouseUp().connect( std::bind( &movContext::mouseUp, this, std::placeholders::_1 ) );
@@ -111,7 +110,6 @@ void movContext::onMarked ( marker_info& t)
 void movContext::setIndex (int mark)
 {
     pause ();
-   	mType = Type::qtime_viewer;
     mMovieIndexPosition = (mark % m_fc);
     m_movie->seekToFrame(mMovieIndexPosition);
 }
@@ -131,12 +129,14 @@ void movContext::setZoom (float nv)
 void movContext::setup()
 {
     // Browse for the movie file
-    loadMovieFile (getOpenFilePath());
+    loadMovieFile ();
     
     clear_movie_params();
     
     if( m_valid )
     {
+       	mType = Type::qtime_viewer;
+        
         mButton_title_index = 0;
         string max = to_string( m_movie->getDuration() );
         {
@@ -181,32 +181,33 @@ void movContext::clear_movie_params ()
 
 
 
-void movContext::loadMovieFile( const boost::filesystem::path &moviePath )
+void movContext::loadMovieFile()
 {
     m_valid = false;
     
     // Browse for the result file
     mPath = getOpenFilePath();
+    
     if (mPath.string().empty() || ! exists(mPath) )
     {
         std::cout << mPath.string() << " Does not exist Or User cancelled " << std::endl;
     }
     
-    if ( ! moviePath.empty () )
+    if ( ! mPath.empty () )
     {
-        ci_console () << moviePath.string ();
+        ci_console () << mPath.string ();
         
         
         try {
             
-            m_movie = qtime::MovieSurface::create( moviePath.string() );
+            m_movie = qtime::MovieSurface::create( mPath.string() );
             m_valid = m_movie->isPlayable ();
             
             mFrameSet = qTimeFrameCache::create (m_movie);
             
             if (m_valid)
             {
-                getWindow()->setTitle( moviePath.filename().string() );
+                getWindow()->setTitle( mPath.filename().string() );
                 mMovieParams = params::InterfaceGl( "Movie Controller", vec2( 90, 160 ) );
                 
                 ci_console() << "Dimensions:" <<m_movie->getWidth() << " x " <<m_movie->getHeight() << std::endl;
@@ -226,7 +227,7 @@ void movContext::loadMovieFile( const boost::filesystem::path &moviePath )
                 m_movie->setLoop( true, false);
                 m_movie->seekToStart();
                 // Do not play at start 
-                //play();
+                play();
                 
                 // Percent trim from all sides.
                 m_max_motion.x = m_max_motion.y = 0.1;
@@ -265,7 +266,7 @@ void movContext::keyDown( KeyEvent event )
         setFullScreen( ! isFullScreen() );
     }
     else if( event.getChar() == 'o' ) {
-        loadMovieFile( getOpenFilePath() );
+        loadMovieFile();
     }
     
     // these keys only make sense if there is an active movie

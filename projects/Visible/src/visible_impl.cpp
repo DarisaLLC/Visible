@@ -59,6 +59,18 @@ uContext::uContext (ci::app::WindowRef window) : mWindow (window)
 
 ///////////////  Matrix Viewer ////////////////////
 
+matContext::matContext(ci::app::WindowRef window) : uContext(window)
+{
+    mType = Type::matrix_viewer;
+    
+    mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &matContext::mouseDown, this, std::placeholders::_1 ) );
+    mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &matContext::mouseDrag, this, std::placeholders::_1 ) );
+    mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &matContext::keyDown, this, std::placeholders::_1 ) );
+    mWindow->setTitle (matContext::caption ());
+    setup ();
+}
+
+
 void matContext::mouseDrag( MouseEvent event )
 {
     mCamUi.mouseDrag(event);
@@ -168,12 +180,12 @@ bool matContext::is_valid ()
 ////////////////// ClipContext  ///////////////////
 
 
-clipContext::clipContext(ci::app::WindowRef window)
+clipContext::clipContext(ci::app::WindowRef window) : uContext(window)
 {
     setup ();
     if (is_valid())
     {
-        uContext(window);
+ 
         mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &clipContext::mouseDown, this, std::placeholders::_1 ) );
         mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &clipContext::mouseDrag, this, std::placeholders::_1 ) );
         mCbMouseUp = mWindow->getSignalMouseUp().connect( std::bind( &clipContext::mouseUp, this, std::placeholders::_1 ) );
@@ -239,15 +251,18 @@ void clipContext::setup()
 
 }
 
+// Only creates on 1D graph 
 void clipContext::loadAll (const  std::vector<vector<float> > & src)
 {
+    if (! m_valid) return;
+    
     // Assumptions: Col 0 is X axis, Col 1,... are separate graphs
     // Normalize to 0 - 1
 
     mGraph1D = Graph1DRef (new graph1D ("signature", getWindowBounds() ) );
     mGraph1D->addListener( this, &clipContext::receivedEvent );
     
-    for (unsigned ii = 1; ii < src.size(); ii++)
+    for (unsigned ii = 1; ii < 2; ii++)
     {
         const std::vector<float>& coi = src[ii];
         std::vector<float> out;
@@ -266,14 +281,11 @@ void clipContext::loadAll (const  std::vector<vector<float> > & src)
             {
                 *dout = (*di - minmax_val.first) / scale;
             }
+            mGraph1D->load_vector(out);
         }
-        
-        if (m_valid)
+        else
         {
-            if (!normalize_option())
-                mGraph1D->load_vector(coi);
-            else if (coi.size() == out.size())
-                mGraph1D->load_vector(out);
+            mGraph1D->load_vector(coi);
         }
     
     }

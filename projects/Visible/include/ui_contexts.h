@@ -24,7 +24,8 @@
 #include <utility>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-
+#include "cinder/Timeline.h"
+#include "AccordionItem.h"
 
 #include <boost/integer_traits.hpp>
 // use int64_t instead of long long for better portability
@@ -48,6 +49,10 @@ using namespace std;
 namespace fs = boost::filesystem;
 
 class uContext;
+typedef std::shared_ptr<uContext> uContextRef;
+
+typedef app_utils::WindowMgr<ci::app::WindowRef,uContextRef> ciWinMgr_t;
+
 
 /*
  *  Need data producer interface.
@@ -62,7 +67,7 @@ class uContext;
 
 class viewCentral : internal_singleton<viewCentral>
 {
-	std::vector<std::shared_ptr<uContext> > mContexts;
+	
 	
 };
 
@@ -70,6 +75,8 @@ class viewCentral : internal_singleton<viewCentral>
 class uContext
 {
 public:
+	
+
 	
 	typedef marker_info marker_info_t;
     typedef void (sig_cb_marker) (marker_info_t&);
@@ -113,6 +120,7 @@ public:
         matrix_viewer = null_viewer+1,
         qtime_viewer = matrix_viewer+1,
         clip_viewer = qtime_viewer+1,
+		image_dir_viewer = clip_viewer+1,
         viewer_types = clip_viewer+1
     };
 	
@@ -142,19 +150,45 @@ public:
 
 
 
+class imageDirContext : public uContext
+{
+public:
+	imageDirContext(ci::app::WindowRef window);
+	static const std::string& caption () { static std::string cp ("Image Dir Viewer "); return cp; }
+	void loadImageDirectory ( const filesystem::path& directory);
+	
+	virtual const std::string & name() const { return mName; }
+	virtual void name (const std::string& name) { mName = name; }
+	virtual void draw ();
+	virtual void setup ();
+	virtual bool is_valid ();
+	virtual void update ();
+	virtual void mouseMove( MouseEvent event );
+	
+private:
+	int				mTotalItems;
+	
+	float			mItemExpandedWidth;
+	float			mItemRelaxedWidth;
+	float			mItemHeight;
+	
+	list<AccordionItem>				mItems;
+	list<AccordionItem>::iterator	mCurrentSelection;
+	
+	std::vector<boost::filesystem::path> mImageFiles;
+	std::vector<std::string> mSupportedExtensions;
+	std::string mName;
+	
+	
+};
+
+
+
+
 class matContext : public uContext
 {
 public:
-    matContext(ci::app::WindowRef window) : uContext(window)
-    {
-		mType = Type::matrix_viewer;
-		
-       mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &matContext::mouseDown, this, std::placeholders::_1 ) );
-       mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &matContext::mouseDrag, this, std::placeholders::_1 ) );
-       mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &matContext::keyDown, this, std::placeholders::_1 ) );
-       mWindow->setTitle (matContext::caption ());
-        setup ();
-    }
+	matContext(ci::app::WindowRef window);
     static const std::string& caption () { static std::string cp ("Smm Viewer # "); return cp; }
 
     virtual const std::string & name() const { return mName; }
@@ -231,7 +265,7 @@ public:
 	void loadImagesThreadFn( gl::ContextRef sharedGlContext );	
     
 private:
-    void loadMovieFile( const boost::filesystem::path &moviePath );
+    void loadMovieFile();
 	bool have_movie ();
 	void play ();
 	void pause ();

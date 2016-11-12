@@ -9,7 +9,8 @@
 #include <functional>
 #include <list>
 #include "core/stl_utils.hpp"
-
+#include "app_utils.hpp"
+#include "core/core.hpp"
 
 using namespace ci;
 using namespace ci::app;
@@ -35,6 +36,7 @@ public:
     void create_matrix_viewer ();
     void create_clip_viewer ();
     void create_qmovie_viewer ();
+    void create_image_dir_viewer ();
     
     void mouseDown( MouseEvent event );
     void mouseMove( MouseEvent event );
@@ -66,10 +68,7 @@ public:
     bool mShowMultiSnapShotAndData;
     bool mPaused;
     
-    static boost::filesystem::path browseToFolder ()
-    {
-        return Platform::get()->getFolderPath (Platform::get()->getHomeDirectory());
-    }
+
     
 };
 
@@ -116,9 +115,13 @@ void VisibleApp::window_close()
 
 void VisibleApp::prepareSettings( Settings *settings )
 {
-    settings->setWindowSize( 640, 480 );
-    settings->setFullScreen( false );
-    settings->setResizable( true );
+    settings->setWindowSize( 848, 564 );
+    settings->setFrameRate( 60 );
+    settings->setResizable( false );
+    
+//    settings->setWindowSize( 640, 480 );
+//    settings->setFullScreen( false );
+//    settings->setResizable( true );
  }
 
 
@@ -135,6 +138,15 @@ void VisibleApp::resize ()
 void VisibleApp::create_matrix_viewer ()
 {
     mContexts.push_back(std::shared_ptr<uContext>(new matContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize())))));
+}
+
+//
+// We allow one movie and multiple clips or matrix view.
+//
+//
+void VisibleApp::create_image_dir_viewer ()
+{
+    mContexts.push_back(std::shared_ptr<uContext>(new imageDirContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize())))));
 }
 
 
@@ -203,8 +215,10 @@ void VisibleApp::setup()
   //  mTopParams->addSeparator();
   // 	mTopParams->addButton( "Import SS Matrix", std::bind( &VisibleApp::create_matrix_viewer, this ) );
     mTopParams->addSeparator();
-   	mTopParams->addButton( "Import Result ", std::bind( &VisibleApp::create_clip_viewer, this ) );
-
+   	mTopParams->addButton( "Import Time Series ", std::bind( &VisibleApp::create_clip_viewer, this ) );
+    mTopParams->addSeparator();
+    mTopParams->addSeparator();
+   	mTopParams->addButton( "Import Image Directory ", std::bind( &VisibleApp::create_image_dir_viewer, this ) );
     
     mTopParams->addSeparator();
     
@@ -314,4 +328,4 @@ void VisibleApp::draw ()
 
 
 // This line tells Cinder to actually create the application
-CINDER_APP( VisibleApp, RendererGl )
+CINDER_APP( VisibleApp, RendererGl (RendererGl ::Options().msaa( 4 ) ) )
