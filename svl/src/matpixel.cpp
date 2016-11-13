@@ -15,31 +15,26 @@
 #include <assert.h>
 #include "core/stl_utils.hpp"
 #include "core/timestamp.h"
+#include <random>
 
 using namespace svl;
 
 
 
-// Using the same seed produces identical "random" results
-// Seed value 0 is special, it forces the generation of a new seed
+
 template <typename P>
 void roiWindow<P>::randomFill( uint32_t seed )
 {
-    if ( seed == 0 ) {
-        // Set a seed from two clocks
-        const time_spec_t now = time_spec_t::get_system_time();
-        const uint32_t secs = uint32_t(now.secs());
-        float s = (now.secs() - secs) / time_spec_t::ticks_per_second();
-        seed = uint32_t( s + clock() );
-    }
+    typedef typename roiWindow<P>::pixel_t pixel_t;
+
+    std::random_device rd;
     
-    // TODO: is this thread-safe? Probably not
-    srandom( seed );
+    std::mt19937 _rng_generator(rd());
     
     for (int32_t j = 0; j < height(); j++) {
         pixel_ptr_t one = rowPointer (j);
         for (uint32_t i = 0; i < width(); ++i, ++one)
-            *one = pixel_t(random ());
+            *one = std::generate_canonical<pixel_t,std::numeric_limits<pixel_t>::digits>(_rng_generator);
     }
         
 }

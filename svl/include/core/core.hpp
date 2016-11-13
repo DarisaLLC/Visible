@@ -4,12 +4,44 @@
 #include <memory>
 #include <atomic>
 #include <cmath>
+#include <sstream>
 # include <assert.h> // .h to support old libraries w/o <cassert> - effect is the same
 #include "coreGLM.h"
+#include <random>
 
 
 namespace svl  // protection from unintended ADL
 {
+    
+#if have_boost_random
+    static std::string default_random_string_char_set ("abcdefghijklmnopqrstuvwxyz"
+                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                        "1234567890"
+                        "!@#$%^&*()"
+                        "`~-_=+[{]}\\|;:'\",<.>/? ");
+    
+    std::string random_string (unsigned size = 8, const std::string chars = default_random_string_char_set)
+    {
+        boost::random::random_device rng;
+        boost::random::uniform_int_distribution<> index_dist(0, chars.size() - 1);
+        std::stringstream sstream;
+        for(int i = 0; i < size; ++i) {
+            sstream << chars[index_dist(rng)];
+        }
+        return sstream.str();
+    }
+#endif
+    
+    template<typename T> T
+    randomT ()
+    {
+        std::random_device rd;
+        
+        std::mt19937 _rng_generator(rd());
+        
+       return std::generate_canonical<T,std::numeric_limits<T>::digits>(_rng_generator);
+
+    }
     
     template<typename T>
     struct math

@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#include "ui_contexts.h"
-#include "stl_util.hpp"
+#include "VisibleApp.h"
 #include "cinder/app/App.h"
+#include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Timeline.h"
 #include "cinder/Timer.h"
@@ -10,13 +10,12 @@
 #include "cinder/qtime/Quicktime.h"
 #include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"
-#include "qtime_frame_cache.hpp"
-#include "CinderOpenCV.h"
-#include "Cinder/ip/Blend.h"
-#include "opencv2/highgui.hpp"
-#include "opencv_utils.hpp"
-#include "cinder/ip/Flip.h"
+#include "ui_contexts.h"
+#include "stl_util.hpp"
 
+using namespace ci;
+using namespace ci::app;
+using namespace std;
 
 static boost::filesystem::path browseToFolder ()
 {
@@ -54,38 +53,41 @@ void imageDirContext::loadImageDirectory ( const filesystem::path& directory)
     
  }
 
-imageDirContext::imageDirContext(ci::app::WindowRef window) : uContext(window)
-{
-    setup ();
-    if (is_valid())
-    {
-        
-        mCbMouseDrag = mWindow->getSignalMouseMove().connect( std::bind( &imageDirContext::mouseMove, this, std::placeholders::_1 ) );
-        mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &clipContext::keyDown, this, std::placeholders::_1 ) );
-//        getWindow()->setTitle( mPath.filename().string() );
-    }
-    
-}
-
-bool imageDirContext::is_valid ()
-{
-    return m_valid;
-}
-void imageDirContext::setup()
+imageDirContext::imageDirContext(const uContextRef& parent , const boost::filesystem::path& dp)
+    : uContext (parent), mFolderPath (dp)
 {
     m_valid = false;
-    mType = Type::image_dir_viewer;
-
+    m_type = Type::image_dir_viewer;
     
     // make a list of valid audio file extensions and initialize audio variables
     const char* extensions[] = { "jpg", "png", "JPG" };
     mSupportedExtensions = vector<string>( extensions, extensions + 3 );
+
+    setup ();
+    if (is_valid())
+    {
+        app::WindowRef new_win = VisibleApp::instance().createWindow ();
+        setWindowRef ( new_win );
+        mCbMouseDrag = mWindow->getSignalMouseMove().connect( std::bind( &imageDirContext::mouseMove, this, std::placeholders::_1 ) );
+        mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &clipContext::keyDown, this, std::placeholders::_1 ) );
+    }
+}
+
+bool imageDirContext::is_valid ()
+{
+    return m_valid && m_type != uContext::Type::null_viewer;
+}
+
+void imageDirContext::setup()
+{
+     // Browse for the image folder
+    if (mFolderPath == boost::filesystem::path ())
+    {
+        mFolderPath = browseToFolder ();
+    }
     
-    // Browse for the image folder
-    auto folderPath = browseToFolder ();
-    
-    loadImageDirectory(folderPath);
-    
+    loadImageDirectory(mFolderPath);
+
     if ( mImageFiles.empty () ) return;
 
     mTotalItems = mImageFiles.size();

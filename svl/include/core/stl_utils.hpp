@@ -16,6 +16,36 @@
 
 
 using namespace std;
+
+template <class Key, class Value, class Comparator, class Alloc>
+bool contains_key (const std::map<Key, Value, Comparator, Alloc>& dmap, const Key& key, Value& out)
+{
+    typename std::map<Key, Value, Comparator, Alloc>::const_iterator it = dmap.find(key);
+    if (it != dmap.end() )
+    {
+        out = it->second;
+        return true;
+    }
+    return false;
+}
+
+template <class Key, class Value, class Comparator, class Alloc>
+bool contains_value (const std::map<Key, Value, Comparator, Alloc>& dmap, const Value& in, Key& out)
+{
+    typedef typename std::pair<Key, Value> pr_t;
+    for (pr_t pr : dmap)
+    {
+        if (pr.second == in)
+        {
+            out = pr.first;
+            return true;
+        }
+    }
+    return false;
+}
+
+
+
 struct null_deleter
 {
   void operator() (void const *) const {}

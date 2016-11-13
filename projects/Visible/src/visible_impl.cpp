@@ -11,7 +11,7 @@
 #include "cinder/ImageIo.h"
 #include <boost/algorithm/minmax.hpp>
 #include <boost/algorithm/minmax_element.hpp>
-
+#include "VisibleApp.h"
 
 using namespace boost;
 
@@ -45,31 +45,29 @@ void uContext::draw () {}
 void uContext::update () {}
 //    virtual void resize () = 0;
 void uContext::setup () {}
-bool uContext::is_valid () { return m_valid; }
+bool uContext::is_valid () { return false; }
 
-uContext::uContext (ci::app::WindowRef window) : mWindow (window)
-{
-    mSelected = false;
-    mWindow->setUserData(this);
-    size_t m_unique_id = getNumWindows();
-    mWindow->getSignalClose().connect([m_unique_id,this] { std::cout << "You closed window #" << m_unique_id << std::endl; });
-    m_uniqueId = m_unique_id;
-    
-}
+
 
 ///////////////  Matrix Viewer ////////////////////
 
-matContext::matContext(ci::app::WindowRef window) : uContext(window)
+matContext::matContext(const uContextRef& parent , const boost::filesystem::path& dp)
+: uContext (parent), mPath (dp)
 {
-    mType = Type::matrix_viewer;
+    m_valid = false;
+    m_type = Type::matrix_viewer;
     
-    mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &matContext::mouseDown, this, std::placeholders::_1 ) );
-    mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &matContext::mouseDrag, this, std::placeholders::_1 ) );
-    mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &matContext::keyDown, this, std::placeholders::_1 ) );
-    mWindow->setTitle (matContext::caption ());
     setup ();
+    if (is_valid())
+    {
+        app::WindowRef new_win = VisibleApp::instance().getNewWindow(ivec2(640, 480));
+        setWindowRef ( new_win );
+        mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &matContext::mouseDown, this, std::placeholders::_1 ) );
+        mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &matContext::mouseDrag, this, std::placeholders::_1 ) );
+        mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &matContext::keyDown, this, std::placeholders::_1 ) );
+        getWindowRef()->setTitle (matContext::caption ());
+    }
 }
-
 
 void matContext::mouseDrag( MouseEvent event )
 {
@@ -94,14 +92,8 @@ void matContext::setup ()
     mCam.setFarClip( 2000 );
     
     // Browse for a matrix file
-    mPath = getOpenFilePath();
-    
-    // Browse for the result file
-    mPath = getOpenFilePath();
-    if (mPath.string().empty() || ! exists(mPath) )
-    {
-        std::cout << mPath.string() << " Does not exist Or User cancelled " << std::endl;
-    }
+    if (! mPath.empty ())
+        mPath = getOpenFilePath();
     
     if(! mPath.empty() ) internal_setupmat_from_file(mPath);
 }
@@ -171,7 +163,7 @@ void matContext::onMarked (marker_info& t)
 
 bool matContext::is_valid ()
 {
-    return m_valid;
+    return m_valid && is_context_type (uContext::Type::matrix_viewer);
 }
 
 
@@ -180,12 +172,17 @@ bool matContext::is_valid ()
 ////////////////// ClipContext  ///////////////////
 
 
-clipContext::clipContext(ci::app::WindowRef window) : uContext(window)
+clipContext::clipContext(const uContextRef& parent , const boost::filesystem::path& dp)
+: uContext (parent), mPath (dp)
 {
+    m_valid = false;
+    m_type = Type::clip_viewer;
+    
     setup ();
     if (is_valid())
     {
- 
+        app::WindowRef new_win = VisibleApp::instance().getNewWindow (ivec2 (640, 480));
+        setWindowRef ( new_win );
         mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &clipContext::mouseDown, this, std::placeholders::_1 ) );
         mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &clipContext::mouseDrag, this, std::placeholders::_1 ) );
         mCbMouseUp = mWindow->getSignalMouseUp().connect( std::bind( &clipContext::mouseUp, this, std::placeholders::_1 ) );
@@ -211,11 +208,11 @@ void clipContext::update ()
 {
 }
 
-bool clipContext::is_valid () { return m_valid; }
+bool clipContext::is_valid () { return m_valid && is_context_type(uContext::clip_viewer); }
 
 void clipContext::setup()
 {
-    mType = Type::clip_viewer;
+    m_type = Type::clip_viewer;
     m_valid = false;
     normalize(true);
     

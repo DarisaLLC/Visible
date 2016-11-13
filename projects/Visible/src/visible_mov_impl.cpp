@@ -7,7 +7,7 @@
 //
 
 #include <stdio.h>
-
+#include "VisibleApp.h"
 #include "ui_contexts.h"
 #include "stl_util.hpp"
 #include "cinder/app/App.h"
@@ -50,11 +50,17 @@ namespace
 
 /////////////  movContext Implementation  ////////////////
 
-movContext::movContext(ci::app::WindowRef window) : uContext(window)
+movContext::movContext(const uContextRef& parent , const boost::filesystem::path& dp)
+: uContext (parent), mPath (dp)
 {
+    m_valid = false;
+    m_type = Type::clip_viewer;
+    
     setup ();
-    if (is_valid ())
+    if (is_valid())
     {
+        app::WindowRef new_win = VisibleApp::instance().createWindow ();
+        setWindowRef ( new_win );
         mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &movContext::mouseDown, this, std::placeholders::_1 ) );
         mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &movContext::mouseDrag, this, std::placeholders::_1 ) );
         mCbMouseUp = mWindow->getSignalMouseUp().connect( std::bind( &movContext::mouseUp, this, std::placeholders::_1 ) );
@@ -135,7 +141,7 @@ void movContext::setup()
     
     if( m_valid )
     {
-       	mType = Type::qtime_viewer;
+       	m_type = Type::qtime_viewer;
         
         mButton_title_index = 0;
         string max = to_string( m_movie->getDuration() );
@@ -309,11 +315,7 @@ void movContext::seek( size_t xPos )
 }
 
 
-bool movContext::is_valid ()
-{
-    return m_valid;
-}
-
+bool movContext::is_valid () { return m_valid && is_context_type(uContext::qtime_viewer); }
 
 
 void movContext::update ()
@@ -397,3 +399,69 @@ void movContext::draw ()
     
 }
 
+
+
+////////   Adding Tracks 
+
+
+// Create a clip viewer. Go through container of viewers, if there is a movie view, connect onMarked signal to it
+void movContext::add_scalar_track(const std::string& name, const boost::filesystem::path& path)
+{
+    // Get a clip context from the path
+    uContextRef new_ts ( new clipContext (getRef(), path));
+    auto parent_size = getWindowRef()->getSize();
+    auto parent_pos = getWindowRef()->getPos();
+    parent_pos.y += parent_size.y;
+    parent_size.y = 100;
+    new_ts->getWindowRef()->setSize (parent_size);
+    new_ts->getWindowRef()->setPos (parent_pos);
+    getRef()->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(new_ts.get()), std::placeholders::_1));
+    new_ts->getRef()->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(new_ts.get()), std::placeholders::_1));
+}
+
+
+
+//////
+// Remove existing viewers. Needs better design & implementation
+//    auto new_end = std::remove_if(mContexts.begin(), mContexts.end(),
+//                                  [](const std::shared_ptr<uContext>& cx)
+//                                 { return cx->is_context_type(uContext::Type::qtime_viewer); });
+//    mContexts.erase (new_end, mContexts.end());
+
+
+
+#if 0
+    std::shared_ptr<uContext> cw(std::shared_ptr<uContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
+    
+    if (! cw->is_valid()) return;
+    
+    for (std::shared_ptr<uContext> uip : mContexts)
+    {
+        if (uip->is_context_type(uContext::Type::qtime_viewer))
+        {
+            uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
+            cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
+        }
+    }
+    mContexts.push_back(cw);
+}
+
+// Create a movie viewer. Go through container of viewers, if there is a clip view, connect onMarked signal to it
+void VisibleApp::create_qmovie_viewer ()
+{
+    std::shared_ptr<uContext> mw(new movContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize()))));
+    
+    if (! mw->is_valid()) return;
+    
+    for (std::shared_ptr<uContext> uip : mContexts)
+    {
+        if (uip->is_context_type(uContext::Type::clip_viewer))
+        {
+            uip->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(mw.get()), std::placeholders::_1));
+            mw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
+        }
+    }
+    mContexts.push_back(mw);
+}
+
+#endif

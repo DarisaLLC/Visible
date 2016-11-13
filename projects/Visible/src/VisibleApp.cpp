@@ -1,87 +1,6 @@
 
-#include "cinder/app/App.h"
-#include "cinder/app/RendererGl.h"
-#include "cinder/Camera.h"
-#include "cinder/params/Params.h"
-#include "cinder/Rand.h"
-#include "ui_contexts.h"
-#include "boost/filesystem.hpp"
-#include <functional>
-#include <list>
-#include "core/stl_utils.hpp"
-#include "app_utils.hpp"
-#include "core/core.hpp"
+#include "VisibleApp.h"
 
-using namespace ci;
-using namespace ci::app;
-using namespace std;
-
-
-
-
-
-static uContext sNullViewer;
-std::shared_ptr<uContext> sNullViewerRef (&sNullViewer, null_deleter ());
-
-
-
-
-class VisibleApp : public App
-{
-public:
-    
-  
-    void prepareSettings( Settings *settings );
-    void setup();
-    void create_matrix_viewer ();
-    void create_clip_viewer ();
-    void create_qmovie_viewer ();
-    void create_image_dir_viewer ();
-    
-    void mouseDown( MouseEvent event );
-    void mouseMove( MouseEvent event );
-    void mouseUp( MouseEvent event );
-    void mouseDrag( MouseEvent event );
-    void keyDown( KeyEvent event );
-    
-    //void fileDrop( FileDropEvent event );
-    void update();
-    void draw();
-    void close_main();
-    void resize();
-    void window_close ();
-    
-      
-    params::InterfaceGlRef         mTopParams;
-    
-    Rectf                       mGraphDisplayRect;
-    Rectf                       mMovieDisplayRect;
-    Rectf                       mMenuDisplayRect;
-    Rectf                       mLogDisplayRect;
-    CameraPersp				mCam;
-    
-    std::list <std::shared_ptr<uContext> > mContexts;
-    bool mImageSequenceDataLoaded;
-    bool mImageDataLoaded;
-    bool mShowCenterOfMotionSignal;
-    bool mShowMultiSnapShot;
-    bool mShowMultiSnapShotAndData;
-    bool mPaused;
-    
-
-    
-};
-
-// The window-specific data for each window
-class WindowData {
-public:
-    WindowData()
-    : mColor( Color( CM_HSV, randFloat(), 0.8f, 0.8f ) ) // a random color
-    {}
-    
-    Color			mColor;
-    list<vec2>		mPoints; // the points drawn into this window
-};
 using namespace csv;
 
 
@@ -124,7 +43,10 @@ void VisibleApp::prepareSettings( Settings *settings )
 //    settings->setResizable( true );
  }
 
-
+WindowRef VisibleApp::getNewWindow (ivec2 size)
+{
+    return createWindow( Window::Format().size(size));
+}
 
 void VisibleApp::resize ()
 {
@@ -149,51 +71,6 @@ void VisibleApp::create_image_dir_viewer ()
     mContexts.push_back(std::shared_ptr<uContext>(new imageDirContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize())))));
 }
 
-
-//////
-// Remove existing viewers. Needs better design & implementation
-//    auto new_end = std::remove_if(mContexts.begin(), mContexts.end(),
-//                                  [](const std::shared_ptr<uContext>& cx)
-//                                 { return cx->is_context_type(uContext::Type::qtime_viewer); });
-//    mContexts.erase (new_end, mContexts.end());
-
-
-
-// Create a clip viewer. Go through container of viewers, if there is a movie view, connect onMarked signal to it
-void VisibleApp::create_clip_viewer ()
-{
-    std::shared_ptr<uContext> cw(std::shared_ptr<uContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
-    
-    if (! cw->is_valid()) return;
-    
-    for (std::shared_ptr<uContext> uip : mContexts)
-    {
-        if (uip->is_context_type(uContext::Type::qtime_viewer))
-        {
-            uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
-            cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
-        }
-    }
-    mContexts.push_back(cw);
-}
-
-// Create a movie viewer. Go through container of viewers, if there is a clip view, connect onMarked signal to it
-void VisibleApp::create_qmovie_viewer ()
-{
-    std::shared_ptr<uContext> mw(new movContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize()))));
-    
-    if (! mw->is_valid()) return;
-    
-    for (std::shared_ptr<uContext> uip : mContexts)
-    {
-        if (uip->is_context_type(uContext::Type::clip_viewer))
-        {
-            uip->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(mw.get()), std::placeholders::_1));
-            mw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
-        }
-    }
-    mContexts.push_back(mw);
-}
 
 
 void VisibleApp::setup()
@@ -308,7 +185,8 @@ void VisibleApp::keyDown( KeyEvent event )
 void VisibleApp::update()
 {
    uContext  *data = getWindow()->getUserData<uContext>();
-   if (data) data->update ();
+
+   if (data && data->is_valid()) data->update ();
     
 }
 

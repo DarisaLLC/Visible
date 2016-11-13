@@ -35,8 +35,6 @@
 
 #include "qtimeAvfLink.h"
 
-
-
 using namespace boost;
 using namespace boost::filesystem;
 using namespace ci;
@@ -48,44 +46,34 @@ using namespace params;
 using namespace std;
 namespace fs = boost::filesystem;
 
-class uContext;
-typedef std::shared_ptr<uContext> uContextRef;
-
-typedef app_utils::WindowMgr<ci::app::WindowRef,uContextRef> ciWinMgr_t;
-
-
-/*
- *  Need data producer interface.
- *  It requires a setup for setting length and scale & callback providing it
- *     The need here is for a time stamped string of std::tuple or a variant
- *
- *
- *
- *
- *
- */
-
-class viewCentral : internal_singleton<viewCentral>
-{
-	
-	
-};
-
-
-class uContext
+class uContext : public std::enable_shared_from_this<uContext>
 {
 public:
 	
-
+	typedef std::shared_ptr<uContext> uContextRef;
 	
 	typedef marker_info marker_info_t;
     typedef void (sig_cb_marker) (marker_info_t&);
 	
-	uContext () : mSelected (false), m_valid (false), mType (null_viewer) {}
+	uContext () : m_valid (false), m_type (null_viewer) {}
 	
-	uContext (ci::app::WindowRef window);
+	uContext (const uContextRef& parent);
+
+	uContextRef getRef()
+	{
+		return shared_from_this();
+	}
 	
- 
+	ci::app::WindowRef	getWindowRef () const { return mWindow; }
+	void setWindowRef (ci::app::WindowRef& ww) 
+	{
+		mWindow = ww;
+		mWindow->setUserData(getRef().get());
+	}
+	
+	
+	uContextRef	getContextRef () const;
+	void setContextRef (uContextRef& ) const;
 
 	Signal <void(marker_info_t&)> signalMarker;
 	
@@ -125,35 +113,38 @@ public:
     };
 	
 
-	Type context_type () const { return mType; }
-	bool is_context_type (const Type t) const { return mType == t; }
+	Type context_type () const { return m_type; }
+	bool is_context_type (const Type t) const { return m_type == t; }
 	
   protected:
+	Type m_type;
     size_t m_uniqueId;
     bool m_valid;
-    bool			mSelected;
-    ci::app::WindowRef				mWindow;
+    mutable ci::app::WindowRef				mWindow;
+	mutable uContextRef	                    m_parent;
     ci::signals::ScopedConnection	mCbMouseDown, mCbMouseDrag;
     ci::signals::ScopedConnection	mCbMouseMove, mCbMouseUp;
     ci::signals::ScopedConnection	mCbKeyDown;
+
 	
-	bool					mShouldQuit;
-	std::shared_ptr<std::thread>		mThread;
-	gl::TextureRef			mTexture, mLastTexture;
-	ConcurrentCircularBuffer<gl::TextureRef>	*mImages;
+//	std::shared_ptr<std::thread>		mThread;
+//	gl::TextureRef			mTexture, mLastTexture;
+//	ConcurrentCircularBuffer<gl::TextureRef>	*mImages;
 	
-	double					mLastTime;
-	
-	Type mType;
 
 };
 
-
+typedef app_utils::WindowMgr<ci::app::WindowRef,uContext::uContextRef> ciWinMgr_t;
 
 class imageDirContext : public uContext
 {
 public:
 	imageDirContext(ci::app::WindowRef window);
+	
+	// From just a name, use the browse to folder dialog to get the file
+	// From a name and a path
+	imageDirContext(const uContextRef& parent = uContextRef () , const boost::filesystem::path& = boost::filesystem::path () );
+
 	static const std::string& caption () { static std::string cp ("Image Dir Viewer "); return cp; }
 	void loadImageDirectory ( const filesystem::path& directory);
 	
@@ -174,7 +165,8 @@ private:
 	
 	list<AccordionItem>				mItems;
 	list<AccordionItem>::iterator	mCurrentSelection;
-	
+
+	boost::filesystem::path mFolderPath;
 	std::vector<boost::filesystem::path> mImageFiles;
 	std::vector<std::string> mSupportedExtensions;
 	std::string mName;
@@ -189,6 +181,11 @@ class matContext : public uContext
 {
 public:
 	matContext(ci::app::WindowRef window);
+	
+	// From just a name, use the open file dialog to get the file
+	// From a name and a path
+	matContext(const uContextRef& parent = uContextRef (), const boost::filesystem::path& = boost::filesystem::path ());
+	
     static const std::string& caption () { static std::string cp ("Smm Viewer # "); return cp; }
 
     virtual const std::string & name() const { return mName; }
@@ -226,10 +223,14 @@ class movContext : public uContext
 {
 public:
 	
-	Signal <void(bool)> signalShowMotioncenter;
 	movContext(ci::app::WindowRef window);
 	
-    
+	// From just a name, use the open file dialog to get the file
+	// From a name and a path
+	movContext(const uContextRef& parent = uContextRef (), const boost::filesystem::path& = boost::filesystem::path () );
+	
+	Signal <void(bool)> signalShowMotioncenter;
+	
     static const std::string& caption () { static std::string cp ("Qtime Viewer # "); return cp; }
     virtual const std::string & name() const { return mName; }
     virtual void name (const std::string& name) { mName = name; }
@@ -262,8 +263,14 @@ public:
 	
 	void play_pause_button ();
 	
-	void loadImagesThreadFn( gl::ContextRef sharedGlContext );	
-    
+	void loadImagesThreadFn( gl::ContextRef sharedGlContext );
+	
+	
+	// Add tracks
+	void add_scalar_track (const std::string& name, const boost::filesystem::path& file);
+	
+
+	
 private:
     void loadMovieFile();
 	bool have_movie ();
@@ -317,7 +324,11 @@ private:
 		xScaled = svl::math<size_t>::clamp( xScaled, 0, wave );
         return xScaled;
     }
-    
+	
+	
+	std::list<std::shared_ptr<uContext> > m_tracks;
+	
+	
 };
 
 
@@ -325,10 +336,11 @@ class clipContext : public uContext
 {
 public:
 	
-	clipContext(ci::app::WindowRef window);
-    
-    clipContext(const std::string& name);
-    static const std::string& caption () { static std::string cp ("Result Clip Viewer # "); return cp; }    
+	// From just a name, use the open file dialog to get the file
+	// From a name and a path
+	clipContext(const uContextRef& parent = uContextRef (), const boost::filesystem::path& = boost::filesystem::path ());
+	
+    static const std::string& caption () { static std::string cp ("Result Clip Viewer # "); return cp; }
     virtual const std::string & name() const { return mName; }
     virtual void name (const std::string& name) { mName = name; }
     virtual void draw ();
