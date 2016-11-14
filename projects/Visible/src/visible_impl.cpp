@@ -12,6 +12,8 @@
 #include <boost/algorithm/minmax.hpp>
 #include <boost/algorithm/minmax_element.hpp>
 #include "VisibleApp.h"
+#include "app_utils.hpp"
+
 
 using namespace boost;
 
@@ -60,7 +62,7 @@ matContext::matContext(const uContextRef& parent , const boost::filesystem::path
     setup ();
     if (is_valid())
     {
-        app::WindowRef new_win = VisibleApp::instance().getNewWindow(ivec2(640, 480));
+        app::WindowRef new_win = App::get()->createWindow ();
         setWindowRef ( new_win );
         mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &matContext::mouseDown, this, std::placeholders::_1 ) );
         mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &matContext::mouseDrag, this, std::placeholders::_1 ) );
@@ -178,10 +180,15 @@ clipContext::clipContext(const uContextRef& parent , const boost::filesystem::pa
     m_valid = false;
     m_type = Type::clip_viewer;
     
+    if (mPath.string().empty())
+        mPath = getOpenFilePath();
+    
+    m_valid = ! mPath.string().empty() && exists(mPath);
+    
     setup ();
     if (is_valid())
     {
-        app::WindowRef new_win = VisibleApp::instance().getNewWindow (ivec2 (640, 480));
+        app::WindowRef new_win = App::get()->createWindow();
         setWindowRef ( new_win );
         mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &clipContext::mouseDown, this, std::placeholders::_1 ) );
         mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &clipContext::mouseDrag, this, std::placeholders::_1 ) );
@@ -189,6 +196,8 @@ clipContext::clipContext(const uContextRef& parent , const boost::filesystem::pa
         mCbMouseDrag = mWindow->getSignalMouseMove().connect( std::bind( &clipContext::mouseMove, this, std::placeholders::_1 ) );
         mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &clipContext::keyDown, this, std::placeholders::_1 ) );
         getWindow()->setTitle( mPath.filename().string() );
+        
+          
     }
     
 }
@@ -216,13 +225,9 @@ void clipContext::setup()
     m_valid = false;
     normalize(true);
     
-    // Browse for the result file
-    mPath = getOpenFilePath();
-    if (mPath.string().empty() || ! exists(mPath) )
-    {
-        std::cout << mPath.string() << " Does not exist Or User cancelled " << std::endl;
-        return;
-    }
+    // Get a Window
+    app::WindowRef new_win = App::get()->createWindow();
+    setWindowRef ( new_win );
     
 
     const std::string& fqfn = mPath.string ();
@@ -287,7 +292,7 @@ void clipContext::loadAll (const  std::vector<vector<float> > & src)
     
     }
     
-    mClipParams = params::InterfaceGl (" Clip ", vec2( 200, 400) );
+//    mClipParams = params::InterfaceGl (" Clip ", vec2( 200, 400) );
 
     //        string max = ci::toString( m_movie.getDuration() );
     //        mMovieParams.addParam( "Column", &m_column_select, "min=0 max=" + columns );

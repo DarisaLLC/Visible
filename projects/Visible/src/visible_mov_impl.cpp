@@ -27,6 +27,10 @@
 
 #include "gradient.h"
 
+using namespace ci;
+using namespace ci::app;
+using namespace std;
+
 extern float  MovieBaseGetCurrentTime(cinder::qtime::MovieSurfaceRef& movie);
 
 namespace
@@ -54,13 +58,16 @@ movContext::movContext(const uContextRef& parent , const boost::filesystem::path
 : uContext (parent), mPath (dp)
 {
     m_valid = false;
-    m_type = Type::clip_viewer;
+    m_type = Type::qtime_viewer;
+    
+    if (mPath.string().empty())
+        mPath = getOpenFilePath();
+
+    m_valid = ! mPath.string().empty() && exists(mPath);
     
     setup ();
     if (is_valid())
     {
-        app::WindowRef new_win = VisibleApp::instance().createWindow ();
-        setWindowRef ( new_win );
         mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &movContext::mouseDown, this, std::placeholders::_1 ) );
         mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &movContext::mouseDrag, this, std::placeholders::_1 ) );
         mCbMouseUp = mWindow->getSignalMouseUp().connect( std::bind( &movContext::mouseUp, this, std::placeholders::_1 ) );
@@ -134,7 +141,15 @@ void movContext::setZoom (float nv)
 
 void movContext::setup()
 {
-    // Browse for the movie file
+    // Get a Window 
+    app::WindowRef new_win = App::get()->createWindow();
+    setWindowRef ( new_win );
+    VisWinMgr::key_t kk;
+    uContextRef fthis = getRef();
+    bool kept = VisWinMgr::instance().makePair(new_win, fthis, kk);
+    ci_console() << "Movie Window/Context registered: " << std::boolalpha << kept << std::endl;
+    
+    // Load the validated movie file
     loadMovieFile ();
     
     clear_movie_params();
@@ -142,6 +157,10 @@ void movContext::setup()
     if( m_valid )
     {
        	m_type = Type::qtime_viewer;
+        
+        mMovieParams.addSeparator();
+        mMovieParams.addButton( "Import Time Series ", std::bind( &movContext::add_scalar_track_get_file, this ) );
+        mMovieParams.addSeparator();
         
         mButton_title_index = 0;
         string max = to_string( m_movie->getDuration() );
@@ -189,20 +208,9 @@ void movContext::clear_movie_params ()
 
 void movContext::loadMovieFile()
 {
-    m_valid = false;
-    
-    // Browse for the result file
-    mPath = getOpenFilePath();
-    
-    if (mPath.string().empty() || ! exists(mPath) )
-    {
-        std::cout << mPath.string() << " Does not exist Or User cancelled " << std::endl;
-    }
-    
     if ( ! mPath.empty () )
     {
         ci_console () << mPath.string ();
-        
         
         try {
             
@@ -386,7 +394,7 @@ void movContext::draw ()
     vec2 mmm = m_max_motion * vec2(getWindowSize().x,getWindowSize().y);
     vec2 mid = (com + mmm) / vec2(2.0f,2.0f);
     
-    float len = distance(mCom, m_max_motion);
+    float len = distance(mmm, com);
     
     if (m_index < 1) return;
     
@@ -405,7 +413,7 @@ void movContext::draw ()
 
 
 // Create a clip viewer. Go through container of viewers, if there is a movie view, connect onMarked signal to it
-void movContext::add_scalar_track(const std::string& name, const boost::filesystem::path& path)
+void movContext::add_scalar_track(const boost::filesystem::path& path)
 {
     // Get a clip context from the path
     uContextRef new_ts ( new clipContext (getRef(), path));
@@ -417,8 +425,12 @@ void movContext::add_scalar_track(const std::string& name, const boost::filesyst
     new_ts->getWindowRef()->setPos (parent_pos);
     getRef()->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(new_ts.get()), std::placeholders::_1));
     new_ts->getRef()->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(new_ts.get()), std::placeholders::_1));
-}
+    
+    VisWinMgr::key_t kk;
+    bool kept = VisWinMgr::instance().makePair(new_ts->getWindowRef(), new_ts, kk);
+    ci_console() << "Time Series Window/Context registered: " << std::boolalpha << kept << std::endl;
 
+}
 
 
 //////

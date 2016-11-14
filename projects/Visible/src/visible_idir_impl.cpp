@@ -66,7 +66,7 @@ imageDirContext::imageDirContext(const uContextRef& parent , const boost::filesy
     setup ();
     if (is_valid())
     {
-        app::WindowRef new_win = VisibleApp::instance().createWindow ();
+        app::WindowRef new_win = App::get()->createWindow ();
         setWindowRef ( new_win );
         mCbMouseDrag = mWindow->getSignalMouseMove().connect( std::bind( &imageDirContext::mouseMove, this, std::placeholders::_1 ) );
         mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &clipContext::keyDown, this, std::placeholders::_1 ) );

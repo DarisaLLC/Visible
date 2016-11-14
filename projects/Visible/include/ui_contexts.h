@@ -55,9 +55,17 @@ public:
 	typedef marker_info marker_info_t;
     typedef void (sig_cb_marker) (marker_info_t&);
 	
-	uContext () : m_valid (false), m_type (null_viewer) {}
+	uContext () : m_valid (false), m_type (null_viewer)
+	{
+//		m_parent = getRef ();
+	}
 	
-	uContext (const uContextRef& parent);
+	uContext (const uContextRef& parent)
+		: m_valid (false), m_type (null_viewer)
+	{
+//		if (! parent) m_parent = getRef ();
+	}
+	
 
 	uContextRef getRef()
 	{
@@ -68,7 +76,7 @@ public:
 	void setWindowRef (ci::app::WindowRef& ww) 
 	{
 		mWindow = ww;
-		mWindow->setUserData(getRef().get());
+		mWindow->setUserData(this);
 	}
 	
 	
@@ -134,16 +142,12 @@ public:
 
 };
 
-typedef app_utils::WindowMgr<ci::app::WindowRef,uContext::uContextRef> ciWinMgr_t;
-
 class imageDirContext : public uContext
 {
 public:
-	imageDirContext(ci::app::WindowRef window);
-	
 	// From just a name, use the browse to folder dialog to get the file
 	// From a name and a path
-	imageDirContext(const uContextRef& parent = uContextRef () , const boost::filesystem::path& = boost::filesystem::path () );
+	imageDirContext(const uContextRef& parent = uContextRef () , const boost::filesystem::path& pp = boost::filesystem::path () );
 
 	static const std::string& caption () { static std::string cp ("Image Dir Viewer "); return cp; }
 	void loadImageDirectory ( const filesystem::path& directory);
@@ -180,11 +184,9 @@ private:
 class matContext : public uContext
 {
 public:
-	matContext(ci::app::WindowRef window);
-	
 	// From just a name, use the open file dialog to get the file
 	// From a name and a path
-	matContext(const uContextRef& parent = uContextRef (), const boost::filesystem::path& = boost::filesystem::path ());
+	matContext(const uContextRef& parent = uContextRef (), const boost::filesystem::path& pp = boost::filesystem::path ());
 	
     static const std::string& caption () { static std::string cp ("Smm Viewer # "); return cp; }
 
@@ -222,12 +224,9 @@ private:
 class movContext : public uContext
 {
 public:
-	
-	movContext(ci::app::WindowRef window);
-	
 	// From just a name, use the open file dialog to get the file
 	// From a name and a path
-	movContext(const uContextRef& parent = uContextRef (), const boost::filesystem::path& = boost::filesystem::path () );
+	movContext(const uContextRef& parent = uContextRef (), const boost::filesystem::path& pp = boost::filesystem::path () );
 	
 	Signal <void(bool)> signalShowMotioncenter;
 	
@@ -267,7 +266,9 @@ public:
 	
 	
 	// Add tracks
-	void add_scalar_track (const std::string& name, const boost::filesystem::path& file);
+	void add_scalar_track_get_file () { add_scalar_track (); }
+	
+	void add_scalar_track (const boost::filesystem::path& file = boost::filesystem::path ());
 	
 
 	
@@ -338,7 +339,7 @@ public:
 	
 	// From just a name, use the open file dialog to get the file
 	// From a name and a path
-	clipContext(const uContextRef& parent = uContextRef (), const boost::filesystem::path& = boost::filesystem::path ());
+	clipContext(const uContextRef& parent = uContextRef (), const boost::filesystem::path& pp = boost::filesystem::path ());
 	
     static const std::string& caption () { static std::string cp ("Result Clip Viewer # "); return cp; }
     virtual const std::string & name() const { return mName; }

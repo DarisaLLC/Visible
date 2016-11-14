@@ -1,12 +1,28 @@
+#include "cinder/app/App.h"
+#include "cinder/app/RendererGl.h"
+#include "cinder/Camera.h"
+#include "cinder/params/Params.h"
+#include "cinder/Rand.h"
+#include "ui_contexts.h"
+#include "boost/filesystem.hpp"
+#include <functional>
+#include <list>
+#include "core/stl_utils.hpp"
+#include "app_utils.hpp"
+#include "core/core.hpp"
+#include <memory>
+
+using namespace ci;
+using namespace ci::app;
+using namespace std;
 
 #include "VisibleApp.h"
 
 using namespace csv;
 
-
 namespace
 {
- 
+    
     std::ostream& ci_console ()
     {
         return App::get()->console();
@@ -22,6 +38,50 @@ namespace
         return App::get()->getNumWindows();
     }
 }
+
+
+class VisibleApp : public App, public SingletonLight<VisibleApp>
+{
+public:
+    
+    
+    void prepareSettings( Settings *settings );
+    void setup();
+    void create_qmovie_viewer ();
+    void create_image_dir_viewer ();
+    
+    void mouseDown( MouseEvent event );
+    void mouseMove( MouseEvent event );
+    void mouseUp( MouseEvent event );
+    void mouseDrag( MouseEvent event );
+    void keyDown( KeyEvent event );
+    
+    //void fileDrop( FileDropEvent event );
+    void update();
+    void draw();
+    void close_main();
+    void resize();
+    void window_close ();
+    
+    params::InterfaceGlRef         mTopParams;
+    
+    Rectf                       mGraphDisplayRect;
+    Rectf                       mMovieDisplayRect;
+    Rectf                       mMenuDisplayRect;
+    Rectf                       mLogDisplayRect;
+    CameraPersp				mCam;
+    
+    std::list <std::shared_ptr<uContext> > mContexts;
+    bool mImageSequenceDataLoaded;
+    bool mImageDataLoaded;
+    bool mShowCenterOfMotionSignal;
+    bool mShowMultiSnapShot;
+    bool mShowMultiSnapShotAndData;
+    bool mPaused;
+    
+    
+    
+};
 
 
 
@@ -43,10 +103,6 @@ void VisibleApp::prepareSettings( Settings *settings )
 //    settings->setResizable( true );
  }
 
-WindowRef VisibleApp::getNewWindow (ivec2 size)
-{
-    return createWindow( Window::Format().size(size));
-}
 
 void VisibleApp::resize ()
 {
@@ -57,9 +113,9 @@ void VisibleApp::resize ()
 // We allow one movie and multiple clips or matrix view.
 //
 //
-void VisibleApp::create_matrix_viewer ()
+void VisibleApp::create_qmovie_viewer ()
 {
-    mContexts.push_back(std::shared_ptr<uContext>(new matContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize())))));
+    mContexts.push_back(std::shared_ptr<uContext>(new movContext()));
 }
 
 //
@@ -68,13 +124,15 @@ void VisibleApp::create_matrix_viewer ()
 //
 void VisibleApp::create_image_dir_viewer ()
 {
-    mContexts.push_back(std::shared_ptr<uContext>(new imageDirContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize())))));
+    mContexts.push_back(std::shared_ptr<uContext>(new imageDirContext()));
 }
 
 
 
 void VisibleApp::setup()
 {
+    getWindow()->setUserData( new uContext () );
+    
     mPaused = mShowMultiSnapShotAndData = mShowMultiSnapShot = mShowCenterOfMotionSignal = false;
     mImageDataLoaded = mImageSequenceDataLoaded = false;
     
@@ -91,9 +149,7 @@ void VisibleApp::setup()
 	mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this ) );
   //  mTopParams->addSeparator();
   // 	mTopParams->addButton( "Import SS Matrix", std::bind( &VisibleApp::create_matrix_viewer, this ) );
-    mTopParams->addSeparator();
-   	mTopParams->addButton( "Import Time Series ", std::bind( &VisibleApp::create_clip_viewer, this ) );
-    mTopParams->addSeparator();
+   
     mTopParams->addSeparator();
    	mTopParams->addButton( "Import Image Directory ", std::bind( &VisibleApp::create_image_dir_viewer, this ) );
     
@@ -186,7 +242,7 @@ void VisibleApp::update()
 {
    uContext  *data = getWindow()->getUserData<uContext>();
 
-   if (data && data->is_valid()) data->update ();
+  if (data && data->is_valid()) data->update ();
     
 }
 

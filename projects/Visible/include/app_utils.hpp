@@ -49,7 +49,7 @@ namespace app_utils
 {
     
     template<typename W,typename C,typename K = uint16_t>
-    class WindowMgr : SingletonLight<WindowMgr <W,K,C> >
+    class WindowMgr : public SingletonLight<WindowMgr <W,C,K> >
     {
     public:
         typedef K key_t;
