@@ -272,6 +272,10 @@
 		C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2B6E6701D0618E400235FB7 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
+		C2BECECE1DD6D4F80001E2BA /* visible_idir_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */; };
+		C2BECECF1DD6D4FA0001E2BA /* visible_idir_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */; };
+		C2BECED11DD6D8BA0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
+		C2BECED21DD6D8DE0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
 		C2FC7DAF1CF4F46100D18193 /* qtime_frame_cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */; };
 /* End PBXBuildFile section */
 
@@ -9716,10 +9720,13 @@
 		C2B38A4F1D022D2A00C70872 /* AVReader.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = AVReader.mm; path = ../src/AVReader.mm; sourceTree = "<group>"; };
 		C2B38A541D022E9D00C70872 /* AVReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AVReader.h; path = ../include/AVReader.h; sourceTree = "<group>"; };
 		C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AVReaderWrapper.mm; path = ../src/AVReaderWrapper.mm; sourceTree = "<group>"; };
+		C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AccordionItem.cpp; path = ../src/AccordionItem.cpp; sourceTree = "<group>"; };
+		C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccordionItem.h; path = ../include/AccordionItem.h; sourceTree = "<group>"; };
 		C2E321FE1D038B16006DFE5E /* AVReader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AVReader.hpp; path = ../AVReader.hpp; sourceTree = "<group>"; };
 		C2E321FF1D0480E4006DFE5E /* mediaInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mediaInfo.h; path = ../include/mediaInfo.h; sourceTree = "<group>"; };
 		C2E322001D05B90C006DFE5E /* time_index.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time_index.h; path = ../include/time_index.h; sourceTree = "<group>"; };
 		C2E469CE1D07718B0066B811 /* cm_time.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cm_time.hpp; sourceTree = "<group>"; };
+		C2F27E891DD8516900890E4C /* VisibleApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VisibleApp.h; path = ../include/VisibleApp.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -9786,6 +9793,7 @@
 		080E96DDFE201D6D7F000001 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */,
 				C2B38A4F1D022D2A00C70872 /* AVReader.mm */,
 				C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */,
 				C2B005811CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm */,
@@ -9794,6 +9802,7 @@
 				C21946661CE4DC7100976025 /* AudioDrawUtils.h */,
 				C21946691CE4DC7100976025 /* DirMovie.cpp */,
 				C219466A1CE4DC7100976025 /* DirMovie.h */,
+				C2F27E891DD8516900890E4C /* VisibleApp.h */,
 				C219466D1CE4DC7100976025 /* InteractiveObject.cpp */,
 				C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */,
 				C21946761CE4DC7100976025 /* visible_impl.cpp */,
@@ -9920,6 +9929,7 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */,
 				C2B38A541D022E9D00C70872 /* AVReader.h */,
 				C2E321FE1D038B16006DFE5E /* AVReader.hpp */,
 				C21FFE6B1CFD1D9B00C97013 /* app_utils.hpp */,
@@ -25971,6 +25981,8 @@
 				C2B6E6701D0618E400235FB7 /* AVReader.mm in Sources */,
 				C2B005821CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm in Sources */,
 				C2606DB01CED3E2E0045FF57 /* opencv_utils.cpp in Sources */,
+				C2BECECE1DD6D4F80001E2BA /* visible_idir_impl.cpp in Sources */,
+				C2BECED11DD6D8BA0001E2BA /* AccordionItem.cpp in Sources */,
 				C219467E1CE4DC7100976025 /* InteractiveObject.cpp in Sources */,
 				C20EDBC31CF277130074C47A /* time_spec.cpp in Sources */,
 				C21946871CE4DC7100976025 /* visible_impl.cpp in Sources */,
@@ -25998,10 +26010,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */,
+				C2BECED21DD6D8DE0001E2BA /* AccordionItem.cpp in Sources */,
 				C27221161D1C912E008EF8B2 /* histo.cpp in Sources */,
 				C20EDBB71CEFC2E70074C47A /* rowfunc.cpp in Sources */,
 				C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */,
 				C21FFE721CFE0AA300C97013 /* sm_producer.cpp in Sources */,
+				C2BECECF1DD6D4FA0001E2BA /* visible_idir_impl.cpp in Sources */,
 				C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,

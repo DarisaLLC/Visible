@@ -49,111 +49,71 @@ namespace fs = boost::filesystem;
 class uContext : public std::enable_shared_from_this<uContext>
 {
 public:
+	enum Type {
+		null_viewer = 0,
+		matrix_viewer = null_viewer+1,
+		qtime_viewer = matrix_viewer+1,
+		clip_viewer = qtime_viewer+1,
+		image_dir_viewer = clip_viewer+1,
+		viewer_types = clip_viewer+1
+	};
 	
-	typedef std::shared_ptr<uContext> uContextRef;
 	
 	typedef marker_info marker_info_t;
     typedef void (sig_cb_marker) (marker_info_t&);
 	
-	uContext () : m_valid (false), m_type (null_viewer)
-	{
-//		m_parent = getRef ();
-	}
+	uContext (ci::app::WindowRef& ww);
+	virtual ~uContext ();
 	
-	uContext (const uContextRef& parent)
-		: m_valid (false), m_type (null_viewer)
-	{
-//		if (! parent) m_parent = getRef ();
-	}
+	std::shared_ptr<uContext> getRef();
 	
-
-	uContextRef getRef()
-	{
-		return shared_from_this();
-	}
-	
-	ci::app::WindowRef	getWindowRef () const { return mWindow; }
-	void setWindowRef (ci::app::WindowRef& ww) 
-	{
-		mWindow = ww;
-		mWindow->setUserData(this);
-	}
-	
-	
-	uContextRef	getContextRef () const;
-	void setContextRef (uContextRef& ) const;
-
 	Signal <void(marker_info_t&)> signalMarker;
 	
-    virtual ~uContext ()
-    {
-        std::cout << "uContext Base Dtor is called " << std::endl;
-    }
-    virtual const std::string & name() const;
-    virtual void name (const std::string& );
-    
-    virtual void draw ();
-    virtual void update ();
-    //    virtual void resize () = 0;
-    virtual void setup ();
-    virtual bool is_valid ();
-    
-    // u implementation does nothing
-    virtual void mouseDown( MouseEvent event ) {}
-    virtual void mouseMove( MouseEvent event ) {}
-  	virtual void mouseUp( MouseEvent event ) {}
-    virtual void mouseDrag( MouseEvent event ) {}
-    
-	virtual void keyDown( KeyEvent event ) {}
-	void normalize_point (vec2& pos, const ivec2& size)
-	{
-		pos.x = pos.x / size.x;
-		pos.y = pos.y / size.y;
-	}
-	
-    enum Type {
-		null_viewer = 0,
-        matrix_viewer = null_viewer+1,
-        qtime_viewer = matrix_viewer+1,
-        clip_viewer = qtime_viewer+1,
-		image_dir_viewer = clip_viewer+1,
-        viewer_types = clip_viewer+1
-    };
+	virtual const std::string & getName() const ;
+	virtual void setName (const std::string& name);
+	virtual uContext::Type context_type () const;
+	virtual bool is_context_type (const uContext::Type t) const;
 	
 
-	Type context_type () const { return m_type; }
-	bool is_context_type (const Type t) const { return m_type == t; }
+	//    virtual void resize () = 0;
+	virtual void draw () = 0;
+	virtual void update () = 0;
+	virtual void setup () = 0;
+    virtual bool is_valid () const ;
+    
+    // u implementation does nothing
+	virtual void mouseDown( MouseEvent event );
+	virtual void mouseMove( MouseEvent event );
+	virtual void mouseUp( MouseEvent event );
+	virtual void mouseDrag( MouseEvent event );
+	
+	virtual void keyDown( KeyEvent event );
+	virtual void normalize_point (vec2& pos, const ivec2& size);
+	
 	
   protected:
 	Type m_type;
     size_t m_uniqueId;
     bool m_valid;
-    mutable ci::app::WindowRef				mWindow;
-	mutable uContextRef	                    m_parent;
-    ci::signals::ScopedConnection	mCbMouseDown, mCbMouseDrag;
-    ci::signals::ScopedConnection	mCbMouseMove, mCbMouseUp;
-    ci::signals::ScopedConnection	mCbKeyDown;
-
-	
-//	std::shared_ptr<std::thread>		mThread;
-//	gl::TextureRef			mTexture, mLastTexture;
-//	ConcurrentCircularBuffer<gl::TextureRef>	*mImages;
-	
-
+    ci::app::WindowRef				mWindow;
+	std::string mName;
 };
+
+typedef std::shared_ptr<uContext> uContextRef;
 
 class imageDirContext : public uContext
 {
 public:
 	// From just a name, use the browse to folder dialog to get the file
 	// From a name and a path
-	imageDirContext(const uContextRef& parent = uContextRef () , const boost::filesystem::path& pp = boost::filesystem::path () );
+	imageDirContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
+	
 
+	
+	~imageDirContext () {}
 	static const std::string& caption () { static std::string cp ("Image Dir Viewer "); return cp; }
 	void loadImageDirectory ( const filesystem::path& directory);
 	
-	virtual const std::string & name() const { return mName; }
-	virtual void name (const std::string& name) { mName = name; }
 	virtual void draw ();
 	virtual void setup ();
 	virtual bool is_valid ();
@@ -173,7 +133,7 @@ private:
 	boost::filesystem::path mFolderPath;
 	std::vector<boost::filesystem::path> mImageFiles;
 	std::vector<std::string> mSupportedExtensions;
-	std::string mName;
+
 	
 	
 };
@@ -186,12 +146,10 @@ class matContext : public uContext
 public:
 	// From just a name, use the open file dialog to get the file
 	// From a name and a path
-	matContext(const uContextRef& parent = uContextRef (), const boost::filesystem::path& pp = boost::filesystem::path ());
-	
+	matContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
+	~matContext () {}
     static const std::string& caption () { static std::string cp ("Smm Viewer # "); return cp; }
 
-    virtual const std::string & name() const { return mName; }
-    virtual void name (const std::string& name) { mName = name; }
     virtual void draw ();
     virtual void setup ();
     virtual bool is_valid ();
@@ -215,9 +173,54 @@ private:
     CameraUi		mCamUi;
     
     boost::filesystem::path mPath;
-    std::string mName;
-	
+};
 
+
+class clipContext : public uContext
+{
+public:
+	
+	// From just a name, use the open file dialog to get the file
+	// From a name and a path
+	clipContext( ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
+	~clipContext () {}
+	
+	static const std::string& caption () { static std::string cp ("Result Clip Viewer # "); return cp; }
+	virtual void draw ();
+	virtual void setup ();
+	virtual bool is_valid ();
+	virtual void update ();
+	virtual void mouseDrag( MouseEvent event );
+	virtual void mouseMove( MouseEvent event );
+	virtual void mouseDown( MouseEvent event );
+	virtual void mouseUp( MouseEvent event );
+	void normalize (const bool do_normalize = false){m_normalize = do_normalize; }
+	bool normalize_option () const { return m_normalize; }
+	
+	void draw_window ();
+	void receivedEvent ( InteractiveObjectEvent event );
+	void loadAll (const csv::matf_t& src);
+	
+	virtual void onMarked (marker_info_t&);
+	
+private:
+	
+	static DataSourcePathRef create (const std::string& fqfn)
+	{
+		return  DataSourcePath::create (boost::filesystem::path  (fqfn));
+	}
+	
+	void select_column (size_t col) { m_column_select = col; }
+	
+	params::InterfaceGl         mClipParams;
+	Graph1DRef mGraph1D;
+	boost::filesystem::path mPath;
+	csv::matf_t mdat;
+	int m_column_select;
+	bool m_normalize;
+	size_t m_frames, m_file_frames, m_read_pos;
+	size_t m_rows, m_columns;
+	
 };
 
 
@@ -226,14 +229,13 @@ class movContext : public uContext
 public:
 	// From just a name, use the open file dialog to get the file
 	// From a name and a path
-	movContext(const uContextRef& parent = uContextRef (), const boost::filesystem::path& pp = boost::filesystem::path () );
+	movContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
+	~movContext () {}
 	
 	Signal <void(bool)> signalShowMotioncenter;
 	
     static const std::string& caption () { static std::string cp ("Qtime Viewer # "); return cp; }
-    virtual const std::string & name() const { return mName; }
-    virtual void name (const std::string& name) { mName = name; }
-    virtual void draw ();
+	virtual void draw ();
     virtual void setup ();
     virtual bool is_valid ();
     virtual void update ();
@@ -253,6 +255,10 @@ public:
     
 	void setShowMotionCenter (bool b)  { mShowMotionCenter = b; }
 	bool getShowMotionCenter ()  { return mShowMotionCenter; }
+	
+	void setShowMotionBubble (bool b)  { mShowMotionBubble = b; }
+	bool getShowMotionBubble ()  { return mShowMotionBubble; }
+	
 	void setZoom (float);
 	float getZoom ();
 
@@ -261,9 +267,6 @@ public:
     void setIndex (int mark);
 	
 	void play_pause_button ();
-	
-	void loadImagesThreadFn( gl::ContextRef sharedGlContext );
-	
 	
 	// Add tracks
 	void add_scalar_track_get_file () { add_scalar_track (); }
@@ -285,7 +288,6 @@ private:
     gl::TextureRef mImage;
     ci::qtime::MovieSurfaceRef m_movie;
     size_t m_fc;
-    std::string mName;
     params::InterfaceGl         mMovieParams;
     float mMoviePosition, mPrevMoviePosition;
     size_t mMovieIndexPosition, mPrevMovieIndexPosition;
@@ -314,7 +316,7 @@ private:
     bool mMouseIsDragging;
     bool mMetaDown;
 	
-	bool mShowMotionCenter;
+	bool mShowMotionCenter, mShowMotionBubble;
 	std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
 	int mButton_title_index;
 	std::string mButton_title;
@@ -327,58 +329,8 @@ private:
     }
 	
 	
-	std::list<std::shared_ptr<uContext> > m_tracks;
+	std::list<std::shared_ptr<clipContext> > m_tracks;
 	
-	
-};
-
-
-class clipContext : public uContext
-{
-public:
-	
-	// From just a name, use the open file dialog to get the file
-	// From a name and a path
-	clipContext(const uContextRef& parent = uContextRef (), const boost::filesystem::path& pp = boost::filesystem::path ());
-	
-    static const std::string& caption () { static std::string cp ("Result Clip Viewer # "); return cp; }
-    virtual const std::string & name() const { return mName; }
-    virtual void name (const std::string& name) { mName = name; }
-    virtual void draw ();
-    virtual void setup ();
-    virtual bool is_valid ();
-    virtual void update ();
-    virtual void mouseDrag( MouseEvent event );
-    virtual void mouseMove( MouseEvent event );
-    virtual void mouseDown( MouseEvent event );
-    virtual void mouseUp( MouseEvent event );
-	void normalize (const bool do_normalize = false){m_normalize = do_normalize; }
-	bool normalize_option () const { return m_normalize; }
-	
-	void draw_window ();
-    void receivedEvent ( InteractiveObjectEvent event );
-	void loadAll (const csv::matf_t& src);
-	
-	virtual void onMarked (marker_info_t&);
-	
-private:
-  
-    static DataSourcePathRef create (const std::string& fqfn)
-    {
-        return  DataSourcePath::create (boost::filesystem::path  (fqfn));
-    }
-    
-    void select_column (size_t col) { m_column_select = col; }
-    
-    params::InterfaceGl         mClipParams;
-    Graph1DRef mGraph1D;
-    boost::filesystem::path mPath;
-    std::string mName;
-	csv::matf_t mdat;
-    int m_column_select;
-	bool m_normalize;
-    size_t m_frames, m_file_frames, m_read_pos;
-    size_t m_rows, m_columns;
 	
 };
 

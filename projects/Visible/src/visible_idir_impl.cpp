@@ -22,7 +22,8 @@ static boost::filesystem::path browseToFolder ()
     return Platform::get()->getFolderPath (Platform::get()->getHomeDirectory());
 }
 
-void imageDirContext::loadImageDirectory ( const filesystem::path& directory)
+void imageDirContext::loadImageDirectory (const filesystem::path& directory)
+
 {
     m_valid = false;
     
@@ -53,8 +54,8 @@ void imageDirContext::loadImageDirectory ( const filesystem::path& directory)
     
  }
 
-imageDirContext::imageDirContext(const uContextRef& parent , const boost::filesystem::path& dp)
-    : uContext (parent), mFolderPath (dp)
+imageDirContext::imageDirContext( WindowRef& ww, const boost::filesystem::path& dp)
+        : uContext (ww), mFolderPath (dp)
 {
     m_valid = false;
     m_type = Type::image_dir_viewer;
@@ -66,10 +67,7 @@ imageDirContext::imageDirContext(const uContextRef& parent , const boost::filesy
     setup ();
     if (is_valid())
     {
-        app::WindowRef new_win = App::get()->createWindow ();
-        setWindowRef ( new_win );
-        mCbMouseDrag = mWindow->getSignalMouseMove().connect( std::bind( &imageDirContext::mouseMove, this, std::placeholders::_1 ) );
-        mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &clipContext::keyDown, this, std::placeholders::_1 ) );
+        mWindow->setTitle( mFolderPath.filename().string() );
     }
 }
 

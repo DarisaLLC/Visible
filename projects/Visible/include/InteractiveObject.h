@@ -92,6 +92,7 @@ public:
     void removeListener( ci::CallbackId callId );
 
     const vec2& norm_pos () const { return mNormPos; }
+    void norm_pos (vec2& nn) const { mNormPos = nn; }
     
     
     ci::Rectf rect;
@@ -100,7 +101,7 @@ public:
 protected:
     bool mPressed, mOver;
     ci::CallbackMgr< void(InteractiveObjectEvent) > mEvents;
-    vec2 mNormPos;
+    mutable vec2 mNormPos;
     bool update_norm_position ( ci::app::MouseEvent& event  );
 };
 

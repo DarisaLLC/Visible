@@ -3,6 +3,8 @@
 #include "cinder/Camera.h"
 #include "cinder/params/Params.h"
 #include "cinder/Rand.h"
+#include "cinder/Utilities.h"
+#include "cinder/Log.h"
 #include "ui_contexts.h"
 #include "boost/filesystem.hpp"
 #include <functional>
@@ -61,7 +63,13 @@ public:
     void draw();
     void close_main();
     void resize();
-    void window_close ();
+    void windowMove();
+    void windowClose();
+    void windowMouseDown( MouseEvent &mouseEvt );
+    void displayChange();
+    
+    bool shouldQuit();
+    WindowRef createConnectedWindow (Window::Format& format);
     
     params::InterfaceGlRef         mTopParams;
     
@@ -83,14 +91,20 @@ public:
     
 };
 
-
-
-void VisibleApp::window_close()
+WindowRef  VisibleCentral::getConnectedWindow (Window::Format& format )
 {
-    console() << "Closing " << getWindow() << std::endl;
+    return VisibleApp::instance().createConnectedWindow(format);
 }
 
 
+WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
+{
+    WindowRef win = createWindow( format );
+    win->getSignalClose().connect( std::bind( &VisibleApp::windowClose, this ) );
+    win->getSignalMouseDown().connect( std::bind( &VisibleApp::windowMouseDown, this, std::placeholders::_1 ) );
+    //   win->getSignalDraw().connect( std::bind( &VisibleApp::windowDraw, this ) );
+
+}
 
 void VisibleApp::prepareSettings( Settings *settings )
 {
@@ -104,6 +118,11 @@ void VisibleApp::prepareSettings( Settings *settings )
  }
 
 
+bool VisibleApp::shouldQuit()
+{
+    return true;
+}
+
 void VisibleApp::resize ()
 {
 }
@@ -115,7 +134,9 @@ void VisibleApp::resize ()
 //
 void VisibleApp::create_qmovie_viewer ()
 {
-    mContexts.push_back(std::shared_ptr<uContext>(new movContext()));
+    Window::Format format( RendererGl::create() );
+    WindowRef ww = createConnectedWindow(format);
+    mContexts.push_back(std::shared_ptr<movContext>( new movContext(ww) ) );
 }
 
 //
@@ -124,14 +145,17 @@ void VisibleApp::create_qmovie_viewer ()
 //
 void VisibleApp::create_image_dir_viewer ()
 {
-    mContexts.push_back(std::shared_ptr<uContext>(new imageDirContext()));
+    Window::Format format( RendererGl::create() );
+    WindowRef ww = createConnectedWindow(format);
+    mContexts.push_back(std::shared_ptr<imageDirContext>(new imageDirContext(ww)));
 }
 
 
 
 void VisibleApp::setup()
 {
-    getWindow()->setUserData( new uContext () );
+    WindowRef ww = getWindow ();
+  //  getWindow()->setUserData( new uContext (ww) );
     
     mPaused = mShowMultiSnapShotAndData = mShowMultiSnapShot = mShowCenterOfMotionSignal = false;
     mImageDataLoaded = mImageSequenceDataLoaded = false;
@@ -146,7 +170,7 @@ void VisibleApp::setup()
 //	mTopParams = params::InterfaceGl::create( getWindow(), "Select", toPixels( vec2( 200, 400)), color );
 
     mTopParams->addSeparator();
-	mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this ) );
+    mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this) );
   //  mTopParams->addSeparator();
   // 	mTopParams->addButton( "Import SS Matrix", std::bind( &VisibleApp::create_matrix_viewer, this ) );
    
@@ -158,21 +182,39 @@ void VisibleApp::setup()
 //    mTopParams->addParam( "Show Multi Snap Shot ", &mShowMultiSnapShot);
 //    mTopParams->addParam( "Show Multi Snap Shot and Data ", &mShowMultiSnapShotAndData);
 //    mTopParams->addParam( "Pause ", &mPaused );
-
+    getSignalShouldQuit().connect( std::bind( &VisibleApp::shouldQuit, this ) );
+    
+    getWindow()->getSignalMove().connect( std::bind( &VisibleApp::windowMove, this ) );
+    getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
     getWindow()->getSignalDraw().connect(std::bind( &VisibleApp::draw, this) );
-    getWindow()->getSignalClose().connect(std::bind( &VisibleApp::window_close, this) );
-    const vec2 c_ul (0.0,0.0);
-    const vec2& c_lr = getWindowBounds().getSize();
-    vec2 c_mr (c_lr.x, (c_lr.y - c_ul.y) / 2);
-    vec2 c_ml (c_ul.x, (c_lr.y - c_ul.y) / 2);
-    mGraphDisplayRect = Area (c_ul, c_mr);
-    mMovieDisplayRect = Area (c_ml, c_lr);
+    getWindow()->getSignalClose().connect(std::bind( &VisibleApp::windowClose, this) );
     
+    getSignalDidBecomeActive().connect( [] { CI_LOG_V( "App became active." ); } );
+    getSignalWillResignActive().connect( [] { CI_LOG_V( "App will resign active." ); } );
     
+}
 
+void VisibleApp::windowMouseDown( MouseEvent &mouseEvt )
+{
+    CI_LOG_V( "Mouse down in window" );
+}
+
+void VisibleApp::windowMove()
+{
+    CI_LOG_V( "window pos: " << getWindow()->getPos() );
+}
+
+void VisibleApp::displayChange()
+{
+    CI_LOG_V( "window display changed: " << getWindow()->getDisplay()->getBounds() );
 }
 
 
+void VisibleApp::windowClose()
+{
+    WindowRef win = getWindow();
+    CI_LOG_V( "Closing " << getWindow() );
+}
 
 void VisibleApp::mouseMove( MouseEvent event )
 {

@@ -18,8 +18,15 @@
 using namespace ci;
 using namespace ci::app;
 
-typedef app_utils::WindowMgr<WindowRef, uContext::uContextRef> VisWinMgr;
+typedef app_utils::WindowMgr<WindowRef, uContextRef> VisWinMgr;
 
+struct VisibleCentral : SingletonLight<VisibleCentral>
+{
+    VisibleCentral () {}
+
+    WindowRef getConnectedWindow (Window::Format& format);
+
+};
 
 #endif
 

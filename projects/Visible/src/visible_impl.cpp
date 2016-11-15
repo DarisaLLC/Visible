@@ -31,30 +31,48 @@ namespace
         return AppBase::get()->getElapsedSeconds();
     }
 
-
-  }
-
-/////////////// Null Viewer ///////////////////////
-
-const std::string & uContext::name() const
-{
-    static std::string sNullName = "nullViewer";
-    return sNullName;
 }
-void uContext::name (const std::string& ) {}
 
-void uContext::draw () {}
-void uContext::update () {}
-//    virtual void resize () = 0;
-void uContext::setup () {}
-bool uContext::is_valid () { return false; }
+uContext::uContext (ci::app::WindowRef& ww)
+: mWindow (ww), m_valid (false), m_type (null_viewer)
+{
+}
 
+uContextRef uContext::getRef ()
+{
+    return shared_from_this();
+}
+
+uContext::~uContext ()
+{
+     std::cout << " uContext Dtor called " << std::endl;
+}
+
+// u implementation does nothing
+void uContext::mouseDown( MouseEvent event ) {}
+void uContext::mouseMove( MouseEvent event ) {}
+void uContext::mouseUp( MouseEvent event ) {}
+void uContext::mouseDrag( MouseEvent event ) {}
+void uContext::keyDown( KeyEvent event ) {}
+
+void uContext::normalize_point (vec2& pos, const ivec2& size)
+{
+    pos.x = pos.x / size.x;
+    pos.y = pos.y / size.y;
+}
+
+
+const std::string & uContext::getName() const { return mName; }
+void uContext::setName (const std::string& name) { mName = name; }
+uContext::Type uContext::context_type () const { return m_type; }
+bool uContext::is_context_type (const Type t) const { return m_type == t; }
+bool uContext::is_valid () const { return m_valid; }
 
 
 ///////////////  Matrix Viewer ////////////////////
 
-matContext::matContext(const uContextRef& parent , const boost::filesystem::path& dp)
-: uContext (parent), mPath (dp)
+matContext::matContext(ci::app::WindowRef& ww, const boost::filesystem::path& dp)
+: uContext (ww), mPath (dp)
 {
     m_valid = false;
     m_type = Type::matrix_viewer;
@@ -62,12 +80,7 @@ matContext::matContext(const uContextRef& parent , const boost::filesystem::path
     setup ();
     if (is_valid())
     {
-        app::WindowRef new_win = App::get()->createWindow ();
-        setWindowRef ( new_win );
-        mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &matContext::mouseDown, this, std::placeholders::_1 ) );
-        mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &matContext::mouseDrag, this, std::placeholders::_1 ) );
-        mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &matContext::keyDown, this, std::placeholders::_1 ) );
-        getWindowRef()->setTitle (matContext::caption ());
+        mWindow->setTitle (matContext::caption ());
     }
 }
 
@@ -174,8 +187,8 @@ bool matContext::is_valid ()
 ////////////////// ClipContext  ///////////////////
 
 
-clipContext::clipContext(const uContextRef& parent , const boost::filesystem::path& dp)
-: uContext (parent), mPath (dp)
+clipContext::clipContext(ci::app::WindowRef& ww, const boost::filesystem::path& dp)
+: uContext (ww), mPath (dp)
 {
     m_valid = false;
     m_type = Type::clip_viewer;
@@ -188,16 +201,7 @@ clipContext::clipContext(const uContextRef& parent , const boost::filesystem::pa
     setup ();
     if (is_valid())
     {
-        app::WindowRef new_win = App::get()->createWindow();
-        setWindowRef ( new_win );
-        mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &clipContext::mouseDown, this, std::placeholders::_1 ) );
-        mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &clipContext::mouseDrag, this, std::placeholders::_1 ) );
-        mCbMouseUp = mWindow->getSignalMouseUp().connect( std::bind( &clipContext::mouseUp, this, std::placeholders::_1 ) );
-        mCbMouseDrag = mWindow->getSignalMouseMove().connect( std::bind( &clipContext::mouseMove, this, std::placeholders::_1 ) );
-        mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &clipContext::keyDown, this, std::placeholders::_1 ) );
-        getWindow()->setTitle( mPath.filename().string() );
-        
-          
+        mWindow->setTitle( mPath.filename().string() );
     }
     
 }
@@ -210,7 +214,11 @@ void clipContext::draw ()
 
 void clipContext::onMarked ( marker_info_t& t)
 {
-    std::cout << " clip <- " << t.norm_time << std::endl;
+  if (mGraph1D)
+  {
+      mGraph1D->set_marker_position ( t );
+      mGraph1D->draw ( );
+  }
 }
 
 void clipContext::update ()
@@ -225,11 +233,6 @@ void clipContext::setup()
     m_valid = false;
     normalize(true);
     
-    // Get a Window
-    app::WindowRef new_win = App::get()->createWindow();
-    setWindowRef ( new_win );
-    
-
     const std::string& fqfn = mPath.string ();
     m_columns = m_rows = 0;
     mdat.clear ();

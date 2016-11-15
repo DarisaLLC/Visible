@@ -61,6 +61,14 @@ public:
         t.index = mIndex;
     }
     
+    void set_marker_position (marker_info& t) const
+    {
+        vec2& pp = t.norm_pos;
+        norm_pos (pp);
+        mVal = t.val;
+        mIndex = t.index;
+    }
+    
     void draw_value_label (float v, float x, float y) const
     {
         TextLayout tmp (mTextLayout);

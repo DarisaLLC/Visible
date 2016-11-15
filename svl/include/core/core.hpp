@@ -8,7 +8,7 @@
 # include <assert.h> // .h to support old libraries w/o <cassert> - effect is the same
 #include "coreGLM.h"
 #include <random>
-
+#include <chrono>
 
 namespace svl  // protection from unintended ADL
 {
@@ -35,11 +35,12 @@ namespace svl  // protection from unintended ADL
     template<typename T> T
     randomT ()
     {
-        std::random_device rd;
+        // obtain a seed from the system clock:
+        auto seed = std::chrono::system_clock::now().time_since_epoch().count();
         
-        std::mt19937 _rng_generator(rd());
+        std::default_random_engine generator (seed);
         
-       return std::generate_canonical<T,std::numeric_limits<T>::digits>(_rng_generator);
+       return std::generate_canonical<T,std::numeric_limits<T>::digits>(generator);
 
     }
     

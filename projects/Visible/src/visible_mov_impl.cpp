@@ -54,8 +54,8 @@ namespace
 
 /////////////  movContext Implementation  ////////////////
 
-movContext::movContext(const uContextRef& parent , const boost::filesystem::path& dp)
-: uContext (parent), mPath (dp)
+movContext::movContext(WindowRef& ww, const boost::filesystem::path& dp)
+: uContext(ww), mPath (dp)
 {
     m_valid = false;
     m_type = Type::qtime_viewer;
@@ -68,12 +68,7 @@ movContext::movContext(const uContextRef& parent , const boost::filesystem::path
     setup ();
     if (is_valid())
     {
-        mCbMouseDown = mWindow->getSignalMouseDown().connect( std::bind( &movContext::mouseDown, this, std::placeholders::_1 ) );
-        mCbMouseDrag = mWindow->getSignalMouseDrag().connect( std::bind( &movContext::mouseDrag, this, std::placeholders::_1 ) );
-        mCbMouseUp = mWindow->getSignalMouseUp().connect( std::bind( &movContext::mouseUp, this, std::placeholders::_1 ) );
-        mCbMouseMove = mWindow->getSignalMouseMove().connect( std::bind( &movContext::mouseMove, this, std::placeholders::_1 ) );
-        mCbKeyDown = mWindow->getSignalKeyDown().connect( std::bind( &movContext::keyDown, this, std::placeholders::_1 ) );
-        getWindow()->setTitle( mPath.filename().string() );
+        mWindow->setTitle( mPath.filename().string() );
     }
     
 }
@@ -117,7 +112,7 @@ void movContext::onMarked ( marker_info& t)
 {
     pause ();
     setIndex((int)(t.norm_pos.x *= m_fc));
-    
+  
 
 }
 void movContext::setIndex (int mark)
@@ -125,6 +120,9 @@ void movContext::setIndex (int mark)
     pause ();
     mMovieIndexPosition = (mark % m_fc);
     m_movie->seekToFrame(mMovieIndexPosition);
+ 
+    
+    
 }
 
 float movContext::getZoom ()
@@ -141,13 +139,11 @@ void movContext::setZoom (float nv)
 
 void movContext::setup()
 {
-    // Get a Window 
-    app::WindowRef new_win = App::get()->createWindow();
-    setWindowRef ( new_win );
-    VisWinMgr::key_t kk;
-    uContextRef fthis = getRef();
-    bool kept = VisWinMgr::instance().makePair(new_win, fthis, kk);
-    ci_console() << "Movie Window/Context registered: " << std::boolalpha << kept << std::endl;
+    
+//    VisWinMgr::key_t kk;
+//    uContextRef fthis = getRef();
+//    bool kept = VisWinMgr::instance().makePair(new_win, fthis, kk);
+//    ci_console() << "Movie Window/Context registered: " << std::boolalpha << kept << std::endl;
     
     // Load the validated movie file
     loadMovieFile ();
@@ -175,6 +171,13 @@ void movContext::setup()
             const std::function<bool (void)> getter = std::bind(&movContext::getShowMotionCenter, this);
 
             mMovieParams.addParam( "Show Mc", setter, getter);
+        }
+        mMovieParams.addSeparator();
+        {
+            const std::function<void (bool)> setter = std::bind(&movContext::setShowMotionBubble, this, std::placeholders::_1);
+            const std::function<bool (void)> getter = std::bind(&movContext::getShowMotionBubble, this);
+            
+            mMovieParams.addParam( "Show Mb", setter, getter);
         }
         
         mMovieParams.addSeparator();
@@ -334,12 +337,12 @@ void movContext::update ()
     time_spec_t new_time = qtimeAvfLink::MovieBaseGetCurrentTime(m_movie);
     
     fPair trim (10, 10);
-    uint8_t edge_magnitude_threshold = 10;
+    uint8_t edge_magnitude_threshold = 5;
     
     if (m_movie->checkNewFrame())
     {
-        ip::flipVertical(*m_movie->getSurface(), mSurface.get());
-        ip::flipHorizontal(mSurface.get());
+       ip::flipVertical(*m_movie->getSurface(), mSurface.get());
+     //   ip::flipHorizontal(mSurface.get());
         
         mFrameSet->loadFrame(mSurface, new_time);
         m_index = mFrameSet->currentIndex(new_time);
@@ -391,6 +394,7 @@ void movContext::draw ()
     gl::draw (mImage, getWindowBounds());
 
     vec2 com = mCom * vec2(getWindowSize().x,getWindowSize().y);
+    vec2 pcom = m_prev_com * vec2(getWindowSize().x,getWindowSize().y);
     vec2 mmm = m_max_motion * vec2(getWindowSize().x,getWindowSize().y);
     vec2 mid = (com + mmm) / vec2(2.0f,2.0f);
     
@@ -400,9 +404,15 @@ void movContext::draw ()
     
     if (getShowMotionCenter ())
     {
+        gl::ScopedColor color (ColorA(1.0f, 0.5f, 1.0f, 0.5f));
+        gl::drawLine(pcom, com);
+    }
+    if (getShowMotionBubble ())
+    {
         gl::ScopedColor color (ColorA(0.5f, 0.5f, 1.0f, 0.5f));
         gl::drawSolidEllipse(mid, len, len / 2.0f);
     }
+    
     mMovieParams.draw();
     
 }
@@ -415,30 +425,25 @@ void movContext::draw ()
 // Create a clip viewer. Go through container of viewers, if there is a movie view, connect onMarked signal to it
 void movContext::add_scalar_track(const boost::filesystem::path& path)
 {
-    // Get a clip context from the path
-    uContextRef new_ts ( new clipContext (getRef(), path));
-    auto parent_size = getWindowRef()->getSize();
-    auto parent_pos = getWindowRef()->getPos();
+    Window::Format format( RendererGl::create() );
+    WindowRef win = VisibleCentral::instance().getConnectedWindow(format);
+    std::shared_ptr<clipContext> new_ts ( new clipContext (win, path));
+    auto parent_size = mWindow->getSize();
+    auto parent_pos = mWindow->getPos();
     parent_pos.y += parent_size.y;
     parent_size.y = 100;
-    new_ts->getWindowRef()->setSize (parent_size);
-    new_ts->getWindowRef()->setPos (parent_pos);
-    getRef()->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(new_ts.get()), std::placeholders::_1));
-    new_ts->getRef()->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(new_ts.get()), std::placeholders::_1));
+    win->setSize (parent_size);
+    win->setPos (parent_pos);
+    signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(new_ts.get()), std::placeholders::_1));
+    new_ts->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(this), std::placeholders::_1));
     
-    VisWinMgr::key_t kk;
-    bool kept = VisWinMgr::instance().makePair(new_ts->getWindowRef(), new_ts, kk);
-    ci_console() << "Time Series Window/Context registered: " << std::boolalpha << kept << std::endl;
+//    VisWinMgr::key_t kk;
+//    bool kept = VisWinMgr::instance().makePair(win, new_ts, kk);
+//    ci_console() << "Time Series Window/Context registered: " << std::boolalpha << kept << std::endl;
 
 }
 
 
-//////
-// Remove existing viewers. Needs better design & implementation
-//    auto new_end = std::remove_if(mContexts.begin(), mContexts.end(),
-//                                  [](const std::shared_ptr<uContext>& cx)
-//                                 { return cx->is_context_type(uContext::Type::qtime_viewer); });
-//    mContexts.erase (new_end, mContexts.end());
 
 
 
