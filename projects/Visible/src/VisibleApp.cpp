@@ -103,6 +103,7 @@ WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
     win->getSignalClose().connect( std::bind( &VisibleApp::windowClose, this ) );
     win->getSignalMouseDown().connect( std::bind( &VisibleApp::windowMouseDown, this, std::placeholders::_1 ) );
     //   win->getSignalDraw().connect( std::bind( &VisibleApp::windowDraw, this ) );
+    return win;
 
 }
 
@@ -294,7 +295,7 @@ void VisibleApp::draw ()
     
     uContext  *data = getWindow()->getUserData<uContext>();
     
-    bool valid_data = data != nullptr && data->context_type() != uContext::null_viewer;
+    bool valid_data = data != nullptr && data->is_valid ();
     
     if (valid_data) data->draw();
     else

@@ -386,8 +386,12 @@ void movContext::update ()
 
 void movContext::draw ()
 {
+   
     if( ! have_movie()  || ( ! mSurface ) )
+    {
+        std::cout << " no have movie or surface " << std::endl;
         return;
+    }
     
     mImage = gl::Texture::create(*mSurface);
     mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);

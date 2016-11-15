@@ -36,6 +36,8 @@ namespace
 uContext::uContext (ci::app::WindowRef& ww)
 : mWindow (ww), m_valid (false), m_type (null_viewer)
 {
+    if (ww)
+        ww->setUserData (this);
 }
 
 uContextRef uContext::getRef ()
