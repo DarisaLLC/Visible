@@ -162,6 +162,8 @@ static inline CGAffineTransform tansformForTrack(AVAssetTrack* assetTrack, CGRec
         supportedTypes = @{
                          @"mov": @"com.apple.quicktime-movie",
                          @"mp4": @"public.mpeg-4",
+                         @"avi": @"public.avi",
+                         @"mpeg": @"public.mpeg"
                          };
     });
     

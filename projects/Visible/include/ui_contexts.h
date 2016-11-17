@@ -14,6 +14,7 @@
 #include "cinder/ConcurrentCircularBuffer.h"
 #include "cinder/Signals.h"
 #include "cinder/Cinder.h"
+#include "cinder/Surface.h"
 #include "iclip.hpp"
 #include "app_utils.hpp"
 #include "timestamp.h"
@@ -75,7 +76,7 @@ public:
 	virtual bool is_context_type (const uContext::Type t) const;
 	
 
-	//    virtual void resize () = 0;
+	virtual void resize () = 0;
 	virtual void draw () = 0;
 	virtual void update () = 0;
 	virtual void setup () = 0;
@@ -101,6 +102,15 @@ public:
 
 typedef std::shared_ptr<uContext> uContextRef;
 
+class mainContext : public uContext
+{
+public:
+	void draw () {}
+	void update () {}
+	void setup () {}
+};
+
+
 class imageDirContext : public uContext
 {
 public:
@@ -108,13 +118,11 @@ public:
 	// From a name and a path
 	imageDirContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
 	
-
-	
-	~imageDirContext () {}
 	static const std::string& caption () { static std::string cp ("Image Dir Viewer "); return cp; }
 	void loadImageDirectory ( const filesystem::path& directory);
 	
 	virtual void draw ();
+	virtual void resize ();
 	virtual void setup ();
 	virtual bool is_valid ();
 	virtual void update ();
@@ -122,12 +130,15 @@ public:
 	
 private:
 	int				mTotalItems;
+	std::pair<int,int> mLarge;
 	
 	float			mItemExpandedWidth;
 	float			mItemRelaxedWidth;
 	float			mItemHeight;
 	
 	list<AccordionItem>				mItems;
+	std::vector<gl::TextureRef>			mTextures;
+	std::vector<SurfaceRef>			mSurfaces;
 	list<AccordionItem>::iterator	mCurrentSelection;
 
 	boost::filesystem::path mFolderPath;
@@ -147,9 +158,9 @@ public:
 	// From just a name, use the open file dialog to get the file
 	// From a name and a path
 	matContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
-	~matContext () {}
     static const std::string& caption () { static std::string cp ("Smm Viewer # "); return cp; }
 
+	virtual void resize ();
     virtual void draw ();
     virtual void setup ();
     virtual bool is_valid ();
@@ -183,13 +194,13 @@ public:
 	// From just a name, use the open file dialog to get the file
 	// From a name and a path
 	clipContext( ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
-	~clipContext () {}
 	
 	static const std::string& caption () { static std::string cp ("Result Clip Viewer # "); return cp; }
 	virtual void draw ();
 	virtual void setup ();
 	virtual bool is_valid ();
 	virtual void update ();
+	virtual void resize ();
 	virtual void mouseDrag( MouseEvent event );
 	virtual void mouseMove( MouseEvent event );
 	virtual void mouseDown( MouseEvent event );
@@ -230,7 +241,6 @@ public:
 	// From just a name, use the open file dialog to get the file
 	// From a name and a path
 	movContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
-	~movContext () {}
 	
 	Signal <void(bool)> signalShowMotioncenter;
 	
@@ -239,6 +249,7 @@ public:
     virtual void setup ();
     virtual bool is_valid ();
     virtual void update ();
+	virtual void resize ();	
     void draw_window ();
 
 	virtual void onMarked (marker_info_t&);
@@ -259,8 +270,8 @@ public:
 	void setShowMotionBubble (bool b)  { mShowMotionBubble = b; }
 	bool getShowMotionBubble ()  { return mShowMotionBubble; }
 	
-	void setZoom (float);
-	float getZoom ();
+	void setZoom (vec2);
+	vec2 getZoom ();
 
     int getIndex ();
     
@@ -296,7 +307,6 @@ private:
     bool mMovieLoop, mPrevMovieLoop;
     vec2 m_zoom;
     Rectf m_display_rect;
-    float mMovieCZoom;
     boost::filesystem::path mPath;
 	vec2		mMousePos;
 	std::shared_ptr<qTimeFrameCache> mFrameSet;

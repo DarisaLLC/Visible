@@ -124,11 +124,6 @@ bool VisibleApp::shouldQuit()
     return true;
 }
 
-void VisibleApp::resize ()
-{
-}
-
-
 //
 // We allow one movie and multiple clips or matrix view.
 //
@@ -156,7 +151,7 @@ void VisibleApp::create_image_dir_viewer ()
 void VisibleApp::setup()
 {
     WindowRef ww = getWindow ();
-  //  getWindow()->setUserData( new uContext (ww) );
+//    getWindow()->setUserData( new mainWindowData () );
     
     mPaused = mShowMultiSnapShotAndData = mShowMultiSnapShot = mShowCenterOfMotionSignal = false;
     mImageDataLoaded = mImageSequenceDataLoaded = false;
@@ -300,6 +295,16 @@ void VisibleApp::draw ()
     if (valid_data) data->draw();
     else
         mTopParams->draw ();
+    
+}
+
+
+
+void VisibleApp::resize ()
+{
+    uContext  *data = getWindow()->getUserData<uContext>();
+    
+    if (data && data->is_valid()) data->resize ();
     
 }
 

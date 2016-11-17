@@ -125,14 +125,14 @@ void movContext::setIndex (int mark)
     
 }
 
-float movContext::getZoom ()
+vec2 movContext::getZoom ()
 {
-    return mMovieCZoom;
+    return m_zoom;
 }
 
-void movContext::setZoom (float nv)
+void movContext::setZoom (vec2 zoom)
 {
-    mMovieCZoom = nv;
+    m_zoom = zoom;
     update ();
 }
 
@@ -204,7 +204,7 @@ void movContext::clear_movie_params ()
     mPrevMoviePlay = mMoviePlay;
     mMovieLoop = false;
     mPrevMovieLoop = mMovieLoop;
-    mMovieCZoom=1.0f;
+    m_zoom.x = m_zoom.y = 1.0f;
 }
 
 
@@ -328,7 +328,11 @@ void movContext::seek( size_t xPos )
 
 bool movContext::is_valid () { return m_valid && is_context_type(uContext::qtime_viewer); }
 
-
+void movContext::resize ()
+{
+    m_zoom = texture_to_display_zoom();
+    
+}
 void movContext::update ()
 {
     if (! have_movie () )
@@ -368,7 +372,7 @@ void movContext::update ()
         {
             cv::absdiff(gm, mS, mS);
             cv::Point2f dcom;
-            getLuminanceCenterOfMass (mS, dcom);
+            getLuminanceCenterOfMass (gm, dcom);
             vec2 m (dcom.x , dcom.y );
             normalize_point(m, mSurface->getSize());
             m = m - (mCom - m_prev_com);
@@ -402,14 +406,14 @@ void movContext::draw ()
     vec2 mmm = m_max_motion * vec2(getWindowSize().x,getWindowSize().y);
     vec2 mid = (com + mmm) / vec2(2.0f,2.0f);
     
-    float len = distance(mmm, com);
+    float len = distance(pcom, com);
     
     if (m_index < 1) return;
     
     if (getShowMotionCenter ())
     {
         gl::ScopedColor color (ColorA(1.0f, 0.5f, 1.0f, 0.5f));
-        gl::drawLine(pcom, com);
+        gl::drawVector(vec3(pcom.x,pcom.y,0), vec3(com.x, com.y, 128));
     }
     if (getShowMotionBubble ())
     {

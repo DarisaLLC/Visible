@@ -172,6 +172,11 @@ void matContext::update()
     
 }
 
+void matContext::resize()
+{
+    
+}
+
 
 void matContext::onMarked (marker_info& t)
 {
@@ -208,9 +213,12 @@ clipContext::clipContext(ci::app::WindowRef& ww, const boost::filesystem::path& 
     
 }
 
+void clipContext::resize ()
+{
+     mGraph1D->rect = getWindowBounds();
+}
 void clipContext::draw ()
 {
-    mGraph1D->rect = getWindowBounds();
     if (mGraph1D) mGraph1D->draw ( );
 }
 
