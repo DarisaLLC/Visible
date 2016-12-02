@@ -51,6 +51,7 @@ public:
     void setup();
     void create_qmovie_viewer ();
     void create_image_dir_viewer ();
+    void create_clip_viewer ();
     
     void mouseDown( MouseEvent event );
     void mouseMove( MouseEvent event );
@@ -70,6 +71,7 @@ public:
     
     bool shouldQuit();
     WindowRef createConnectedWindow (Window::Format& format);
+   
     
     params::InterfaceGlRef         mTopParams;
     
@@ -79,7 +81,7 @@ public:
     Rectf                       mLogDisplayRect;
     CameraPersp				mCam;
     
-    std::list <std::shared_ptr<uContext> > mContexts;
+
     bool mImageSequenceDataLoaded;
     bool mImageDataLoaded;
     bool mShowCenterOfMotionSignal;
@@ -87,7 +89,8 @@ public:
     bool mShowMultiSnapShotAndData;
     bool mPaused;
     
-    
+
+    mutable std::list <std::shared_ptr<uContext> > mContexts;
     
 };
 
@@ -96,6 +99,10 @@ WindowRef  VisibleCentral::getConnectedWindow (Window::Format& format )
     return VisibleApp::instance().createConnectedWindow(format);
 }
 
+std::list <std::shared_ptr<uContext> >& VisibleCentral::contexts ()
+{
+    return VisibleApp::instance().mContexts;
+}
 
 WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
 {
@@ -146,6 +153,16 @@ void VisibleApp::create_image_dir_viewer ()
     mContexts.push_back(std::shared_ptr<imageDirContext>(new imageDirContext(ww)));
 }
 
+//
+// We allow one movie and multiple clips or matrix view.
+//
+//
+void VisibleApp::create_clip_viewer ()
+{
+    Window::Format format( RendererGl::create() );
+    WindowRef ww = createConnectedWindow(format);
+    mContexts.push_back(std::shared_ptr<clipContext>(new clipContext(ww)));
+}
 
 
 void VisibleApp::setup()

@@ -2,9 +2,7 @@
 //  GLMmath.h
 //  svl
 //
-//  Created by Arman Garakani on 12/23/15.
-//  Copyright © 2015 Captureproof Inc. All rights reserved.
-//
+
 
 #pragma once
 

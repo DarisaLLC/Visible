@@ -444,6 +444,7 @@ void movContext::add_scalar_track(const boost::filesystem::path& path)
     win->setPos (parent_pos);
     signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(new_ts.get()), std::placeholders::_1));
     new_ts->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(this), std::placeholders::_1));
+    VisibleCentral::instance().contexts().push_back(new_ts);
     
 //    VisWinMgr::key_t kk;
 //    bool kept = VisWinMgr::instance().makePair(win, new_ts, kk);

@@ -33,6 +33,7 @@ struct VisibleCentral : SingletonLight<VisibleCentral>
     VisibleCentral () {}
 
     WindowRef getConnectedWindow (Window::Format& format);
+    std::list <std::shared_ptr<uContext> >& contexts ();
 
 };
 

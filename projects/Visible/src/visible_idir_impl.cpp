@@ -101,7 +101,7 @@ void imageDirContext::setup()
     std::vector<filesystem::path>::const_iterator pItr = mImageFiles.begin();
     for (; pItr < mImageFiles.end(); pItr++)
     {
-        mSurfaces.push_back(SurfaceT::create( loadImage( pItr->string())) );
+        mSurfaces.push_back(Surface8u::create( loadImage( pItr->string())) );
 
         
         const std::pair<int,int> sz (mTextures.back()->getSize().x, mTextures.back()->getSize().y);
