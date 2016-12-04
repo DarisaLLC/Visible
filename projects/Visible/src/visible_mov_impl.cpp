@@ -100,7 +100,7 @@ void movContext::play_pause_button ()
 
 bool movContext::have_movie ()
 {
-    return m_movie != nullptr && m_valid;
+    return m_movie != nullptr && m_valid && m_movie->isLoaded();
 }
 
 int movContext::getIndex ()
@@ -233,12 +233,15 @@ void movContext::loadMovieFile()
                 ci_console() << "Framerate: " <<m_movie->getFramerate() << std::endl;
                 getWindow()->getApp()->setFrameRate(m_movie->getFramerate() / 3);
 
-                
                 mScreenSize = vec2(std::fabs(m_movie->getWidth()), std::fabs(m_movie->getHeight()));
+        
                 mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
                 
                 mS = cv::Mat(mScreenSize.x, mScreenSize.y, CV_32F);
                 mSS = cv::Mat(mScreenSize.x, mScreenSize.y, CV_32F);
+                
+                texture_to_display_zoom();
+                
                 
                 m_fc = m_movie->getNumFrames ();
                 m_movie->setLoop( true, false);
@@ -316,8 +319,25 @@ void movContext::mouseUp( MouseEvent event )
 
 vec2 movContext::texture_to_display_zoom()
 {
-    Rectf textureBounds = mImage->getBounds();
-    return vec2(m_display_rect.getWidth() / textureBounds.getWidth(),m_display_rect.getHeight() / textureBounds.getHeight());
+    Rectf image (0.0f, 0.0f, mScreenSize.x, mScreenSize.y);
+    Rectf window = getWindowBounds();
+    float sx = window.getWidth() / image.getWidth();
+    float sy = window.getHeight() / image.getHeight();
+    
+    if ( sx < 1.1f || sy < 1.1f )
+    {
+        getWindow()->setSize((int32_t) (mScreenSize.x*1.15f), (int32_t) (mScreenSize.y*1.15f));
+        sx = window.getWidth() / image.getWidth();
+        sy = window.getHeight() / image.getHeight();
+    }
+    float w = image.getWidth() * sx;
+    float h = image.getHeight() * sy;
+    float ox = -0.5 * ( w - window.getWidth());
+    float oy = -0.5 * ( h - window.getHeight());
+    image.set(ox, oy, ox + w, oy + h);
+    m_display_rect = image;
+
+    return vec2(sx, sy);
 }
 
 void movContext::seek( size_t xPos )
@@ -346,7 +366,7 @@ void movContext::update ()
     if (m_movie->checkNewFrame())
     {
        ip::flipVertical(*m_movie->getSurface(), mSurface.get());
-     //   ip::flipHorizontal(mSurface.get());
+        ip::flipHorizontal(mSurface.get());
         
         mFrameSet->loadFrame(mSurface, new_time);
         m_index = mFrameSet->currentIndex(new_time);
@@ -398,8 +418,9 @@ void movContext::draw ()
     }
     
     mImage = gl::Texture::create(*mSurface);
-    mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
-    gl::draw (mImage, getWindowBounds());
+    
+      mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
+    gl::draw (mImage, m_display_rect);
 
     vec2 com = mCom * vec2(getWindowSize().x,getWindowSize().y);
     vec2 pcom = m_prev_com * vec2(getWindowSize().x,getWindowSize().y);
