@@ -35,6 +35,37 @@
 using namespace svl;
 
 
+//#define _INTERACTIVE
+void on_mouse( int e, int x, int y, int d, void *ptr )
+{
+    Point*p = (Point*)ptr;
+    p->x = x;
+    p->y = y;
+    cout<<*p;
+}
+
+int iAngle = 180;
+int iScale = 50;
+int iBorderMode = 0;
+Mat showImage ;
+int iImageCenterY = 0;
+int iImageCenterX = 0;
+const char* displayImage = "Display Image";
+
+void CallbackForTrackBar(int, void*)
+{
+    iImageCenterY = showImage.rows / 2.0;
+    iImageCenterX = showImage.cols / 2.0;
+    Mat matRotation = getRotationMatrix2D(  Point( iImageCenterX, iImageCenterY ), (iAngle - 180), iScale / 50.0 );
+    
+    // Rotate the image
+    Mat imgRotated;
+    warpAffine( showImage, imgRotated, matRotation, showImage.size(), INTER_LINEAR, iBorderMode, Scalar() );
+    imshow( displayImage, imgRotated );
+
+    
+}
+
 
 static test_utils::genv * dgenv_ptr;
 
@@ -128,9 +159,7 @@ void fillramp (roiWindow<P8U>& img)
 }
 TEST (ut_mi, basic)
 {
-    cv::namedWindow( "Image View", 1 );
-    
- 
+   // cv::namedWindow( "Image View", 1 );
 //    NewFromSVL (img3, mv);
 //    imshow( "Image View", mv );
 //    key = cvWaitKey( -1);
@@ -247,8 +276,7 @@ TEST (ut_lifFile, single_channel)
     
     cimg_library::CImg<uint8_t> vol (dims[0], dims[1], lif.getSerie(0).getNbTimeSteps());
     
-    lif.getSerie(0).fill2DBuffer(vol.data());
-   // cimg_library::CImgDisplay disp (vol);
+    lif.getSerie(0).fill3DBuffer(vol.data());
     
     EXPECT_EQ(vol.depth(), lif.getSerie(0).getNbTimeSteps());
     EXPECT_EQ(vol.width(), dims[0]);
@@ -261,9 +289,12 @@ TEST (ut_lifFile, single_channel)
     EXPECT_NEAR(stats.at(1), 255.0, 0.001);
     EXPECT_NEAR(stats.at(2), 114.271, 0.001);
 
-    cimg_library::CImg<float> project = vol.cumulate("z");
     cimg_library::CImgDisplay dsp (512, 128);
-    project.display(dsp, True);
+    cimg_library::CImg<uint8_t> project = vol.get_projections2d(0,0,0);
+
+#ifdef _INTERACTIVE
+  //  project.display(dsp, True);
+#endif
     
 }
 
@@ -348,11 +379,28 @@ TEST (ut_lifFile, triple_channel)
     }
     
     {
+ #ifdef _INTERACTIVE
+        cv::namedWindow( "Voxel View",   cv::WINDOW_NORMAL  | cv::WINDOW_KEEPRATIO);
+#endif
+        vector<int> compression_params;
+        compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+        compression_params.push_back(9);
+
+        //set the callback function for any mouse event
+        Point p;
+        setMouseCallback("Voxel View", on_mouse, &p );
         
-        cv::namedWindow( "Voxel View", 1 );
-
-
-         lifIO::LifSerie& lls = lif.getSerie(series.size()-2);
+        cv::Mat tops (dims[1], dims[0], CV_8U);
+        cv::Mat bots (dims[1], dims[0], CV_8U);
+        bots = 255;
+        tops = 0;
+        cv::Mat tmp (dims[1], dims[0], CV_32F);
+        cv::Mat S (dims[1], dims[0], CV_32F);
+        cv::Mat SS (dims[1], dims[0], CV_32F);
+        S = 0;
+        SS = 0;
+        
+        lifIO::LifSerie& lls = lif.getSerie(series.size()-2);
         std::vector<roiMultiWindow<P8UP3> > voxel;
         for (auto tt = 0; tt < lls.getNbTimeSteps(); tt++)
         {
@@ -361,8 +409,57 @@ TEST (ut_lifFile, triple_channel)
             voxel.emplace_back(oneBy3);
             cv::Mat mv;
             NewFromSVL (voxel.back().plane(2), mv);
+            cv::min(mv, bots, bots);
+            cv::max(mv, tops, tops);
+
+            mv.convertTo(tmp, CV_32F);
+            S += tmp;
+            SS += tmp.mul(tmp);
+#ifdef _INTERACTIVE
             imshow( "Voxel View", mv );
+            // Wait for a key press
+            int key = cvWaitKey( 33 );
+#endif
         }
+        auto count = lls.getNbTimeSteps();
+
+//        S = S.mul(S);
+//        SS = SS - S /count;
+//        SS *= (1.0/count-1.0);
+        
+ //       bots.convertTo(tmp, CV_32F);
+  //      tops.convertTo(tmp2, CV_32F);
+        showImage = tops - bots;
+        cv::imwrite ("/Users/arman/Pictures/motionsignature.png", showImage, compression_params);
+        
+//        SS *= 1.0/255.;
+//        SS.convertTo(showImage, CV_8U);
+        
+     //   tmp -= tmp2;
+     //   tmp *= 1.0/255;
+
+
+        
+        cv::namedWindow(displayImage,    cv::WINDOW_NORMAL |  cv::WINDOW_FREERATIO );
+      //  createTrackbar("Angle",displayImage, &iAngle, 360, CallbackForTrackBar);
+        createTrackbar("Scale",displayImage, &iScale, 100, CallbackForTrackBar);
+
+        
+        int iDummy = 0;
+        
+        CallbackForTrackBar(iDummy, &iDummy);
+        
+        waitKey(0);
+        
+        //set the callback function for any mouse event
+      //  Point pp;
+      //  setMouseCallback(displayImage, on_mouse, &pp );
+     //   imshow(displayImage, tops );
+        // Wait for a key press
+      //  int key = cvWaitKey( 0 );
+        
+        
+        
         std::cout << voxel.size () << std::endl;
     }
     
