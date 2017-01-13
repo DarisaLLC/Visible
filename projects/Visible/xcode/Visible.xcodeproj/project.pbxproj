@@ -24,6 +24,12 @@
 		C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
 		C21FFE721CFE0AA300C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
 		C21FFE731CFE0E1D00C97013 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
+		C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */; };
+		C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
+		C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
+		C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
+		C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
+		C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
 		C24CD87F1CEA5B1B0008C72B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
 		C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
 		C24CD8891CEA916E0008C72B /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
@@ -350,6 +356,13 @@
 		C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sm_producer.cpp; path = ../src/sm_producer.cpp; sourceTree = "<group>"; };
 		C21FFE711CFDF82600C97013 /* self_similarity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = self_similarity.h; sourceTree = "<group>"; };
 		C21FFE741CFE104600C97013 /* ut_sm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_sm.hpp; sourceTree = "<group>"; };
+		C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_lif_impl.cpp; path = ../src/visible_lif_impl.cpp; sourceTree = "<group>"; };
+		C23D0F481E2982690049ADDB /* lifFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lifFile.hpp; path = ../../../svl/include/otherIO/lifFile.hpp; sourceTree = "<group>"; };
+		C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lifFile.cpp; sourceTree = "<group>"; };
+		C23D0F4C1E298CE50049ADDB /* tinystr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinystr.cpp; path = ../../../svl/local/tinyxml/tinystr.cpp; sourceTree = "<group>"; };
+		C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../../../svl/local/tinyxml/tinyxml.cpp; sourceTree = "<group>"; };
+		C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../../../svl/local/tinyxml/tinyxmlerror.cpp; sourceTree = "<group>"; };
+		C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../../../svl/local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
 		C24CD87C1CEA5B1B0008C72B /* VisibleGtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VisibleGtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C24CD87E1CEA5B1B0008C72B /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		C24CD8831CEA916E0008C72B /* libboost_date_time.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_date_time.a; path = ../../../svl/local/boost/lib/libboost_date_time.a; sourceTree = "<group>"; };
@@ -9807,6 +9820,7 @@
 				C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */,
 				C21946761CE4DC7100976025 /* visible_impl.cpp */,
 				C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */,
+				C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */,
 				C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */,
 				C21946771CE4DC7100976025 /* VisibleApp.cpp */,
 			);
@@ -9825,6 +9839,10 @@
 		29B97314FDCFA39411CA2CEA /* QuickTimeIteration */ = {
 			isa = PBXGroup;
 			children = (
+				C23D0F4C1E298CE50049ADDB /* tinystr.cpp */,
+				C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */,
+				C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */,
+				C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */,
 				C260099A1CED3E010045FF57 /* svl */,
 				C21946B11CE4EA6100976025 /* include */,
 				C21946891CE4DC9700976025 /* Configurations */,
@@ -9957,6 +9975,15 @@
 				C2E322001D05B90C006DFE5E /* time_index.h */,
 			);
 			name = include;
+			sourceTree = "<group>";
+		};
+		C23D0F491E29826F0049ADDB /* otherIO */ = {
+			isa = PBXGroup;
+			children = (
+				C23D0F481E2982690049ADDB /* lifFile.hpp */,
+			);
+			name = otherIO;
+			path = ../../projects/Visible/xcode;
 			sourceTree = "<group>";
 		};
 		C24CD87D1CEA5B1B0008C72B /* VisibleGtest */ = {
@@ -10095,6 +10122,7 @@
 		C26009DF1CED3E010045FF57 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C23D0F491E29826F0049ADDB /* otherIO */,
 				C26009E01CED3E010045FF57 /* cinder */,
 				C26009EA1CED3E010045FF57 /* core */,
 				C26009FF1CED3E010045FF57 /* vision */,
@@ -25679,6 +25707,7 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */,
 				C20EDBBE1CF277130074C47A /* exception.cpp */,
 				C20EDBBF1CF277130074C47A /* self_similarity.cpp */,
 				C20EDBC01CF277130074C47A /* time_spec.cpp */,
@@ -25988,18 +26017,24 @@
 				C21946871CE4DC7100976025 /* visible_impl.cpp in Sources */,
 				C2FC7DAF1CF4F46100D18193 /* qtime_frame_cache.cpp in Sources */,
 				C2B38A571D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
+				C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */,
 				C2606DAE1CED3E2E0045FF57 /* localvariance.cpp in Sources */,
 				C2606DAD1CED3E2E0045FF57 /* lineseg.cpp in Sources */,
 				C25822461CE6478400D83AB0 /* visible_mov_impl.cpp in Sources */,
+				C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */,
 				C21946881CE4DC7100976025 /* VisibleApp.cpp in Sources */,
 				C2606DAA1CED3E2E0045FF57 /* histo.cpp in Sources */,
+				C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */,
+				C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */,
 				C2606DAB1CED3E2E0045FF57 /* ip_utils.cpp in Sources */,
 				C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */,
+				C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */,
 				C2606DAC1CED3E2E0045FF57 /* labelconnect.cpp in Sources */,
 				C2606DB11CED3E2E0045FF57 /* registration.cpp in Sources */,
 				C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */,
 				C20EDBC11CF277130074C47A /* exception.cpp in Sources */,
 				C20EDBC21CF277130074C47A /* self_similarity.cpp in Sources */,
+				C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */,
 				C2606DA81CED3E2E0045FF57 /* edgel.cpp in Sources */,
 				C2606DAF1CED3E2E0045FF57 /* matpixel.cpp in Sources */,
 			);
@@ -26053,6 +26088,7 @@
 					"$(LOCAL_CINDER)/include",
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
+					"$(LOCAL_TINYXML)",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -26098,6 +26134,7 @@
 					"$(LOCAL_CINDER)/include",
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
+					"$(LOCAL_TINYXML)",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
