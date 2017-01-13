@@ -100,7 +100,7 @@ void movContext::play_pause_button ()
 
 bool movContext::have_movie ()
 {
-    return m_movie != nullptr && m_valid && m_movie->isLoaded();
+    return m_movie != nullptr && m_valid;
 }
 
 int movContext::getIndex ()
@@ -247,7 +247,7 @@ void movContext::loadMovieFile()
                 m_movie->setLoop( true, false);
                 m_movie->seekToStart();
                 // Do not play at start 
-                play();
+                m_movie->play();
                 
                 // Percent trim from all sides.
                 m_max_motion.x = m_max_motion.y = 0.1;
