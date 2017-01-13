@@ -52,6 +52,7 @@ public:
     void create_qmovie_viewer ();
     void create_image_dir_viewer ();
     void create_clip_viewer ();
+    void create_lif_viewer ();
     
     void mouseDown( MouseEvent event );
     void mouseMove( MouseEvent event );
@@ -142,6 +143,19 @@ void VisibleApp::create_qmovie_viewer ()
     mContexts.push_back(std::shared_ptr<movContext>( new movContext(ww) ) );
 }
 
+
+//
+// We allow one movie and multiple clips or matrix view.
+//
+//
+void VisibleApp::create_lif_viewer ()
+{
+    Window::Format format( RendererGl::create() );
+    WindowRef ww = createConnectedWindow(format);
+    mContexts.push_back(std::shared_ptr<lifContext>(new lifContext(ww)));
+}
+
+
 //
 // We allow one movie and multiple clips or matrix view.
 //
@@ -187,6 +201,9 @@ void VisibleApp::setup()
   //  mTopParams->addSeparator();
   // 	mTopParams->addButton( "Import SS Matrix", std::bind( &VisibleApp::create_matrix_viewer, this ) );
    
+    mTopParams->addSeparator();
+   	mTopParams->addButton( "Import LIF  ", std::bind( &VisibleApp::create_lif_viewer, this ) );
+    
     mTopParams->addSeparator();
    	mTopParams->addButton( "Import Image Directory ", std::bind( &VisibleApp::create_image_dir_viewer, this ) );
     
