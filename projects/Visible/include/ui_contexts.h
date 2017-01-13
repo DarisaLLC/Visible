@@ -27,6 +27,7 @@
 #include <boost/bind.hpp>
 #include "cinder/Timeline.h"
 #include "AccordionItem.h"
+#include "otherIO/lifFile.hpp"
 
 #include <boost/integer_traits.hpp>
 // use int64_t instead of long long for better portability
@@ -56,6 +57,7 @@ public:
 		qtime_viewer = matrix_viewer+1,
 		clip_viewer = qtime_viewer+1,
 		image_dir_viewer = clip_viewer+1,
+		lif_file_viewer = image_dir_viewer+1,
 		viewer_types = clip_viewer+1
 	};
 	
@@ -345,6 +347,150 @@ private:
 };
 
 
+
+class lifContext : public uContext
+{
+public:
+	// From just a name, use the open file dialog to get the file
+	// From a name and a path
+	lifContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
+	
+	Signal <void(bool)> signalShowMotioncenter;
+	
+	static const std::string& caption () { static std::string cp ("Qtime Viewer # "); return cp; }
+	virtual void draw ();
+	virtual void setup ();
+	virtual bool is_valid ();
+	virtual void update ();
+	virtual void resize ();
+	void draw_window ();
+	
+	virtual void onMarked (marker_info_t&);
+	virtual void mouseDown( MouseEvent event );
+	virtual void mouseMove( MouseEvent event );
+	virtual void mouseUp( MouseEvent event );
+	virtual void mouseDrag( MouseEvent event );
+	virtual void keyDown( KeyEvent event );
+	
+	const params::InterfaceGl& ui_params ()
+	{
+		return mMovieParams;
+	}
+	
+	void setShowMotionCenter (bool b)  { mShowMotionCenter = b; }
+	bool getShowMotionCenter ()  { return mShowMotionCenter; }
+	
+	void setShowMotionBubble (bool b)  { mShowMotionBubble = b; }
+	bool getShowMotionBubble ()  { return mShowMotionBubble; }
+	
+	void setZoom (vec2);
+	vec2 getZoom ();
+	
+	int getIndex ();
+	
+	void setIndex (int mark);
+	
+	void play_pause_button ();
+	
+	// Add tracks
+	void add_scalar_track_get_file () { add_scalar_track (); }
+	
+	void add_scalar_track (const boost::filesystem::path& file = boost::filesystem::path ());
+	
+	
+	
+private:
+	void loadLifFile();
+	bool have_movie ();
+	void play ();
+	void pause ();
+	
+	
+	struct series_info
+	{
+		std::string name;
+		uint32_t    timesteps;
+		uint32_t    pixelsInOneTimestep;
+		uint32_t	channelCount;
+		std::vector<size_t> dimensions;
+		std::vector<lifIO::ChannelData> channels;
+		
+	};
+	
+	void get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer)
+	{
+		m_series_book.clear ();
+		for (unsigned ss = 0; ss < lifer->getNbSeries(); ss++)
+		{
+			series_info si;
+			si.name = lifer->getSerie(ss).getName();
+			si.timesteps = lifer->getSerie(ss).getNbTimeSteps();
+			si.pixelsInOneTimestep = lifer->getSerie(ss).getNbPixelsInOneTimeStep();
+			si.dimensions = lifer->getSerie(ss).getSpatialDimensions();
+			si.channelCount = lifer->getSerie(ss).getChannels().size();
+			si.channels.clear ();
+			for (lifIO::ChannelData cda : lifer->getSerie(ss).getChannels())
+				si.channels.emplace_back(cda);
+			
+			m_series_book.emplace_back (si);
+		}
+	}
+	
+	std::shared_ptr<lifIO::LifReader> m_lifRef;
+	std::vector<size_t> m_spatial_dims;
+	std::vector<series_info> m_series_book;
+	
+	void seek( size_t xPos );
+	void clear_movie_params ();
+	vec2 texture_to_display_zoom ();
+	vec2 mScreenSize;
+	gl::TextureRef mImage;
+	ci::qtime::MovieSurfaceRef m_movie;
+	size_t m_fc;
+	params::InterfaceGl         mMovieParams;
+	float mMoviePosition, mPrevMoviePosition;
+	size_t mMovieIndexPosition, mPrevMovieIndexPosition;
+	float mMovieRate, mPrevMovieRate;
+	bool mMoviePlay, mPrevMoviePlay;
+	bool mMovieLoop, mPrevMovieLoop;
+	vec2 m_zoom;
+	Rectf m_display_rect;
+	boost::filesystem::path mPath;
+	vec2		mMousePos;
+	std::shared_ptr<qTimeFrameCache> mFrameSet;
+	SurfaceRef  mSurface;
+	std::vector<time_spec_t> mTimeHist;
+	vec2 mCom;
+	vec2 m_prev_com;
+	cv::Mat mS;
+	cv::Mat mSS;
+	roiWindow<P8U> mModel;
+	vec2 m_max_motion;
+	int64_t m_index;
+	bool movie_error_do_flip;
+	
+	bool mMouseIsDown;
+	bool mMouseIsMoving;
+	bool mMouseIsDragging;
+	bool mMetaDown;
+	
+	bool mShowMotionCenter, mShowMotionBubble;
+	std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
+	int mButton_title_index;
+	std::string mButton_title;
+	
+	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
+	{
+		size_t xScaled = (pos * wave) / box.getWidth();
+		xScaled = svl::math<size_t>::clamp( xScaled, 0, wave );
+		return xScaled;
+	}
+	
+	
+	std::list<std::shared_ptr<clipContext> > m_tracks;
+	
+	
+};
 
 
 
