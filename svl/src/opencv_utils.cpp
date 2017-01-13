@@ -21,11 +21,12 @@ namespace svl
             std::memmove(win.rowPointer(row), mat.ptr(row), mat.cols);
         roi = win;
     }
-    void NewFromSVL (const roiWindow<P8U>& roi, cv::Mat& mat)
+    void NewFromSVL (const roiWindow<P8U>& roi, cv::Mat& dst)
     {
-        mat = cv::Mat (roi.height(), roi.width(), CV_8U);
+        cv::Mat mat (roi.height(), roi.width(), CV_8U);
         for (uint32_t row = 0; row < mat.rows; row++)
             std::memmove(mat.ptr(row), roi.rowPointer(row), mat.cols);
+        dst = mat;
     }
 
 
