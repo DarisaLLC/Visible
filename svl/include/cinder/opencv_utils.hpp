@@ -54,7 +54,8 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     
     void computeNormalizedColorHist(const Mat& image, Mat& hist, int N, double minProb);
     
-    
+    bool matIsEqual(const cv::Mat mat1, const cv::Mat mat2);
+       
     template <typename T, typename U>
     Size_<T> operator*(const Size_<T> &s, U a) {
         return Size_<T>(s.width * a, s.height * a);
@@ -86,6 +87,24 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
         return out << r.x << " y=" << r.y << " width=" << r.width << " height=" << r.height << ">";
     }
     
+    
+    class motionSmear
+    {
+        public:
+            motionSmear ();
+            void add (const cv::Mat&) const;
+            const cv::Mat& signature () const;
+            const uint32_t count () const;
+        
+        
+        private:
+        mutable cv::Mat m_min;
+        mutable cv::Mat m_max;
+        mutable cv::Mat m_sig;
+        mutable uint32_t m_count;
+        mutable bool m_done;
+        
+    };
     
     
     std::ostream &operator<<(std::ostream &out, const Scalar s);
