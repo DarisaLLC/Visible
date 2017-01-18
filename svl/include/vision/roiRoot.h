@@ -291,27 +291,33 @@ public:
     // Accessors
     operator root<P> *() const
     {
+        std::lock_guard<std::mutex> lock( mMutex );
         return mFrameBuf;
     }
     const root<P> & operator*() const
     {
+        std::lock_guard<std::mutex> lock( mMutex );
         return *mFrameBuf;
     }
     root<P> & operator*()
     {
+        std::lock_guard<std::mutex> lock( mMutex );
         return *mFrameBuf;
     }
     const root<P> * operator->() const
     {
+        std::lock_guard<std::mutex> lock( mMutex );
         return mFrameBuf;
     }
     root<P> * operator->()
     {
+        std::lock_guard<std::mutex> lock( mMutex );
         return mFrameBuf;
     }
 
     int64_t refcount() const
     {
+        std::lock_guard<std::mutex> lock( mMutex );
         int64_t retVal = 0;
         if (mFrameBuf)
         {

@@ -84,6 +84,8 @@ template <typename P>
 void point(const roiWindow<P> & moving, const roiWindow<P> & fixed, CorrelationParts & res);
 template <typename P>
 bool area_translation(const roiWindow<P> & moving, const roiWindow<P> & fixed, spaceResult& );
+template <typename P>
+bool autoCorrelation(const roiWindow<P> & moving, const uint32_t half_size,spaceResult& );
 }
 
 namespace MutualInfo

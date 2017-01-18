@@ -130,5 +130,11 @@ public:
 
 };
 
+/* In this function
+ * If image is 8 bit, angle and mag are 8 bit
+ */
+
+
+void DirectionSignal (const roiWindow<P8U>& image, const roiWindow<P8U>& mask, vector<double>& signal);
 
 #endif // _FEHF_H

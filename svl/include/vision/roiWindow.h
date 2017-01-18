@@ -238,7 +238,7 @@ public:
     bool copy_pixels_from(pixel_ptr_t pixels, int columns, int rows, int stride);
     bool copy_pixels_to(roiWindow<T> & other);
     void randomFill( uint32_t seed );
-    void output (std::ostream& outs = std::cout) const;
+    void output (std::ostream& outs = std::cout, uint8_t delim = ',', bool is_normalized = true) const;
     void to_file (const std::string& fqfn) const;
   
   
