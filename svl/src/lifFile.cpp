@@ -26,26 +26,10 @@ lifIO::LifSerieHeader::LifSerieHeader(TiXmlElement *root) : name(root->Attribute
     if (elementImage)
         parseImage(elementImage);
     
+    m_cached_frame_duration.first = false;
     return;
 }
 
-/** @brief Let the user choose a Channel  */
-size_t lifIO::LifSerieHeader::chooseChannel() const
-{
-    for(size_t ch=0;ch<channels.size();++ch)
-        cout << "("<<ch<<")"<<channels[ch].getName()<<endl;
-
-	if(channels.size() == 1)
-		return 0;
-
-	size_t channel;
-    do
-    {
-        cout<<"Chose a channel between 0 and "<<channels.size()-1<<": ";
-        cin>>channel;
-    }while(channel >= channels.size());
-    return channel;
-}
 
 /** \brief get the real size of a pixel (in meters) in the dimension d */
 double lifIO::LifSerieHeader::getVoxelSize(const size_t d) const
@@ -187,8 +171,6 @@ void lifIO::LifSerieHeader::parseTimeStampList(TiXmlNode *elementTimeStampList)
                 std::istream_iterator<unsigned long long>(),
                 this->timeStamps.begin());
             
-          //  copy (this->timeStamps.begin(), this->timeStamps.end(), ostream_iterator<unsigned long long>(cout, " , "));
-            
         }
         
         //old way to store time stamps
@@ -240,6 +222,25 @@ void lifIO::LifSerieHeader::parseScannerSetting(TiXmlNode *elementScannerSetting
     }
 }
 
+/**
+ \brief caclulate frame_duration average
+ */
+float lifIO::LifSerieHeader::frame_duration_ms() const
+{
+    if (m_cached_frame_duration.first == false)
+    {
+        m_frame_durations.resize(getTimestamps().size());
+        adjacent_difference(getTimestamps().begin(), getTimestamps().end(), m_frame_durations.begin());
+        m_frame_durations[0] = 0; // firs difference not written
+        auto sumall = accumulate(m_frame_durations.begin(), m_frame_durations.end(), 0);
+        float avg_fd = (sumall / (m_frame_durations.size()-1))/10000.0f;
+        m_cached_frame_duration.first = true;
+        m_cached_frame_duration.second = avg_fd;
+    }
+    return m_cached_frame_duration.second;
+    
+}
+
 /** @brief LifSerie constructor  */
 lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize) :
  LifSerieHeader(serie)
@@ -261,6 +262,8 @@ lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, uns
     this->offset = offset;
     this->memorySize = memorySize;
 }
+
+
 
 /**
     \brief fill a memory buffer that already has the good dimension
@@ -332,22 +335,6 @@ unsigned long long lifIO::LifSerie::getOffset(size_t t) const
 
 
 
-/** @brief Display the available series and let the user choose one  */
-size_t lifIO::LifHeader::chooseSerieNumber() const
-{
-    cout<< *this <<endl;
-    if(series.size() == 1)
-		return 0;
-
-	size_t s = 0;
-    do
-    {
-        cout<<"Chose a serie between 0 and "<<series.size()-1<<": ";
-        cin>>s;
-    }while(s >= series.size());
-    return s;
-}
-
 /** @brief parse the XML header  */
 void lifIO::LifHeader::parseHeader()
 {
@@ -378,6 +365,9 @@ void lifIO::LifHeader::parseHeader()
 /** \brief Constructor from lif file name */
 lifIO::LifReader::LifReader(const string &filename) : file(filename.c_str(), ios::in | ios::binary)
 {
+    static std::mutex sMutex;
+    std::lock_guard<std::mutex> lock( sMutex );
+
     const int MemBlockCode = 0x70, TestCode = 0x2a;
     char lifChar;
 
