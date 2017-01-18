@@ -184,13 +184,16 @@ std::shared_ptr<std::ifstream> make_shared_ifstream(std::string filename)
 
 
 template <typename P>
-void roiWindow<P>::output(std::ostream& outstream) const
+void roiWindow<P>::output(std::ostream& outstream, uint8_t delim, bool is_normalized) const
 {
     // = first < second
     iPair range_j(0, height());
     iPair range_i(0, width());
-    
+    bool is_float = P::is_floating_point();
+
     outstream << std::endl;
+    
+    float mult = (is_float && is_normalized) ? 255.0 : 1.0;
     
     for (int j = range_j.first; j < range_j.second; j++)
     {
@@ -199,8 +202,8 @@ void roiWindow<P>::output(std::ostream& outstream) const
         for (int i = range_i.first - range_i.first; i < range_i.second - range_i.first; i++)
         {
             pixel_t pel = row_ptr[i];
-            outstream << setfill(' ') << setw(4);
-            outstream << (int)pel;
+            outstream << (int)(pel*mult);
+            outstream << delim  << setw(4);
         }
         outstream << std::endl;
     }

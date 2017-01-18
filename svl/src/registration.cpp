@@ -259,11 +259,28 @@ void imageTranslation<P>::run()
     }
 }
 
+template <typename P>
+bool Correlation::autoCorrelation(const roiWindow<P> & fixed, const uint32_t half_size, spaceResult& result)
+{
+    typedef typename PixelType<P>::pixel_t pixel_t;
+    int delta = 2 * half_size + 1;
+    iRect fr (half_size, half_size, fixed.width() - delta, fixed.height() - delta);
+    bool contains = fixed.contains (fr);
+    if (contains)
+    {
+        roiWindow<P> ctr (fixed.frameBuf(), fr);
+        bool ac = Correlation::area_translation(fixed, ctr, result);
+        return ac;
+    }
+    return contains;
+}
 
 
 template void Correlation::point(const roiWindow<P8U> & moving, const roiWindow<P8U> & fixed, CorrelationParts & res);
 
 template bool Correlation::area_translation(const roiWindow<P8U> & moving, const roiWindow<P8U> & fixed, spaceResult& );
+
+template bool Correlation::autoCorrelation(const roiWindow<P8U> & fixed, const uint32_t half_size, spaceResult& result);
 
 template class imageTranslation<P8U>;
 
