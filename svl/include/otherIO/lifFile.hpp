@@ -38,16 +38,11 @@ struct FilterSettingRecord;
 
 class LifSerieHeader
 {
-    protected:
-        std::string name;
-        std::map<std::string, DimensionData> dimensions;
-        std::vector<ChannelData> channels;
-        std::vector<unsigned long long> timeStamps;
-        std::map<std::string, ScannerSettingRecord> scannerSettings;
-        TiXmlElement *rootElement;
-
+  
     public:
         explicit LifSerieHeader(TiXmlElement *root);
+    
+        typedef unsigned long long timestamp_t;
 
         size_t chooseChannel() const;
         std::string getName() const {return this->name;};
@@ -60,15 +55,30 @@ class LifSerieHeader
         double getZXratio() const;
         const std::map<std::string, DimensionData>& getDimensionsData() const {return dimensions;};
         const std::vector<ChannelData>& getChannels() const {return channels;};
-        const std::vector<unsigned long long>& getTimestamps () const { return timeStamps; }
+        const std::vector<timestamp_t>& getTimestamps () const { return timeStamps; }
 
+        float frame_duration_ms () const;
+    float frame_rate () const { if (frame_duration_ms() > 0.0) return 1000.0/frame_duration_ms ();return -1.0; }
+    
+    protected:
+        std::string name;
+        std::map<std::string, DimensionData> dimensions;
+        std::vector<ChannelData> channels;
+        std::vector<timestamp_t> timeStamps;
+        std::map<std::string, ScannerSettingRecord> scannerSettings;
+        TiXmlElement *rootElement;
+    
+        mutable std::vector<timestamp_t> m_frame_durations;
+        mutable std::pair<bool, float> m_cached_frame_duration;
+    
     private:
         void parseImage(TiXmlNode *elementImage);
         void parseImageDescription(TiXmlNode *elementImageDescription);
         void parseTimeStampList(TiXmlNode *elementTimeStampList);
         void parseHardwareSettingList(TiXmlNode *elementHardwareSettingList);
         void parseScannerSetting(TiXmlNode *elementScannerSetting);
-};
+    
+    };
 
 class LifSerie : public LifSerieHeader, boost::noncopyable
 {
@@ -82,9 +92,12 @@ class LifSerie : public LifSerieHeader, boost::noncopyable
 
         void fill3DBuffer(void* buffer, size_t t=0);
         void fill2DBuffer(void* buffer, size_t t=0, size_t z=0);
+    
+    
         std::istreambuf_iterator<char> begin(size_t t=0);
         std::streampos tellg(){return file.tellg();}
         unsigned long long getOffset(size_t t=0) const;
+    
 };
 
 class LifHeader : boost::noncopyable
@@ -131,12 +144,9 @@ class LifReader : boost::noncopyable
         const int& getVersion() const {return getLifHeader().getVersion();};
         size_t getNbSeries() const {return this->series.size();}
         bool contains(size_t s) const {return getLifHeader().contains(s);}
-        size_t chooseSerieNumber() const {return getLifHeader().chooseSerieNumber();};
 
         LifSerie& getSerie(size_t s){return series[s];};
         const LifSerie& getSerie(size_t s) const {return series[s];};
-        LifSerie& chooseSerie(){return getSerie(chooseSerieNumber());};
-        const LifSerie& chooseSerie() const {return getSerie(chooseSerieNumber());};
 
     private:
         int readInt();
