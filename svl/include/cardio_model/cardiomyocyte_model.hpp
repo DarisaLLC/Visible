@@ -149,8 +149,8 @@ namespace cm  // protection from unintended ADL
             auto p = scale * eQ;
             quantity<cgs::force> total_exerted = p.segment (0, n_.first/2).sum() * bi::cgs::dynes;
             
-            std::cout << p.rows () << "," << p.cols () << std::endl;
-            std::cout << scale << "," << U.mean () << "," << U(0) << std::endl;
+          //  std::cout << p.rows () << "," << p.cols () << std::endl;
+//            std::cout << scale << "," << U.mean () << "," << U(0) << std::endl;
             
             res.length = l_;
             res.width = w_;
