@@ -29,7 +29,7 @@
 #include "vision/histo.h"
 #include "vision/roiMultiWindow.h"
 #include "vision/sample.hpp"
-#include "cinder/opencv_utils.hpp"
+#include "vision/opencv_utils.hpp"
 #include "CImg/CImg.h"
 
 using namespace svl;
@@ -147,6 +147,116 @@ const char * pi341234[] =
 //	}
 //}
 //
+
+
+TEST(basicU8, gradient)
+{
+    
+    std::string filename ("small_read_ut.txt");
+    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
+    roiWindow<P8U> pels (res.first.string());
+    
+    auto w = pels.width();
+    auto h = pels.height();
+    roiWindow<P8U> mag(w, h);
+    roiWindow<P8U> ang(w, h);
+    roiWindow<P8U> peaks(w, h);
+    Gradient(pels, mag, ang);
+    
+    unsigned int pks = SpatialEdge(mag, ang, peaks, 1, false);
+    
+    EXPECT_EQ(pks, 26);
+    
+    
+    std::string afilename ("small_mag_ut.txt");
+    std::pair<test_utils::genv::path_t, bool> ares = dgenv_ptr->asset_path(afilename);
+    roiWindow<P8U> au_mag (ares.first.string());
+    
+    EXPECT_EQ(mag.size(), au_mag.size());
+    for (auto j = 0; j < mag.height(); j++)
+        for (auto i = 0; i < mag.width(); i++)
+        {
+            EXPECT_EQ(mag.getPixel(i,j), au_mag.getPixel(i,j));
+        }
+    
+    std::string mfilename ("small_ang_ut.txt");
+    std::pair<test_utils::genv::path_t, bool> mres = dgenv_ptr->asset_path(mfilename);
+    roiWindow<P8U> au_ang (mres.first.string());
+    
+    EXPECT_EQ(ang.size(), au_ang.size());
+    for (auto j = 0; j < ang.height(); j++)
+        for (auto i = 0; i < ang.width(); i++)
+        {
+            EXPECT_EQ(ang.getPixel(i,j), au_ang.getPixel(i,j));
+        }
+    
+#ifdef NOTYET
+    std::string pfilename ("small_peak_ut.txt");
+    std::pair<test_utils::genv::path_t, bool> pres = dgenv_ptr->asset_path(pfilename);
+    roiWindow<P8U> au_peaks (pres.first.string());
+    au_peaks.output();
+    
+    EXPECT_EQ(peaks.size(), au_peaks.size());
+    for (auto j = 0; j < peaks.height(); j++)
+        for (auto i = 0; i < peaks.width(); i++)
+        {
+            EXPECT_EQ(peaks.getPixel(i,j), au_peaks.getPixel(i,j));
+        }
+#endif
+    
+    
+    
+    
+}
+
+TEST(timing8, gradient)
+{
+    std::shared_ptr<uint8_t> img1 = test_utils::create_trig(1920, 1080);
+    double endtime;
+    std::clock_t start;
+    
+    int w = 1920, h = 1080;
+    roiWindow<P8U> pels(w, h);
+    roiWindow<P8U> mag(w, h);
+    roiWindow<P8U> ang(w, h);
+    roiWindow<P8U> peaks(w, h);
+    
+    start = std::clock();
+    Gradient(pels, mag, ang);
+    unsigned int pks = SpatialEdge(mag, ang, peaks, 1, false);
+    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    double scale = 1000.0;
+    std::cout << " Edge: Mag, Ang, NonMax: 1920 * 1080 * 8 bit " << endtime * scale << " millieseconds per " << std::endl;
+}
+
+
+
+TEST(basicU8, motioncenter)
+{
+    roiWindow<P8U> tmp(16, 16);
+    roiWindow<P8U> mag(16, 16);
+    roiWindow<P8U> ang(16, 16);
+    roiWindow<P8U> peaks(16, 16);
+    
+    tmp.set(255);
+    iPair tl(tmp.width() / 4, tmp.height() / 4);
+    iPair br(4 * tmp.width() / 4 - 1, 4 * tmp.height() / 4 - 1);
+    roiWindow<P8U> box(tmp, tl.x(), tl.y(), br.x() - tl.x(), br.y() - tl.y());
+    box.set(0xef);
+    
+    Gradient(tmp, mag, ang);
+    
+    unsigned int pks = SpatialEdge(mag, ang, peaks, 1, false);
+    EXPECT_EQ(pks, 37);
+    fPair center;
+    GetMotionCenter(peaks, ang, center);
+    fPair correct(3.52f, 3.52f);
+    EXPECT_EQ(true, fabs(center.first - correct.first) < 0.1f);
+    EXPECT_EQ(true, fabs(center.second - correct.second) < 0.1f);
+    
+    edgels::directed_features_t lines;
+    extract(mag, ang, peaks, lines, 0);
+}
 
 void fillramp (roiWindow<P8U>& img)
 {
@@ -378,43 +488,40 @@ TEST (ut_lifFile, triple_channel)
         EXPECT_NEAR(h.mode(), 125.0, 0.001);
     }
     
+    // Test Smear Signal 
     {
  #ifdef _INTERACTIVE
         cv::namedWindow( "Voxel View",   cv::WINDOW_NORMAL  | cv::WINDOW_KEEPRATIO);
+        //set the callback function for any mouse event
+        Point p;
+        setMouseCallback("Voxel View", on_mouse, &p );
 #endif
         vector<int> compression_params;
         compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
         compression_params.push_back(9);
 
-        //set the callback function for any mouse event
-        Point p;
-        setMouseCallback("Voxel View", on_mouse, &p );
         
         cv::Mat tops (dims[1], dims[0], CV_8U);
-        cv::Mat bots (dims[1], dims[0], CV_8U);
+        cv::Mat bots = tops.clone ();
+        cv::Mat mv = tops.clone ();
+        
         bots = 255;
         tops = 0;
-        cv::Mat tmp (dims[1], dims[0], CV_32F);
-        cv::Mat S (dims[1], dims[0], CV_32F);
-        cv::Mat SS (dims[1], dims[0], CV_32F);
-        S = 0;
-        SS = 0;
         
         lifIO::LifSerie& lls = lif.getSerie(series.size()-2);
         std::vector<roiMultiWindow<P8UP3> > voxel;
+        motionSmear smear;
+        
         for (auto tt = 0; tt < lls.getNbTimeSteps(); tt++)
         {
             roiMultiWindow<P8UP3> oneBy3 (names,lls.getTimestamps()[tt]);
             lls.fill2DBuffer(oneBy3.rowPointer(0), tt);
             voxel.emplace_back(oneBy3);
-            cv::Mat mv;
-            NewFromSVL (voxel.back().plane(2), mv);
+            CopyFromSVL (oneBy3.plane(2), mv);
+            smear.add(mv);
             cv::min(mv, bots, bots);
             cv::max(mv, tops, tops);
 
-            mv.convertTo(tmp, CV_32F);
-            S += tmp;
-            SS += tmp.mul(tmp);
 #ifdef _INTERACTIVE
             imshow( "Voxel View", mv );
             // Wait for a key press
@@ -422,24 +529,20 @@ TEST (ut_lifFile, triple_channel)
 #endif
         }
         auto count = lls.getNbTimeSteps();
-
-//        S = S.mul(S);
-//        SS = SS - S /count;
-//        SS *= (1.0/count-1.0);
-        
- //       bots.convertTo(tmp, CV_32F);
-  //      tops.convertTo(tmp2, CV_32F);
         showImage = tops - bots;
+        ellipse_parms ep;
+        EXPECT_EQ(count, smear.count());
+        EXPECT_EQ(showImage.empty(), false);
+        EXPECT_EQ(smear.signature(ep).empty(), false);
+        EXPECT_EQ(matIsEqual(showImage, smear.signature(ep)), true);
+        
+        roiWindow<P8U> sig;
+        
+        NewFromOCV(showImage, sig);
+        
         cv::imwrite ("/Users/arman/Pictures/motionsignature.png", showImage, compression_params);
         
-//        SS *= 1.0/255.;
-//        SS.convertTo(showImage, CV_8U);
-        
-     //   tmp -= tmp2;
-     //   tmp *= 1.0/255;
-
-
-        
+#ifdef _INTERACTIVE
         cv::namedWindow(displayImage,    cv::WINDOW_NORMAL |  cv::WINDOW_FREERATIO );
       //  createTrackbar("Angle",displayImage, &iAngle, 360, CallbackForTrackBar);
         createTrackbar("Scale",displayImage, &iScale, 100, CallbackForTrackBar);
@@ -450,6 +553,7 @@ TEST (ut_lifFile, triple_channel)
         CallbackForTrackBar(iDummy, &iDummy);
         
         waitKey(0);
+#endif
         
         //set the callback function for any mouse event
       //  Point pp;
@@ -528,29 +632,6 @@ TEST(basicU8, jpg_io)
     }
 }
 
-#if 0
-TEST(basiccv, histogram_display)
-{
-    auto wavelength  = 40.0f;
-    auto orientation = (float)M_PI/4.0f;
-    auto gaussvar    = 20.0f;
-    auto phaseoffset = 4.0*(M_PI / 16.0f);
-    auto aspectratio = 0.5f;
-    cv::Mat gabor = cv::CreateGaborFilterImage (368, wavelength, orientation, phaseoffset, gaussvar, aspectratio);
-    
-    ColorHistogram ch (gabor);
-    cv::Mat histimage = ch.graphic ();
-    
-    
-    //  cv::namedWindow( "H-S Histogram", 1 );
-    imshow( "Gaborfilter", histimage );
-    
-    // Wait for a key press
-    int key = cvWaitKey( 1 );
-    
-    
-}
-#endif
 
 TEST(basicU8, localvar)
 {
@@ -559,115 +640,6 @@ TEST(basicU8, localvar)
     
 }
 
-
-TEST(basicU8, gradient)
-{
-    
-    std::string filename ("small_read_ut.txt");
-    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
-    roiWindow<P8U> pels (res.first.string());
-    
-    auto w = pels.width();
-    auto h = pels.height();
-    roiWindow<P8U> mag(w, h);
-    roiWindow<P8U> ang(w, h);
-    roiWindow<P8U> peaks(w, h);
-    Gradient(pels, mag, ang);
-    
-    unsigned int pks = SpatialEdge(mag, ang, peaks, 1, false);
-    
-    EXPECT_EQ(pks, 26);
-    
-    
-    std::string afilename ("small_mag_ut.txt");
-    std::pair<test_utils::genv::path_t, bool> ares = dgenv_ptr->asset_path(afilename);
-    roiWindow<P8U> au_mag (ares.first.string());
-    
-    EXPECT_EQ(mag.size(), au_mag.size());
-    for (auto j = 0; j < mag.height(); j++)
-        for (auto i = 0; i < mag.width(); i++)
-        {
-            EXPECT_EQ(mag.getPixel(i,j), au_mag.getPixel(i,j));
-        }
-    
-    std::string mfilename ("small_ang_ut.txt");
-    std::pair<test_utils::genv::path_t, bool> mres = dgenv_ptr->asset_path(mfilename);
-    roiWindow<P8U> au_ang (mres.first.string());
-    
-    EXPECT_EQ(ang.size(), au_ang.size());
-    for (auto j = 0; j < ang.height(); j++)
-        for (auto i = 0; i < ang.width(); i++)
-        {
-            EXPECT_EQ(ang.getPixel(i,j), au_ang.getPixel(i,j));
-        }
-    
-#ifdef NOTYET
-    std::string pfilename ("small_peak_ut.txt");
-    std::pair<test_utils::genv::path_t, bool> pres = dgenv_ptr->asset_path(pfilename);
-    roiWindow<P8U> au_peaks (pres.first.string());
-    au_peaks.output();
-    
-    EXPECT_EQ(peaks.size(), au_peaks.size());
-    for (auto j = 0; j < peaks.height(); j++)
-        for (auto i = 0; i < peaks.width(); i++)
-        {
-            EXPECT_EQ(peaks.getPixel(i,j), au_peaks.getPixel(i,j));
-        }
-#endif
-    
-    
-    
-    
-}
-
-TEST(timing8, gradient)
-{
-    std::shared_ptr<uint8_t> img1 = test_utils::create_trig(1920, 1080);
-    double endtime;
-    std::clock_t start;
-    
-    int w = 1920, h = 1080;
-    roiWindow<P8U> pels(w, h);
-    roiWindow<P8U> mag(w, h);
-    roiWindow<P8U> ang(w, h);
-    roiWindow<P8U> peaks(w, h);
-    
-    start = std::clock();
-    Gradient(pels, mag, ang);
-    unsigned int pks = SpatialEdge(mag, ang, peaks, 1, false);
-    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
-    double scale = 1000.0;
-    std::cout << " Edge: Mag, Ang, NonMax: 1920 * 1080 * 8 bit " << endtime * scale << " millieseconds per " << std::endl;
-}
-
-
-
-TEST(basicU8, motioncenter)
-{
-    roiWindow<P8U> tmp(16, 16);
-    roiWindow<P8U> mag(16, 16);
-    roiWindow<P8U> ang(16, 16);
-    roiWindow<P8U> peaks(16, 16);
-    
-    tmp.set(255);
-    iPair tl(tmp.width() / 4, tmp.height() / 4);
-    iPair br(4 * tmp.width() / 4 - 1, 4 * tmp.height() / 4 - 1);
-    roiWindow<P8U> box(tmp, tl.x(), tl.y(), br.x() - tl.x(), br.y() - tl.y());
-    box.set(0xef);
-    
-    Gradient(tmp, mag, ang);
-    
-    unsigned int pks = SpatialEdge(mag, ang, peaks, 1, false);
-    EXPECT_EQ(pks, 37);
-    fPair center;
-    GetMotionCenter(peaks, ang, center);
-    fPair correct(3.52f, 3.52f);
-    EXPECT_EQ(true, fabs(center.first - correct.first) < 0.1f);
-    EXPECT_EQ(true, fabs(center.second - correct.second) < 0.1f);
-    
-    edgels::directed_features_t lines;
-    extract(mag, ang, peaks, lines, 0);
-}
 
 TEST(synth, basic)
 {
@@ -1083,6 +1055,29 @@ TEST(basicGL, display)
         iRect db (100, 150, 320, 240);
         showImage(rootwin, db);
     }
+    
+}
+
+
+TEST(basiccv, histogram_display)
+{
+    auto wavelength  = 40.0f;
+    auto orientation = (float)M_PI/4.0f;
+    auto gaussvar    = 20.0f;
+    auto phaseoffset = 4.0*(M_PI / 16.0f);
+    auto aspectratio = 0.5f;
+    cv::Mat gabor = cv::CreateGaborFilterImage (368, wavelength, orientation, phaseoffset, gaussvar, aspectratio);
+    
+    ColorHistogram ch (gabor);
+    cv::Mat histimage = ch.graphic ();
+    
+    
+    //  cv::namedWindow( "H-S Histogram", 1 );
+    imshow( "Gaborfilter", histimage );
+    
+    // Wait for a key press
+    int key = cvWaitKey( 1 );
+    
     
 }
 
