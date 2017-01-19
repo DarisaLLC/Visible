@@ -44,7 +44,6 @@ class LifSerieHeader
     
         typedef unsigned long long timestamp_t;
 
-        size_t chooseChannel() const;
         std::string getName() const {return this->name;};
         double getVoxelSize(const size_t d) const;
         int getResolution(const size_t channel) const;
@@ -53,6 +52,7 @@ class LifSerieHeader
         size_t getNbPixelsInOneTimeStep() const;
         size_t getNbPixelsInOneSlice() const;
         double getZXratio() const;
+        bool hasTimeChannel () const;
         const std::map<std::string, DimensionData>& getDimensionsData() const {return dimensions;};
         const std::vector<ChannelData>& getChannels() const {return channels;};
         const std::vector<timestamp_t>& getTimestamps () const { return timeStamps; }
@@ -118,11 +118,8 @@ class LifHeader : boost::noncopyable
         const int& getVersion() const {return this->lifVersion;};
         size_t getNbSeries() const {return this->series.size();}
         bool contains(size_t s) const {return s<this->series.size();}
-        size_t chooseSerieNumber() const;
         LifSerieHeader& getSerieHeader(size_t s){return this->series[s];};
         const LifSerieHeader& getSerieHeader(size_t s) const {return this->series[s];};
-        LifSerieHeader& chooseSerieHeader(){return getSerieHeader(chooseSerieNumber());};
-        const LifSerieHeader& chooseSerieHeader() const {return getSerieHeader(chooseSerieNumber());};
 
     private:
         void parseHeader();
