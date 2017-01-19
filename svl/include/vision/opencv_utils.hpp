@@ -23,8 +23,10 @@ namespace svl
         double a;
         double b;
         double theta;
+        double eigen_angle;
         Point2d mc;
         Moments mu;
+        bool eigen_ok;
     };
 
     void NewFromOCV (const cv::Mat& mat, roiWindow<P8U>& roi);
