@@ -18,6 +18,36 @@
 
 std::string qTimeFrameCache::getName () const { return "qTimeFrameCache"; }
 
+std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifserie)
+{
+    tiny_media_info tm;
+    tm.count = lifserie.getNbTimeSteps();
+    auto dims = lifserie.getSpatialDimensions();
+    tm.size.width = static_cast<int>(dims[0]);
+    tm.size.height = static_cast<int>(dims[1]);
+    tm.duration = lifserie.frame_duration_ms();
+    tm.mFps = lifserie.frame_rate();
+    tm.mIsLifSerie = true;
+    tm.mIsImageFolder = false;
+    tm.mChannels = lifserie.getChannels().size();
+    
+    auto thisref = std::make_shared<qTimeFrameCache>(tm);
+    std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator tItr = lifserie.getDurations().begin();
+    auto frame_count = 0;
+    cm_time frame_time;
+    while (tItr < lifserie.getDurations().end())
+    {
+        Surface8uRef frame = Surface8u::create(tm.getWidth(), tm.getHeight(), true);
+        lifserie.fill2DBuffer(frame->getData(), frame_count++);
+        thisref->loadFrame(frame, frame_time);
+        cm_time ts((*tItr++)/(10000.0));
+        frame_time = frame_time + ts;
+    }
+    return thisref;
+    
+}
+
+
 std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ci::qtime::MovieSurfaceRef& mMovie)
 {
     tiny_media_info minfo;
@@ -60,7 +90,7 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const std::vector<ci::
 {
     tiny_media_info minfo;
     minfo.mFps = 1.0;
-    minfo.count = folderImages.size();
+    minfo.count = static_cast<uint32_t>(folderImages.size());
     minfo.duration = 1.0;
 
     auto thisref = std::make_shared<qTimeFrameCache>(minfo);
