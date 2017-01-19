@@ -12,7 +12,6 @@
 		C20E3E621CF378470074C47A /* affine_rectangle.h in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC3D1CF3780E0074C47A /* affine_rectangle.h */; };
 		C20E3E631CF378470074C47A /* cinder_xchg.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC3E1CF3780E0074C47A /* cinder_xchg.hpp */; };
 		C20E3E641CF378470074C47A /* editableRectangle.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC3F1CF3780E0074C47A /* editableRectangle.hpp */; };
-		C20E3E651CF378470074C47A /* opencv_utils.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC401CF3780E0074C47A /* opencv_utils.hpp */; };
 		C20E3E671CF378470074C47A /* AccordionItem.h in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC431CF3780E0074C47A /* AccordionItem.h */; };
 		C20E3E691CF378470074C47A /* Resources.h in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC451CF3780E0074C47A /* Resources.h */; };
 		C20E3E6A1CF378470074C47A /* angle_units.h in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC471CF3780F0074C47A /* angle_units.h */; };
@@ -100,6 +99,7 @@
 		C22293111D949CE100F978DC /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C222930D1D949CE100F978DC /* tinyxmlerror.cpp */; };
 		C22293121D949CE100F978DC /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C222930E1D949CE100F978DC /* tinyxmlparser.cpp */; };
 		C22293131D949F1400F978DC /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22293091D949CBD00F978DC /* lifFile.cpp */; };
+		C23D0F591E2D9B4C0049ADDB /* opencv_utils.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C23D0F581E2D9B4C0049ADDB /* opencv_utils.hpp */; };
 		C24B1FB41D8B54E700292F85 /* cerruti_rectangle_integral.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C24B1FB31D8B54E700292F85 /* cerruti_rectangle_integral.hpp */; };
 		C24B1FB61D8B55E500292F85 /* cardiomyocyte_model.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C24B1FB51D8B55E500292F85 /* cardiomyocyte_model.hpp */; };
 		C24B1FB91D8B590100292F85 /* metric.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C24B1FB81D8B590100292F85 /* metric.hpp */; };
@@ -249,7 +249,6 @@
 		C20EDC3D1CF3780E0074C47A /* affine_rectangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = affine_rectangle.h; sourceTree = "<group>"; };
 		C20EDC3E1CF3780E0074C47A /* cinder_xchg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cinder_xchg.hpp; sourceTree = "<group>"; };
 		C20EDC3F1CF3780E0074C47A /* editableRectangle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = editableRectangle.hpp; sourceTree = "<group>"; };
-		C20EDC401CF3780E0074C47A /* opencv_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = opencv_utils.hpp; sourceTree = "<group>"; };
 		C20EDC421CF3780E0074C47A /* AccordionItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AccordionItem.cpp; sourceTree = "<group>"; };
 		C20EDC431CF3780E0074C47A /* AccordionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccordionItem.h; sourceTree = "<group>"; };
 		C20EDC441CF3780E0074C47A /* ImageAccordionApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ImageAccordionApp.cpp; sourceTree = "<group>"; };
@@ -310,6 +309,7 @@
 		C222930C1D949CE100F978DC /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../local/tinyxml/tinyxml.cpp; sourceTree = "<group>"; };
 		C222930D1D949CE100F978DC /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../local/tinyxml/tinyxmlerror.cpp; sourceTree = "<group>"; };
 		C222930E1D949CE100F978DC /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
+		C23D0F581E2D9B4C0049ADDB /* opencv_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = opencv_utils.hpp; sourceTree = "<group>"; };
 		C24B1FB31D8B54E700292F85 /* cerruti_rectangle_integral.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cerruti_rectangle_integral.hpp; sourceTree = "<group>"; };
 		C24B1FB51D8B55E500292F85 /* cardiomyocyte_model.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model.hpp; sourceTree = "<group>"; };
 		C24B1FB81D8B590100292F85 /* metric.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = metric.hpp; sourceTree = "<group>"; };
@@ -664,7 +664,6 @@
 				C20EDC3D1CF3780E0074C47A /* affine_rectangle.h */,
 				C20EDC3E1CF3780E0074C47A /* cinder_xchg.hpp */,
 				C20EDC3F1CF3780E0074C47A /* editableRectangle.hpp */,
-				C20EDC401CF3780E0074C47A /* opencv_utils.hpp */,
 				C20EDC411CF3780E0074C47A /* snippets */,
 			);
 			path = cinder;
@@ -732,6 +731,7 @@
 				C20EDC6B1CF3780F0074C47A /* labelconnect.hpp */,
 				C20EDC6C1CF3780F0074C47A /* localvariance.h */,
 				C20EDC6D1CF3780F0074C47A /* median_t.hpp */,
+				C23D0F581E2D9B4C0049ADDB /* opencv_utils.hpp */,
 				C20EDC6E1CF3780F0074C47A /* pixel_traits.h */,
 				C20EDC6F1CF3780F0074C47A /* registration.h */,
 				C20EDC701CF3780F0074C47A /* roiRoot.h */,
@@ -829,7 +829,6 @@
 				C29854281D95E147005F59EF /* roiMultiWindow.h in Headers */,
 				C20E3E921CF378470074C47A /* roiRoot.h in Headers */,
 				C20E3E791CF378470074C47A /* singleton.hpp in Headers */,
-				C20E3E651CF378470074C47A /* opencv_utils.hpp in Headers */,
 				C20E3E6A1CF378470074C47A /* angle_units.h in Headers */,
 				C20E3E811CF378470074C47A /* colorhistogram.hpp in Headers */,
 				C20E3E981CF378470074C47A /* sparsehist.h in Headers */,
@@ -872,6 +871,7 @@
 				C20E3E901CF378470074C47A /* pixel_traits.h in Headers */,
 				C24B1FB41D8B54E700292F85 /* cerruti_rectangle_integral.hpp in Headers */,
 				C20E3E911CF378470074C47A /* registration.h in Headers */,
+				C23D0F591E2D9B4C0049ADDB /* opencv_utils.hpp in Headers */,
 				C20E3E7D1CF378470074C47A /* svl_exception.hpp in Headers */,
 				C20E3E961CF378470074C47A /* sample.hpp in Headers */,
 				C20E3E941CF378470074C47A /* rowfunc.h in Headers */,
