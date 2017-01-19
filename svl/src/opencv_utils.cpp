@@ -126,14 +126,13 @@ namespace svl
 
         bool eigenok = cv::eigen(M, e_vals, e_vects);
         int ev = (e_vals.at<float>(0,0) > e_vals.at<float>(0,1)) ? 0 : 1;
-        std::cout <<  e_vals.at<float>(0,0) << " " <<  e_vals.at<float>(0,1) << std::endl;
+        double angle = atan2 (e_vects.at<float>(ev, 0),e_vects.at<float>(ev, 1));
         
-        double angle = cv::fastAtan2 (e_vects.at<float>(ev, 0),e_vects.at<float>(ev, 1));
-
         
         double mm2 = m20 - m02;
         auto tana = mm2 + std::sqrt (4*m11*m11 + mm2*mm2);
         double theta = atan(2*m11 / tana);
+        
         double cos2 = cos(theta)*cos(theta);
         double sin2 = sin(theta)*sin(theta);
         double sin2x = sin(theta)*cos(theta);
@@ -146,6 +145,8 @@ namespace svl
         res.a = 2.0 * std::sqrt(lambda1/mu.m00);
         res.b = 2.0 * std::sqrt(lambda2/mu.m00);
         res.theta = theta;
+        res.eigen_angle = angle;
+        res.eigen_ok = eigenok;
         
         return true;
     }
