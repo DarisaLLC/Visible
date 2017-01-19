@@ -42,6 +42,18 @@ namespace
 }
 
 
+void prepareSettings( App::Settings *settings )
+{
+    settings->setHighDensityDisplayEnabled();
+    settings->setWindowSize( 848, 564 );
+    settings->setFrameRate( 60 );
+    settings->setResizable( false );
+    
+    //    settings->setWindowSize( 640, 480 );
+    //    settings->setFullScreen( false );
+    //    settings->setResizable( true );
+}
+
 class VisibleApp : public App, public SingletonLight<VisibleApp>
 {
 public:
@@ -115,17 +127,6 @@ WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
 
 }
 
-void VisibleApp::prepareSettings( Settings *settings )
-{
-    settings->setWindowSize( 848, 564 );
-    settings->setFrameRate( 60 );
-    settings->setResizable( false );
-    
-//    settings->setWindowSize( 640, 480 );
-//    settings->setFullScreen( false );
-//    settings->setResizable( true );
- }
-
 
 bool VisibleApp::shouldQuit()
 {
@@ -194,7 +195,6 @@ void VisibleApp::setup()
     
      // Setup the parameters
     mTopParams = params::InterfaceGl::create( "Visible", ivec2( 250, 300 ) );
-//	mTopParams = params::InterfaceGl::create( getWindow(), "Select", toPixels( vec2( 200, 400)), color );
 
     mTopParams->addSeparator();
     mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this) );
@@ -209,9 +209,6 @@ void VisibleApp::setup()
     
     mTopParams->addSeparator();
     
-//    mTopParams->addParam( "Show Multi Snap Shot ", &mShowMultiSnapShot);
-//    mTopParams->addParam( "Show Multi Snap Shot and Data ", &mShowMultiSnapShotAndData);
-//    mTopParams->addParam( "Pause ", &mPaused );
     getSignalShouldQuit().connect( std::bind( &VisibleApp::shouldQuit, this ) );
     
     getWindow()->getSignalMove().connect( std::bind( &VisibleApp::windowMove, this ) );
@@ -344,4 +341,4 @@ void VisibleApp::resize ()
 
 
 // This line tells Cinder to actually create the application
-CINDER_APP( VisibleApp, RendererGl (RendererGl ::Options().msaa( 4 ) ) )
+CINDER_APP( VisibleApp, RendererGl (RendererGl ::Options().msaa( 4 ) ), prepareSettings )
