@@ -58,6 +58,12 @@ size_t lifIO::LifSerieHeader::getNbTimeSteps() const
     return it->second.numberOfElements;
 }
 
+bool lifIO::LifSerieHeader::hasTimeChannel() const
+{
+    map<string, DimensionData>::const_iterator it = dimensions.find("T");
+    return it != dimensions.end();
+}
+
 /** @brief getSpatialDimensions  */
 vector<size_t> lifIO::LifSerieHeader::getSpatialDimensions() const
 {
@@ -106,12 +112,10 @@ void lifIO::LifSerieHeader::parseImage(TiXmlNode *elementImage)
     // Parse time stamps even if there aren't any, then add empty
     // Unsigned Long Long to timestamps vector
     TiXmlNode *elementTimeStampList = elementImage->FirstChild("TimeStampList");
-    //std::cout << "parsing TimeStampList" << std::endl;
     parseTimeStampList(elementTimeStampList);
 
 
     // Parse Hardware Setting List even if there aren't
-    //std::cout << "parsing elementHardwareSettingList" << std::endl;
     TiXmlNode *elementHardwareSettingList = 0;
     TiXmlNode *child = 0;
     string Name;
@@ -252,7 +256,7 @@ lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, uns
     //get size of the file
     file.seekg(0,ios::end);
     fileSize = file.tellg();
-    //cout<<"offset: "<<offset<<"\tmemorySize: "<<memorySize<<"\tfileSize: "<<fileSize<<endl;
+
     //check the validity of the offset and memorysize parameters
     if(offset >= (unsigned long long)fileSize)
         throw invalid_argument("Offset is larger than file size");
@@ -354,7 +358,6 @@ void lifIO::LifHeader::parseHeader()
     {
         //have to remove some nodes also named "Element" introduced in later versions of LIF
         std::string elname(serieNode->ToElement()->Attribute("Name"));
-        //std::cout << "Element Name: " << elname << std::endl;
         if (elname == "BleachPointROISet") continue;
         series.push_back(new LifSerieHeader(serieNode->ToElement()));
     }
@@ -366,8 +369,6 @@ void lifIO::LifHeader::parseHeader()
 lifIO::LifReader::LifReader(const string &filename) : file(filename.c_str(), ios::in | ios::binary)
 {
     static std::mutex sMutex;
-    std::lock_guard<std::mutex> lock( sMutex );
-
     const int MemBlockCode = 0x70, TestCode = 0x2a;
     char lifChar;
 
@@ -389,23 +390,27 @@ lifIO::LifReader::LifReader(const string &filename) : file(filename.c_str(), ios
         throw invalid_argument((filename+" is not a Leica SP5 file").c_str());
 
     unsigned int xmlChars = readUnsignedInt();
-    //cout << xmlChars<<endl;
     xmlChars*=2;
 
     // Read and parse xml header
     string xmlString;
     xmlString.reserve(xmlChars/2);
-    std::shared_ptr<char> xmlHeader (new char[xmlChars]);
-    file.read(xmlHeader.get(),xmlChars);
-    for(unsigned int p=0;p<xmlChars/2;++p)
-        xmlString.push_back(xmlHeader.get()[2*p]);
-//    delete[] xmlHeader;
+    
+    {
+        std::shared_ptr<char> xmlHeader (new char[xmlChars]);
+        file.read(xmlHeader.get(),xmlChars);
+        for(unsigned int p=0;p<xmlChars/2;++p)
+            xmlString.push_back(xmlHeader.get()[2*p]);
+    }
+
 
     header.reset(new LifHeader(xmlString));
 
     size_t s = 0;
     while (file.tellg() < fileSize)
     {
+        std::lock_guard<std::mutex> lock( sMutex );
+        
         // Check LIF test value
         int lifCheck = readInt();
         if (lifCheck != MemBlockCode)
