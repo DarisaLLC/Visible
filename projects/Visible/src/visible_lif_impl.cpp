@@ -81,28 +81,36 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
 
 void lifContext::play ()
 {
-    if (! have_movie() || m_movie->isPlaying() ) return;
-    m_movie->play ();
+    if (! have_movie() || mMoviePlay ) return;
+    mMoviePlay = true;
 }
 
 void lifContext::pause ()
 {
-    if (! have_movie() || ! m_movie->isPlaying() ) return;
-    m_movie->stop ();
+    if (! have_movie() || ! mMoviePlay ) return;
+    mMoviePlay = false;
 }
 
 void lifContext::play_pause_button ()
 {
     if (! have_movie () ) return;
-    if (m_movie->isPlaying())
+    if (mMoviePlay)
         pause ();
     else
         play ();
 }
 
+void lifContext::onMarked ( marker_info& t)
+{
+    pause ();
+    setIndex((int)(t.norm_pos.x *= m_fc));
+    
+    
+}
+
 bool lifContext::have_movie ()
 {
-    return m_movie != nullptr && m_valid;
+    return m_lifRef && m_selected_serie >= 0 && m_selected_serie < m_lifRef->getNbSeries() && mFrameSet;
 }
 
 int lifContext::getIndex ()
@@ -110,21 +118,11 @@ int lifContext::getIndex ()
     return mMovieIndexPosition;
 }
 
-void lifContext::onMarked ( marker_info& t)
-{
-    pause ();
-    setIndex((int)(t.norm_pos.x *= m_fc));
-  
-
-}
 void lifContext::setIndex (int mark)
 {
     pause ();
     mMovieIndexPosition = (mark % m_fc);
-    m_movie->seekToFrame(mMovieIndexPosition);
- 
-    
-    
+    mFrameSet->getFrame (mMovieIndexPosition);
 }
 
 vec2 lifContext::getZoom ()
@@ -141,11 +139,8 @@ void lifContext::setZoom (vec2 zoom)
 
 void lifContext::setup()
 {
-    
-//    VisWinMgr::key_t kk;
-//    uContextRef fthis = getRef();
-//    bool kept = VisWinMgr::instance().makePair(new_win, fthis, kk);
-//    ci_console() << "Movie Window/Context registered: " << std::boolalpha << kept << std::endl;
+    mMovieParams = params::InterfaceGl( "Lif Player ", vec2( 90, 160 ) );
+
     
     // Load the validated movie file
     loadLifFile ();
@@ -155,17 +150,26 @@ void lifContext::setup()
     if( m_valid )
     {
        	m_type = Type::qtime_viewer;
+        mMovieParams.addSeparator();
+
+        m_series_names.clear ();
+        for (auto ss = 0; ss < m_series_book.size(); ss++)
+            m_series_names.push_back (m_series_book[ss].name);
+        
+        
+        // Add an enum (list) selector.
+        m_selected_serie = 0;
+        mMovieParams.addParam( "Series ", m_series_names, &m_selected_serie )
+        .keyDecr( "[" )
+        .keyIncr( "]" )
+        .updateFn( [this] { loadCurrentSerie (); console() << "selected serie updated: " << m_series_names [m_selected_serie] << endl; loadCurrentSerie (); } );
+        
         
         mMovieParams.addSeparator();
-        mMovieParams.addButton( "Import Time Series ", std::bind( &lifContext::add_scalar_track_get_file, this ) );
-        mMovieParams.addSeparator();
-        
-        mButton_title_index = 0;
-        string max = to_string( m_movie->getDuration() );
         {
-        const std::function<void (int)> setter = std::bind(&lifContext::setIndex, this, std::placeholders::_1);
-        const std::function<int ()> getter = std::bind(&lifContext::getIndex, this);
-        mMovieParams.addParam ("Mark", setter, getter);
+            const std::function<void (int)> setter = std::bind(&lifContext::setIndex, this, std::placeholders::_1);
+            const std::function<int ()> getter = std::bind(&lifContext::getIndex, this);
+            mMovieParams.addParam ("Current Time Step", setter, getter);
         }
         mMovieParams.addSeparator();
         {
@@ -210,7 +214,6 @@ void lifContext::clear_movie_params ()
 }
 
 
-
 void lifContext::loadLifFile ()
 {
     if ( ! mPath.empty () )
@@ -218,28 +221,42 @@ void lifContext::loadLifFile ()
         ci_console () << mPath.string ();
         
         try {
-
+            
             m_lifRef =  std::shared_ptr<lifIO::LifReader> (new lifIO::LifReader (mPath.string()));
             get_series_info (m_lifRef);
             
-            m_movie = qtime::MovieSurface::create( mPath.string() );
-            m_valid = m_movie->isPlayable ();
+        }
+        catch( ... ) {
+            ci_console() << "Unable to load the movie." << std::endl;
+            return;
+        }
+        
+    }
+}
+
+
+void lifContext::loadCurrentSerie ()
+{
+    if ( ! (m_lifRef && m_selected_serie >= 0 && m_selected_serie < m_lifRef->getNbSeries()))
+        return;
+        
+    try {
             
-            mFrameSet = qTimeFrameCache::create (m_movie);
+            m_serie = m_series_book[m_selected_serie];
+            mFrameSet = qTimeFrameCache::create (m_lifRef->getSerie(m_selected_serie));
             
             if (m_valid)
             {
                 getWindow()->setTitle( mPath.filename().string() );
-                mMovieParams = params::InterfaceGl( "Movie Controller", vec2( 90, 160 ) );
-                
-                ci_console() << "Dimensions:" <<m_movie->getWidth() << " x " <<m_movie->getHeight() << std::endl;
-                ci_console() << "Duration:  " <<m_movie->getDuration() << " seconds" << std::endl;
-                ci_console() << "Frames:    " <<m_movie->getNumFrames() << std::endl;
-                ci_console() << "Framerate: " <<m_movie->getFramerate() << std::endl;
-                getWindow()->getApp()->setFrameRate(m_movie->getFramerate() / 3);
-
-                mScreenSize = vec2(std::fabs(m_movie->getWidth()), std::fabs(m_movie->getHeight()));
         
+                ci_console() << "Series:  " << m_series_book.size() << std::endl;
+
+                const tiny_media_info tm = mFrameSet->media_info ();
+                getWindow()->getApp()->setFrameRate(tm.getFramerate());
+
+                mScreenSize = tm.getSize();
+                m_fc = tm.getNumFrames ();
+                
                 mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
                 
                 mS = cv::Mat(mScreenSize.x, mScreenSize.y, CV_32F);
@@ -248,22 +265,20 @@ void lifContext::loadLifFile ()
                 texture_to_display_zoom();
                 
                 
-                m_fc = m_movie->getNumFrames ();
-                m_movie->setLoop( true, false);
-                m_movie->seekToStart();
+
+//                m_movie->setLoop( true, false);
+//                m_movie->seekToStart();
                 // Do not play at start 
-                m_movie->play();
+//                m_movie->play();
                 
                 // Percent trim from all sides.
                 m_max_motion.x = m_max_motion.y = 0.1;
                 
             }
         }
-        catch( ... ) {
-            ci_console() << "Unable to load the movie." << std::endl;
-            return;
-        }
-        
+    catch( const std::exception &ex ) {
+        console() << ex.what() << endl;
+          return;
     }
 }
 
@@ -295,10 +310,10 @@ void lifContext::keyDown( KeyEvent event )
     }
     
     // these keys only make sense if there is an active movie
-    if( m_movie ) {
+    if( have_movie () ) {
         if( event.getCode() == KeyEvent::KEY_LEFT ) {
             pause();
-            setIndex (mMovieIndexPosition - 1);
+           setIndex (mMovieIndexPosition - 1);
         }
         if( event.getCode() == KeyEvent::KEY_RIGHT ) {
             pause ();
@@ -351,7 +366,7 @@ void lifContext::seek( size_t xPos )
 }
 
 
-bool lifContext::is_valid () { return m_valid && is_context_type(uContext::qtime_viewer); }
+bool lifContext::is_valid () { return m_valid && is_context_type(uContext::lif_file_viewer); }
 
 void lifContext::resize ()
 {
@@ -363,70 +378,56 @@ void lifContext::update ()
     if (! have_movie () )
         return;
     
-    time_spec_t new_time = qtimeAvfLink::MovieBaseGetCurrentTime(m_movie);
-    
     fPair trim (10, 10);
     uint8_t edge_magnitude_threshold = 5;
     
-    if (m_movie->checkNewFrame())
+    
+  //  if(mFrameSet->checkFrame(mMovieIndexPosition))
     {
-       ip::flipVertical(*m_movie->getSurface(), mSurface.get());
-        ip::flipHorizontal(mSurface.get());
-        
-        mFrameSet->loadFrame(mSurface, new_time);
-        m_index = mFrameSet->currentIndex(new_time);
-        
-        mSurface = mFrameSet->getFrame(new_time);
-        cv::Mat surfm = toOcv( *mSurface);
-        cv::Mat gm (mSurface->getWidth(), mSurface->getHeight(), CV_8U);
-        cvtColor(surfm, gm, cv::COLOR_RGB2GRAY);
-        cv::GaussianBlur(gm, gm, cv::Size(11,11), 5.00);
-        roiWindow<P8U> rw;
-        NewFromOCV(gm, rw);
-        roiWindow<P8U> roi (rw.frameBuf(), trim.first, trim.second, rw.width() - 2*trim.first, rw.height() - 2*trim.second );
-        fPair center;
-        GetMotionCenter(roi, center, edge_magnitude_threshold);
-        center += trim;
-        m_prev_com = mCom;
-        mCom = vec2(center.first, center.second);
-        
-        cv::Point2f com (mCom.x , mCom.y );
-        normalize_point(mCom, mSurface->getSize());
-
-        if (m_index > 0)
-        {
-            cv::absdiff(gm, mS, mS);
-            cv::Point2f dcom;
-            getLuminanceCenterOfMass (gm, dcom);
-            vec2 m (dcom.x , dcom.y );
-            normalize_point(m, mSurface->getSize());
-            m = m - (mCom - m_prev_com);
-            m_max_motion = m;
-        }
-        
-          mS = gm;
-        mSS = surfm;
-        
-        
-        
+        mSurface = mFrameSet->getFrame(getIndex ());
+        if (mMoviePlay)
+            setIndex (getIndex()+1);
     }
     
 }
 
+void lifContext::draw_info ()
+{
+    if (! m_lifRef) return;
+        
+    gl::setMatricesWindow( getWindowSize() );
+    
+    gl::ScopedBlendAlpha blend_;
+    TextLayout layoutR;
+    
+    layoutR.clear( ColorA::gray( 0.2f, 0.5f ) );
+    layoutR.setFont( Font( "Arial", 18 ) );
+    layoutR.setColor( Color::white() );
+    layoutR.setLeadingOffset( 3 );
+    layoutR.addRightLine( string( "Frame: " + to_string( int( getIndex() ) ) ) );
+    
+    
+    auto texR = gl::Texture::create( layoutR.render( true ) );
+    gl::draw( texR, vec2( getWindowWidth() - texR->getWidth() - 16, 10 ) );
+}
+
+
 void lifContext::draw ()
 {
-   
-    if( ! have_movie()  || ( ! mSurface ) )
-    {
-        std::cout << " no have movie or surface " << std::endl;
-        return;
-    }
-    
-    mImage = gl::Texture::create(*mSurface);
-    
-      mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
-    gl::draw (mImage, m_display_rect);
 
+
+    if( have_movie()  && mSurface )
+    {
+        mImage = gl::Texture::create(*mSurface);
+        Rectf rect (mImage->getBounds());
+        rect = rect.getCenteredFit(getWindowBounds(), true);
+        mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
+        gl::draw (mImage, rect);
+//        draw_info ();
+    }
+    mMovieParams.draw();
+    
+#if 0
     vec2 com = mCom * vec2(getWindowSize().x,getWindowSize().y);
     vec2 pcom = m_prev_com * vec2(getWindowSize().x,getWindowSize().y);
     vec2 mmm = m_max_motion * vec2(getWindowSize().x,getWindowSize().y);
@@ -446,8 +447,9 @@ void lifContext::draw ()
         gl::ScopedColor color (ColorA(0.5f, 0.5f, 1.0f, 0.5f));
         gl::drawSolidEllipse(mid, len, len / 2.0f);
     }
+#endif
     
-    mMovieParams.draw();
+
     
 }
 
