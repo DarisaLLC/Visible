@@ -21,6 +21,8 @@
 #include "mediaInfo.h"
 #include "time_index.h"
 #include "avReader.hpp"
+#include "lifFile.hpp"
+
 
 using namespace ci;
 using namespace std;
@@ -46,6 +48,8 @@ public:
     static std::shared_ptr<qTimeFrameCache> create (const ci::qtime::MovieGlRef& movie);
     static std::shared_ptr<qTimeFrameCache> create (const std::shared_ptr<avcc::avReader>& assetReader);
     static std::shared_ptr<qTimeFrameCache> create (const std::vector<ci::Surface8uRef>& folderImages);
+    static std::shared_ptr<qTimeFrameCache> create (lifIO::LifSerie&);
+    
 
     // todo: also return index to time mapping 
     size_t convertTo (std::vector<roiWindow<P8U> >& dst);

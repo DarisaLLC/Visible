@@ -364,6 +364,7 @@ public:
 	virtual void update ();
 	virtual void resize ();
 	void draw_window ();
+	void draw_info ();
 	
 	virtual void onMarked (marker_info_t&);
 	virtual void mouseDown( MouseEvent event );
@@ -401,6 +402,7 @@ public:
 	
 private:
 	void loadLifFile();
+	void loadCurrentSerie ();
 	bool have_movie ();
 	void play ();
 	void pause ();
@@ -439,20 +441,27 @@ private:
 	std::shared_ptr<lifIO::LifReader> m_lifRef;
 	std::vector<size_t> m_spatial_dims;
 	std::vector<series_info> m_series_book;
+    std::vector<std::string> m_series_names;
+	int  m_selected_serie;
 	
 	void seek( size_t xPos );
 	void clear_movie_params ();
 	vec2 texture_to_display_zoom ();
 	vec2 mScreenSize;
 	gl::TextureRef mImage;
-	ci::qtime::MovieSurfaceRef m_movie;
+	series_info m_serie;
+	
 	size_t m_fc;
 	params::InterfaceGl         mMovieParams;
+	
+	
 	float mMoviePosition, mPrevMoviePosition;
-	size_t mMovieIndexPosition, mPrevMovieIndexPosition;
+	int64_t mMovieIndexPosition, mPrevMovieIndexPosition;
 	float mMovieRate, mPrevMovieRate;
 	bool mMoviePlay, mPrevMoviePlay;
 	bool mMovieLoop, mPrevMovieLoop;
+	
+	
 	vec2 m_zoom;
 	Rectf m_display_rect;
 	boost::filesystem::path mPath;

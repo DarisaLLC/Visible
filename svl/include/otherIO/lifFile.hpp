@@ -56,7 +56,8 @@ class LifSerieHeader
         const std::map<std::string, DimensionData>& getDimensionsData() const {return dimensions;};
         const std::vector<ChannelData>& getChannels() const {return channels;};
         const std::vector<timestamp_t>& getTimestamps () const { return timeStamps; }
-
+        const std::vector<timestamp_t>& getDurations () const { return m_frame_durations; }
+    
         float frame_duration_ms () const;
     float frame_rate () const { if (frame_duration_ms() > 0.0) return 1000.0/frame_duration_ms ();return -1.0; }
     
