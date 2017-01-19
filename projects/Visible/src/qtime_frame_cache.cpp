@@ -35,10 +35,13 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifse
     std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator tItr = lifserie.getDurations().begin();
     auto frame_count = 0;
     cm_time frame_time;
+    ivec2 zv;
     while (tItr < lifserie.getDurations().end())
     {
         Surface8uRef frame = Surface8u::create(tm.getWidth(), tm.getHeight(), true);
-        lifserie.fill2DBuffer(frame->getData(), frame_count++);
+        lifserie.fill2DBuffer(frame->getDataRed(zv), frame_count);
+        lifserie.fill2DBuffer(frame->getDataBlue(zv), frame_count);
+        lifserie.fill2DBuffer(frame->getDataGreen(zv), frame_count++);
         thisref->loadFrame(frame, frame_time);
         cm_time ts((*tItr++)/(10000.0));
         frame_time = frame_time + ts;
