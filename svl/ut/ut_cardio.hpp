@@ -47,7 +47,7 @@ namespace cardio_ut
             cardio_model cmm;
             ar( CEREAL_NVP(cmm.result()) );
         }
-        std::cout << ss.str() << std::endl;
+        std::cout << ss.str().length() << std::endl;
 
      }
 };
