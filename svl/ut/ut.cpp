@@ -38,7 +38,7 @@ using namespace svl;
 //#define _INTERACTIVE
 void on_mouse( int e, int x, int y, int d, void *ptr )
 {
-    Point*p = (Point*)ptr;
+    cv::Point*p = (cv::Point*)ptr;
     p->x = x;
     p->y = y;
     cout<<*p;
@@ -56,13 +56,13 @@ void CallbackForTrackBar(int, void*)
 {
     iImageCenterY = showImage.rows / 2.0;
     iImageCenterX = showImage.cols / 2.0;
-    Mat matRotation = getRotationMatrix2D(  Point( iImageCenterX, iImageCenterY ), (iAngle - 180), iScale / 50.0 );
+    Mat matRotation = getRotationMatrix2D(  cv::Point( iImageCenterX, iImageCenterY ), (iAngle - 180), iScale / 50.0 );
     
     // Rotate the image
     Mat imgRotated;
     warpAffine( showImage, imgRotated, matRotation, showImage.size(), INTER_LINEAR, iBorderMode, Scalar() );
     imshow( displayImage, imgRotated );
-
+    
     
 }
 
@@ -269,38 +269,38 @@ void fillramp (roiWindow<P8U>& img)
 }
 TEST (ut_mi, basic)
 {
-   // cv::namedWindow( "Image View", 1 );
-//    NewFromSVL (img3, mv);
-//    imshow( "Image View", mv );
-//    key = cvWaitKey( -1);
+    // cv::namedWindow( "Image View", 1 );
+    //    NewFromSVL (img3, mv);
+    //    imshow( "Image View", mv );
+    //    key = cvWaitKey( -1);
     
-//    Gauss3by3(img1, img3);
+    //    Gauss3by3(img1, img3);
     
-
+    
     std::vector<std::string> names = {"meena_mp67_mp67.png", "meena.png", "meena_pp67_pp67.png", "meena_p1p3_p1p3.png"};
     std::vector<roiWindow<P8U> > images;
     std::vector<std::pair<test_utils::genv::path_t, bool> > results;
     std::vector<MutualInfo::Parts8U> outputs;
-
+    
     for (auto name : names)
     {
         results.push_back(dgenv_ptr->asset_path(name));
     }
-
+    
     for (auto res : results)
     {
         if (res.second)
         {
             std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
             images.push_back (svl::NewFromChannel(*wp.second));
-         //   cv::Mat mv;
-         //   NewFromSVL (images.back(), mv);
-         //   imshow( "Image View", mv );
-         //   int key = cvWaitKey( -1);
+            //   cv::Mat mv;
+            //   NewFromSVL (images.back(), mv);
+            //   imshow( "Image View", mv );
+            //   int key = cvWaitKey( -1);
             
         }
     }
-  
+    
     if (results[1].second)
     {
         MutualInfo::Parts8U outp;
@@ -344,7 +344,7 @@ TEST (ut_units, basic)
     units_ut::run();
     cardio_ut::run();
     
- }
+}
 
 TEST (ut_lifFile, single_channel)
 {
@@ -374,7 +374,7 @@ TEST (ut_lifFile, single_channel)
         EXPECT_EQ(1, lif.getSerie(sn).getChannels().size());
     }
     
-
+    
     roiWindow<P8U> slice (dims[0], dims[1]);
     lif.getSerie(0).fill2DBuffer(slice.rowPointer(0));
     histoStats h;
@@ -392,18 +392,18 @@ TEST (ut_lifFile, single_channel)
     EXPECT_EQ(vol.width(), dims[0]);
     EXPECT_EQ(vol.height(), dims[1]);
     
- 
+    
     cimg_library::CImg<uint8_t> z0 = vol.get_slice(0);
     const auto stats = z0.get_stats();
     EXPECT_NEAR(stats.at(0), 44.0, 0.001);
     EXPECT_NEAR(stats.at(1), 255.0, 0.001);
     EXPECT_NEAR(stats.at(2), 114.271, 0.001);
-
+    
     cimg_library::CImgDisplay dsp (512, 128);
     cimg_library::CImg<uint8_t> project = vol.get_projections2d(0,0,0);
-
+    
 #ifdef _INTERACTIVE
-  //  project.display(dsp, True);
+    //  project.display(dsp, True);
 #endif
     
 }
@@ -447,7 +447,7 @@ TEST (ut_lifFile, triple_channel)
         EXPECT_EQ(262144, lif.getSerie(series.size()-1).getNbPixelsInOneTimeStep ());
         EXPECT_EQ(3, lif.getSerie(series.size()-1).getChannels().size());
     }
-
+    
     roiWindow<P8U> slice (dims[0], dims[1]);
     lif.getSerie(0).fill2DBuffer(slice.rowPointer(0));
     histoStats h;
@@ -456,14 +456,14 @@ TEST (ut_lifFile, triple_channel)
     EXPECT_NEAR(h.median(), 0.0, 0.001);
     EXPECT_NEAR(h.min(), 0.0, 0.001);
     EXPECT_NEAR(h.max(), 205.0, 0.001);
-
+    
     std::vector<std::string> names { "green", "red", "gray" };
-
+    
     {
         lifIO::LifSerie& lls = lif.getSerie(0);
         roiMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[0]);
         lls.fill2DBuffer(oneBy3.rowPointer(0), 0);
-
+        
         EXPECT_EQ(oneBy3.timestamp(),lls.getTimestamps()[0] );
         histoStats h;
         h.from_image(oneBy3.plane(0));
@@ -488,9 +488,9 @@ TEST (ut_lifFile, triple_channel)
         EXPECT_NEAR(h.mode(), 125.0, 0.001);
     }
     
-    // Test Smear Signal 
+    // Test Smear Signal
     {
- #ifdef _INTERACTIVE
+#ifdef _INTERACTIVE
         cv::namedWindow( "Voxel View",   cv::WINDOW_NORMAL  | cv::WINDOW_KEEPRATIO);
         //set the callback function for any mouse event
         Point p;
@@ -499,72 +499,86 @@ TEST (ut_lifFile, triple_channel)
         vector<int> compression_params;
         compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
         compression_params.push_back(9);
-
         
-        cv::Mat tops (dims[1], dims[0], CV_8U);
-        cv::Mat bots = tops.clone ();
-        cv::Mat mv = tops.clone ();
         
-        bots = 255;
-        tops = 0;
         
-        lifIO::LifSerie& lls = lif.getSerie(series.size()-2);
-        std::vector<roiMultiWindow<P8UP3> > voxel;
-        motionSmear smear;
-        
-        for (auto tt = 0; tt < lls.getNbTimeSteps(); tt++)
+        for (auto ss = 0; ss < lif.getNbSeries(); ss++)
         {
-            roiMultiWindow<P8UP3> oneBy3 (names,lls.getTimestamps()[tt]);
-            lls.fill2DBuffer(oneBy3.rowPointer(0), tt);
-            voxel.emplace_back(oneBy3);
-            CopyFromSVL (oneBy3.plane(2), mv);
-            smear.add(mv);
-            cv::min(mv, bots, bots);
-            cv::max(mv, tops, tops);
+            lifIO::LifSerie& lls = lif.getSerie(ss);
 
+            // Last series does not have time data. check
+            if (!lls.hasTimeChannel())
+            {
+                EXPECT_EQ(ss, 12);
+                continue;
+            }
+            
+            const std::vector<size_t>& extends = lls.getSpatialDimensions();
+            std::shared_ptr<cv::Mat> tops =  std::shared_ptr<cv::Mat>(new cv::Mat (static_cast<int>(extends[1]),
+                                                                                   static_cast<int>(extends[0]), CV_8U));
+            std::shared_ptr<cv::Mat> bots = std::shared_ptr<cv::Mat>(new cv::Mat(tops->clone ()));
+            std::shared_ptr<cv::Mat> mv = std::shared_ptr<cv::Mat>(new cv::Mat (tops->clone ()));
+            
+            *bots = 255;
+            *tops = 0;
+
+            std::vector<roiMultiWindow<P8UP3> > voxel;
+            motionSmear smear;
+
+            
+            for (auto tt = 0; tt < lls.getNbTimeSteps(); tt++)
+            {
+                roiMultiWindow<P8UP3> oneBy3 (names,lls.getTimestamps()[tt]);
+                lls.fill2DBuffer(oneBy3.rowPointer(0), tt);
+                voxel.emplace_back(oneBy3);
+                CopyFromSVL (oneBy3.plane(2), *mv);
+                smear.add(*mv);
+                cv::min(*mv, *bots, *bots);
+                cv::max(*mv, *tops, *tops);
+                
 #ifdef _INTERACTIVE
-            imshow( "Voxel View", mv );
+                imshow( "Voxel View", mv );
+                // Wait for a key press
+                int key = cvWaitKey( 33 );
+#endif
+            }
+            auto count = lls.getNbTimeSteps();
+            showImage = *tops - *bots;
+            ellipse_parms ep;
+            EXPECT_EQ(count, smear.count());
+            EXPECT_EQ(showImage.empty(), false);
+            EXPECT_EQ(smear.signature(ep).empty(), false);
+            EXPECT_EQ(matIsEqual(showImage, smear.signature(ep)), true);
+            
+            roiWindow<P8U> sig;
+            
+            NewFromOCV(showImage, sig);
+            std::string path = "/Users/arman/Pictures/";
+            std::string fname = path + lls.getName() + ".png";
+
+            cv::imwrite (fname, showImage, compression_params);
+            
+#ifdef _INTERACTIVE
+            cv::namedWindow(displayImage,    cv::WINDOW_NORMAL |  cv::WINDOW_FREERATIO );
+            //  createTrackbar("Angle",displayImage, &iAngle, 360, CallbackForTrackBar);
+            createTrackbar("Scale",displayImage, &iScale, 100, CallbackForTrackBar);
+            
+            
+            int iDummy = 0;
+            
+            CallbackForTrackBar(iDummy, &iDummy);
+            
+            waitKey(0);
+#endif
+            
+            //set the callback function for any mouse event
+            //  Point pp;
+            //  setMouseCallback(displayImage, on_mouse, &pp );
+            //   imshow(displayImage, tops );
             // Wait for a key press
-            int key = cvWaitKey( 33 );
-#endif
-        }
-        auto count = lls.getNbTimeSteps();
-        showImage = tops - bots;
-        ellipse_parms ep;
-        EXPECT_EQ(count, smear.count());
-        EXPECT_EQ(showImage.empty(), false);
-        EXPECT_EQ(smear.signature(ep).empty(), false);
-        EXPECT_EQ(matIsEqual(showImage, smear.signature(ep)), true);
-        
-        roiWindow<P8U> sig;
-        
-        NewFromOCV(showImage, sig);
-        
-        cv::imwrite ("/Users/arman/Pictures/motionsignature.png", showImage, compression_params);
-        
-#ifdef _INTERACTIVE
-        cv::namedWindow(displayImage,    cv::WINDOW_NORMAL |  cv::WINDOW_FREERATIO );
-      //  createTrackbar("Angle",displayImage, &iAngle, 360, CallbackForTrackBar);
-        createTrackbar("Scale",displayImage, &iScale, 100, CallbackForTrackBar);
+            //  int key = cvWaitKey( 0 );
 
-        
-        int iDummy = 0;
-        
-        CallbackForTrackBar(iDummy, &iDummy);
-        
-        waitKey(0);
-#endif
-        
-        //set the callback function for any mouse event
-      //  Point pp;
-      //  setMouseCallback(displayImage, on_mouse, &pp );
-     //   imshow(displayImage, tops );
-        // Wait for a key press
-      //  int key = cvWaitKey( 0 );
-        
-        
-        
-        std::cout << voxel.size () << std::endl;
+        }
     }
     
 }
