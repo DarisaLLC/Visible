@@ -20,7 +20,7 @@
 #include "vision/ColorHistogram.hpp"
 #include "vision/histogram.h"
 #include "cinder/affine_rectangle.h"
-#include "cinder/opencv_utils.hpp"
+#include "vision/opencv_utils.hpp"
 #include "boost/filesystem.hpp"
 #include "vision/histo.h"
 #include "vision/ipUtils.h"

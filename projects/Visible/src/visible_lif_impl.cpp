@@ -115,14 +115,22 @@ bool lifContext::have_movie ()
 
 int lifContext::getIndex ()
 {
-    return mMovieIndexPosition;
+    if (m_fc)
+        return mMovieIndexPosition % m_fc;
+    return m_fc;
 }
 
-void lifContext::setIndex (int mark)
+bool lifContext::incrementIndex()
 {
-    pause ();
+    return setIndex(getIndex()+1);
+    
+}
+
+bool lifContext::setIndex (int mark)
+{
+    bool lastc = mMovieIndexPosition == m_fc - 1;
     mMovieIndexPosition = (mark % m_fc);
-    mFrameSet->getFrame (mMovieIndexPosition);
+    return lastc;
 }
 
 vec2 lifContext::getZoom ()
@@ -160,8 +168,8 @@ void lifContext::setup()
         // Add an enum (list) selector.
         m_selected_serie = 0;
         mMovieParams.addParam( "Series ", m_series_names, &m_selected_serie )
-        .keyDecr( "[" )
-        .keyIncr( "]" )
+//        .keyDecr( "[" )
+//        .keyIncr( "]" )
         .updateFn( [this] { loadCurrentSerie (); console() << "selected serie updated: " << m_series_names [m_selected_serie] << endl; loadCurrentSerie (); } );
         
         
@@ -252,7 +260,7 @@ void lifContext::loadCurrentSerie ()
                 ci_console() << "Series:  " << m_series_book.size() << std::endl;
 
                 const tiny_media_info tm = mFrameSet->media_info ();
-                getWindow()->getApp()->setFrameRate(tm.getFramerate());
+                getWindow()->getApp()->setFrameRate(tm.getFramerate() / 5.0);
 
                 mScreenSize = tm.getSize();
                 m_fc = tm.getNumFrames ();
@@ -264,7 +272,7 @@ void lifContext::loadCurrentSerie ()
                 
                 texture_to_display_zoom();
                 
-                
+                play ();
 
 //                m_movie->setLoop( true, false);
 //                m_movie->seekToStart();
@@ -341,23 +349,23 @@ vec2 lifContext::texture_to_display_zoom()
 {
     Rectf image (0.0f, 0.0f, mScreenSize.x, mScreenSize.y);
     Rectf window = getWindowBounds();
-    float sx = window.getWidth() / image.getWidth();
-    float sy = window.getHeight() / image.getHeight();
     
-    if ( sx < 1.1f || sy < 1.1f )
-    {
-        getWindow()->setSize((int32_t) (mScreenSize.x*1.15f), (int32_t) (mScreenSize.y*1.15f));
-        sx = window.getWidth() / image.getWidth();
-        sy = window.getHeight() / image.getHeight();
-    }
-    float w = image.getWidth() * sx;
-    float h = image.getHeight() * sy;
-    float ox = -0.5 * ( w - window.getWidth());
-    float oy = -0.5 * ( h - window.getHeight());
+    // Trim display window
+
+    float sx =  image.getWidth() / window.getWidth();
+    float sy = image.getHeight() / window.getHeight();
+    
+    float aspect_same = 2.0f / (sx + sy);
+    
+    
+    float w = window.getWidth() * aspect_same;
+    float h = window.getHeight() * aspect_same;
+    float ox = (window.getWidth() - w) / 2.0;
+    float oy = (window.getHeight() - h) / 2.0;
     image.set(ox, oy, ox + w, oy + h);
     m_display_rect = image;
 
-    return vec2(sx, sy);
+    return vec2(aspect_same, aspect_same);
 }
 
 void lifContext::seek( size_t xPos )
@@ -370,24 +378,17 @@ bool lifContext::is_valid () { return m_valid && is_context_type(uContext::lif_f
 
 void lifContext::resize ()
 {
-    m_zoom = texture_to_display_zoom();
+  //  if (! have_movie () ) return;
+//    m_zoom = texture_to_display_zoom();
     
 }
 void lifContext::update ()
 {
-    if (! have_movie () )
-        return;
+    if (! have_movie () ) return;
     
-    fPair trim (10, 10);
-    uint8_t edge_magnitude_threshold = 5;
-    
-    
-  //  if(mFrameSet->checkFrame(mMovieIndexPosition))
-    {
-        mSurface = mFrameSet->getFrame(getIndex ());
-        if (mMoviePlay)
-            setIndex (getIndex()+1);
-    }
+     mSurface = mFrameSet->getFrame(getIndex());
+
+    if (mMoviePlay) incrementIndex ();
     
 }
 
@@ -419,11 +420,9 @@ void lifContext::draw ()
     if( have_movie()  && mSurface )
     {
         mImage = gl::Texture::create(*mSurface);
-        Rectf rect (mImage->getBounds());
-        rect = rect.getCenteredFit(getWindowBounds(), true);
         mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
-        gl::draw (mImage, rect);
-//        draw_info ();
+        gl::draw (mImage, m_display_rect);
+        draw_info ();
     }
     mMovieParams.draw();
     

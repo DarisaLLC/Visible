@@ -441,7 +441,6 @@
 		C26009E11CED3E010045FF57 /* affine_rectangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = affine_rectangle.h; sourceTree = "<group>"; };
 		C26009E21CED3E010045FF57 /* cinder_xchg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cinder_xchg.hpp; sourceTree = "<group>"; };
 		C26009E31CED3E010045FF57 /* editableRectangle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = editableRectangle.hpp; sourceTree = "<group>"; };
-		C26009E41CED3E010045FF57 /* opencv_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = opencv_utils.hpp; sourceTree = "<group>"; };
 		C26009EB1CED3E010045FF57 /* angle_units.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = angle_units.h; sourceTree = "<group>"; };
 		C26009EC1CED3E010045FF57 /* ConcurrentDeque.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConcurrentDeque.h; sourceTree = "<group>"; };
 		C26009ED1CED3E010045FF57 /* ConcurrentMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConcurrentMap.h; sourceTree = "<group>"; };
@@ -10136,7 +10135,6 @@
 				C26009E11CED3E010045FF57 /* affine_rectangle.h */,
 				C26009E21CED3E010045FF57 /* cinder_xchg.hpp */,
 				C26009E31CED3E010045FF57 /* editableRectangle.hpp */,
-				C26009E41CED3E010045FF57 /* opencv_utils.hpp */,
 			);
 			path = cinder;
 			sourceTree = "<group>";

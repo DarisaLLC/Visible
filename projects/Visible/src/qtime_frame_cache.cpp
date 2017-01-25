@@ -4,6 +4,7 @@
 #include "stl_util.hpp"
 #include "cinder_xchg.hpp"
 #include <algorithm>
+#include "cinder/ip/Fill.h"
 /*
  *  Concepte:
  *  Movie consisting of M frames identified by time and index in the movie context
@@ -15,6 +16,9 @@
  *  If the container is large enough for all frames in the movie, after initial load, all frame fetches are nearly free
  *  To Do: If the container is smaller then number of frames in the movie, a least used stack will be used to refresh
  */
+
+using namespace ci;
+using namespace ci::ip;
 
 std::string qTimeFrameCache::getName () const { return "qTimeFrameCache"; }
 
@@ -35,17 +39,19 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifse
     std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator tItr = lifserie.getDurations().begin();
     auto frame_count = 0;
     cm_time frame_time;
-    ivec2 zv;
+
     while (tItr < lifserie.getDurations().end())
     {
-        Surface8uRef frame = Surface8u::create(tm.getWidth(), tm.getHeight(), true);
-        lifserie.fill2DBuffer(frame->getDataRed(zv), frame_count);
-        lifserie.fill2DBuffer(frame->getDataBlue(zv), frame_count);
-        lifserie.fill2DBuffer(frame->getDataGreen(zv), frame_count++);
-        thisref->loadFrame(frame, frame_time);
+        Channel8u frame (tm.getWidth(), tm.getHeight());
+        lifserie.fill2DBuffer(frame.getData(), frame_count++);
+        Surface8uRef surface = Surface8u::create(frame);
+        thisref->loadFrame(surface, frame_time);
         cm_time ts((*tItr++)/(10000.0));
         frame_time = frame_time + ts;
     }
+    
+    assert(tm.count == frame_count);
+    
     return thisref;
     
 }

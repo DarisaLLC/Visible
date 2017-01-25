@@ -71,6 +71,21 @@ bool uContext::is_context_type (const Type t) const { return m_type == t; }
 bool uContext::is_valid () const { return m_valid; }
 
 
+///////////////  Main Viewer ////////////////////
+
+mainContext::mainContext(ci::app::WindowRef& ww, const boost::filesystem::path& dp)
+: uContext (ww)
+{
+    m_valid = false;
+    m_type = Type::null_viewer;
+    
+}
+
+
+////////////////////////////////////////////////////
+
+
+
 ///////////////  Matrix Viewer ////////////////////
 
 matContext::matContext(ci::app::WindowRef& ww, const boost::filesystem::path& dp)

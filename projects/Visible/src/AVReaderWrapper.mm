@@ -21,7 +21,7 @@ namespace anonymous
     {
         ::CVPixelBufferLockBaseAddress( pixelBufferRef, 0 );
         uint8_t *ptr = reinterpret_cast<uint8_t*>( CVPixelBufferGetBaseAddress( pixelBufferRef ) );
-        int32_t rowBytes = (int32_t)::CVPixelBufferGetBytesPerRow( pixelBufferRef );
+        ptrdiff_t rowBytes = (int32_t)::CVPixelBufferGetBytesPerRow( pixelBufferRef );
         OSType type = CVPixelBufferGetPixelFormatType( pixelBufferRef );
         size_t width = CVPixelBufferGetWidth( pixelBufferRef );
         size_t height = CVPixelBufferGetHeight( pixelBufferRef );

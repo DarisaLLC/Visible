@@ -107,6 +107,8 @@ typedef std::shared_ptr<uContext> uContextRef;
 class mainContext : public uContext
 {
 public:
+	mainContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
+	void resize () {}
 	void draw () {}
 	void update () {}
 	void setup () {}
@@ -388,8 +390,9 @@ public:
 	vec2 getZoom ();
 	
 	int getIndex ();
+	bool incrementIndex ();
 	
-	void setIndex (int mark);
+	bool setIndex (int mark);
 	
 	void play_pause_button ();
 	

@@ -15,6 +15,7 @@
 #include "core/core.hpp"
 #include <memory>
 #include "cinder/Log.h"
+#include "cinder/editableRectangle.hpp"
 
 using namespace ci;
 using namespace ci::app;

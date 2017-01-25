@@ -183,7 +183,6 @@ void VisibleApp::create_clip_viewer ()
 void VisibleApp::setup()
 {
     WindowRef ww = getWindow ();
-//    getWindow()->setUserData( new mainWindowData () );
     
     mPaused = mShowMultiSnapShotAndData = mShowMultiSnapShot = mShowCenterOfMotionSignal = false;
     mImageDataLoaded = mImageSequenceDataLoaded = false;
