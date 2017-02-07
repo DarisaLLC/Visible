@@ -51,7 +51,7 @@ struct tiny_media_info
     double getFramerate () const { return mFps; }
     double getNumFrames () const { return count; }
     double getFrameDuration () const { return getDuration () / getNumFrames (); }
- 
+    double getNumChannels () const { return mChannels; }
     
     
     const std::ostream& operator<< (std::ostream& std_stream)

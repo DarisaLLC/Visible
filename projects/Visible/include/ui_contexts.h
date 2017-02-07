@@ -411,8 +411,9 @@ private:
 	void pause ();
 	
 	
-	struct series_info
+	class series_info
 	{
+	public:
 		std::string name;
 		uint32_t    timesteps;
 		uint32_t    pixelsInOneTimestep;
@@ -420,8 +421,18 @@ private:
 		std::vector<size_t> dimensions;
 		std::vector<lifIO::ChannelData> channels;
 		
+		friend std::ostream& operator<< (std::ostream& out, const series_info& se)
+		{
+			out << "Name:    " << se.name << std::endl;
+			out << "Dimensions:" << se.dimensions[0]  << " x " << se.dimensions[1] << std::endl;
+			out << "TimeSteps  " << se.timesteps << std::endl;
+			out << "Channels: " << se.channelCount << std::endl;
+			return out;
+		}
+		
 	};
 	
+
 	void get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer)
 	{
 		m_series_book.clear ();
@@ -436,6 +447,8 @@ private:
 			si.channels.clear ();
 			for (lifIO::ChannelData cda : lifer->getSerie(ss).getChannels())
 				si.channels.emplace_back(cda);
+			
+			std::cout << si << std::endl;
 			
 			m_series_book.emplace_back (si);
 		}
@@ -471,15 +484,7 @@ private:
 	vec2		mMousePos;
 	std::shared_ptr<qTimeFrameCache> mFrameSet;
 	SurfaceRef  mSurface;
-	std::vector<time_spec_t> mTimeHist;
-	vec2 mCom;
-	vec2 m_prev_com;
-	cv::Mat mS;
-	cv::Mat mSS;
-	roiWindow<P8U> mModel;
-	vec2 m_max_motion;
-	int64_t m_index;
-	bool movie_error_do_flip;
+
 	
 	bool mMouseIsDown;
 	bool mMouseIsMoving;

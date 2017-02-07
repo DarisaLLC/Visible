@@ -252,12 +252,13 @@ void lifContext::loadCurrentSerie ()
             
             m_serie = m_series_book[m_selected_serie];
             mFrameSet = qTimeFrameCache::create (m_lifRef->getSerie(m_selected_serie));
-            
+            std::cout << m_serie << std::endl;
+        
             if (m_valid)
             {
                 getWindow()->setTitle( mPath.filename().string() );
         
-                ci_console() << "Series:  " << m_series_book.size() << std::endl;
+                ci_console() <<  m_series_book.size() << "  Series  " << std::endl;
 
                 const tiny_media_info tm = mFrameSet->media_info ();
                 getWindow()->getApp()->setFrameRate(tm.getFramerate() / 5.0);
@@ -267,21 +268,19 @@ void lifContext::loadCurrentSerie ()
                 
                 mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
                 
-                mS = cv::Mat(mScreenSize.x, mScreenSize.y, CV_32F);
-                mSS = cv::Mat(mScreenSize.x, mScreenSize.y, CV_32F);
-                
+                // Set window size according to layout
+                //  Channel             Data
+                //  1
+                //  2
+                //  3
+                //  Create 2x mag for images
+                ivec2 window_size (mSurface->getWidth() * 1.5, mSurface->getHeight() * 3);
+                setWindowSize(window_size);
                 texture_to_display_zoom();
                 
                 play ();
 
-//                m_movie->setLoop( true, false);
-//                m_movie->seekToStart();
-                // Do not play at start 
-//                m_movie->play();
-                
-                // Percent trim from all sides.
-                m_max_motion.x = m_max_motion.y = 0.1;
-                
+
             }
         }
     catch( const std::exception &ex ) {
@@ -362,7 +361,7 @@ vec2 lifContext::texture_to_display_zoom()
     float h = window.getHeight() * aspect_same;
     float ox = (window.getWidth() - w) / 2.0;
     float oy = (window.getHeight() - h) / 2.0;
-    image.set(ox, oy, ox + w, oy + h);
+    image.set(20, 20, ox + w, oy + h);
     m_display_rect = image;
 
     return vec2(aspect_same, aspect_same);
@@ -419,9 +418,19 @@ void lifContext::draw ()
 
     if( have_movie()  && mSurface )
     {
+        switch(m_serie.channelCount)
+        {
+            case 1:
         mImage = gl::Texture::create(*mSurface);
         mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
         gl::draw (mImage, m_display_rect);
+                break;
+            case 3:
+                mImage = gl::Texture::create(*mSurface);
+                mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
+                gl::draw (mImage, m_display_rect);
+                break;
+        }
         draw_info ();
     }
     mMovieParams.draw();

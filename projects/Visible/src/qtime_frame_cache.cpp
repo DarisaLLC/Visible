@@ -5,10 +5,12 @@
 #include "cinder_xchg.hpp"
 #include <algorithm>
 #include "cinder/ip/Fill.h"
+#include "vision/roiMultiWindow.h"
+
 /*
  *  Concepte:
  *  Movie consisting of M frames identified by time and index in the movie context
- *  qTimeFrameCache is a container of frames identified by time and index 
+ *  qTimeFrameCache is a container of frames identified by time and index
  *                access is done through the following maps
  *                movie time <-> movie index
  *                movie index -> container index ( or iterator )
@@ -20,10 +22,46 @@
 using namespace ci;
 using namespace ci::ip;
 
+namespace anonymous
+{
+    std::vector<std::string> d_names { "green", "red", "gray" };
+    
+    void internal_fill_one (lifIO::LifSerie& lifserie, const tiny_media_info& tm, const int frameCount, std::vector<Surface8uRef>& out,
+                            std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator time_iter,
+                            std::vector<std::string>& names = d_names)
+    {
+        out.resize (0);
+        switch (tm.mChannels)
+        {
+            case 1:
+            {
+                Channel8u frame (tm.getWidth(), tm.getHeight());
+                lifserie.fill2DBuffer(frame.getData(), frameCount);
+                Surface8uRef chsurface = Surface8u::create(frame);
+                out.push_back(chsurface);
+                break;
+            }
+            case 3:
+            {
+                cm_time ts((*time_iter)/(10000.0));
+                roiMultiWindow<P8UP3> oneBy3 (names, ts.getValue());
+                lifserie.fill2DBuffer(oneBy3.rowPointer(0), frameCount);
+                std::shared_ptr<Channel8u> cref = newCiChannel(oneBy3.plane(2));
+                Surface8uRef chsurface = Surface8u::create(*cref);
+                out.push_back(chsurface);
+                break;
+            }
+            default:
+                assert(0);
+        }
+    }
+}
 std::string qTimeFrameCache::getName () const { return "qTimeFrameCache"; }
 
 std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifserie)
 {
+    std::vector<std::string> names { "green", "red", "gray" };
+    
     tiny_media_info tm;
     tm.count = lifserie.getNbTimeSteps();
     auto dims = lifserie.getSpatialDimensions();
@@ -34,20 +72,31 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifse
     tm.mIsLifSerie = true;
     tm.mIsImageFolder = false;
     tm.mChannels = lifserie.getChannels().size();
-    
-    auto thisref = std::make_shared<qTimeFrameCache>(tm);
-    std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator tItr = lifserie.getDurations().begin();
     auto frame_count = 0;
     cm_time frame_time;
-
-    while (tItr < lifserie.getDurations().end())
+    
+    
+    auto thisref = std::make_shared<qTimeFrameCache>(tm);
+    if (lifserie.getDurations().size ())
+    
+    if (tm.count > 1)
     {
-        Channel8u frame (tm.getWidth(), tm.getHeight());
-        lifserie.fill2DBuffer(frame.getData(), frame_count++);
-        Surface8uRef surface = Surface8u::create(frame);
-        thisref->loadFrame(surface, frame_time);
-        cm_time ts((*tItr++)/(10000.0));
-        frame_time = frame_time + ts;
+        std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator tItr = lifserie.getDurations().begin();
+
+        std::vector<Surface8uRef> out;
+        while (tItr < lifserie.getDurations().end())
+        {
+            anonymous::internal_fill_one(lifserie, tm, frame_count, out, tItr);
+
+            // Increment durations by number of channels
+            cm_time ts((*tItr)/(10000.0));
+            frame_time = frame_time + ts;
+            for (auto ii = 0; ii < tm.mChannels; ii++, tItr++);
+        }
+    }
+    else if (tm.count == 1)
+    {
+        
     }
     
     assert(tm.count == frame_count);
@@ -65,7 +114,7 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ci::qtime::Movie
     minfo.mFps = mMovie->getFramerate();
     minfo.count = mMovie->getNumFrames ();
     minfo.duration = mMovie->getDuration();
-   return std::make_shared<qTimeFrameCache>( minfo);
+    return std::make_shared<qTimeFrameCache>( minfo);
     
 }
 
@@ -78,7 +127,7 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ci::qtime::Movie
     minfo.count = mMovie->getNumFrames ();
     minfo.duration = mMovie->getDuration();
     return std::make_shared<qTimeFrameCache>( minfo);
-   
+    
 }
 
 std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const std::shared_ptr<avcc::avReader>& asset_reader)
@@ -101,7 +150,7 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const std::vector<ci::
     minfo.mFps = 1.0;
     minfo.count = static_cast<uint32_t>(folderImages.size());
     minfo.duration = 1.0;
-
+    
     auto thisref = std::make_shared<qTimeFrameCache>(minfo);
     cm_time ts;
     cm_time duration (minfo.duration);
@@ -120,8 +169,8 @@ qTimeFrameCache::qTimeFrameCache ( const tiny_media_info& info ) : tiny_media_in
 }
 
 /*
- * Get the frame at offset from current. 
- * Updates currentIndex only if successful and consistent 
+ * Get the frame at offset from current.
+ * Updates currentIndex only if successful and consistent
  * Returns a shared_ptr to frame. Valid until that frame is still alive.
  */
 
@@ -131,7 +180,7 @@ const Surface8uRef  qTimeFrameCache::getFrame (int64_t offset) const
     Surface8uRef s8;
     indexToContainer::const_iterator p = _checkFrame(offset);
     if (p == m_itIter.end()) return s8;
-
+    
     assert(p->second > 0 && p->second <= mFrames.size());
     return mFrames[p->second-1].first;
 }
@@ -143,10 +192,10 @@ const Surface8uRef qTimeFrameCache::getFrame(const time_spec_t& dtime) const
     indexToContainer::const_iterator fc = _checkFrame (dtime);
     if (fc == m_itIter.end())
         return s8;
-
+    
     assert(fc->second > 0 && fc->second <= mFrames.size());
     return mFrames[fc->second-1].first;
-
+    
 }
 
 size_t qTimeFrameCache::count () const { return mFrames.size(); }
@@ -202,7 +251,7 @@ bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const index_time_t& t
 {
     assert (frame );
     index_time_t ltid (tid);
-//    SurTiIndexRef_t pp (std::make_shared<Surface8u>(frame->clone(true)), ltid);
+    //    SurTiIndexRef_t pp (std::make_shared<Surface8u>(frame->clone(true)), ltid);
     mFrames.emplace_back(std::make_shared<Surface8u>(frame->clone(true)), ltid);
     m_tti[tid.second] = tid.first;
     m_itt[tid.first] = tid.second;
@@ -219,7 +268,7 @@ bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const index_time_t& t
 bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const time_spec_t& tic )
 {
     assert(frame );
-
+    
     std::lock_guard <std::mutex> lock( mMutex );
     if (!mFrames.empty())
     {
@@ -227,14 +276,14 @@ bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const time_spec_t& ti
         auto pp = _checkFrame (tic);
         if (pp != m_itIter.end()) return false;
     }
-    // It is not in the cache. 
+    // It is not in the cache.
     // Get a time_index for it and load it
     index_time_t ti;
     return make_unique_increasing_time_indices (tic, ti) && loadFrame(frame, ti);
 }
 
 /*
- * Returns an iterator to the container of <TimeIndex,SurfaceRef> 
+ * Returns an iterator to the container of <TimeIndex,SurfaceRef>
  * The end iterator is returned if entry is not found.
  */
 
@@ -248,7 +297,7 @@ int64_t qTimeFrameCache::currentIndex (const time_spec_t& time) const
 
 qTimeFrameCache::indexToContainer::const_iterator qTimeFrameCache::_checkFrame (const time_spec_t& query_time) const
 {
-//    std::lock_guard<std::mutex> lock( mMutex );
+    //    std::lock_guard<std::mutex> lock( mMutex );
     // First see if this time exist in time index maps
     timeToIndex::const_iterator low, prev;
     low = m_tti.lower_bound(query_time);
@@ -259,15 +308,15 @@ qTimeFrameCache::indexToContainer::const_iterator qTimeFrameCache::_checkFrame (
     
     if (low == m_tti.begin())
         return m_itIter.begin();
-
+    
     prev = low;
     --prev;
     if ((query_time - prev->first) < (low->first - query_time))
         return m_itIter.find(prev->second);
     else
         return m_itIter.find(low->second);
-
-
+    
+    
 }
 
 qTimeFrameCache::indexToContainer::const_iterator qTimeFrameCache::_checkFrame (const int64_t query_index) const

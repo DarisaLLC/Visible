@@ -233,11 +233,15 @@ float lifIO::LifSerieHeader::frame_duration_ms() const
 {
     if (m_cached_frame_duration.first == false)
     {
-        m_frame_durations.resize(getTimestamps().size());
-        adjacent_difference(getTimestamps().begin(), getTimestamps().end(), m_frame_durations.begin());
-        m_frame_durations[0] = 0; // firs difference not written
-        auto sumall = accumulate(m_frame_durations.begin(), m_frame_durations.end(), 0);
-        float avg_fd = (sumall / (m_frame_durations.size()-1))/10000.0f;
+        float avg_fd = 0.0;
+        if (getTimestamps().size())
+            {
+                m_frame_durations.resize(getTimestamps().size());
+                adjacent_difference(getTimestamps().begin(), getTimestamps().end(), m_frame_durations.begin());
+                m_frame_durations[0] = 0; // firs difference not written
+                auto sumall = accumulate(m_frame_durations.begin(), m_frame_durations.end(), 0);
+                avg_fd = (sumall / (m_frame_durations.size()-1))/10000.0f;
+            }
         m_cached_frame_duration.first = true;
         m_cached_frame_duration.second = avg_fd;
     }

@@ -8,6 +8,7 @@
 #include "cinder/Timer.h"
 #include "cinder/Camera.h"
 #include "cinder/qtime/Quicktime.h"
+#include "cinder/ip/resize.h"
 #include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"
 #include "ui_contexts.h"
@@ -17,6 +18,15 @@
 using namespace ci;
 using namespace ci::app;
 using namespace std;
+
+namespace anonymous
+{
+    bool is_anaonymous_name (const filesystem::path& pp, size_t check_size = 36)
+    {
+        string extension = pp.extension().string();
+        return extension.length() == 0 && pp.filename().string().length() == check_size;
+    }
+}
 
 static boost::filesystem::path browseToFolder ()
 {
@@ -43,29 +53,32 @@ void imageDirContext::loadImageDirectory (const filesystem::path& directory)
         
         // skip if extension does not match
         string extension = i->path().extension().string();
-        extension.erase( 0, 1 );
-        if( std::find( mSupportedExtensions.begin(), mSupportedExtensions.end(), extension ) == mSupportedExtensions.end() )
-            continue;
         
+        if (! anonymous::is_anaonymous_name(i->path()))
+        {
+            extension.erase( 0, 1 );
+            if( std::find( mSupportedExtensions.begin(), mSupportedExtensions.end(), extension ) == mSupportedExtensions.end() )
+                continue;
+        }
         // file matches
         mImageFiles.push_back( i->path() );
     }
     
-    std::sort (mImageFiles.begin(), mImageFiles.end(), stl_utils::naturalPathComparator());
+    //    std::sort (mImageFiles.begin(), mImageFiles.end(), stl_utils::naturalPathComparator());
     m_valid = mImageFiles.size() > 0;
     
- }
+}
 
 imageDirContext::imageDirContext( WindowRef& ww, const boost::filesystem::path& dp)
-        : uContext (ww), mFolderPath (dp)
+: uContext (ww), mFolderPath (dp)
 {
     m_valid = false;
     m_type = Type::image_dir_viewer;
     
     // make a list of valid audio file extensions and initialize audio variables
-    const char* extensions[] = { "jpg", "png", "JPG" };
-    mSupportedExtensions = vector<string>( extensions, extensions + 3 );
-
+    const char* extensions[] = { "jpg", "png", "JPG", "jpeg"};
+    mSupportedExtensions = vector<string>( extensions, extensions + 4 );
+    
     setup ();
     if (is_valid())
     {
@@ -80,54 +93,69 @@ bool imageDirContext::is_valid ()
 
 void imageDirContext::setup()
 {
-     // Browse for the image folder
+    // Browse for the image folder
     if (mFolderPath == boost::filesystem::path ())
     {
         mFolderPath = browseToFolder ();
     }
     
     loadImageDirectory(mFolderPath);
-
+    
     if ( mImageFiles.empty () ) return;
-
+    
     mTotalItems = mImageFiles.size();
- 
+    
     float xPos = 0;
-
+    
     // @to_improve
     // Load textures at full size to get the size information ( could have used sips cli in OS X )
     std::map<std::pair<int,int>,int> size_hist;
+    std::vector<std::pair<int,int> > sizes;
     
     std::vector<filesystem::path>::const_iterator pItr = mImageFiles.begin();
     for (; pItr < mImageFiles.end(); pItr++)
     {
-        mSurfaces.push_back(Surface8u::create( loadImage( pItr->string())) );
-
-        
-        const std::pair<int,int> sz (mTextures.back()->getSize().x, mTextures.back()->getSize().y);
-        int check = stl_utils::safe_get (size_hist, sz, int(-1));
-        if (check < 0)
-            size_hist[sz] = 1; // new entry
-        else
+        try
         {
-            size_hist[sz] = check+1;
+            Surface8uRef sref, dref;
+            if (anonymous::is_anaonymous_name(*pItr))
+                sref = Surface8u::create( loadImage( pItr->string(), ImageSource::Options(), "jpg"));
+            //            mTextures.push_back(cinder::gl::Texture2d::create( loadImage( pItr->string(), ImageSource::Options(), "jpg") ) );
+            else
+                sref = Surface8u::create( loadImage( pItr->string() ) );
+            //            mTextures.push_back(cinder::gl::Texture2d::create( loadImage( pItr->string())) );
+            
+            auto bounds = sref->getBounds();
+            dref = Surface8u::create(bounds.getWidth()/8, bounds.getHeight()/8, false);
+            
+            cinder::ip::resize(*sref, dref.get());
+            cinder::gl::Texture2dRef mt = cinder::gl::Texture2d::create(*dref);
+            mTextures.push_back(mt);
+            
+            const std::pair<int,int> sz (mTextures.back()->getSize().x, mTextures.back()->getSize().y);
+            sizes.push_back(sz);
         }
+        catch( const std::exception &ex ) {
+            console() << ex.what() << "File: " << pItr->string() <<endl;
+            return;
+        }
+        std::cout << mTextures.size () << std::endl;
     }
-
+    
     // find the largest image. Again: expectation is that they are equal
-    std::vector<int> areas;
-    std::vector<std::pair<int,int> > sizes = stl_utils::keys_as_vector(size_hist);
+    std::vector<uint32_t> areas;
     for (std::pair<int,int>& hh : sizes)areas.push_back(hh.first * hh.second);
     auto maxi = std::distance (areas.begin(), std::max_element(areas.begin(), areas.end()));
+    assert(maxi >= 0 && maxi < areas.size());
     mLarge = sizes[maxi];
-
+    
     App::get()->setWindowSize(mLarge.first/2, mLarge.second/2);
     
     mItemExpandedWidth = mLarge.first/4;
     mItemHeight = mLarge.second;
     mItemRelaxedWidth = mLarge.first/2 / mTotalItems;
-
-
+    
+    
     
     pItr = mImageFiles.begin();
     std::vector<gl::TextureRef>::const_iterator tItr = mTextures.begin();
@@ -145,7 +173,7 @@ void imageDirContext::setup()
                                         pItr->filename().string()));
         xPos += mItemRelaxedWidth;
     }
-
+    
     
     // similar to mCurrentSelection = null;
     mCurrentSelection = mItems.end();
@@ -189,33 +217,33 @@ void imageDirContext::mouseMove( MouseEvent event )
 
 void imageDirContext::resize ()
 {
-//    mItemExpandedWidth = getWindowWidth();
-//    float xyscale = mItemExpandedWidth / ((float)mLarge.first);
-//    mItemHeight = xyscale * mLarge.second;
-//    mItemRelaxedWidth = (getWindowWidth() * 1.333 ) / mTotalItems;
-//    
-//    
-//    std::vector<filesystem::path>::const_iterator pItr = mImageFiles.begin();
-//    std::vector<gl::TextureRef>::const_iterator tItr = mTextures.begin();
-//    mItems.clear ();
-//       float xPos = 0;
-//    
-//    for (; pItr < mImageFiles.end(); pItr++, tItr++)
-//    {
-//        mItems.push_back( AccordionItem( timeline(),
-//                                        xPos,
-//                                        0,
-//                                        mItemHeight,
-//                                        mItemRelaxedWidth,
-//                                        mItemExpandedWidth,
-//                                        *tItr,
-//                                        pItr->parent_path().string(),
-//                                        pItr->filename().string()));
-//        xPos += mItemRelaxedWidth;
-//    }
-//    
+    //    mItemExpandedWidth = getWindowWidth();
+    //    float xyscale = mItemExpandedWidth / ((float)mLarge.first);
+    //    mItemHeight = xyscale * mLarge.second;
+    //    mItemRelaxedWidth = (getWindowWidth() * 1.333 ) / mTotalItems;
+    //
+    //
+    //    std::vector<filesystem::path>::const_iterator pItr = mImageFiles.begin();
+    //    std::vector<gl::TextureRef>::const_iterator tItr = mTextures.begin();
+    //    mItems.clear ();
+    //       float xPos = 0;
+    //
+    //    for (; pItr < mImageFiles.end(); pItr++, tItr++)
+    //    {
+    //        mItems.push_back( AccordionItem( timeline(),
+    //                                        xPos,
+    //                                        0,
+    //                                        mItemHeight,
+    //                                        mItemRelaxedWidth,
+    //                                        mItemExpandedWidth,
+    //                                        *tItr,
+    //                                        pItr->parent_path().string(),
+    //                                        pItr->filename().string()));
+    //        xPos += mItemRelaxedWidth;
+    //    }
+    //
     
-
+    
 }
 void imageDirContext::update()
 {
