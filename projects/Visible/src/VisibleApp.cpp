@@ -62,7 +62,7 @@ public:
     void prepareSettings( Settings *settings );
     void setup();
     void create_qmovie_viewer ();
-    void create_image_dir_viewer ();
+    void create_movie_dir_viewer ();
     void create_clip_viewer ();
     void create_lif_viewer ();
     
@@ -135,7 +135,7 @@ bool VisibleApp::shouldQuit()
 
 //
 // We allow one movie and multiple clips or matrix view.
-//
+// And movie of a directory
 //
 void VisibleApp::create_qmovie_viewer ()
 {
@@ -161,11 +161,11 @@ void VisibleApp::create_lif_viewer ()
 // We allow one movie and multiple clips or matrix view.
 //
 //
-void VisibleApp::create_image_dir_viewer ()
+void VisibleApp::create_movie_dir_viewer ()
 {
     Window::Format format( RendererGl::create() );
     WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::shared_ptr<imageDirContext>(new imageDirContext(ww)));
+    mContexts.push_back(std::shared_ptr<movDirContext>(new movDirContext(ww)));
 }
 
 //
@@ -204,7 +204,7 @@ void VisibleApp::setup()
    	mTopParams->addButton( "Import LIF  ", std::bind( &VisibleApp::create_lif_viewer, this ) );
     
     mTopParams->addSeparator();
-   	mTopParams->addButton( "Import Image Directory ", std::bind( &VisibleApp::create_image_dir_viewer, this ) );
+   	mTopParams->addButton( "Import Image Directory ", std::bind( &VisibleApp::create_movie_dir_viewer, this ) );
     
     mTopParams->addSeparator();
     

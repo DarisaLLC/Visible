@@ -24,6 +24,8 @@
 		C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
 		C21FFE721CFE0AA300C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
 		C21FFE731CFE0E1D00C97013 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
+		C221D9171E4B043A00AF74CE /* DirMovie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946691CE4DC7100976025 /* DirMovie.cpp */; };
+		C221D91B1E4B48F400AF74CE /* visible_mov_dir_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C221D9181E4B130400AF74CE /* visible_mov_dir_impl.cpp */; };
 		C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */; };
 		C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
 		C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
@@ -329,7 +331,6 @@
 		C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AudioDrawUtils.cpp; path = ../src/AudioDrawUtils.cpp; sourceTree = "<group>"; };
 		C21946661CE4DC7100976025 /* AudioDrawUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioDrawUtils.h; path = ../src/AudioDrawUtils.h; sourceTree = "<group>"; };
 		C21946691CE4DC7100976025 /* DirMovie.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DirMovie.cpp; path = ../src/DirMovie.cpp; sourceTree = "<group>"; };
-		C219466A1CE4DC7100976025 /* DirMovie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DirMovie.h; path = ../src/DirMovie.h; sourceTree = "<group>"; };
 		C219466D1CE4DC7100976025 /* InteractiveObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InteractiveObject.cpp; path = ../src/InteractiveObject.cpp; sourceTree = "<group>"; };
 		C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = qtime_frame_cache.cpp; path = ../src/qtime_frame_cache.cpp; sourceTree = "<group>"; };
 		C21946761CE4DC7100976025 /* visible_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_impl.cpp; path = ../src/visible_impl.cpp; sourceTree = "<group>"; };
@@ -356,6 +357,8 @@
 		C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sm_producer.cpp; path = ../src/sm_producer.cpp; sourceTree = "<group>"; };
 		C21FFE711CFDF82600C97013 /* self_similarity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = self_similarity.h; sourceTree = "<group>"; };
 		C21FFE741CFE104600C97013 /* ut_sm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_sm.hpp; sourceTree = "<group>"; };
+		C221D9181E4B130400AF74CE /* visible_mov_dir_impl.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = visible_mov_dir_impl.cpp; path = ../src/visible_mov_dir_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		C221D91A1E4B176800AF74CE /* DirMovie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DirMovie.h; path = ../include/DirMovie.h; sourceTree = "<group>"; };
 		C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_lif_impl.cpp; path = ../src/visible_lif_impl.cpp; sourceTree = "<group>"; };
 		C23D0F481E2982690049ADDB /* lifFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lifFile.hpp; path = ../../../svl/include/otherIO/lifFile.hpp; sourceTree = "<group>"; };
 		C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lifFile.cpp; sourceTree = "<group>"; };
@@ -9813,12 +9816,12 @@
 				C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */,
 				C21946661CE4DC7100976025 /* AudioDrawUtils.h */,
 				C21946691CE4DC7100976025 /* DirMovie.cpp */,
-				C219466A1CE4DC7100976025 /* DirMovie.h */,
 				C2F27E891DD8516900890E4C /* VisibleApp.h */,
 				C219466D1CE4DC7100976025 /* InteractiveObject.cpp */,
 				C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */,
 				C21946761CE4DC7100976025 /* visible_impl.cpp */,
 				C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */,
+				C221D9181E4B130400AF74CE /* visible_mov_dir_impl.cpp */,
 				C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */,
 				C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */,
 				C21946771CE4DC7100976025 /* VisibleApp.cpp */,
@@ -9957,6 +9960,7 @@
 				C219468B1CE4EA4900976025 /* AudioTestGui.h */,
 				C219468C1CE4EA4900976025 /* base_signaler.h */,
 				C219468F1CE4EA4900976025 /* cimovinggraph.h */,
+				C221D91A1E4B176800AF74CE /* DirMovie.h */,
 				C21946931CE4EA4900976025 /* grabber.h */,
 				C21946941CE4EA4900976025 /* iclip.hpp */,
 				C21946961CE4EA4900976025 /* InteractiveObject.h */,
@@ -26032,6 +26036,8 @@
 				C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */,
 				C20EDBC11CF277130074C47A /* exception.cpp in Sources */,
 				C20EDBC21CF277130074C47A /* self_similarity.cpp in Sources */,
+				C221D9171E4B043A00AF74CE /* DirMovie.cpp in Sources */,
+				C221D91B1E4B48F400AF74CE /* visible_mov_dir_impl.cpp in Sources */,
 				C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */,
 				C2606DA81CED3E2E0045FF57 /* edgel.cpp in Sources */,
 				C2606DAF1CED3E2E0045FF57 /* matpixel.cpp in Sources */,

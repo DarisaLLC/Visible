@@ -34,7 +34,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/cstdint.hpp>
 #include "core/singleton.hpp"
-
+#include "DirMovie.h"
 #include "qtimeAvfLink.h"
 
 using namespace boost;
@@ -58,7 +58,8 @@ public:
 		clip_viewer = qtime_viewer+1,
 		image_dir_viewer = clip_viewer+1,
 		lif_file_viewer = image_dir_viewer+1,
-		viewer_types = clip_viewer+1
+		movie_dir_viewer = lif_file_viewer+1,
+		viewer_types = movie_dir_viewer+1,
 	};
 	
 	
@@ -247,8 +248,11 @@ public:
 	movContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
 	
 	Signal <void(bool)> signalShowMotioncenter;
+
+	const  boost::filesystem::path source_path () const;
+	void  source_path (const boost::filesystem::path& source_path) const;
 	
-    static const std::string& caption () { static std::string cp ("Qtime Viewer # "); return cp; }
+    static const std::string& caption () { static std::string cp ("Movie Viewer # "); return cp; }
 	virtual void draw ();
     virtual void setup ();
     virtual bool is_valid ();
@@ -299,6 +303,10 @@ private:
     void seek( size_t xPos );
     void clear_movie_params ();
     vec2 texture_to_display_zoom ();
+	
+	
+	mutable boost::filesystem::path mPath;
+	
     vec2 mScreenSize;
     gl::TextureRef mImage;
     ci::qtime::MovieSurfaceRef m_movie;
@@ -311,7 +319,6 @@ private:
     bool mMovieLoop, mPrevMovieLoop;
     vec2 m_zoom;
     Rectf m_display_rect;
-    boost::filesystem::path mPath;
 	vec2		mMousePos;
 	std::shared_ptr<qTimeFrameCache> mFrameSet;
 	SurfaceRef  mSurface;
@@ -345,6 +352,81 @@ private:
 	
 	std::list<std::shared_ptr<clipContext> > m_tracks;
 	
+	
+};
+
+
+class movDirContext : public uContext
+{
+public:
+	// From a name and a path and an optional format for anonymous file names
+	movDirContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
+	
+	void set_dir_info (const std::string extension = ".jpg", double fps=29.97, const std::string anonymous_format = "01234567890abcdefghijklmnopqrstuvwxy");
+	
+	const  boost::filesystem::path source_path () const;
+
+	virtual bool is_valid ()
+	{
+		return m_valid && is_context_type(uContext::movie_dir_viewer);
+	}
+	
+	static const std::string& caption () { static std::string cp ("Image Dir Viewer "); return cp; }
+	
+	virtual void draw ();
+	virtual void resize ();
+	virtual void setup ();
+	virtual void update ();
+	virtual void mouseMove( MouseEvent event );
+	virtual void onMarked (marker_info_t&);
+	virtual void mouseDown( MouseEvent event );
+	virtual void mouseUp( MouseEvent event );
+	virtual void mouseDrag( MouseEvent event );
+	virtual void keyDown( KeyEvent event );
+	
+	
+	
+	void setZoom (vec2);
+	vec2 getZoom ();
+	
+	
+	void                            seekToFrame( const size_t frame );
+	void                            seekToStart();
+	void                            seekToEnd();
+	size_t                          getCurrentFrame() const;
+	size_t                          getNumFrames() const;
+	double                          getCurrentTime() const;
+	double                          getDuration() const;
+	
+	
+private:
+	
+	mutable boost::filesystem::path mPath;
+	
+	params::InterfaceGl         mMovieParams;	
+	bool mMoviePlay, mPrevMoviePlay;
+	bool mMovieLoop, mPrevMovieLoop;
+	void play_pause_button ();
+	bool have_movie () const;
+	void play ();
+	void pause ();
+	void clear_movie_params ();
+	void loadMovieFile();
+	vec2 texture_to_display_zoom();
+	
+	mutable DirMovieRef m_Dm;
+	std::string m_extension;
+	std::string m_anonymous_format;
+	double m_fps;
+	
+	Rectf m_display_rect;
+	vec2		mMousePos;
+	vec2 m_zoom;
+	vec2 mScreenSize;
+	bool mMouseIsDown;
+	bool mMouseIsMoving;
+	bool mMouseIsDragging;
+	bool mMetaDown;
 	
 };
 
@@ -508,7 +590,6 @@ private:
 	
 	
 };
-
 
 
 #endif

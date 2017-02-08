@@ -2,15 +2,26 @@
 #include "cinder/app/App.h"
 #include "cinder/Utilities.h"
 #include "cinder/CinderMath.h"
+#include "stl_util.hpp"
 
 using namespace std;
 using namespace ci;
+
+namespace anonymous
+{
+    bool is_anaonymous_name (const boost::filesystem::path& pp, size_t check_size = 36)
+    {
+        string extension = pp.extension().string();
+        return extension.length() == 0 && pp.filename().string().length() == check_size;
+    }
+}
 
 /*******************************************************************************
  * Construction
  */
 
-DirMovie::DirMovie( const fs::path &directory, const std::string &extension, const double fps ) :
+DirMovie::DirMovie( const fs::path &directory, const std::string &extension, const double fps,
+                                const std::string &name_format) :
 mThreadIsRunning( false ),
 mDataIsFresh( false ),
 mLoopEnabled( true ),
@@ -35,6 +46,8 @@ mNumFrames( 0 )
 
     mThreadData.extension       = extension;
     mThreadData.directoryPath   = directory;
+    mThreadData.format =            name_format;
+    mThreadData.format_length = name_format.length();
 
     readFramePaths();
 
@@ -70,7 +83,7 @@ DirMovie::update()
     {
         {
             lock_guard< mutex > lock( mMutex );
-            mTexture = ci::gl::Texture::Dds( mThreadData.buffer->createStream(), ::mdds::Texture::Format() );
+            mTexture = cinder::gl::Texture2d::create ( * mThreadData.buffer );
         }
 
         if ( mTexture == nullptr ) warn( "error creating texture" );
@@ -80,9 +93,16 @@ DirMovie::update()
 }
 
 void
-DirMovie::draw()
+DirMovie::draw(const Rectf& win)
 {
-    if ( mTexture ) gl::draw( mTexture );
+
+    if (mTexture)
+        mTexture->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
+    
+    if ( win.getWidth() > 0 && win.getHeight() > 0 )
+        gl::draw( mTexture, win );
+    else
+        gl::draw (mTexture);
 }
 
 /*******************************************************************************
@@ -144,7 +164,9 @@ DirMovie::readFramePaths()
 
     for ( auto it = directory_iterator( mThreadData.directoryPath ); it != directory_iterator(); it++ )
     {
-        if ( it->path().extension() != mThreadData.extension ) continue;
+        if ( it->path().extension() != mThreadData.extension &&
+            ! mThreadData.is_anaonymous_name(it->path()))
+            continue;
 
         mThreadData.framePaths.push_back( it->path() );
     }
@@ -204,6 +226,12 @@ DirMovie::getDuration() const
     return (double)mNumFrames / mFrameRate;
 }
 
+
+void DirMovie::looping (bool what) const { mLoopEnabled = what; }
+
+
+bool DirMovie::looping () const { return mLoopEnabled; }
+
 /*******************************************************************************
  * Async
  */
@@ -222,9 +250,10 @@ DirMovie::updateFrameThreadFn()
         unique_lock< mutex > lock( mMutex );
 
         // Read data into memory buffer
-        auto ds_path = DataSourcePath::create( mThreadData.framePaths[ mCurrentFrameIdx ] );
-        mThreadData.buffer = DataSourceBuffer::create( ds_path->getBuffer() );
-
+        if (anonymous::is_anaonymous_name (mThreadData.framePaths[ mCurrentFrameIdx ]))
+            mThreadData.buffer = Surface8u::create( loadImage( mThreadData.framePaths[ mCurrentFrameIdx ], ImageSource::Options(), "jpg"));
+        else
+             mThreadData.buffer = Surface8u::create( loadImage( mThreadData.framePaths[ mCurrentFrameIdx ]));
 
         mDataIsFresh = true;
         updateAverageFps();

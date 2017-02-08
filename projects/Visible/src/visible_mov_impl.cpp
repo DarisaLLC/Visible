@@ -75,6 +75,10 @@ movContext::movContext(WindowRef& ww, const boost::filesystem::path& dp)
 
 
 
+const  boost::filesystem::path movContext::source_path () const
+{
+    return mPath;
+}
 
 
 void movContext::play ()

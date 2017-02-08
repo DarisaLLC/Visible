@@ -3,6 +3,9 @@
 #include "cinder/gl/gl.h"
 #include "cinder/Thread.h"
 #include "cinder/DataSource.h"
+#include "cinder/Rect.h"
+
+using namespace ci;
 
 #include <atomic>
 
@@ -32,16 +35,17 @@ protected:
 public:
     //! Factory method to create a reference to a movie that plays all frames in
     // \a directory.
-    static DirMovieRef create( const ci::fs::path &directory, const std::string &extension=".png", const double fps=29.97 )
+    static DirMovieRef create( const ci::fs::path &directory, const std::string &extension=".png", const double fps=29.97,
+                              const std::string &name_format="")
     {
-        return (DirMovieRef)(new DirMovie( directory, extension, fps ));
+        return (DirMovieRef)(new DirMovie( directory, extension, fps, name_format ));
     }
     
 
     //! Construct a movie that plays all frames in \a directory. Files in the
     // directory that don't have a file extension that matches (case-sensitively
     // \a extension will be skipped. \a fps sets the framerate of the movie.
-    DirMovie( const ci::fs::path &directory, const std::string &extension=".DDS", const double fps=29.97 );
+    DirMovie( const ci::fs::path &directory, const std::string &extension=".png", const double fps=29.97, const std::string &name_format="");
 
     ~DirMovie();
 
@@ -51,7 +55,7 @@ public:
     void                            update();
     //! Draws the movie texture using default arugments. For better control over
     // drawing, call getTexture().
-    void                            draw();
+    void                            draw(const ci::Rectf& bound = Rectf ());
 
 
     // Play control ------------------------------------------------------------
@@ -94,6 +98,10 @@ public:
 
     //! Get the total number of seconds in the movie
     double                          getDuration() const;
+    
+    void looping (bool what) const;
+    bool looping () const;
+    
 protected:
     void                            updateAverageFps();
     double                          mAverageFps, mFpsLastSampleTime;
@@ -102,7 +110,6 @@ protected:
     void                            readFramePaths();
     std::atomic< size_t >           mCurrentFrameIdx, mNumFrames;
     std::atomic< bool >             mCurrentFrameIsFresh;
-
 
     // Async -------------------------------------------------------------------
 protected:
@@ -118,9 +125,17 @@ protected:
         buffer( nullptr ), extension("")
         {}
 
+        bool is_anaonymous_name (const boost::filesystem::path& pp)
+        {
+            std::string extension = pp.extension().string();
+            return extension.length() == 0 && pp.filename().string().length() == format_length;
+        }
+        
         std::string                 extension;
+        std::string                 format;
+        size_t                      format_length;
         ci::fs::path                directoryPath;
-        ci::DataSourceBufferRef     buffer;
+        ci::Surface8uRef            buffer;
         std::vector< ci::fs::path > framePaths;
     };
     thread_data                     mThreadData;
@@ -136,7 +151,7 @@ public:
 
     // Position control --------------------------------------------------------
 protected:
-    std::atomic< bool >             mLoopEnabled;
+    mutable std::atomic< bool >             mLoopEnabled;
     void                            nextFramePosition();
     
 };

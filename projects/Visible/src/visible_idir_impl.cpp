@@ -19,7 +19,7 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-namespace anonymous
+namespace
 {
     bool is_anaonymous_name (const filesystem::path& pp, size_t check_size = 36)
     {
@@ -54,7 +54,7 @@ void imageDirContext::loadImageDirectory (const filesystem::path& directory)
         // skip if extension does not match
         string extension = i->path().extension().string();
         
-        if (! anonymous::is_anaonymous_name(i->path()))
+        if (! is_anaonymous_name(i->path()))
         {
             extension.erase( 0, 1 );
             if( std::find( mSupportedExtensions.begin(), mSupportedExtensions.end(), extension ) == mSupportedExtensions.end() )
@@ -113,12 +113,15 @@ void imageDirContext::setup()
     std::vector<std::pair<int,int> > sizes;
     
     std::vector<filesystem::path>::const_iterator pItr = mImageFiles.begin();
+    std::vector<filesystem::path> good_files;
     for (; pItr < mImageFiles.end(); pItr++)
     {
+        Surface8uRef sref, dref;
+        cinder::gl::Texture2dRef mt;
         try
         {
-            Surface8uRef sref, dref;
-            if (anonymous::is_anaonymous_name(*pItr))
+            
+            if (is_anaonymous_name(*pItr))
                 sref = Surface8u::create( loadImage( pItr->string(), ImageSource::Options(), "jpg"));
             //            mTextures.push_back(cinder::gl::Texture2d::create( loadImage( pItr->string(), ImageSource::Options(), "jpg") ) );
             else
@@ -129,18 +132,21 @@ void imageDirContext::setup()
             dref = Surface8u::create(bounds.getWidth()/8, bounds.getHeight()/8, false);
             
             cinder::ip::resize(*sref, dref.get());
-            cinder::gl::Texture2dRef mt = cinder::gl::Texture2d::create(*dref);
-            mTextures.push_back(mt);
-            
-            const std::pair<int,int> sz (mTextures.back()->getSize().x, mTextures.back()->getSize().y);
-            sizes.push_back(sz);
+            mt = cinder::gl::Texture2d::create(*dref);
         }
         catch( const std::exception &ex ) {
             console() << ex.what() << "File: " << pItr->string() <<endl;
-            return;
+            continue;
         }
-        std::cout << mTextures.size () << std::endl;
+        
+        mTextures.push_back(mt);
+        
+        const std::pair<int,int> sz (mTextures.back()->getSize().x, mTextures.back()->getSize().y);
+        sizes.push_back(sz);
+        good_files.push_back(*pItr);
     }
+    std::cout << mTextures.size () << std::endl;
+    
     
     // find the largest image. Again: expectation is that they are equal
     std::vector<uint32_t> areas;
@@ -157,10 +163,10 @@ void imageDirContext::setup()
     
     
     
-    pItr = mImageFiles.begin();
+    pItr = good_files.begin();
     std::vector<gl::TextureRef>::const_iterator tItr = mTextures.begin();
     
-    for (; pItr < mImageFiles.end(); pItr++, tItr++)
+    for (; pItr < good_files.end(); pItr++, tItr++)
     {
         mItems.push_back( AccordionItem( timeline(),
                                         xPos,
@@ -253,7 +259,7 @@ void imageDirContext::update()
 }
 
 void imageDirContext::draw()
-{	
+{
     gl::clear( Color( 1, 1, 1 ) );
     gl::enableAlphaBlending();
     

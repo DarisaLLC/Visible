@@ -47,7 +47,7 @@ uContextRef uContext::getRef ()
 
 uContext::~uContext ()
 {
-    std::cout << " uContext Dtor called " << std::endl;
+   // std::cout << " uContext Dtor called " << std::endl;
 }
 
 // u implementation does nothing
