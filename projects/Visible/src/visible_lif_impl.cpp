@@ -22,7 +22,7 @@
 #include "CinderOpenCV.h"
 #include "Cinder/ip/Blend.h"
 #include "opencv2/highgui.hpp"
-#include "opencv_utils.hpp"
+#include "vision/opencv_utils.hpp"
 #include "cinder/ip/Flip.h"
 #include "otherIO/lifFile.hpp"
 

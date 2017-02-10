@@ -173,7 +173,7 @@ TEST(ut_similarity, run)
     EXPECT_EQ(sm.aborted() , false);
     
     roiWindow<P8U> tmp (640, 480);
-    tmp.randomFill(0);
+    tmp.randomFill(1066);
     
     for (uint32_t i = 0; i < images.size(); i++) {
         images[i] = tmp;
@@ -208,7 +208,7 @@ TEST(ut_similarity, run)
     EXPECT_EQ(fRet, true);
     
     eRet = sm.entropies(ent);
-    EXPECT_EQ(fRet, true);
+    EXPECT_EQ(eRet, true);
     
     EXPECT_EQ(ent.size() , images.size());
     EXPECT_EQ(fRet, true);

@@ -15,6 +15,7 @@
 #include <assert.h>
 #include "core/stl_utils.hpp"
 #include "core/timestamp.h"
+#include "core/rand_support.h"
 #include <random>
 
 using namespace svl;
@@ -34,7 +35,10 @@ void roiWindow<P>::randomFill( uint32_t seed )
     for (int32_t j = 0; j < height(); j++) {
         pixel_ptr_t one = rowPointer (j);
         for (uint32_t i = 0; i < width(); ++i, ++one)
-            *one = std::generate_canonical<pixel_t,std::numeric_limits<pixel_t>::digits>(_rng_generator);
+        {
+            float fr = randFloat(0.0f, 1.0f);
+            *one = (pixel_t)(fr * std::numeric_limits<pixel_t>::max());
+        }
     }
         
 }

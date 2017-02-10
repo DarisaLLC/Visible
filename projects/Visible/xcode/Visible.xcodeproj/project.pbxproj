@@ -8,6 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069691CED3E2C0045FF57 /* ip_utils.cpp */; };
+		C20BBC031E4E33CE002C7D68 /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
+		C20BBC041E4E33D3002C7D68 /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
+		C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
+		C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
+		C20BBC071E4E34C3002C7D68 /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
+		C20BBC081E4E34D5002C7D68 /* visible_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946761CE4DC7100976025 /* visible_impl.cpp */; };
+		C20BBC091E4E34F0002C7D68 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
+		C20BBC0B1E4E39E6002C7D68 /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
+		C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
 		C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696D1CED3E2C0045FF57 /* matpixel.cpp */; };
 		C20EDBB61CEFC2D20074C47A /* registration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696F1CED3E2C0045FF57 /* registration.cpp */; };
 		C20EDBB71CEFC2E70074C47A /* rowfunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069701CED3E2C0045FF57 /* rowfunc.cpp */; };
@@ -321,6 +330,10 @@
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Visible.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Visible.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C202D9721D18427800AA8951 /* bit_chrome.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = bit_chrome.hpp; sourceTree = "<group>"; };
+		C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rand_support.cpp; sourceTree = "<group>"; };
+		C20BBC0D1E4E3BE6002C7D68 /* coreGLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coreGLM.h; sourceTree = "<group>"; };
+		C20BBC0E1E4E3C7B002C7D68 /* GLMmath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLMmath.h; sourceTree = "<group>"; };
+		C20BBC0F1E4E3CB5002C7D68 /* rand_support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rand_support.h; sourceTree = "<group>"; };
 		C20EDBBE1CF277130074C47A /* exception.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = exception.cpp; sourceTree = "<group>"; };
 		C20EDBBF1CF277130074C47A /* self_similarity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = self_similarity.cpp; sourceTree = "<group>"; };
 		C20EDBC01CF277130074C47A /* time_spec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = time_spec.cpp; sourceTree = "<group>"; };
@@ -362,10 +375,10 @@
 		C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_lif_impl.cpp; path = ../src/visible_lif_impl.cpp; sourceTree = "<group>"; };
 		C23D0F481E2982690049ADDB /* lifFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lifFile.hpp; path = ../../../svl/include/otherIO/lifFile.hpp; sourceTree = "<group>"; };
 		C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lifFile.cpp; sourceTree = "<group>"; };
-		C23D0F4C1E298CE50049ADDB /* tinystr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinystr.cpp; path = ../../../svl/local/tinyxml/tinystr.cpp; sourceTree = "<group>"; };
-		C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../../../svl/local/tinyxml/tinyxml.cpp; sourceTree = "<group>"; };
-		C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../../../svl/local/tinyxml/tinyxmlerror.cpp; sourceTree = "<group>"; };
-		C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../../../svl/local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
+		C23D0F4C1E298CE50049ADDB /* tinystr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinystr.cpp; path = ../local/tinyxml/tinystr.cpp; sourceTree = "<group>"; };
+		C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../local/tinyxml/tinyxml.cpp; sourceTree = "<group>"; };
+		C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../local/tinyxml/tinyxmlerror.cpp; sourceTree = "<group>"; };
+		C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
 		C24CD87C1CEA5B1B0008C72B /* VisibleGtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VisibleGtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C24CD87E1CEA5B1B0008C72B /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		C24CD8831CEA916E0008C72B /* libboost_date_time.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_date_time.a; path = ../../../svl/local/boost/lib/libboost_date_time.a; sourceTree = "<group>"; };
@@ -9841,10 +9854,6 @@
 		29B97314FDCFA39411CA2CEA /* QuickTimeIteration */ = {
 			isa = PBXGroup;
 			children = (
-				C23D0F4C1E298CE50049ADDB /* tinystr.cpp */,
-				C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */,
-				C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */,
-				C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */,
 				C260099A1CED3E010045FF57 /* svl */,
 				C21946B11CE4EA6100976025 /* include */,
 				C21946891CE4DC9700976025 /* Configurations */,
@@ -10146,6 +10155,9 @@
 		C26009EA1CED3E010045FF57 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				C20BBC0F1E4E3CB5002C7D68 /* rand_support.h */,
+				C20BBC0E1E4E3C7B002C7D68 /* GLMmath.h */,
+				C20BBC0D1E4E3BE6002C7D68 /* coreGLM.h */,
 				C2E469CE1D07718B0066B811 /* cm_time.hpp */,
 				C20EDBC41CF277480074C47A /* simple_timing.hpp */,
 				C20EDBC51CF277480074C47A /* timestamp.h */,
@@ -25709,6 +25721,11 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */,
+				C23D0F4C1E298CE50049ADDB /* tinystr.cpp */,
+				C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */,
+				C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */,
+				C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */,
 				C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */,
 				C20EDBBE1CF277130074C47A /* exception.cpp */,
 				C20EDBBF1CF277130074C47A /* self_similarity.cpp */,
@@ -26026,6 +26043,7 @@
 				C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */,
 				C21946881CE4DC7100976025 /* VisibleApp.cpp in Sources */,
 				C2606DAA1CED3E2E0045FF57 /* histo.cpp in Sources */,
+				C20BBC0B1E4E39E6002C7D68 /* rand_support.cpp in Sources */,
 				C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */,
 				C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */,
 				C2606DAB1CED3E2E0045FF57 /* ip_utils.cpp in Sources */,
@@ -26048,22 +26066,30 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C20BBC071E4E34C3002C7D68 /* lifFile.cpp in Sources */,
 				C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */,
+				C20BBC041E4E33D3002C7D68 /* tinyxml.cpp in Sources */,
+				C20BBC091E4E34F0002C7D68 /* InteractiveObject.cpp in Sources */,
 				C2BECED21DD6D8DE0001E2BA /* AccordionItem.cpp in Sources */,
 				C27221161D1C912E008EF8B2 /* histo.cpp in Sources */,
 				C20EDBB71CEFC2E70074C47A /* rowfunc.cpp in Sources */,
 				C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */,
 				C21FFE721CFE0AA300C97013 /* sm_producer.cpp in Sources */,
+				C20BBC081E4E34D5002C7D68 /* visible_impl.cpp in Sources */,
 				C2BECECF1DD6D4FA0001E2BA /* visible_idir_impl.cpp in Sources */,
 				C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,
 				C24CD87F1CEA5B1B0008C72B /* main.cpp in Sources */,
+				C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */,
+				C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */,
 				C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */,
 				C20EDBB61CEFC2D20074C47A /* registration.cpp in Sources */,
 				C20EDBC81CF277740074C47A /* exception.cpp in Sources */,
+				C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */,
 				C20EDBC61CF2776D0074C47A /* self_similarity.cpp in Sources */,
 				C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */,
+				C20BBC031E4E33CE002C7D68 /* tinystr.cpp in Sources */,
 				C2606E721CED44370045FF57 /* qtime_frame_cache.cpp in Sources */,
 				C2B005831CFF878B00AC2E64 /* ExtraQuickTimeImplAvf.mm in Sources */,
 			);
@@ -26088,7 +26114,7 @@
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include/**",
+					"$(SRCROOT)/include",
 					"$(LOCAL_CINDER)/include",
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
@@ -26110,6 +26136,7 @@
 					"$(LOCAL_OCV)/lib/osx/libopencv_objdetect.a",
 					"$(LOCAL_OCV)/lib/osx/libzlib.a",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.darisallc.visible;
 				PRODUCT_NAME = Visible;
 				USER_HEADER_SEARCH_PATHS = include;
 				WRAPPER_EXTENSION = app;
@@ -26134,7 +26161,7 @@
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include/**",
+					"$(SRCROOT)/include",
 					"$(LOCAL_CINDER)/include",
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
@@ -26147,6 +26174,7 @@
 					"$(LOCAL_OCV)/lib/macosx",
 				);
 				OTHER_LDFLAGS = "$(LOCAL_CINDER)/lib/libcinder.a";
+				PRODUCT_BUNDLE_IDENTIFIER = com.darisallc.visible;
 				PRODUCT_NAME = Visible;
 				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = include;
@@ -26233,6 +26261,7 @@
 					"$(LOCAL_BOOST)/include",
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)/",
+					"$(LOCAL_TINYXML)",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(LOCAL_gtest)/lib/Release",
@@ -26284,6 +26313,7 @@
 					"$(LOCAL_BOOST)/include",
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)/",
+					"$(LOCAL_TINYXML)",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(LOCAL_gtest)/lib/Release",

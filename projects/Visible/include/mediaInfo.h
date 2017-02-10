@@ -4,10 +4,11 @@
 #include <CoreMedia/CMTime.h>
 #include <CoreMedia/CMTimeRange.h>
 #include <CoreGraphics/CGBitmapContext.h>
+#include "core/coreGLM.h"
 
 #ifdef __cplusplus
 #include <iostream>
-#include "coreGLM.h"
+
 using namespace std;
 #define BOOL bool
 #endif

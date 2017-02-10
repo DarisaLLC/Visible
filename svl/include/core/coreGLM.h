@@ -8,7 +8,7 @@
 #include "glm/gtx/transform2.hpp"
 #include "glm/gtx/euler_angles.hpp"
 
-namespace cpcore {
+namespace svl {
 
 using glm::length;
 using glm::length2;
