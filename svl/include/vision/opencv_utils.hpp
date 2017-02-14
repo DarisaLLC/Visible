@@ -105,16 +105,20 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     {
         public:
             motionSmear ();
-            void add (const cv::Mat&) const;
-            const cv::Mat& signature (ellipse_parms&) const;
-            const uint32_t count () const;
-        
+        void add_to_smear (const cv::Mat&) const;
+        void add_to_deform (const cv::Mat&, const fPair& trim = fPair (10.0f,10.0f)) const;
+        const cv::Mat& signature (ellipse_parms&) const;
+        const uint32_t count () const;
+        const vec2 deform () const;
         
         private:
+        mutable cv::Mat m_prev;
         mutable cv::Mat m_min;
         mutable cv::Mat m_max;
         mutable cv::Mat m_sig;
         mutable uint32_t m_count;
+        mutable vec2 m_com;
+        mutable vec2 m_prev_com;
         mutable bool m_done;
 
           

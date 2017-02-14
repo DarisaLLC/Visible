@@ -234,7 +234,7 @@ namespace svl
     /////////////////////////////////////////////////////////
     
     motionSmear::motionSmear () : m_done (false), m_count(0) {}
-    void motionSmear::add(const cv::Mat& src) const
+    void motionSmear::add_to_smear(const cv::Mat& src) const
     {
         if (m_min.empty() || m_max.empty() || m_sig.empty())
         {
@@ -247,6 +247,49 @@ namespace svl
         cv::subtract(m_max, m_min, m_sig);
         m_count += 1;
     }
+    
+    void motionSmear::add_to_deform(const cv::Mat& src, const fPair & trim) const
+    {
+        assert(src.channels() == 1);
+        
+        if (m_prev.empty() )
+        {
+            m_prev = src.clone();//m_min = 0.0;
+            cv::GaussianBlur(m_prev, m_prev, cv::Size(11,11), 5.00);
+            return;
+        }
+        
+        cv::Mat gm = src.clone ();
+        vec2 isize (gm.cols, gm.rows);
+        
+        cv::GaussianBlur(src, gm, cv::Size(11,11), 5.00);
+        
+        roiWindow<P8U> rw;
+        NewFromOCV(gm, rw);
+        roiWindow<P8U> roi (rw.frameBuf(), trim.first, trim.second, rw.width() - 2*trim.first, rw.height() - 2*trim.second );
+        fPair center;
+        GetMotionCenter(roi, center, 10);
+        center += trim;
+        m_prev_com = m_com;
+        m_com = vec2(center.first, center.second);
+        
+        cv::Point2f com (m_com.x , m_com.y );
+        m_com.x = m_com.x / isize.x;
+        m_com.y = m_com.y / isize.y;
+
+        
+        cv::absdiff(gm, m_prev, m_prev);
+        cv::Point2f dcom;
+        getLuminanceCenterOfMass (m_prev, dcom);
+        vec2 m (dcom.x , dcom.y );
+        dcom.x = dcom.x / isize.x;
+        dcom.y = dcom.y / isize.y;
+        
+        m = m_com - m_prev_com;
+        
+        m_count += 1;
+    }
+    
     const cv::Mat& motionSmear::signature (ellipse_parms& ep) const
     {
         direction_moments (m_sig, ep);
@@ -257,6 +300,13 @@ namespace svl
     {
         return m_count;
     }
+    
+    
+    const vec2 motionSmear::deform () const
+    {
+        return m_com - m_prev_com;
+    }
+    
     
     /////////////////////////////////////////////////////////
     

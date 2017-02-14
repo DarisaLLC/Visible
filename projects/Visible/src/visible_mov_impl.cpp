@@ -22,7 +22,7 @@
 #include "CinderOpenCV.h"
 #include "Cinder/ip/Blend.h"
 #include "opencv2/highgui.hpp"
-#include "vision/opencv_utils.hpp"
+#include "opencv_utils.hpp"
 #include "cinder/ip/Flip.h"
 
 #include "gradient.h"
@@ -241,9 +241,6 @@ void movContext::loadMovieFile()
         
                 mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
                 
-                mS = cv::Mat(mScreenSize.x, mScreenSize.y, CV_32F);
-                mSS = cv::Mat(mScreenSize.x, mScreenSize.y, CV_32F);
-                
                 texture_to_display_zoom();
                 
                 
@@ -365,49 +362,16 @@ void movContext::update ()
     time_spec_t new_time = qtimeAvfLink::MovieBaseGetCurrentTime(m_movie);
     
     fPair trim (10, 10);
-    uint8_t edge_magnitude_threshold = 5;
+
     
     if (m_movie->checkNewFrame())
     {
        ip::flipVertical(*m_movie->getSurface(), mSurface.get());
-        ip::flipHorizontal(mSurface.get());
+       ip::flipHorizontal(mSurface.get());
         
         mFrameSet->loadFrame(mSurface, new_time);
         m_index = mFrameSet->currentIndex(new_time);
-        
         mSurface = mFrameSet->getFrame(new_time);
-        cv::Mat surfm = toOcv( *mSurface);
-        cv::Mat gm (mSurface->getWidth(), mSurface->getHeight(), CV_8U);
-        cvtColor(surfm, gm, cv::COLOR_RGB2GRAY);
-        cv::GaussianBlur(gm, gm, cv::Size(11,11), 5.00);
-        roiWindow<P8U> rw;
-        NewFromOCV(gm, rw);
-        roiWindow<P8U> roi (rw.frameBuf(), trim.first, trim.second, rw.width() - 2*trim.first, rw.height() - 2*trim.second );
-        fPair center;
-        GetMotionCenter(roi, center, edge_magnitude_threshold);
-        center += trim;
-        m_prev_com = mCom;
-        mCom = vec2(center.first, center.second);
-        
-        cv::Point2f com (mCom.x , mCom.y );
-        normalize_point(mCom, mSurface->getSize());
-
-        if (m_index > 0)
-        {
-            cv::absdiff(gm, mS, mS);
-            cv::Point2f dcom;
-            getLuminanceCenterOfMass (gm, dcom);
-            vec2 m (dcom.x , dcom.y );
-            normalize_point(m, mSurface->getSize());
-            m = m - (mCom - m_prev_com);
-            m_max_motion = m;
-        }
-        
-          mS = gm;
-        mSS = surfm;
-        
-        
-        
     }
     
 }
@@ -426,25 +390,6 @@ void movContext::draw ()
       mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
     gl::draw (mImage, m_display_rect);
 
-    vec2 com = mCom * vec2(getWindowSize().x,getWindowSize().y);
-    vec2 pcom = m_prev_com * vec2(getWindowSize().x,getWindowSize().y);
-    vec2 mmm = m_max_motion * vec2(getWindowSize().x,getWindowSize().y);
-    vec2 mid = (com + mmm) / vec2(2.0f,2.0f);
-    
-    float len = distance(pcom, com);
-    
-    if (m_index < 1) return;
-    
-    if (getShowMotionCenter ())
-    {
-        gl::ScopedColor color (ColorA(1.0f, 0.5f, 1.0f, 0.5f));
-        gl::drawVector(vec3(pcom.x,pcom.y,0), vec3(com.x, com.y, 128));
-    }
-    if (getShowMotionBubble ())
-    {
-        gl::ScopedColor color (ColorA(0.5f, 0.5f, 1.0f, 0.5f));
-        gl::drawSolidEllipse(mid, len, len / 2.0f);
-    }
     
     mMovieParams.draw();
     

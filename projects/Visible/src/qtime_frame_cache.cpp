@@ -46,7 +46,7 @@ namespace anonymous
                 cm_time ts((*time_iter)/(10000.0));
                 roiMultiWindow<P8UP3> oneBy3 (names, ts.getValue());
                 lifserie.fill2DBuffer(oneBy3.rowPointer(0), frameCount);
-                std::shared_ptr<Channel8u> cref = newCiChannel(oneBy3.plane(2));
+                std::shared_ptr<Channel8u> cref = newCiChannel(oneBy3);
                 Surface8uRef chsurface = Surface8u::create(*cref);
                 out.push_back(chsurface);
                 break;
@@ -88,9 +88,17 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifse
         {
             anonymous::internal_fill_one(lifserie, tm, frame_count, out, tItr);
 
+            // For 3 Channel get the one by 3 image containing all.
+            //
+            if (! out.empty() && out.size() == 1)
+                thisref->loadFrame(out[0], frame_time);
+            
             // Increment durations by number of channels
             cm_time ts((*tItr)/(10000.0));
             frame_time = frame_time + ts;
+            frame_count ++;
+            
+            // Step the durations number of channel times.
             for (auto ii = 0; ii < tm.mChannels; ii++, tItr++);
         }
     }

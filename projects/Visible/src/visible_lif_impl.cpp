@@ -170,7 +170,7 @@ void lifContext::setup()
         mMovieParams.addParam( "Series ", m_series_names, &m_selected_serie )
 //        .keyDecr( "[" )
 //        .keyIncr( "]" )
-        .updateFn( [this] { loadCurrentSerie (); console() << "selected serie updated: " << m_series_names [m_selected_serie] << endl; loadCurrentSerie (); } );
+        .updateFn( [this] { console() << "selected serie updated: " << m_series_names [m_selected_serie] << endl; loadCurrentSerie (); } );
         
         
         mMovieParams.addSeparator();
@@ -179,21 +179,7 @@ void lifContext::setup()
             const std::function<int ()> getter = std::bind(&lifContext::getIndex, this);
             mMovieParams.addParam ("Current Time Step", setter, getter);
         }
-        mMovieParams.addSeparator();
-        {
-            const std::function<void (bool)> setter = std::bind(&lifContext::setShowMotionCenter, this, std::placeholders::_1);
-            const std::function<bool (void)> getter = std::bind(&lifContext::getShowMotionCenter, this);
-
-            mMovieParams.addParam( "Show Mc", setter, getter);
-        }
-        mMovieParams.addSeparator();
-        {
-            const std::function<void (bool)> setter = std::bind(&lifContext::setShowMotionBubble, this, std::placeholders::_1);
-            const std::function<bool (void)> getter = std::bind(&lifContext::getShowMotionBubble, this);
             
-            mMovieParams.addParam( "Show Mb", setter, getter);
-        }
-        
         mMovieParams.addSeparator();
         mMovieParams.addButton("Play / Pause ", bind( &lifContext::play_pause_button, this ) );
         
@@ -278,7 +264,7 @@ void lifContext::loadCurrentSerie ()
                 setWindowSize(window_size);
                 texture_to_display_zoom();
                 
-                play ();
+//                play ();
 
 
             }
@@ -435,29 +421,6 @@ void lifContext::draw ()
     }
     mMovieParams.draw();
     
-#if 0
-    vec2 com = mCom * vec2(getWindowSize().x,getWindowSize().y);
-    vec2 pcom = m_prev_com * vec2(getWindowSize().x,getWindowSize().y);
-    vec2 mmm = m_max_motion * vec2(getWindowSize().x,getWindowSize().y);
-    vec2 mid = (com + mmm) / vec2(2.0f,2.0f);
-    
-    float len = distance(pcom, com);
-    
-    if (m_index < 1) return;
-    
-    if (getShowMotionCenter ())
-    {
-        gl::ScopedColor color (ColorA(1.0f, 0.5f, 1.0f, 0.5f));
-        gl::drawVector(vec3(pcom.x,pcom.y,0), vec3(com.x, com.y, 128));
-    }
-    if (getShowMotionBubble ())
-    {
-        gl::ScopedColor color (ColorA(0.5f, 0.5f, 1.0f, 0.5f));
-        gl::drawSolidEllipse(mid, len, len / 2.0f);
-    }
-#endif
-    
-
     
 }
 

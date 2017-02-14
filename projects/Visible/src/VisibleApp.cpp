@@ -207,6 +207,11 @@ void VisibleApp::setup()
    	mTopParams->addButton( "Import Image Directory ", std::bind( &VisibleApp::create_movie_dir_viewer, this ) );
     
     mTopParams->addSeparator();
+
+    
+    mTopParams->addSeparator();
+    mTopParams->addButton( "Import A CSV File", std::bind( &VisibleApp::create_clip_viewer, this ) );
+    mTopParams->addSeparator();
     
     getSignalShouldQuit().connect( std::bind( &VisibleApp::shouldQuit, this ) );
     

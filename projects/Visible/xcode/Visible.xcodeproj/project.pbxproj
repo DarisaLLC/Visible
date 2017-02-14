@@ -334,6 +334,7 @@
 		C20BBC0D1E4E3BE6002C7D68 /* coreGLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coreGLM.h; sourceTree = "<group>"; };
 		C20BBC0E1E4E3C7B002C7D68 /* GLMmath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLMmath.h; sourceTree = "<group>"; };
 		C20BBC0F1E4E3CB5002C7D68 /* rand_support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rand_support.h; sourceTree = "<group>"; };
+		C20BBC181E5271C5002C7D68 /* opencv_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = opencv_utils.hpp; sourceTree = "<group>"; };
 		C20EDBBE1CF277130074C47A /* exception.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = exception.cpp; sourceTree = "<group>"; };
 		C20EDBBF1CF277130074C47A /* self_similarity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = self_similarity.cpp; sourceTree = "<group>"; };
 		C20EDBC01CF277130074C47A /* time_spec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = time_spec.cpp; sourceTree = "<group>"; };
@@ -10189,6 +10190,7 @@
 		C26009FF1CED3E010045FF57 /* vision */ = {
 			isa = PBXGroup;
 			children = (
+				C20BBC181E5271C5002C7D68 /* opencv_utils.hpp */,
 				C21FFE711CFDF82600C97013 /* self_similarity.h */,
 				C2600A001CED3E010045FF57 /* colorhistogram.hpp */,
 				C2600A011CED3E010045FF57 /* corners.hpp */,
