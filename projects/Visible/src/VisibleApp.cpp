@@ -5,7 +5,7 @@
 #include "cinder/Rand.h"
 #include "cinder/Utilities.h"
 #include "cinder/Log.h"
-#include "ui_contexts.h"
+#include "guiContext.h"
 #include "boost/filesystem.hpp"
 #include <functional>
 #include <list>
@@ -103,7 +103,7 @@ public:
     bool mPaused;
     
 
-    mutable std::list <std::shared_ptr<uContext> > mContexts;
+    mutable std::list <std::shared_ptr<guiContext> > mContexts;
     
 };
 
@@ -112,7 +112,7 @@ WindowRef  VisibleCentral::getConnectedWindow (Window::Format& format )
     return VisibleApp::instance().createConnectedWindow(format);
 }
 
-std::list <std::shared_ptr<uContext> >& VisibleCentral::contexts ()
+std::list <std::shared_ptr<guiContext> >& VisibleCentral::contexts ()
 {
     return VisibleApp::instance().mContexts;
 }
@@ -249,7 +249,7 @@ void VisibleApp::windowClose()
 
 void VisibleApp::mouseMove( MouseEvent event )
 {
-    uContext  *data = getWindow()->getUserData<uContext>();
+    guiContext  *data = getWindow()->getUserData<guiContext>();
     if(data)
         data->mouseMove(event);
     else
@@ -260,7 +260,7 @@ void VisibleApp::mouseMove( MouseEvent event )
 
 void VisibleApp::mouseDrag( MouseEvent event )
 {
-    uContext  *data = getWindow()->getUserData<uContext>();
+    guiContext  *data = getWindow()->getUserData<guiContext>();
     if(data)
         data->mouseDrag(event);
     else
@@ -270,7 +270,7 @@ void VisibleApp::mouseDrag( MouseEvent event )
 
 void VisibleApp::mouseDown( MouseEvent event )
 {
-    uContext  *data = getWindow()->getUserData<uContext>();
+    guiContext  *data = getWindow()->getUserData<guiContext>();
     if(data)
         data->mouseDown(event);
     else
@@ -280,7 +280,7 @@ void VisibleApp::mouseDown( MouseEvent event )
 
 void VisibleApp::mouseUp( MouseEvent event )
 {
-    uContext  *data = getWindow()->getUserData<uContext>();
+    guiContext  *data = getWindow()->getUserData<guiContext>();
     if(data)
         data->mouseUp(event);
     else
@@ -290,7 +290,7 @@ void VisibleApp::mouseUp( MouseEvent event )
 
 void VisibleApp::keyDown( KeyEvent event )
 {
-    uContext  *data = getWindow()->getUserData<uContext>();
+    guiContext  *data = getWindow()->getUserData<guiContext>();
     if(data)
         data->keyDown(event);
     else
@@ -313,7 +313,7 @@ void VisibleApp::keyDown( KeyEvent event )
 
 void VisibleApp::update()
 {
-   uContext  *data = getWindow()->getUserData<uContext>();
+   guiContext  *data = getWindow()->getUserData<guiContext>();
 
   if (data && data->is_valid()) data->update ();
     
@@ -323,7 +323,7 @@ void VisibleApp::draw ()
 {
     gl::clear( Color( 0.3f, 0.3f, 0.3f ) );
     
-    uContext  *data = getWindow()->getUserData<uContext>();
+    guiContext  *data = getWindow()->getUserData<guiContext>();
     
     bool valid_data = data != nullptr && data->is_valid ();
     
@@ -337,7 +337,7 @@ void VisibleApp::draw ()
 
 void VisibleApp::resize ()
 {
-    uContext  *data = getWindow()->getUserData<uContext>();
+    guiContext  *data = getWindow()->getUserData<guiContext>();
     
     if (data && data->is_valid()) data->resize ();
     

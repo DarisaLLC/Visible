@@ -1,0 +1,9 @@
+curl -O http://ftp.gnu.org/gnu/wget/wget-1.17.tar.gz
+tar -xzf wget-1.17.tar.gz
+cd wget-1.17
+./configure --with-ssl=openssl
+./configure --with-ssl=openssl --with-libssl-prefix=/usr/local/ssl
+make
+sudo make install
+wget --help
+cd .. && rm -rf wget*

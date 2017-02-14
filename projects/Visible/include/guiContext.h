@@ -1,5 +1,5 @@
-#ifndef __ui_contexts___h
-#define __ui_contexts___h
+#ifndef __guiContext___h
+#define __guiContext___h
 
 #include "cinder/app/App.h"
 #include "cinder/gl/Vbo.h"
@@ -15,7 +15,7 @@
 #include "cinder/Signals.h"
 #include "cinder/Cinder.h"
 #include "cinder/Surface.h"
-#include "iclip.hpp"
+#include "graph1d.hpp"
 #include "app_utils.hpp"
 #include "timestamp.h"
 #include "qtime_frame_cache.hpp"
@@ -34,8 +34,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/cstdint.hpp>
 #include "core/singleton.hpp"
-#include "DirMovie.h"
+#include "directoryPlayer.h"
 #include "qtimeAvfLink.h"
+#include "cinder/Text.h"
+#include <sstream>
 
 using namespace boost;
 using namespace boost::filesystem;
@@ -48,7 +50,7 @@ using namespace params;
 using namespace std;
 namespace fs = boost::filesystem;
 
-class uContext : public std::enable_shared_from_this<uContext>
+class guiContext : public std::enable_shared_from_this<guiContext>
 {
 public:
 	enum Type {
@@ -66,17 +68,17 @@ public:
 	typedef marker_info marker_info_t;
     typedef void (sig_cb_marker) (marker_info_t&);
 	
-	uContext (ci::app::WindowRef& ww);
-	virtual ~uContext ();
+	guiContext (ci::app::WindowRef& ww);
+	virtual ~guiContext ();
 	
-	std::shared_ptr<uContext> getRef();
+	std::shared_ptr<guiContext> getRef();
 	
 	Signal <void(marker_info_t&)> signalMarker;
 	
 	virtual const std::string & getName() const ;
 	virtual void setName (const std::string& name);
-	virtual uContext::Type context_type () const;
-	virtual bool is_context_type (const uContext::Type t) const;
+	virtual guiContext::Type context_type () const;
+	virtual bool is_context_type (const guiContext::Type t) const;
 	
 
 	virtual void resize () = 0;
@@ -103,9 +105,9 @@ public:
 	std::string mName;
 };
 
-typedef std::shared_ptr<uContext> uContextRef;
+typedef std::shared_ptr<guiContext> guiContextRef;
 
-class mainContext : public uContext
+class mainContext : public guiContext
 {
 public:
 	mainContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
@@ -116,7 +118,7 @@ public:
 };
 
 
-class imageDirContext : public uContext
+class imageDirContext : public guiContext
 {
 public:
 	// From just a name, use the browse to folder dialog to get the file
@@ -157,7 +159,7 @@ private:
 
 
 
-class matContext : public uContext
+class matContext : public guiContext
 {
 public:
 	// From just a name, use the open file dialog to get the file
@@ -192,7 +194,7 @@ private:
 };
 
 
-class clipContext : public uContext
+class clipContext : public guiContext
 {
 public:
 	
@@ -240,7 +242,7 @@ private:
 };
 
 
-class movContext : public uContext
+class movContext : public guiContext
 {
 public:
 	// From just a name, use the open file dialog to get the file
@@ -356,7 +358,7 @@ private:
 };
 
 
-class movDirContext : public uContext
+class movDirContext : public guiContext
 {
 public:
 	// From a name and a path and an optional format for anonymous file names
@@ -368,7 +370,7 @@ public:
 
 	virtual bool is_valid ()
 	{
-		return m_valid && is_context_type(uContext::movie_dir_viewer);
+		return m_valid && is_context_type(guiContext::movie_dir_viewer);
 	}
 	
 	static const std::string& caption () { static std::string cp ("Image Dir Viewer "); return cp; }
@@ -414,7 +416,7 @@ private:
 	void loadMovieFile();
 	vec2 texture_to_display_zoom();
 	
-	mutable DirMovieRef m_Dm;
+	mutable directoryPlayerRef m_Dm;
 	std::string m_extension;
 	std::string m_anonymous_format;
 	double m_fps;
@@ -432,7 +434,7 @@ private:
 
 
 
-class lifContext : public uContext
+class lifContext : public guiContext
 {
 public:
 	// From just a name, use the open file dialog to get the file
@@ -491,7 +493,9 @@ private:
 	bool have_movie ();
 	void play ();
 	void pause ();
-	
+	void update_log (const std::string& meg = "");
+	Rectf get_image_display_rect ();
+	Rectf get_plotting_display_rect ();
 	
 	class series_info
 	{
@@ -505,11 +509,18 @@ private:
 		
 		friend std::ostream& operator<< (std::ostream& out, const series_info& se)
 		{
-			out << "Name:    " << se.name << std::endl;
-			out << "Dimensions:" << se.dimensions[0]  << " x " << se.dimensions[1] << std::endl;
-			out << "TimeSteps  " << se.timesteps << std::endl;
+			out << "Serie:    " << se.name << std::endl;
 			out << "Channels: " << se.channelCount << std::endl;
+			out << "TimeSteps  " << se.timesteps << std::endl;
+			out << "Dimensions:" << se.dimensions[0]  << " x " << se.dimensions[1] << std::endl;
 			return out;
+		}
+		
+		std::string info ()
+		{
+			std::ostringstream osr;
+			osr << *this << std::endl;
+			return osr.str();
 		}
 		
 	};
@@ -535,6 +546,7 @@ private:
 			m_series_book.emplace_back (si);
 		}
 	}
+	
 	
 	std::shared_ptr<lifIO::LifReader> m_lifRef;
 	std::vector<size_t> m_spatial_dims;
@@ -588,6 +600,10 @@ private:
 	
 	std::list<std::shared_ptr<clipContext> > m_tracks;
 	
+	gl::TextureRef		mTextTexture;
+	vec2				mSize;
+	Font				mFont;
+	std::string			mLog;
 	
 };
 

@@ -101,7 +101,7 @@ private:
     mutable std::mutex			mMutex;
 };
 
-
+#if 0
 class directoryPlayer : tiny_media_info
 {
 public:
@@ -148,6 +148,7 @@ private:
     
 };
 
+#endif
 
 
 

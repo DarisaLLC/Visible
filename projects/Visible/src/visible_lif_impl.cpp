@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 #include "VisibleApp.h"
-#include "ui_contexts.h"
+#include "guiContext.h"
 #include "stl_util.hpp"
 #include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
@@ -26,8 +26,6 @@
 #include "cinder/ip/Flip.h"
 #include "otherIO/lifFile.hpp"
 
-
-#include "gradient.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -48,7 +46,16 @@ namespace
     {
         return AppBase::get()->getElapsedSeconds();
     }
-    
+
+
+    inline ivec2 trim () { return vec2(10,10); }
+    vec2 trim_norm () { return vec2(trim().x, trim().y) / vec2(getWindowWidth(), getWindowHeight()); }
+    inline ivec2 desired_window_size () { return ivec2 (960 + 2 * trim().x, 540 + 2 * trim().y); }
+    inline ivec2 canvas_size () { return getWindowSize() - trim() - trim (); }
+    inline ivec2 image_frame_size () { return ivec2 ((canvas_size().x * 2) / 3, (canvas_size().y * 3) / 4); }
+    inline ivec2 plot_frame_size () { return ivec2 ((canvas_size().x * 1) / 3, (canvas_size().y * 3) / 4); }
+    inline vec2 canvas_norm_size () { return vec2(canvas_size().x, canvas_size().y) / vec2(getWindowWidth(), getWindowHeight()); }
+    inline Rectf text_norm_rect () { return Rectf(0.0, 1.0 - 0.125, 1.0, 0.125); }
     
     
 }
@@ -57,7 +64,7 @@ namespace
 /////////////  lifContext Implementation  ////////////////
 
 lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
-: uContext(ww), mPath (dp)
+: guiContext(ww), mPath (dp)
 {
     m_valid = false;
     m_type = Type::lif_file_viewer;
@@ -67,12 +74,15 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
 
     m_valid = ! mPath.string().empty() && exists(mPath);
     
-    setup ();
     if (is_valid())
     {
         mWindow->setTitle( mPath.filename().string() );
+        mWindow->setSize(desired_window_size());
+        mFont = Font( "Menlo", 32 );
+        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     }
-    
+
+    setup ();
 }
 
 
@@ -147,7 +157,8 @@ void lifContext::setZoom (vec2 zoom)
 
 void lifContext::setup()
 {
-    mMovieParams = params::InterfaceGl( "Lif Player ", vec2( 90, 160 ) );
+    mMovieParams = params::InterfaceGl( "Lif Player ", vec2( 260, 260) );
+    mMovieParams.setPosition(getWindowSize() / 2);
 
     
     // Load the validated movie file
@@ -238,6 +249,10 @@ void lifContext::loadCurrentSerie ()
             
             m_serie = m_series_book[m_selected_serie];
             mFrameSet = qTimeFrameCache::create (m_lifRef->getSerie(m_selected_serie));
+       
+        
+            std::stringstream str;
+        
             std::cout << m_serie << std::endl;
         
             if (m_valid)
@@ -260,13 +275,10 @@ void lifContext::loadCurrentSerie ()
                 //  2
                 //  3
                 //  Create 2x mag for images
-                ivec2 window_size (mSurface->getWidth() * 1.5, mSurface->getHeight() * 3);
+                ivec2 window_size (desired_window_size());
                 setWindowSize(window_size);
                 texture_to_display_zoom();
                 
-//                play ();
-
-
             }
         }
     catch( const std::exception &ex ) {
@@ -329,6 +341,42 @@ void lifContext::mouseUp( MouseEvent event )
     mMouseIsDragging = false;
 }
 
+void  lifContext::update_log (const std::string& msg)
+{
+    if (msg.length() > 2)
+        mLog = msg;
+    TextBox tbox = TextBox().alignment( TextBox::RIGHT).font( mFont ).size( mSize ).text( mLog );
+    tbox.setColor( Color( 1.0f, 0.65f, 0.35f ) );
+    tbox.setBackgroundColor( ColorA( 0.3f, 0.3f, 0.3f, 0.4f )  );
+    ivec2 sz = tbox.measure();
+    mTextTexture = gl::Texture2d::create( tbox.render() );
+}
+
+Rectf lifContext::get_image_display_rect ()
+{
+    ivec2 ivf = image_frame_size();
+    ivec2 tl = trim();
+    
+    if (m_serie.channelCount == 1)
+        ivf.y /= 3;
+    
+    ivec2 lr = tl + ivf;
+    return Rectf (tl, lr);
+}
+
+Rectf lifContext::get_plotting_display_rect ()
+{
+    ivec2 pvf = plot_frame_size();
+    ivec2 tl = trim();
+    tl.x += image_frame_size().x;
+    
+    if (m_serie.channelCount == 1)
+        pvf.y /= 3;
+    
+    ivec2 lr = tl + pvf;
+    return Rectf (tl, lr);
+
+}
 
 vec2 lifContext::texture_to_display_zoom()
 {
@@ -359,10 +407,12 @@ void lifContext::seek( size_t xPos )
 }
 
 
-bool lifContext::is_valid () { return m_valid && is_context_type(uContext::lif_file_viewer); }
+bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif_file_viewer); }
 
 void lifContext::resize ()
 {
+    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+    
   //  if (! have_movie () ) return;
 //    m_zoom = texture_to_display_zoom();
     
@@ -380,7 +430,10 @@ void lifContext::update ()
 void lifContext::draw_info ()
 {
     if (! m_lifRef) return;
-        
+
+    std::string frame_str = string( "Frame: " + to_string( int( getIndex() ) ) );
+    std::string seri_str = m_serie.info();
+    
     gl::setMatricesWindow( getWindowSize() );
     
     gl::ScopedBlendAlpha blend_;
@@ -390,11 +443,18 @@ void lifContext::draw_info ()
     layoutR.setFont( Font( "Arial", 18 ) );
     layoutR.setColor( Color::white() );
     layoutR.setLeadingOffset( 3 );
-    layoutR.addRightLine( string( "Frame: " + to_string( int( getIndex() ) ) ) );
-    
+    layoutR.addRightLine( seri_str  );
+    update_log (frame_str);
     
     auto texR = gl::Texture::create( layoutR.render( true ) );
-    gl::draw( texR, vec2( getWindowWidth() - texR->getWidth() - 16, 10 ) );
+    gl::draw( texR, vec2( 10, 10 ) );
+    
+    if (mTextTexture)
+    {
+        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
+        gl::draw(mTextTexture, textrect);
+    }
+        
 }
 
 
@@ -404,17 +464,19 @@ void lifContext::draw ()
 
     if( have_movie()  && mSurface )
     {
+        Rectf dr = get_image_display_rect();
+        
         switch(m_serie.channelCount)
         {
             case 1:
         mImage = gl::Texture::create(*mSurface);
         mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
-        gl::draw (mImage, m_display_rect);
+        gl::draw (mImage, dr);
                 break;
             case 3:
                 mImage = gl::Texture::create(*mSurface);
                 mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
-                gl::draw (mImage, m_display_rect);
+                gl::draw (mImage, dr);
                 break;
         }
         draw_info ();
@@ -456,13 +518,13 @@ void lifContext::add_scalar_track(const boost::filesystem::path& path)
 
 
 #if 0
-    std::shared_ptr<uContext> cw(std::shared_ptr<uContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
+    std::shared_ptr<guiContext> cw(std::shared_ptr<guiContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
     
     if (! cw->is_valid()) return;
     
-    for (std::shared_ptr<uContext> uip : mContexts)
+    for (std::shared_ptr<guiContext> uip : mContexts)
     {
-        if (uip->is_context_type(uContext::Type::qtime_viewer))
+        if (uip->is_context_type(guiContext::Type::qtime_viewer))
         {
             uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
             cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
@@ -474,13 +536,13 @@ void lifContext::add_scalar_track(const boost::filesystem::path& path)
 // Create a movie viewer. Go through container of viewers, if there is a clip view, connect onMarked signal to it
 void VisibleApp::create_qmovie_viewer ()
 {
-    std::shared_ptr<uContext> mw(new lifContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize()))));
+    std::shared_ptr<guiContext> mw(new lifContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize()))));
     
     if (! mw->is_valid()) return;
     
-    for (std::shared_ptr<uContext> uip : mContexts)
+    for (std::shared_ptr<guiContext> uip : mContexts)
     {
-        if (uip->is_context_type(uContext::Type::clip_viewer))
+        if (uip->is_context_type(guiContext::Type::clip_viewer))
         {
             uip->signalMarker.connect(std::bind(&lifContext::onMarked, static_cast<lifContext*>(mw.get()), std::placeholders::_1));
             mw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));

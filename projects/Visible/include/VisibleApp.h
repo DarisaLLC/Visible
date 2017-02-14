@@ -6,7 +6,7 @@
 #include "cinder/Camera.h"
 #include "cinder/params/Params.h"
 #include "cinder/Rand.h"
-#include "ui_contexts.h"
+#include "guiContext.h"
 #include "boost/filesystem.hpp"
 #include <functional>
 #include <list>
@@ -20,7 +20,7 @@
 using namespace ci;
 using namespace ci::app;
 
-typedef app_utils::WindowMgr<WindowRef, uContextRef> VisWinMgr;
+typedef app_utils::WindowMgr<WindowRef, guiContextRef> VisWinMgr;
 
 class mainWindowData {
 public:
@@ -34,7 +34,7 @@ struct VisibleCentral : SingletonLight<VisibleCentral>
     VisibleCentral () {}
 
     WindowRef getConnectedWindow (Window::Format& format);
-    std::list <std::shared_ptr<uContext> >& contexts ();
+    std::list <std::shared_ptr<guiContext> >& contexts ();
 
 };
 

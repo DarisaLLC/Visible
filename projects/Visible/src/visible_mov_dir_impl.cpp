@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include "VisibleApp.h"
-#include "ui_contexts.h"
+#include "guiContext.h"
 #include "stl_util.hpp"
 #include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
@@ -17,7 +17,7 @@
 #include "opencv2/highgui.hpp"
 #include "vision/opencv_utils.hpp"
 #include "cinder/ip/Flip.h"
-#include "DirMovie.h"
+#include "directoryPlayer.h"
 
 #include "gradient.h"
 
@@ -57,7 +57,7 @@ namespace
 
 
 movDirContext::movDirContext(WindowRef& ww, const boost::filesystem::path& dp)
-                            : uContext(ww), mPath (dp)
+                            : guiContext(ww), mPath (dp)
 {
     m_valid = false;
     m_type = Type::qtime_viewer;
@@ -179,7 +179,7 @@ void movDirContext::setup()
     clear_movie_params();
     
     
-    m_Dm = DirMovie::create (source_path(), m_extension, m_fps, m_anonymous_format);
+    m_Dm = directoryPlayer::create (source_path(), m_extension, m_fps, m_anonymous_format);
     
     if( m_Dm && m_valid )
     {
@@ -418,13 +418,13 @@ void movDirContext::add_scalar_track(const boost::filesystem::path& path)
 
 
 
-    std::shared_ptr<uContext> cw(std::shared_ptr<uContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
+    std::shared_ptr<guiContext> cw(std::shared_ptr<guiContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
     
     if (! cw->is_valid()) return;
     
-    for (std::shared_ptr<uContext> uip : mContexts)
+    for (std::shared_ptr<guiContext> uip : mContexts)
     {
-        if (uip->is_context_type(uContext::Type::qtime_viewer))
+        if (uip->is_context_type(guiContext::Type::qtime_viewer))
         {
             uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
             cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
@@ -436,13 +436,13 @@ void movDirContext::add_scalar_track(const boost::filesystem::path& path)
 // Create a movie viewer. Go through container of viewers, if there is a clip view, connect onMarked signal to it
 void VisibleApp::create_qmovie_viewer ()
 {
-    std::shared_ptr<uContext> mw(new movDirContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize()))));
+    std::shared_ptr<guiContext> mw(new movDirContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize()))));
     
     if (! mw->is_valid()) return;
     
-    for (std::shared_ptr<uContext> uip : mContexts)
+    for (std::shared_ptr<guiContext> uip : mContexts)
     {
-        if (uip->is_context_type(uContext::Type::clip_viewer))
+        if (uip->is_context_type(guiContext::Type::clip_viewer))
         {
             uip->signalMarker.connect(std::bind(&movDirContext::onMarked, static_cast<movDirContext*>(mw.get()), std::placeholders::_1));
             mw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));

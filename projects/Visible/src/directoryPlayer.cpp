@@ -1,4 +1,4 @@
-#include "DirMovie.h"
+#include "directoryPlayer.h"
 #include "cinder/app/App.h"
 #include "cinder/Utilities.h"
 #include "cinder/CinderMath.h"
@@ -20,7 +20,7 @@ namespace anonymous
  * Construction
  */
 
-DirMovie::DirMovie( const fs::path &directory, const std::string &extension, const double fps,
+directoryPlayer::directoryPlayer( const fs::path &directory, const std::string &extension, const double fps,
                                 const std::string &name_format) :
 mThreadIsRunning( false ),
 mDataIsFresh( false ),
@@ -51,11 +51,11 @@ mNumFrames( 0 )
 
     readFramePaths();
 
-    mThread                     = thread( bind( &DirMovie::updateFrameThreadFn, this ) );
+    mThread                     = thread( bind( &directoryPlayer::updateFrameThreadFn, this ) );
     mThreadIsRunning            = true;
 }
 
-DirMovie::~DirMovie()
+directoryPlayer::~directoryPlayer()
 {
     mThreadIsRunning = false;
     mThread.join();
@@ -67,7 +67,7 @@ DirMovie::~DirMovie()
  */
 
 void
-DirMovie::warn( const string &warning )
+directoryPlayer::warn( const string &warning )
 {
     cout << warning << endl;
 }
@@ -77,7 +77,7 @@ DirMovie::warn( const string &warning )
  */
 
 void
-DirMovie::update()
+directoryPlayer::update()
 {
     if ( mDataIsFresh )
     {
@@ -93,7 +93,7 @@ DirMovie::update()
 }
 
 void
-DirMovie::draw(const Rectf& win)
+directoryPlayer::draw(const Rectf& win)
 {
 
     if (mTexture)
@@ -110,13 +110,13 @@ DirMovie::draw(const Rectf& win)
  */
 
 double
-DirMovie::getFrameRate() const
+directoryPlayer::getFrameRate() const
 {
     return mFrameRate;
 }
 
 void
-DirMovie::updateAverageFps()
+directoryPlayer::updateAverageFps()
 {
     double now = app::getElapsedSeconds();
     mFpsFrameCount++;
@@ -131,13 +131,13 @@ DirMovie::updateAverageFps()
 }
 
 double
-DirMovie::getAverageFps() const
+directoryPlayer::getAverageFps() const
 {
     return mAverageFps;
 }
 
 void
-DirMovie::setPlayRate( const double newRate )
+directoryPlayer::setPlayRate( const double newRate )
 {
     mInterruptTriggeredFoRealz = newRate != mPlayRate;
     mPlayRate = newRate;
@@ -150,13 +150,13 @@ DirMovie::setPlayRate( const double newRate )
 }
 
 double
-DirMovie::getPlayRate() const
+directoryPlayer::getPlayRate() const
 {
     return mPlayRate;
 }
 
 void
-DirMovie::readFramePaths()
+directoryPlayer::readFramePaths()
 {
     using namespace ci::fs;
 
@@ -175,13 +175,13 @@ DirMovie::readFramePaths()
 }
 
 void
-DirMovie::seekToTime( const double seconds )
+directoryPlayer::seekToTime( const double seconds )
 {
     seekToFrame( seconds * mFrameRate );
 }
 
 void
-DirMovie::seekToFrame( const size_t frame )
+directoryPlayer::seekToFrame( const size_t frame )
 {
     mCurrentFrameIdx = frame;
     mCurrentFrameIsFresh = true;
@@ -191,53 +191,53 @@ DirMovie::seekToFrame( const size_t frame )
 }
 
 void
-DirMovie::seekToStart()
+directoryPlayer::seekToStart()
 {
     seekToFrame( 0 );
 }
 
 void
-DirMovie::seekToEnd()
+directoryPlayer::seekToEnd()
 {
     seekToFrame( -1 );
 }
 
 size_t
-DirMovie::getCurrentFrame() const
+directoryPlayer::getCurrentFrame() const
 {
     return mCurrentFrameIdx;
 }
 
 size_t
-DirMovie::getNumFrames() const
+directoryPlayer::getNumFrames() const
 {
     return mNumFrames;
 }
 
 double
-DirMovie::getCurrentTime() const
+directoryPlayer::getCurrentTime() const
 {
     return (double)mCurrentFrameIdx / mFrameRate;
 }
 
 double
-DirMovie::getDuration() const
+directoryPlayer::getDuration() const
 {
     return (double)mNumFrames / mFrameRate;
 }
 
 
-void DirMovie::looping (bool what) const { mLoopEnabled = what; }
+void directoryPlayer::looping (bool what) const { mLoopEnabled = what; }
 
 
-bool DirMovie::looping () const { return mLoopEnabled; }
+bool directoryPlayer::looping () const { return mLoopEnabled; }
 
 /*******************************************************************************
  * Async
  */
 
 void
-DirMovie::updateFrameThreadFn()
+directoryPlayer::updateFrameThreadFn()
 {
     using namespace ci::fs;
 
@@ -281,7 +281,7 @@ DirMovie::updateFrameThreadFn()
  */
 
 void
-DirMovie::nextFramePosition()
+directoryPlayer::nextFramePosition()
 {
     using namespace ci::fs;
 

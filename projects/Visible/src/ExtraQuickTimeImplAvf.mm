@@ -20,7 +20,7 @@
 
 #include "cinder/qtime/QuickTimeImplAvf.h"
 #include "cinder/qtime/AvfUtils.h"
-#include "ui_contexts.h"
+#include "qtimeAvfLink.h"
 
 using namespace cinder;
 using namespace cinder::qtime;

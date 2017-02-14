@@ -1,5 +1,5 @@
 
-#include "ui_contexts.h"
+#include "guiContext.h"
 #include "stl_util.hpp"
 #include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
@@ -33,48 +33,48 @@ namespace
     
 }
 
-uContext::uContext (ci::app::WindowRef& ww)
+guiContext::guiContext (ci::app::WindowRef& ww)
 : mWindow (ww), m_valid (false), m_type (null_viewer)
 {
     if (ww)
         ww->setUserData (this);
 }
 
-uContextRef uContext::getRef ()
+guiContextRef guiContext::getRef ()
 {
     return shared_from_this();
 }
 
-uContext::~uContext ()
+guiContext::~guiContext ()
 {
-   // std::cout << " uContext Dtor called " << std::endl;
+   // std::cout << " guiContext Dtor called " << std::endl;
 }
 
 // u implementation does nothing
-void uContext::mouseDown( MouseEvent event ) {}
-void uContext::mouseMove( MouseEvent event ) {}
-void uContext::mouseUp( MouseEvent event ) {}
-void uContext::mouseDrag( MouseEvent event ) {}
-void uContext::keyDown( KeyEvent event ) {}
+void guiContext::mouseDown( MouseEvent event ) {}
+void guiContext::mouseMove( MouseEvent event ) {}
+void guiContext::mouseUp( MouseEvent event ) {}
+void guiContext::mouseDrag( MouseEvent event ) {}
+void guiContext::keyDown( KeyEvent event ) {}
 
-void uContext::normalize_point (vec2& pos, const ivec2& size)
+void guiContext::normalize_point (vec2& pos, const ivec2& size)
 {
     pos.x = pos.x / size.x;
     pos.y = pos.y / size.y;
 }
 
 
-const std::string & uContext::getName() const { return mName; }
-void uContext::setName (const std::string& name) { mName = name; }
-uContext::Type uContext::context_type () const { return m_type; }
-bool uContext::is_context_type (const Type t) const { return m_type == t; }
-bool uContext::is_valid () const { return m_valid; }
+const std::string & guiContext::getName() const { return mName; }
+void guiContext::setName (const std::string& name) { mName = name; }
+guiContext::Type guiContext::context_type () const { return m_type; }
+bool guiContext::is_context_type (const Type t) const { return m_type == t; }
+bool guiContext::is_valid () const { return m_valid; }
 
 
 ///////////////  Main Viewer ////////////////////
 
 mainContext::mainContext(ci::app::WindowRef& ww, const boost::filesystem::path& dp)
-: uContext (ww)
+: guiContext (ww)
 {
     m_valid = false;
     m_type = Type::null_viewer;
@@ -89,7 +89,7 @@ mainContext::mainContext(ci::app::WindowRef& ww, const boost::filesystem::path& 
 ///////////////  Matrix Viewer ////////////////////
 
 matContext::matContext(ci::app::WindowRef& ww, const boost::filesystem::path& dp)
-: uContext (ww), mPath (dp)
+: guiContext (ww), mPath (dp)
 {
     m_valid = false;
     m_type = Type::matrix_viewer;
@@ -200,7 +200,7 @@ void matContext::onMarked (marker_info& t)
 
 bool matContext::is_valid ()
 {
-    return m_valid && is_context_type (uContext::Type::matrix_viewer);
+    return m_valid && is_context_type (guiContext::Type::matrix_viewer);
 }
 
 
@@ -210,7 +210,7 @@ bool matContext::is_valid ()
 
 
 clipContext::clipContext(ci::app::WindowRef& ww, const boost::filesystem::path& dp)
-: uContext (ww), mPath (dp)
+: guiContext (ww), mPath (dp)
 {
     m_valid = false;
     m_type = Type::clip_viewer;
@@ -250,7 +250,7 @@ void clipContext::update ()
 {
 }
 
-bool clipContext::is_valid () { return m_valid && is_context_type(uContext::clip_viewer); }
+bool clipContext::is_valid () { return m_valid && is_context_type(guiContext::clip_viewer); }
 
 void clipContext::setup()
 {

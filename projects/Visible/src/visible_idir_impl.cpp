@@ -11,7 +11,7 @@
 #include "cinder/ip/resize.h"
 #include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"
-#include "ui_contexts.h"
+#include "guiContext.h"
 #include "stl_util.hpp"
 #include <stdlib.h>
 
@@ -70,7 +70,7 @@ void imageDirContext::loadImageDirectory (const filesystem::path& directory)
 }
 
 imageDirContext::imageDirContext( WindowRef& ww, const boost::filesystem::path& dp)
-: uContext (ww), mFolderPath (dp)
+: guiContext (ww), mFolderPath (dp)
 {
     m_valid = false;
     m_type = Type::image_dir_viewer;
@@ -88,7 +88,7 @@ imageDirContext::imageDirContext( WindowRef& ww, const boost::filesystem::path& 
 
 bool imageDirContext::is_valid ()
 {
-    return m_valid && is_context_type(uContext::image_dir_viewer);
+    return m_valid && is_context_type(guiContext::image_dir_viewer);
 }
 
 void imageDirContext::setup()

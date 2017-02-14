@@ -9,10 +9,10 @@ using namespace ci;
 
 #include <atomic>
 
-class DirMovie;
-typedef std::shared_ptr< DirMovie > DirMovieRef;
+class directoryPlayer;
+typedef std::shared_ptr< directoryPlayer > directoryPlayerRef;
 
-class DirMovie
+class directoryPlayer
 {
     // Exception handling ------------------------------------------------------
 public:
@@ -35,19 +35,19 @@ protected:
 public:
     //! Factory method to create a reference to a movie that plays all frames in
     // \a directory.
-    static DirMovieRef create( const ci::fs::path &directory, const std::string &extension=".png", const double fps=29.97,
+    static directoryPlayerRef create( const ci::fs::path &directory, const std::string &extension=".png", const double fps=29.97,
                               const std::string &name_format="")
     {
-        return (DirMovieRef)(new DirMovie( directory, extension, fps, name_format ));
+        return (directoryPlayerRef)(new directoryPlayer( directory, extension, fps, name_format ));
     }
     
 
     //! Construct a movie that plays all frames in \a directory. Files in the
     // directory that don't have a file extension that matches (case-sensitively
     // \a extension will be skipped. \a fps sets the framerate of the movie.
-    DirMovie( const ci::fs::path &directory, const std::string &extension=".png", const double fps=29.97, const std::string &name_format="");
+    directoryPlayer( const ci::fs::path &directory, const std::string &extension=".png", const double fps=29.97, const std::string &name_format="");
 
-    ~DirMovie();
+    ~directoryPlayer();
 
     // Lifecycle ---------------------------------------------------------------
 public:

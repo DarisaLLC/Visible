@@ -33,7 +33,7 @@
 		C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
 		C21FFE721CFE0AA300C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
 		C21FFE731CFE0E1D00C97013 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
-		C221D9171E4B043A00AF74CE /* DirMovie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946691CE4DC7100976025 /* DirMovie.cpp */; };
+		C221D9171E4B043A00AF74CE /* directoryPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946691CE4DC7100976025 /* directoryPlayer.cpp */; };
 		C221D91B1E4B48F400AF74CE /* visible_mov_dir_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C221D9181E4B130400AF74CE /* visible_mov_dir_impl.cpp */; };
 		C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */; };
 		C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
@@ -344,7 +344,7 @@
 		C21946631CE4D9C400976025 /* libpng16.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng16.a; path = ../../../../../../../../usr/local/Cellar/libpng/1.6.21/lib/libpng16.a; sourceTree = "<group>"; };
 		C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AudioDrawUtils.cpp; path = ../src/AudioDrawUtils.cpp; sourceTree = "<group>"; };
 		C21946661CE4DC7100976025 /* AudioDrawUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioDrawUtils.h; path = ../src/AudioDrawUtils.h; sourceTree = "<group>"; };
-		C21946691CE4DC7100976025 /* DirMovie.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DirMovie.cpp; path = ../src/DirMovie.cpp; sourceTree = "<group>"; };
+		C21946691CE4DC7100976025 /* directoryPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = directoryPlayer.cpp; path = ../src/directoryPlayer.cpp; sourceTree = "<group>"; };
 		C219466D1CE4DC7100976025 /* InteractiveObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InteractiveObject.cpp; path = ../src/InteractiveObject.cpp; sourceTree = "<group>"; };
 		C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = qtime_frame_cache.cpp; path = ../src/qtime_frame_cache.cpp; sourceTree = "<group>"; };
 		C21946761CE4DC7100976025 /* visible_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_impl.cpp; path = ../src/visible_impl.cpp; sourceTree = "<group>"; };
@@ -354,14 +354,14 @@
 		C219468C1CE4EA4900976025 /* base_signaler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_signaler.h; path = ../include/base_signaler.h; sourceTree = "<group>"; };
 		C219468F1CE4EA4900976025 /* cimovinggraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cimovinggraph.h; path = ../include/cimovinggraph.h; sourceTree = "<group>"; };
 		C21946931CE4EA4900976025 /* grabber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = grabber.h; path = ../include/grabber.h; sourceTree = "<group>"; };
-		C21946941CE4EA4900976025 /* iclip.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = iclip.hpp; path = ../include/iclip.hpp; sourceTree = "<group>"; };
+		C21946941CE4EA4900976025 /* graph1d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = graph1d.hpp; path = ../include/graph1d.hpp; sourceTree = "<group>"; };
 		C21946961CE4EA4900976025 /* InteractiveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InteractiveObject.h; path = ../include/InteractiveObject.h; sourceTree = "<group>"; };
 		C21946971CE4EA4900976025 /* intrusive_ptr_base.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = intrusive_ptr_base.hpp; path = ../include/intrusive_ptr_base.hpp; sourceTree = "<group>"; };
 		C219469D1CE4EA4900976025 /* signaler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = signaler.h; path = ../include/signaler.h; sourceTree = "<group>"; };
 		C219469E1CE4EA4900976025 /* simple_pair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = simple_pair.h; path = ../include/simple_pair.h; sourceTree = "<group>"; };
 		C219469F1CE4EA4900976025 /* sshist.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sshist.hpp; path = ../include/sshist.hpp; sourceTree = "<group>"; };
 		C21946A11CE4EA4900976025 /* stl_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = stl_util.hpp; path = ../include/stl_util.hpp; sourceTree = "<group>"; };
-		C21946A31CE4EA4900976025 /* ui_contexts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_contexts.h; path = ../include/ui_contexts.h; sourceTree = "<group>"; usesTabs = 1; };
+		C21946A31CE4EA4900976025 /* guiContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiContext.h; path = ../include/guiContext.h; sourceTree = "<group>"; usesTabs = 1; };
 		C21946A71CE4EA4900976025 /* vf_cinder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = vf_cinder.hpp; path = ../include/vf_cinder.hpp; sourceTree = "<group>"; };
 		C21946AC1CE4EA4900976025 /* qtime_frame_cache.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = qtime_frame_cache.hpp; path = ../include/qtime_frame_cache.hpp; sourceTree = "<group>"; };
 		C21FFE6B1CFD1D9B00C97013 /* app_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = app_utils.hpp; path = ../include/app_utils.hpp; sourceTree = "<group>"; };
@@ -372,7 +372,7 @@
 		C21FFE711CFDF82600C97013 /* self_similarity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = self_similarity.h; sourceTree = "<group>"; };
 		C21FFE741CFE104600C97013 /* ut_sm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_sm.hpp; sourceTree = "<group>"; };
 		C221D9181E4B130400AF74CE /* visible_mov_dir_impl.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = visible_mov_dir_impl.cpp; path = ../src/visible_mov_dir_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
-		C221D91A1E4B176800AF74CE /* DirMovie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DirMovie.h; path = ../include/DirMovie.h; sourceTree = "<group>"; };
+		C221D91A1E4B176800AF74CE /* directoryPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = directoryPlayer.h; path = ../include/directoryPlayer.h; sourceTree = "<group>"; };
 		C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_lif_impl.cpp; path = ../src/visible_lif_impl.cpp; sourceTree = "<group>"; };
 		C23D0F481E2982690049ADDB /* lifFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lifFile.hpp; path = ../../../svl/include/otherIO/lifFile.hpp; sourceTree = "<group>"; };
 		C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lifFile.cpp; sourceTree = "<group>"; };
@@ -9829,7 +9829,7 @@
 				C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */,
 				C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */,
 				C21946661CE4DC7100976025 /* AudioDrawUtils.h */,
-				C21946691CE4DC7100976025 /* DirMovie.cpp */,
+				C21946691CE4DC7100976025 /* directoryPlayer.cpp */,
 				C2F27E891DD8516900890E4C /* VisibleApp.h */,
 				C219466D1CE4DC7100976025 /* InteractiveObject.cpp */,
 				C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */,
@@ -9970,16 +9970,16 @@
 				C219468B1CE4EA4900976025 /* AudioTestGui.h */,
 				C219468C1CE4EA4900976025 /* base_signaler.h */,
 				C219468F1CE4EA4900976025 /* cimovinggraph.h */,
-				C221D91A1E4B176800AF74CE /* DirMovie.h */,
+				C221D91A1E4B176800AF74CE /* directoryPlayer.h */,
 				C21946931CE4EA4900976025 /* grabber.h */,
-				C21946941CE4EA4900976025 /* iclip.hpp */,
+				C21946941CE4EA4900976025 /* graph1d.hpp */,
 				C21946961CE4EA4900976025 /* InteractiveObject.h */,
 				C21946971CE4EA4900976025 /* intrusive_ptr_base.hpp */,
 				C219469D1CE4EA4900976025 /* signaler.h */,
 				C219469E1CE4EA4900976025 /* simple_pair.h */,
 				C219469F1CE4EA4900976025 /* sshist.hpp */,
 				C21946A11CE4EA4900976025 /* stl_util.hpp */,
-				C21946A31CE4EA4900976025 /* ui_contexts.h */,
+				C21946A31CE4EA4900976025 /* guiContext.h */,
 				C2B005861CFF8FE100AC2E64 /* qtimeAvfLink.h */,
 				C2E321FF1D0480E4006DFE5E /* mediaInfo.h */,
 				C21946A71CE4EA4900976025 /* vf_cinder.hpp */,
@@ -26056,7 +26056,7 @@
 				C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */,
 				C20EDBC11CF277130074C47A /* exception.cpp in Sources */,
 				C20EDBC21CF277130074C47A /* self_similarity.cpp in Sources */,
-				C221D9171E4B043A00AF74CE /* DirMovie.cpp in Sources */,
+				C221D9171E4B043A00AF74CE /* directoryPlayer.cpp in Sources */,
 				C221D91B1E4B48F400AF74CE /* visible_mov_dir_impl.cpp in Sources */,
 				C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */,
 				C2606DA81CED3E2E0045FF57 /* edgel.cpp in Sources */,
