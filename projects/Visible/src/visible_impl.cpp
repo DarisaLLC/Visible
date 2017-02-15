@@ -304,11 +304,11 @@ void clipContext::loadAll (const  std::vector<vector<float> > & src)
         {
             *dout = (*di - minmax_val.first) / scale;
         }
-        mGraph1D->load_vector(out);
+        mGraph1D->setup(out);
     }
     else
     {
-        mGraph1D->load_vector(coi);
+        mGraph1D->setup(coi);
     }
     
     

@@ -18,12 +18,14 @@ using namespace ci::app;
 class graph1D;
 
 typedef std::shared_ptr<graph1D> Graph1DRef;
+typedef std::function<float (float)> Graph1DSetCb;
+
 
 class graph1D:  public InteractiveObject
 {
 public:
     
-    graph1D( std::string name, const ci::Rectf& display_box) : InteractiveObject(display_box)
+    graph1D( std::string name, const ci::Rectf& display_box) : InteractiveObject(display_box) , mIsSet(false)
     {
         // create label
         mTextLayout.clear( cinder::Color::white() ); mTextLayout.setColor( Color(0.5f, 0.5f, 0.5f) );
@@ -33,8 +35,15 @@ public:
         mLabelTex = cinder::gl::Texture::create(tmp.render( true ) );
     }
     
+    void setup (size_t length, Graph1DSetCb callback)
+    {
+        assert (! mIsSet);
+        mBuffer.resize (length);
+        m_CB = bind (callback, std::placeholders::_1);
+        mIsSet = true;
+    }
     // load the data and bind a function to access it
-    void load_vector (const std::vector<float>& buffer)
+    void setup (const std::vector<float>& buffer)
     {
         mBuffer.clear ();
         std::vector<float>::const_iterator reader = buffer.begin ();
@@ -42,7 +51,8 @@ public:
         {
             mBuffer.push_back (*reader++);
         }
-        mFn = bind (&graph1D::get, std::placeholders::_1, std::placeholders::_2);
+        m_CB = bind (&graph1D::get, this, std::placeholders::_1);
+        mIsSet = true;
     }
     
     // a NN fetch function using the bound function
@@ -88,7 +98,7 @@ public:
         gl::begin( GL_LINE_STRIP );
         for( float x = 0; x < content.getWidth(); x ++ )
         {
-            float y = mFn ( this, x / content.getWidth());
+            float y = m_CB ( x / content.getWidth());
             if (y < 0) continue;
             y = 1.0f - y;
             ci::gl::vertex(vec2( x , y * content.getHeight() ) + content.getUpperLeft() );
@@ -98,7 +108,7 @@ public:
         gl::color( Color( 0.75f, 0.5f, 0.25f ) );
         glLineWidth(25.f);
         float px = norm_pos().x * rect.getWidth();
-        float mVal = mFn (this, norm_pos().x);
+        float mVal = m_CB (norm_pos().x);
         
         vec2 mid (px, rect.getHeight()/2.0);
         if (content.contains(mid))
@@ -109,15 +119,23 @@ public:
         }
     }
     
+    const std::vector<float>& buffer () const
+    {
+        return mBuffer;
+    }
+
+private:
     TextLayout mTextLayout;
+    mutable bool mIsSet;
     mutable float mVal;
     mutable int32_t mIndex;
     std::vector<float>                   mBuffer;
-    const std::vector<float>&       buffer () const { return mBuffer; }
+    
     bool empty () const { return mBuffer.empty (); }
     
     cinder::gl::TextureRef						mLabelTex;
-    std::function<float (const graph1D*, float)> mFn;
+    Graph1DSetCb m_CB;
+    
 };
 
 
