@@ -29,7 +29,7 @@ public:
     {
         // create label
         mTextLayout.clear( cinder::Color::white() ); mTextLayout.setColor( Color(0.5f, 0.5f, 0.5f) );
-        try { mTextLayout.setFont( Font( "Futura-CondensedMedium", 18 ) ); } catch( ... ) { mTextLayout.setFont( Font( "Arial", 18 ) ); }
+        try { mTextLayout.setFont( Font( "Menlo", 18 ) ); } catch( ... ) { mTextLayout.setFont( Font( "Menlo", 18 ) ); }
         TextLayout tmp (mTextLayout);
         tmp.addLine( name );
         mLabelTex = cinder::gl::Texture::create(tmp.render( true ) );
