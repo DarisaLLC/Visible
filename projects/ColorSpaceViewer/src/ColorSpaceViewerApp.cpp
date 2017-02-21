@@ -1,7 +1,7 @@
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
-#include "SurfacePalette.h"
+#include "ColorPalette.h"
 #include "cinder/CameraUi.h"
 #include "cinder/Camera.h"
 using namespace ci;

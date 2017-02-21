@@ -19,10 +19,10 @@
 		5323E6B20EAFCA74003A9687 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
 		5323E6B60EAFCA7E003A9687 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B50EAFCA7E003A9687 /* QTKit.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		C24FC84A1E5CA91F0071AA1A /* cp_release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C24FC8481E5CA91F0071AA1A /* cp_release.xcconfig */; };
+		C24FC84B1E5CA91F0071AA1A /* cp-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C24FC8491E5CA91F0071AA1A /* cp-debug.xcconfig */; };
 		C2B04C2B1E5BC260009E1CC6 /* ColorSpaceViewerApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2B04C2A1E5BC260009E1CC6 /* ColorSpaceViewerApp.cpp */; };
 		C2B04C2E1E5BD772009E1CC6 /* ColorPalette.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2B04C2C1E5BD772009E1CC6 /* ColorPalette.cpp */; };
-		C2B04C2F1E5BD772009E1CC6 /* ColorQuantizationApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2B04C2D1E5BD772009E1CC6 /* ColorQuantizationApp.cpp */; };
-		C2B04C321E5BD8C6009E1CC6 /* cp-cv.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2B04C311E5BD8C6009E1CC6 /* cp-cv.xcconfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,11 +47,12 @@
 		53E3CDFB0E86099300238D2B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* ColorSpaceViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ColorSpaceViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C24FC8481E5CA91F0071AA1A /* cp_release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = cp_release.xcconfig; sourceTree = "<group>"; };
+		C24FC8491E5CA91F0071AA1A /* cp-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "cp-debug.xcconfig"; sourceTree = "<group>"; };
 		C2B04C2A1E5BC260009E1CC6 /* ColorSpaceViewerApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ColorSpaceViewerApp.cpp; path = ../src/ColorSpaceViewerApp.cpp; sourceTree = "<group>"; };
 		C2B04C2C1E5BD772009E1CC6 /* ColorPalette.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ColorPalette.cpp; path = ../src/ColorPalette.cpp; sourceTree = "<group>"; };
 		C2B04C2D1E5BD772009E1CC6 /* ColorQuantizationApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ColorQuantizationApp.cpp; path = ../src/ColorQuantizationApp.cpp; sourceTree = "<group>"; };
-		C2B04C311E5BD8C6009E1CC6 /* cp-cv.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "cp-cv.xcconfig"; sourceTree = "<group>"; };
-		C2B04C331E5BD974009E1CC6 /* ColorPalette.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorPalette.h; sourceTree = "<group>"; };
+		C2B04C331E5BD974009E1CC6 /* include */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = folder; name = include; path = ../include; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,7 +126,8 @@
 		29B97314FDCFA39411CA2CEA /* SurfaceBasic */ = {
 			isa = PBXGroup;
 			children = (
-				C2B04C311E5BD8C6009E1CC6 /* cp-cv.xcconfig */,
+				C24FC8481E5CA91F0071AA1A /* cp_release.xcconfig */,
+				C24FC8491E5CA91F0071AA1A /* cp-debug.xcconfig */,
 				29B97315FDCFA39411CA2CEA /* Headers */,
 				080E96DDFE201D6D7F000001 /* Source */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -138,7 +140,7 @@
 		29B97315FDCFA39411CA2CEA /* Headers */ = {
 			isa = PBXGroup;
 			children = (
-				C2B04C331E5BD974009E1CC6 /* ColorPalette.h */,
+				C2B04C331E5BD974009E1CC6 /* include */,
 				00CD22761173C7CB0051407E /* Resources.h */,
 				32CA4F630368D1EE00C91783 /* ColorSpaceViewer_Prefix.pch */,
 			);
@@ -216,7 +218,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C2B04C321E5BD8C6009E1CC6 /* cp-cv.xcconfig in Resources */,
+				C24FC84A1E5CA91F0071AA1A /* cp_release.xcconfig in Resources */,
+				C24FC84B1E5CA91F0071AA1A /* cp-debug.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,7 +230,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C2B04C2F1E5BD772009E1CC6 /* ColorQuantizationApp.cpp in Sources */,
 				C2B04C2B1E5BC260009E1CC6 /* ColorSpaceViewerApp.cpp in Sources */,
 				C2B04C2E1E5BD772009E1CC6 /* ColorPalette.cpp in Sources */,
 			);
@@ -238,7 +240,7 @@
 /* Begin XCBuildConfiguration section */
 		C01FCF4B08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C2B04C311E5BD8C6009E1CC6 /* cp-cv.xcconfig */;
+			baseConfigurationReference = C24FC8491E5CA91F0071AA1A /* cp-debug.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
@@ -251,7 +253,7 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = "$(CINDER_PATH)/lib/libcinder_d.a";
+				OTHER_LDFLAGS = "$(LOCAL_CINDER)/lib/libcinder_d.a ";
 				PRODUCT_NAME = ColorSpaceViewer;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
@@ -260,7 +262,7 @@
 		};
 		C01FCF4C08A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C2B04C311E5BD8C6009E1CC6 /* cp-cv.xcconfig */;
+			baseConfigurationReference = C24FC8481E5CA91F0071AA1A /* cp_release.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LIBRARY = "libc++";
 				DEAD_CODE_STRIPPING = YES;
@@ -274,7 +276,7 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = "$(CINDER_PATH)/lib/libcinder.a";
+				OTHER_LDFLAGS = "$(LOCAL_CINDER)/lib/libcinder.a ";
 				PRODUCT_NAME = ColorSpaceViewer;
 				STRIP_INSTALLED_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
@@ -283,7 +285,7 @@
 		};
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C2B04C311E5BD8C6009E1CC6 /* cp-cv.xcconfig */;
+			baseConfigurationReference = C24FC8491E5CA91F0071AA1A /* cp-debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = x86_64;
@@ -300,7 +302,7 @@
 		};
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C2B04C311E5BD8C6009E1CC6 /* cp-cv.xcconfig */;
+			baseConfigurationReference = C24FC8481E5CA91F0071AA1A /* cp_release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = x86_64;
