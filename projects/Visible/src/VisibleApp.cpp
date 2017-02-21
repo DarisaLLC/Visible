@@ -13,6 +13,7 @@
 #include "app_utils.hpp"
 #include "core/core.hpp"
 #include <memory>
+#include <functional>
 
 using namespace ci;
 using namespace ci::app;
@@ -60,49 +61,37 @@ public:
     
     
     void prepareSettings( Settings *settings );
-    void setup();
+    void setup()override;
     void create_qmovie_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
     void create_movie_dir_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
     void create_clip_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
     void create_lif_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
     
-    void mouseDown( MouseEvent event );
-    void mouseMove( MouseEvent event );
-    void mouseUp( MouseEvent event );
-    void mouseDrag( MouseEvent event );
-    void keyDown( KeyEvent event );
+    void mouseDown( MouseEvent event )override;
+    void mouseMove( MouseEvent event )override;
+    void mouseUp( MouseEvent event )override;
+    void mouseDrag( MouseEvent event )override;
+    void keyDown( KeyEvent event )override;
     
     //void fileDrop( FileDropEvent event );
-    void update();
-    void draw();
+    void update()override;
+    void draw()override;
     void close_main();
-    void resize();
+    void resize()override;
     void windowMove();
     void windowClose();
     void windowMouseDown( MouseEvent &mouseEvt );
     void displayChange();
+    void update_log (const std::string& msg);
     
-	void fileDrop( FileDropEvent event ) override;
+    void fileDrop( FileDropEvent event ) override;
     
     bool shouldQuit();
     WindowRef createConnectedWindow (Window::Format& format);
-   
+    
     
     params::InterfaceGlRef         mTopParams;
     
-    Rectf                       mGraphDisplayRect;
-    Rectf                       mMovieDisplayRect;
-    Rectf                       mMenuDisplayRect;
-    Rectf                       mLogDisplayRect;
-    CameraPersp				mCam;
-    
-
-    bool mImageSequenceDataLoaded;
-    bool mImageDataLoaded;
-    bool mShowCenterOfMotionSignal;
-    bool mShowMultiSnapShot;
-    bool mShowMultiSnapShotAndData;
-    bool mPaused;
     
     gl::TextureRef		mTextTexture;
     vec2				mSize;
@@ -130,7 +119,7 @@ WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
     win->getSignalMouseDown().connect( std::bind( &VisibleApp::windowMouseDown, this, std::placeholders::_1 ) );
     //   win->getSignalDraw().connect( std::bind( &VisibleApp::windowDraw, this ) );
     return win;
-
+    
 }
 
 
@@ -187,9 +176,9 @@ void VisibleApp::create_clip_viewer (const boost::filesystem::path& pp)
 
 void VisibleApp::fileDrop( FileDropEvent event )
 {
-    auto file = event.getFile(0);
-
-    const fs::path& imageFile = file;
+    auto imageFile = event.getFile(0);
+    
+    const fs::path& file = imageFile;
     
     if (! exists(file) ) return;
     
@@ -202,13 +191,10 @@ void VisibleApp::fileDrop( FileDropEvent event )
     if (file.has_extension())
     {
         std::string ext = file.extension().string ();
-        switch (ext)
-    case: ".lif":
-        create_lif_viewer(file);
-        return;
-        
-    case: ".mov":
-        create_qmovie_viewer(file);
+        if (ext.compare(".lif") == 0)
+            create_lif_viewer(file);
+        else if (ext.compare(".mov"))
+            create_qmovie_viewer(file);
         return;
     }
 }
@@ -216,34 +202,31 @@ void VisibleApp::fileDrop( FileDropEvent event )
 void VisibleApp::setup()
 {
     WindowRef ww = getWindow ();
-    
-    mPaused = mShowMultiSnapShotAndData = mShowMultiSnapShot = mShowCenterOfMotionSignal = false;
-    mImageDataLoaded = mImageSequenceDataLoaded = false;
+    ww->setTitle ("Visible");
+    mFont = Font( "Menlo", 12 );
+    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     
     ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
-    // Setup our default camera, looking down the z-axis
-    mCam.lookAt( vec3( -20, 0, 0 ), vec3(0.0f,0.0f,0.0f) );
-  
     
-     // Setup the parameters
-    mTopParams = params::InterfaceGl::create( "Visible", ivec2( 250, 300 ) );
-
-    mTopParams->addSeparator();
-    mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this) );
-  //  mTopParams->addSeparator();
-  // 	mTopParams->addButton( "Import SS Matrix", std::bind( &VisibleApp::create_matrix_viewer, this ) );
-   
-    mTopParams->addSeparator();
-   	mTopParams->addButton( "Import LIF  ", std::bind( &VisibleApp::create_lif_viewer, this ) );
+    // Setup the parameters
+    mTopParams = params::InterfaceGl::create( "Visible", ivec2( getWindowWidth()/2, getWindowHeight()/2 ) );
     
     mTopParams->addSeparator();
-   	mTopParams->addButton( "Import Image Directory ", std::bind( &VisibleApp::create_movie_dir_viewer, this ) );
+    mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this, boost::filesystem::path () ) );
+    //  mTopParams->addSeparator();
+    // 	mTopParams->addButton( "Import SS Matrix", std::bind( &VisibleApp::create_matrix_viewer, this ) );
     
     mTopParams->addSeparator();
-
+   	mTopParams->addButton( "Import LIF  ", std::bind( &VisibleApp::create_lif_viewer, this, boost::filesystem::path () ) );
     
     mTopParams->addSeparator();
-    mTopParams->addButton( "Import A CSV File", std::bind( &VisibleApp::create_clip_viewer, this ) );
+   	mTopParams->addButton( "Import Image Directory ", std::bind( &VisibleApp::create_movie_dir_viewer, this, boost::filesystem::path () ) );
+    
+    mTopParams->addSeparator();
+    
+    
+    mTopParams->addSeparator();
+    mTopParams->addButton( "Import A CSV File", std::bind( &VisibleApp::create_clip_viewer, this, boost::filesystem::path () ) );
     mTopParams->addSeparator();
     
     getSignalShouldQuit().connect( std::bind( &VisibleApp::shouldQuit, this ) );
@@ -253,8 +236,8 @@ void VisibleApp::setup()
     getWindow()->getSignalDraw().connect(std::bind( &VisibleApp::draw, this) );
     getWindow()->getSignalClose().connect(std::bind( &VisibleApp::windowClose, this) );
     
-    getSignalDidBecomeActive().connect( [] { update_log ( "App became active." ); } );
-    getSignalWillResignActive().connect( [] { update_log ( "App will resign active." ); } );
+    getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
+    getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
     
 }
 
@@ -266,23 +249,23 @@ void VisibleApp::update_log (const std::string& msg)
     TextBox tbox = TextBox().alignment( TextBox::RIGHT).font( mFont ).size( mSize ).text( mLog );
     tbox.setColor( Color( 1.0f, 0.65f, 0.35f ) );
     tbox.setBackgroundColor( ColorA( 0.3f, 0.3f, 0.3f, 0.4f )  );
-    //    ivec2 sz = tbox.measure();
+    ivec2 sz = tbox.measure();
     mTextTexture = gl::Texture2d::create( tbox.render() );
 }
 
 void VisibleApp::windowMouseDown( MouseEvent &mouseEvt )
 {
-    CI_LOG_V( "Mouse down in window" );
+    update_log ( "Mouse down in window" );
 }
 
 void VisibleApp::windowMove()
 {
-    CI_LOG_V( "window pos: " << getWindow()->getPos() );
+    update_log("window pos: " + toString(getWindow()->getPos()));
 }
 
 void VisibleApp::displayChange()
 {
-    CI_LOG_V( "window display changed: " << getWindow()->getDisplay()->getBounds() );
+    update_log ( "window display changed: " + toString(getWindow()->getDisplay()->getBounds()));
 }
 
 
@@ -299,7 +282,7 @@ void VisibleApp::mouseMove( MouseEvent event )
         data->mouseMove(event);
     else
         cinder::app::App::mouseMove(event);
-
+    
 }
 
 
@@ -358,9 +341,9 @@ void VisibleApp::keyDown( KeyEvent event )
 
 void VisibleApp::update()
 {
-   guiContext  *data = getWindow()->getUserData<guiContext>();
-
-  if (data && data->is_valid()) data->update ();
+    guiContext  *data = getWindow()->getUserData<guiContext>();
+    
+    if (data && data->is_valid()) data->update ();
     
 }
 
@@ -374,13 +357,13 @@ void VisibleApp::draw ()
     
     if (valid_data) data->draw();
     else
-        mTopParams->draw ();
-    
-    
-    if (mTextTexture)
     {
-        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
-        gl::draw(mTextTexture, textrect);
+        mTopParams->draw ();
+        if (mTextTexture)
+        {
+            Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
+            gl::draw(mTextTexture, textrect);
+        }
     }
     
     
@@ -390,6 +373,7 @@ void VisibleApp::draw ()
 
 void VisibleApp::resize ()
 {
+    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     guiContext  *data = getWindow()->getUserData<guiContext>();
     
     if (data && data->is_valid()) data->resize ();

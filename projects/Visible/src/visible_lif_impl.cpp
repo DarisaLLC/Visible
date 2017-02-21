@@ -6,6 +6,7 @@
 //
 //
 
+
 #include <stdio.h>
 #include "VisibleApp.h"
 #include "guiContext.h"
@@ -24,7 +25,8 @@
 #include "vision/opencv_utils.hpp"
 #include "cinder/ip/Flip.h"
 #include "otherIO/lifFile.hpp"
-
+#include <strstream>
+#include <algorithm>
 
 using namespace ci;
 using namespace ci::app;
@@ -45,8 +47,8 @@ namespace
     {
         return AppBase::get()->getElapsedSeconds();
     }
-
-
+    
+    
     inline ivec2 expected_window_size () { return vec2 (960, 540); }
     inline ivec2 trim () { return vec2(10,10); }
     vec2 trim_norm () { return vec2(trim().x, trim().y) / vec2(getWindowWidth(), getWindowHeight()); }
@@ -71,23 +73,33 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
     
     if (mPath.string().empty())
         mPath = getOpenFilePath();
-
+    
     m_valid = ! mPath.string().empty() && exists(mPath);
     
     if (is_valid())
     {
         mWindow->setTitle( mPath.filename().string() );
         mWindow->setSize(desired_window_size());
-        mFont = Font( "Menlo", 32 );
+        mFont = Font( "Menlo", 12 );
         mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     }
-
+    
     setup ();
 }
 
 
 
 
+void lifContext::looping (bool what)
+{
+    mMovieLoop = what;
+}
+
+
+bool lifContext::looping ()
+{
+    return mMovieLoop;
+}
 
 void lifContext::play ()
 {
@@ -110,10 +122,19 @@ void lifContext::play_pause_button ()
         play ();
 }
 
+void lifContext::loop_no_loop_button ()
+{
+    if (! have_movie () ) return;
+    if (looping())
+        looping(false);
+    else
+        looping(true);
+}
+
 void lifContext::onMarked ( marker_info& t)
 {
     pause ();
-    setIndex((int)(t.norm_pos.x *= m_fc));
+    seekToFrame((int)(t.norm_pos.x *= getNumFrames () ));
     
     
 }
@@ -123,24 +144,30 @@ bool lifContext::have_movie ()
     return m_lifRef && m_selected_serie >= 0 && m_selected_serie < m_lifRef->getNbSeries() && mFrameSet;
 }
 
-int lifContext::getIndex ()
+void lifContext::seekToEnd ()
 {
-    if (m_fc)
-        return mMovieIndexPosition % m_fc;
+    mMovieIndexPosition = getNumFrames() - 1;
+}
+
+void lifContext::seekToStart ()
+{
+    mMovieIndexPosition = 0;
+}
+
+int lifContext::getNumFrames ()
+{
     return m_fc;
 }
 
-bool lifContext::incrementIndex()
+int lifContext::getCurrentFrame ()
 {
-    return setIndex(getIndex()+1);
-    
+    return mMovieIndexPosition;
 }
 
-bool lifContext::setIndex (int mark)
+
+void lifContext::seekToFrame (int mark)
 {
-    bool lastc = mMovieIndexPosition == m_fc - 1;
-    mMovieIndexPosition = (mark % m_fc);
-    return lastc;
+    mMovieIndexPosition = mark;
 }
 
 vec2 lifContext::getZoom ()
@@ -159,7 +186,7 @@ void lifContext::setup()
 {
     mMovieParams = params::InterfaceGl( "Lif Player ", vec2( 260, 260) );
     mMovieParams.setPosition(getWindowSize() / 2);
-
+    
     
     // Load the validated movie file
     loadLifFile ();
@@ -170,7 +197,7 @@ void lifContext::setup()
     {
        	m_type = Type::qtime_viewer;
         mMovieParams.addSeparator();
-
+        
         m_series_names.clear ();
         for (auto ss = 0; ss < m_series_book.size(); ss++)
             m_series_names.push_back (m_series_book[ss].name);
@@ -179,26 +206,28 @@ void lifContext::setup()
         // Add an enum (list) selector.
         m_selected_serie = 0;
         mMovieParams.addParam( "Series ", m_series_names, &m_selected_serie )
-//        .keyDecr( "[" )
-//        .keyIncr( "]" )
+        //        .keyDecr( "[" )
+        //        .keyIncr( "]" )
         .updateFn( [this] { console() << "selected serie updated: " << m_series_names [m_selected_serie] << endl; loadCurrentSerie (); } );
         
         
         mMovieParams.addSeparator();
         {
-            const std::function<void (int)> setter = std::bind(&lifContext::setIndex, this, std::placeholders::_1);
-            const std::function<int ()> getter = std::bind(&lifContext::getIndex, this);
+            const std::function<void (int)> setter = std::bind(&lifContext::seekToFrame, this, std::placeholders::_1);
+            const std::function<int ()> getter = std::bind(&lifContext::getCurrentFrame, this);
             mMovieParams.addParam ("Current Time Step", setter, getter);
         }
-            
+        
         mMovieParams.addSeparator();
         mMovieParams.addButton("Play / Pause ", bind( &lifContext::play_pause_button, this ) );
+        mMovieParams.addSeparator();
+        mMovieParams.addButton(" Loop ", bind( &lifContext::loop_no_loop_button, this ) );
         
-//        {
-//            const std::function<void (float)> setter = std::bind(&lifContext::setZoom, this, std::placeholders::_1);
-//            const std::function<float (void)> getter = std::bind(&lifContext::getZoom, this);
-//            mMovieParams.addParam( "Zoom", setter, getter);
-//        }
+        //        {
+        //            const std::function<void (float)> setter = std::bind(&lifContext::setZoom, this, std::placeholders::_1);
+        //            const std::function<float (void)> getter = std::bind(&lifContext::getZoom, this);
+        //            mMovieParams.addParam( "Zoom", setter, getter);
+        //        }
         
     }
 }
@@ -210,11 +239,8 @@ void lifContext::clear_movie_params ()
     mMovieIndexPosition = 0;
     mPrevMovieIndexPosition = -1;
     mMovieRate = 1.0f;
-    mPrevMovieRate = mMovieRate;
     mMoviePlay = false;
-    mPrevMoviePlay = mMoviePlay;
     mMovieLoop = false;
-    mPrevMovieLoop = mMovieLoop;
     m_zoom.x = m_zoom.y = 1.0f;
 }
 
@@ -244,45 +270,45 @@ void lifContext::loadCurrentSerie ()
 {
     if ( ! (m_lifRef && m_selected_serie >= 0 && m_selected_serie < m_lifRef->getNbSeries()))
         return;
-        
+    
     try {
+        
+        m_serie = m_series_book[m_selected_serie];
+        mFrameSet = qTimeFrameCache::create (m_lifRef->getSerie(m_selected_serie));
+        
+        
+        std::stringstream str;
+        
+        std::cout << m_serie << std::endl;
+        
+        if (m_valid)
+        {
+            getWindow()->setTitle( mPath.filename().string() );
             
-            m_serie = m_series_book[m_selected_serie];
-            mFrameSet = qTimeFrameCache::create (m_lifRef->getSerie(m_selected_serie));
-       
-        
-            std::stringstream str;
-        
-            std::cout << m_serie << std::endl;
-        
-            if (m_valid)
-            {
-                getWindow()->setTitle( mPath.filename().string() );
-        
-                ci_console() <<  m_series_book.size() << "  Series  " << std::endl;
-
-                const tiny_media_info tm = mFrameSet->media_info ();
-                getWindow()->getApp()->setFrameRate(tm.getFramerate() / 5.0);
-
-                mScreenSize = tm.getSize();
-                m_fc = tm.getNumFrames ();
-                
-                mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
-                
-                // Set window size according to layout
-                //  Channel             Data
-                //  1
-                //  2
-                //  3
-                //  Create 2x mag for images
-                ivec2 window_size (desired_window_size());
-                setWindowSize(window_size);
-                
-            }
+            ci_console() <<  m_series_book.size() << "  Series  " << std::endl;
+            
+            const tiny_media_info tm = mFrameSet->media_info ();
+            getWindow()->getApp()->setFrameRate(tm.getFramerate() / 5.0);
+            
+            mScreenSize = tm.getSize();
+            m_fc = tm.getNumFrames ();
+            
+            mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
+            
+            // Set window size according to layout
+            //  Channel             Data
+            //  1
+            //  2
+            //  3
+            //  Create 2x mag for images
+            ivec2 window_size (desired_window_size());
+            setWindowSize(window_size);
+            
         }
+    }
     catch( const std::exception &ex ) {
         console() << ex.what() << endl;
-          return;
+        return;
     }
 }
 
@@ -317,17 +343,29 @@ void lifContext::keyDown( KeyEvent event )
     if( have_movie () ) {
         if( event.getCode() == KeyEvent::KEY_LEFT ) {
             pause();
-           setIndex (mMovieIndexPosition - 1);
+            seekToFrame (getCurrentFrame() - 1);
         }
         if( event.getCode() == KeyEvent::KEY_RIGHT ) {
             pause ();
-            setIndex (mMovieIndexPosition + 1);
+            seekToFrame (getCurrentFrame() + 1);
         }
-        
+        if( event.getChar() == 'l' ) {
+            loop_no_loop_button();
+        }
         
         if( event.getChar() == ' ' ) {
             play_pause_button();
         }
+        
+        if (event.getChar() == KeyEvent::KEY_v)
+        {
+            // Toggle vertical sync.
+            if( gl::isVerticalSyncEnabled() )
+                gl::enableVerticalSync( false );
+            else
+                gl::enableVerticalSync();
+        }
+        
         
     }
 }
@@ -374,15 +412,15 @@ Rectf lifContext::get_plotting_display_rect ()
     
     ivec2 lr = tl + pvf;
     return Rectf (tl, lr);
-
+    
 }
 
 
 
-void lifContext::seek( size_t xPos )
-{
-    if (is_valid()) mMovieIndexPosition = lifContext::Normal2Index ( getWindowBounds(), xPos, m_fc);
-}
+//void lifContext::seek( size_t xPos )
+//{
+//    if (is_valid()) mMovieIndexPosition = lifContext::Normal2Index ( getWindowBounds(), xPos, getNumFrames () );
+//}
 
 
 bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif_file_viewer); }
@@ -395,17 +433,28 @@ void lifContext::update ()
 {
     if (! have_movie () ) return;
     
-     mSurface = mFrameSet->getFrame(getIndex());
-
-    if (mMoviePlay) incrementIndex ();
+    if (getCurrentFrame() >= getNumFrames())
+    {
+        if (! looping () ) pause ();
+        else
+            seekToStart();
+    }
+    
+    mSurface = mFrameSet->getFrame(getCurrentFrame());
+    
+    if (mMoviePlay ) seekToFrame (getCurrentFrame() + 1);
+    
+    
     
 }
 
 void lifContext::draw_info ()
 {
     if (! m_lifRef) return;
-
-    std::string frame_str = string( "Frame: " + to_string( int( getIndex() ) ) );
+    
+    std::strstream msg;
+    msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << mMoviePlay << " F " << setw(12) << int( getCurrentFrame ());
+    std::string frame_str = msg.str();
     std::string seri_str = m_serie.info();
     
     gl::setMatricesWindow( getWindowSize() );
@@ -428,14 +477,14 @@ void lifContext::draw_info ()
         Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
         gl::draw(mTextTexture, textrect);
     }
-        
+    
 }
 
 
 void lifContext::draw ()
 {
-
-
+    
+    
     if( have_movie()  && mSurface )
     {
         Rectf dr = get_image_display_rect();
@@ -443,9 +492,9 @@ void lifContext::draw ()
         switch(m_serie.channelCount)
         {
             case 1:
-        mImage = gl::Texture::create(*mSurface);
-        mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
-        gl::draw (mImage, dr);
+                mImage = gl::Texture::create(*mSurface);
+                mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
+                gl::draw (mImage, dr);
                 break;
             case 3:
                 mImage = gl::Texture::create(*mSurface);
@@ -455,6 +504,7 @@ void lifContext::draw ()
         }
         draw_info ();
     }
+    
     mMovieParams.draw();
     
     
@@ -462,7 +512,7 @@ void lifContext::draw ()
 
 
 
-////////   Adding Tracks 
+////////   Adding Tracks
 
 
 // Create a clip viewer. Go through container of viewers, if there is a movie view, connect onMarked signal to it
@@ -481,10 +531,10 @@ void lifContext::add_scalar_track(const boost::filesystem::path& path)
     new_ts->signalMarker.connect(std::bind(&lifContext::onMarked, static_cast<lifContext*>(this), std::placeholders::_1));
     VisibleCentral::instance().contexts().push_back(new_ts);
     
-//    VisWinMgr::key_t kk;
-//    bool kept = VisWinMgr::instance().makePair(win, new_ts, kk);
-//    ci_console() << "Time Series Window/Context registered: " << std::boolalpha << kept << std::endl;
-
+    //    VisWinMgr::key_t kk;
+    //    bool kept = VisWinMgr::instance().makePair(win, new_ts, kk);
+    //    ci_console() << "Time Series Window/Context registered: " << std::boolalpha << kept << std::endl;
+    
 }
 
 
@@ -492,19 +542,19 @@ void lifContext::add_scalar_track(const boost::filesystem::path& path)
 
 
 #if 0
-    std::shared_ptr<guiContext> cw(std::shared_ptr<guiContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
-    
-    if (! cw->is_valid()) return;
-    
-    for (std::shared_ptr<guiContext> uip : mContexts)
+std::shared_ptr<guiContext> cw(std::shared_ptr<guiContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
+
+if (! cw->is_valid()) return;
+
+for (std::shared_ptr<guiContext> uip : mContexts)
+{
+    if (uip->is_context_type(guiContext::Type::qtime_viewer))
     {
-        if (uip->is_context_type(guiContext::Type::qtime_viewer))
-        {
-            uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
-            cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
-        }
+        uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
+        cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
     }
-    mContexts.push_back(cw);
+}
+mContexts.push_back(cw);
 }
 
 // Create a movie viewer. Go through container of viewers, if there is a clip view, connect onMarked signal to it

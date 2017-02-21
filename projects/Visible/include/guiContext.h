@@ -317,8 +317,8 @@ private:
     float mMoviePosition, mPrevMoviePosition;
     size_t mMovieIndexPosition, mPrevMovieIndexPosition;
     float mMovieRate, mPrevMovieRate;
-    bool mMoviePlay, mPrevMoviePlay;
-    bool mMovieLoop, mPrevMovieLoop;
+	bool mMoviePlay;
+	bool mMovieLoop;
     vec2 m_zoom;
     Rectf m_display_rect;
 	vec2		mMousePos;
@@ -406,9 +406,10 @@ private:
 	mutable boost::filesystem::path mPath;
 	
 	params::InterfaceGl         mMovieParams;	
-	bool mMoviePlay, mPrevMoviePlay;
-	bool mMovieLoop, mPrevMovieLoop;
+	bool mMoviePlay;
+	bool mMovieLoop;
 	void play_pause_button ();
+	void loop_no_loop_button ();	
 	bool have_movie () const;
 	void play ();
 	void pause ();
@@ -482,6 +483,12 @@ public:
 	
 	void setZoom (vec2);
 	vec2 getZoom ();
+
+	void seekToStart ();
+	void seekToEnd ();
+	void seekToFrame (int);
+	int getCurrentFrame ();
+	int getNumFrames ();
 	
 	int getIndex ();
 	bool incrementIndex ();
@@ -489,6 +496,7 @@ public:
 	bool setIndex (int mark);
 	
 	void play_pause_button ();
+	void loop_no_loop_button ();
 	
 	// Add tracks
 	void add_scalar_track_get_file () { add_scalar_track (); }
@@ -504,6 +512,9 @@ private:
 	void play ();
 	void pause ();
 	void update_log (const std::string& meg = "");
+	bool looping ();
+	void looping (bool what);
+	
 	Rectf get_image_display_rect ();
 	Rectf get_plotting_display_rect ();
 	
@@ -578,8 +589,8 @@ private:
 	float mMoviePosition, mPrevMoviePosition;
 	int64_t mMovieIndexPosition, mPrevMovieIndexPosition;
 	float mMovieRate, mPrevMovieRate;
-	bool mMoviePlay, mPrevMoviePlay;
-	bool mMovieLoop, mPrevMovieLoop;
+	bool mMoviePlay;
+	bool mMovieLoop;
 	
 	
 	vec2 m_zoom;
@@ -609,6 +620,7 @@ private:
 	
 	
 	std::list<std::shared_ptr<clipContext> > m_tracks;
+	
 	
 	gl::TextureRef		mTextTexture;
 	vec2				mSize;

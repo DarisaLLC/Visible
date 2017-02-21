@@ -18,6 +18,7 @@
 #include "vision/opencv_utils.hpp"
 #include "cinder/ip/Flip.h"
 #include "directoryPlayer.h"
+#include <strstream>
 
 #include "gradient.h"
 
@@ -86,7 +87,7 @@ movDirContext::movDirContext(WindowRef& ww, const boost::filesystem::path& dp)
         mWindow->setTitle( source_path().filename().string() );
         
         mWindow->setSize(desired_window_size());
-        mFont = Font( "Menlo", 32 );
+        mFont = Font( "Menlo", 12 );
         mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
         
     }
@@ -157,6 +158,16 @@ void movDirContext::play_pause_button ()
 }
 
 
+void movDirContext::loop_no_loop_button ()
+{
+    if (! have_movie () ) return;
+    if (m_Dm->looping())
+        m_Dm->looping(false);
+    else
+        m_Dm->looping(true);
+}
+
+
 
 bool movDirContext::have_movie () const
 {
@@ -199,7 +210,7 @@ void movDirContext::setup()
     {
         
         getWindow()->setTitle( mPath.filename().string() );
-        mMovieParams = params::InterfaceGl( "Directory Player", vec2( 190, 160 ) );
+        mMovieParams = params::InterfaceGl( "Directory Player", vec2( getWindowWidth()/2, getWindowHeight()/2 ) );
         
         
         std::string max = to_string( m_Dm->getDuration() );
@@ -211,6 +222,8 @@ void movDirContext::setup()
         
         mMovieParams.addSeparator();
         mMovieParams.addButton(" Play / Pause ", bind( &movDirContext::play_pause_button, this ) );
+        mMovieParams.addSeparator();
+        mMovieParams.addButton(" Loop ", bind( &movDirContext::loop_no_loop_button, this ) );
         
         
     }
@@ -220,9 +233,7 @@ void movDirContext::clear_movie_params ()
 {
     seekToStart ();
     mMoviePlay = false;
-    mPrevMoviePlay = mMoviePlay;
     mMovieLoop = false;
-    mPrevMovieLoop = mMovieLoop;
     m_zoom.x = m_zoom.y = 1.0f;
 }
 
@@ -242,10 +253,12 @@ void movDirContext::loadMovieFile()
             if (m_valid)
             {
                 
-                //  ci_console() << "Dimensions:" <<m_movie->getWidth() << " x " <<m_movie->getHeight() << std::endl;
-                ci_console() << "Duration:  " <<getDuration() << " seconds" << std::endl;
-                ci_console() << "Frames:    " <<getNumFrames() << std::endl;
-                ci_console() << "Framerate: " <<getFrameRate() << std::endl;
+                std::strstream msg;
+                msg << "Duration:  " <<getDuration() << " seconds" << std::endl;
+                msg << "Frames:    " <<getNumFrames() << std::endl;
+                msg << "Framerate: " <<getFrameRate() << std::endl;
+                update_log(msg.str());
+                
                 m_Dm->setPlayRate (1.0);
                 ivec2 window_size (desired_window_size());
                 setWindowSize(window_size);

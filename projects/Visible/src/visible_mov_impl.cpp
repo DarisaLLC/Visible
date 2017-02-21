@@ -203,11 +203,8 @@ void movContext::clear_movie_params ()
     mMovieIndexPosition = 0;
     mPrevMovieIndexPosition = -1;
     mMovieRate = 1.0f;
-    mPrevMovieRate = mMovieRate;
     mMoviePlay = false;
-    mPrevMoviePlay = mMoviePlay;
     mMovieLoop = false;
-    mPrevMovieLoop = mMovieLoop;
     m_zoom.x = m_zoom.y = 1.0f;
 }
 
