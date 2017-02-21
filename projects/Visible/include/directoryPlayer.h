@@ -122,7 +122,7 @@ protected:
 
     struct thread_data {
         thread_data() :
-        buffer( nullptr ), extension("")
+        buffer( nullptr ), texture_buffer (nullptr), extension("")
         {}
 
         bool is_anaonymous_name (const boost::filesystem::path& pp)
@@ -135,6 +135,7 @@ protected:
         std::string                 format;
         size_t                      format_length;
         ci::fs::path                directoryPath;
+        cinder::gl::Texture2dRef            texture_buffer;
         ci::Surface8uRef            buffer;
         std::vector< ci::fs::path > framePaths;
     };

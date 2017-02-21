@@ -260,7 +260,6 @@ directoryPlayer::updateFrameThreadFn()
 
         nextFramePosition();
 
-
         // FrameRate control, cribbed from AppImplMswBasic.cpp
         double currentSeconds   = app::getElapsedSeconds();
         double secondsPerFrame  = mPlayRate == 0.0 ? 1.0 : ((1.0 / math< double >::abs( mPlayRate )) / mFrameRate);
@@ -273,6 +272,8 @@ directoryPlayer::updateFrameThreadFn()
                                                  [&]{ return mInterruptTriggeredFoRealz; } );
         }
         mInterruptTriggeredFoRealz = false;
+
+        
     }
 }
 

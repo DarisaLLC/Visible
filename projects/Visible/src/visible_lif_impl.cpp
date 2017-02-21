@@ -18,7 +18,6 @@
 #include "cinder/qtime/Quicktime.h"
 #include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"
-#include "qtime_frame_cache.hpp"
 #include "CinderOpenCV.h"
 #include "Cinder/ip/Blend.h"
 #include "opencv2/highgui.hpp"
@@ -48,9 +47,10 @@ namespace
     }
 
 
+    inline ivec2 expected_window_size () { return vec2 (960, 540); }
     inline ivec2 trim () { return vec2(10,10); }
     vec2 trim_norm () { return vec2(trim().x, trim().y) / vec2(getWindowWidth(), getWindowHeight()); }
-    inline ivec2 desired_window_size () { return ivec2 (960 + 2 * trim().x, 540 + 2 * trim().y); }
+    inline ivec2 desired_window_size () { return expected_window_size() + trim () + trim (); }
     inline ivec2 canvas_size () { return getWindowSize() - trim() - trim (); }
     inline ivec2 image_frame_size () { return ivec2 ((canvas_size().x * 2) / 3, (canvas_size().y * 3) / 4); }
     inline ivec2 plot_frame_size () { return ivec2 ((canvas_size().x * 1) / 3, (canvas_size().y * 3) / 4); }
@@ -277,7 +277,6 @@ void lifContext::loadCurrentSerie ()
                 //  Create 2x mag for images
                 ivec2 window_size (desired_window_size());
                 setWindowSize(window_size);
-                texture_to_display_zoom();
                 
             }
         }
@@ -378,28 +377,7 @@ Rectf lifContext::get_plotting_display_rect ()
 
 }
 
-vec2 lifContext::texture_to_display_zoom()
-{
-    Rectf image (0.0f, 0.0f, mScreenSize.x, mScreenSize.y);
-    Rectf window = getWindowBounds();
-    
-    // Trim display window
 
-    float sx =  image.getWidth() / window.getWidth();
-    float sy = image.getHeight() / window.getHeight();
-    
-    float aspect_same = 2.0f / (sx + sy);
-    
-    
-    float w = window.getWidth() * aspect_same;
-    float h = window.getHeight() * aspect_same;
-    float ox = (window.getWidth() - w) / 2.0;
-    float oy = (window.getHeight() - h) / 2.0;
-    image.set(20, 20, ox + w, oy + h);
-    m_display_rect = image;
-
-    return vec2(aspect_same, aspect_same);
-}
 
 void lifContext::seek( size_t xPos )
 {
@@ -412,10 +390,6 @@ bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif
 void lifContext::resize ()
 {
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-    
-  //  if (! have_movie () ) return;
-//    m_zoom = texture_to_display_zoom();
-    
 }
 void lifContext::update ()
 {

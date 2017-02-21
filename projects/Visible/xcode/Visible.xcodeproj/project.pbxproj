@@ -293,6 +293,8 @@
 		C2BECECF1DD6D4FA0001E2BA /* visible_idir_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */; };
 		C2BECED11DD6D8BA0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
 		C2BECED21DD6D8DE0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
+		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
+		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2FC7DAF1CF4F46100D18193 /* qtime_frame_cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */; };
 /* End PBXBuildFile section */
 
@@ -9751,6 +9753,7 @@
 		C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AVReaderWrapper.mm; path = ../src/AVReaderWrapper.mm; sourceTree = "<group>"; };
 		C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AccordionItem.cpp; path = ../src/AccordionItem.cpp; sourceTree = "<group>"; };
 		C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccordionItem.h; path = ../include/AccordionItem.h; sourceTree = "<group>"; };
+		C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cinder_support.cpp; sourceTree = "<group>"; };
 		C2E321FE1D038B16006DFE5E /* AVReader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AVReader.hpp; path = ../AVReader.hpp; sourceTree = "<group>"; };
 		C2E321FF1D0480E4006DFE5E /* mediaInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mediaInfo.h; path = ../include/mediaInfo.h; sourceTree = "<group>"; };
 		C2E322001D05B90C006DFE5E /* time_index.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time_index.h; path = ../include/time_index.h; sourceTree = "<group>"; };
@@ -25723,6 +25726,7 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */,
 				C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */,
 				C23D0F4C1E298CE50049ADDB /* tinystr.cpp */,
 				C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */,
@@ -26042,6 +26046,7 @@
 				C2606DAE1CED3E2E0045FF57 /* localvariance.cpp in Sources */,
 				C2606DAD1CED3E2E0045FF57 /* lineseg.cpp in Sources */,
 				C25822461CE6478400D83AB0 /* visible_mov_impl.cpp in Sources */,
+				C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */,
 				C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */,
 				C21946881CE4DC7100976025 /* VisibleApp.cpp in Sources */,
 				C2606DAA1CED3E2E0045FF57 /* histo.cpp in Sources */,
@@ -26080,6 +26085,7 @@
 				C20BBC081E4E34D5002C7D68 /* visible_impl.cpp in Sources */,
 				C2BECECF1DD6D4FA0001E2BA /* visible_idir_impl.cpp in Sources */,
 				C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
+				C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */,
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,
 				C24CD87F1CEA5B1B0008C72B /* main.cpp in Sources */,
@@ -26224,6 +26230,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
 			buildSettings = {
+				ASSETS_DATA = "$(SRCROOT)/Assets/checker";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -26282,6 +26289,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */;
 			buildSettings = {
+				ASSETS_DATA = "$(SRCROOT)/Assets/checker";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";

@@ -390,7 +390,7 @@ public:
 	
 	void setZoom (vec2);
 	vec2 getZoom ();
-	
+		void draw_info ();
 	
 	void                            seekToFrame( const size_t frame );
 	void                            seekToStart();
@@ -414,14 +414,18 @@ private:
 	void pause ();
 	void clear_movie_params ();
 	void loadMovieFile();
-	vec2 texture_to_display_zoom();
+	
+	void update_log (const std::string& meg = "");
+	Rectf get_image_display_rect ();
+	Rectf get_plotting_display_rect ();
+	
+	
 	
 	mutable directoryPlayerRef m_Dm;
 	std::string m_extension;
 	std::string m_anonymous_format;
 	double m_fps;
 	
-	Rectf m_display_rect;
 	vec2		mMousePos;
 	vec2 m_zoom;
 	vec2 mScreenSize;
@@ -429,6 +433,12 @@ private:
 	bool mMouseIsMoving;
 	bool mMouseIsDragging;
 	bool mMetaDown;
+	
+	gl::TextureRef		mTextTexture;
+	vec2				mSize;
+	Font				mFont;
+	std::string			mLog;
+	
 	
 };
 

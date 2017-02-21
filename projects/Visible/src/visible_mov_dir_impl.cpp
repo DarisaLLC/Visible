@@ -28,7 +28,7 @@ using namespace std;
 
 static boost::filesystem::path browseToFolder ()
 {
-return Platform::get()->getFolderPath (Platform::get()->getHomeDirectory());
+    return Platform::get()->getFolderPath (Platform::get()->getHomeDirectory());
 }
 
 extern float  MovieBaseGetCurrentTime(cinder::qtime::MovieSurfaceRef& movie);
@@ -47,6 +47,16 @@ namespace
         return AppBase::get()->getElapsedSeconds();
     }
     
+    inline ivec2 expected_window_size () { return vec2 (960, 540); }
+    inline ivec2 trim () { return vec2(10,10); }
+    vec2 trim_norm () { return vec2(trim().x, trim().y) / vec2(getWindowWidth(), getWindowHeight()); }
+    inline ivec2 desired_window_size () { return expected_window_size() + trim () + trim (); }
+    inline ivec2 canvas_size () { return getWindowSize() - trim() - trim (); }
+    inline ivec2 image_frame_size () { return ivec2 (canvas_size().x / 2, (canvas_size().y * 3) / 4); }
+    inline ivec2 plot_frame_size () { return ivec2 (canvas_size().x / 2, (canvas_size().y * 3) / 4); }
+    inline vec2 canvas_norm_size () { return vec2(canvas_size().x, canvas_size().y) / vec2(getWindowWidth(), getWindowHeight()); }
+    inline Rectf text_norm_rect () { return Rectf(0.0, 1.0 - 0.125, 1.0, 0.125); }
+    
     
     
 }
@@ -57,25 +67,30 @@ namespace
 
 
 movDirContext::movDirContext(WindowRef& ww, const boost::filesystem::path& dp)
-                            : guiContext(ww), mPath (dp)
+: guiContext(ww), mPath (dp)
 {
     m_valid = false;
-    m_type = Type::qtime_viewer;
-
+    m_type = Type::movie_dir_viewer;
+    
     if (dp.string().empty())
     {
         auto dirPath = browseToFolder ();
         mPath = dirPath;
     }
-
+    
     m_valid = ! source_path().string().empty() && exists(source_path());
     
     setup ();
     if (is_valid())
     {
         mWindow->setTitle( source_path().filename().string() );
+        
+        mWindow->setSize(desired_window_size());
+        mFont = Font( "Menlo", 32 );
+        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+        
     }
- 
+    
     set_dir_info ();
     
 }
@@ -94,7 +109,7 @@ const  boost::filesystem::path movDirContext::source_path () const
 
 void movDirContext::seekToStart()
 {
-      if ( have_movie () ) m_Dm->seekToStart ();
+    if ( have_movie () ) m_Dm->seekToStart ();
 }
 
 
@@ -157,8 +172,8 @@ void movDirContext::onMarked ( marker_info& t)
 {
     pause ();
     seekToFrame ((size_t)(t.norm_pos.x *= m_Dm->getNumFrames()));
-  
-
+    
+    
 }
 
 vec2 movDirContext::getZoom ()
@@ -178,52 +193,25 @@ void movDirContext::setup()
     
     clear_movie_params();
     
-    
-    m_Dm = directoryPlayer::create (source_path(), m_extension, m_fps, m_anonymous_format);
+    loadMovieFile();
     
     if( m_Dm && m_valid )
     {
-       	m_type = Type::qtime_viewer;
-
-#if 0
-        mMovieParams.addSeparator();
-        mMovieParams.addButton( "Import Time Series ", std::bind( &movDirContext::add_scalar_track_get_file, this ) );
-        mMovieParams.addSeparator();
-        mButton_title_index = 0;
-#endif
         
-
+        getWindow()->setTitle( mPath.filename().string() );
+        mMovieParams = params::InterfaceGl( "Directory Player", vec2( 190, 160 ) );
+        
+        
         std::string max = to_string( m_Dm->getDuration() );
         {
-        const std::function<void (int)> setter = std::bind(&movDirContext::seekToFrame, this, std::placeholders::_1);
-        const std::function<int ()> getter = std::bind(&movDirContext::getCurrentFrame, this);
-        mMovieParams.addParam ("Mark", setter, getter);
+            const std::function<void (int)> setter = std::bind(&directoryPlayer::seekToFrame, m_Dm, std::placeholders::_1);
+            const std::function<int ()> getter = std::bind(&directoryPlayer::getCurrentFrame, m_Dm);
+            mMovieParams.addParam (" Mark ", setter, getter);
         }
-#if 0
-        mMovieParams.addSeparator();
-        {
-            const std::function<void (bool)> setter = std::bind(&movDirContext::setShowMotionCenter, this, std::placeholders::_1);
-            const std::function<bool (void)> getter = std::bind(&movDirContext::getShowMotionCenter, this);
-
-            mMovieParams.addParam( "Show Mc", setter, getter);
-        }
-        mMovieParams.addSeparator();
-        {
-            const std::function<void (bool)> setter = std::bind(&movDirContext::setShowMotionBubble, this, std::placeholders::_1);
-            const std::function<bool (void)> getter = std::bind(&movDirContext::getShowMotionBubble, this);
-            
-            mMovieParams.addParam( "Show Mb", setter, getter);
-        }
-#endif
         
         mMovieParams.addSeparator();
-        mMovieParams.addButton("Play / Pause ", bind( &movDirContext::play_pause_button, this ) );
+        mMovieParams.addButton(" Play / Pause ", bind( &movDirContext::play_pause_button, this ) );
         
-//        {
-//            const std::function<void (float)> setter = std::bind(&movDirContext::setZoom, this, std::placeholders::_1);
-//            const std::function<float (void)> getter = std::bind(&movDirContext::getZoom, this);
-//            mMovieParams.addParam( "Zoom", setter, getter);
-//        }
         
     }
 }
@@ -248,25 +236,21 @@ void movDirContext::loadMovieFile()
         
         try {
             
-
+            
+            m_Dm = directoryPlayer::create (source_path(), m_extension, getWindow()->getApp()->getFrameRate() , m_anonymous_format);
+            
             if (m_valid)
             {
-                getWindow()->setTitle( mPath.filename().string() );
-                mMovieParams = params::InterfaceGl( "Movie Controller", vec2( 90, 160 ) );
                 
-              //  ci_console() << "Dimensions:" <<m_movie->getWidth() << " x " <<m_movie->getHeight() << std::endl;
+                //  ci_console() << "Dimensions:" <<m_movie->getWidth() << " x " <<m_movie->getHeight() << std::endl;
                 ci_console() << "Duration:  " <<getDuration() << " seconds" << std::endl;
                 ci_console() << "Frames:    " <<getNumFrames() << std::endl;
                 ci_console() << "Framerate: " <<getFrameRate() << std::endl;
-                getWindow()->getApp()->setFrameRate(m_Dm->getFrameRate() / 3);
-
-                mScreenSize = vec2(640, 480);
-        
-                texture_to_display_zoom();
-                
-                
+                m_Dm->setPlayRate (1.0);
+                ivec2 window_size (desired_window_size());
+                setWindowSize(window_size);
                 seekToStart();
-
+                
             }
         }
         catch( ... ) {
@@ -332,63 +316,107 @@ void movDirContext::mouseUp( MouseEvent event )
 }
 
 
-vec2 movDirContext::texture_to_display_zoom()
-{
-    if (! have_movie ()) return vec2(0,0);
-    vec2 textureSize (m_Dm->getTexture()->getWidth(), m_Dm->getTexture()->getWidth());
-    Rectf image (0.0f, 0.0f, textureSize.x, textureSize.y);
-    Rectf window = getWindowBounds();
-    float sx = window.getWidth() / image.getWidth();
-    float sy = window.getHeight() / image.getHeight();
-    
-    if ( sx < 1.1f || sy < 1.1f )
-    {
-        getWindow()->setSize((int32_t) (textureSize.x*1.15f), (int32_t) (textureSize.y*1.15f));
-        sx = window.getWidth() / image.getWidth();
-        sy = window.getHeight() / image.getHeight();
-    }
-    float w = image.getWidth() * sx;
-    float h = image.getHeight() * sy;
-    float ox = -0.5 * ( w - window.getWidth());
-    float oy = -0.5 * ( h - window.getHeight());
-    image.set(ox, oy, ox + w, oy + h);
-    m_display_rect = image;
-
-    return vec2(sx, sy);
-}
-
 
 
 
 
 void movDirContext::resize ()
 {
-    m_zoom = texture_to_display_zoom();
-    
+    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
 }
 void movDirContext::update ()
 {
     if (! have_movie () )
         return;
-    m_Dm->update ();
+    
+    // Update text texture with most recent text
+    auto num_str = to_string( int( m_Dm->getCurrentFrame ()));
+    std::string frame_str = mMoviePlay ? string( "Playing: " + num_str) : string ("Paused: " + num_str);
+    update_log (frame_str);
+    
+    if (mMoviePlay )
+        m_Dm->update ();
 }
 
 void movDirContext::draw ()
 {
-   
     if (! have_movie () )
         return;
-    m_Dm->draw (getWindowBounds ());
     
-  
+    Rectf dr = get_image_display_rect();
+    
+    m_Dm->draw (dr);
+    
+    draw_info ();
     mMovieParams.draw();
     
 }
 
+void movDirContext::update_log (const std::string& msg)
+{
+    if (msg.length() > 2)
+        mLog = msg;
+    TextBox tbox = TextBox().alignment( TextBox::RIGHT).font( mFont ).size( mSize ).text( mLog );
+    tbox.setColor( Color( 1.0f, 0.65f, 0.35f ) );
+    tbox.setBackgroundColor( ColorA( 0.3f, 0.3f, 0.3f, 0.4f )  );
+//    ivec2 sz = tbox.measure();
+    mTextTexture = gl::Texture2d::create( tbox.render() );
+}
+
+Rectf movDirContext::get_image_display_rect ()
+{
+    ivec2 ivf = image_frame_size();
+    ivec2 tl = trim();
+    
+    ivec2 lr = tl + ivf;
+    return Rectf (tl, lr);
+}
+
+Rectf movDirContext::get_plotting_display_rect ()
+{
+    ivec2 pvf = plot_frame_size();
+    ivec2 tl = trim();
+    tl.x += image_frame_size().x;
+    
+    ivec2 lr = tl + pvf;
+    return Rectf (tl, lr);
+    
+}
+
+void movDirContext::draw_info ()
+{
+    if (! m_Dm || ! m_Dm->getTexture () ) return;
+    
+    // Setup for putting text on
+    
+    gl::setMatricesWindow( getWindowSize() );
+    gl::ScopedBlendAlpha blend_;
+    
+    // Adding Text on the Right
+    //    TextLayout layoutR;
+    //
+    //    layoutR.clear( ColorA::gray( 0.2f, 0.5f ) );
+    //    layoutR.setFont( Font( "Arial", 18 ) );
+    //    layoutR.setColor( Color::white() );
+    //    layoutR.setLeadingOffset( 3 );
+    //    layoutR.addRightLine( other_str  );
+    //    auto texR = gl::Texture::create( layoutR.render( true ) );
+    //    gl::draw( texR, vec2( 10, 10 ) );
+    
+    
+    if (mTextTexture)
+    {
+        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
+        gl::draw(mTextTexture, textrect);
+    }
+    
+}
+
+
 
 #if 0
 
-////////   Adding Tracks 
+////////   Adding Tracks
 
 
 // Create a clip viewer. Go through container of viewers, if there is a movie view, connect onMarked signal to it
@@ -407,10 +435,10 @@ void movDirContext::add_scalar_track(const boost::filesystem::path& path)
     new_ts->signalMarker.connect(std::bind(&movDirContext::onMarked, static_cast<movDirContext*>(this), std::placeholders::_1));
     VisibleCentral::instance().contexts().push_back(new_ts);
     
-//    VisWinMgr::key_t kk;
-//    bool kept = VisWinMgr::instance().makePair(win, new_ts, kk);
-//    ci_console() << "Time Series Window/Context registered: " << std::boolalpha << kept << std::endl;
-
+    //    VisWinMgr::key_t kk;
+    //    bool kept = VisWinMgr::instance().makePair(win, new_ts, kk);
+    //    ci_console() << "Time Series Window/Context registered: " << std::boolalpha << kept << std::endl;
+    
 }
 
 
@@ -418,19 +446,19 @@ void movDirContext::add_scalar_track(const boost::filesystem::path& path)
 
 
 
-    std::shared_ptr<guiContext> cw(std::shared_ptr<guiContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
-    
-    if (! cw->is_valid()) return;
-    
-    for (std::shared_ptr<guiContext> uip : mContexts)
+std::shared_ptr<guiContext> cw(std::shared_ptr<guiContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
+
+if (! cw->is_valid()) return;
+
+for (std::shared_ptr<guiContext> uip : mContexts)
+{
+    if (uip->is_context_type(guiContext::Type::qtime_viewer))
     {
-        if (uip->is_context_type(guiContext::Type::qtime_viewer))
-        {
-            uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
-            cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
-        }
+        uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
+        cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
     }
-    mContexts.push_back(cw);
+}
+mContexts.push_back(cw);
 }
 
 // Create a movie viewer. Go through container of viewers, if there is a clip view, connect onMarked signal to it

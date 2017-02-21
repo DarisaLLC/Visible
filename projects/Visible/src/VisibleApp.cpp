@@ -61,10 +61,10 @@ public:
     
     void prepareSettings( Settings *settings );
     void setup();
-    void create_qmovie_viewer ();
-    void create_movie_dir_viewer ();
-    void create_clip_viewer ();
-    void create_lif_viewer ();
+    void create_qmovie_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
+    void create_movie_dir_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
+    void create_clip_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
+    void create_lif_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
     
     void mouseDown( MouseEvent event );
     void mouseMove( MouseEvent event );
@@ -81,6 +81,8 @@ public:
     void windowClose();
     void windowMouseDown( MouseEvent &mouseEvt );
     void displayChange();
+    
+	void fileDrop( FileDropEvent event ) override;
     
     bool shouldQuit();
     WindowRef createConnectedWindow (Window::Format& format);
@@ -102,7 +104,11 @@ public:
     bool mShowMultiSnapShotAndData;
     bool mPaused;
     
-
+    gl::TextureRef		mTextTexture;
+    vec2				mSize;
+    Font				mFont;
+    std::string			mLog;
+    
     mutable std::list <std::shared_ptr<guiContext> > mContexts;
     
 };
@@ -137,11 +143,11 @@ bool VisibleApp::shouldQuit()
 // We allow one movie and multiple clips or matrix view.
 // And movie of a directory
 //
-void VisibleApp::create_qmovie_viewer ()
+void VisibleApp::create_qmovie_viewer (const boost::filesystem::path& pp)
 {
     Window::Format format( RendererGl::create() );
     WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::shared_ptr<movContext>( new movContext(ww) ) );
+    mContexts.push_back(std::shared_ptr<movContext>( new movContext(ww, pp) ) );
 }
 
 
@@ -149,11 +155,11 @@ void VisibleApp::create_qmovie_viewer ()
 // We allow one movie and multiple clips or matrix view.
 //
 //
-void VisibleApp::create_lif_viewer ()
+void VisibleApp::create_lif_viewer (const boost::filesystem::path& pp)
 {
     Window::Format format( RendererGl::create() );
     WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::shared_ptr<lifContext>(new lifContext(ww)));
+    mContexts.push_back(std::shared_ptr<lifContext>(new lifContext(ww, pp)));
 }
 
 
@@ -161,24 +167,51 @@ void VisibleApp::create_lif_viewer ()
 // We allow one movie and multiple clips or matrix view.
 //
 //
-void VisibleApp::create_movie_dir_viewer ()
+void VisibleApp::create_movie_dir_viewer (const boost::filesystem::path& pp)
 {
     Window::Format format( RendererGl::create() );
     WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::shared_ptr<movDirContext>(new movDirContext(ww)));
+    mContexts.push_back(std::shared_ptr<movDirContext>(new movDirContext(ww, pp)));
 }
 
 //
 // We allow one movie and multiple clips or matrix view.
 //
 //
-void VisibleApp::create_clip_viewer ()
+void VisibleApp::create_clip_viewer (const boost::filesystem::path& pp)
 {
     Window::Format format( RendererGl::create() );
     WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::shared_ptr<clipContext>(new clipContext(ww)));
+    mContexts.push_back(std::shared_ptr<clipContext>(new clipContext(ww, pp)));
 }
 
+void VisibleApp::fileDrop( FileDropEvent event )
+{
+    auto file = event.getFile(0);
+
+    const fs::path& imageFile = file;
+    
+    if (! exists(file) ) return;
+    
+    if (is_directory(file))
+    {
+        create_movie_dir_viewer(file);
+        return;
+    }
+    
+    if (file.has_extension())
+    {
+        std::string ext = file.extension().string ();
+        switch (ext)
+    case: ".lif":
+        create_lif_viewer(file);
+        return;
+        
+    case: ".mov":
+        create_qmovie_viewer(file);
+        return;
+    }
+}
 
 void VisibleApp::setup()
 {
@@ -220,9 +253,21 @@ void VisibleApp::setup()
     getWindow()->getSignalDraw().connect(std::bind( &VisibleApp::draw, this) );
     getWindow()->getSignalClose().connect(std::bind( &VisibleApp::windowClose, this) );
     
-    getSignalDidBecomeActive().connect( [] { CI_LOG_V( "App became active." ); } );
-    getSignalWillResignActive().connect( [] { CI_LOG_V( "App will resign active." ); } );
+    getSignalDidBecomeActive().connect( [] { update_log ( "App became active." ); } );
+    getSignalWillResignActive().connect( [] { update_log ( "App will resign active." ); } );
     
+}
+
+
+void VisibleApp::update_log (const std::string& msg)
+{
+    if (msg.length() > 2)
+        mLog = msg;
+    TextBox tbox = TextBox().alignment( TextBox::RIGHT).font( mFont ).size( mSize ).text( mLog );
+    tbox.setColor( Color( 1.0f, 0.65f, 0.35f ) );
+    tbox.setBackgroundColor( ColorA( 0.3f, 0.3f, 0.3f, 0.4f )  );
+    //    ivec2 sz = tbox.measure();
+    mTextTexture = gl::Texture2d::create( tbox.render() );
 }
 
 void VisibleApp::windowMouseDown( MouseEvent &mouseEvt )
@@ -330,6 +375,14 @@ void VisibleApp::draw ()
     if (valid_data) data->draw();
     else
         mTopParams->draw ();
+    
+    
+    if (mTextTexture)
+    {
+        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
+        gl::draw(mTextTexture, textrect);
+    }
+    
     
 }
 

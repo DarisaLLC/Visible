@@ -25,6 +25,8 @@
 #include "AVReader.hpp"
 #include "cm_time.hpp"
 #include "core/gtest_image_utils.hpp"
+#include "vision/colorhistogram.hpp"
+#include "CinderOpenCV.h"
 
 using namespace boost;
 
@@ -54,9 +56,30 @@ SurfaceRef get_surface(const std::string & path){
     return sp;
 }
 
-TEST(CacheTexture, basic)
+TEST(colorHistogram, basic)
 {
-     Surface8uRef s8 = ci::Surface8u::create(3, 7, true);
+    {
+        std::string name = "red_bar.png";
+        std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
+        EXPECT_TRUE(res.second);
+        {
+            std::pair<Surface8uRef, Channel8uRef> wp (svl::image_io_read_surface(res.first));
+            roiWindow<P8UC4> rootwin = svl::NewFromSurface(wp.first.get());
+            EXPECT_EQ(rootwin.width(), 420);
+            EXPECT_EQ(rootwin.height(), 934);
+        
+            Surface8uRef rr = wp.first;
+            cv::Mat rgb = cinder::toOcvRef(*wp.first.get());
+            ColorSpaceHistogram sh (rgb);
+            sh.run();
+            
+            sh.check_against(sh.spaceHistogram ());
+            
+            std::cout << sh << std::endl;
+            
+        }
+    }
+    
 }
 
 #if 1
@@ -246,11 +269,11 @@ TEST (UT_surface_roi_conversion, run)
             sums[2] += col[2];
             s8->setPixel(pos, col);
         }
-
+    
     roiWindow<P8UC4> uc4 = svl::NewFromSurface(s8.get());
     EXPECT_EQ(3, uc4.width());
     EXPECT_EQ(7, uc4.height());
-
+    
     for (int r = 0; r < s8->getHeight(); r++)
     {
         uint32_t* pel = (uint32_t*) uc4.rowPointer(r);
@@ -277,29 +300,29 @@ TEST (UT_surface_roi_conversion, run)
 
 TEST (UT_fileutils, run)
 {
-        boost::filesystem::path test_filepath;
-        
-        std::string txtfile ("onecolumn.txt");
-        std::string matfile ("matrix.txt");
-        
-        auto res = dgenv_ptr->asset_path(txtfile);
-        if (res.second)
-            test_filepath = res.first;
-        
-        VisibleAudioSourceRef   vis ( new VisibleAudioSource (test_filepath));
-        EXPECT_TRUE (vis->getNumChannels() == 1);
-        EXPECT_TRUE (vis->getNumFrames () == 3296);
-        
-        auto res2 = dgenv_ptr->asset_path(matfile);
-        if (res2.second)
-            test_filepath = res2.first;
-
-        vector<vector<float> > matrix;
-        csv::csv2vectors(test_filepath.string(), matrix, false, false, true);
-        EXPECT_TRUE(matrix.size() == 300);
-        for (int rr=0; rr < matrix.size(); rr++)
-            EXPECT_TRUE(matrix[rr].size() == 300);
-        
+    boost::filesystem::path test_filepath;
+    
+    std::string txtfile ("onecolumn.txt");
+    std::string matfile ("matrix.txt");
+    
+    auto res = dgenv_ptr->asset_path(txtfile);
+    if (res.second)
+        test_filepath = res.first;
+    
+    VisibleAudioSourceRef   vis ( new VisibleAudioSource (test_filepath));
+    EXPECT_TRUE (vis->getNumChannels() == 1);
+    EXPECT_TRUE (vis->getNumFrames () == 3296);
+    
+    auto res2 = dgenv_ptr->asset_path(matfile);
+    if (res2.second)
+        test_filepath = res2.first;
+    
+    vector<vector<float> > matrix;
+    csv::csv2vectors(test_filepath.string(), matrix, false, false, true);
+    EXPECT_TRUE(matrix.size() == 300);
+    for (int rr=0; rr < matrix.size(); rr++)
+        EXPECT_TRUE(matrix[rr].size() == 300);
+    
 }
 
 
@@ -316,7 +339,7 @@ TEST (UT_QtimeCache, run)
     
     if (res.second)
         test_filepath = res.first;
-
+    
     ci::qtime::MovieSurfaceRef m_movie;
     m_movie = qtime::MovieSurface::create( test_filepath.string() );
     EXPECT_TRUE(m_movie->isPlayable ());
@@ -351,9 +374,9 @@ int main(int argc, char ** argv)
     shared_env->setUpFromArgs(argc, argv);
     dgenv_ptr = shared_env;
     testing::InitGoogleTest(&argc, argv);
-
-
+    
+    
     RUN_ALL_TESTS();
-
+    
 }
 
