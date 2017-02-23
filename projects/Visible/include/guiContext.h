@@ -28,6 +28,8 @@
 #include "cinder/Timeline.h"
 #include "AccordionItem.h"
 #include "otherIO/lifFile.hpp"
+#include "core/stl_utils.hpp"
+#include "async_producer.h"
 
 #include <boost/integer_traits.hpp>
 // use int64_t instead of long long for better portability
@@ -448,6 +450,36 @@ private:
 class lifContext : public guiContext
 {
 public:
+	
+	class series_info
+	{
+	public:
+		std::string name;
+		uint32_t    timesteps;
+		uint32_t    pixelsInOneTimestep;
+		uint32_t	channelCount;
+		std::vector<size_t> dimensions;
+		std::vector<lifIO::ChannelData> channels;
+		std::vector<std::string> channel_names;
+		
+		friend std::ostream& operator<< (std::ostream& out, const series_info& se)
+		{
+			out << "Serie:    " << se.name << std::endl;
+			out << "Channels: " << se.channelCount << std::endl;
+			out << "TimeSteps  " << se.timesteps << std::endl;
+			out << "Dimensions:" << se.dimensions[0]  << " x " << se.dimensions[1] << std::endl;
+			return out;
+		}
+		
+		std::string info ()
+		{
+			std::ostringstream osr;
+			osr << *this << std::endl;
+			return osr.str();
+		}
+		
+	};
+	
 	// From just a name, use the open file dialog to get the file
 	// From a name and a path
 	lifContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
@@ -504,7 +536,6 @@ public:
 	void add_scalar_track (const boost::filesystem::path& file = boost::filesystem::path ());
 	
 	
-	
 private:
 	void loadLifFile();
 	void loadCurrentSerie ();
@@ -518,33 +549,6 @@ private:
 	Rectf get_image_display_rect ();
 	Rectf get_plotting_display_rect ();
 	
-	class series_info
-	{
-	public:
-		std::string name;
-		uint32_t    timesteps;
-		uint32_t    pixelsInOneTimestep;
-		uint32_t	channelCount;
-		std::vector<size_t> dimensions;
-		std::vector<lifIO::ChannelData> channels;
-		
-		friend std::ostream& operator<< (std::ostream& out, const series_info& se)
-		{
-			out << "Serie:    " << se.name << std::endl;
-			out << "Channels: " << se.channelCount << std::endl;
-			out << "TimeSteps  " << se.timesteps << std::endl;
-			out << "Dimensions:" << se.dimensions[0]  << " x " << se.dimensions[1] << std::endl;
-			return out;
-		}
-		
-		std::string info ()
-		{
-			std::ostringstream osr;
-			osr << *this << std::endl;
-			return osr.str();
-		}
-		
-	};
 	
 
 	void get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer)
@@ -560,7 +564,10 @@ private:
 			si.channelCount = lifer->getSerie(ss).getChannels().size();
 			si.channels.clear ();
 			for (lifIO::ChannelData cda : lifer->getSerie(ss).getChannels())
+			{
+				si.channel_names.push_back(cda.getName());
 				si.channels.emplace_back(cda);
+			}
 			
 			std::cout << si << std::endl;
 			
@@ -573,7 +580,8 @@ private:
 	std::vector<size_t> m_spatial_dims;
 	std::vector<series_info> m_series_book;
     std::vector<std::string> m_series_names;
-	int  m_selected_serie;
+	std::shared_ptr<lifIO::LifSerie> m_current_serie_ref;
+	int  m_selected_serie_index;
 	
 	void seek( size_t xPos );
 	void clear_movie_params ();
@@ -594,12 +602,11 @@ private:
 	
 	
 	vec2 m_zoom;
-	Rectf m_display_rect;
 	boost::filesystem::path mPath;
 	vec2		mMousePos;
 	std::shared_ptr<qTimeFrameCache> mFrameSet;
 	SurfaceRef  mSurface;
-
+	std::vector<Rectf> m_plots;
 	
 	bool mMouseIsDown;
 	bool mMouseIsMoving;
@@ -618,8 +625,11 @@ private:
 		return xScaled;
 	}
 	
+	std::vector<Graph1DRef> m_tracks;
+	std::mutex m_track_mutex;
 	
-	std::list<std::shared_ptr<clipContext> > m_tracks;
+	tracksD1_t m_luminance_tracks;
+	async_tracksD1_t m_async_luminance_tracks;
 	
 	
 	gl::TextureRef		mTextTexture;

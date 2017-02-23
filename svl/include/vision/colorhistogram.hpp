@@ -2,21 +2,198 @@
 #define COLHISTOGRAM
 
 
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/imgcodecs.hpp>
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/imgproc.hpp"
 #include <vector>
-
+#include <array>
 
 
 using namespace std;
 using namespace cv;
 
-class ColorHistogram
+class ColorSpaceHistogram
 {
-
- 
 public:
-    ColorHistogram(const cv::Mat& src) : histSize (256), uniform(true), accumulate(false)
+    typedef uint8_t pixel_t;
+    typedef std::vector<std::vector<std::vector<float> > > hist3d_t;
+    
+    int bins () const
+    {
+        static int bb = 256;
+        return bb;
+    }
+    
+    int factor () const
+    {
+        return 1000.0;
+    }
+    
+    ColorSpaceHistogram(const cv::Mat& src, bool ChromocityNorm = true) : uniform(true), accumulate(false),
+    norm_chromocity (ChromocityNorm)
+    {
+        mChannels = {0,1,2};
+        mSizes = {bins(), bins(), bins()};
+        float top = static_cast<float>(bins()-1);
+        mRanges = {0,top,0,top,0,top};
+        _currentHist.create (3, &mSizes[0], CV_32F);
+        assert(src.channels() >= 3);
+        deep_copy = src.clone ();
+    }
+    
+    void run ()
+    {
+        /// check if we have all
+        //        calcHist( &hsv, 1, channels, Mat(), // do not use mask
+        //                 hist, 2, histSize, ranges,
+        //                 true, // the histogram is uniform
+        //                 false );
+        
+        static int hist_size [] = {256, 256, 256};
+        static int channels [] {0, 1, 2};
+        static float range_0 [] {0, 255};
+        
+        const float* ranges [] = { range_0,range_0,range_0 };
+        
+        calcHist(&deep_copy, 1,
+                 channels, Mat(),
+                 _currentHist, 3, hist_size, ranges,
+                 true, false);
+        
+        // Normalize: the sum of all the bins will equal to 100
+       // cv::normalize(_currentHist, _currentHist, factor(), 0, NORM_L1);
+    }
+    
+    
+    const cv::SparseMat spaceHistogram () const
+    {
+        return _currentHist;
+    }
+    
+    void check_against (const cv::SparseMat& other)
+    {
+        double correlation = compareHist(_currentHist,  other,CV_COMP_CORREL);
+        double chisquared = compareHist(_currentHist,  other,CV_COMP_CHISQR);
+        double intersect = compareHist(_currentHist,  other,CV_COMP_INTERSECT);
+        double bhattacharyya = compareHist(_currentHist, other,CV_COMP_BHATTACHARYYA);
+        
+        std::cout <<  "Comparison Results " << " Corr: " <<
+        correlation << " ChiSq: " << chisquared <<
+        " Intersect: " << intersect << " Bhatt: " << bhattacharyya  << std::endl;
+    }
+    
+    friend ostream & operator<<(ostream & ous, const ColorSpaceHistogram & dis)
+    {
+        cv::SparseMatConstIterator_<float> it = dis.spaceHistogram().begin<float>();
+        cv::SparseMatConstIterator_<float> it_end = dis.spaceHistogram().end<float>();
+        
+        double s = 0;
+        int dims = dis.spaceHistogram().dims();
+        for(; it != it_end; ++it)
+        {
+            // print element indices and the element value
+            const SparseMat::Node* n = it.node();
+            printf("(");
+            for(int i = 0; i < dims; i++)
+                printf("%d%s", n->idx[i], i < dims-1 ? ", " : ")");
+            printf(": %g\n", it.value<float>());
+            s += *it;
+        }
+        printf("Element sum is %g\n", s);
+
+        
+        return ous;
+    }
+    
+ 
+    float * range () const
+    {
+        static float rn [] {0, 255};
+        return rn;
+    }
+
+    int * channels () const
+    {
+        static int chans [] {0, 1, 2};
+        return chans;
+    }
+    int * dimensions () const
+    {
+         static int histSize [] = {bins(), bins(), bins() };
+        return histSize;
+    }
+    
+    float ** ranges () const
+    {
+        static float* rns [] = { range(),range(),range() };
+        return rns;
+    }
+    
+//    
+//    const 3dhist_t& getHistogram3d() const
+//    {
+//        
+//        ofxCvGrayscaleImage r, g, b;
+//        r.setFromPixels(img.getPixels().getChannel(0));
+//        g.setFromPixels(img.getPixels().getChannel(1));
+//        b.setFromPixels(img.getPixels().getChannel(2));
+//        CvHistogram* hist;
+//        IplImage *iplImage, **plane;
+//        IplImage* planes[] = {r.getCvImage(), g.getCvImage(), b.getCvImage()};
+//        int hist_size[] = { numBins, numBins, numBins };
+//        float range[] = { 0, 255 };
+//        float* ranges[] = { range, range, range };
+//        hist = cvCreateHist( 3, hist_size, CV_HIST_ARRAY, ranges, 1 );
+//        cvCalcHist( planes, hist, 0, 0 );
+//        cvNormalizeHist( hist, 1.0 );
+//        for (int ir=0; ir<numBins; ir++) {
+//            for (int ig=0; ig<numBins; ig++) {
+//                for (int ib=0; ib<numBins; ib++) {
+//                    histogram[ir][ig][ib] = cvQueryHistValue_3D(hist, ir, ig, ib);
+//                }
+//            }
+//        }    
+//        return histogram;
+//    }
+private:
+    mutable hist3d_t mHist3d;
+    std::vector<int> mChannels;
+    std::vector<float> mRanges;
+    std::vector<int> mSizes;
+    
+    cv::Size mBounds;
+    bool uniform;
+    bool accumulate;
+    bool norm_chromocity;
+    std::vector<cv::Mat> mhists;
+    cv::Mat mHistImage;
+    cv::Mat deep_copy;
+    mutable cv::SparseMat _currentHist;
+    
+    void create_3dhist (hist3d_t& h3d)
+    {
+        h3d.resize (0);
+        for (int ir=0; ir<bins(); ir++) {
+            vector<vector<float > > hist1;
+            for (int ig=0; ig<bins(); ig++) {
+                vector<float> hist2;
+                hist2.resize(bins());
+                hist1.push_back(hist2);
+            }
+            h3d.push_back(hist1);
+        }
+    }
+    
+    
+    
+};
+
+class ColorChannelHistogram
+{
+    
+    
+public:
+    ColorChannelHistogram(const cv::Mat& src) : histSize (256), uniform(true), accumulate(false)
     {
         vector<cv::Mat> bgr_planes(src.channels());
         /// Separate the image in 3 places ( B, G and R )
@@ -24,7 +201,7 @@ public:
         run (bgr_planes);
     }
     
-    ColorHistogram(const vector<cv::Mat>& bgr_planes) : histSize (256), uniform(true), accumulate(false)
+    ColorChannelHistogram(const vector<cv::Mat>& bgr_planes) : histSize (256), uniform(true), accumulate(false)
     {
         mBounds = bgr_planes[0].size();
         run (bgr_planes);
@@ -38,7 +215,7 @@ public:
         return mhists[index];
     }
     
-
+    
     
     const cv::Mat display_image () const
     {
@@ -52,7 +229,7 @@ private:
     bool accumulate;
     std::vector<cv::Mat> mhists;
     cv::Mat mHistImage;
-
+    
     float entropy (int index)
     {
         Mat logP;
@@ -74,7 +251,7 @@ private:
     
     void run (const vector<Mat> bgr_planes)
     {
-
+        
         /// Set the ranges ( for B,G,R) )
         float range[] = { 0, 256 } ;
         const float* histRange = { range };
@@ -121,13 +298,13 @@ private:
         mhists.push_back (g_hist.clone());
         mhists.push_back (b_hist.clone());
         
-      
+        
         
     }
     
     
     
-   };
+};
 
 
 

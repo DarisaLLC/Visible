@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "VisibleApp.h"
 #include "guiContext.h"
-#include "stl_util.hpp"
+#include "core/stl_utils.hpp"
 #include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Timeline.h"

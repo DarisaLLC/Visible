@@ -25,14 +25,28 @@ class graph1D:  public InteractiveObject
 {
 public:
     
-    graph1D( std::string name, const ci::Rectf& display_box) : InteractiveObject(display_box) , mIsSet(false)
+    ci::Font sSmallFont, sBigFont;	// small and large fonts for Text textures
+    
+    void setFonts ( const Font &smallFont, const Font &bigFont )
     {
+        sSmallFont	= smallFont;
+        sBigFont	= bigFont;
+    }
+                     
+    
+    graph1D( std::string name, const ci::Rectf& display_box) :
+    InteractiveObject(display_box) , mIsSet(false)
+    {
+        graph1D::setFonts (Font( "Menlo", 18 ), Font( "Menlo", 25 ));
+        
         // create label
-        mTextLayout.clear( cinder::Color::white() ); mTextLayout.setColor( Color(0.5f, 0.5f, 0.5f) );
-        try { mTextLayout.setFont( Font( "Menlo", 18 ) ); } catch( ... ) { mTextLayout.setFont( Font( "Menlo", 18 ) ); }
-        TextLayout tmp (mTextLayout);
-        tmp.addLine( name );
-        mLabelTex = cinder::gl::Texture::create(tmp.render( true ) );
+//        mTextLayout.clear( cinder::Color::white() ); mTextLayout.setColor( Color(0.5f, 0.5f, 0.5f) );
+//        try { mTextLayout.setFont( Font( "Menlo", 18 ) ); } catch( ... ) { mTextLayout.setFont( Font( "Menlo", 18 ) ); }
+//        TextLayout tmp (mTextLayout);
+//        tmp.addLine( name );
+//        mLabelTex = cinder::gl::Texture::create(tmp.render( true ) );
+        
+        
     }
     
     void setup (size_t length, Graph1DSetCb callback)
@@ -81,18 +95,27 @@ public:
     
     void draw_value_label (float v, float x, float y) const
     {
-        TextLayout tmp (mTextLayout);
-        tmp.addLine(to_string(v));
-        auto counter = cinder::gl::Texture::create(tmp.render( true ) );
+        TextLayout layout;
+        layout.clear( cinder::Color::white() );
+        layout.setFont( sSmallFont );
+        layout.setColor( Color(0.5f, 0.5f, 0.5f ) );
+        
+        layout.addLine( to_string(v) );
+        auto counter = cinder::gl::Texture::create(layout.render( true ) );
         
         ci::gl::color( ci::Color::white() );
         ci::gl::draw( counter, vec2(x, y));
-    }
+            }
     
     void draw() const
     {
+        if (! mIsSet) return;
+        
         Rectf content = rect;
 
+        gl::color( Color( 0.75f, 0.75f, 0.75f ) );
+        ci::gl::drawStrokedRect(content);
+        
        // draw graph
         gl::color( ColorA( 0.0f, 0.0f, 1.0f, 1.0f ) );
         gl::begin( GL_LINE_STRIP );
@@ -125,7 +148,7 @@ public:
     }
 
 private:
-    TextLayout mTextLayout;
+
     mutable bool mIsSet;
     mutable float mVal;
     mutable int32_t mIndex;

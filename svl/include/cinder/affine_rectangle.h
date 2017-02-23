@@ -5,7 +5,6 @@
 #include "cinder/cinder.h"
 #include "CinderOpenCV.h"
 #include "cinder/Quaternion.h"
-#include "CinderOpenCV.h"
 
 #undef near
 #undef far

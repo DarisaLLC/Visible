@@ -12,7 +12,7 @@
 #include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"
 #include "guiContext.h"
-#include "stl_util.hpp"
+#include "core/stl_utils.hpp"
 #include <stdlib.h>
 
 using namespace ci;

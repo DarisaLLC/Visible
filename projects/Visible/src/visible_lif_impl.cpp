@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include "VisibleApp.h"
 #include "guiContext.h"
-#include "stl_util.hpp"
 #include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Timeline.h"
@@ -23,16 +22,26 @@
 #include "Cinder/ip/Blend.h"
 #include "opencv2/highgui.hpp"
 #include "vision/opencv_utils.hpp"
+#include "vision/histo.h"
+#include "core/stl_utils.hpp"
 #include "cinder/ip/Flip.h"
 #include "otherIO/lifFile.hpp"
 #include <strstream>
 #include <algorithm>
+#include <future>
+#include <mutex>
+#include "async_producer.h"
+#include "cinder_xchg.hpp"
+
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
+using namespace svl;
+
 
 extern float  MovieBaseGetCurrentTime(cinder::qtime::MovieSurfaceRef& movie);
+
 
 namespace
 {
@@ -58,12 +67,26 @@ namespace
     inline ivec2 plot_frame_size () { return ivec2 ((canvas_size().x * 1) / 3, (canvas_size().y * 3) / 4); }
     inline vec2 canvas_norm_size () { return vec2(canvas_size().x, canvas_size().y) / vec2(getWindowWidth(), getWindowHeight()); }
     inline Rectf text_norm_rect () { return Rectf(0.0, 1.0 - 0.125, 1.0, 0.125); }
-    
+    inline void plot_rects (std::vector<Rectf>& plots )
+    {
+        plots.resize(3);
+        vec2 plots_tl (desired_window_size().x - image_frame_size().x, trim().y);
+        vec2 plot_size (plot_frame_size().x, plot_frame_size().y / 3);
+        Rectf plot_rect (plots_tl, plots_tl + plot_size);
+        
+        plots[0] = plot_rect;
+        plots[1] = plots[0];
+        plots[1] += vec2 (0.0, plots[1].getHeight());
+        plots[2] = plots[1];
+        plots[2] += vec2 (0.0, plots[1].getHeight());
+        
+    }
     
 }
 
 
 /////////////  lifContext Implementation  ////////////////
+
 
 lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
 : guiContext(ww), mPath (dp)
@@ -141,7 +164,7 @@ void lifContext::onMarked ( marker_info& t)
 
 bool lifContext::have_movie ()
 {
-    return m_lifRef && m_selected_serie >= 0 && m_selected_serie < m_lifRef->getNbSeries() && mFrameSet;
+    return m_lifRef && m_current_serie_ref >= 0 && mFrameSet;
 }
 
 void lifContext::seekToEnd ()
@@ -204,11 +227,23 @@ void lifContext::setup()
         
         
         // Add an enum (list) selector.
-        m_selected_serie = 0;
-        mMovieParams.addParam( "Series ", m_series_names, &m_selected_serie )
+        
+        m_selected_serie_index = 0;
+        m_current_serie_ref = std::shared_ptr<lifIO::LifSerie>();
+        
+        mMovieParams.addParam( "Series ", m_series_names, &m_selected_serie_index )
         //        .keyDecr( "[" )
         //        .keyIncr( "]" )
-        .updateFn( [this] { console() << "selected serie updated: " << m_series_names [m_selected_serie] << endl; loadCurrentSerie (); } );
+        .updateFn( [this]
+                  {
+                      if (m_selected_serie_index >= 0 && m_selected_serie_index < m_series_names.size() )
+                      {
+                          m_serie = m_series_book[m_selected_serie_index];
+                          m_current_serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(m_selected_serie_index), stl_utils::null_deleter());
+                          loadCurrentSerie ();
+                          console() << "selected serie updated: " << m_series_names [m_selected_serie_index] << endl;
+                      }
+                  });
         
         
         mMovieParams.addSeparator();
@@ -228,6 +263,8 @@ void lifContext::setup()
         //            const std::function<float (void)> getter = std::bind(&lifContext::getZoom, this);
         //            mMovieParams.addParam( "Zoom", setter, getter);
         //        }
+        
+        plot_rects (m_plots);
         
     }
 }
@@ -266,20 +303,73 @@ void lifContext::loadLifFile ()
 }
 
 
+tracksD1_t get_mean_luminance (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names)
+{
+
+    tracksD1_t tracks;
+    tracks.resize (names.size ());
+    for (auto tt = 0; tt < names.size(); tt++)
+        tracks[tt].first = names[tt];
+
+    // If it is 3 channels. We will use multiple window
+    int64_t fn = 0;
+    while (frames->checkFrame(fn))
+    {
+        auto su8 = frames->getFrame(fn++);
+        
+        auto channels = names.size();
+
+        std::vector<roiWindow<P8U> > rois;
+        switch (channels)
+        {
+            case 1:
+            {
+                auto m1 = svl::NewRedFromSurface(su8);
+                rois.emplace_back(m1);
+                break;
+            }
+            case 3:
+            {
+                auto m3 = svl::NewMultiFromSurface (su8, names, fn);
+                for (auto cc = 0; cc < m3.planes(); cc++)
+                    rois.emplace_back(m3.plane(cc));
+                break;
+            }
+        }
+
+        assert (rois.size () == tracks.size());
+        
+        // Now get average intensity for each channel
+        int index = 0;
+        for (roiWindow<P8U> roi : rois)
+        {
+            index_time_t ti;
+            ti.first = fn;
+            timed_double_t res;
+            res.first = ti;
+            res.second = histoStats::mean(roi);
+            tracks[index++].second.emplace_back(res);
+        }
+        
+        std::cout << ".";
+    }
+
+    
+    return tracks;
+}
+
+
 void lifContext::loadCurrentSerie ()
 {
-    if ( ! (m_lifRef && m_selected_serie >= 0 && m_selected_serie < m_lifRef->getNbSeries()))
+    if ( ! (m_lifRef || ! m_current_serie_ref) )
         return;
     
     try {
         
-        m_serie = m_series_book[m_selected_serie];
-        mFrameSet = qTimeFrameCache::create (m_lifRef->getSerie(m_selected_serie));
+        mFrameSet = qTimeFrameCache::create (*m_current_serie_ref);
         
         
         std::stringstream str;
-        
-        std::cout << m_serie << std::endl;
         
         if (m_valid)
         {
@@ -300,9 +390,31 @@ void lifContext::loadCurrentSerie ()
             //  1
             //  2
             //  3
-            //  Create 2x mag for images
+            
             ivec2 window_size (desired_window_size());
             setWindowSize(window_size);
+            int channel_count = (int) tm.getNumChannels();
+
+            {
+                std::lock_guard<std::mutex> lock(m_track_mutex);
+                std::vector<Rectf> plots;
+                plot_rects(plots);
+                
+                assert (plots.size() >= channel_count);
+                
+                m_tracks.resize (0);
+                
+                for (int cc = 0; cc < channel_count; cc++)
+                {
+                    m_tracks.push_back( Graph1DRef (new graph1D (m_current_serie_ref->getChannels()[cc].getName(), plots[cc])));
+                }
+            }
+            
+            // Launch Average Luminance Computation
+            m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance,
+                                                  mFrameSet, m_serie.channel_names);
+                                                  
+            
             
         }
     }
@@ -311,6 +423,8 @@ void lifContext::loadCurrentSerie ()
         return;
     }
 }
+
+
 
 void lifContext::mouseDown( MouseEvent event )
 {
@@ -431,6 +545,7 @@ void lifContext::resize ()
 }
 void lifContext::update ()
 {
+    
     if (! have_movie () ) return;
     
     if (getCurrentFrame() >= getNumFrames())
@@ -503,6 +618,14 @@ void lifContext::draw ()
                 break;
         }
         draw_info ();
+        
+        if (m_serie.channelCount)
+        {
+            for (int cc = 0; cc < m_tracks.size(); cc++)
+            {
+                m_tracks[cc]->draw();
+            }
+        }
     }
     
     mMovieParams.draw();

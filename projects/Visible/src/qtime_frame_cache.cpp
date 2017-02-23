@@ -1,7 +1,7 @@
 
 #include "qtime_frame_cache.hpp"
 #include <iterator>
-#include "stl_util.hpp"
+#include "core/stl_utils.hpp"
 #include "cinder_xchg.hpp"
 #include <algorithm>
 #include "cinder/ip/Fill.h"

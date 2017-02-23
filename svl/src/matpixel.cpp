@@ -21,7 +21,7 @@
 using namespace svl;
 
 
-
+using namespace stl_utils;
 
 template <typename P>
 void roiWindow<P>::randomFill( uint32_t seed )

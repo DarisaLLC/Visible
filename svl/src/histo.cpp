@@ -294,5 +294,15 @@ void histoStats::from_image(const roiWindow<P> & src)
     computeNsamp();
 }
 
+template <typename P>
+double histoStats::mean(const roiWindow<P> & src)
+{
+    histoStats h;
+    h.from_image(src);
+    return h.mean();
+}
+
 
 template void histoStats::from_image<P8U>(const roiWindow<P8U> & src);
+template double histoStats::mean<P8U> (const roiWindow<P8U> & src);
+

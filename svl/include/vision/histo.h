@@ -30,6 +30,9 @@ public:
     histoStats();
 
     template <typename P>
+    static double mean (const roiWindow<P> & image);
+    
+    template <typename P>
     void from_image(const roiWindow<P> & image);
     /*
     requires an allocated image. Supports 8bit and 16bit images only

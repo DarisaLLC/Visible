@@ -2,7 +2,7 @@
 #include "cinder/app/App.h"
 #include "cinder/Utilities.h"
 #include "cinder/CinderMath.h"
-#include "stl_util.hpp"
+#include "core/stl_utils.hpp"
 
 using namespace std;
 using namespace ci;

@@ -8,6 +8,7 @@
 #include "cinder/ImageIo.h"
 #include "cinder/Utilities.h"
 #include "vision/roiWindow.h"
+#include "vision/roiMultiWindow.h"
 #include "core/vector2d.hpp"
 #include <fstream>
 #include "core/singleton.hpp"
@@ -40,6 +41,20 @@ namespace svl
         void operator () (const Surface8uRef&, roiWindow<D>&);
     };
 
+    static roiMultiWindow<P8UP3> NewMultiFromChannel ( ChannelT<uint8_t>& onec, const std::vector<std::string>& names_l2r, int64_t timestamp = 0)
+    {
+        uint8_t* pixels = onec.getData();
+        roiMultiWindow<P8UP3> mw (names_l2r, timestamp);
+        assert (onec.getWidth() == mw.width() && onec.getHeight() == mw.height());
+        mw.copy_pixels_from(pixels, onec.getWidth (),onec.getHeight (), (int32_t) onec.getRowBytes ());
+        return mw;
+    }
+    
+    static roiMultiWindow<P8UP3> NewMultiFromSurface (const Surface8uRef& src, const std::vector<std::string>& names_l2r, int64_t timestamp = 0)
+    {
+        return NewMultiFromChannel (src->getChannelRed(), names_l2r, timestamp);
+    }
+    
 
     static roiWindow<P8U> NewFromChannel ( ChannelT<uint8_t>& onec)
     {
@@ -56,6 +71,26 @@ namespace svl
         roiWindow<P8UC4> window (ones->getWidth (),ones->getHeight ());
         window.copy_pixels_from(pixels, ones->getWidth (),ones->getHeight (), (int32_t) ones->getRowBytes ());
         return window;
+    }
+    
+    static roiWindow<P8U> NewRedFromSurface (const Surface8uRef& src)
+    {
+        return NewFromChannel (src->getChannelRed());
+    }
+    
+    static roiWindow<P8U> NewBlueFromSurface (const Surface8uRef& src)
+    {
+        return NewFromChannel (src->getChannelBlue());
+    }
+    
+    static roiWindow<P8U> NewGreenFromSurface (const Surface8uRef& src)
+    {
+        return NewFromChannel (src->getChannelGreen());
+    }
+
+    static roiWindow<P8U> NewAlphaFromSurface (const Surface8uRef& src)
+    {
+        return NewFromChannel (src->getChannelAlpha());
     }
     
     static roiWindow<P8U> NewGrayFromSurface (const Surface8uRef& src)

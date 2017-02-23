@@ -91,6 +91,11 @@ namespace svl
             return -1;
         }
         
+        inline int planes () const
+        {
+            return T::planes_c;
+        }
+        
         // Destructor
         virtual ~roiMultiWindow() {}
         

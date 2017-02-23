@@ -7,7 +7,9 @@
 //
 
 SRCROOT = $(PROJECT_DIR)/../../../svl
-TEST_DATA = $(PROJECT_DIR)/../../../Assets/test_data
+TEST_DATA = $(SRCROOT)/Assets/test_data
+
+
 
 
 

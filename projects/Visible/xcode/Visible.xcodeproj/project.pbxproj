@@ -178,7 +178,6 @@
 		C219469D1CE4EA4900976025 /* signaler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = signaler.h; path = ../include/signaler.h; sourceTree = "<group>"; };
 		C219469E1CE4EA4900976025 /* simple_pair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = simple_pair.h; path = ../include/simple_pair.h; sourceTree = "<group>"; };
 		C219469F1CE4EA4900976025 /* sshist.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sshist.hpp; path = ../include/sshist.hpp; sourceTree = "<group>"; };
-		C21946A11CE4EA4900976025 /* stl_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = stl_util.hpp; path = ../include/stl_util.hpp; sourceTree = "<group>"; };
 		C21946A31CE4EA4900976025 /* guiContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiContext.h; path = ../include/guiContext.h; sourceTree = "<group>"; usesTabs = 1; };
 		C21946A71CE4EA4900976025 /* vf_cinder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = vf_cinder.hpp; path = ../include/vf_cinder.hpp; sourceTree = "<group>"; };
 		C21946AC1CE4EA4900976025 /* qtime_frame_cache.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = qtime_frame_cache.hpp; path = ../include/qtime_frame_cache.hpp; sourceTree = "<group>"; };
@@ -210,6 +209,8 @@
 		C24CD8961CEB70E30008C72B /* libcinder_d.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder_d.a; path = ../../../svl/local/cinder/cinder_0.9/lib/libcinder_d.a; sourceTree = "<group>"; };
 		C24CD8A51CEB726B0008C72B /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
 		C24CD8A81CEB80750008C72B /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../../svl/local/cinder/cinder_0.9/lib/libcinder.a; sourceTree = "<group>"; };
+		C24FC84C1E5E40130071AA1A /* async_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = async_producer.h; path = ../include/async_producer.h; sourceTree = "<group>"; };
+		C24FC84D1E5E56960071AA1A /* roiMultiWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = roiMultiWindow.h; sourceTree = "<group>"; };
 		C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_mov_impl.cpp; path = ../src/visible_mov_impl.cpp; sourceTree = "<group>"; };
 		C260099D1CED3E010045FF57 /* check_rgb8.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = check_rgb8.jpg; sourceTree = "<group>"; };
 		C260099E1CED3E010045FF57 /* check_u8.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = check_u8.jpg; sourceTree = "<group>"; };
@@ -9795,9 +9796,9 @@
 				C21946961CE4EA4900976025 /* InteractiveObject.h */,
 				C21946971CE4EA4900976025 /* intrusive_ptr_base.hpp */,
 				C219469D1CE4EA4900976025 /* signaler.h */,
+				C24FC84C1E5E40130071AA1A /* async_producer.h */,
 				C219469E1CE4EA4900976025 /* simple_pair.h */,
 				C219469F1CE4EA4900976025 /* sshist.hpp */,
-				C21946A11CE4EA4900976025 /* stl_util.hpp */,
 				C21946A31CE4EA4900976025 /* guiContext.h */,
 				C2B005861CFF8FE100AC2E64 /* qtimeAvfLink.h */,
 				C2E321FF1D0480E4006DFE5E /* mediaInfo.h */,
@@ -10009,6 +10010,7 @@
 		C26009FF1CED3E010045FF57 /* vision */ = {
 			isa = PBXGroup;
 			children = (
+				C24FC84D1E5E56960071AA1A /* roiMultiWindow.h */,
 				C20BBC181E5271C5002C7D68 /* opencv_utils.hpp */,
 				C21FFE711CFDF82600C97013 /* self_similarity.h */,
 				C2600A001CED3E010045FF57 /* colorhistogram.hpp */,
