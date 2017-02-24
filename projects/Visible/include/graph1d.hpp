@@ -10,7 +10,7 @@
 #include "cinder/gl/Texture.h"
 #include "cinder/gl/TextureFont.h"
 #include "InteractiveObject.h"
-
+#include "async_producer.h"
 
 using namespace std;
 using namespace ci;
@@ -64,6 +64,21 @@ public:
         while (reader != buffer.end())
         {
             mBuffer.push_back (*reader++);
+        }
+        m_CB = bind (&graph1D::get, this, std::placeholders::_1);
+        mIsSet = true;
+    }
+    
+    // load the data and bind a function to access it
+    void setup (const tracksD1_t& track)
+    {
+        const timed_double_vec_t& ds = track.second;
+        mBuffer.clear ();
+        std::vector<timed_double_t>::const_iterator reader = ds.begin ();
+        while (reader != ds.end())
+        {
+            mBuffer.push_back (reader->second);
+            reader++;
         }
         m_CB = bind (&graph1D::get, this, std::placeholders::_1);
         mIsSet = true;
