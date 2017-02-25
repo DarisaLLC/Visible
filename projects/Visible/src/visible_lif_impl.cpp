@@ -264,8 +264,7 @@ void lifContext::setup()
         //            mMovieParams.addParam( "Zoom", setter, getter);
         //        }
         
-        plot_rects (m_plots);
-        
+      
     }
 }
 
@@ -303,7 +302,9 @@ void lifContext::loadLifFile ()
 }
 
 
-tracksD1_t get_mean_luminance (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names)
+
+tracksD1_t get_mean_luminance (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+                               bool test_data = false)
 {
 
     tracksD1_t tracks;
@@ -347,8 +348,9 @@ tracksD1_t get_mean_luminance (const std::shared_ptr<qTimeFrameCache>& frames, c
             ti.first = fn;
             timed_double_t res;
             res.first = ti;
-            res.second = histoStats::mean(roi);
-            tracks[index++].second.emplace_back(res);
+            res.second = (! test_data) ? histoStats::mean(roi) / 256.0 :
+                (((float) fn) / frames->count() );
+            tracks[index].second.emplace_back(res);
         }
         
         std::cout << ".";
@@ -367,9 +369,6 @@ void lifContext::loadCurrentSerie ()
     try {
         
         mFrameSet = qTimeFrameCache::create (*m_current_serie_ref);
-        
-        
-        std::stringstream str;
         
         if (m_valid)
         {
@@ -397,22 +396,22 @@ void lifContext::loadCurrentSerie ()
 
             {
                 std::lock_guard<std::mutex> lock(m_track_mutex);
-                std::vector<Rectf> plots;
-                plot_rects(plots);
+                plot_rects(m_track_rects);
                 
-                assert (plots.size() >= channel_count);
+                assert (m_track_rects.size() >= channel_count);
                 
                 m_tracks.resize (0);
                 
                 for (int cc = 0; cc < channel_count; cc++)
                 {
-                    m_tracks.push_back( Graph1DRef (new graph1D (m_current_serie_ref->getChannels()[cc].getName(), plots[cc])));
+                    m_tracks.push_back( Graph1DRef (new graph1D (m_current_serie_ref->getChannels()[cc].getName(),
+                                                                 m_track_rects [cc])));
                 }
             }
             
             // Launch Average Luminance Computation
             m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance,
-                                                  mFrameSet, m_serie.channel_names);
+                                                  mFrameSet, m_serie.channel_names, true);
                                                   
             
             
@@ -542,9 +541,23 @@ bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif
 void lifContext::resize ()
 {
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+    plot_rects(m_track_rects);
+    for (int cc = 0; cc < m_tracks.size(); cc++)
+    {
+        m_tracks[cc]->setRect (m_track_rects[cc]);
+    }
 }
 void lifContext::update ()
 {
+    if ( is_ready (m_async_luminance_tracks))
+    {
+        m_luminance_tracks = m_async_luminance_tracks.get();
+        assert (m_luminance_tracks.size() == m_tracks.size ());
+        for (int cc = 0; cc < m_luminance_tracks.size(); cc++)
+        {
+            m_tracks[cc]->setup(m_luminance_tracks[cc]);
+        }
+    }
     
     if (! have_movie () ) return;
     
@@ -559,13 +572,13 @@ void lifContext::update ()
     
     if (mMoviePlay ) seekToFrame (getCurrentFrame() + 1);
     
-    
-    
 }
+
 
 void lifContext::draw_info ()
 {
     if (! m_lifRef) return;
+    
     
     std::strstream msg;
     msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << mMoviePlay << " F " << setw(12) << int( getCurrentFrame ());

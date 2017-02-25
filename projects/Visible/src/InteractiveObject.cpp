@@ -10,8 +10,11 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-InteractiveObject::InteractiveObject( const Rectf& rect ){
-    this->rect = rect;
+#define DEBUGIO
+
+InteractiveObject::InteractiveObject( const Rectf& rect )
+: m_rect (rect)
+{
     pressedColor = Color( 1.0f, 0.0f, 0.0f );
     idleColor = Color( 0.7f, 0.7f, 0.7f );
     overColor = Color( 1.0f, 1.0f, 1.0f );
@@ -31,44 +34,58 @@ void InteractiveObject::draw(){
     } else {
         gl::color( idleColor );
     }
-    gl::drawSolidRect( rect );
+    gl::drawSolidRect( getRect () );
     gl::color( strokeColor );
-    gl::drawStrokedRect( rect );
+    gl::drawStrokedRect( getRect () );
 }
 
 void InteractiveObject::pressed(){
+#if defined(DEBUGIO)
     console() << "pressed" << endl;
+#endif
 }
 
 void InteractiveObject::pressedOutside(){
+#if defined(DEBUGIO)
     console() << "pressed outside" << endl;
+#endif
 }
 
 void InteractiveObject::released(){
+#if defined(DEBUGIO)
     console() << "released" << endl;
+#endif
 }
 
 void InteractiveObject::releasedOutside(){
+#if defined(DEBUGIO)
     console() << "released outside" << endl;
+#endif
 }
 
 void InteractiveObject::rolledOver(){
+#if defined(DEBUGIO)
     console() << "rolled over" << endl;
+#endif
 }
 
 void InteractiveObject::rolledOut(){
+#if defined(DEBUGIO)
     console() << "rolled out" << endl;
+#endif
 }
 
 void InteractiveObject::dragged(){
+#if defined(DEBUGIO)
     console() << "dragged" << endl;
+#endif    
 }
 
 bool InteractiveObject::update_norm_position ( ci::app::MouseEvent& event )
 {
     const vec2 mousePos = event.getPos();
-    mNormPos = vec2(mousePos.x / rect.getWidth (), mousePos.y / rect.getHeight () );
-    return rect.contains( mousePos );
+    mNormPos = vec2(mousePos.x / getRect().getWidth (), mousePos.y / getRect().getHeight () );
+    return getRect().contains( mousePos );
 }
 
 void InteractiveObject::mouseDown( MouseEvent& event )

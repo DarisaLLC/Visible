@@ -32,7 +32,7 @@ public:
         sSmallFont	= smallFont;
         sBigFont	= bigFont;
     }
-                     
+    
     
     graph1D( std::string name, const ci::Rectf& display_box) :
     InteractiveObject(display_box) , mIsSet(false)
@@ -40,18 +40,20 @@ public:
         graph1D::setFonts (Font( "Menlo", 18 ), Font( "Menlo", 25 ));
         
         // create label
-//        mTextLayout.clear( cinder::Color::white() ); mTextLayout.setColor( Color(0.5f, 0.5f, 0.5f) );
-//        try { mTextLayout.setFont( Font( "Menlo", 18 ) ); } catch( ... ) { mTextLayout.setFont( Font( "Menlo", 18 ) ); }
-//        TextLayout tmp (mTextLayout);
-//        tmp.addLine( name );
-//        mLabelTex = cinder::gl::Texture::create(tmp.render( true ) );
+        //        mTextLayout.clear( cinder::Color::white() ); mTextLayout.setColor( Color(0.5f, 0.5f, 0.5f) );
+        //        try { mTextLayout.setFont( Font( "Menlo", 18 ) ); } catch( ... ) { mTextLayout.setFont( Font( "Menlo", 18 ) ); }
+        //        TextLayout tmp (mTextLayout);
+        //        tmp.addLine( name );
+        //        mLabelTex = cinder::gl::Texture::create(tmp.render( true ) );
         
         
     }
     
+    // Setup should get called only once.
+    // TBD: implement reset
     void setup (size_t length, Graph1DSetCb callback)
     {
-        assert (! mIsSet);
+        if ( mIsSet ) return;
         mBuffer.resize (length);
         m_CB = bind (callback, std::placeholders::_1);
         mIsSet = true;
@@ -59,6 +61,7 @@ public:
     // load the data and bind a function to access it
     void setup (const std::vector<float>& buffer)
     {
+        if ( mIsSet ) return;
         mBuffer.clear ();
         std::vector<float>::const_iterator reader = buffer.begin ();
         while (reader != buffer.end())
@@ -70,8 +73,10 @@ public:
     }
     
     // load the data and bind a function to access it
-    void setup (const tracksD1_t& track)
+    void setup (const trackD1_t& track)
     {
+        if ( mIsSet ) return;
+        
         const timed_double_vec_t& ds = track.second;
         mBuffer.clear ();
         std::vector<timed_double_t>::const_iterator reader = ds.begin ();
@@ -81,7 +86,7 @@ public:
             reader++;
         }
         m_CB = bind (&graph1D::get, this, std::placeholders::_1);
-        mIsSet = true;
+        mIsSet = mBuffer.size() == ds.size();
     }
     
     // a NN fetch function using the bound function
@@ -120,18 +125,18 @@ public:
         
         ci::gl::color( ci::Color::white() );
         ci::gl::draw( counter, vec2(x, y));
-            }
+    }
     
     void draw() const
     {
         if (! mIsSet) return;
         
-        Rectf content = rect;
-
+        const Rectf& content = getRect ();
+        
         gl::color( Color( 0.75f, 0.75f, 0.75f ) );
         ci::gl::drawStrokedRect(content);
         
-       // draw graph
+        // draw graph
         gl::color( ColorA( 0.0f, 0.0f, 1.0f, 1.0f ) );
         gl::begin( GL_LINE_STRIP );
         for( float x = 0; x < content.getWidth(); x ++ )
@@ -145,14 +150,14 @@ public:
         
         gl::color( Color( 0.75f, 0.5f, 0.25f ) );
         glLineWidth(25.f);
-        float px = norm_pos().x * rect.getWidth();
+        float px = norm_pos().x * content.getWidth();
         float mVal = m_CB (norm_pos().x);
         
-        vec2 mid (px, rect.getHeight()/2.0);
+        vec2 mid (px, content.getHeight()/2.0);
         if (content.contains(mid))
         {
-            ci::gl::drawLine (vec2(px, 0.f), vec2(px, rect.getHeight()));
-            draw_value_label (mVal, px, rect.getHeight()/2.0f);
+            ci::gl::drawLine (vec2(px, 0.f), vec2(px, content.getHeight()));
+            draw_value_label (mVal, px, content.getHeight()/2.0f);
             
         }
     }
@@ -161,9 +166,9 @@ public:
     {
         return mBuffer;
     }
-
+    
 private:
-
+    
     mutable bool mIsSet;
     mutable float mVal;
     mutable int32_t mIndex;
@@ -186,14 +191,14 @@ public:
         mValue = 0.f;
     }
     
-    vec2   getPosition() { return rect.getUpperLeft(); }
-    void    setPosition(vec2 position) { rect.offset(position); }
+    vec2   getPosition() { return getRect().getUpperLeft(); }
+    void    setPosition(vec2 position) { getRect().offset(position); }
     void    setPosition(float x, float y) { setPosition(vec2(x,y)); }
     
     float   getWidth() { return getSize().x; }
     float   getHeight() { return getSize().y; }
-    vec2   getSize() { return rect.getSize(); }
-    void    setSize(vec2 size) { rect.x2 = rect.x1+size.x; rect.y2 = rect.y1+size.y; }
+    vec2   getSize() { return getRect().getSize(); }
+    void    setSize(vec2 size) { m_rect.x2 = m_rect.x1+size.x; m_rect.y2 = m_rect.y1+size.y; }
     void    setSize(float width, float height) { setSize(vec2(width,height)); }
     
     
@@ -222,7 +227,7 @@ public:
         InteractiveObject::dragged();
         
         vec2 mousePos = App::get()->getMousePos();
-        setValue( (mousePos.x - rect.x1) / rect.getWidth() );
+        setValue( (mousePos.x - getRect().x1) / getRect().getWidth() );
     }
     
     virtual void changed()
@@ -233,10 +238,10 @@ public:
     virtual void draw()
     {
         gl::color(Color::gray(0.7f));
-        gl::drawSolidRect(rect);
+        gl::drawSolidRect (getRect());
         
         gl::color(Color::black());
-        Rectf fillRect = Rectf(rect);
+        Rectf fillRect = Rectf(getRect());
         fillRect.x2 = fillRect.x1 + fillRect.getWidth() * mValue;
         gl::drawSolidRect( fillRect );
     }
@@ -257,11 +262,11 @@ public:
     
     virtual void draw(){
         if( mPressed ){
-            ci::gl::draw( mPressTex, rect );
+            ci::gl::draw( mPressTex, getRect() );
         } else if( mOver ){
-            ci::gl::draw( mOverTex, rect );
+            ci::gl::draw( mOverTex, getRect() );
         } else {
-            ci::gl::draw( mPressTex, rect );
+            ci::gl::draw( mPressTex, getRect() );
         }
     }
     

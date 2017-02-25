@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "vf_types.h"
 #include "cinder/Rect.h"
 #include "cinder/Color.h"
 #include "cinder/app/MouseEvent.h"
@@ -95,10 +94,13 @@ public:
     void norm_pos (vec2& nn) const { mNormPos = nn; }
     
     
-    ci::Rectf rect;
+    ci::Rectf getRect () const { return m_rect; }
+    void setRect (const ci::Rectf& new_rect) { m_rect = new_rect; }
+    
     ci::Color pressedColor, idleColor, overColor, strokeColor;
     
 protected:
+    ci::Rectf m_rect;
     bool mPressed, mOver;
     ci::CallbackMgr< void(InteractiveObjectEvent) > mEvents;
     mutable vec2 mNormPos;

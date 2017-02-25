@@ -230,7 +230,7 @@ clipContext::clipContext(ci::app::WindowRef& ww, const boost::filesystem::path& 
 
 void clipContext::resize ()
 {
-    mGraph1D->rect = getWindowBounds();
+    mGraph1D->setRect(getWindowBounds());
 }
 void clipContext::draw ()
 {

@@ -626,6 +626,8 @@ private:
 	}
 	
 	std::vector<Graph1DRef> m_tracks;
+	std::vector<ci::Rectf> m_track_rects;
+	
 	std::mutex m_track_mutex;
 	
 	tracksD1_t m_luminance_tracks;
