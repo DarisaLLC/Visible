@@ -385,16 +385,6 @@ Rectf movDirContext::get_image_display_rect ()
     return Rectf (tl, lr);
 }
 
-Rectf movDirContext::get_plotting_display_rect ()
-{
-    ivec2 pvf = plot_frame_size();
-    ivec2 tl = trim();
-    tl.x += image_frame_size().x;
-    
-    ivec2 lr = tl + pvf;
-    return Rectf (tl, lr);
-    
-}
 
 void movDirContext::draw_info ()
 {

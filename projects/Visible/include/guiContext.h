@@ -420,8 +420,6 @@ private:
 	
 	void update_log (const std::string& meg = "");
 	Rectf get_image_display_rect ();
-	Rectf get_plotting_display_rect ();
-	
 	
 	
 	mutable directoryPlayerRef m_Dm;
@@ -547,8 +545,6 @@ private:
 	void looping (bool what);
 	
 	Rectf get_image_display_rect ();
-	Rectf get_plotting_display_rect ();
-	
 	
 
 	void get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer)
