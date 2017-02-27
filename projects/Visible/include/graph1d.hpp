@@ -11,6 +11,8 @@
 #include "cinder/gl/TextureFont.h"
 #include "InteractiveObject.h"
 #include "async_producer.h"
+#include "core/core.hpp"
+#include <Iterator>
 
 using namespace std;
 using namespace ci;
@@ -19,6 +21,9 @@ class graph1D;
 
 typedef std::shared_ptr<graph1D> Graph1DRef;
 typedef std::function<float (float)> Graph1DSetCb;
+
+
+using    std::numeric_limits;
 
 
 class graph1D:  public InteractiveObject
@@ -33,9 +38,17 @@ public:
         sBigFont	= bigFont;
     }
     
+    enum mapping_option
+    {
+        type_limits = 0,
+        type_unit = 1,
+        type_signed_unit = 2,
+        data_limits = 3
+    };
     
-    graph1D( std::string name, const ci::Rectf& display_box) :
-    InteractiveObject(display_box) , mIsSet(false)
+    graph1D( std::string name, const ci::Rectf& display_box,
+            mapping_option mo = data_limits)
+    : InteractiveObject(display_box) , mIsSet(false), m_opt (mo)
     {
         graph1D::setFonts (Font( "Menlo", 18 ), Font( "Menlo", 25 ));
         
@@ -85,6 +98,11 @@ public:
             mBuffer.push_back (reader->second);
             reader++;
         }
+        if (m_opt == data_limits)
+        {
+            auto extr = svl::norm_min_max (mBuffer.begin(), mBuffer.end());
+        }
+        
         m_CB = bind (&graph1D::get, this, std::placeholders::_1);
         mIsSet = mBuffer.size() == ds.size();
     }
@@ -133,7 +151,7 @@ public:
         
         const Rectf& content = getRect ();
         
-        gl::color( Color( 0.75f, 0.75f, 0.75f ) );
+        gl::color( Color( 0.25f, 0.25f, 0.25f ) );
         ci::gl::drawStrokedRect(content);
         
         // draw graph
@@ -178,6 +196,8 @@ private:
     
     cinder::gl::TextureRef						mLabelTex;
     Graph1DSetCb m_CB;
+    mapping_option m_opt;
+    
     
 };
 
