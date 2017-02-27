@@ -394,12 +394,12 @@ tracksD1_t get_mean_luminance (const std::shared_ptr<qTimeFrameCache>& frames, c
             ti.first = fn;
             timed_double_t res;
             res.first = ti;
-            res.second = (! test_data) ? histoStats::mean(roi) / 256.0 :
-                (((float) fn) / frames->count() );
+            auto nmg = histoStats::mean(roi) / 256.0;
+            res.second = (! test_data) ? nmg :  (((float) fn) / frames->count() );
             tracks[index++].second.emplace_back(res);
         }
         
-        std::cout << ".";
+        // TBD: call progress reporter
     }
 
     
@@ -458,9 +458,6 @@ void lifContext::loadCurrentSerie ()
             // Launch Average Luminance Computation
             m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance,
                                                   mFrameSet, m_serie.channel_names, false);
-                                                  
-            
-            
         }
     }
     catch( const std::exception &ex ) {
