@@ -288,28 +288,14 @@ void clipContext::loadAll (const  std::vector<vector<float> > & src)
     mGraph1D->addListener( this, &clipContext::receivedEvent );
     
     const std::vector<float>& coi = src[0];
-    std::vector<float> out;
+    std::vector<float> out = coi;
     
     if (normalize_option ())
     {
-        std::pair<std::vector<float>::const_iterator, std::vector<float>::const_iterator> p =
-        boost::minmax_element(coi.begin(), coi.end());
-        std::pair<float,float> minmax_val (*p.first, *p.second);
-        out.resize (coi.size());
-        
-        std::vector<float>::const_iterator di = coi.begin();
-        std::vector<float>::iterator dout = out.begin();
-        float scale = minmax_val.second - minmax_val.first;
-        for (; di < coi.end(); di++, dout++)
-        {
-            *dout = (*di - minmax_val.first) / scale;
-        }
-        mGraph1D->setup(out);
+        std::pair<float,float> minmax_val = svl::norm_min_max(out.begin(), out.end());
     }
-    else
-    {
-        mGraph1D->setup(coi);
-    }
+    mGraph1D->setup(coi);
+
     
     
     //    mClipParams = params::InterfaceGl (" Clip ", vec2( 200, 400) );

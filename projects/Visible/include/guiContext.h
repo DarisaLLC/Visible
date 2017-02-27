@@ -225,10 +225,10 @@ public:
 	
 private:
 	
-	static DataSourcePathRef create (const std::string& fqfn)
-	{
-		return  DataSourcePath::create (boost::filesystem::path  (fqfn));
-	}
+//	static DataSourcePathRef create (const std::string& fqfn)
+//	{
+//		return  DataSourcePath::create (boost::filesystem::path  (fqfn));
+//	}
 	
 	void select_column (size_t col) { m_column_select = col; }
 	
@@ -243,8 +243,48 @@ private:
 	
 };
 
+///////////////////   Visual Browsing Contexts
 
-class movContext : public guiContext
+class visualContext : public guiContext
+{
+public:
+	visualContext(ci::app::WindowRef& ww)
+	: guiContext (ww)
+	{}
+	
+	virtual void seekToStart () = 0;
+	virtual void seekToEnd () = 0;
+	virtual void seekToFrame (int) = 0;
+	virtual int getCurrentFrame () = 0;
+	virtual int getNumFrames () = 0;
+	
+	virtual void draw_info () = 0;
+	virtual void update_log (const std::string& meg = "") = 0;
+	virtual bool looping () = 0;
+	virtual void looping (bool what) = 0;
+	virtual Rectf get_image_display_rect () = 0;
+	
+protected:
+	std::vector<Graph1DRef> m_tracks;
+	std::vector<ci::Rectf> m_track_rects;
+	
+	std::mutex m_track_mutex;
+	
+	tracksD1_t m_luminance_tracks;
+	async_tracksD1_t m_async_luminance_tracks;
+	
+	
+	gl::TextureRef		mTextTexture;
+	vec2				mSize;
+	Font				mFont;
+	std::string			mLog;
+	
+};
+
+
+///////////////////
+
+class movContext : public visualContext
 {
 public:
 	// From just a name, use the open file dialog to get the file
@@ -262,7 +302,7 @@ public:
     virtual bool is_valid ();
     virtual void update ();
 	virtual void resize ();	
-    void draw_window ();
+	void draw_window ();
 
 	virtual void onMarked (marker_info_t&);
     virtual void mouseDown( MouseEvent event );
@@ -271,6 +311,18 @@ public:
     virtual void mouseDrag( MouseEvent event );
     virtual void keyDown( KeyEvent event );
 
+	virtual void seekToStart ();
+	virtual void seekToEnd ();
+	virtual void seekToFrame (int);
+	virtual int getCurrentFrame ();
+	virtual int getNumFrames ();
+
+	virtual void draw_info ();
+	virtual void update_log (const std::string& meg = "");
+	virtual bool looping ();
+	virtual void looping (bool what);
+	virtual Rectf get_image_display_rect ();
+	
     const params::InterfaceGl& ui_params ()
     {
         return mMovieParams;
@@ -285,11 +337,8 @@ public:
 	void setZoom (vec2);
 	vec2 getZoom ();
 
-    int getIndex ();
-    
-    void setIndex (int mark);
-	
 	void play_pause_button ();
+	void loop_no_loop_button ();
 	
 	// Add tracks
 	void add_scalar_track_get_file () { add_scalar_track (); }
@@ -316,8 +365,8 @@ private:
     ci::qtime::MovieSurfaceRef m_movie;
     size_t m_fc;
     params::InterfaceGl         mMovieParams;
-    float mMoviePosition, mPrevMoviePosition;
-    size_t mMovieIndexPosition, mPrevMovieIndexPosition;
+	float mMoviePosition;
+	size_t mMovieIndexPosition;
     float mMovieRate, mPrevMovieRate;
 	bool mMoviePlay;
 	bool mMovieLoop;
@@ -353,9 +402,7 @@ private:
         return xScaled;
     }
 	
-	
-	std::list<std::shared_ptr<clipContext> > m_tracks;
-	
+
 	
 };
 
@@ -444,8 +491,7 @@ private:
 };
 
 
-
-class lifContext : public guiContext
+class lifContext : public visualContext
 {
 public:
 	
@@ -500,6 +546,12 @@ public:
 	virtual void mouseDrag( MouseEvent event );
 	virtual void keyDown( KeyEvent event );
 	
+	virtual void seekToStart ();
+	virtual void seekToEnd ();
+	virtual void seekToFrame (int);
+	virtual int getCurrentFrame ();
+	virtual int getNumFrames ();
+	
 	const params::InterfaceGl& ui_params ()
 	{
 		return mMovieParams;
@@ -514,16 +566,7 @@ public:
 	void setZoom (vec2);
 	vec2 getZoom ();
 
-	void seekToStart ();
-	void seekToEnd ();
-	void seekToFrame (int);
-	int getCurrentFrame ();
-	int getNumFrames ();
-	
-	int getIndex ();
-	bool incrementIndex ();
-	
-	bool setIndex (int mark);
+
 	
 	void play_pause_button ();
 	void loop_no_loop_button ();
@@ -590,8 +633,8 @@ private:
 	params::InterfaceGl         mMovieParams;
 	
 	
-	float mMoviePosition, mPrevMoviePosition;
-	int64_t mMovieIndexPosition, mPrevMovieIndexPosition;
+	float mMoviePosition;
+	int64_t mMovieIndexPosition;
 	float mMovieRate, mPrevMovieRate;
 	bool mMoviePlay;
 	bool mMovieLoop;
@@ -602,7 +645,6 @@ private:
 	vec2		mMousePos;
 	std::shared_ptr<qTimeFrameCache> mFrameSet;
 	SurfaceRef  mSurface;
-	std::vector<Rectf> m_plots;
 	
 	bool mMouseIsDown;
 	bool mMouseIsMoving;
@@ -621,20 +663,7 @@ private:
 		return xScaled;
 	}
 	
-	std::vector<Graph1DRef> m_tracks;
-	std::vector<ci::Rectf> m_track_rects;
-	
-	std::mutex m_track_mutex;
-	
-	tracksD1_t m_luminance_tracks;
-	async_tracksD1_t m_async_luminance_tracks;
-	
-	
-	gl::TextureRef		mTextTexture;
-	vec2				mSize;
-	Font				mFont;
-	std::string			mLog;
-	
+
 };
 
 

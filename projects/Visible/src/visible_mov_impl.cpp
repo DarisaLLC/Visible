@@ -24,7 +24,7 @@
 #include "opencv2/highgui.hpp"
 #include "opencv_utils.hpp"
 #include "cinder/ip/Flip.h"
-
+#include <strstream>
 #include "gradient.h"
 
 using namespace ci;
@@ -33,10 +33,10 @@ using namespace std;
 
 extern float  MovieBaseGetCurrentTime(cinder::qtime::MovieSurfaceRef& movie);
 
+/// Layout for this widget. Poor design !!
+
 namespace
 {
-    
-    
     std::ostream& ci_console ()
     {
         return AppBase::get()->console();
@@ -48,6 +48,75 @@ namespace
     }
     
     
+    inline ivec2 expected_window_size () { return vec2 (960, 540); }
+    inline ivec2 trim () { return vec2(10,10); }
+    vec2 trim_norm () { return vec2(trim().x, trim().y) / vec2(getWindowWidth(), getWindowHeight()); }
+    inline ivec2 desired_window_size () { return expected_window_size() + trim () + trim (); }
+    inline ivec2 canvas_size () { return getWindowSize() - trim() - trim (); }
+    inline vec2& image_frame_size_norm (){ static vec2 ni (0.67, 0.75); return ni;}
+    inline ivec2 image_frame_size ()
+    {
+        static vec2& np = image_frame_size_norm ();
+        return ivec2 (np.x * expected_window_size().x, np.y * expected_window_size().y);
+    }
+    
+    
+    inline vec2 plots_frame_position_norm ()
+    {
+        vec2 np = vec2 (image_frame_size_norm().x + trim_norm().x, trim_norm().y);
+        return np;
+    }
+    inline vec2 image_frame_position_norm ()
+    {
+        vec2 np = vec2 (trim_norm().x, trim_norm().y);
+        return np;
+    }
+    
+    inline vec2 plots_frame_position ()
+    {
+        vec2 np = vec2 (plots_frame_position_norm().x * expected_window_size().x, plots_frame_position_norm().y * expected_window_size().y);
+        return np;
+    }
+    inline vec2 image_frame_position ()
+    {
+        vec2 np = vec2 (image_frame_position_norm().x * expected_window_size().x, image_frame_position_norm().y * expected_window_size().y);
+        return np;
+    }
+    
+    
+    inline vec2 single_plot_size_norm (){ vec2 np = vec2 (1.0 - image_frame_size_norm().x, 0.25); return np;}
+    inline vec2 plots_frame_size_norm (){ vec2 np = vec2 (1.0 - image_frame_size_norm().x,
+                                                          3 * single_plot_size_norm().y); return np;}
+    
+    
+    inline ivec2 plots_frame_size () { return ivec2 ((canvas_size().x * plots_frame_size_norm().x),
+                                                     (canvas_size().y * plots_frame_size_norm().y)); }
+    
+    inline ivec2 single_plot_size () { return ivec2 ((canvas_size().x * single_plot_size_norm().x),
+                                                     (canvas_size().y * single_plot_size_norm().y)); }
+    
+    inline Rectf image_frame_rect ()
+    {
+        vec2 tl = image_frame_position();
+        vec2 br = vec2 (tl.x + image_frame_size().x, tl.y + image_frame_size().y);
+        
+        return Rectf (tl, br);
+    }
+    
+    inline vec2 canvas_norm_size () { return vec2(canvas_size().x, canvas_size().y) / vec2(getWindowWidth(), getWindowHeight()); }
+    inline Rectf text_norm_rect () { return Rectf(0.0, 1.0 - 0.125, 1.0, 0.125); }
+    inline void plot_rects (std::vector<Rectf>& plots )
+    {
+        plots.resize(3);
+        auto plot_tl = plots_frame_position();
+        auto plot_size = single_plot_size();
+        
+        plots[0] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
+        plots[1] = Rectf (vec2(plots[0].getUpperLeft().x, plots[0].getUpperLeft().y + plot_size.y),
+                          vec2(plots[0].getLowerRight().x, plots[0].getLowerRight().y + plot_size.y));
+        plots[2] = Rectf (vec2(plots[1].getUpperLeft().x, plots[1].getUpperLeft().y + plot_size.y),
+                          vec2(plots[1].getLowerRight().x, plots[1].getLowerRight().y + plot_size.y));
+    }
     
 }
 
@@ -55,7 +124,7 @@ namespace
 /////////////  movContext Implementation  ////////////////
 
 movContext::movContext(WindowRef& ww, const boost::filesystem::path& dp)
-: guiContext(ww), mPath (dp)
+: visualContext(ww), mPath (dp)
 {
     m_valid = false;
     m_type = Type::qtime_viewer;
@@ -65,12 +134,14 @@ movContext::movContext(WindowRef& ww, const boost::filesystem::path& dp)
 
     m_valid = ! mPath.string().empty() && exists(mPath);
     
-    setup ();
     if (is_valid())
     {
         mWindow->setTitle( mPath.filename().string() );
+        mWindow->setSize(desired_window_size());
+        mFont = Font( "Menlo", 12 );
+        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     }
-    
+    setup ();
 }
 
 
@@ -81,16 +152,29 @@ const  boost::filesystem::path movContext::source_path () const
 }
 
 
+
+void movContext::looping (bool what)
+{
+    m_movie->setLoop(what);
+    mMovieLoop = what;
+}
+
+
+bool movContext::looping ()
+{
+    return mMovieLoop;
+}
+
 void movContext::play ()
 {
-    if (! have_movie() || m_movie->isPlaying() ) return;
-    m_movie->play ();
+    if (! m_movie->isPlaying() )
+        m_movie->play ();
 }
 
 void movContext::pause ()
 {
-    if (! have_movie() || ! m_movie->isPlaying() ) return;
-    m_movie->stop ();
+    if (m_movie->isPlaying())
+        m_movie->stop ();
 }
 
 void movContext::play_pause_button ()
@@ -102,32 +186,53 @@ void movContext::play_pause_button ()
         play ();
 }
 
+void movContext::loop_no_loop_button ()
+{
+    if (! have_movie () || ! m_movie->isPlaying()) return;
+    if (looping())
+        looping(false);
+    else
+        looping(true);
+}
 bool movContext::have_movie ()
 {
     return m_movie != nullptr && m_valid;
 }
 
-int movContext::getIndex ()
+void movContext::seekToEnd ()
 {
-    return mMovieIndexPosition;
+    m_movie->seekToEnd();
 }
+
+void movContext::seekToStart ()
+{
+    m_movie->seekToStart();
+}
+
+int movContext::getNumFrames ()
+{
+    return m_fc;
+}
+
+int movContext::getCurrentFrame ()
+{
+    auto ft = m_movie->getCurrentTime();
+    return std::floor(m_movie->getFramerate() * ft);
+
+}
+
+void movContext::seekToFrame (int mark)
+{
+    m_movie->seekToFrame (mark);
+}
+
+
 
 void movContext::onMarked ( marker_info& t)
 {
-    pause ();
-    setIndex((int)(t.norm_pos.x *= m_fc));
-  
+    seekToFrame(std::floor(t.norm_pos.x *= getNumFrames ()));
+}
 
-}
-void movContext::setIndex (int mark)
-{
-    pause ();
-    mMovieIndexPosition = (mark % m_fc);
-    m_movie->seekToFrame(mMovieIndexPosition);
- 
-    
-    
-}
 
 vec2 movContext::getZoom ()
 {
@@ -158,15 +263,12 @@ void movContext::setup()
     {
        	m_type = Type::qtime_viewer;
         
-        mMovieParams.addSeparator();
-        mMovieParams.addButton( "Import Time Series ", std::bind( &movContext::add_scalar_track_get_file, this ) );
-        mMovieParams.addSeparator();
         
         mButton_title_index = 0;
         string max = to_string( m_movie->getDuration() );
         {
-        const std::function<void (int)> setter = std::bind(&movContext::setIndex, this, std::placeholders::_1);
-        const std::function<int ()> getter = std::bind(&movContext::getIndex, this);
+        const std::function<void (int)> setter = std::bind(&movContext::seekToFrame, this, std::placeholders::_1);
+        const std::function<int ()> getter = std::bind(&movContext::getCurrentFrame, this);
         mMovieParams.addParam ("Mark", setter, getter);
         }
         mMovieParams.addSeparator();
@@ -186,6 +288,8 @@ void movContext::setup()
         
         mMovieParams.addSeparator();
         mMovieParams.addButton("Play / Pause ", bind( &movContext::play_pause_button, this ) );
+        mMovieParams.addSeparator();
+        mMovieParams.addButton(" Loop ", bind( &movContext::loop_no_loop_button, this ) );
         
 //        {
 //            const std::function<void (float)> setter = std::bind(&movContext::setZoom, this, std::placeholders::_1);
@@ -199,9 +303,7 @@ void movContext::setup()
 void movContext::clear_movie_params ()
 {
     mMoviePosition = 0.0f;
-    mPrevMoviePosition = mMoviePosition;
     mMovieIndexPosition = 0;
-    mPrevMovieIndexPosition = -1;
     mMovieRate = 1.0f;
     mMoviePlay = false;
     mMovieLoop = false;
@@ -226,22 +328,34 @@ void movContext::loadMovieFile()
             if (m_valid)
             {
                 getWindow()->setTitle( mPath.filename().string() );
-                mMovieParams = params::InterfaceGl( "Movie Controller", vec2( 90, 160 ) );
+                mMovieParams = params::InterfaceGl( "Movie Player", vec2( 260, 260 ) );
+
+                // TBD: wrap these into media_info
+                m_fc = m_movie->getNumFrames ();
+                mScreenSize = vec2(std::fabs(m_movie->getWidth()), std::fabs(m_movie->getHeight()));
+                ivec2 window_size (desired_window_size());
+                setWindowSize(window_size);
+                mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
+                getWindow()->getApp()->setFrameRate(m_movie->getFramerate() / 3);
                 
                 ci_console() << "Dimensions:" <<m_movie->getWidth() << " x " <<m_movie->getHeight() << std::endl;
                 ci_console() << "Duration:  " <<m_movie->getDuration() << " seconds" << std::endl;
                 ci_console() << "Frames:    " <<m_movie->getNumFrames() << std::endl;
                 ci_console() << "Framerate: " <<m_movie->getFramerate() << std::endl;
-                getWindow()->getApp()->setFrameRate(m_movie->getFramerate() / 3);
 
-                mScreenSize = vec2(std::fabs(m_movie->getWidth()), std::fabs(m_movie->getHeight()));
-        
-                mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
+
+                // Setup Plot area
+                    std::lock_guard<std::mutex> lock(m_track_mutex);
+                    plot_rects(m_track_rects);
+                    
+                    assert (m_track_rects.size() >= 1);
+                    m_tracks.resize (0);
+                    
+                    m_tracks.push_back( Graph1DRef (new graph1D ("Plot 1",  m_track_rects [0])));
+
+   
                 
-                texture_to_display_zoom();
-                
-                
-                m_fc = m_movie->getNumFrames ();
+
                 m_movie->setLoop( true, false);
                 m_movie->seekToStart();
                 // Do not play at start 
@@ -291,11 +405,11 @@ void movContext::keyDown( KeyEvent event )
     if( m_movie ) {
         if( event.getCode() == KeyEvent::KEY_LEFT ) {
             pause();
-            setIndex (mMovieIndexPosition - 1);
+            seekToFrame (getCurrentFrame() - 1);
         }
         if( event.getCode() == KeyEvent::KEY_RIGHT ) {
-            pause ();
-            setIndex (mMovieIndexPosition + 1);
+            pause();
+            seekToFrame (getCurrentFrame() + 1);
         }
         
         
@@ -315,28 +429,6 @@ void movContext::mouseUp( MouseEvent event )
 }
 
 
-vec2 movContext::texture_to_display_zoom()
-{
-    Rectf image (0.0f, 0.0f, mScreenSize.x, mScreenSize.y);
-    Rectf window = getWindowBounds();
-    float sx = window.getWidth() / image.getWidth();
-    float sy = window.getHeight() / image.getHeight();
-    
-    if ( sx < 1.1f || sy < 1.1f )
-    {
-        getWindow()->setSize((int32_t) (mScreenSize.x*1.15f), (int32_t) (mScreenSize.y*1.15f));
-        sx = window.getWidth() / image.getWidth();
-        sy = window.getHeight() / image.getHeight();
-    }
-    float w = image.getWidth() * sx;
-    float h = image.getHeight() * sy;
-    float ox = -0.5 * ( w - window.getWidth());
-    float oy = -0.5 * ( h - window.getHeight());
-    image.set(ox, oy, ox + w, oy + h);
-    m_display_rect = image;
-
-    return vec2(sx, sy);
-}
 
 void movContext::seek( size_t xPos )
 {
@@ -348,7 +440,13 @@ bool movContext::is_valid () { return m_valid && is_context_type(guiContext::qti
 
 void movContext::resize ()
 {
-    m_zoom = texture_to_display_zoom();
+    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+    plot_rects(m_track_rects);
+    for (int cc = 0; cc < m_tracks.size(); cc++)
+    {
+        m_tracks[cc]->setRect (m_track_rects[cc]);
+    }
+
     
 }
 void movContext::update ()
@@ -371,22 +469,30 @@ void movContext::update ()
         mSurface = mFrameSet->getFrame(new_time);
     }
     
+    update_log();
+    
 }
 
 void movContext::draw ()
 {
-   
+     Rectf dr = get_image_display_rect();
+    
     if( ! have_movie()  || ( ! mSurface ) )
     {
         std::cout << " no have movie or surface " << std::endl;
         return;
     }
     
-    mImage = gl::Texture::create(*mSurface);
     
-      mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
-    gl::draw (mImage, m_display_rect);
-
+    mImage = gl::Texture::create(*mSurface);
+    mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
+    gl::draw (mImage, dr);
+    
+    
+    draw_info ();
+    
+    for(Graph1DRef gg : m_tracks)
+        gg->draw ();
     
     mMovieParams.draw();
     
@@ -394,7 +500,66 @@ void movContext::draw ()
 
 
 
-////////   Adding Tracks 
+////////   Info Log
+
+void  movContext::update_log (const std::string& message)
+{
+    
+    std::strstream msg;
+    msg << " Looping: " << (looping() ? " On" : "Off");
+    msg << " Playing: " << (m_movie->isPlaying() ? "Yes" : " No");
+    msg << " | - F  " << setw(8) << getCurrentFrame () << std::endl;
+    mLog = msg.str() + message;
+    
+    TextBox tbox = TextBox().alignment( TextBox::RIGHT).font( mFont ).size( mSize ).text( mLog );
+    tbox.setColor( Color( 1.0f, 0.65f, 0.35f ) );
+    tbox.setBackgroundColor( ColorA( 0.3f, 0.3f, 0.3f, 0.4f )  );
+    ivec2 sz = tbox.measure();
+    mTextTexture = gl::Texture2d::create( tbox.render() );
+}
+
+Rectf movContext::get_image_display_rect ()
+{
+    ivec2 ivf = image_frame_size();
+    ivec2 tl = trim();
+    
+    ivf.y /= 3;
+    
+    ivec2 lr = tl + ivf;
+    return Rectf (tl, lr);
+}
+
+
+void movContext::draw_info ()
+{
+    if (! have_movie () ) return;
+    
+
+    std::string seri_str = mPath.filename().string();
+    
+    gl::setMatricesWindow( getWindowSize() );
+    
+    gl::ScopedBlendAlpha blend_;
+    TextLayout layoutL;
+    
+    layoutL.clear( ColorA::gray( 0.2f, 0.5f ) );
+    layoutL.setFont( Font( "Arial", 18 ) );
+    layoutL.setColor( Color::white() );
+    layoutL.setLeadingOffset( 3 );
+    layoutL.addRightLine( seri_str);
+    
+    auto texR = gl::Texture::create( layoutL.render( true ) );
+    gl::draw( texR, vec2( 10, 10 ) );
+    gl::clearColor(ColorA::gray( 0.2f, 0.5f ));
+    
+    if (mTextTexture)
+    {
+        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
+        gl::draw(mTextTexture, textrect);
+    }
+    
+}
+
 
 
 // Create a clip viewer. Go through container of viewers, if there is a movie view, connect onMarked signal to it

@@ -43,10 +43,10 @@ using namespace svl;
 extern float  MovieBaseGetCurrentTime(cinder::qtime::MovieSurfaceRef& movie);
 
 
+/// Layout for this widget. Poor design !!
+
 namespace
 {
-    
-    
     std::ostream& ci_console ()
     {
         return AppBase::get()->console();
@@ -135,7 +135,7 @@ namespace
 
 
 lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
-: guiContext(ww), mPath (dp)
+: visualContext(ww), mPath (dp)
 {
     m_valid = false;
     m_type = Type::lif_file_viewer;
@@ -317,9 +317,7 @@ void lifContext::setup()
 void lifContext::clear_movie_params ()
 {
     mMoviePosition = 0.0f;
-    mPrevMoviePosition = mMoviePosition;
     mMovieIndexPosition = 0;
-    mPrevMovieIndexPosition = -1;
     mMovieRate = 1.0f;
     mMoviePlay = false;
     mMovieLoop = false;
