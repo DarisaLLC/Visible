@@ -15,10 +15,10 @@ namespace svl  // protection from unintended ADL
     
 #if have_boost_random
     static std::string default_random_string_char_set ("abcdefghijklmnopqrstuvwxyz"
-                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                        "1234567890"
-                        "!@#$%^&*()"
-                        "`~-_=+[{]}\\|;:'\",<.>/? ");
+                                                       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                                       "1234567890"
+                                                       "!@#$%^&*()"
+                                                       "`~-_=+[{]}\\|;:'\",<.>/? ");
     
     std::string random_string (unsigned size = 8, const std::string chars = default_random_string_char_set)
     {
@@ -40,8 +40,8 @@ namespace svl  // protection from unintended ADL
         
         std::default_random_engine generator (seed);
         
-       return std::generate_canonical<T,std::numeric_limits<T>::digits>(generator);
-
+        return std::generate_canonical<T,std::numeric_limits<T>::digits>(generator);
+        
     }
     
     template<typename T>
@@ -144,6 +144,26 @@ namespace svl  // protection from unintended ADL
     {
         return (fabs (val1 - val2) < eps);
     }
+    
+    template <typename Iter, typename T = typename std::iterator_traits<Iter>::value_type>
+    static std::pair<T,T> norm_min_max (Iter begin, Iter endd)
+    {
+        std::pair<Iter,Iter> min_max_iter = std::minmax_element (begin, endd);
+        T max_val = *min_max_iter.second;
+        T min_val = *min_max_iter.first;
+        std::pair<T,T> extr (min_val, max_val);
+        if (max_val != T(0))
+        {
+            T scale = max_val - min_val;
+            for (auto iit = begin; iit != endd; iit++)
+            {
+                T val = *iit;
+                *iit = (val - min_val) / scale;
+            }
+        }
+        return std::pair<T,T>(min_val, max_val);
+    }
+    
     
     
     
