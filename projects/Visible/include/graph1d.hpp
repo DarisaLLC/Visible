@@ -147,39 +147,44 @@ public:
     
     void draw() const
     {
-        if (! mIsSet) return;
         
         const Rectf& content = getRect ();
         
-        gl::color( Color( 0.25f, 0.25f, 0.25f ) );
-        ci::gl::drawStrokedRect(content);
+        {
+            gl::ScopedColor Color( 0.25f, 0.25f, 0.25f);
+            ci::gl::drawStrokedRect(content);
+        }
+        if (! mIsSet) return;
         
         // draw graph
-        gl::color( ColorA( 0.0f, 0.0f, 1.0f, 1.0f ) );
-        gl::begin( GL_LINE_STRIP );
-        for( float x = 0; x < content.getWidth(); x ++ )
         {
-            float y = m_CB ( x / content.getWidth());
-            if (y < 0) continue;
-            y = 1.0f - y;
-            ci::gl::vertex(vec2( x , y * content.getHeight() ) + content.getUpperLeft() );
+            gl::ScopedColor ColorA( 0.0f, 0.0f, 1.0f, 1.0f );
+            gl::begin( GL_LINE_STRIP );
+            for( float x = 0; x < content.getWidth(); x ++ )
+            {
+                float y = m_CB ( x / content.getWidth());
+                if (y < 0) continue;
+                y = 1.0f - y;
+                ci::gl::vertex(vec2( x , y * content.getHeight() ) + content.getUpperLeft() );
+            }
+            gl::end();
         }
-        gl::end();
         
-        gl::color( Color( 0.75f, 0.5f, 0.25f ) );
-        glLineWidth(25.f);
-        float px = norm_pos().x * content.getWidth();
-        float mVal = m_CB (norm_pos().x);
-        
-        vec2 mid (px, content.getHeight()/2.0);
-        if (content.contains(mid))
         {
-            ci::gl::drawLine (vec2(px, 0.f), vec2(px, content.getHeight()));
-            draw_value_label (mVal, px, content.getHeight()/2.0f);
+            gl::ScopedColor Color( 0.75f, 0.5f, 0.25f );
+            glLineWidth(25.f);
+            float px = norm_pos().x * content.getWidth();
+            float mVal = m_CB (norm_pos().x);
             
+            vec2 mid (px, content.getHeight()/2.0);
+            if (content.contains(mid))
+            {
+                ci::gl::drawLine (vec2(px, 0.f), vec2(px, content.getHeight()));
+                draw_value_label (mVal, px, content.getHeight()/2.0f);
+                
+            }
         }
     }
-    
     const std::vector<float>& buffer () const
     {
         return mBuffer;

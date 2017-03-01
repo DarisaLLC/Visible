@@ -4465,6 +4465,7 @@
 		C2601BB21CED3E060045FF57 /* list.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = list.hpp; sourceTree = "<group>"; };
 		C2601BB31CED3E060045FF57 /* list_c.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = list_c.hpp; sourceTree = "<group>"; };
 		C2601BB41CED3E060045FF57 /* map.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = map.hpp; sourceTree = "<group>"; };
+		C2601BB41E674F88004415A3 /* visible_layout.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = visible_layout.hpp; path = ../include/visible_layout.hpp; sourceTree = "<group>"; };
 		C2601BB51CED3E060045FF57 /* minus.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = minus.hpp; sourceTree = "<group>"; };
 		C2601BB61CED3E060045FF57 /* modulus.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = modulus.hpp; sourceTree = "<group>"; };
 		C2601BB71CED3E060045FF57 /* not_equal_to.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = not_equal_to.hpp; sourceTree = "<group>"; };
@@ -9802,6 +9803,7 @@
 				C21946A31CE4EA4900976025 /* guiContext.h */,
 				C2B005861CFF8FE100AC2E64 /* qtimeAvfLink.h */,
 				C2E321FF1D0480E4006DFE5E /* mediaInfo.h */,
+				C2601BB41E674F88004415A3 /* visible_layout.hpp */,
 				C21946A71CE4EA4900976025 /* vf_cinder.hpp */,
 				C21946AC1CE4EA4900976025 /* qtime_frame_cache.hpp */,
 				C29F43581CFA8D9B008EE460 /* time_index_cache.h */,

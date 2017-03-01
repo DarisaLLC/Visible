@@ -377,3 +377,4 @@ void clipContext::mouseUp( MouseEvent event )
     if (mGraph1D) mGraph1D->mouseUp( event );
 }
 
+

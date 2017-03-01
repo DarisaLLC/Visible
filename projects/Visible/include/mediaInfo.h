@@ -1,3 +1,4 @@
+
 #ifndef __GEN_MOVIE_INFO__
 #define __GEN_MOVIE_INFO__
 
@@ -27,18 +28,18 @@ struct tiny_media_info
     BOOL mIsLifSerie;
     uint32_t mChannels;
     
-      
+    
     void printout ()
     {
-       if (! isImageFolder ())
-           std::cout  << " -- General Movie Info -- " << std::endl;
+        if (! isImageFolder ())
+            std::cout  << " -- General Movie Info -- " << std::endl;
         else
             std::cout  << " -- Image Folder Info -- " << std::endl;
         
-       std::cout  << "Dimensions:" << getWidth() << " x " << getHeight() << std::endl;
-       std::cout  << "Duration:  " << getDuration() << " seconds" << std::endl;
-       std::cout  << "Frames:    " << getNumFrames() << std::endl;
-       std::cout  << "Framerate: " << getFramerate() << std::endl;
+        std::cout  << "Dimensions:" << getWidth() << " x " << getHeight() << std::endl;
+        std::cout  << "Duration:  " << getDuration() << " seconds" << std::endl;
+        std::cout  << "Frames:    " << getNumFrames() << std::endl;
+        std::cout  << "Framerate: " << getFramerate() << std::endl;
     }
     
 #ifdef __cplusplus
@@ -61,7 +62,7 @@ struct tiny_media_info
             std::cout  << " -- General Movie Info -- " << std::endl;
         else
             std::cout  << " -- Image Folder Info -- " << std::endl;
-
+        
         std_stream << "Dimensions:" << getWidth() << " x " << getHeight() << std::endl;
         std_stream << "Duration:  " << getDuration() << " seconds" << std::endl;
         std_stream << "Frames:    " << getNumFrames() << std::endl;
@@ -74,5 +75,5 @@ struct tiny_media_info
 };
 
 
-
 #endif
+

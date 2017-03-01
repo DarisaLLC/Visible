@@ -32,7 +32,7 @@
 #include <mutex>
 #include "async_producer.h"
 #include "cinder_xchg.hpp"
-
+#include "visible_layout.hpp"
 
 using namespace ci;
 using namespace ci::app;
@@ -57,77 +57,8 @@ namespace
         return AppBase::get()->getElapsedSeconds();
     }
     
-    
-    inline ivec2 expected_window_size () { return vec2 (960, 540); }
-    inline ivec2 trim () { return vec2(10,10); }
-    vec2 trim_norm () { return vec2(trim().x, trim().y) / vec2(getWindowWidth(), getWindowHeight()); }
-    inline ivec2 desired_window_size () { return expected_window_size() + trim () + trim (); }
-    inline ivec2 canvas_size () { return getWindowSize() - trim() - trim (); }
-    inline vec2& image_frame_size_norm (){ static vec2 ni (0.67, 0.75); return ni;}
-    inline ivec2 image_frame_size ()
-    {
-        static vec2& np = image_frame_size_norm ();
-        return ivec2 (np.x * expected_window_size().x, np.y * expected_window_size().y);
-    }
-    
-  
-    inline vec2 plots_frame_position_norm ()
-    {
-        vec2 np = vec2 (image_frame_size_norm().x + trim_norm().x, trim_norm().y);
-        return np;
-    }
-    inline vec2 image_frame_position_norm ()
-    {
-        vec2 np = vec2 (trim_norm().x, trim_norm().y);
-        return np;
-    }
-    
-    inline vec2 plots_frame_position ()
-    {
-        vec2 np = vec2 (plots_frame_position_norm().x * expected_window_size().x, plots_frame_position_norm().y * expected_window_size().y);
-        return np;
-    }
-    inline vec2 image_frame_position ()
-    {
-        vec2 np = vec2 (image_frame_position_norm().x * expected_window_size().x, image_frame_position_norm().y * expected_window_size().y);
-        return np;
-    }
-    
-    
-    inline vec2 single_plot_size_norm (){ vec2 np = vec2 (1.0 - image_frame_size_norm().x, 0.25); return np;}
-    inline vec2 plots_frame_size_norm (){ vec2 np = vec2 (1.0 - image_frame_size_norm().x,
-                                                           3 * single_plot_size_norm().y); return np;}
+    static layout vl (ivec2 (960, 540), ivec2 (10, 10));
 
-
-    inline ivec2 plots_frame_size () { return ivec2 ((canvas_size().x * plots_frame_size_norm().x),
-                                                     (canvas_size().y * plots_frame_size_norm().y)); }
-    
-    inline ivec2 single_plot_size () { return ivec2 ((canvas_size().x * single_plot_size_norm().x),
-                                                     (canvas_size().y * single_plot_size_norm().y)); }
-    
-    inline Rectf image_frame_rect ()
-    {
-        vec2 tl = image_frame_position();
-        vec2 br = vec2 (tl.x + image_frame_size().x, tl.y + image_frame_size().y);
-        
-        return Rectf (tl, br);
-    }
-    
-    inline vec2 canvas_norm_size () { return vec2(canvas_size().x, canvas_size().y) / vec2(getWindowWidth(), getWindowHeight()); }
-    inline Rectf text_norm_rect () { return Rectf(0.0, 1.0 - 0.125, 1.0, 0.125); }
-    inline void plot_rects (std::vector<Rectf>& plots )
-    {
-        plots.resize(3);
-        auto plot_tl = plots_frame_position();
-        auto plot_size = single_plot_size();
-        
-        plots[0] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
-        plots[1] = Rectf (vec2(plots[0].getUpperLeft().x, plots[0].getUpperLeft().y + plot_size.y),
-                          vec2(plots[0].getLowerRight().x, plots[0].getLowerRight().y + plot_size.y));
-        plots[2] = Rectf (vec2(plots[1].getUpperLeft().x, plots[1].getUpperLeft().y + plot_size.y),
-                          vec2(plots[1].getLowerRight().x, plots[1].getLowerRight().y + plot_size.y));
-    }
-    
 }
 
 
@@ -148,7 +79,7 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
     if (is_valid())
     {
         mWindow->setTitle( mPath.filename().string() );
-        mWindow->setSize(desired_window_size());
+        mWindow->setSize(vl.desired_window_size());
         mFont = Font( "Menlo", 12 );
         mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     }
@@ -434,13 +365,13 @@ void lifContext::loadCurrentSerie ()
             //  2
             //  3
             
-            ivec2 window_size (desired_window_size());
+            ivec2 window_size (vl.desired_window_size());
             setWindowSize(window_size);
             int channel_count = (int) tm.getNumChannels();
 
             {
                 std::lock_guard<std::mutex> lock(m_track_mutex);
-                plot_rects(m_track_rects);
+                vl.plot_rects(m_track_rects);
                 
                 assert (m_track_rects.size() >= channel_count);
                 
@@ -545,8 +476,8 @@ void  lifContext::update_log (const std::string& msg)
 
 Rectf lifContext::get_image_display_rect ()
 {
-    ivec2 ivf = image_frame_size();
-    ivec2 tl = trim();
+    ivec2 ivf = vl.image_frame_size();
+    ivec2 tl = vl.trim();
     
     if (m_serie.channelCount == 1)
         ivf.y /= 3;
@@ -568,7 +499,7 @@ bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif
 void lifContext::resize ()
 {
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-    plot_rects(m_track_rects);
+    vl.plot_rects(m_track_rects);
     for (int cc = 0; cc < m_tracks.size(); cc++)
     {
         m_tracks[cc]->setRect (m_track_rects[cc]);
