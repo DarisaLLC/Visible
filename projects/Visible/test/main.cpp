@@ -27,6 +27,7 @@
 #include "core/gtest_image_utils.hpp"
 #include "vision/colorhistogram.hpp"
 #include "CinderOpenCV.h"
+#include "ut_algo.hpp"
 
 using namespace boost;
 

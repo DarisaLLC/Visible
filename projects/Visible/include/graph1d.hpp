@@ -9,10 +9,13 @@
 #include "cinder/Function.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/gl/TextureFont.h"
+#include <Iterator>
+#include <Functional>
+
 #include "InteractiveObject.h"
 #include "async_producer.h"
 #include "core/core.hpp"
-#include <Iterator>
+
 
 using namespace std;
 using namespace ci;

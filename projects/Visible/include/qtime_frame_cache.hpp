@@ -14,10 +14,8 @@
 #include <fstream>
 #include <mutex>
 #include <memory>
-#include <functional>
 #include <map>
 #include "timestamp.h"
-#include "base_signaler.h"
 #include "mediaInfo.h"
 #include "time_index.h"
 #include "avReader.hpp"
@@ -34,7 +32,7 @@ typedef std::pair<SurfaceRef, index_time_t> SurTiIndexRef_t;
 
 typedef std::function<SurfaceRef ()> getSurfaceCb_t;
 
-class qTimeFrameCache : tiny_media_info, public base_signaler
+class qTimeFrameCache : tiny_media_info 
 {
 public:
     typedef std::map<time_spec_t, int64_t> timeToIndex;
@@ -64,6 +62,9 @@ public:
 
     const std::ostream& print_to_ (std::ostream& std_stream);
 
+    const std::vector<std::string>& channel_names () const;
+    void channel_names (const std::vector<std::string>& cnames) const; 
+    
     // Load a frame at the time stamp indicated.
     // If a frame at that time stamp is already cached, it will return false
     // If the frame is loaded in, it will return true.
@@ -98,6 +99,7 @@ private:
     std::vector<time_spec_t> m_time_hist;
     getSurfaceCb_t m_getSurface_cb;
     mutable std::pair<uint32_t,uint32_t> m_stats;
+    mutable std::vector<std::string> m_names;
     mutable std::mutex			mMutex;
 };
 

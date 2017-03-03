@@ -1,19 +1,9 @@
 
-#include "guiContext.h"
-#include "core/stl_utils.hpp"
-#include "cinder/app/App.h"
-#include "cinder/gl/gl.h"
-#include "cinder/Timeline.h"
-#include "cinder/Timer.h"
-#include "cinder/Camera.h"
-#include "cinder/qtime/Quicktime.h"
-#include "cinder/params/Params.h"
-#include "cinder/ImageIo.h"
-#include <boost/algorithm/minmax.hpp>
-#include <boost/algorithm/minmax_element.hpp>
+
 #include "VisibleApp.h"
 #include "app_utils.hpp"
-
+#include "guiContext.h"
+#include "core/stl_utils.hpp"
 
 using namespace boost;
 
@@ -141,9 +131,9 @@ void matContext::internal_setupmat_from_mat (const csv::matf_t & mat)
 {
     m_valid = false;
     size_t dL = mat.size ();
-    int numPixels = dL * dL;
+    auto numPixels = dL * dL;
     
-    mPointCloud = gl::VboMesh::create( numPixels, GL_POINTS, { gl::VboMesh::Layout().usage(GL_STATIC_DRAW).attrib(geom::POSITION, 3).attrib(geom::COLOR, 3) } );
+    mPointCloud = gl::VboMesh::create( static_cast<uint32_t>(numPixels), GL_POINTS, { gl::VboMesh::Layout().usage(GL_STATIC_DRAW).attrib(geom::POSITION, 3).attrib(geom::COLOR, 3) } );
     
     mPointsBatch = gl::Batch::create( mPointCloud, gl::getStockShader( gl::ShaderDef().color() ) );
     
@@ -281,9 +271,6 @@ void clipContext::loadAll (const  std::vector<vector<float> > & src)
 {
     if (! m_valid) return;
     
-    // Assumptions: Col 0 is X axis, Col 1,... are separate graphs
-    // Normalize to 0 - 1
-    // Create the first column
     mGraph1D = Graph1DRef (new graph1D ("signature", getWindowBounds() ) );
     mGraph1D->addListener( this, &clipContext::receivedEvent );
     
@@ -293,6 +280,7 @@ void clipContext::loadAll (const  std::vector<vector<float> > & src)
     if (normalize_option ())
     {
         std::pair<float,float> minmax_val = svl::norm_min_max(out.begin(), out.end());
+        std::cout << minmax_val.first << " , " << minmax_val.second << std::endl;
     }
     mGraph1D->setup(coi);
 

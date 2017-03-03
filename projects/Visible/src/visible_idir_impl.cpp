@@ -1,13 +1,6 @@
 #include <stdio.h>
 
 #include "VisibleApp.h"
-#include "cinder/app/App.h"
-#include "cinder/app/RendererGl.h"
-#include "cinder/gl/gl.h"
-#include "cinder/Timeline.h"
-#include "cinder/Timer.h"
-#include "cinder/Camera.h"
-#include "cinder/qtime/Quicktime.h"
 #include "cinder/ip/resize.h"
 #include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"

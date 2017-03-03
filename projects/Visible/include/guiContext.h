@@ -11,34 +11,33 @@
 #include "cinder/Timeline.h"
 #include "cinder/ImageIo.h"
 #include "cinder/Thread.h"
-#include "cinder/ConcurrentCircularBuffer.h"
 #include "cinder/Signals.h"
 #include "cinder/Cinder.h"
 #include "cinder/Surface.h"
-#include "graph1d.hpp"
-#include "app_utils.hpp"
-#include "timestamp.h"
-#include "qtime_frame_cache.hpp"
+#include "cinder/Text.h"
 #include "CinderOpenCV.h"
-#include "roiWindow.h"
+
 #include <memory>
 #include <utility>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include "cinder/Timeline.h"
-#include "AccordionItem.h"
-#include "otherIO/lifFile.hpp"
-#include "core/stl_utils.hpp"
-#include "async_producer.h"
-
 #include <boost/integer_traits.hpp>
 // use int64_t instead of long long for better portability
 #include <boost/filesystem.hpp>
 #include <boost/cstdint.hpp>
-#include "core/singleton.hpp"
+
+#include "app_utils.hpp"
+#include "timestamp.h"
+#include "qtime_frame_cache.hpp"
+
+#include "graph1d.hpp"
+#include "roiWindow.h"
+#include "AccordionItem.h"
+#include "otherIO/lifFile.hpp"
+#include "core/stl_utils.hpp"
+#include "async_producer.h"
 #include "directoryPlayer.h"
 #include "qtimeAvfLink.h"
-#include "cinder/Text.h"
+
+
 #include <sstream>
 
 using namespace boost;
@@ -245,10 +244,10 @@ private:
 
 ///////////////////   Visual Browsing Contexts
 
-class visualContext : public guiContext
+class sequencedImageContext : public guiContext
 {
 public:
-	visualContext(ci::app::WindowRef& ww)
+	sequencedImageContext(ci::app::WindowRef& ww)
 	: guiContext (ww)
 	{}
 	
@@ -273,6 +272,10 @@ protected:
 	tracksD1_t m_luminance_tracks;
 	async_tracksD1_t m_async_luminance_tracks;
 	
+	std::vector<size_t> m_spatial_dims;
+//	std::vector<series_info> m_series_book;
+	std::vector<std::string> m_perform_names;
+	int  m_selected_perform_index;
 	
 	gl::TextureRef		mTextTexture;
 	vec2				mSize;
@@ -284,7 +287,7 @@ protected:
 
 ///////////////////
 
-class movContext : public visualContext
+class movContext : public sequencedImageContext
 {
 public:
 	// From just a name, use the open file dialog to get the file
@@ -339,11 +342,6 @@ public:
 
 	void play_pause_button ();
 	void loop_no_loop_button ();
-	
-	// Add tracks
-	void add_scalar_track_get_file () { add_scalar_track (); }
-	
-	void add_scalar_track (const boost::filesystem::path& file = boost::filesystem::path ());
 	
 
 	
@@ -491,7 +489,7 @@ private:
 };
 
 
-class lifContext : public visualContext
+class lifContext : public sequencedImageContext
 {
 public:
 	
@@ -571,10 +569,6 @@ public:
 	void play_pause_button ();
 	void loop_no_loop_button ();
 	
-	// Add tracks
-	void add_scalar_track_get_file () { add_scalar_track (); }
-	
-	void add_scalar_track (const boost::filesystem::path& file = boost::filesystem::path ());
 	
 	
 private:
@@ -616,7 +610,6 @@ private:
 	
 	
 	std::shared_ptr<lifIO::LifReader> m_lifRef;
-	std::vector<size_t> m_spatial_dims;
 	std::vector<series_info> m_series_book;
     std::vector<std::string> m_series_names;
 	std::shared_ptr<lifIO::LifSerie> m_current_serie_ref;

@@ -29,7 +29,7 @@ public:
     
     inline vec2 plots_frame_position_norm ()
     {
-        vec2 np = vec2 (image_frame_size_norm().x + trim_norm().x, trim_norm().y);
+        vec2 np = vec2 (1.0 - 2*trim_norm().x - plots_frame_size_norm().x , trim_norm().y);
         return np;
     }
     inline vec2 image_frame_position_norm ()
@@ -50,9 +50,8 @@ public:
     }
     
     
-    inline vec2 single_plot_size_norm (){ vec2 np = vec2 (1.0 - image_frame_size_norm().x, 0.25); return np;}
-    inline vec2 plots_frame_size_norm (){ vec2 np = vec2 (1.0 - image_frame_size_norm().x,
-                                                          3 * single_plot_size_norm().y); return np;}
+    inline vec2 single_plot_size_norm (){ vec2 np = vec2 (0.25, 0.25); return np;}
+    inline vec2 plots_frame_size_norm (){ vec2 np = vec2 (0.25, 3 * single_plot_size_norm().y); return np;}
     
     
     inline ivec2 plots_frame_size () { return ivec2 ((canvas_size().x * plots_frame_size_norm().x),

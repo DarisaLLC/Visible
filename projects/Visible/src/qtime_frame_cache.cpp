@@ -77,36 +77,38 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifse
     
     
     auto thisref = std::make_shared<qTimeFrameCache>(tm);
-    if (lifserie.getDurations().size ())
+    thisref->channel_names (names);
     
-    if (tm.count > 1)
+    if (lifserie.getDurations().size ())
     {
-        std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator tItr = lifserie.getDurations().begin();
-
-        std::vector<Surface8uRef> out;
-        while (tItr < lifserie.getDurations().end())
+        if (tm.count > 1)
         {
-            anonymous::internal_fill_one(lifserie, tm, frame_count, out, tItr);
-
-            // For 3 Channel get the one by 3 image containing all.
-            //
-            if (! out.empty() && out.size() == 1)
-                thisref->loadFrame(out[0], frame_time);
+            std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator tItr = lifserie.getDurations().begin();
             
-            // Increment durations by number of channels
-            cm_time ts((*tItr)/(10000.0));
-            frame_time = frame_time + ts;
-            frame_count ++;
+            std::vector<Surface8uRef> out;
+            while (tItr < lifserie.getDurations().end())
+            {
+                anonymous::internal_fill_one(lifserie, tm, frame_count, out, tItr);
+                
+                // For 3 Channel get the one by 3 image containing all.
+                //
+                if (! out.empty() && out.size() == 1)
+                    thisref->loadFrame(out[0], frame_time);
+                
+                // Increment durations by number of channels
+                cm_time ts((*tItr)/(10000.0));
+                frame_time = frame_time + ts;
+                frame_count ++;
+                
+                // Step the durations number of channel times.
+                for (auto ii = 0; ii < tm.mChannels; ii++, tItr++);
+            }
+        }
+        else if (tm.count == 1)
+        {
             
-            // Step the durations number of channel times.
-            for (auto ii = 0; ii < tm.mChannels; ii++, tItr++);
         }
     }
-    else if (tm.count == 1)
-    {
-        
-    }
-    
     assert(tm.count == frame_count);
     
     return thisref;
@@ -345,7 +347,8 @@ size_t qTimeFrameCache::convertTo(std::vector<roiWindow<P8U> >& dst)
     return dst.size();
 }
 
-
+const std::vector<std::string>& qTimeFrameCache::channel_names () const { return m_names; }
+void qTimeFrameCache::channel_names (const std::vector<std::string>& cnames) const { m_names = cnames; }
 
 
 

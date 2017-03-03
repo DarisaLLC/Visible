@@ -21,9 +21,6 @@
 #include "CinderOpenCV.h"
 #include "Cinder/ip/Blend.h"
 #include "opencv2/highgui.hpp"
-#include "vision/opencv_utils.hpp"
-#include "vision/histo.h"
-#include "core/stl_utils.hpp"
 #include "cinder/ip/Flip.h"
 #include "otherIO/lifFile.hpp"
 #include <strstream>
@@ -33,6 +30,9 @@
 #include "async_producer.h"
 #include "cinder_xchg.hpp"
 #include "visible_layout.hpp"
+#include "vision/opencv_utils.hpp"
+#include "vision/histo.h"
+#include "core/stl_utils.hpp"
 
 using namespace ci;
 using namespace ci::app;
@@ -58,7 +58,68 @@ namespace
     }
     
     static layout vl (ivec2 (960, 540), ivec2 (10, 10));
-
+    
+    
+    
+    tracksD1_t get_mean_luminance (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+                                   bool test_data = false)
+    {
+        
+        tracksD1_t tracks;
+        tracks.resize (names.size ());
+        for (auto tt = 0; tt < names.size(); tt++)
+            tracks[tt].first = names[tt];
+        
+        // If it is 3 channels. We will use multiple window
+        int64_t fn = 0;
+        while (frames->checkFrame(fn))
+        {
+            auto su8 = frames->getFrame(fn++);
+            
+            auto channels = names.size();
+            
+            std::vector<roiWindow<P8U> > rois;
+            switch (channels)
+            {
+                case 1:
+                {
+                    auto m1 = svl::NewRedFromSurface(su8);
+                    rois.emplace_back(m1);
+                    break;
+                }
+                case 3:
+                {
+                    auto m3 = svl::NewMultiFromSurface (su8, names, fn);
+                    for (auto cc = 0; cc < m3.planes(); cc++)
+                        rois.emplace_back(m3.plane(cc));
+                    break;
+                }
+            }
+            
+            assert (rois.size () == tracks.size());
+            
+            // Now get average intensity for each channel
+            int index = 0;
+            for (roiWindow<P8U> roi : rois)
+            {
+                index_time_t ti;
+                ti.first = fn;
+                timed_double_t res;
+                res.first = ti;
+                auto nmg = histoStats::mean(roi) / 256.0;
+                res.second = (! test_data) ? nmg :  (((float) fn) / frames->count() );
+                tracks[index++].second.emplace_back(res);
+            }
+            
+            // TBD: call progress reporter
+        }
+        
+        
+        return tracks;
+    }
+    
+    
+    
 }
 
 
@@ -66,7 +127,7 @@ namespace
 
 
 lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
-: visualContext(ww), mPath (dp)
+: sequencedImageContext(ww), mPath (dp)
 {
     m_valid = false;
     m_type = Type::lif_file_viewer;
@@ -135,8 +196,10 @@ void lifContext::onMarked ( marker_info& t)
 {
     pause ();
     seekToFrame((int)(t.norm_pos.x *= getNumFrames () ));
-    
-    
+    for (Graph1DRef graphRef : m_tracks )
+    {
+        graphRef->set_marker_position ( t );
+    }
 }
 
 bool lifContext::have_movie ()
@@ -202,6 +265,9 @@ void lifContext::setup()
         for (auto ss = 0; ss < m_series_book.size(); ss++)
             m_series_names.push_back (m_series_book[ss].name);
         
+        m_perform_names.clear ();
+        for (auto ss = 0; ss < m_series_book.size(); ss++)
+            m_perform_names.push_back (m_series_book[ss].name);
         
         // Add an enum (list) selector.
         
@@ -234,6 +300,22 @@ void lifContext::setup()
         mMovieParams.addButton("Play / Pause ", bind( &lifContext::play_pause_button, this ) );
         mMovieParams.addSeparator();
         mMovieParams.addButton(" Loop ", bind( &lifContext::loop_no_loop_button, this ) );
+        mMovieParams.addSeparator();
+        
+        mMovieParams.addParam( "Perform ", m_perform_names, &m_selected_perform_index )
+        //        .keyDecr( "[" )
+        //        .keyIncr( "]" )
+        .updateFn( [this]
+                  {
+                      if (m_selected_perform_index >= 0 && m_selected_perform_index < m_perform_names.size() )
+                      {
+                          m_serie = m_series_book[m_selected_serie_index];
+                          m_current_serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(m_selected_serie_index), stl_utils::null_deleter());
+                          loadCurrentSerie ();
+                          console() << "selected serie updated: " << m_series_names [m_selected_serie_index] << endl;
+                      }
+                  });
+        
         
         //        {
         //            const std::function<void (float)> setter = std::bind(&lifContext::setZoom, this, std::placeholders::_1);
@@ -241,7 +323,7 @@ void lifContext::setup()
         //            mMovieParams.addParam( "Zoom", setter, getter);
         //        }
         
-      
+        
     }
 }
 
@@ -277,65 +359,6 @@ void lifContext::loadLifFile ()
 }
 
 
-
-tracksD1_t get_mean_luminance (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
-                               bool test_data = false)
-{
-
-    tracksD1_t tracks;
-    tracks.resize (names.size ());
-    for (auto tt = 0; tt < names.size(); tt++)
-        tracks[tt].first = names[tt];
-
-    // If it is 3 channels. We will use multiple window
-    int64_t fn = 0;
-    while (frames->checkFrame(fn))
-    {
-        auto su8 = frames->getFrame(fn++);
-        
-        auto channels = names.size();
-
-        std::vector<roiWindow<P8U> > rois;
-        switch (channels)
-        {
-            case 1:
-            {
-                auto m1 = svl::NewRedFromSurface(su8);
-                rois.emplace_back(m1);
-                break;
-            }
-            case 3:
-            {
-                auto m3 = svl::NewMultiFromSurface (su8, names, fn);
-                for (auto cc = 0; cc < m3.planes(); cc++)
-                    rois.emplace_back(m3.plane(cc));
-                break;
-            }
-        }
-
-        assert (rois.size () == tracks.size());
-        
-        // Now get average intensity for each channel
-        int index = 0;
-        for (roiWindow<P8U> roi : rois)
-        {
-            index_time_t ti;
-            ti.first = fn;
-            timed_double_t res;
-            res.first = ti;
-            auto nmg = histoStats::mean(roi) / 256.0;
-            res.second = (! test_data) ? nmg :  (((float) fn) / frames->count() );
-            tracks[index++].second.emplace_back(res);
-        }
-        
-        // TBD: call progress reporter
-    }
-
-    
-    return tracks;
-}
-
-
 void lifContext::loadCurrentSerie ()
 {
     if ( ! (m_lifRef || ! m_current_serie_ref) )
@@ -343,7 +366,10 @@ void lifContext::loadCurrentSerie ()
     
     try {
         
+        // Create the frameset and assign the channel names
         mFrameSet = qTimeFrameCache::create (*m_current_serie_ref);
+        mFrameSet->channel_names (m_series_book[m_selected_serie_index].channel_names);
+        
         
         if (m_valid)
         {
@@ -368,7 +394,7 @@ void lifContext::loadCurrentSerie ()
             ivec2 window_size (vl.desired_window_size());
             setWindowSize(window_size);
             int channel_count = (int) tm.getNumChannels();
-
+            
             {
                 std::lock_guard<std::mutex> lock(m_track_mutex);
                 vl.plot_rects(m_track_rects);
@@ -382,6 +408,8 @@ void lifContext::loadCurrentSerie ()
                     m_tracks.push_back( Graph1DRef (new graph1D (m_current_serie_ref->getChannels()[cc].getName(),
                                                                  m_track_rects [cc])));
                 }
+                
+                
             }
             
             // Launch Average Luminance Computation
@@ -397,22 +425,47 @@ void lifContext::loadCurrentSerie ()
 
 
 
-void lifContext::mouseDown( MouseEvent event )
-{
-    mMetaDown = event.isMetaDown();
-    mMouseIsDown = true;
-}
-
 void lifContext::mouseMove( MouseEvent event )
 {
-    mMousePos = event.getPos();
+    for (Graph1DRef graphRef : m_tracks )
+    {
+        // Call base mouse move to update
+        graphRef->mouseMove( event );
+        marker_info tt;
+        graphRef->get_marker_position(tt);
+        tt.et = marker_info::event_type::move;
+//        signalMarker.emit(tt);
+        
+    }
 }
+
 
 void lifContext::mouseDrag( MouseEvent event )
 {
-    mMousePos = event.getPos();
-    mMouseIsDragging  = true;
+    for (Graph1DRef graphRef : m_tracks)
+        graphRef->mouseDrag( event );
 }
+
+
+void lifContext::mouseDown( MouseEvent event )
+{
+    for (Graph1DRef graphRef : m_tracks )
+    {
+        graphRef->mouseDown( event );
+        marker_info tt;
+        graphRef->get_marker_position(tt);
+        tt.et = marker_info::event_type::down;
+//        signalMarker.emit(tt);
+    }
+}
+
+
+void lifContext::mouseUp( MouseEvent event )
+{
+    for (Graph1DRef graphRef : m_tracks)
+        graphRef->mouseUp( event );
+}
+
 
 
 void lifContext::keyDown( KeyEvent event )
@@ -455,13 +508,6 @@ void lifContext::keyDown( KeyEvent event )
     }
 }
 
-
-
-void lifContext::mouseUp( MouseEvent event )
-{
-    mMouseIsDown = false;
-    mMouseIsDragging = false;
-}
 
 void  lifContext::update_log (const std::string& msg)
 {
@@ -604,7 +650,7 @@ void lifContext::draw ()
     
 }
 
-
+#if 0
 
 ////////   Adding Tracks
 
@@ -635,7 +681,7 @@ void lifContext::add_scalar_track(const boost::filesystem::path& path)
 
 
 
-#if 0
+
 std::shared_ptr<guiContext> cw(std::shared_ptr<guiContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
 
 if (! cw->is_valid()) return;

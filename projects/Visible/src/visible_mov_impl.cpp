@@ -9,29 +9,29 @@
 #include <stdio.h>
 #include "VisibleApp.h"
 #include "guiContext.h"
-#include "core/stl_utils.hpp"
-#include "cinder/app/App.h"
-#include "cinder/gl/gl.h"
-#include "cinder/Timeline.h"
-#include "cinder/Timer.h"
-#include "cinder/Camera.h"
-#include "cinder/qtime/Quicktime.h"
-#include "cinder/params/Params.h"
-#include "cinder/ImageIo.h"
 #include "qtime_frame_cache.hpp"
-#include "CinderOpenCV.h"
-#include "Cinder/ip/Blend.h"
+
+#include "cinder/ip/Flip.h"
 #include "opencv2/highgui.hpp"
 #include "opencv_utils.hpp"
-#include "cinder/ip/Flip.h"
+
+
 #include <strstream>
-#include "gradient.h"
+#include <future>
+#include <mutex>
+#include "async_producer.h"
+#include "cinder_xchg.hpp"
 #include "visible_layout.hpp"
+
+#include "gradient.h"
+#include "vision/opencv_utils.hpp"
+#include "vision/histo.h"
+#include "core/stl_utils.hpp"
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
-
+using namespace svl;
 
 extern float  MovieBaseGetCurrentTime(cinder::qtime::MovieSurfaceRef& movie);
 
@@ -50,15 +50,81 @@ namespace
     }
     
     static layout vl (ivec2(960,540), ivec2(10,10));
+    
+    
+    
+    tracksD1_t get_mean_luminance (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names, bool test_data = false)
+    {
+        tracksD1_t tracks;
+        
+        if (names.empty() || (names.size() != 1 && names.size() != 3))
+            return tracks;
+        
+        // We either have 3 channels or a single one ( that is content is same in all 3 channels ) --
+        // Note that Alpha channel is not processed
+        
+        tracks.resize (names.size ());
+        for (auto tt = 0; tt < names.size(); tt++)
+            tracks[tt].first = names[tt];
+        
+        int64_t fn = 0;
+        while (frames->checkFrame(fn))
+        {
+            auto su8 = frames->getFrame(fn++);
+            
+            auto channels = names.size();
+            
+            std::vector<roiWindow<P8U> > rois;
+            switch (channels)
+            {
+                case 1:
+                {
+                    rois.emplace_back(svl::NewRedFromSurface(su8));
+                    break;
+                }
+                case 3:
+                {
+                    rois.emplace_back(svl::NewRedFromSurface(su8));
+                    rois.emplace_back(svl::NewGreenFromSurface(su8));
+                    rois.emplace_back(svl::NewBlueFromSurface(su8));
+                    break;
+                }
+            }
+            
+            assert (rois.size () == tracks.size());
+            
+            // Now get average intensity for each channel
+            int index = 0;
+            for (roiWindow<P8U> roi : rois)
+            {
+                index_time_t ti;
+                ti.first = fn;
+                timed_double_t res;
+                res.first = ti;
+                auto nmg = histoStats::mean(roi) / 256.0;
+                res.second = (! test_data) ? nmg :  (((float) fn) / frames->count() );
+                tracks[index++].second.emplace_back(res);
+            }
+            
+            std::cout << fn << std::endl;
+            
+            // TBD: call progress reporter
+        }
+        
+        
+        return tracks;
+    }
+    
+    
 }
 
-    
+
 
 
 /////////////  movContext Implementation  ////////////////
 
 movContext::movContext(WindowRef& ww, const boost::filesystem::path& dp)
-: visualContext(ww), mPath (dp)
+: sequencedImageContext(ww), mPath (dp)
 {
     m_valid = false;
     m_type = Type::qtime_viewer;
@@ -196,9 +262,9 @@ void movContext::setup()
         mButton_title_index = 0;
         string max = to_string( m_movie->getDuration() );
         {
-        const std::function<void (int)> setter = std::bind(&movContext::seekToFrame, this, std::placeholders::_1);
-        const std::function<int ()> getter = std::bind(&movContext::getCurrentFrame, this);
-        mMovieParams.addParam ("Mark", setter, getter);
+            const std::function<void (int)> setter = std::bind(&movContext::seekToFrame, this, std::placeholders::_1);
+            const std::function<int ()> getter = std::bind(&movContext::getCurrentFrame, this);
+            mMovieParams.addParam ("Mark", setter, getter);
         }
         mMovieParams.addSeparator();
         {
@@ -240,7 +306,6 @@ void movContext::clear_movie_params ()
 }
 
 
-
 void movContext::loadMovieFile()
 {
     if ( ! mPath.empty () )
@@ -251,8 +316,10 @@ void movContext::loadMovieFile()
             
             m_movie = qtime::MovieSurface::create( mPath.string() );
             m_valid = m_movie->isPlayable ();
+            std::vector<std::string> names = { "red", "green", "blue"};
             
             mFrameSet = qTimeFrameCache::create (m_movie);
+            mFrameSet->channel_names(names);
             
             if (m_valid)
             {
@@ -274,24 +341,33 @@ void movContext::loadMovieFile()
 
 
                 // Setup Plot area
-                    std::lock_guard<std::mutex> lock(m_track_mutex);
-                    vl.plot_rects(m_track_rects);
-                    
-                    assert (m_track_rects.size() >= 1);
-                    m_tracks.resize (0);
-                    
-                    m_tracks.push_back( Graph1DRef (new graph1D ("Plot 1",  m_track_rects [0])));
-
-   
+                std::lock_guard<std::mutex> lock(m_track_mutex);
+                vl.plot_rects(m_track_rects);
                 
+                assert (m_track_rects.size() >= 1);
+                m_tracks.resize (0);
 
+               
+                for (int cc = 0; cc < names.size() ; cc++)
+                {
+                    m_tracks.push_back( Graph1DRef (new graph1D (names[cc], m_track_rects [cc])));
+                }
+                
+                
                 m_movie->setLoop( true, false);
                 m_movie->seekToStart();
-                // Do not play at start 
+                // Do not play at start
                 m_movie->play();
                 
                 // Percent trim from all sides.
                 m_max_motion.x = m_max_motion.y = 0.1;
+                
+                
+                // Launch Average Luminance Computation
+                m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance,
+                                                      mFrameSet, names, false);
+                
+                
                 
             }
         }
@@ -380,6 +456,16 @@ void movContext::resize ()
 }
 void movContext::update ()
 {
+    if ( is_ready (m_async_luminance_tracks) &&  m_async_luminance_tracks.get().size() == m_tracks.size ())
+    {
+        m_luminance_tracks = m_async_luminance_tracks.get();
+
+        for (int cc = 0; cc < m_luminance_tracks.size(); cc++)
+        {
+            m_tracks[cc]->setup(m_luminance_tracks[cc]);
+        }
+    }
+    
     if (! have_movie () )
         return;
     
@@ -489,7 +575,7 @@ void movContext::draw_info ()
     
 }
 
-
+#if 0
 
 // Create a clip viewer. Go through container of viewers, if there is a movie view, connect onMarked signal to it
 void movContext::add_scalar_track(const boost::filesystem::path& path)
@@ -507,30 +593,30 @@ void movContext::add_scalar_track(const boost::filesystem::path& path)
     new_ts->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(this), std::placeholders::_1));
     VisibleCentral::instance().contexts().push_back(new_ts);
     
-//    VisWinMgr::key_t kk;
-//    bool kept = VisWinMgr::instance().makePair(win, new_ts, kk);
-//    ci_console() << "Time Series Window/Context registered: " << std::boolalpha << kept << std::endl;
-
+    //    VisWinMgr::key_t kk;
+    //    bool kept = VisWinMgr::instance().makePair(win, new_ts, kk);
+    //    ci_console() << "Time Series Window/Context registered: " << std::boolalpha << kept << std::endl;
+    
 }
 
 
 
 
 
-#if 0
-    std::shared_ptr<guiContext> cw(std::shared_ptr<guiContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
-    
-    if (! cw->is_valid()) return;
-    
-    for (std::shared_ptr<guiContext> uip : mContexts)
+
+std::shared_ptr<guiContext> cw(std::shared_ptr<guiContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
+
+if (! cw->is_valid()) return;
+
+for (std::shared_ptr<guiContext> uip : mContexts)
+{
+    if (uip->is_context_type(guiContext::Type::qtime_viewer))
     {
-        if (uip->is_context_type(guiContext::Type::qtime_viewer))
-        {
-            uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
-            cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
-        }
+        uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
+        cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
     }
-    mContexts.push_back(cw);
+}
+mContexts.push_back(cw);
 }
 
 // Create a movie viewer. Go through container of viewers, if there is a clip view, connect onMarked signal to it
