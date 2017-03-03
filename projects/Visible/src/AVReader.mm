@@ -163,7 +163,8 @@ static inline CGAffineTransform tansformForTrack(AVAssetTrack* assetTrack, CGRec
                          @"mov": @"com.apple.quicktime-movie",
                          @"mp4": @"public.mpeg-4",
                          @"avi": @"public.avi",
-                         @"mpeg": @"public.mpeg"
+                         @"mpeg": @"public.mpeg",
+                         @"m4v": @"com.apple.m4v-video"                         
                          };
     });
     

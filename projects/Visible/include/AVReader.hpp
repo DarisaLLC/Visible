@@ -73,6 +73,8 @@ namespace avcc
 
 
     };
+    
+    typedef std::shared_ptr<avReader> avReaderRef;
 }
 
 #endif

@@ -57,6 +57,30 @@ SurfaceRef get_surface(const std::string & path){
     return sp;
 }
 
+
+TEST (UT_qtimeCache, AVReader)
+{
+    boost::filesystem::path test_filepath;
+    
+    // vf does not support QuickTime natively. The ut expectes and checks for failure
+    
+    auto res = dgenv_ptr->asset_path("box-move.m4v");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    
+    if (res.second)
+        test_filepath = res.first;
+    
+    avcc::avReaderRef rref = std::make_shared< avcc::avReader> (test_filepath.string());
+    rref->run ();
+    std::shared_ptr<qTimeFrameCache> sm = qTimeFrameCache::create(rref);
+    
+    EXPECT_TRUE(rref->isValid());
+    EXPECT_TRUE(sm->count() == 57);
+    
+    
+}
+
 TEST(colorHistogram, basic)
 {
     {
@@ -67,7 +91,7 @@ TEST(colorHistogram, basic)
             std::pair<Surface8uRef, Channel8uRef> wp (svl::image_io_read_surface(res.first));
             roiWindow<P8UC4> rootwin = svl::NewFromSurface(wp.first.get());
             EXPECT_EQ(rootwin.width(), 420);
-            EXPECT_EQ(rootwin.height(), 934);
+            EXPECT_EQ(rootwin.height(), 234);
         
             Surface8uRef rr = wp.first;
             cv::Mat rgb = cinder::toOcvRef(*wp.first.get());
@@ -76,7 +100,7 @@ TEST(colorHistogram, basic)
             
             sh.check_against(sh.spaceHistogram ());
             
-            std::cout << sh << std::endl;
+           // std::cout << sh << std::endl;
             
         }
     }

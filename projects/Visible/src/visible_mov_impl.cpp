@@ -466,19 +466,14 @@ void movContext::update ()
         }
     }
     
-    if (! have_movie () )
-        return;
-    
-    time_spec_t new_time = qtimeAvfLink::MovieBaseGetCurrentTime(m_movie);
-    
-    fPair trim (10, 10);
-
+    if (! have_movie () ) return;
     
     if (m_movie->checkNewFrame())
     {
        ip::flipVertical(*m_movie->getSurface(), mSurface.get());
        ip::flipHorizontal(mSurface.get());
-        
+
+        time_spec_t new_time = m_movie->getCurrentTime();
         mFrameSet->loadFrame(mSurface, new_time);
         m_index = mFrameSet->currentIndex(new_time);
         mSurface = mFrameSet->getFrame(new_time);

@@ -42,10 +42,17 @@ public:
     
     typedef std::map<int64_t, container_index_t > indexToContainer;
     
+    // Cinder Movie requires rendering though the App
     static std::shared_ptr<qTimeFrameCache> create (const ci::qtime::MovieSurfaceRef& movie);
     static std::shared_ptr<qTimeFrameCache> create (const ci::qtime::MovieGlRef& movie);
+    
+    // Offline movie loader
     static std::shared_ptr<qTimeFrameCache> create (const std::shared_ptr<avcc::avReader>& assetReader);
+    
+    // From directory of images
     static std::shared_ptr<qTimeFrameCache> create (const std::vector<ci::Surface8uRef>& folderImages);
+    
+    // From LIF files
     static std::shared_ptr<qTimeFrameCache> create (lifIO::LifSerie&);
     
 
