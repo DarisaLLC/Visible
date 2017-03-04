@@ -27,7 +27,11 @@
 #include "core/gtest_image_utils.hpp"
 #include "vision/colorhistogram.hpp"
 #include "CinderOpenCV.h"
+#include "algo_in_frames_out_tracks.hpp"
+#include "algo_registry.hpp"
+#include "ut_util.hpp"
 #include "ut_algo.hpp"
+#include "getLuminanceAlgo.hpp"
 
 using namespace boost;
 
@@ -62,6 +66,11 @@ void done_callback (void)
         std::cout << "Done"  << std::endl;
 }
 
+TEST (UT_make_function, make_function)
+{
+    make_function_test::run();
+}
+
 
 TEST (UT_algo, AVReader)
 {
@@ -85,9 +94,18 @@ TEST (UT_algo, AVReader)
     EXPECT_TRUE(rref->isValid());
     EXPECT_TRUE(sm->count() == 57);
     
-    algoIO::algo_fn_t algoFN = get_mean_luminance;
-    algoIO::algoIORef al = algoIO::create("UT", algoFN, sm);
+    using algoRef = framesInTracksOut::framesInTracksOutRef;
+    using lum_func_t = algo_cb_t<algoRef>;
     
+    algoRef al = framesInTracksOut::create("UT", sm);
+    
+    std::unique_ptr<lum_func_t> f_ut(new lum_func_t (&algo_registry_ut));
+    
+    auto lum_func_ti = algo_library::instance().add(f_ut);
+    
+    auto return_val = algo_library::instance().call(lum_func_ti, al);
+    
+    EXPECT_TRUE(return_val);
     
 }
 
