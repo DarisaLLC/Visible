@@ -16,6 +16,8 @@
 #include <iomanip>
 #include <fstream>
 #include <stdio.h>
+#include <thread>
+#include <condition_variable>
 
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
@@ -25,6 +27,43 @@ using namespace std;
 
 namespace stl_utils
 {
+    
+    class watchdog {
+    public:
+        static void start(int secs);
+        static void stop();
+        
+    private:
+        watchdog(int secs) {
+            thread_ = std::thread{[=] {
+                auto tp =
+                std::chrono::high_resolution_clock::now() + std::chrono::seconds(secs);
+                std::unique_lock<std::mutex> guard{mtx_};
+                while (! canceled_
+                       && cv_.wait_until(guard, tp) != std::cv_status::timeout) {
+                    // spin
+                }
+                if (! canceled_) {
+                    std::cerr << "WATCHDOG: unit test did not finish within "
+                    << secs << "s, abort\n";
+                    abort();
+                }
+            }};
+        }
+        ~watchdog() {
+            { // lifetime scope of guard
+                std::lock_guard<std::mutex> guard{mtx_};
+                canceled_ = true;
+                cv_.notify_all();
+            }
+            thread_.join();
+        }
+        
+        volatile bool canceled_ = false;
+        std::mutex mtx_;
+        std::condition_variable cv_;
+        std::thread thread_;
+    };
     
     
     template <typename Key, typename Value, typename Comparator = less<Key>, typename Alloc = std::allocator<std::pair<const Key, Value> > >

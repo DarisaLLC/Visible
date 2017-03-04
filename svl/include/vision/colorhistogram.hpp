@@ -82,6 +82,7 @@ public:
         " Intersect: " << intersect << " Bhatt: " << bhattacharyya  << std::endl;
     }
     
+    // TBD: Fix this
     friend ostream & operator<<(ostream & ous, const ColorSpaceHistogram & dis)
     {
         cv::SparseMatConstIterator_<float> it = dis.spaceHistogram().begin<float>();
@@ -93,6 +94,7 @@ public:
         {
             // print element indices and the element value
             const SparseMat::Node* n = it.node();
+            if (!n) continue;
             printf("(");
             for(int i = 0; i < dims; i++)
                 printf("%d%s", n->idx[i], i < dims-1 ? ", " : ")");

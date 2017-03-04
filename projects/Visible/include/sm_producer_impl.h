@@ -55,6 +55,7 @@ public:
     bool generate_ssm (int start_frame, int frames);
     int64_t frame_count () { return _frameCount; }
     std::string  getName () const { return m_name; }
+    void asset_reader_done_cb ();
     
     
 private:

@@ -57,6 +57,10 @@ SurfaceRef get_surface(const std::string & path){
     return sp;
 }
 
+void done_callback (void)
+{
+        std::cout << "Done"  << std::endl;
+}
 
 TEST (UT_qtimeCache, AVReader)
 {
@@ -71,7 +75,9 @@ TEST (UT_qtimeCache, AVReader)
     if (res.second)
         test_filepath = res.first;
     
-    avcc::avReaderRef rref = std::make_shared< avcc::avReader> (test_filepath.string());
+    avcc::avReaderRef rref = std::make_shared< avcc::avReader> (test_filepath.string(), false);
+    rref->setUserDoneCallBack(done_callback);
+    
     rref->run ();
     std::shared_ptr<qTimeFrameCache> sm = qTimeFrameCache::create(rref);
     
@@ -99,9 +105,6 @@ TEST(colorHistogram, basic)
             sh.run();
             
             sh.check_against(sh.spaceHistogram ());
-            
-           // std::cout << sh << std::endl;
-            
         }
     }
     
@@ -185,7 +188,9 @@ TEST (UT_AVReaderBasic, run)
         test_filepath = res.first;
     
     {
-        avcc::avReader rr (test_filepath.string());
+        avcc::avReader rr (test_filepath.string(), false);
+        rr.setUserDoneCallBack(done_callback);
+        rr.run ();
         EXPECT_TRUE(rr.info().count == 11);
         EXPECT_FALSE(rr.isEmpty());
         tiny_media_info mif (rr.info());

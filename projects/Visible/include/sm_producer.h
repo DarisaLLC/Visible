@@ -74,6 +74,7 @@ public:
     template<typename T>
     bool providesCallback () const;
     
+  
     
 private:
     class spImpl;

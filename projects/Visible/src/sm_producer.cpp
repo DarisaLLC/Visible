@@ -76,6 +76,10 @@ const sm_producer::sMatrix_t& sm_producer::similarityMatrix () const { return _i
 
 const sm_producer::sMatrixProjection_t& sm_producer::shannonProjection () const { return _impl->m_entropies; }
 
+void sm_producer::spImpl::asset_reader_done_cb ()
+{
+    std::cout << " asset reader Done" << std::endl;
+}
 
 /*
  * Load all the frames
@@ -87,6 +91,7 @@ int sm_producer::spImpl::loadMovie( const std::string& movieFile )
     {
         ScopeTimer timeit("avReader");
         m_assetReader = std::make_shared<avcc::avReader>(movieFile, false);
+        m_assetReader->setUserDoneCallBack(std::bind(&sm_producer::spImpl::asset_reader_done_cb, this));
     }
     
     bool m_valid = m_assetReader->isValid();

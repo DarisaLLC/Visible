@@ -35,7 +35,8 @@ namespace avcc
         typedef void (progress_callback) (float);
 
         avReader (const std::string&, bool andRun = true);
-        avReader (const std::string&, void (*get_progress)(CMTime), void (*get_image)(CVPixelBufferRef));
+        avReader (const std::string&, void (*user_done_cb)(void) = nullptr, void (*get_progress)(CMTime) = nullptr,
+                                      void (*get_image)(CVPixelBufferRef) = nullptr);
         bool isValid () const;
         bool isEmpty () const;
         bool isDone () const;
@@ -49,10 +50,11 @@ namespace avcc
 
         void setImageCallBack (image_cb icb);
         void setProgressCallBack (progress_cb icb);
-        void setDoneCallBack (done_cb dcb);
+        void setUserDoneCallBack (done_cb dcb);
 
         static image_cb m_image_cb;
         static progress_cb m_progress_cb;
+        static done_cb m_user_done_cb;
         static done_cb m_done_cb;
         
         static shared_queue<Surface8uRef> m_surfaces;
@@ -68,7 +70,7 @@ namespace avcc
         std::pair<size_t,size_t> m_sizes;
         void m_default_progress_cb (CMTime p);
         void m_default_image_cb (CVPixelBufferRef cvp);
-        void m_default_done_cb ();
+
         
 
 

@@ -47,20 +47,21 @@ namespace anonymous
     {
         avReader::m_done = 1;
         avReader::m_cv.notify_all();
-        std::cout << "Done"  << std::endl;
+        if(avReader::m_user_done_cb)
+            avReader::m_user_done_cb ();
     }
     
     
     void default_progress_cb (CMTime progress)
     {
         avReader::m_timestamps.push(progress);
-//        std::cout << cm_time(progress)  << std::endl;
+        //        std::cout << cm_time(progress)  << std::endl;
     }
     
     void default_image_cb (CVPixelBufferRef cvp)
     {
         avReader::m_surfaces.push(anonymous::convertCVPixelBufferToSurface (cvp));
-//        std::cout << avReader::m_surfaces.size() << std::endl;
+        //        std::cout << avReader::m_surfaces.size() << std::endl;
     }
 }
 
@@ -70,10 +71,11 @@ namespace avcc
     avReader::progress_cb avReader::m_progress_cb;// = std::bind(anonymous::default_progress_cb, std::placeholders::_1);
     avReader::image_cb avReader::m_image_cb;
     avReader::done_cb avReader::m_done_cb;
+    avReader::done_cb avReader::m_user_done_cb;
     std::mutex avReader::m_mu;
     std::condition_variable avReader::m_cv;
     int avReader::m_done;
-
+    
     shared_queue<Surface8uRef> avReader::m_surfaces;
     shared_queue<cm_time> avReader::m_timestamps;
     
@@ -90,19 +92,23 @@ namespace avcc
     {
         setProgressCallBack(anonymous::default_progress_cb);
         setImageCallBack(anonymous::default_image_cb);
-        setDoneCallBack(anonymous::default_done_cb);
+        avReader::m_done_cb = std::bind(anonymous::default_done_cb);
         
         internal_setup(file_path);
         if (andRun)
             run ();
     }
-
     
-    avReader::avReader (const std::string& file_path, void (*get_progress)(CMTime), void (*get_image)(CVPixelBufferRef))
+    
+    avReader::avReader (const std::string& file_path, void (*user_done)(void), void (*get_progress)(CMTime), void (*get_image)(CVPixelBufferRef))
     : m_impl(new avReader_impl())
     {
-        setProgressCallBack(get_progress);
-        setImageCallBack(get_image);
+        // base done callback is always called. User done will be called before it ends it execution.
+        avReader::m_done_cb = std::bind(anonymous::default_done_cb);
+        if (get_progress) setProgressCallBack(get_progress);
+        if (get_image) setImageCallBack(get_image);
+        if (user_done) setUserDoneCallBack(user_done);
+        
         internal_setup(file_path);
     }
     
@@ -169,18 +175,18 @@ namespace avcc
     {
         avReader::m_progress_cb = std::bind(pcb, std::placeholders::_1);
     }
-   
+    
     void avReader::setImageCallBack(avReader::image_cb icb)
     {
         avReader::m_image_cb = std::bind(icb, std::placeholders::_1);
     }
     
-    void avReader::setDoneCallBack(avReader::done_cb dcb)
+    void avReader::setUserDoneCallBack(avReader::done_cb dcb)
     {
-        avReader::m_done_cb = std::bind(dcb);
+        avReader::m_user_done_cb = std::bind(dcb);
     }
     
- 
+    
 }
 
 

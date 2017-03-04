@@ -115,8 +115,6 @@ inline void basicCorrRowFunc<uint8_t>::rowFunc()
     if (! onetime)
     {
         onetime = square_table().validate();
-        std::cout << square_table().lut_ptr()[510] << std::endl;
-        std::cout << "validated: " << std::boolalpha << onetime << std::endl;
     }
     
     for (const uint8_t * pEnd = mFirst + mWidth; pFirst < pEnd; ++pFirst, ++pSecond)
