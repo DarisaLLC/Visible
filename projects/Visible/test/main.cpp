@@ -62,6 +62,36 @@ void done_callback (void)
         std::cout << "Done"  << std::endl;
 }
 
+
+TEST (UT_algo, AVReader)
+{
+    boost::filesystem::path test_filepath;
+    
+    // vf does not support QuickTime natively. The ut expectes and checks for failure
+    
+    auto res = dgenv_ptr->asset_path("box-move.m4v");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    
+    if (res.second)
+        test_filepath = res.first;
+    
+    avcc::avReaderRef rref = std::make_shared< avcc::avReader> (test_filepath.string(), false);
+    rref->setUserDoneCallBack(done_callback);
+    
+    rref->run ();
+    std::shared_ptr<qTimeFrameCache> sm = qTimeFrameCache::create(rref);
+    
+    EXPECT_TRUE(rref->isValid());
+    EXPECT_TRUE(sm->count() == 57);
+    
+    algoIO::algo_fn_t algoFN = get_mean_luminance;
+    algoIO::algoIORef al = algoIO::create("UT", algoFN, sm);
+    
+    
+}
+
+
 TEST (UT_qtimeCache, AVReader)
 {
     boost::filesystem::path test_filepath;
@@ -86,6 +116,7 @@ TEST (UT_qtimeCache, AVReader)
     
     
 }
+
 
 TEST(colorHistogram, basic)
 {

@@ -56,8 +56,9 @@ typedef std::map<std::string, tracksD1_t> algo_output_tracks_t;
 
 struct algoIO
 {
-    typedef std::function<bool (algoIO& )> algo_fn_t;
     typedef std::shared_ptr<algoIO> algoIORef;
+    typedef std::function<bool (algoIORef& )> algo_fn_t;
+
     
    
     static algoIORef create (const std::string& name, algo_fn_t algo, std::shared_ptr<qTimeFrameCache>& frames, bool test_data = false)
