@@ -10,17 +10,28 @@
 
 using namespace std;
 
-class meanLumMultiChannelAlgorithm : public virtual temporalAlgorithm<double,3>
+class meanLumMultiChannelAlgorithm : public temporalAlgorithm<double,3>
 {
 public:
-    ~meanLumMultiChannelAlgorithm ();
+    ~meanLumMultiChannelAlgorithm () {};
     
     meanLumMultiChannelAlgorithm ()
     {
         mProgressReporter = std::bind(&meanLumMultiChannelAlgorithm::updateProgress, this, std::placeholders::_1);
     }
     
-    bool run ()
+    static meanLumMultiChannelAlgorithm::Ref_t create (const std::vector<std::string>& names, std::shared_ptr<qTimeFrameCache>& frames, bool test_data = false)
+    {
+        auto thisref = std::make_shared<meanLumMultiChannelAlgorithm>();
+        thisref->mNames = names;
+        thisref->mFrameSet = frames;
+        thisref->mIs_test_data = test_data;
+        thisref->mState = 0;
+        thisref->mTimestamp = time_spec_t::get_system_time ();
+        return thisref;
+    }
+    
+    bool run () override
     {
         
         const std::vector<std::string>& names = mFrameSet->channel_names();
@@ -82,19 +93,30 @@ public:
 class meanLumAlgorithm : public temporalAlgorithm<double,1>
 {
 public:
-    ~meanLumAlgorithm ();
+    ~meanLumAlgorithm () {};
     
     meanLumAlgorithm ()
     {
         mProgressReporter = std::bind(&meanLumAlgorithm::updateProgress, this, std::placeholders::_1);
     }
 
-    virtual bool run ()
+    static meanLumAlgorithm::Ref_t create (const std::string& name, std::shared_ptr<qTimeFrameCache>& frames, bool test_data = false)
+    {
+        auto thisref = std::make_shared<meanLumAlgorithm>();
+        thisref->mName = name;
+        thisref->mFrameSet = frames;
+        thisref->mIs_test_data = test_data;
+        thisref->mState = 0;
+        thisref->mTimestamp = time_spec_t::get_system_time ();
+        return thisref;
+    }
+    
+    virtual bool run () override
     {
 
         const std::vector<std::string>& names = mFrameSet->channel_names();
         
-        if (names.size() < 1) return false;
+        // ToDo: select channel API 
         
         // We either have 3 channels or a single one ( that is content is same in all 3 channels ) --
         // Note that Alpha channel is not processed
@@ -107,7 +129,7 @@ public:
         {
             if (! mDone.empty() && mDone[fn]) continue;
             
-            auto su8 = mFrameSet->getFrame(fn++);
+            auto su8 = mFrameSet->getFrame(fn);
             
             roiWindow<P8U> roi = svl::NewRedFromSurface(su8);
             const index_time_t ti = mFrameSet->currentIndexTime ();
@@ -119,7 +141,8 @@ public:
             if (!test_data)
                 res[0] = histoStats::mean(roi) / 256.0;
             mOutput_tracks.second.push_back(res);
-            mDone.push_back(true);
+            bool tt = true;
+            mDone.push_back(tt);
             fn++;
             if (mProgressReporter)
                 mProgressReporter (fn / fcnt);

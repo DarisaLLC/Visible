@@ -95,8 +95,10 @@ TEST (UT_algo, AVReader)
     
     meanLumAlgorithm::Ref_t al0 = meanLumAlgorithm::create("zero", sm);
     
-    meanLumMultiChannelAlgorithm::Ref_t al3 = meanLumMultiChannelAlgorithm::create("zero", sm);
+    std::vector<std::string> names = {"zero", "one", "two"};
+    meanLumMultiChannelAlgorithm::Ref_t al3 = meanLumMultiChannelAlgorithm::create(names, sm);
 
+    al0->run();
     
 //    std::unique_ptr<lum_func_t> f_ut(new lum_func_t (&algo_registry_ut));
 //    

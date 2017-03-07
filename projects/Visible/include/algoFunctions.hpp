@@ -40,18 +40,8 @@ public:
     
     temporalAlgorithm () {}
     virtual ~temporalAlgorithm () {}
-    virtual bool run () { assert(false); return false;}
+    virtual bool run () {return false; } // { assert(false); return false;}
     
-    static temporalAlgorithm::Ref_t create (const std::string& name, std::shared_ptr<qTimeFrameCache>& frames, bool test_data = false)
-    {
-        auto thisref = std::make_shared<algorithm_t>();
-        thisref->mName = name;
-        thisref->mFrameSet = frames;
-        thisref->mIs_test_data = test_data;
-        thisref->mState = 0;
-        thisref->mTimestamp = time_spec_t::get_system_time ();
-        return thisref;
-    }
 
     void clear () const { mState = 0; mOutput_tracks.clear (); }
     int state () const { return mState; }
@@ -62,7 +52,7 @@ public:
 
 protected:
     progress_fn_t mProgressReporter;
-    
+    std::vector<std::string> mNames;
     std::string mName;
     std::shared_ptr<qTimeFrameCache> mFrameSet;
     mutable track<T,C> mOutput_tracks;
@@ -74,11 +64,11 @@ protected:
     
 
 };
-//
-//template
-//class temporalAlgorithm<double,1>;
-//
-//template
-//class temporalAlgorithm<double,3>;
+
+template
+class temporalAlgorithm<double,1>;
+
+template
+class temporalAlgorithm<double,3>;
 
 #endif
