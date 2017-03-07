@@ -7,20 +7,21 @@
 #include "core/core.hpp"
 #include "vision/histo.h"
 #include "algoFunctions.hpp"
+#include "vision/pixel_traits.h"
 
 using namespace std;
 
-class meanLumMultiChannelAlgorithm : public temporalAlgorithm<double,3>
+class meanLumMultiChannelAlgorithm : public temporalAlgorithm<P8UC3, double,3>
 {
 public:
     ~meanLumMultiChannelAlgorithm () {};
     
-    meanLumMultiChannelAlgorithm ()
+    meanLumMultiChannelAlgorithm () : temporalAlgorithm<P8UC3, double,3> ()
     {
         mProgressReporter = std::bind(&meanLumMultiChannelAlgorithm::updateProgress, this, std::placeholders::_1);
     }
     
-    static meanLumMultiChannelAlgorithm::Ref_t create (const std::vector<std::string>& names, std::shared_ptr<qTimeFrameCache>& frames, bool test_data = false)
+    static temporalAlgorithm<P8UC3, double,3>::Ref_t create (const std::vector<std::string>& names, std::shared_ptr<qTimeFrameCache>& frames, bool test_data = false)
     {
         auto thisref = std::make_shared<meanLumMultiChannelAlgorithm>();
         thisref->mNames = names;
@@ -35,6 +36,8 @@ public:
     {
         
         const std::vector<std::string>& names = mFrameSet->channel_names();
+        if (mDone.empty())
+            mDone.resize (mFrameSet->count ());
         
         if (names.size() != 3) return false;
         
@@ -49,7 +52,7 @@ public:
         {
             if (! mDone.empty() && mDone[fn]) continue;
             
-            auto su8 = mFrameSet->getFrame(fn++);
+            auto su8 = mFrameSet->getFrame(fn);
             const index_time_t ti = mFrameSet->currentIndexTime ();
             
             std::vector<roiWindow<P8U> > rois;
@@ -59,19 +62,17 @@ public:
             
             assert(rois.size() == 3);
             
-            mOutput_tracks.first.push_back (ti);
-            track<double,3>::result_array_t res;
-            track<double,3>::result_array_t::iterator be = res.begin();
-            
+            track_t te (ti);
+            int index = 0;
             // Now get average intensity for each channel
             for (roiWindow<P8U> roi : rois)
             {
                 auto nmg = histoStats::mean(roi) / 256.0;
                 nmg = (! test_data) ? nmg :  (((float) fn) / mFrameSet->count() );
-                *be++ = nmg;
+                te[index++] = nmg;
             }
-            mOutput_tracks.second.push_back(res);
-            mDone.push_back(true);
+            mOutput_tracks.push_back(te);
+            mDone[fn] = true;
             fn++;
             if (mProgressReporter)
                 mProgressReporter (fn / fcnt);
@@ -90,23 +91,25 @@ public:
 };
 
 
-class meanLumAlgorithm : public temporalAlgorithm<double,1>
+class meanLumAlgorithm : public temporalAlgorithm<P8U, double,1>
 {
 public:
     ~meanLumAlgorithm () {};
     
-    meanLumAlgorithm ()
+    meanLumAlgorithm () : temporalAlgorithm<P8U, double,1> ()
     {
         mProgressReporter = std::bind(&meanLumAlgorithm::updateProgress, this, std::placeholders::_1);
+        mOutput_tracks.resize (0);
     }
 
-    static meanLumAlgorithm::Ref_t create (const std::string& name, std::shared_ptr<qTimeFrameCache>& frames, bool test_data = false)
+    static temporalAlgorithm<P8U, double,1>::Ref_t create (const std::string& name, const std::shared_ptr<qTimeFrameCache>& frames, bool test_data = false)
     {
         auto thisref = std::make_shared<meanLumAlgorithm>();
-        thisref->mName = name;
+        thisref->mNames[0] = name;
         thisref->mFrameSet = frames;
         thisref->mIs_test_data = test_data;
         thisref->mState = 0;
+        thisref->mDone.resize(frames->count());
         thisref->mTimestamp = time_spec_t::get_system_time ();
         return thisref;
     }
@@ -114,7 +117,8 @@ public:
     virtual bool run () override
     {
 
-        const std::vector<std::string>& names = mFrameSet->channel_names();
+        if (mDone.empty())
+            mDone.resize (mFrameSet->count ());
         
         // ToDo: select channel API 
         
@@ -135,14 +139,12 @@ public:
             const index_time_t ti = mFrameSet->currentIndexTime ();
             
             // Now get average intensity for each channel
-            mOutput_tracks.first.push_back (ti);
-            track<double,1>::result_array_t res;
-            res[0] = fn / fcnt;
+            track_t te (ti);
+            te[0] = fn / fcnt;
             if (!test_data)
-                res[0] = histoStats::mean(roi) / 256.0;
-            mOutput_tracks.second.push_back(res);
-            bool tt = true;
-            mDone.push_back(tt);
+                te[0] = histoStats::mean(roi) / 256.0;
+            mOutput_tracks.push_back(te);
+            mDone[fn] = true;
             fn++;
             if (mProgressReporter)
                 mProgressReporter (fn / fcnt);

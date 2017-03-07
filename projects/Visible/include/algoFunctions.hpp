@@ -16,6 +16,7 @@
 #include "qtime_frame_cache.hpp"
 #include "async_producer.h"
 
+using namespace svl;
 
 /*
  * Base class for one timed source in one timed source out
@@ -25,27 +26,31 @@
  *
  */
 
-
-
-template <class T, uint32_t C = 1>
+template<typename P, typename T, uint32_t N>
 class temporalAlgorithm
 {
 public:
-    const static uint32_t instance_c = C;
-    
-    typedef temporalAlgorithm<T,C> algorithm_t;
+    typedef track<T,N> track_t;
+    typedef PixelType<P> pixel_type_t;
+    typedef PixelLayout<P> pixel_layout_t;
+
+    typedef temporalAlgorithm<P,T,N> algorithm_t;
     typedef std::shared_ptr<algorithm_t> Ref_t;
     typedef std::function<bool (float)> progress_fn_t;
 
     
-    temporalAlgorithm () {}
+    temporalAlgorithm ()
+    {
+        mNames.resize (pixel_layout_t::channels ());
+    }
+    
     virtual ~temporalAlgorithm () {}
-    virtual bool run () {return false; } // { assert(false); return false;}
+    virtual bool run () = 0; //{return false; } // { assert(false); return false;}
     
 
-    void clear () const { mState = 0; mOutput_tracks.clear (); }
+    void clear () const { mState = 0; mOutput_tracks.clear (); mDone.clear(); }
     int state () const { return mState; }
-    const track<T,C>& output () const { return mOutput_tracks; }
+    const std::vector<track_t>& output () const { return mOutput_tracks; }
     bool done () { return (mDone.size() > 0 && mFrameSet && mDone.size() == mFrameSet->count()); }
     
 
@@ -53,22 +58,17 @@ public:
 protected:
     progress_fn_t mProgressReporter;
     std::vector<std::string> mNames;
-    std::string mName;
     std::shared_ptr<qTimeFrameCache> mFrameSet;
-    mutable track<T,C> mOutput_tracks;
+    mutable std::vector<track_t> mOutput_tracks;
     
     bool mIs_test_data;
     mutable int mState;
     time_spec_t mTimestamp;
-    bitvector mDone;
+    mutable std::vector<uint8_t> mDone;
     
 
 };
 
-template
-class temporalAlgorithm<double,1>;
 
-template
-class temporalAlgorithm<double,3>;
 
 #endif

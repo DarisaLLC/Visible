@@ -30,15 +30,27 @@ typedef std::vector<index_time_t>  index_time_vec_t;
 typedef std::pair<index_time_t, double> timed_double_t;
 
 template<typename T, uint32_t N = 1>
-class track : public std::pair<index_time_vec_t, std::vector<std::array<T,N>>>
+class track : public std::array<T,N>
 {
 public:
     typedef std::array<T,N> result_array_t;
-    inline static uint32_t step () { return N; }
+    inline static uint32_t count () { return N; }
     track () { clear (); }
-    void clear () { this->first.resize(0); this->second.resize(0); }
+    track (const index_time_t& ti) : mIt (ti) {}
+    void clear () { mIt.first = 0; mIt.second = time_spec_t (); for (T v : *this) v = 0; }
     
+private:
+    index_time_t mIt;
+
 };
+
+
+typedef track<double, 1> track1D;
+typedef track<double, 3> track3D;
+
+
+
+
 
 
 
