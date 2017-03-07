@@ -85,7 +85,7 @@ public:
     
     /*
      * Get the frame at offset from current.
-     * Updates currentIndex only if successful and consistent
+     * Updates current Info only if successful and consistent
      * Returns a shared_ptr to frame. Valid until that frame is still alive.
      */
     
@@ -140,7 +140,7 @@ public:
 private:
     mutable bool                mValid;
     mutable container_t      mElements;
-    mutable index_time_t     mCurrentTime;
+    mutable index_time_t     mCurrentIndexTime;
     timeToIndex m_tti;
     indexToTime m_itt;
     indexToContainer m_itIter;
@@ -171,7 +171,7 @@ private:
                             m_tti[tid.second] = tid.first;
                             m_itt[tid.first] = tid.second;
                             m_itIter[tid.first] = mElems.size();
-                            mCurrentTime = tid;
+                            mCurrentIndexTime = tid;
                             m_stats.first += 1;
                             return true;
                             }

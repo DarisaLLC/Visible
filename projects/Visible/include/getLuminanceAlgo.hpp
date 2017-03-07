@@ -6,83 +6,137 @@
 #include "async_producer.h"
 #include "core/core.hpp"
 #include "vision/histo.h"
-#include "algo_in_frames_out_tracks.hpp"
+#include "algoFunctions.hpp"
 
 using namespace std;
 
-
-    bool get_mean_luminance (framesInTracksOut::framesInTracksOutRef algo)
+class meanLumMultiChannelAlgorithm : public virtual temporalAlgorithm<double,3>
+{
+public:
+    ~meanLumMultiChannelAlgorithm ();
+    
+    meanLumMultiChannelAlgorithm ()
     {
-        tracksD1_t& tracks = algo->mOutput_tracks;
+        mProgressReporter = std::bind(&meanLumMultiChannelAlgorithm::updateProgress, this, std::placeholders::_1);
+    }
+    
+    bool run ()
+    {
         
-        const std::vector<std::string>& names = algo->mFrameSet->channel_names();
+        const std::vector<std::string>& names = mFrameSet->channel_names();
         
-        if (names.empty() || (names.size() != 1 && names.size() != 3))
-            return false;
+        if (names.size() != 3) return false;
         
         // We either have 3 channels or a single one ( that is content is same in all 3 channels ) --
         // Note that Alpha channel is not processed
         
-        tracks.resize (names.size ());
-        for (auto tt = 0; tt < names.size(); tt++)
-            tracks[tt].first = names[tt];
-        
         int64_t fn = 0;
-        bool test_data = algo->mIs_test_data;
+        bool test_data = mIs_test_data;
+        float fcnt = mFrameSet->count ();
         
-        while (algo->mFrameSet->checkFrame(fn))
+        while (mFrameSet->checkFrame(fn))
         {
-            if (! algo->mDone.empty() && algo->mDone[fn]) continue;
+            if (! mDone.empty() && mDone[fn]) continue;
             
-            auto su8 = algo->mFrameSet->getFrame(fn++);
-            
-            auto channels = names.size();
+            auto su8 = mFrameSet->getFrame(fn++);
+            const index_time_t ti = mFrameSet->currentIndexTime ();
             
             std::vector<roiWindow<P8U> > rois;
-            switch (channels)
-            {
-                case 1:
-                {
-                    rois.emplace_back(svl::NewRedFromSurface(su8));
-                    break;
-                }
-                case 3:
-                {
-                    rois.emplace_back(svl::NewRedFromSurface(su8));
-                    rois.emplace_back(svl::NewGreenFromSurface(su8));
-                    rois.emplace_back(svl::NewBlueFromSurface(su8));
-                    break;
-                }
-            }
+            rois.emplace_back(svl::NewRedFromSurface(su8));
+            rois.emplace_back(svl::NewGreenFromSurface(su8));
+            rois.emplace_back(svl::NewBlueFromSurface(su8));
             
-            assert (rois.size () == tracks.size());
+            assert(rois.size() == 3);
+            
+            mOutput_tracks.first.push_back (ti);
+            track<double,3>::result_array_t res;
+            track<double,3>::result_array_t::iterator be = res.begin();
             
             // Now get average intensity for each channel
-            int index = 0;
             for (roiWindow<P8U> roi : rois)
             {
-                index_time_t ti;
-                ti.first = fn;
-                timed_double_t res;
-                res.first = ti;
                 auto nmg = histoStats::mean(roi) / 256.0;
-                res.second = (! test_data) ? nmg :  (((float) fn) / algo->mFrameSet->count() );
-                tracks[index++].second.emplace_back(res);
+                nmg = (! test_data) ? nmg :  (((float) fn) / mFrameSet->count() );
+                *be++ = nmg;
             }
+            mOutput_tracks.second.push_back(res);
+            mDone.push_back(true);
+            fn++;
+            if (mProgressReporter)
+                mProgressReporter (fn / fcnt);
             
-            algo->mDone.push_back(true);
-            
-            // TBD: call progress reporter
         }
         
-        // Only when we have all, put the output out
-        if (algo->done())
-            algo->mOutput_tracks = tracks;
-        
-        return algo->done ();
+        return done ();
+    }
+    
+    bool updateProgress(float pct)
+    {
+        int ipct (pct * 100);
+        std::cout << ipct << "% complete...\n";
+        return(true);
+    }
+};
+
+
+class meanLumAlgorithm : public temporalAlgorithm<double,1>
+{
+public:
+    ~meanLumAlgorithm ();
+    
+    meanLumAlgorithm ()
+    {
+        mProgressReporter = std::bind(&meanLumAlgorithm::updateProgress, this, std::placeholders::_1);
     }
 
+    virtual bool run ()
+    {
+
+        const std::vector<std::string>& names = mFrameSet->channel_names();
+        
+        if (names.size() < 1) return false;
+        
+        // We either have 3 channels or a single one ( that is content is same in all 3 channels ) --
+        // Note that Alpha channel is not processed
+        
+        int64_t fn = 0;
+        bool test_data = mIs_test_data;
+        float fcnt = mFrameSet->count ();
+        
+        while (mFrameSet->checkFrame(fn))
+        {
+            if (! mDone.empty() && mDone[fn]) continue;
+            
+            auto su8 = mFrameSet->getFrame(fn++);
+            
+            roiWindow<P8U> roi = svl::NewRedFromSurface(su8);
+            const index_time_t ti = mFrameSet->currentIndexTime ();
+            
+            // Now get average intensity for each channel
+            mOutput_tracks.first.push_back (ti);
+            track<double,1>::result_array_t res;
+            res[0] = fn / fcnt;
+            if (!test_data)
+                res[0] = histoStats::mean(roi) / 256.0;
+            mOutput_tracks.second.push_back(res);
+            mDone.push_back(true);
+            fn++;
+            if (mProgressReporter)
+                mProgressReporter (fn / fcnt);
+        }
+        
+        return done ();
+    }
+    
+    bool updateProgress(float pct)
+    {
+        int ipct (pct * 100);
+        std::cout << ipct << "% complete...\n";
+        return(true);
+    }
+};
 
 
 #endif
+
 

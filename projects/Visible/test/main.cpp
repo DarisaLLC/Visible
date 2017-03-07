@@ -27,8 +27,7 @@
 #include "core/gtest_image_utils.hpp"
 #include "vision/colorhistogram.hpp"
 #include "CinderOpenCV.h"
-#include "algo_in_frames_out_tracks.hpp"
-#include "algo_registry.hpp"
+#include "algoFunctions.hpp"
 #include "ut_util.hpp"
 #include "ut_algo.hpp"
 #include "getLuminanceAlgo.hpp"
@@ -94,18 +93,18 @@ TEST (UT_algo, AVReader)
     EXPECT_TRUE(rref->isValid());
     EXPECT_TRUE(sm->count() == 57);
     
-    using algoRef = framesInTracksOut::framesInTracksOutRef;
-    using lum_func_t = algo_cb_t<algoRef>;
+    meanLumAlgorithm::Ref_t al0 = meanLumAlgorithm::create("zero", sm);
     
-    algoRef al = framesInTracksOut::create("UT", sm);
+    meanLumMultiChannelAlgorithm::Ref_t al3 = meanLumMultiChannelAlgorithm::create("zero", sm);
+
     
-    std::unique_ptr<lum_func_t> f_ut(new lum_func_t (&algo_registry_ut));
-    
-    auto lum_func_ti = algo_library::instance().add(f_ut);
-    
-    auto return_val = algo_library::instance().call(lum_func_ti, al);
-    
-    EXPECT_TRUE(return_val);
+//    std::unique_ptr<lum_func_t> f_ut(new lum_func_t (&algo_registry_ut));
+//    
+//    auto lum_func_ti = algo_library::instance().add(f_ut);
+//    
+//    auto return_val = algo_library::instance().call(lum_func_ti, al);
+//    
+//    EXPECT_TRUE(return_val);
     
 }
 

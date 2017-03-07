@@ -4486,7 +4486,7 @@
 		C2601BBE1CED3E060045FF57 /* set.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = set.hpp; sourceTree = "<group>"; };
 		C2601BBE1E6B5C78004415A3 /* getLuminanceAlgo.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = getLuminanceAlgo.hpp; path = ../include/getLuminanceAlgo.hpp; sourceTree = "<group>"; };
 		C2601BBF1CED3E060045FF57 /* set_c.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = set_c.hpp; sourceTree = "<group>"; };
-		C2601BBF1E6B5EF3004415A3 /* algo_in_frames_out_tracks.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = algo_in_frames_out_tracks.hpp; path = ../include/algo_in_frames_out_tracks.hpp; sourceTree = "<group>"; };
+		C2601BBF1E6B5EF3004415A3 /* algoFunctions.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = algoFunctions.hpp; path = ../include/algoFunctions.hpp; sourceTree = "<group>"; };
 		C2601BC01CED3E060045FF57 /* shift_left.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = shift_left.hpp; sourceTree = "<group>"; };
 		C2601BC11CED3E060045FF57 /* shift_right.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = shift_right.hpp; sourceTree = "<group>"; };
 		C2601BC21CED3E060045FF57 /* template_arity.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = template_arity.hpp; sourceTree = "<group>"; };
@@ -9566,6 +9566,7 @@
 		C2606EA11CEE09440045FF57 /* libippicv.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libippicv.a; path = ../../../svl/local/cinder/cinder_0.9/blocks/OpenCV3/lib/osx/libippicv.a; sourceTree = "<group>"; };
 		C2606EA41CEE0E660045FF57 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
 		C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_idir_impl.cpp; path = ../src/visible_idir_impl.cpp; sourceTree = "<group>"; };
+		C26916141E6C78E8005C79F2 /* spimple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = spimple.h; path = ../../../svl/include/core/spimple.h; sourceTree = "<group>"; };
 		C276EC821C72971400242CDB /* cvcapture.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cvcapture.icns; sourceTree = "<group>"; };
 		C276EC841C72988200242CDB /* cp-visible_release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "cp-visible_release.xcconfig"; sourceTree = "<group>"; };
 		C276ECA81C72B5D900242CDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -9790,7 +9791,8 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
-				C2601BBF1E6B5EF3004415A3 /* algo_in_frames_out_tracks.hpp */,
+				C26916141E6C78E8005C79F2 /* spimple.h */,
+				C2601BBF1E6B5EF3004415A3 /* algoFunctions.hpp */,
 				C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */,
 				C2B38A541D022E9D00C70872 /* AVReader.h */,
 				C2E321FE1D038B16006DFE5E /* AVReader.hpp */,

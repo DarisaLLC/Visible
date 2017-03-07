@@ -80,10 +80,14 @@ public:
     const Surface8uRef  getFrame (const int64_t) const;
     const Surface8uRef  getFrame (const time_spec_t& ) const;
     
+    
+    
     bool checkFrame (const int64_t) const;
     bool checkFrame (const time_spec_t& ) const;
     
-    int64_t currentIndex (const time_spec_t& time) const;
+    int64_t indexFromTime (const time_spec_t& time) const;
+
+    const index_time_t& currentIndexTime () const;
     size_t count () const;
     
     /** \brief returns the name of the concrete subclass.
@@ -99,7 +103,7 @@ private:
     bool make_unique_increasing_time_indices (const time_spec_t&, index_time_t&);
     mutable bool                mValid;
     mutable container_t      mFrames;
-    mutable index_time_t     mCurrentTime;
+    mutable index_time_t     mCurrentIndexTime;
     timeToIndex m_tti;
     indexToTime m_itt;
     indexToContainer m_itIter;

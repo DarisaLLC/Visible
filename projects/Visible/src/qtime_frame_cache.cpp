@@ -180,7 +180,7 @@ qTimeFrameCache::qTimeFrameCache ( const tiny_media_info& info ) : tiny_media_in
 
 /*
  * Get the frame at offset from current.
- * Updates currentIndex only if successful and consistent
+ * Updates current only if successful and consistent
  * Returns a shared_ptr to frame. Valid until that frame is still alive.
  */
 
@@ -190,10 +190,18 @@ const Surface8uRef  qTimeFrameCache::getFrame (int64_t offset) const
     Surface8uRef s8;
     indexToContainer::const_iterator p = _checkFrame(offset);
     if (p == m_itIter.end()) return s8;
-    
+    mCurrentIndexTime.first = p->second - 1;
+    mCurrentIndexTime.second = m_itt.at(p->second-1);
     assert(p->second > 0 && p->second <= mFrames.size());
+    
     return mFrames[p->second-1].first;
 }
+
+/*
+ * Get the frame at a time
+ * Updates current only if successful and consistent
+ * Returns a shared_ptr to frame. Valid until that frame is still alive.
+ */
 
 const Surface8uRef qTimeFrameCache::getFrame(const time_spec_t& dtime) const
 {
@@ -204,6 +212,8 @@ const Surface8uRef qTimeFrameCache::getFrame(const time_spec_t& dtime) const
         return s8;
     
     assert(fc->second > 0 && fc->second <= mFrames.size());
+    mCurrentIndexTime.first = fc->second - 1;
+    mCurrentIndexTime.second = dtime;
     return mFrames[fc->second-1].first;
     
 }
@@ -266,7 +276,6 @@ bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const index_time_t& t
     m_tti[tid.second] = tid.first;
     m_itt[tid.first] = tid.second;
     m_itIter[tid.first] = mFrames.size();
-    mCurrentTime = tid;
     m_stats.first += 1;
     return true;
 }
@@ -297,12 +306,17 @@ bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const time_spec_t& ti
  * The end iterator is returned if entry is not found.
  */
 
-int64_t qTimeFrameCache::currentIndex (const time_spec_t& time) const
+int64_t qTimeFrameCache::indexFromTime (const time_spec_t& time) const
 {
     indexToContainer::const_iterator ci = _checkFrame(time);
     if(ci == m_itIter.end()) return -1;
     if(ci == m_itIter.begin()) return 0;
     return std::distance(m_itIter.begin(), ci);
+}
+
+const index_time_t& qTimeFrameCache::currentIndexTime () const
+{
+    return mCurrentIndexTime;
 }
 
 qTimeFrameCache::indexToContainer::const_iterator qTimeFrameCache::_checkFrame (const time_spec_t& query_time) const

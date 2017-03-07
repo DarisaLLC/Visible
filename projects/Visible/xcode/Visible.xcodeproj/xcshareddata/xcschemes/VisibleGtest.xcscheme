@@ -63,7 +63,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "--assets $(TEST_DATA)"
+            argument = "--assets $(TEST_DATA) "
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

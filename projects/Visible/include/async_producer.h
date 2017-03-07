@@ -7,6 +7,7 @@
 #include <string>
 #include <typeinfo>
 #include <vector>
+#include <array>
 #include <sstream>
 #include <typeindex>
 #include <map>
@@ -18,27 +19,48 @@
 
 // *****************
 // *                *
-// *  Tracks Async  *
+// *  Tracks        *
 // *                *
 // *****************
 
+// Begining of track types. For now, just a sequence of index/time and doubles
+
+typedef std::vector<index_time_t>  index_time_vec_t;
 
 typedef std::pair<index_time_t, double> timed_double_t;
 
-template<typename R>
+template<typename T, uint32_t N = 1>
+class track : public std::pair<index_time_vec_t, std::vector<std::array<T,N>>>
+{
+public:
+    typedef std::array<T,N> result_array_t;
+    inline static uint32_t step () { return N; }
+    track () { clear (); }
+    void clear () { this->first.resize(0); this->second.resize(0); }
+    
+};
 
+
+
+template<typename R>
 bool is_ready(std::future<R> const& f)
 
 { return f.valid() && f.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
 
 
 typedef std::vector<timed_double_t>  timed_double_vec_t;
-typedef std::future<timed_double_vec_t > async_timed_double_vec_t;
 
+typedef std::future<timed_double_vec_t > async_timed_double_vec_t;
 typedef std::pair<std::string, timed_double_vec_t> trackD1_t;
 typedef std::vector<trackD1_t>  tracksD1_t;
 
 
+
+// *****************
+// *                *
+// *  Async         *
+// *                *
+// *****************
 
 
 // Steps:
