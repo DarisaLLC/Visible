@@ -475,7 +475,6 @@ void movContext::update ()
 
         time_spec_t new_time = m_movie->getCurrentTime();
         mFrameSet->loadFrame(mSurface, new_time);
-        m_index = mFrameSet->currentIndex(new_time);
         mSurface = mFrameSet->getFrame(new_time);
     }
     
