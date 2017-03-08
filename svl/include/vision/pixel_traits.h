@@ -399,7 +399,40 @@ namespace svl
 
     // Primary template class
     template <typename P>
-    class PixelPlane;
+    class PixelLayout;
+    
+    template <>
+    class PixelLayout<P8U>
+    {
+    public:
+        static int channels () { return P8U::components(); }
+        static int planes () { return P8U::planes(); }
+    };
+    
+    template <>
+    class PixelLayout<P8UC3>
+    {
+    public:
+        static int channels () { return P8UC3::components(); }
+        static int planes () { return P8UC3::planes(); }
+    };
+    
+    template <>
+    class PixelLayout<P8UC4>
+    {
+    public:
+        static int channels () { return P8UC4::components(); }
+        static int planes () { return P8UC4::planes(); }
+    };
+    
+    template <>
+    class PixelLayout<P8UP3>
+    {
+    public:
+        static int channels () { return P8UP3::components(); }
+        static int planes () { return P8UP3::planes(); }
+    };
+    
     
     template <>
     class PixelType<P8U>

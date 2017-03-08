@@ -30,6 +30,9 @@ public:
     typedef typename PixelType<T>::pixel_t pixel_t;
     typedef pixel_t * pixel_ptr_t;
     typedef int64_t timestamp_t;
+    typedef root<T> root_t;
+    typedef std::shared_ptr<root_t> sharedRoot_t;
+    
 
     // Constructors
     //! default constructor takes no arguments
@@ -79,8 +82,7 @@ public:
         int h = bound.ul().second + bound.height();
         if (w >= bound.width() && h >= bound.height())
         {
-            sharedRoot<T> ptr = new root<T>(w, h, im);
-            m_frame_buf = ptr;
+            m_frame_buf = sharedRoot_t (new root<T>(w, h, im));
             m_bounds = iRect(bound.ul().first, bound.ul().second, w, h);
         }
         else
@@ -91,12 +93,11 @@ public:
 
     roiWindow(int w, int h, image_memory_alignment_policy im = image_memory_alignment_policy::align_every_row)
     {
-        sharedRoot<T> ptr = new root<T>(w, h, im);
-        m_frame_buf = ptr;
+        m_frame_buf = sharedRoot_t (new root<T>(w, h, im));
         m_bounds = iRect(0, 0, w, h);
     }
 
-    roiWindow(sharedRoot<T> ptr, const iRect & Rect)
+    roiWindow(sharedRoot_t ptr, const iRect & Rect)
     {
         m_bounds = Rect;
         if (ptr->bounds().contains(m_bounds))
@@ -106,7 +107,7 @@ public:
     }
 
 
-    roiWindow(sharedRoot<T> ptr, int32_t x, int32_t y, int32_t width, int32_t height)
+    roiWindow(sharedRoot_t ptr, int32_t x, int32_t y, int32_t width, int32_t height)
     {
         m_bounds = iRect(x, y, width, height);
         if (ptr->bounds().contains(m_bounds))
@@ -119,7 +120,7 @@ public:
     roiWindow(const roiWindow<T> &, int32_t x, int32_t y, int32_t width, int32_t height);
 
 
-    roiWindow(sharedRoot<T> ptr)
+    roiWindow(sharedRoot_t ptr)
     {
         m_frame_buf = ptr;
         m_bounds = iRect(0, 0, ptr->width(), ptr->height());
@@ -136,8 +137,8 @@ public:
     virtual ~roiWindow() {}
 
     // Accessors
-    const sharedRoot<T> & frameBuf() const { return m_frame_buf; }
-    sharedRoot<T> & frameBuf() { return m_frame_buf; }
+    const sharedRoot_t & frameBuf() const { return m_frame_buf; }
+    sharedRoot_t & frameBuf() { return m_frame_buf; }
 
     int32_t depth() const { return m_frame_buf->depth(); }
     uint32_t n() const { return m_bounds.area(); }
@@ -260,7 +261,7 @@ public:
 
 
 protected:
-    sharedRoot<T> m_frame_buf; // Ref-counted pointer to frame buffer
+    sharedRoot_t m_frame_buf; // Ref-counted pointer to frame buffer
     iRect m_bounds;
 
 

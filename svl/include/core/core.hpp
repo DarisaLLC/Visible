@@ -267,7 +267,7 @@ namespace svl  // protection from unintended ADL
             assert(s->m_refs > 0);
             
             if (--s->m_refs == 0)
-                checked_delete(static_cast<const T*>(s));
+                checked_array_delete  (static_cast<const T*>(s));
         }
         
         int64_t refcount() const { return m_refs; }

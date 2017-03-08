@@ -30,7 +30,7 @@ enum image_memory_alignment_policy
 
 
 template <typename T>
-class root : public svl::refcounted_ptr<root<T> >
+class root
 {
 public:
     typedef typename PixelType<T>::pixel_t pixel_t;
@@ -71,15 +71,20 @@ public:
         }
     }
 
-    // prohibit irect copying and assignment
+    // prohibit direct copying and assignment
     root(root && other) = delete;
     root & operator=(root && other) = delete;
 
 
     virtual ~root()
     {
-        if (m_storage) delete m_storage;
+        if (m_storage)
+        {
+            delete [] m_storage;
+            m_storage = nullptr;
+        }
     }
+    
     bayer_type bayerType() { return _bayer_type; }
     void SetbayerType(bayer_type b) { _bayer_type = b; }
 
@@ -186,9 +191,6 @@ public:
 
     int rowPad() const { return m_pad; }
 
-    void addRef() { intrusive_ptr_add_ref(this); }
-    void remRef() { intrusive_ptr_release(this); }
-
 protected:
     int32_t m_pad;
     int32_t m_align;
@@ -239,7 +241,7 @@ protected:
     }
 };
 
-
+#if 0
 template <typename P>
 class sharedRoot
 {
@@ -332,7 +334,7 @@ private:
     mutable std::mutex mMutex;
 };
     
- 
+#endif
     
 }
 #endif

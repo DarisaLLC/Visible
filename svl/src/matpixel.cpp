@@ -275,8 +275,7 @@ roiWindow<P>::roiWindow(const std::string& fqfn, image_memory_alignment_policy i
         int w = sizeit.first;
         int h = sizeit.second;
         
-        sharedRoot<P> ptr = new root<P>(w, h, im);
-        m_frame_buf = ptr;
+        m_frame_buf = sharedRoot_t (new root<P>(w, h, im));
         m_bounds = iRect(w, h);
         std::shared_ptr<std::ifstream> myfile = make_shared_ifstream(fqfn);
         
@@ -369,44 +368,44 @@ roiWindow<P> roiWindow<P>::window(int32_t tl_x, int32_t tl_y, int32_t width, int
     return roiWindow<P>();
 }
 
-// Assignment operators
-template <typename T>
-sharedRoot<T> & sharedRoot<T>::operator=(const sharedRoot<T> & p)
-{
-    if (mFrameBuf == p)
-        return *this;
-
-    mFrameBuf = p.mFrameBuf;
-    if (mFrameBuf)
-    {
-        mFrameBuf->addRef();
-    }
-    return *this;
-}
-
-template <typename T>
-sharedRoot<T> & sharedRoot<T>::operator=(root<T> * p)
-{
-    if (mFrameBuf == p)
-        return *this;
-
-    mFrameBuf = p;
-    if (mFrameBuf)
-    {
-        mFrameBuf->addRef();
-    }
-
-    return *this;
-}
-
-
-template <typename T>
-sharedRoot<T>::~sharedRoot()
-{
-    if (mFrameBuf)
-        mFrameBuf->remRef();
-}
-
+//// Assignment operators
+//template <typename T>
+//sharedRoot<T> & sharedRoot<T>::operator=(const sharedRoot<T> & p)
+//{
+//    if (mFrameBuf == p)
+//        return *this;
+//
+//    mFrameBuf = p.mFrameBuf;
+//    if (mFrameBuf)
+//    {
+//        mFrameBuf->addRef();
+//    }
+//    return *this;
+//}
+//
+//template <typename T>
+//sharedRoot<T> & sharedRoot<T>::operator=(root<T> * p)
+//{
+//    if (mFrameBuf == p)
+//        return *this;
+//
+//    mFrameBuf = p;
+//    if (mFrameBuf)
+//    {
+//        mFrameBuf->addRef();
+//    }
+//
+//    return *this;
+//}
+//
+//
+//template <typename T>
+//sharedRoot<T>::~sharedRoot()
+//{
+//    if (mFrameBuf)
+//        mFrameBuf->remRef();
+//}
+//
 
  template <typename T, typename trait_t, int W, int H>
 roiMultiWindow<T,trait_t,W,H>::roiMultiWindow ()
@@ -519,12 +518,14 @@ namespace svl
     template class root<P8UC3>;
     template class root<P8UC4>;
     
+#if 0
     template class sharedRoot<P8U>;
     template class sharedRoot<P16U>;
     template class sharedRoot<P32F>;
     template class sharedRoot<P32S>;
     template class sharedRoot<P8UC3>;
     template class sharedRoot<P8UC4>;
+#endif
     
     template class roiWindow<P8U>;
     template class roiWindow<P16U>;

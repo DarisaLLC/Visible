@@ -100,6 +100,8 @@ TEST (UT_algo, AVReader)
 
     al0->run();
     
+    al3->run();
+    
 //    std::unique_ptr<lum_func_t> f_ut(new lum_func_t (&algo_registry_ut));
 //    
 //    auto lum_func_ti = algo_library::instance().add(f_ut);

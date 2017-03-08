@@ -64,6 +64,18 @@ namespace svl
         return window;
     }
     
+    static std::shared_ptr<roiWindow<P8U>> NewRefFromChannel ( ChannelT<uint8_t>& onec)
+    {
+        uint8_t* pixels = onec.getData();
+        std::shared_ptr<root<P8U>> rootref (new root<P8U> (pixels, (int32_t) onec.getRowBytes (),
+                                                           onec.getWidth(), onec.getHeight()));
+        return std::shared_ptr<roiWindow<P8U>> (new roiWindow<P8U>(rootref, 0, 0, onec.getWidth(), onec.getHeight()));
+    }
+    
+    static std::shared_ptr<roiWindow<P8U>> NewIndexedChannelFromSurface (const Surface8uRef& src, uint8_t channelIndex)
+    {
+        return NewRefFromChannel (src->getChannel(channelIndex));
+    }
     
     static roiWindow<P8UC4> NewFromSurface ( Surface8u *ones)
     {
