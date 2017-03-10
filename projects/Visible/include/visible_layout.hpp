@@ -4,21 +4,60 @@
 #define __VISIBLE_LAYOUT__
 
 #include "cinder/Rect.h"
+#include "cinder/Signals.h"
+#include "cinder/app/Event.h"
+
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 
 using namespace std;
 using namespace ci;
+using namespace ci::signals;
 
 class layout
 {
 public:
-    layout (ivec2 expected, ivec2 trim): m_expected (expected), m_trim (trim) {}
     
-    inline ivec2& desired_window_size () const { return m_expected; }
+    typedef	 signals::Signal<void( ivec2 & )>		LayoutSignalWindowSize_t;
+    LayoutSignalWindowSize_t&	getSignalWindowSize() { return m_windowSizeSignal; }
+    
+    
+    // Constructor
+    layout (ivec2 window_size, ivec2 trim, bool keep_aspect = true): m_canvas_size (window_size), m_trim (trim) ,
+    m_aspect (layout::aspect(window_size)), m_keep_aspect ( keep_aspect) {}
+    
+    
+    const float& aspectRatio () const { return m_aspect; }
+    
+    inline void scale (vec2& scale_by)
+    {
+        m_canvas_size.x  = std::floor(m_canvas_size.x * scale_by.x);
+        m_canvas_size.y  = std::floor(m_canvas_size.y * scale_by.y);
+        m_windowSizeSignal.emit(m_canvas_size);
+    }
+    inline void update_window_size (const ivec2& new_size )
+    {
+        ivec2 ns = new_size;
+        if (m_keep_aspect)
+        {
+            float newAr = new_size.x / (float) new_size.y ;
+            if (aspectRatio() > newAr)
+                ns.y= std::floor(ns.x/ aspectRatio ());
+            else
+                ns.x = std::floor(ns.y * aspectRatio () );
+        }
+        
+        m_canvas_size = new_size;
+        m_windowSizeSignal.emit(m_canvas_size);
+    }
+    
+    inline ivec2& desired_window_size () const { return m_canvas_size; }
     inline ivec2& trim () const { return m_trim; }
-
-
+    
+    
     vec2 trim_norm () { return vec2(trim().x, trim().y) / vec2(getWindowWidth(), getWindowHeight()); }
-    inline ivec2 canvas_size () { return getWindowSize() - trim() - trim (); }
+    inline ivec2 canvas_size () { return desired_window_size() - trim() - trim (); }
     inline vec2& image_frame_size_norm (){ static vec2 ni (0.67, 0.75); return ni;}
     inline ivec2 image_frame_size ()
     {
@@ -49,7 +88,6 @@ public:
         return np;
     }
     
-    
     inline vec2 single_plot_size_norm (){ vec2 np = vec2 (0.25, 0.25); return np;}
     inline vec2 plots_frame_size_norm (){ vec2 np = vec2 (0.25, 3 * single_plot_size_norm().y); return np;}
     
@@ -73,14 +111,26 @@ public:
     inline void plot_rects (std::vector<Rectf>& plots )
     {
         plots.resize(3);
-        auto plot_tl = plots_frame_position();
-        auto plot_size = single_plot_size();
+        auto plot_tl = plots_frame_position_norm();
+        auto plot_size = single_plot_size_norm ();
+        vec2 plot_vertical (0.0, plot_size.y);
         
         plots[0] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
-        plots[1] = Rectf (vec2(plots[0].getUpperLeft().x, plots[0].getUpperLeft().y + plot_size.y),
-                          vec2(plots[0].getLowerRight().x, plots[0].getLowerRight().y + plot_size.y));
-        plots[2] = Rectf (vec2(plots[1].getUpperLeft().x, plots[1].getUpperLeft().y + plot_size.y),
-                          vec2(plots[1].getLowerRight().x, plots[1].getLowerRight().y + plot_size.y));
+        plot_tl += plot_vertical;
+        plots[1] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
+        plot_tl += plot_vertical;
+        plots[2] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
+        
+        vec2 cs (m_canvas_size.x, m_canvas_size.y);
+        
+        for (Rectf& plot : plots)
+        {
+            plot.x1 *= cs.x;
+            plot.x2 *= cs.x;
+            plot.y1 *= cs.y;
+            plot.y2 *= cs.y;
+            
+        }
     }
     
     
@@ -88,9 +138,13 @@ public:
     
     
 private:
-    mutable ivec2 m_expected;
+    mutable ivec2 m_canvas_size;
     mutable ivec2 m_trim;
+    mutable float m_aspect;
+    mutable bool m_keep_aspect;
+    LayoutSignalWindowSize_t m_windowSizeSignal;
     
+    static float aspect (const ivec2& s) { return s.x / (float) s.y; }
     
 };
 

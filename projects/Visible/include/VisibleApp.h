@@ -22,12 +22,6 @@ using namespace ci::app;
 
 typedef app_utils::WindowMgr<WindowRef, guiContextRef> VisWinMgr;
 
-class mainWindowData {
-public:
-    ~mainWindowData() { CI_LOG_V( "Destroying Main Window Data" ); };
-    vector<vec2> 	mPoints;
-};
-
 
 struct VisibleCentral : SingletonLight<VisibleCentral>
 {

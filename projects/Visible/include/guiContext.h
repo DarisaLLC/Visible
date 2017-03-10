@@ -36,7 +36,7 @@
 #include "async_producer.h"
 #include "directoryPlayer.h"
 #include "qtimeAvfLink.h"
-
+#include "timeMarker.h"
 
 #include <sstream>
 
@@ -51,6 +51,26 @@ using namespace params;
 using namespace std;
 namespace fs = boost::filesystem;
 
+struct Circle {
+	void posUpdate() { // make the radius the distance to the closest edge
+		mRadius = mPos().x;
+		mRadius = std::min( mRadius, getWindowWidth() - mPos().x );
+		mRadius = std::min( mRadius, mPos().y );
+		mRadius = std::min( mRadius, getWindowHeight() - mPos().y );
+	}
+	
+	void draw() {
+		gl::color( Color( 1.0f, 0.5f, 0.25f ) );
+		gl::drawSolidCircle( mPos, mRadius );
+	}
+	
+	Anim<vec2>	mPos;
+	float		mRadius;
+};
+
+
+
+
 class guiContext : public std::enable_shared_from_this<guiContext>
 {
 public:
@@ -62,19 +82,23 @@ public:
 		image_dir_viewer = clip_viewer+1,
 		lif_file_viewer = image_dir_viewer+1,
 		movie_dir_viewer = lif_file_viewer+1,
-		viewer_types = movie_dir_viewer+1,
+		timeline_browser = movie_dir_viewer+1,
+		viewer_types = timeline_browser+1,
 	};
 	
-	
+	// Signal time point mark to all
+	// receive time point mark from all
 	typedef marker_info marker_info_t;
     typedef void (sig_cb_marker) (marker_info_t&);
+	Signal <void(marker_info_t&)> signalMarker;
+	
 	
 	guiContext (ci::app::WindowRef& ww);
 	virtual ~guiContext ();
 	
 	std::shared_ptr<guiContext> getRef();
 	
-	Signal <void(marker_info_t&)> signalMarker;
+
 	
 	virtual const std::string & getName() const ;
 	virtual void setName (const std::string& name);
@@ -87,6 +111,7 @@ public:
 	virtual void update () = 0;
 	virtual void setup () = 0;
     virtual bool is_valid () const ;
+
     
     // u implementation does nothing
 	virtual void mouseDown( MouseEvent event );
@@ -96,7 +121,8 @@ public:
 	
 	virtual void keyDown( KeyEvent event );
 	virtual void normalize_point (vec2& pos, const ivec2& size);
-	
+
+	virtual bool keepAspect () {return true; }
 	
   protected:
 	Type m_type;
@@ -195,6 +221,56 @@ private:
 };
 
 
+class timelineContext : public guiContext
+{
+public:
+	
+	typedef	 signals::Signal<void( marker_info_t & )>		MarkerSignalInfo_t;
+	MarkerSignalInfo_t&	getMarkerSignal () { return m_marker_signal; }
+	
+	// Create one
+	timelineContext(const Rectf&); //ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
+
+	
+	static const std::string& caption () { static std::string cp ("Timeline Browser "); return cp; }
+	
+	virtual void draw ();
+	virtual void setup ();
+	virtual bool is_valid ();
+	virtual void update ();
+	virtual void resize ();
+	virtual void mouseDrag( MouseEvent event );
+	virtual void mouseMove( MouseEvent event );
+	virtual void mouseDown( MouseEvent event );
+	virtual void mouseUp( MouseEvent event );
+	void normalize (const bool do_normalize = false){m_normalize = do_normalize; }
+	bool normalize_option () const { return m_normalize; }
+	
+	void draw_window ();
+	void receivedEvent ( InteractiveObjectEvent event );
+	void loadAll (const csv::matf_t& src);
+	
+	virtual void onMarked (marker_info_t&);
+	
+private:
+	
+	//	static DataSourcePathRef create (const std::string& fqfn)
+	//	{
+	//		return  DataSourcePath::create (boost::filesystem::path  (fqfn));
+	//	}
+	
+	params::InterfaceGl         mClipParams;
+	Graph1DRef mGraph1D;
+	boost::filesystem::path mPath;
+	csv::matf_t mdat;
+	int m_column_select;
+	bool m_normalize;
+	size_t m_frames, m_file_frames, m_read_pos;
+	size_t m_rows, m_columns;
+	MarkerSignalInfo_t m_marker_signal;
+};
+
+
 class clipContext : public guiContext
 {
 public:
@@ -247,6 +323,10 @@ private:
 class sequencedImageContext : public guiContext
 {
 public:
+	
+	typedef	 signals::Signal<void( marker_info_t & )>		MarkerSignalInfo_t;
+	MarkerSignalInfo_t&	getMarkerSignal () { return m_marker_signal; }
+	
 	sequencedImageContext(ci::app::WindowRef& ww)
 	: guiContext (ww)
 	{}
@@ -255,6 +335,7 @@ public:
 	virtual void seekToEnd () = 0;
 	virtual void seekToFrame (int) = 0;
 	virtual int getCurrentFrame () = 0;
+	virtual time_spec_t getCurrentTime () = 0;
 	virtual int getNumFrames () = 0;
 	
 	virtual void draw_info () = 0;
@@ -262,6 +343,8 @@ public:
 	virtual bool looping () = 0;
 	virtual void looping (bool what) = 0;
 	virtual Rectf get_image_display_rect () = 0;
+	
+	MarkerSignalInfo_t& markerSignal () const { return m_marker_signal; }
 	
 protected:
 	std::vector<Graph1DRef> m_tracks;
@@ -273,9 +356,10 @@ protected:
 	async_tracksD1_t m_async_luminance_tracks;
 	
 	std::vector<size_t> m_spatial_dims;
-//	std::vector<series_info> m_series_book;
 	std::vector<std::string> m_perform_names;
 	int  m_selected_perform_index;
+
+	mutable MarkerSignalInfo_t m_marker_signal;
 	
 	gl::TextureRef		mTextTexture;
 	vec2				mSize;
@@ -318,6 +402,7 @@ public:
 	virtual void seekToEnd ();
 	virtual void seekToFrame (int);
 	virtual int getCurrentFrame ();
+	virtual time_spec_t getCurrentTime ();
 	virtual int getNumFrames ();
 
 	virtual void draw_info ();
@@ -357,29 +442,20 @@ private:
 	
 	
 	mutable boost::filesystem::path mPath;
-	
+
+	bool m_looping;
     vec2 mScreenSize;
     gl::TextureRef mImage;
     ci::qtime::MovieSurfaceRef m_movie;
     size_t m_fc;
     params::InterfaceGl         mMovieParams;
-	float mMoviePosition;
-	size_t mMovieIndexPosition;
-    float mMovieRate, mPrevMovieRate;
-	bool mMoviePlay;
-	bool mMovieLoop;
     vec2 m_zoom;
-    Rectf m_display_rect;
 	vec2		mMousePos;
 	std::shared_ptr<qTimeFrameCache> mFrameSet;
 	SurfaceRef  mSurface;
 	std::vector<time_spec_t> mTimeHist;
 	vec2 mCom;
 	vec2 m_prev_com;
-	cv::Mat mS;
-	cv::Mat mSS;
-	roiWindow<P8U> mModel;
-	vec2 m_max_motion;
 	int64_t m_index;
 	bool movie_error_do_flip;
 	
@@ -446,6 +522,7 @@ public:
 	size_t                          getNumFrames() const;
 	double                          getCurrentTime() const;
 	double                          getDuration() const;
+	time_spec_t						getCurrentTime ();
 	
 	
 private:
@@ -503,6 +580,8 @@ public:
 		std::vector<size_t> dimensions;
 		std::vector<lifIO::ChannelData> channels;
 		std::vector<std::string> channel_names;
+		std::vector<time_spec_t> timeSpecs;
+		float                    length_in_seconds;
 		
 		friend std::ostream& operator<< (std::ostream& out, const series_info& se)
 		{
@@ -510,6 +589,7 @@ public:
 			out << "Channels: " << se.channelCount << std::endl;
 			out << "TimeSteps  " << se.timesteps << std::endl;
 			out << "Dimensions:" << se.dimensions[0]  << " x " << se.dimensions[1] << std::endl;
+			out << "Time Length:" << se.length_in_seconds	<< std::endl;
 			return out;
 		}
 		
@@ -548,6 +628,7 @@ public:
 	virtual void seekToEnd ();
 	virtual void seekToFrame (int);
 	virtual int getCurrentFrame ();
+	virtual time_spec_t getCurrentTime ();
 	virtual int getNumFrames ();
 	
 	const params::InterfaceGl& ui_params ()
@@ -569,7 +650,7 @@ public:
 	void play_pause_button ();
 	void loop_no_loop_button ();
 	
-	
+	void receivedEvent ( InteractiveObjectEvent event );
 	
 private:
 	void loadLifFile();
@@ -602,6 +683,15 @@ private:
 				si.channels.emplace_back(cda);
 			}
 			
+			// Get timestamps in to time_spec_t and store it in info
+			si.timeSpecs.resize (lifer->getSerie(ss).getTimestamps().size());
+			
+			// Adjust sizes based on the number of bytes
+			std::transform(lifer->getSerie(ss).getTimestamps().begin(), lifer->getSerie(ss).getTimestamps().end(),
+						   si.timeSpecs.begin(), [](lifIO::LifSerie::timestamp_t ts) { return time_spec_t ( ts / 10000.0); });
+			
+			si.length_in_seconds = lifer->getSerie(ss).total_duration ();
+			
 			std::cout << si << std::endl;
 			
 			m_series_book.emplace_back (si);
@@ -626,11 +716,9 @@ private:
 	params::InterfaceGl         mMovieParams;
 	
 	
-	float mMoviePosition;
-	int64_t mMovieIndexPosition;
-	float mMovieRate, mPrevMovieRate;
-	bool mMoviePlay;
-	bool mMovieLoop;
+	int64_t m_seek_position;
+
+	bool m_is_playing, m_is_looping;
 	
 	
 	vec2 m_zoom;
@@ -643,6 +731,9 @@ private:
 	bool mMouseIsMoving;
 	bool mMouseIsDragging;
 	bool mMetaDown;
+	
+	int mMouseInGraphs; // -1 if not, 0 1 2
+	bool mMouseInImage; // if in Image, mMouseInGraph is -1 
 	
 	bool mShowMotionCenter, mShowMotionBubble;
 	std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};

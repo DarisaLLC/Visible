@@ -40,9 +40,6 @@ using namespace std;
 using namespace svl;
 
 
-extern float  MovieBaseGetCurrentTime(cinder::qtime::MovieSurfaceRef& movie);
-
-
 /// Layout for this widget. Poor design !!
 
 namespace
@@ -89,9 +86,9 @@ namespace
                 }
                 case 3:
                 {
-                    auto m3 = svl::NewMultiFromSurface (su8, names, fn);
-                    for (auto cc = 0; cc < m3.planes(); cc++)
-                        rois.emplace_back(m3.plane(cc));
+                    auto m3 = svl::NewRefMultiFromSurface (su8, names, fn);
+                    for (auto cc = 0; cc < m3->planes(); cc++)
+                        rois.emplace_back(m3->plane(cc));
                     break;
                 }
             }
@@ -153,31 +150,31 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
 
 void lifContext::looping (bool what)
 {
-    mMovieLoop = what;
+    m_is_looping = what;
 }
 
 
 bool lifContext::looping ()
 {
-    return mMovieLoop;
+    return m_is_looping;
 }
 
 void lifContext::play ()
 {
-    if (! have_movie() || mMoviePlay ) return;
-    mMoviePlay = true;
+    if (! have_movie() || m_is_playing ) return;
+    m_is_playing = true;
 }
 
 void lifContext::pause ()
 {
-    if (! have_movie() || ! mMoviePlay ) return;
-    mMoviePlay = false;
+    if (! have_movie() || ! m_is_playing ) return;
+    m_is_playing = false;
 }
 
 void lifContext::play_pause_button ()
 {
     if (! have_movie () ) return;
-    if (mMoviePlay)
+    if (m_is_playing)
         pause ();
     else
         play ();
@@ -192,14 +189,11 @@ void lifContext::loop_no_loop_button ()
         looping(true);
 }
 
+
+
 void lifContext::onMarked ( marker_info& t)
 {
-    pause ();
     seekToFrame((int)(t.norm_pos.x *= getNumFrames () ));
-    for (Graph1DRef graphRef : m_tracks )
-    {
-        graphRef->set_marker_position ( t );
-    }
 }
 
 bool lifContext::have_movie ()
@@ -209,12 +203,12 @@ bool lifContext::have_movie ()
 
 void lifContext::seekToEnd ()
 {
-    mMovieIndexPosition = getNumFrames() - 1;
+    seekToFrame (getNumFrames() - 1);
 }
 
 void lifContext::seekToStart ()
 {
-    mMovieIndexPosition = 0;
+    seekToFrame(0);
 }
 
 int lifContext::getNumFrames ()
@@ -224,13 +218,24 @@ int lifContext::getNumFrames ()
 
 int lifContext::getCurrentFrame ()
 {
-    return mMovieIndexPosition;
+    return m_seek_position;
 }
+
+time_spec_t lifContext::getCurrentTime ()
+{
+    if (m_seek_position >= 0 && m_seek_position < m_serie.timeSpecs.size())
+        return m_serie.timeSpecs[m_seek_position];
+    else return -1.0;
+}
+
 
 
 void lifContext::seekToFrame (int mark)
 {
-    mMovieIndexPosition = mark;
+    m_seek_position = mark;
+
+    marker_info tt (m_seek_position, getCurrentTime().secs(), m_fc);
+    m_marker_signal.emit(tt);
 }
 
 vec2 lifContext::getZoom ()
@@ -329,11 +334,9 @@ void lifContext::setup()
 
 void lifContext::clear_movie_params ()
 {
-    mMoviePosition = 0.0f;
-    mMovieIndexPosition = 0;
-    mMovieRate = 1.0f;
-    mMoviePlay = false;
-    mMovieLoop = false;
+    m_seek_position = 0;
+    m_is_playing = false;
+    m_is_looping = false;
     m_zoom.x = m_zoom.y = 1.0f;
 }
 
@@ -409,6 +412,11 @@ void lifContext::loadCurrentSerie ()
                                                                  m_track_rects [cc])));
                 }
                 
+                for (Graph1DRef gr : m_tracks)
+                {
+                    m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
+                }
+                
                 
             }
             
@@ -427,16 +435,17 @@ void lifContext::loadCurrentSerie ()
 
 void lifContext::mouseMove( MouseEvent event )
 {
-    for (Graph1DRef graphRef : m_tracks )
-    {
-        // Call base mouse move to update
-        graphRef->mouseMove( event );
-        marker_info tt;
-        graphRef->get_marker_position(tt);
-        tt.et = marker_info::event_type::move;
-//        signalMarker.emit(tt);
-        
-    }
+    mMouseInImage = false;
+    mMouseInGraphs  = -1;
+    
+    mMouseInImage = get_image_display_rect().contains(event.getPos());
+    if (mMouseInImage) return;
+    
+    std::vector<float> dds (m_track_rects.size());
+    for (auto pp = 0; pp < m_track_rects.size(); pp++) dds[pp] = m_track_rects[pp].distanceSquared(event.getPos());
+
+    auto min_iter = std::min_element(dds.begin(),dds.end());
+    mMouseInGraphs = min_iter - dds.begin();
 }
 
 
@@ -455,7 +464,7 @@ void lifContext::mouseDown( MouseEvent event )
         marker_info tt;
         graphRef->get_marker_position(tt);
         tt.et = marker_info::event_type::down;
-//        signalMarker.emit(tt);
+        signalMarker.emit(tt);
     }
 }
 
@@ -465,6 +474,7 @@ void lifContext::mouseUp( MouseEvent event )
     for (Graph1DRef graphRef : m_tracks)
         graphRef->mouseUp( event );
 }
+
 
 
 
@@ -534,16 +544,12 @@ Rectf lifContext::get_image_display_rect ()
 
 
 
-//void lifContext::seek( size_t xPos )
-//{
-//    if (is_valid()) mMovieIndexPosition = lifContext::Normal2Index ( getWindowBounds(), xPos, getNumFrames () );
-//}
-
 
 bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif_file_viewer); }
 
 void lifContext::resize ()
 {
+    vl.update_window_size(getWindowSize ());
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     vl.plot_rects(m_track_rects);
     for (int cc = 0; cc < m_tracks.size(); cc++)
@@ -574,7 +580,7 @@ void lifContext::update ()
     
     mSurface = mFrameSet->getFrame(getCurrentFrame());
     
-    if (mMoviePlay ) seekToFrame (getCurrentFrame() + 1);
+    if (m_is_playing ) seekToFrame (getCurrentFrame() + 1);
     
 }
 
@@ -583,9 +589,14 @@ void lifContext::draw_info ()
 {
     if (! m_lifRef) return;
     
-    
+    std::string image_location (" In Image ");
+    std::string graph_location (" In Graph ");
+    graph_location += to_string (mMouseInGraphs);
+    std::string which = mMouseInImage ? image_location : mMouseInGraphs >= 0 ? graph_location : " Outside ";
     std::strstream msg;
-    msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << mMoviePlay << " F " << setw(12) << int( getCurrentFrame ());
+    msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << m_is_playing <<
+        " F " << setw(12) << int( getCurrentFrame () ) << which;
+    
     std::string frame_str = msg.str();
     std::string seri_str = m_serie.info();
     

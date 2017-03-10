@@ -156,13 +156,13 @@ const  boost::filesystem::path movContext::source_path () const
 void movContext::looping (bool what)
 {
     m_movie->setLoop(what);
-    mMovieLoop = what;
+    m_looping = what;
 }
 
 
 bool movContext::looping ()
 {
-    return mMovieLoop;
+    return m_looping;
 }
 
 void movContext::play ()
@@ -214,6 +214,11 @@ int movContext::getNumFrames ()
     return m_fc;
 }
 
+time_spec_t movContext::getCurrentTime ()
+{
+    return m_movie->getCurrentTime();
+}
+
 int movContext::getCurrentFrame ()
 {
     auto ft = m_movie->getCurrentTime();
@@ -224,6 +229,9 @@ int movContext::getCurrentFrame ()
 void movContext::seekToFrame (int mark)
 {
     m_movie->seekToFrame (mark);
+    marker_info tt (int64_t(mark), getCurrentTime().secs(), getNumFrames());
+    m_marker_signal.emit(tt);
+    
 }
 
 
@@ -297,11 +305,8 @@ void movContext::setup()
 
 void movContext::clear_movie_params ()
 {
-    mMoviePosition = 0.0f;
-    mMovieIndexPosition = 0;
-    mMovieRate = 1.0f;
-    mMoviePlay = false;
-    mMovieLoop = false;
+    m_movie->setLoop(false);
+    m_movie->stop();
     m_zoom.x = m_zoom.y = 1.0f;
 }
 
@@ -358,10 +363,6 @@ void movContext::loadMovieFile()
                 m_movie->seekToStart();
                 // Do not play at start
                 m_movie->play();
-                
-                // Percent trim from all sides.
-                m_max_motion.x = m_max_motion.y = 0.1;
-                
                 
                 // Launch Average Luminance Computation
                 m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance,
@@ -434,11 +435,11 @@ void movContext::mouseUp( MouseEvent event )
 }
 
 
-
-void movContext::seek( size_t xPos )
-{
-    if (is_valid()) mMovieIndexPosition = movContext::Normal2Index ( getWindowBounds(), xPos, m_fc);
-}
+//
+//void movContext::seek( size_t xPos )
+//{
+//    if (is_valid()) mMovieIndexPosition = movContext::Normal2Index ( getWindowBounds(), xPos, m_fc);
+//}
 
 
 bool movContext::is_valid () { return m_valid && is_context_type(guiContext::qtime_viewer); }

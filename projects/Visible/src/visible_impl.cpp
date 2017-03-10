@@ -185,7 +185,7 @@ void matContext::resize()
 
 void matContext::onMarked (marker_info& t)
 {
-    std::cout << " clip <- " << t.norm_time << std::endl;
+    std::cout << " clip <- " << t.first << std::endl;
 }
 
 bool matContext::is_valid ()

@@ -238,7 +238,7 @@ float lifIO::LifSerieHeader::frame_duration_ms() const
             {
                 m_frame_durations.resize(getTimestamps().size());
                 adjacent_difference(getTimestamps().begin(), getTimestamps().end(), m_frame_durations.begin());
-                m_frame_durations[0] = 0; // firs difference not written
+                m_frame_durations[0] = 0; // first difference not written
                 auto sumall = accumulate(m_frame_durations.begin(), m_frame_durations.end(), 0);
                 avg_fd = (sumall / (m_frame_durations.size()-1))/10000.0f;
             }

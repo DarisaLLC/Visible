@@ -12,9 +12,12 @@
 #include <Iterator>
 #include <Functional>
 
+#include "cinder/Timeline.h"
+
 #include "InteractiveObject.h"
 #include "async_producer.h"
 #include "core/core.hpp"
+#include "timeMarker.h"
 
 
 using namespace std;
@@ -115,23 +118,21 @@ public:
     {
         const std::vector<float>& buf = buffer();
         if (empty()) return -1.0;
-        int32_t mIndex = floor (tnormed * (buf.size()-1));
-        return (mIndex >= 0 && mIndex < buf.size()) ? buf[mIndex] : -1.0f;
+        int32_t index = floor (tnormed * (buf.size()-1));
+        return (index >= 0 && index < buf.size()) ? buf[index] : -1.0f;
     }
     
     void get_marker_position (marker_info& t) const
     {
         t.norm_pos = norm_pos();
-        t.val = mVal;
-        t.index = mIndex;
     }
     
-    void set_marker_position (marker_info& t) const
+    void set_marker_position (marker_info t) const
     {
-        vec2& pp = t.norm_pos;
+        std::cout << t.first << "/" << t.count << std::endl;
+        vec2 pp ((float)t.first/(float)t.count, 0.0);
         norm_pos (pp);
-        mVal = t.val;
-        mIndex = t.index;
+
     }
     
     void draw_value_label (float v, float x, float y) const
@@ -180,8 +181,11 @@ public:
             float mVal = m_CB (norm_pos().x);
             
             vec2 mid (px, content.getHeight()/2.0);
+            mid += content.getUpperLeft();
+            
             if (content.contains(mid))
             {
+                px += content.getUpperLeft().x;
                 ci::gl::drawLine (vec2(px, 0.f), vec2(px, content.getHeight()));
                 draw_value_label (mVal, px, content.getHeight()/2.0f);
                 
@@ -205,7 +209,7 @@ private:
     cinder::gl::TextureRef						mLabelTex;
     Graph1DSetCb m_CB;
     mapping_option m_opt;
-    
+    ci::Anim<marker_info> m_marker;
     
 };
 

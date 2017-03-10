@@ -41,18 +41,27 @@ namespace svl
         void operator () (const Surface8uRef&, roiWindow<D>&);
     };
 
-    static roiMultiWindow<P8UP3> NewMultiFromChannel ( ChannelT<uint8_t>& onec, const std::vector<std::string>& names_l2r, int64_t timestamp = 0)
+    static std::shared_ptr<roiWindow<P8U>> NewRefFromChannel ( ChannelT<uint8_t>& onec)
     {
         uint8_t* pixels = onec.getData();
-        roiMultiWindow<P8UP3> mw (names_l2r, timestamp);
-        assert (onec.getWidth() == mw.width() && onec.getHeight() == mw.height());
-        mw.copy_pixels_from(pixels, onec.getWidth (),onec.getHeight (), (int32_t) onec.getRowBytes ());
-        return mw;
+        std::shared_ptr<root<P8U>> rootref (new root<P8U> (pixels, (int32_t) onec.getRowBytes (),
+                                                           onec.getWidth(), onec.getHeight()));
+        return std::shared_ptr<roiWindow<P8U>> (new roiWindow<P8U>(rootref, 0, 0, onec.getWidth(), onec.getHeight()));
     }
     
-    static roiMultiWindow<P8UP3> NewMultiFromSurface (const Surface8uRef& src, const std::vector<std::string>& names_l2r, int64_t timestamp = 0)
+    static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromChannel ( ChannelT<uint8_t>& onec,
+                                                                          const std::vector<std::string>& names_l2r, int64_t timestamp = 0)
     {
-        return NewMultiFromChannel (src->getChannelRed(), names_l2r, timestamp);
+        uint8_t* pixels = onec.getData();
+        std::shared_ptr<roiMultiWindow<P8UP3>> mwRef (new roiMultiWindow<P8UP3>(names_l2r, timestamp));
+        assert (onec.getWidth() == mwRef->width() && onec.getHeight() == mwRef->height());
+        mwRef->copy_pixels_from(pixels, onec.getWidth (),onec.getHeight (), (int32_t) onec.getRowBytes ());
+        return mwRef;
+    }
+    
+    static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromSurface (const Surface8uRef& src, const std::vector<std::string>& names_l2r, int64_t timestamp = 0)
+    {
+        return NewRefMultiFromChannel (src->getChannelRed(), names_l2r, timestamp);
     }
     
 
@@ -64,13 +73,13 @@ namespace svl
         return window;
     }
     
-    static std::shared_ptr<roiWindow<P8U>> NewRefFromChannel ( ChannelT<uint8_t>& onec)
-    {
-        uint8_t* pixels = onec.getData();
-        std::shared_ptr<root<P8U>> rootref (new root<P8U> (pixels, (int32_t) onec.getRowBytes (),
-                                                           onec.getWidth(), onec.getHeight()));
-        return std::shared_ptr<roiWindow<P8U>> (new roiWindow<P8U>(rootref, 0, 0, onec.getWidth(), onec.getHeight()));
-    }
+//    static std::shared_ptr<roiWindow<P8U>> NewRefFromChannel ( ChannelT<uint8_t>& onec)
+//    {
+//        uint8_t* pixels = onec.getData();
+//        std::shared_ptr<root<P8U>> rootref (new root<P8U> (pixels, (int32_t) onec.getRowBytes (),
+//                                                           onec.getWidth(), onec.getHeight()));
+//        return std::shared_ptr<roiWindow<P8U>> (new roiWindow<P8U>(rootref, 0, 0, onec.getWidth(), onec.getHeight()));
+//    }
     
     static std::shared_ptr<roiWindow<P8U>> NewIndexedChannelFromSurface (const Surface8uRef& src, uint8_t channelIndex)
     {

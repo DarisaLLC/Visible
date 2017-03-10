@@ -10,37 +10,6 @@
 #include <vector>
 
 
-
-
-
-
-class marker_info
-{
-public:
-    enum event_type { move = 0, down = move+1, num_types = down+1 };
-
-    cinder::vec2 norm_pos;
-    float norm_time;
-    float val;
-    int32_t index;
-    index_time_t timestamp;
-    event_type et;
-    
-    friend std::ostream& operator<< (std::ostream& std_stream, marker_info& t)
-    {
-        
-        std_stream << "Normalized Position:" << t.norm_pos.x << " x " << t.norm_pos.y << std::endl;
-        std_stream << "Value:  " << t.val <<  std::endl;
-        std_stream << "Event:    " << ((t.et == event_type::move) ? "move" : "down") << std::endl;
-        std_stream << "Index:    " << t.index << std::endl;
-        return std_stream;
-    }
-    
-};
-
-
-
-
 using namespace ci;
 //using namespace ci::app;
 using namespace std;

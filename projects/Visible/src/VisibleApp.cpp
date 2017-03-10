@@ -117,7 +117,7 @@ WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
     WindowRef win = createWindow( format );
     win->getSignalClose().connect( std::bind( &VisibleApp::windowClose, this ) );
     win->getSignalMouseDown().connect( std::bind( &VisibleApp::windowMouseDown, this, std::placeholders::_1 ) );
-    //   win->getSignalDraw().connect( std::bind( &VisibleApp::windowDraw, this ) );
+//    win->getSignalDisplayChange().connect( std::bind( &VisibleApp::update, this ) );
     return win;
     
 }
@@ -235,6 +235,7 @@ void VisibleApp::setup()
     getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
     getWindow()->getSignalDraw().connect(std::bind( &VisibleApp::draw, this) );
     getWindow()->getSignalClose().connect(std::bind( &VisibleApp::windowClose, this) );
+    getWindow()->getSignalResize().connect(std::bind( &VisibleApp::resize, this) );
     
     getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
     getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );

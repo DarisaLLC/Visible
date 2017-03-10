@@ -15,6 +15,7 @@
 #define lif_reader_H
 
 #include "core/core.hpp"
+#include "core/timestamp.h"
 #include "tinyxml.h"
 #include <string>
 #include <iostream>
@@ -57,6 +58,13 @@ class LifSerieHeader
         const std::vector<ChannelData>& getChannels() const {return channels;};
         const std::vector<timestamp_t>& getTimestamps () const { return timeStamps; }
         const std::vector<timestamp_t>& getDurations () const { return m_frame_durations; }
+        float total_duration () const
+        {
+            if (timeStamps.size() < 2) return -1.0f;
+            auto timeL = (timeStamps.end() - timeStamps.begin()) / 10000.0;
+            if (std::signbit(timeL)) return -1.0f;
+            return timeL;
+        }
     
         float frame_duration_ms () const;
     float frame_rate () const { if (frame_duration_ms() > 0.0) return 1000.0/frame_duration_ms ();return -1.0; }
@@ -132,6 +140,8 @@ class LifReader : boost::noncopyable
     std::ifstream file;
     std::streampos fileSize;
     boost::ptr_vector<LifSerie> series;
+    
+
 
     public:
         explicit LifReader(const std::string &filename);
