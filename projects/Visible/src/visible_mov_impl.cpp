@@ -9,8 +9,6 @@
 #include <stdio.h>
 #include "VisibleApp.h"
 #include "guiContext.h"
-#include "qtime_frame_cache.hpp"
-
 #include "cinder/ip/Flip.h"
 #include "opencv2/highgui.hpp"
 #include "opencv_utils.hpp"
@@ -272,21 +270,7 @@ void movContext::setup()
         {
             const std::function<void (int)> setter = std::bind(&movContext::seekToFrame, this, std::placeholders::_1);
             const std::function<int ()> getter = std::bind(&movContext::getCurrentFrame, this);
-            mMovieParams.addParam ("Mark", setter, getter);
-        }
-        mMovieParams.addSeparator();
-        {
-            const std::function<void (bool)> setter = std::bind(&movContext::setShowMotionCenter, this, std::placeholders::_1);
-            const std::function<bool (void)> getter = std::bind(&movContext::getShowMotionCenter, this);
-
-            mMovieParams.addParam( "Show Mc", setter, getter);
-        }
-        mMovieParams.addSeparator();
-        {
-            const std::function<void (bool)> setter = std::bind(&movContext::setShowMotionBubble, this, std::placeholders::_1);
-            const std::function<bool (void)> getter = std::bind(&movContext::getShowMotionBubble, this);
-            
-            mMovieParams.addParam( "Show Mb", setter, getter);
+            mMovieParams.addParam ("Current Time Step", setter, getter);
         }
         
         mMovieParams.addSeparator();
@@ -305,8 +289,11 @@ void movContext::setup()
 
 void movContext::clear_movie_params ()
 {
-    m_movie->setLoop(false);
-    m_movie->stop();
+    if (m_movie)
+    {
+        m_movie->setLoop(false);
+        m_movie->stop();
+    }
     m_zoom.x = m_zoom.y = 1.0f;
 }
 
@@ -332,19 +319,15 @@ void movContext::loadMovieFile()
                 mMovieParams = params::InterfaceGl( "Movie Player", vec2( 260, 260 ) );
 
                 // TBD: wrap these into media_info
-                m_fc = m_movie->getNumFrames ();
                 mScreenSize = vec2(std::fabs(m_movie->getWidth()), std::fabs(m_movie->getHeight()));
-                ivec2 window_size (vl.desired_window_size());
-                setWindowSize(window_size);
                 mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
                 getWindow()->getApp()->setFrameRate(m_movie->getFramerate() / 3);
+                m_fc = m_movie->getNumFrames ();
                 
-                ci_console() << "Dimensions:" <<m_movie->getWidth() << " x " <<m_movie->getHeight() << std::endl;
-                ci_console() << "Duration:  " <<m_movie->getDuration() << " seconds" << std::endl;
-                ci_console() << "Frames:    " <<m_movie->getNumFrames() << std::endl;
-                ci_console() << "Framerate: " <<m_movie->getFramerate() << std::endl;
-
-
+                vl.update_window_size(m_movie->getSize());
+                ivec2 window_size (vl.desired_window_size());
+                setWindowSize(window_size);
+                
                 // Setup Plot area
                 std::lock_guard<std::mutex> lock(m_track_mutex);
                 vl.plot_rects(m_track_rects);
@@ -358,22 +341,29 @@ void movContext::loadMovieFile()
                     m_tracks.push_back( Graph1DRef (new graph1D (names[cc], m_track_rects [cc])));
                 }
                 
-                
                 m_movie->setLoop( true, false);
                 m_movie->seekToStart();
-                // Do not play at start
                 m_movie->play();
+                
+                for (Graph1DRef gr : m_tracks)
+                {
+                    m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
+                }
                 
                 // Launch Average Luminance Computation
                 m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance,
                                                       mFrameSet, names, false);
                 
                 
+                ci_console() << "Dimensions:" <<m_movie->getWidth() << " x " <<m_movie->getHeight() << std::endl;
+                ci_console() << "Duration:  " <<m_movie->getDuration() << " seconds" << std::endl;
+                ci_console() << "Frames:    " <<m_movie->getNumFrames() << std::endl;
+                ci_console() << "Framerate: " <<m_movie->getFramerate() << std::endl;
                 
             }
         }
-        catch( ... ) {
-            ci_console() << "Unable to load the movie." << std::endl;
+        catch( const std::exception &ex ) {
+            console() << ex.what() << endl;
             return;
         }
         
@@ -389,6 +379,18 @@ void movContext::mouseDown( MouseEvent event )
 void movContext::mouseMove( MouseEvent event )
 {
     mMousePos = event.getPos();
+    mMouseInImage = false;
+    mMouseInGraphs  = -1;
+    
+    mMouseInImage = get_image_display_rect().contains(event.getPos());
+    if (mMouseInImage) return;
+    
+    std::vector<float> dds (m_track_rects.size());
+    for (auto pp = 0; pp < m_track_rects.size(); pp++) dds[pp] = m_track_rects[pp].distanceSquared(event.getPos());
+    
+    auto min_iter = std::min_element(dds.begin(),dds.end());
+    mMouseInGraphs = min_iter - dds.begin();
+    
 }
 
 void movContext::mouseDrag( MouseEvent event )
@@ -457,29 +459,43 @@ void movContext::resize ()
 }
 void movContext::update ()
 {
-    if ( is_ready (m_async_luminance_tracks) &&  m_async_luminance_tracks.get().size() == m_tracks.size ())
-    {
-        m_luminance_tracks = m_async_luminance_tracks.get();
-
-        for (int cc = 0; cc < m_luminance_tracks.size(); cc++)
-        {
-            m_tracks[cc]->setup(m_luminance_tracks[cc]);
-        }
-    }
+//    if ( is_ready (m_async_luminance_tracks) &&  m_async_luminance_tracks.get().size() == m_tracks.size ())
+//    {
+//        m_luminance_tracks = m_async_luminance_tracks.get();
+//
+//        for (int cc = 0; cc < m_luminance_tracks.size(); cc++)
+//        {
+//            m_tracks[cc]->setup(m_luminance_tracks[cc]);
+//        }
+//    }
     
     if (! have_movie () ) return;
-    
-    if (m_movie->checkNewFrame())
-    {
-       ip::flipVertical(*m_movie->getSurface(), mSurface.get());
-       ip::flipHorizontal(mSurface.get());
 
-        time_spec_t new_time = m_movie->getCurrentTime();
-        mFrameSet->loadFrame(mSurface, new_time);
+    time_spec_t new_time = m_movie->getCurrentTime();
+    if (mFrameSet->checkFrame(new_time))
         mSurface = mFrameSet->getFrame(new_time);
+    else
+    {
+        if (m_movie->checkNewFrame())
+        {
+            mSurface = m_movie->getSurface();
+            mFrameSet->loadFrame(mSurface, new_time);
+        }
     }
+
+
     
-    update_log();
+    std::string image_location (" In Image ");
+    std::string graph_location (" In Graph ");
+    graph_location += to_string (mMouseInGraphs);
+    std::string which = mMouseInImage ? image_location : mMouseInGraphs >= 0 ? graph_location : " Outside ";
+    std::strstream msg;
+    msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << m_movie->isPlaying() <<
+    " F " << setw(12) << int( getCurrentFrame () ) << which;
+    
+    std::string frame_str = msg.str();
+    update_log (frame_str);
+    
     
 }
 

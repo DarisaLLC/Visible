@@ -240,18 +240,15 @@ void VisibleApp::setup()
     getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
     getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
     
+    gl::enableVerticalSync();
+    
 }
 
 
 void VisibleApp::update_log (const std::string& msg)
 {
     if (msg.length() > 2)
-        mLog = msg;
-    TextBox tbox = TextBox().alignment( TextBox::RIGHT).font( mFont ).size( mSize ).text( mLog );
-    tbox.setColor( Color( 1.0f, 0.65f, 0.35f ) );
-    tbox.setBackgroundColor( ColorA( 0.3f, 0.3f, 0.3f, 0.4f )  );
-    ivec2 sz = tbox.measure();
-    mTextTexture = gl::Texture2d::create( tbox.render() );
+        std::cout << msg.c_str ();
 }
 
 void VisibleApp::windowMouseDown( MouseEvent &mouseEvt )
@@ -360,11 +357,11 @@ void VisibleApp::draw ()
     else
     {
         mTopParams->draw ();
-        if (mTextTexture)
-        {
-            Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
-            gl::draw(mTextTexture, textrect);
-        }
+//        if (mTextTexture)
+//        {
+//            Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
+//            gl::draw(mTextTexture, textrect);
+//        }
     }
     
     
@@ -383,4 +380,4 @@ void VisibleApp::resize ()
 
 
 // This line tells Cinder to actually create the application
-CINDER_APP( VisibleApp, RendererGl (RendererGl ::Options().msaa( 4 ) ), prepareSettings )
+CINDER_APP( VisibleApp, RendererGl, prepareSettings )

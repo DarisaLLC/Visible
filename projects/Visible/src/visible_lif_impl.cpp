@@ -191,11 +191,6 @@ void lifContext::loop_no_loop_button ()
 
 
 
-void lifContext::onMarked ( marker_info& t)
-{
-    seekToFrame((int)(t.norm_pos.x *= getNumFrames () ));
-}
-
 bool lifContext::have_movie ()
 {
     return m_lifRef && m_current_serie_ref >= 0 && mFrameSet;
@@ -233,9 +228,14 @@ time_spec_t lifContext::getCurrentTime ()
 void lifContext::seekToFrame (int mark)
 {
     m_seek_position = mark;
-
     marker_info tt (m_seek_position, getCurrentTime().secs(), m_fc);
     m_marker_signal.emit(tt);
+}
+
+
+void lifContext::onMarked ( marker_info& t)
+{
+    seekToFrame((int)(t.norm_pos.x *= getNumFrames () ));
 }
 
 vec2 lifContext::getZoom ()
@@ -504,17 +504,7 @@ void lifContext::keyDown( KeyEvent event )
         if( event.getChar() == ' ' ) {
             play_pause_button();
         }
-        
-        if (event.getChar() == KeyEvent::KEY_v)
-        {
-            // Toggle vertical sync.
-            if( gl::isVerticalSyncEnabled() )
-                gl::enableVerticalSync( false );
-            else
-                gl::enableVerticalSync();
-        }
-        
-        
+       
     }
 }
 
@@ -582,6 +572,17 @@ void lifContext::update ()
     
     if (m_is_playing ) seekToFrame (getCurrentFrame() + 1);
     
+    std::string image_location (" In Image ");
+    std::string graph_location (" In Graph ");
+    graph_location += to_string (mMouseInGraphs);
+    std::string which = mMouseInImage ? image_location : mMouseInGraphs >= 0 ? graph_location : " Outside ";
+    std::strstream msg;
+    msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << m_is_playing <<
+    " F " << setw(12) << int( getCurrentFrame () ) << which;
+    
+    std::string frame_str = msg.str();
+    update_log (frame_str);
+    
 }
 
 
@@ -589,16 +590,7 @@ void lifContext::draw_info ()
 {
     if (! m_lifRef) return;
     
-    std::string image_location (" In Image ");
-    std::string graph_location (" In Graph ");
-    graph_location += to_string (mMouseInGraphs);
-    std::string which = mMouseInImage ? image_location : mMouseInGraphs >= 0 ? graph_location : " Outside ";
-    std::strstream msg;
-    msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << m_is_playing <<
-        " F " << setw(12) << int( getCurrentFrame () ) << which;
-    
-    std::string frame_str = msg.str();
-    std::string seri_str = m_serie.info();
+      std::string seri_str = m_serie.info();
     
     gl::setMatricesWindow( getWindowSize() );
     
@@ -610,7 +602,7 @@ void lifContext::draw_info ()
     layoutR.setColor( Color::white() );
     layoutR.setLeadingOffset( 3 );
     layoutR.addRightLine( seri_str  );
-    update_log (frame_str);
+ 
     
     auto texR = gl::Texture::create( layoutR.render( true ) );
     gl::draw( texR, vec2( 10, 10 ) );

@@ -464,6 +464,9 @@ private:
     bool mMouseIsDragging;
     bool mMetaDown;
 	
+	int mMouseInGraphs; // -1 if not, 0 1 2
+	bool mMouseInImage; // if in Image, mMouseInGraph is -1
+	
 	bool mShowMotionCenter, mShowMotionBubble;
 	std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
 	int mButton_title_index;
@@ -556,6 +559,9 @@ private:
 	bool mMouseIsMoving;
 	bool mMouseIsDragging;
 	bool mMetaDown;
+	
+	int mMouseInGraphs; // -1 if not, 0 1 2
+	bool mMouseInImage; // if in Image, mMouseInGraph is -1
 	
 	gl::TextureRef		mTextTexture;
 	vec2				mSize;
