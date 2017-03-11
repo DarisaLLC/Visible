@@ -257,7 +257,7 @@ void movDirContext::loadMovieFile()
                 msg << "Duration:  " <<getDuration() << " seconds" << std::endl;
                 msg << "Frames:    " <<getNumFrames() << std::endl;
                 msg << "Framerate: " <<getFrameRate() << std::endl;
-                update_log(msg.str());
+             //   update_log(msg.str());
                 
                 m_Dm->setPlayRate (1.0);
                 ivec2 window_size (desired_window_size());

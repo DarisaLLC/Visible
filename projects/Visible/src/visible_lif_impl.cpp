@@ -193,7 +193,7 @@ void lifContext::loop_no_loop_button ()
 
 bool lifContext::have_movie ()
 {
-    return m_lifRef && m_current_serie_ref >= 0 && mFrameSet;
+    return m_lifRef && m_current_serie_ref >= 0 && mFrameSet && vl.isSet();
 }
 
 void lifContext::seekToEnd ()
@@ -439,6 +439,8 @@ void lifContext::mouseMove( MouseEvent event )
     mMouseInImage = false;
     mMouseInGraphs  = -1;
     
+   if (! have_movie () ) return;
+    
     mMouseInImage = get_image_display_rect().contains(event.getPos());
     if (mMouseInImage) return;
     
@@ -523,7 +525,7 @@ void  lifContext::update_log (const std::string& msg)
 
 Rectf lifContext::get_image_display_rect ()
 {
-    return vl.image_frame_rect();
+    return vl.display_frame_rect();
 }
 
 

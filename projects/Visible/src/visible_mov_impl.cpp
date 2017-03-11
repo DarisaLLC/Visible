@@ -194,7 +194,7 @@ void movContext::loop_no_loop_button ()
 }
 bool movContext::have_movie ()
 {
-    return m_movie != nullptr && m_valid;
+    return m_movie != nullptr && m_valid && vl.isSet();
 }
 
 void movContext::seekToEnd ()
@@ -328,7 +328,6 @@ void movContext::loadMovieFile()
 
                 vl.normSinglePlotSize (vec2 (0.25, 0.1));
 
-                vl.update_window_size(m_movie->getSize());
                 ivec2 window_size (vl.desired_window_size());
                 setWindowSize(window_size);
                 
@@ -505,15 +504,14 @@ void movContext::update ()
 
 void movContext::draw ()
 {
-     Rectf dr = get_image_display_rect();
-    
+  
     if( ! have_movie()  || ( ! mSurface ) )
     {
         std::cout << " no have movie or surface " << std::endl;
         return;
     }
     
-    
+    Rectf dr = get_image_display_rect();
     mImage = gl::Texture::create(*mSurface);
   //  mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
     gl::draw (mImage, dr);
@@ -550,7 +548,7 @@ void  movContext::update_log (const std::string& message)
 
 Rectf movContext::get_image_display_rect ()
 {
-    return vl.image_frame_rect();
+    return vl.display_frame_rect();
 //    ivec2 ivf = vl.image_frame_size();
 //    ivec2 tl = vl.trim();
 //    

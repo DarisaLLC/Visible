@@ -49,6 +49,8 @@ public:
     
     inline void update_window_size (const ivec2& new_size )
     {
+        if (m_canvas_size == new_size) return;
+        
         ivec2 ns = new_size;
         if (m_keep_aspect)
         {
@@ -60,17 +62,27 @@ public:
         }
         
         m_canvas_size = new_size;
+        Area wi (0, 0, m_canvas_size.x, m_canvas_size.y);
+        m_window_rect = Rectf(wi);
+        
         m_windowSizeSignal.emit(m_canvas_size);
     }
     
-    inline Rectf image_frame_rect ()
+    inline Rectf display_frame_rect ()
     {
+        assert(isSet());
         
-        vec2 tl = image_frame_position();
-        vec2 br = vec2 (tl.x + image_frame_size().x, tl.y + image_frame_size().y);
-        Rectf fr (tl, br);
-        auto ir = m_image_rect.getCenteredFill(fr, true);
-        return ir;
+        // Get the image frame
+        Rectf imf = image_frame_rect ();
+        Rectf rawf = m_image_rect;
+        if (imf.intersects(rawf))
+        {
+            auto it = rawf.getCenteredFit(imf, true);
+            // Leave it centered and not align it to the top
+            //       it.offset(-it.getUpperLeft());
+            rawf = it;
+        }
+        return rawf;
     }
     
     // Modify window size
@@ -95,6 +107,8 @@ public:
     inline ivec2& trim () const { return m_trim; }
     vec2 trim_norm () { return vec2(trim().x, trim().y) / vec2(m_canvas_size.x, m_canvas_size.y); }
     
+
+    inline Rectf desired_window_rect () { return Rectf (trim().x, trim().y, trim().x + canvas_size().x, trim().y + canvas_size().y); }
     inline ivec2& desired_window_size () const { return m_canvas_size; }
     inline ivec2 canvas_size () { return desired_window_size() - trim() - trim (); }
  
@@ -136,16 +150,18 @@ private:
         return np;
     }
     
-    inline vec2 image_frame_position ()
+    inline Rectf image_frame_rect ()
     {
         vec2 np = vec2 (image_frame_position_norm().x * desired_window_size().x, image_frame_position_norm().y * desired_window_size().y);
-        return np;
+        vec2 pp = image_frame_size_norm ();
+        vec2 pn (np.x + pp.x * desired_window_size().x, np.y + pp.y * desired_window_size().y);
+        return Rectf(np, pn);
     }
     
     inline vec2& image_frame_size_norm (){ return m_image_frame_size_norm;}
     inline ivec2 image_frame_size ()
     {
-        static vec2& np = image_frame_size_norm ();
+        vec2& np = image_frame_size_norm ();
         return ivec2 (np.x * desired_window_size().x, np.y * desired_window_size().y);
     }
     
