@@ -428,7 +428,6 @@ public:
 	void play_pause_button ();
 	void loop_no_loop_button ();
 	
-
 	
 private:
     void loadMovieFile();

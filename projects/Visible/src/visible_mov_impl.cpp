@@ -47,8 +47,8 @@ namespace
         return AppBase::get()->getElapsedSeconds();
     }
     
-    static layout vl (ivec2(960,540), ivec2(10,10));
-    
+ 
+    static layout vl (ivec2 (10, 10));
     
     
     tracksD1_t get_mean_luminance (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names, bool test_data = false)
@@ -135,7 +135,7 @@ movContext::movContext(WindowRef& ww, const boost::filesystem::path& dp)
     if (is_valid())
     {
         mWindow->setTitle( mPath.filename().string() );
-        mWindow->setSize(vl.desired_window_size());
+        mWindow->setSize(960, 540);
         mFont = Font( "Menlo", 12 );
         mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     }
@@ -313,6 +313,8 @@ void movContext::loadMovieFile()
             mFrameSet = qTimeFrameCache::create (m_movie);
             mFrameSet->channel_names(names);
             
+            vl.init (app::getWindow(), mFrameSet->media_info());
+            
             if (m_valid)
             {
                 getWindow()->setTitle( mPath.filename().string() );
@@ -323,7 +325,9 @@ void movContext::loadMovieFile()
                 mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
                 getWindow()->getApp()->setFrameRate(m_movie->getFramerate() / 3);
                 m_fc = m_movie->getNumFrames ();
-                
+
+                vl.normSinglePlotSize (vec2 (0.25, 0.1));
+
                 vl.update_window_size(m_movie->getSize());
                 ivec2 window_size (vl.desired_window_size());
                 setWindowSize(window_size);
@@ -511,7 +515,7 @@ void movContext::draw ()
     
     
     mImage = gl::Texture::create(*mSurface);
-    mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
+  //  mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
     gl::draw (mImage, dr);
     
     
@@ -546,13 +550,14 @@ void  movContext::update_log (const std::string& message)
 
 Rectf movContext::get_image_display_rect ()
 {
-    ivec2 ivf = vl.image_frame_size();
-    ivec2 tl = vl.trim();
-    
-    ivf.y /= 3;
-    
-    ivec2 lr = tl + ivf;
-    return Rectf (tl, lr);
+    return vl.image_frame_rect();
+//    ivec2 ivf = vl.image_frame_size();
+//    ivec2 tl = vl.trim();
+//    
+//    ivf.y /= 3;
+//    
+//    ivec2 lr = tl + ivf;
+//    return Rectf (tl, lr);
 }
 
 

@@ -54,7 +54,7 @@ namespace
         return AppBase::get()->getElapsedSeconds();
     }
     
-    static layout vl (ivec2 (960, 540), ivec2 (10, 10));
+    static layout vl ( ivec2 (10, 10));
     
     
     
@@ -137,7 +137,7 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
     if (is_valid())
     {
         mWindow->setTitle( mPath.filename().string() );
-        mWindow->setSize(vl.desired_window_size());
+        mWindow->setSize(960, 540);
         mFont = Font( "Menlo", 12 );
         mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     }
@@ -373,6 +373,7 @@ void lifContext::loadCurrentSerie ()
         mFrameSet = qTimeFrameCache::create (*m_current_serie_ref);
         mFrameSet->channel_names (m_series_book[m_selected_serie_index].channel_names);
         
+        vl.init (app::getWindow(), mFrameSet->media_info());
         
         if (m_valid)
         {
@@ -522,14 +523,7 @@ void  lifContext::update_log (const std::string& msg)
 
 Rectf lifContext::get_image_display_rect ()
 {
-    ivec2 ivf = vl.image_frame_size();
-    ivec2 tl = vl.trim();
-    
-    if (m_serie.channelCount == 1)
-        ivf.y /= 3;
-    
-    ivec2 lr = tl + ivf;
-    return Rectf (tl, lr);
+    return vl.image_frame_rect();
 }
 
 
