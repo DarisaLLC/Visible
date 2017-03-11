@@ -69,7 +69,7 @@ public:
         vec2 tl = image_frame_position();
         vec2 br = vec2 (tl.x + image_frame_size().x, tl.y + image_frame_size().y);
         Rectf fr (tl, br);
-        auto ir = m_image_rect.getCenteredFit(fr, true);
+        auto ir = m_image_rect.getCenteredFill(fr, true);
         return ir;
     }
     

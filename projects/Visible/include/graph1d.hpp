@@ -185,9 +185,11 @@ public:
             
             if (content.contains(mid))
             {
+                auto low = content.getUpperLeft().y;
+                auto high = low + content.getHeight();
                 px += content.getUpperLeft().x;
-                ci::gl::drawLine (vec2(px, 0.f), vec2(px, content.getHeight()));
-                draw_value_label (mVal, px, content.getHeight()/2.0f);
+                ci::gl::drawLine (vec2(px, low), vec2(px, high));
+                draw_value_label (mVal, px, mid.y);
                 
             }
         }
