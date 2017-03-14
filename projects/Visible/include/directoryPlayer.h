@@ -126,10 +126,10 @@ protected:
         buffer( nullptr ), texture_buffer (nullptr)
         {}
 
-        bool is_anaonymous_name (const boost::filesystem::path& pp)
+        bool is_anaonymous_name (const boost::filesystem::path& pp, size_t check_size = 36)
         {
-            std::string extension = pp.extension().string();
-            return extension.length() == 0 && pp.filename().string().length() == format_length;
+            auto extension = pp.extension().string();
+            return extension.length() == 0 && pp.filename().string().length() == check_size;
         }
         
         std::vector<std::string>                 extension;
