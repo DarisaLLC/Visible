@@ -73,5 +73,69 @@ struct cb_similarity_producer
 };
 
 
+struct dir_producer
+{
+    dir_producer (const std::string& imageDir, bool auto_run = false)
+    {
+        m_imagedir = imageDir;
+        m_auto = auto_run;
+    }
+    
+    int run ()
+    {
+        try
+        {
+            sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
+            std::function<void (int&,double&)> frame_loaded_cb = boost::bind (&dir_producer::signal_frame_loaded, this, _1, _2);
+            std::function<void ()> content_loaded_cb = std::bind (&dir_producer::signal_content_loaded, this);
+            boost::signals2::connection fl_connection = sp->registerCallback(frame_loaded_cb);
+            boost::signals2::connection ml_connection = sp->registerCallback(content_loaded_cb);
+            
+            int error;
+            //            if (m_auto) sp->set_auto_run_on ();
+            
+            auto fdone = std::async(&sm_producer::load_image_directory, sp, m_imagedir);
+            
+            
+            if (fdone.get() )
+            {
+                sp->operator()(0, sp->frames_in_content());
+            }
+            
+        }
+        catch (...)
+        {
+            return 1;
+        }
+        return 0;
+        
+    }
+    void signal_content_loaded ()
+    {
+        movie_loaded = true;
+        std::cout << "Content Loaded " << std::endl;
+    }
+    void signal_frame_loaded (int& findex, double& timestamp)
+    {
+        frame_indices.push_back (findex);
+        frame_times.push_back (timestamp);
+        std::cout << frame_indices.size() << std::endl;
+    }
+    
+    std::shared_ptr<sm_producer> sp;
+    bool m_auto;
+    std::vector<int> frame_indices;
+    std::vector<double> frame_times;
+    std::string m_imagedir;
+    
+    bool movie_loaded;
+    void clear_movie_loaded () { movie_loaded = false; }
+    bool is_movie_loaded () { return movie_loaded; }
+    int frameCount () { if (sp) return sp->frames_in_content (); return -1; }
+    
+};
+
+
+
 #endif
 

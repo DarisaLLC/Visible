@@ -14,6 +14,9 @@
 #include "cinder/qtime/Quicktime.h"
 #include "cinder_xchg.hpp"
 #include "core/simple_timing.hpp"
+#include "core/stl_utils.hpp"
+#include "vision/opencv_utils.hpp"
+#include "vision/histo.h"
 
 #include "qtimeAvfLink.h"
 
@@ -21,6 +24,18 @@ using namespace std::chrono;
 
 using namespace boost;
 
+using namespace ci;
+
+using namespace svl;
+
+namespace anonymous
+{
+    bool is_anaonymous_name (const boost::filesystem::path& pp, size_t check_size = 36)
+    {
+        string extension = pp.extension().string();
+        return extension.length() == 0 && pp.filename().string().length() == check_size;
+    }
+}
 
 sm_producer::sm_producer ()
 {
@@ -29,6 +44,10 @@ sm_producer::sm_producer ()
     
 }
 
+std::vector<roiWindow<P8U>>& sm_producer::images () const
+{
+    return _impl->images ();
+}
 
 bool sm_producer::load_content_file (const std::string& movie_fqfn)
 {
@@ -37,11 +56,22 @@ bool sm_producer::load_content_file (const std::string& movie_fqfn)
     return false;
 }
 
+bool sm_producer::load_image_directory (const std::string& dir_fqfn)
+{
+    if ( !boost::filesystem::exists( dir_fqfn ) ) return false;
+    if ( !boost::filesystem::is_directory( dir_fqfn ) ) return false;
+    
+ 
+    if (_impl) return _impl->loadImageDirectory(dir_fqfn) > 0;
+    return false;
+}
+
 bool sm_producer::operator() (int start_frame, int frames ) const
 {
     if (_impl)
     {
-        std::future<bool> bright = std::async(std::launch::deferred, &sm_producer::spImpl::generate_ssm, _impl, start_frame, frames);
+        std::future<bool> bright = std::async(std::launch::async, &sm_producer::spImpl::generate_ssm, _impl, start_frame, frames);
+        bright.wait();
         return bright.get();
     }
     return false;
@@ -81,8 +111,83 @@ void sm_producer::spImpl::asset_reader_done_cb ()
     std::cout << " asset reader Done" << std::endl;
 }
 
+
 /*
- * Load all the frames
+* Load all the frames
+*/
+int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  const std::vector<std::string>& supported_extensions)
+{
+    std::unique_lock <std::mutex> lock(m_mutex);
+
+    using namespace ci::fs;
+    
+    m_framePaths.clear();
+    
+    // make a list of all image files in the directory
+    filesystem::directory_iterator end_itr;
+    for( filesystem::directory_iterator i( imageDir ); i != end_itr; ++i )
+    {
+        // skip if not a file
+        if( !filesystem::is_regular_file( i->status() ) ) continue;
+        
+        std::cout << "Checking " << i->path().string();
+        
+        if (std::find( supported_extensions.begin(), supported_extensions.end(), i->path().extension()  ) != supported_extensions.end())
+        {
+            std::cout << "  Extension matches " << std::endl;
+            m_framePaths.push_back( i->path().string() );
+        }
+        else if (anonymous::is_anaonymous_name(i->path()))
+        {
+            std::cout << "  Anonymous rule matches " << std::endl;
+            m_framePaths.push_back( i->path().string() );
+        }
+        else
+        {
+            std::cout << "Skipped " << i->path().string() << std::endl;
+            continue;
+
+        }
+        
+    }
+    
+    if (m_framePaths.empty()) return false;
+    
+    m_loaded_ref.resize(0);
+    
+    // Read data into memory buffer
+    for (boost::filesystem::path& pp : m_framePaths)
+    {
+        // OpenCv imread determines format from the content
+        // -1 returns the loaded as is
+        auto ipair = svl::image_io_read_surface (pp);
+        std::shared_ptr<roiWindow<P8U>> rw;
+        if (ipair.first)
+        {
+            rw = NewRedRefFromSurface(ipair.first);
+        }
+        else if (ipair.second)
+        {
+            rw = NewRefFromChannel(*ipair.second);
+        }
+        else
+            continue;
+        
+        auto mean = histoStats::mean(*rw.get());
+        
+        m_loaded_ref.emplace_back(*rw.get());
+
+    }
+
+    if (m_loaded_ref.empty()) return -1;
+
+    _frameCount = m_loaded_ref.size ();
+    if (m_auto_run) generate_ssm (0,0);
+    return (int) _frameCount;
+}
+
+/*
+ * Load all the frames in the movie
  */
 int sm_producer::spImpl::loadMovie( const std::string& movieFile )
 {
@@ -153,7 +258,7 @@ static    double tiny = 1e-10;
     m_SMatrix.resize (0);
     simi->selfSimilarityMatrix(m_SMatrix);
     std::cout << simi->matrixSz() << std::endl;
-    svl::stats<float>::PrintTo(simi->timeStats(), & std::cout);
+//    svl::stats<float>::PrintTo(simi->timeStats(), & std::cout);
 
     
     return ok;

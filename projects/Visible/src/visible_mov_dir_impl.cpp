@@ -78,7 +78,8 @@ movDirContext::movDirContext(WindowRef& ww, const boost::filesystem::path& dp)
         auto dirPath = browseToFolder ();
         mPath = dirPath;
     }
-    
+
+    m_extension = { ".jpg", ".png", ".JPG", ".jpeg"};
     m_valid = ! source_path().string().empty() && exists(source_path());
     
     setup ();
@@ -91,14 +92,14 @@ movDirContext::movDirContext(WindowRef& ww, const boost::filesystem::path& dp)
         mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
         
     }
-    
+
+
     set_dir_info ();
     
 }
 
-void movDirContext::set_dir_info (const std::string extension , double fps, const std::string anonymous_format )
+void movDirContext::set_dir_info (const std::vector<std::string>& extension , double fps, const std::string anonymous_format )
 {
-    m_extension = extension;
     m_anonymous_format = anonymous_format;
     m_fps = fps;
 }

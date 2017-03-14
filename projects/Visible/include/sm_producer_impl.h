@@ -45,6 +45,8 @@ public:
     }
     
     bool load_content_file (const std::string& movie_fqfn);
+    int loadImageDirectory (const std::string& image_dir, const std::vector<std::string>& supported_extensions = { ".jpg", ".png", ".JPG", ".jpeg"});
+    
     void loadImages ( const images_vector_t& );
     
     bool set_auto_run_on () { bool tmp = m_auto_run; m_auto_run = true; return tmp; }
@@ -57,6 +59,7 @@ public:
     std::string  getName () const { return m_name; }
     void asset_reader_done_cb ();
     
+    images_vector_t& images () const { return m_loaded_ref; }
     
 private:
     int32_t loadMovie( const std::string& movieFile );
@@ -81,7 +84,7 @@ private:
     mutable std::condition_variable m_frame_ready;
     
     time_spec_t       _currentTime, _startTime;
-    images_vector_t                 m_loaded_ref;
+    mutable images_vector_t                 m_loaded_ref;
     int64_t                         _frameRate;
     int64_t                          _frameCount;
     int64_t                          _elapasedFrames;
@@ -93,6 +96,7 @@ private:
     std::shared_ptr<qTimeFrameCache>   m_qtime_cache_ref;
 
     std::queue<float> m_queue;
+    std::vector< ci::fs::path > m_framePaths;
     
     deque<deque<double> >        m_SMatrix;   // Used in eExhaustive and
     deque<double>                m_entropies; // Final entropy signal

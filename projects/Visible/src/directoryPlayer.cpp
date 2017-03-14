@@ -7,7 +7,7 @@
 using namespace std;
 using namespace ci;
 
-namespace anonymous
+namespace
 {
     bool is_anaonymous_name (const boost::filesystem::path& pp, size_t check_size = 36)
     {
@@ -20,7 +20,7 @@ namespace anonymous
  * Construction
  */
 
-directoryPlayer::directoryPlayer( const fs::path &directory, const std::string &extension, const double fps,
+directoryPlayer::directoryPlayer( const fs::path &directory, const std::vector<std::string> &extension, const double fps,
                                 const std::string &name_format) :
 mThreadIsRunning( false ),
 mDataIsFresh( false ),
@@ -162,13 +162,29 @@ directoryPlayer::readFramePaths()
 
     mThreadData.framePaths.clear();
 
-    for ( auto it = directory_iterator( mThreadData.directoryPath ); it != directory_iterator(); it++ )
+    for ( auto i = directory_iterator( mThreadData.directoryPath ); i != directory_iterator(); i++ )
     {
-        if ( it->path().extension() != mThreadData.extension &&
-            ! mThreadData.is_anaonymous_name(it->path()))
+        // skip if not a file
+        if( !boost::filesystem::is_regular_file( i->status() ) ) continue;
+        
+        std::cout << "Checking " << i->path().string();
+        
+        if (std::find( mThreadData.extension.begin(), mThreadData.extension.end(), i->path().extension()  ) != mThreadData.extension.end())
+        {
+            std::cout << "  Extension matches " << std::endl;
+            mThreadData.framePaths.push_back( i->path() );
+        }
+        else if (mThreadData.is_anaonymous_name(i->path()))
+        {
+            std::cout << "  Anonymous rule matches " << std::endl;
+            mThreadData.framePaths.push_back( i->path() );
+        }
+        else
+        {
+            std::cout << "Skipped " << i->path().string() << std::endl;
             continue;
-
-        mThreadData.framePaths.push_back( it->path() );
+            
+        }
     }
 
     mNumFrames = mThreadData.framePaths.size();
@@ -243,14 +259,15 @@ directoryPlayer::updateFrameThreadFn()
 
     ci::ThreadSetup threadSetup;
 
-    while ( mThreadIsRunning )
+    while ( ! mThreadData.framePaths.empty() && mThreadIsRunning )
     {
         mNextFrameTime = app::getElapsedSeconds();
         
         unique_lock< mutex > lock( mMutex );
 
         // Read data into memory buffer
-        if (anonymous::is_anaonymous_name (mThreadData.framePaths[ mCurrentFrameIdx ]))
+        
+        if (is_anaonymous_name (mThreadData.framePaths[ mCurrentFrameIdx ]))
             mThreadData.buffer = Surface8u::create( loadImage( mThreadData.framePaths[ mCurrentFrameIdx ], ImageSource::Options(), "jpg"));
         else
              mThreadData.buffer = Surface8u::create( loadImage( mThreadData.framePaths[ mCurrentFrameIdx ]));

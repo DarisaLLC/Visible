@@ -30,6 +30,8 @@ namespace svl
     };
 
     void NewFromOCV (const cv::Mat& mat, roiWindow<P8U>& roi);
+    std::shared_ptr<roiWindow<P8U>> NewRefFromOCV (const cv::Mat& mat);
+    
     void NewFromSVL (const roiWindow<P8U>& roi, cv::Mat& mat);
     void CopyFromSVL (const roiWindow<P8U>& roi, cv::Mat& mat);
     

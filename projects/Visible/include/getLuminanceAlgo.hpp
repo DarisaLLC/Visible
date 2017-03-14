@@ -193,7 +193,7 @@ public:
             
             auto su8 = mFrameSet->getFrame(fn);
             
-            auto m3 = svl::NewMultiFromSurface (su8, mNames, fn);
+            auto m3 = svl::NewRefMultiFromSurface (su8, mNames, fn);
             
             auto roi = NewIndexedChannelFromSurface (su8, 0);
             const index_time_t ti = mFrameSet->currentIndexTime ();

@@ -35,7 +35,8 @@ protected:
 public:
     //! Factory method to create a reference to a movie that plays all frames in
     // \a directory.
-    static directoryPlayerRef create( const ci::fs::path &directory, const std::string &extension=".png", const double fps=29.97,
+    static directoryPlayerRef create( const ci::fs::path &directory,
+                                     const std::vector<std::string>& extension = { ".jpg", ".png", ".JPG", ".jpeg"}, const double fps=29.97,
                               const std::string &name_format="")
     {
         return (directoryPlayerRef)(new directoryPlayer( directory, extension, fps, name_format ));
@@ -45,7 +46,7 @@ public:
     //! Construct a movie that plays all frames in \a directory. Files in the
     // directory that don't have a file extension that matches (case-sensitively
     // \a extension will be skipped. \a fps sets the framerate of the movie.
-    directoryPlayer( const ci::fs::path &directory, const std::string &extension=".png", const double fps=29.97, const std::string &name_format="");
+    directoryPlayer( const ci::fs::path &directory, const std::vector<std::string>&  extension = { ".jpg", ".png", ".JPG", ".jpeg"}, const double fps=29.97, const std::string &name_format="");
 
     ~directoryPlayer();
 
@@ -122,7 +123,7 @@ protected:
 
     struct thread_data {
         thread_data() :
-        buffer( nullptr ), texture_buffer (nullptr), extension("")
+        buffer( nullptr ), texture_buffer (nullptr)
         {}
 
         bool is_anaonymous_name (const boost::filesystem::path& pp)
@@ -131,7 +132,7 @@ protected:
             return extension.length() == 0 && pp.filename().string().length() == format_length;
         }
         
-        std::string                 extension;
+        std::vector<std::string>                 extension;
         std::string                 format;
         size_t                      format_length;
         ci::fs::path                directoryPath;

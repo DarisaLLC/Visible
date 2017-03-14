@@ -37,7 +37,7 @@ void imageDirContext::loadImageDirectory (const filesystem::path& directory)
     if( directory.empty() || !filesystem::is_directory( directory ) )
         return;
     
-    // make a list of all audio files in the directory
+    // make a list of all image files in the directory
     filesystem::directory_iterator end_itr;
     for( filesystem::directory_iterator i( directory ); i != end_itr; ++i )
     {

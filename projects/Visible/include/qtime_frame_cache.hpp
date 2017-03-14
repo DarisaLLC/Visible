@@ -1,7 +1,7 @@
 #ifndef __QTIME_FRAMES_
 #define __QTIME_FRAMES_
 
-#include "cinder/app/App.h"
+//#include "cinder/app/App.h"
 #include <cinder/Channel.h>
 #include <cinder/Area.h>
 #include <limits>
@@ -113,55 +113,6 @@ private:
     mutable std::vector<std::string> m_names;
     mutable std::mutex			mMutex;
 };
-
-#if 0
-class directoryPlayer : tiny_media_info
-{
-public:
-    directoryPlayer (): mLoaded (false) {}
-    
-    void reset (const std::shared_ptr<qTimeFrameCache>& qf)
-    {
-        mCacheRef = qf;
-        mLoaded = mCacheRef->isValid();
-        count = qf->media_info().getNumFrames();
-        duration = qf->media_info().getDuration();
-        mFps = qf->media_info().getFramerate ();
-        seekToStart();
-        mLoaded = true;
-    }
-    
-    bool		isLoaded() const { return mLoaded; }
-    //! Returns whether the movie is playable, implying the movie is fully formed and can be played but media data is still downloading
-    float		getDuration() const { return getDuration(); }
-    //! Returns the movie's framerate measured as frames per second
-    float		getFramerate() const { return getFramerate(); }
-    //! Returns the total number of frames (video samples) in the movie
-    int32_t		getNumFrames() const { return getNumFrames (); }
-    
-    bool		hasAudio() const { return false; }
-    //! Returns whether the first video track in the movie contains an alpha channel. Returns false in the absence of visual media.
-    virtual bool hasAlpha() const { return false; }
-    
-    void		seekToFrame( int64_t frame ) { m_current_frame = frame; }
-    void		seekToStart() { m_current_frame = 0; }
-    void		seekToEnd() { m_current_frame = getNumFrames() - 1; }
-    
-    SurfaceRef  getSurface() const
-    {
-        
-        if (! isLoaded ()) return  Surface8uRef ();
-        return mCacheRef->getFrame(m_current_frame);
-    }
-    
-private:
-    bool mLoaded;
-    std::shared_ptr<qTimeFrameCache> mCacheRef;
-    int64_t m_current_frame;
-    
-};
-
-#endif
 
 
 

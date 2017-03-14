@@ -489,7 +489,8 @@ public:
 	// From a name and a path and an optional format for anonymous file names
 	movDirContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
 	
-	void set_dir_info (const std::string extension = ".jpg", double fps=29.97, const std::string anonymous_format = "01234567890abcdefghijklmnopqrstuvwxy");
+	void set_dir_info (const std::vector<std::string>& extension = { ".jpg", ".png", ".JPG", ".jpeg"},
+					   double fps=29.97, const std::string anonymous_format = "01234567890abcdefghijklmnopqrstuvwxy");
 	
 	const  boost::filesystem::path source_path () const;
 
@@ -547,7 +548,7 @@ private:
 	
 	
 	mutable directoryPlayerRef m_Dm;
-	std::string m_extension;
+	std::vector<std::string> m_extension;
 	std::string m_anonymous_format;
 	double m_fps;
 	

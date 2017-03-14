@@ -34,6 +34,7 @@ public:
     sm_producer ();
     
     bool load_content_file (const string& fq_path);
+    bool load_image_directory (const string& fq_path);
     void load_images (const images_vector_t&);
     
     bool operator () (int start_frame, int frames) const;
@@ -74,7 +75,7 @@ public:
     template<typename T>
     bool providesCallback () const;
     
-  
+    images_vector_t& images () const;
     
 private:
     class spImpl;

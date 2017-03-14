@@ -86,6 +86,21 @@ namespace svl
         return NewRefFromChannel (src->getChannel(channelIndex));
     }
     
+    static std::shared_ptr<roiWindow<P8U>> NewRedRefFromSurface (const Surface8uRef& src)
+    {
+        return NewRefFromChannel (src->getChannelRed());
+    }
+    
+    static std::shared_ptr<roiWindow<P8U>> NewGreenRefFromSurface (const Surface8uRef& src)
+    {
+        return NewRefFromChannel (src->getChannelGreen());
+    }
+    
+    static std::shared_ptr<roiWindow<P8U>> NewBlueRefFromSurface (const Surface8uRef& src)
+    {
+        return NewRefFromChannel (src->getChannelBlue());
+    }
+    
     static roiWindow<P8UC4> NewFromSurface ( Surface8u *ones)
     {
         uint8_t* pixels = (uint8_t*) ones->getData();

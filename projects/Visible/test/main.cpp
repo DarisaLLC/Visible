@@ -113,6 +113,81 @@ TEST (UT_algo, AVReader)
 }
 
 
+
+TEST(ut_similarity, run)
+{
+    vector<roiWindow<P8U>> images(4);
+    double tiny = 1e-10;
+    
+    self_similarity_producer<P8U> sm((uint32_t) images.size(),0, self_similarity_producer<P8U>::eNorm,
+                                     false,
+                                     0,
+                                     tiny);
+    
+    EXPECT_EQ(sm.depth() , D_8U);
+    EXPECT_EQ(sm.matrixSz() , images.size());
+    EXPECT_EQ(sm.cacheSz() , 0);
+    EXPECT_EQ(sm.aborted() , false);
+    
+    roiWindow<P8U> tmp (640, 480);
+    tmp.randomFill(1066);
+    
+    for (uint32_t i = 0; i < images.size(); i++) {
+        images[i] = tmp;
+    }
+    
+    deque<double> ent;
+    
+    bool fRet = sm.fill(images);
+    EXPECT_EQ(fRet, true);
+    
+    bool eRet = sm.entropies(ent);
+    EXPECT_EQ(eRet, true);
+    
+    EXPECT_EQ(ent.size() , images.size());
+    
+    for (uint32_t i = 0; i < ent.size(); i++)
+        EXPECT_EQ(svl::equal(ent[i], 0.0, 1.e-9), true);
+    
+    
+    for (uint32_t i = 0; i < images.size(); i++) {
+        roiWindow<P8U> tmp(640, 480);
+        tmp.randomFill(i);
+        images[i] = tmp;
+    }
+    
+    
+    EXPECT_EQ (sm.longTermCache() , false);
+    EXPECT_EQ (sm.longTermCache (true) , true);
+    EXPECT_EQ (sm.longTermCache() , true);
+    
+    fRet = sm.fill(images);
+    EXPECT_EQ(fRet, true);
+    
+    eRet = sm.entropies(ent);
+    EXPECT_EQ(eRet, true);
+    
+    EXPECT_EQ(ent.size() , images.size());
+    EXPECT_EQ(fRet, true);
+    
+    
+    deque<deque<double> > matrix;
+    sm.selfSimilarityMatrix(matrix);
+    //  rfDumpMatrix (matrix);
+    
+    // Test RefSimilarator
+    self_similarity_producerRef simi (new self_similarity_producer<P8U> (7, 0));
+    EXPECT_EQ (simi.use_count() , 1);
+    self_similarity_producerRef simi2 (simi);
+    EXPECT_EQ (simi.use_count() , 2);
+    
+    // Test Base Filer
+    // vector<double> signal (32);
+    // simi->filter (signal);
+}
+
+
+
 TEST (UT_qtimeCache, AVReader)
 {
     boost::filesystem::path test_filepath;
@@ -259,80 +334,6 @@ TEST (UT_AVReaderBasic, run)
     
 }
 
-
-
-
-TEST(ut_similarity, run)
-{
-    vector<roiWindow<P8U>> images(4);
-    double tiny = 1e-10;
-    
-    self_similarity_producer<P8U> sm((uint32_t) images.size(),0, self_similarity_producer<P8U>::eNorm,
-                                     false,
-                                     0,
-                                     tiny);
-    
-    EXPECT_EQ(sm.depth() , D_8U);
-    EXPECT_EQ(sm.matrixSz() , images.size());
-    EXPECT_EQ(sm.cacheSz() , 0);
-    EXPECT_EQ(sm.aborted() , false);
-    
-    roiWindow<P8U> tmp (640, 480);
-    tmp.randomFill(1066);
-    
-    for (uint32_t i = 0; i < images.size(); i++) {
-        images[i] = tmp;
-    }
-    
-    deque<double> ent;
-    
-    bool fRet = sm.fill(images);
-    EXPECT_EQ(fRet, true);
-    
-    bool eRet = sm.entropies(ent);
-    EXPECT_EQ(eRet, true);
-    
-    EXPECT_EQ(ent.size() , images.size());
-    
-    for (uint32_t i = 0; i < ent.size(); i++)
-        EXPECT_EQ(svl::equal(ent[i], 0.0, 1.e-9), true);
-    
-    
-    for (uint32_t i = 0; i < images.size(); i++) {
-        roiWindow<P8U> tmp(640, 480);
-        tmp.randomFill(i);
-        images[i] = tmp;
-    }
-    
-    
-    EXPECT_EQ (sm.longTermCache() , false);
-    EXPECT_EQ (sm.longTermCache (true) , true);
-    EXPECT_EQ (sm.longTermCache() , true);
-    
-    fRet = sm.fill(images);
-    EXPECT_EQ(fRet, true);
-    
-    eRet = sm.entropies(ent);
-    EXPECT_EQ(eRet, true);
-    
-    EXPECT_EQ(ent.size() , images.size());
-    EXPECT_EQ(fRet, true);
-    
-    
-    deque<deque<double> > matrix;
-    sm.selfSimilarityMatrix(matrix);
-    //  rfDumpMatrix (matrix);
-    
-    // Test RefSimilarator
-    self_similarity_producerRef simi (new self_similarity_producer<P8U> (7, 0));
-    EXPECT_EQ (simi.use_count() , 1);
-    self_similarity_producerRef simi2 (simi);
-    EXPECT_EQ (simi.use_count() , 2);
-    
-    // Test Base Filer
-    // vector<double> signal (32);
-    // simi->filter (signal);
-}
 
 
 TEST (UT_surface_roi_conversion, run)
