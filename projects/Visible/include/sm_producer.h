@@ -37,7 +37,7 @@ public:
     bool load_image_directory (const string& fq_path);
     void load_images (const images_vector_t&);
     
-    bool operator () (int start_frame, int frames) const;
+    bool operator () (int start_frame = 0, int frames = 0) const;
     
     bool set_auto_run_on () const;
     bool set_auto_run_off () const;

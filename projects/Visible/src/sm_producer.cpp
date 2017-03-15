@@ -72,7 +72,8 @@ bool sm_producer::operator() (int start_frame, int frames ) const
 {
     if (_impl)
     {
-        std::future<bool> bright = std::async(std::launch::async, &sm_producer::spImpl::generate_ssm, _impl, start_frame, frames);
+        auto fcnt = (frames == 0) ? _impl-> _frameCount : frames;
+        std::future<bool> bright = std::async(std::launch::async, &sm_producer::spImpl::generate_ssm, _impl, start_frame, fcnt);
         bright.wait();
         return bright.get();
     }

@@ -26,7 +26,7 @@ public:
     {
         
         m_image_frame_size_norm = vec2(0.75, 0.75);
-        m_single_plot_size_norm = vec2(0.25, 0.25);
+        m_single_plot_size_norm = vec2(0.20, 0.25);
         
  
     }
@@ -168,7 +168,7 @@ private:
     // Plot areas on the right
     inline vec2 plots_frame_position_norm ()
     {
-        vec2 np = vec2 (1.0 - 2*trim_norm().x - plots_frame_size_norm().x , trim_norm().y);
+        vec2 np = vec2 (1.0 - trim_norm().x - plots_frame_size_norm().x , trim_norm().y);
         return np;
     }
     

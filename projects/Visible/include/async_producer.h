@@ -64,7 +64,9 @@ typedef std::vector<timed_double_t>  timed_double_vec_t;
 
 typedef std::future<timed_double_vec_t > async_timed_double_vec_t;
 typedef std::pair<std::string, timed_double_vec_t> trackD1_t;
+typedef std::future<trackD1_t> future_trackD1_t;
 typedef std::vector<trackD1_t>  tracksD1_t;
+typedef std::vector<future_trackD1_t>  future_tracksD1_t;
 
 
 

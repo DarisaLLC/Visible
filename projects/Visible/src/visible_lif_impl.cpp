@@ -124,7 +124,11 @@ namespace
         
         auto sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
         sp->load_images (images);
-        sp->operator()(0, images.size());
+
+        std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
+        std::future<bool>  future_ss = task.get_future();  // get a future
+        std::thread(std::move(task)).detach(); // launch on a thread
+        future_ss.wait();
         auto entropies = sp->shannonProjection ();
         sm_producer::sMatrixProjection_t::const_iterator bee = entropies.begin();
         for (auto ss = 0; bee != entropies.end() && ss < fcnt; ss++, bee++)
