@@ -117,8 +117,6 @@ void sm_producer::spImpl::asset_reader_done_cb ()
 */
 int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  const std::vector<std::string>& supported_extensions)
 {
-    std::unique_lock <std::mutex> lock(m_mutex);
-
     using namespace ci::fs;
     
     m_framePaths.clear();
@@ -127,6 +125,7 @@ int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  const
     filesystem::directory_iterator end_itr;
     for( filesystem::directory_iterator i( imageDir ); i != end_itr; ++i )
     {
+        std::unique_lock <std::mutex> lock(m_mutex, std::try_to_lock);
         // skip if not a file
         if( !filesystem::is_regular_file( i->status() ) ) continue;
         
@@ -158,24 +157,28 @@ int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  const
     // Read data into memory buffer
     for (boost::filesystem::path& pp : m_framePaths)
     {
+        std::unique_lock<std::mutex> lock( m_mutex, std::try_to_lock );
+        
         // OpenCv imread determines format from the content
         // -1 returns the loaded as is
         auto ipair = svl::image_io_read_surface (pp);
-        std::shared_ptr<roiWindow<P8U>> rw;
+        roiWindow<P8U> rw;
         if (ipair.first)
         {
-            rw = NewRedRefFromSurface(ipair.first);
+            rw = NewRedFromSurface(ipair.first);
         }
         else if (ipair.second)
         {
-            rw = NewRefFromChannel(*ipair.second);
+            rw = NewFromChannel(*ipair.second, 0);
         }
         else
             continue;
         
-        auto mean = histoStats::mean(*rw.get());
+        auto mean = histoStats::mean(rw);
+        std::cout << mean << std::endl;
         
-        m_loaded_ref.emplace_back(*rw.get());
+        
+        m_loaded_ref.emplace_back(rw);
 
     }
 

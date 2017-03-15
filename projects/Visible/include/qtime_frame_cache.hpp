@@ -27,7 +27,6 @@ using namespace std;
 
 
 
-
 typedef std::pair<SurfaceRef, index_time_t> SurTiIndexRef_t;
 
 typedef std::function<SurfaceRef ()> getSurfaceCb_t;

@@ -26,6 +26,18 @@ namespace svl
         
     }
     
+    std::shared_ptr<roiWindow<P8U>> NewRefFromOCV (const cv::Mat& mat)
+    {
+        std::shared_ptr<root<P8U>> rootref (new root<P8U> (mat.cols, mat.rows));
+        
+        for (uint32_t row = 0; row < mat.rows; row++)
+            std::memmove(rootref->rowPointer(row), mat.ptr(row), mat.cols);
+        
+        return std::shared_ptr<roiWindow<P8U>> (new roiWindow<P8U>(rootref, 0, 0, mat.cols, mat.rows));
+        
+    }
+
+    
     void NewFromSVL (const roiWindow<P8U>& roi, cv::Mat& mat)
     {
         mat.create(roi.height(), roi.width(), CV_8U);

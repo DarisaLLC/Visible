@@ -186,7 +186,7 @@ qTimeFrameCache::qTimeFrameCache ( const tiny_media_info& info ) : tiny_media_in
 
 const Surface8uRef  qTimeFrameCache::getFrame (int64_t offset) const
 {
-    std::unique_lock<std::mutex> lock( mMutex );
+    std::unique_lock<std::mutex> lock( mMutex , std::try_to_lock);
     Surface8uRef s8;
     indexToContainer::const_iterator p = _checkFrame(offset);
     if (p == m_itIter.end()) return s8;
@@ -205,7 +205,7 @@ const Surface8uRef  qTimeFrameCache::getFrame (int64_t offset) const
 
 const Surface8uRef qTimeFrameCache::getFrame(const time_spec_t& dtime) const
 {
-    std::unique_lock<std::mutex> lock( mMutex );
+    std::unique_lock<std::mutex> lock( mMutex, std::try_to_lock );
     Surface8uRef s8;
     indexToContainer::const_iterator fc = _checkFrame (dtime);
     if (fc == m_itIter.end())
@@ -269,6 +269,8 @@ bool qTimeFrameCache::make_unique_increasing_time_indices (const time_spec_t& ti
 
 bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const index_time_t& tid )
 {
+    std::unique_lock <std::mutex> lock( mMutex , std::try_to_lock );
+    
     assert (frame );
     index_time_t ltid (tid);
     //    SurTiIndexRef_t pp (std::make_shared<Surface8u>(frame->clone(true)), ltid);
@@ -287,8 +289,6 @@ bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const index_time_t& t
 bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const time_spec_t& tic )
 {
     assert(frame );
-    
-    std::lock_guard <std::mutex> lock( mMutex );
     if (!mFrames.empty())
     {
         // Check to see if it exists
@@ -308,6 +308,8 @@ bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const time_spec_t& ti
 
 int64_t qTimeFrameCache::indexFromTime (const time_spec_t& time) const
 {
+    std::unique_lock<std::mutex> lock( mMutex, std::try_to_lock );
+    
     indexToContainer::const_iterator ci = _checkFrame(time);
     if(ci == m_itIter.end()) return -1;
     if(ci == m_itIter.begin()) return 0;
@@ -321,7 +323,8 @@ const index_time_t& qTimeFrameCache::currentIndexTime () const
 
 qTimeFrameCache::indexToContainer::const_iterator qTimeFrameCache::_checkFrame (const time_spec_t& query_time) const
 {
-    //    std::lock_guard<std::mutex> lock( mMutex );
+    std::unique_lock<std::mutex> lock( mMutex, std::try_to_lock );
+    
     // First see if this time exist in time index maps
     timeToIndex::const_iterator low, prev;
     low = m_tti.lower_bound(query_time);

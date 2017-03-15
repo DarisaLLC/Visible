@@ -136,11 +136,27 @@ typename roiWindow<P>::pixel_t roiWindow<P>::setPixel(int32_t px, int32_t py, ty
 
 
 template <typename P>
-bool roiWindow<P>::copy_pixels_from(pixel_ptr_t pixels, int columns, int rows, int stride)
+bool roiWindow<P>::copy_pixels_from(pixel_ptr_t pixels, int columns, int rows, int stride, int increment)
 {
     bool sg = isBound() && pixels != nullptr && width() == columns && height() == rows;
     if (!sg) return !sg;
     pixel_ptr_t pels = pixels;
+    if (increment != 1)
+    {
+        for (int j = 0; j < height(); j++)
+        {
+            pixel_ptr_t our_row = rowPointer(j);
+            pixel_ptr_t our_col = pels;
+            for (int i = 0; i < width(); i++)
+            {
+                *our_row++ = *our_col;
+                our_col += increment;
+            }
+            pels += stride;
+        }
+        return true;
+    }
+    
     for (int j = 0; j < height(); j++)
     {
         pixel_ptr_t our_row = rowPointer(j);
@@ -149,6 +165,7 @@ bool roiWindow<P>::copy_pixels_from(pixel_ptr_t pixels, int columns, int rows, i
     }
     return true;
 }
+
 
 template <typename P>
 bool roiWindow<P>::copy_pixels_to(roiWindow<P> & other)

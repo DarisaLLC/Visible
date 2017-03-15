@@ -65,40 +65,20 @@ namespace svl
     }
     
 
-    static roiWindow<P8U> NewFromChannel ( ChannelT<uint8_t>& onec)
+    static roiWindow<P8U> NewFromChannel ( ChannelT<uint8_t>& onec, uint8_t ci)
     {
+        assert(ci >= 0 && ci < 4);
+        
         uint8_t* pixels = onec.getData();
         roiWindow<P8U> window (onec.getWidth (),onec.getHeight ());
-        window.copy_pixels_from(pixels, onec.getWidth (),onec.getHeight (), (int32_t) onec.getRowBytes ());
+        
+        window.copy_pixels_from(pixels, onec.getWidth (),onec.getHeight (), (int32_t) onec.getRowBytes (), ci);
         return window;
     }
     
-//    static std::shared_ptr<roiWindow<P8U>> NewRefFromChannel ( ChannelT<uint8_t>& onec)
-//    {
-//        uint8_t* pixels = onec.getData();
-//        std::shared_ptr<root<P8U>> rootref (new root<P8U> (pixels, (int32_t) onec.getRowBytes (),
-//                                                           onec.getWidth(), onec.getHeight()));
-//        return std::shared_ptr<roiWindow<P8U>> (new roiWindow<P8U>(rootref, 0, 0, onec.getWidth(), onec.getHeight()));
-//    }
-    
-    static std::shared_ptr<roiWindow<P8U>> NewIndexedChannelFromSurface (const Surface8uRef& src, uint8_t channelIndex)
+    static roiWindow<P8U> NewChannelFromSurfaceAtIndex (const Surface8uRef& src, uint8_t ci)
     {
-        return NewRefFromChannel (src->getChannel(channelIndex));
-    }
-    
-    static std::shared_ptr<roiWindow<P8U>> NewRedRefFromSurface (const Surface8uRef& src)
-    {
-        return NewRefFromChannel (src->getChannelRed());
-    }
-    
-    static std::shared_ptr<roiWindow<P8U>> NewGreenRefFromSurface (const Surface8uRef& src)
-    {
-        return NewRefFromChannel (src->getChannelGreen());
-    }
-    
-    static std::shared_ptr<roiWindow<P8U>> NewBlueRefFromSurface (const Surface8uRef& src)
-    {
-        return NewRefFromChannel (src->getChannelBlue());
+        return NewFromChannel (src->getChannel(src->getRedOffset()), ci);
     }
     
     static roiWindow<P8UC4> NewFromSurface ( Surface8u *ones)
@@ -109,31 +89,28 @@ namespace svl
         return window;
     }
     
+ 
+    
     static roiWindow<P8U> NewRedFromSurface (const Surface8uRef& src)
     {
-        return NewFromChannel (src->getChannelRed());
+        return NewFromChannel (src->getChannel(src->getRedOffset()), src->getRedOffset());
     }
     
     static roiWindow<P8U> NewBlueFromSurface (const Surface8uRef& src)
     {
-        return NewFromChannel (src->getChannelBlue());
+        return NewFromChannel (src->getChannel(src->getBlueOffset()), src->getBlueOffset());
     }
     
     static roiWindow<P8U> NewGreenFromSurface (const Surface8uRef& src)
     {
-        return NewFromChannel (src->getChannelGreen());
+        return NewFromChannel (src->getChannel(src->getGreenOffset()), src->getGreenOffset());
     }
 
-    static roiWindow<P8U> NewAlphaFromSurface (const Surface8uRef& src)
-    {
-        return NewFromChannel (src->getChannelAlpha());
-    }
-    
     static roiWindow<P8U> NewGrayFromSurface (const Surface8uRef& src)
     {
         Channel8uRef ci8 = ChannelT<uint8_t>::create(src->getWidth(), src->getHeight());
         ci::ip::grayscale (*src, ci8.get());
-        return NewFromChannel (*ci8);
+        return NewFromChannel (*ci8, 0);
     }
     
     template<typename P, class pixel_t = typename PixelType<P>::pixel_t>

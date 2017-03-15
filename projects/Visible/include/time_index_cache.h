@@ -20,6 +20,7 @@
 #include "base_signaler.h"
 #include "time_index.h"
 
+
 using namespace ci;
 using namespace std;
 
@@ -27,6 +28,10 @@ using namespace std;
  * T has to be copy constructable 
  * TODO: supply a clone function
  * T has to be null able.
+ *
+ *
+ *
+ * Cache Size: is in units of an instance of T
  */
 
 
@@ -36,6 +41,7 @@ class timeIndexCache : public tiny_media_info, public base_signaler
 public:
     typedef T elem;
     typedef std::pair<elem, index_time_t> ElemTiIndexRef_t;
+    typedef typename container_t::size_type size_type_t;
     typedef std::map<time_spec_t, int64_t> timeToIndex;
     typedef std::map<int64_t, time_spec_t> indexToTime;
     typedef std::vector<ElemTiIndexRef_t> container_t;
@@ -49,10 +55,12 @@ public:
     // Initializes for the movie. Frame indices are generated for unique increasing time stamps.
     // time-stamped Frames are copied and cached at the first load. Further references to the frame
     // by time stamp or index is from cache.
-    timeIndexCache ( const tiny_media_info& info ) : tiny_media_info(info)
+    timeIndexCache ( const tiny_media_info& info, const size_t& cache_size = 8 ) :
+    tiny_media_info(info), mCacheSize (cache_size), mAvailable (0)
     {
         m_time_hist.resize (0);
         m_stats.first = m_stats.second = 0;
+        mElements.resize (cache_size);
     }
     bool isValid () const'
     
@@ -148,6 +156,9 @@ private:
     getElemCb_t m_getSurface_cb;
     mutable std::pair<uint32_t,uint32_t> m_stats;
     mutable std::mutex			mMutex;
+    size_t mCacheSize;
+    size_type_t mAvailable;
+    
 
     /*
      * Increment the time histogram if the new time stamp is increasing.
@@ -165,6 +176,8 @@ private:
     
     bool loadElem (const T& elem, const index_time_t& tid )
     {
+        std::mutex::scoped_lock lock(m_mutex);
+        
         assert (elem );
         index_time_t ltid (tid);
         mElems.emplace_back(std::make_shared<T>(new T(elem), ltid);

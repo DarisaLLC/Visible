@@ -236,7 +236,7 @@ public:
 
     void set(pixel_t val = pixel_t(0));
     void setBorder(int pad, pixel_t clear_val = pixel_t(0));
-    bool copy_pixels_from(pixel_ptr_t pixels, int columns, int rows, int stride);
+    bool copy_pixels_from(pixel_ptr_t pixels, int columns, int rows, int stride, int increment = 1);
     bool copy_pixels_to(roiWindow<T> & other);
     void randomFill( uint32_t seed );
     void output (std::ostream& outs = std::cout, uint8_t delim = ',', bool is_normalized = true) const;
