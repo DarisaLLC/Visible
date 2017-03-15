@@ -33,6 +33,7 @@
 #include "vision/opencv_utils.hpp"
 #include "vision/histo.h"
 #include "core/stl_utils.hpp"
+#include "sm_producer.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -58,14 +59,17 @@ namespace
     
     
     
-    tracksD1_t get_mean_luminance (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
-                                   bool test_data = false)
+    tracksD1_t get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+                                           bool test_data = false)
     {
         
         tracksD1_t tracks;
         tracks.resize (names.size ());
         for (auto tt = 0; tt < names.size(); tt++)
             tracks[tt].first = names[tt];
+        
+        std::vector<roiWindow<P8U>> images;
+        auto fcnt = frames->count();
         
         // If it is 3 channels. We will use multiple window
         int64_t fn = 0;
@@ -99,16 +103,38 @@ namespace
             int index = 0;
             for (roiWindow<P8U> roi : rois)
             {
+                if (index == 2)
+                {
+                    images.push_back(roi);
+                    break;
+                }
                 index_time_t ti;
                 ti.first = fn;
                 timed_double_t res;
                 res.first = ti;
                 auto nmg = histoStats::mean(roi) / 256.0;
-                res.second = (! test_data) ? nmg :  (((float) fn) / frames->count() );
+                res.second = (! test_data) ? nmg :  (((float) fn) / fcnt );
                 tracks[index++].second.emplace_back(res);
             }
-            
             // TBD: call progress reporter
+        }
+        
+        // Now Do Aci on the 3rd channel
+        assert(images.size() == fcnt && fcnt > 0);
+        
+        auto sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
+        sp->load_images (images);
+        sp->operator()(0, images.size());
+        auto entropies = sp->shannonProjection ();
+        sm_producer::sMatrixProjection_t::const_iterator bee = entropies.begin();
+        for (auto ss = 0; bee != entropies.end() && ss < fcnt; ss++, bee++)
+        {
+            index_time_t ti;
+            ti.first = ss;
+            timed_double_t res;
+            res.first = ti;
+            res.second = *bee;
+            tracks[2].second.emplace_back(res);
         }
         
         
@@ -422,7 +448,7 @@ void lifContext::loadCurrentSerie ()
             }
             
             // Launch Average Luminance Computation
-            m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance,
+            m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance_and_aci,
                                                   mFrameSet, m_serie.channel_names, false);
         }
     }
@@ -439,14 +465,14 @@ void lifContext::mouseMove( MouseEvent event )
     mMouseInImage = false;
     mMouseInGraphs  = -1;
     
-   if (! have_movie () ) return;
+    if (! have_movie () ) return;
     
     mMouseInImage = get_image_display_rect().contains(event.getPos());
     if (mMouseInImage) return;
     
     std::vector<float> dds (m_track_rects.size());
     for (auto pp = 0; pp < m_track_rects.size(); pp++) dds[pp] = m_track_rects[pp].distanceSquared(event.getPos());
-
+    
     auto min_iter = std::min_element(dds.begin(),dds.end());
     mMouseInGraphs = min_iter - dds.begin();
 }
@@ -507,7 +533,7 @@ void lifContext::keyDown( KeyEvent event )
         if( event.getChar() == ' ' ) {
             play_pause_button();
         }
-       
+        
     }
 }
 
@@ -586,7 +612,7 @@ void lifContext::draw_info ()
 {
     if (! m_lifRef) return;
     
-      std::string seri_str = m_serie.info();
+    std::string seri_str = m_serie.info();
     
     gl::setMatricesWindow( getWindowSize() );
     
@@ -598,7 +624,7 @@ void lifContext::draw_info ()
     layoutR.setColor( Color::white() );
     layoutR.setLeadingOffset( 3 );
     layoutR.addRightLine( seri_str  );
- 
+    
     
     auto texR = gl::Texture::create( layoutR.render( true ) );
     gl::draw( texR, vec2( 10, 10 ) );

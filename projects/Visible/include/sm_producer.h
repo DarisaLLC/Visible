@@ -31,7 +31,7 @@ public:
     typedef void (sig_cb_frames_cached) ();
     typedef void (sig_cb_sm1d_available) ();
     typedef void (sig_cb_sm2d_available) ();
-    sm_producer ();
+    sm_producer (bool auto_on_off = false);
     
     bool load_content_file (const string& fq_path);
     bool load_image_directory (const string& fq_path);

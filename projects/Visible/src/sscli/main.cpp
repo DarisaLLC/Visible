@@ -31,6 +31,15 @@ ostream& operator<<(ostream& os, const vector<T>& v)
     return os;
 }
 
+template <class Val>
+void Out(const std::deque<Val>& v)
+{
+    if (v.size() > 1)
+        std::copy(v.begin(), v.end() - 1, std::ostream_iterator<Val>(std::cout, ", "));
+    if (v.size())
+        std::cout << v.back() << std::endl;
+}
+
 
 struct cb_similarity_producer
 {
@@ -55,6 +64,7 @@ struct cb_similarity_producer
            
             sp->load_image_directory(m_imagedir);
             sp->operator()(0, sp->frames_in_content());
+            Out(sp->shannonProjection());
             
 //            auto fdone = std::async(&sm_producer::load_image_directory, sp, m_imagedir);
 //            fdone.wait();

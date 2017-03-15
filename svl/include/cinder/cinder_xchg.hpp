@@ -49,6 +49,7 @@ namespace svl
         return std::shared_ptr<roiWindow<P8U>> (new roiWindow<P8U>(rootref, 0, 0, onec.getWidth(), onec.getHeight()));
     }
     
+    // P8UP3 is 3 planes mapped as in the header file
     static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromChannel ( ChannelT<uint8_t>& onec,
                                                                           const std::vector<std::string>& names_l2r, int64_t timestamp = 0)
     {
@@ -61,7 +62,7 @@ namespace svl
     
     static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromSurface (const Surface8uRef& src, const std::vector<std::string>& names_l2r, int64_t timestamp = 0)
     {
-        return NewRefMultiFromChannel (src->getChannelRed(), names_l2r, timestamp);
+        return NewRefMultiFromChannel (src->getChannel(0), names_l2r, timestamp);
     }
     
 

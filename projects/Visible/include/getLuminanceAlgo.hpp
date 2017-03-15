@@ -58,10 +58,10 @@ public:
             
             for (auto cc = 0; cc < 3; cc++)
             {
-                auto roi = NewIndexedChannelFromSurface (su8, cc);
+                auto roi = NewChannelFromSurfaceAtIndex (su8, cc);
                 te[cc] = fn / fcnt;
                 if (!test_data)
-                    te[cc] = histoStats::mean(*roi) / 256.0;
+                    te[cc] = histoStats::mean(roi) / 256.0;
             }
             
             mOutput_tracks.push_back(te);
@@ -125,14 +125,14 @@ public:
             
             auto su8 = mFrameSet->getFrame(fn);
             
-            auto roi = NewIndexedChannelFromSurface (su8, 0);
+            auto roi = NewChannelFromSurfaceAtIndex (su8, 0);
             const index_time_t ti = mFrameSet->currentIndexTime ();
             
             // Now get average intensity for each channel
             track_t te (ti);
             te[0] = fn / fcnt;
             if (!test_data)
-                te[0] = histoStats::mean(*roi) / 256.0;
+                te[0] = histoStats::mean(roi) / 256.0;
             mOutput_tracks.push_back(te);
             mDone[fn] = true;
             fn++;
@@ -193,17 +193,21 @@ public:
             
             auto su8 = mFrameSet->getFrame(fn);
             
-            auto m3 = svl::NewRefMultiFromSurface (su8, mNames, fn);
+            auto rois = svl::NewRefMultiFromSurface (su8, mNames, fn);
             
-            auto roi = NewIndexedChannelFromSurface (su8, 0);
             const index_time_t ti = mFrameSet->currentIndexTime ();
             
             // Now get average intensity for each channel
-            track_t te (ti);
-            te[0] = fn / fcnt;
-            if (!test_data)
-                te[0] = histoStats::mean(*roi) / 256.0;
-            mOutput_tracks.push_back(te);
+            int index = 0;
+            {
+                auto roi = rois->plane(index);
+                track_t te (ti);
+                te[0] = fn / fcnt;
+                if (!test_data)
+                    te[0] = histoStats::mean(roi) / 256.0;
+                mOutput_tracks.push_back(te);
+            }
+            
             mDone[fn] = true;
             fn++;
             if (mProgressReporter)
