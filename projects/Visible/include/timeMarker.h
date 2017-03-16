@@ -9,32 +9,76 @@
 
 
 
-class marker_info : public index_time_t
+class marker_info : index_time_t
 {
 public:
-    enum event_type { move = 0, down = move+1, num_types = down+1 };
     
     marker_info () { first = -1; second = 0.0; }
     
-    marker_info (int64_t index, float time_in_seconds, int64_t num_frames)
+    marker_info (int64_t num_frames, double duration)
+    {
+        first = 0;
+        second = time_spec_t (0.0);
+        mEntire.first = num_frames;
+        mEntire.second = duration;
+    }
+    
+    marker_info (int64_t index, float time_in_seconds, int64_t num_frames, float duration)
     {
         first = index;
         second = time_spec_t (time_in_seconds);
-        count = num_frames;
+        mEntire.first = num_frames;
+        mEntire.second = duration;
+    }
+
+    inline double duration () const { return mEntire.second.secs(); }
+    inline int64_t count () const { return mEntire.first; }
+    
+    inline int64_t current_frame () const { return first; }
+    inline const time_spec_t& current_time_spec () const { return second; }
+    
+    
+    void from_norm (double normed)
+    {
+        if (std::signbit(normed) || normed > 1.0 ) return;
+        first = count() * normed;
+        second = time_spec_t (duration() * normed);
     }
     
-    cinder::vec2 norm_pos;
-    int64_t count;
-    event_type et;
+    void from_time (double new_secs)
+    {
+        double normed = new_secs / duration ();
+        
+        if (normed > 1.0) return;
+        
+        second = time_spec_t (new_secs);
+        first = count() * normed;
+
+    }
+    
+    void from_count (int64_t _cnt)
+    {
+        double normed = ((double)_cnt) / count();
+        
+        if (normed > 1.0) return;
+        
+        second = time_spec_t (normed * duration());
+        first = _cnt;
+        
+    }
+    
+    double norm_time () const { return second.secs() / mEntire.second.secs(); }
+    double norm_index () const { return first / (double) mEntire.first; }
     
     friend std::ostream& operator<< (std::ostream& std_stream, marker_info& t)
     {
         
-        std_stream << "Normalized Position:" << t.norm_pos.x << " x " << t.norm_pos.y << std::endl;
-        std_stream << "Event:    " << ((t.et == event_type::move) ? "move" : "down") << std::endl;
-        std_stream << "Index:    " << t.first << std::endl;
+        std_stream << t.first << "," << t.second.secs() << "[" << t.mEntire.first << "," << t.mEntire.second.secs() << "]";
         return std_stream;
     }
+    
+private:
+    index_time_t mEntire;
     
 };
 

@@ -124,13 +124,13 @@ public:
     
     void get_marker_position (marker_info& t) const
     {
-        t.norm_pos = norm_pos();
+        t.from_norm (norm_pos().x);
     }
     
     void set_marker_position (marker_info t) const
     {
-        std::cout << t.first << "/" << t.count << std::endl;
-        vec2 pp ((float)t.first/(float)t.count, 0.0);
+        std::cout << t.current_frame() << "/" << t.count() << std::endl;
+        vec2 pp ((float)t.norm_index(), 0.0);
         norm_pos (pp);
 
     }
@@ -216,96 +216,5 @@ private:
 };
 
 
-
-class Slider : public InteractiveObject {
-    
-public:
-    Slider( ) : InteractiveObject( Rectf(0,0, 100,10) )
-    {
-        mValue = 0.f;
-    }
-    
-    vec2   getPosition() { return getRect().getUpperLeft(); }
-    void    setPosition(vec2 position) { getRect().offset(position); }
-    void    setPosition(float x, float y) { setPosition(vec2(x,y)); }
-    
-    float   getWidth() { return getSize().x; }
-    float   getHeight() { return getSize().y; }
-    vec2   getSize() { return getRect().getSize(); }
-    void    setSize(vec2 size) { m_rect.x2 = m_rect.x1+size.x; m_rect.y2 = m_rect.y1+size.y; }
-    void    setSize(float width, float height) { setSize(vec2(width,height)); }
-    
-    
-    virtual float getValue()
-    {
-        return mValue;
-    }
-    
-    virtual void setValue(float value)
-    {
-        if(mValue != value) {
-            mValue = ci::math<float>::clamp(value);
-            changed();
-            mEvents.call( InteractiveObjectEvent( this, InteractiveObjectEvent::Changed ) );
-        }
-    }
-    
-    virtual void pressed()
-    {
-        InteractiveObject::pressed();
-        dragged();
-    }
-    
-    virtual void dragged()
-    {
-        InteractiveObject::dragged();
-        
-        vec2 mousePos = App::get()->getMousePos();
-        setValue( (mousePos.x - getRect().x1) / getRect().getWidth() );
-    }
-    
-    virtual void changed()
-    {
-        console() << "Slider::changed" << endl;
-    }
-    
-    virtual void draw()
-    {
-        gl::color(Color::gray(0.7f));
-        gl::drawSolidRect (getRect());
-        
-        gl::color(Color::black());
-        Rectf fillRect = Rectf(getRect());
-        fillRect.x2 = fillRect.x1 + fillRect.getWidth() * mValue;
-        gl::drawSolidRect( fillRect );
-    }
-    
-protected:
-    float mValue;
-};
-
-
-class Button: public InteractiveObject{
-public:
-    Button( const ci::Rectf& rect, ci::gl::TextureRef idleTex, ci::gl::TextureRef overTex, ci::gl::TextureRef pressTex ):InteractiveObject( rect )
-    {
-        mIdleTex = idleTex;
-        mOverTex = overTex;
-        mPressTex = pressTex;
-    }
-    
-    virtual void draw(){
-        if( mPressed ){
-            ci::gl::draw( mPressTex, getRect() );
-        } else if( mOver ){
-            ci::gl::draw( mOverTex, getRect() );
-        } else {
-            ci::gl::draw( mPressTex, getRect() );
-        }
-    }
-    
-private:
-    ci::gl::TextureRef mIdleTex, mOverTex, mPressTex;
-};
 
 #endif // _iclip_H_

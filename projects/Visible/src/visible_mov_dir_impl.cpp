@@ -183,9 +183,7 @@ size_t movDirContext::getCurrentFrame () const
 void movDirContext::onMarked ( marker_info& t)
 {
     pause ();
-    seekToFrame ((size_t)(t.norm_pos.x *= m_Dm->getNumFrames()));
-    
-    
+    seekToFrame ((size_t)(t.current_frame ()));
 }
 
 vec2 movDirContext::getZoom ()

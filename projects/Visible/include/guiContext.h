@@ -37,8 +37,11 @@
 #include "directoryPlayer.h"
 #include "qtimeAvfLink.h"
 #include "timeMarker.h"
+#include "TinyUi.h"
 
 #include <sstream>
+
+using namespace tinyUi;
 
 using namespace boost;
 using namespace boost::filesystem;
@@ -130,6 +133,8 @@ public:
     bool m_valid;
     ci::app::WindowRef				mWindow;
 	std::string mName;
+	marker_info mTimeMarker;
+	
 };
 
 typedef std::shared_ptr<guiContext> guiContextRef;
@@ -343,10 +348,15 @@ public:
 	virtual bool looping () = 0;
 	virtual void looping (bool what) = 0;
 	virtual Rectf get_image_display_rect () = 0;
+	virtual void processDrag( ivec2 pos ) = 0;
 	
 	MarkerSignalInfo_t& markerSignal () const { return m_marker_signal; }
+
 	
 protected:
+	TimeLineSlider					mTimeLineSlider;
+	vector<Widget *>	mWidgets;
+	
 	std::vector<Graph1DRef> m_tracks;
 	std::vector<ci::Rectf> m_track_rects;
 	
@@ -410,6 +420,7 @@ public:
 	virtual bool looping ();
 	virtual void looping (bool what);
 	virtual Rectf get_image_display_rect ();
+	virtual void processDrag (ivec2 pos);
 	
     const params::InterfaceGl& ui_params ()
     {
@@ -614,7 +625,7 @@ public:
 	
 	Signal <void(bool)> signalShowMotioncenter;
 	
-	static const std::string& caption () { static std::string cp ("Qtime Viewer # "); return cp; }
+	static const std::string& caption () { static std::string cp ("Lif Viewer # "); return cp; }
 	virtual void draw ();
 	virtual void setup ();
 	virtual bool is_valid ();
@@ -636,6 +647,7 @@ public:
 	virtual int getCurrentFrame ();
 	virtual time_spec_t getCurrentTime ();
 	virtual int getNumFrames ();
+	virtual void processDrag (ivec2 pos);
 	
 	const params::InterfaceGl& ui_params ()
 	{

@@ -3,11 +3,11 @@
 #define CI_MOVING_GRAPH
 
 #include "cinder/Shape2d.h"
-#include "ciUIWidget.h"
+#include "ciWidget.h"
 #include <boost/algorithm/minmax.hpp>
 #include <boost/algorithm/minmax_element.hpp>
 
-class ciMovingGraph : public ciUIWidget
+class ciMovingGraph : public ciWidget
 {
 public:    
     ciMovingGraph(float x, float y, float w, float h, vector<float> _buffer, int _bufferSize, float _min, float _max, string _name)
@@ -72,7 +72,7 @@ public:
         }
     }
     
-	void setParent(ciUIWidget *_parent)
+	void setParent(ciWidget *_parent)
 	{
 		parent = _parent; 
 	}
@@ -99,7 +99,7 @@ public:
         buffer = _buffer; 
     }
     
-protected:    //inherited: ciUIRectangle *rect; ciUIWidget *parent; 
+protected:    //inherited: ciUIRectangle *rect; ciWidget *parent; 
     vector<float> buffer;
     float max, min, scale, inc; 
 	int bufferSize;

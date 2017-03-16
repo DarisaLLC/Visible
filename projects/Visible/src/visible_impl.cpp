@@ -185,7 +185,7 @@ void matContext::resize()
 
 void matContext::onMarked (marker_info& t)
 {
-    std::cout << " clip <- " << t.first << std::endl;
+    std::cout << " clip <- " << t.current_frame() << std::endl;
 }
 
 bool matContext::is_valid ()
@@ -334,7 +334,6 @@ void clipContext::mouseMove( MouseEvent event )
         mGraph1D->mouseMove( event );
         marker_info tt;
         mGraph1D->get_marker_position(tt);
-        tt.et = marker_info::event_type::move;
         signalMarker.emit(tt);
         
     }
@@ -354,7 +353,6 @@ void clipContext::mouseDown( MouseEvent event )
         mGraph1D->mouseDown( event );
         marker_info tt;
         mGraph1D->get_marker_position(tt);
-        tt.et = marker_info::event_type::down;
         signalMarker.emit(tt);
     }
 }

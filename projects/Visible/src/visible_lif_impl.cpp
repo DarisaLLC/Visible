@@ -258,14 +258,14 @@ time_spec_t lifContext::getCurrentTime ()
 void lifContext::seekToFrame (int mark)
 {
     m_seek_position = mark;
-    marker_info tt (m_seek_position, getCurrentTime().secs(), m_fc);
-    m_marker_signal.emit(tt);
+    mTimeMarker.from_count (m_seek_position);
+    m_marker_signal.emit(mTimeMarker);
 }
 
 
 void lifContext::onMarked ( marker_info& t)
 {
-    seekToFrame((int)(t.norm_pos.x *= getNumFrames () ));
+    seekToFrame(t.current_frame());
 }
 
 vec2 lifContext::getZoom ()
@@ -416,6 +416,8 @@ void lifContext::loadCurrentSerie ()
             
             mScreenSize = tm.getSize();
             m_fc = tm.getNumFrames ();
+            mTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
+            
             
             mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
             
@@ -448,6 +450,12 @@ void lifContext::loadCurrentSerie ()
                     m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
                 }
                 
+                mTimeLineSlider.mBounds = vl.display_timeline_rect();
+                mTimeLineSlider.mTitle = "Time Line";
+                m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mTimeLineSlider, std::placeholders::_1));
+                mWidgets.push_back( &mTimeLineSlider );
+                
+                getWindow()->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
                 
             }
             
@@ -460,6 +468,15 @@ void lifContext::loadCurrentSerie ()
         console() << ex.what() << endl;
         return;
     }
+}
+
+void lifContext::processDrag( ivec2 pos )
+{
+    if( mTimeLineSlider.hitTest( pos ) ) {
+        mTimeMarker.from_norm(mTimeLineSlider.mValueScaled);
+        seekToFrame(mTimeMarker.current_frame());
+    }
+
 }
 
 
@@ -494,10 +511,8 @@ void lifContext::mouseDown( MouseEvent event )
     for (Graph1DRef graphRef : m_tracks )
     {
         graphRef->mouseDown( event );
-        marker_info tt;
-        graphRef->get_marker_position(tt);
-        tt.et = marker_info::event_type::down;
-        signalMarker.emit(tt);
+        graphRef->get_marker_position(mTimeMarker);
+        signalMarker.emit(mTimeMarker);
     }
 }
 
@@ -565,6 +580,8 @@ bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif
 
 void lifContext::resize ()
 {
+    if (! have_movie () ) return;
+    
     vl.update_window_size(getWindowSize ());
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     vl.plot_rects(m_track_rects);
@@ -572,6 +589,9 @@ void lifContext::resize ()
     {
         m_tracks[cc]->setRect (m_track_rects[cc]);
     }
+    
+    mTimeLineSlider.mBounds = vl.display_timeline_rect();
+    
 }
 void lifContext::update ()
 {
@@ -621,6 +641,21 @@ void lifContext::draw_info ()
     gl::setMatricesWindow( getWindowSize() );
     
     gl::ScopedBlendAlpha blend_;
+
+    {
+        gl::ScopedColor (ColorA::gray(1.0));
+        gl::drawStrokedRect(get_image_display_rect(), 3.0f);
+    }
+    {
+        gl::ScopedColor (ColorA::gray(0.0));
+        gl::drawStrokedRect(vl.display_timeline_rect(), 3.0f);
+    }
+    {
+        gl::ScopedColor (ColorA::gray(0.75));
+        gl::drawStrokedRect(vl.display_plots_rect(), 3.0f);
+    }
+    
+    
     TextLayout layoutR;
     
     layoutR.clear( ColorA::gray( 0.2f, 0.5f ) );
@@ -633,11 +668,13 @@ void lifContext::draw_info ()
     auto texR = gl::Texture::create( layoutR.render( true ) );
     gl::draw( texR, vec2( 10, 10 ) );
     
-    if (mTextTexture)
-    {
-        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
-        gl::draw(mTextTexture, textrect);
-    }
+    tinyUi::drawWidgets(mWidgets);
+    
+//    if (mTextTexture)
+//    {
+//        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
+//        gl::draw(mTextTexture, textrect);
+//    }
     
 }
 

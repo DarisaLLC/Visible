@@ -15,6 +15,28 @@ using namespace std;
 using namespace ci;
 using namespace ci::signals;
 
+/*
+ *   Visible Layout
+ 
+ ************************    **********
+ *                      *    * Plots  *
+ *  Image               *    **********
+ *                      *    *        *
+ *                      *    **********
+ *                      *    *        *
+ ************************    **********
+ 
+ ************************    **********
+ *    Time Line         *    **********
+ ************************    **********
+ 
+ **************************************
+ *  Log Output                        *
+     **************************************
+ 
+ 
+ */
+
 class layout : tiny_media_info
 {
 public:
@@ -27,13 +49,15 @@ public:
         
         m_image_frame_size_norm = vec2(0.75, 0.75);
         m_single_plot_size_norm = vec2(0.20, 0.25);
+        m_timeline_size_norm = vec2(0.75, 0.10);
+        m_log_size_norm = vec2(0.95, 0.10);
         
- 
+        
     }
     
     // Constructor
     void init (const WindowRef& uiWin, const tiny_media_info& tmi)
-
+    
     {
         *((tiny_media_info*)this) = tmi;
         m_canvas_size = uiWin->getSize ();
@@ -43,8 +67,8 @@ public:
         m_image_rect = Rectf (ai);
         m_aspect = layout::aspect(tmi.getSize());
         m_isSet = true;
-      }
-
+    }
+    
     inline bool isSet () const { return m_isSet; }
     
     inline void update_window_size (const ivec2& new_size )
@@ -85,6 +109,20 @@ public:
         return rawf;
     }
     
+    inline Rectf display_timeline_rect ()
+    {
+        assert (m_image_frame_size_norm.x == m_timeline_size_norm.x);
+        vec2 scali (1.0, m_timeline_size_norm.y / m_image_frame_size_norm.y);
+        // Get the image frame rect
+        Rectf ir = display_frame_rect ();
+        // Move it down the height of the image rect + trim
+        vec2 offset (ir.getCenter().x, ir.getY2() + ir.getY1());
+        ir.offsetCenterTo (offset);
+        // Cut the height to timeline height
+        ir.scaleCentered (scali);
+        return ir;
+    }
+    
     // Modify window size
     inline void scale (vec2& scale_by)
     {
@@ -92,43 +130,34 @@ public:
         m_canvas_size.y  = std::floor(m_canvas_size.y * scale_by.y);
         m_windowSizeSignal.emit(m_canvas_size);
     }
-
+    
     
     const vec2& normImageFrameSize () const { return m_image_frame_size_norm; }
     void normImageFrameSize (vec2 ns) const { m_image_frame_size_norm = ns; }
-
+    
     const vec2& normSinglePlotSize () const { return m_single_plot_size_norm; }
     void normSinglePlotSize (vec2 ns) const { m_single_plot_size_norm = ns; }
     
     
     const float& aspectRatio () const { return m_aspect; }
- 
+    
     // Trim on all sides
     inline ivec2& trim () const { return m_trim; }
     vec2 trim_norm () { return vec2(trim().x, trim().y) / vec2(m_canvas_size.x, m_canvas_size.y); }
     
-
+    
     inline Rectf desired_window_rect () { return Rectf (trim().x, trim().y, trim().x + canvas_size().x, trim().y + canvas_size().y); }
     inline ivec2& desired_window_size () const { return m_canvas_size; }
     inline ivec2 canvas_size () { return desired_window_size() - trim() - trim (); }
- 
+    
     
     inline void plot_rects (std::vector<Rectf>& plots )
     {
-        plots.resize(3);
-        auto plot_tl = plots_frame_position_norm();
-        auto plot_size = single_plot_size_norm ();
-        vec2 plot_vertical (0.0, plot_size.y);
-        
-        plots[0] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
-        plot_tl += plot_vertical;
-        plots[1] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
-        plot_tl += plot_vertical;
-        plots[2] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
+        update_plots ();
         
         vec2 cs (m_canvas_size.x, m_canvas_size.y);
         
-        for (Rectf& plot : plots)
+        for (Rectf& plot : m_plot_rects)
         {
             plot.x1 *= cs.x;
             plot.x2 *= cs.x;
@@ -136,9 +165,25 @@ public:
             plot.y2 *= cs.y;
             
         }
+        plots = m_plot_rects;
+        
     }
     
-
+    inline Rectf display_plots_rect ()
+    {
+        update_plots ();
+        
+        vec2 cs (m_canvas_size.x, m_canvas_size.y);
+        Rectf ir = m_plots_display;
+        ir.x1 *= cs.x;
+        ir.x2 *= cs.x;
+        ir.y1 *= cs.y;
+        ir.y2 *= cs.y;
+        
+        return ir;
+    }
+    
+    
 private:
     bool m_isSet;
     
@@ -149,6 +194,7 @@ private:
         vec2 np = vec2 (trim_norm().x, trim_norm().y);
         return np;
     }
+    
     
     inline Rectf image_frame_rect ()
     {
@@ -194,8 +240,26 @@ private:
     
     
     
+    inline void update_plots ()
+    {
+        m_plot_rects.resize(3);
+        auto plot_tl = plots_frame_position_norm();
+        auto plot_size = single_plot_size_norm ();
+        vec2 plot_vertical (0.0, plot_size.y);
+        
+        m_plot_rects[0] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
+        plot_tl += plot_vertical;
+        m_plot_rects[1] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
+        plot_tl += plot_vertical;
+        m_plot_rects[2] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
+        
+        m_plots_display = Rectf(m_plot_rects[0].getUpperLeft(), m_plot_rects[2].getLowerRight());
+        
+    }
     
-
+    
+    // Represent norm rectangles for the whole screen and image viewer
+    // Real Rects are updated according to the layout and screen size
     mutable Rectf m_window_rect, m_image_rect;
     mutable ivec2 m_canvas_size;
     mutable ivec2 m_trim;
@@ -203,6 +267,10 @@ private:
     mutable bool m_keep_aspect;
     mutable vec2 m_image_frame_size_norm;
     mutable vec2 m_single_plot_size_norm;
+    mutable vec2 m_timeline_size_norm;
+    mutable vec2 m_log_size_norm;
+    mutable Rectf m_plots_display;
+    mutable std::vector<Rectf> m_plot_rects;
     
     LayoutSignalWindowSize_t m_windowSizeSignal;
     

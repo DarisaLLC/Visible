@@ -227,16 +227,25 @@ int movContext::getCurrentFrame ()
 void movContext::seekToFrame (int mark)
 {
     m_movie->seekToFrame (mark);
-    marker_info tt (int64_t(mark), getCurrentTime().secs(), getNumFrames());
-    m_marker_signal.emit(tt);
+    mTimeMarker.from_count(mark);
+    m_marker_signal.emit(mTimeMarker);
     
 }
 
 
+void movContext::processDrag( ivec2 pos )
+{
+    if( mTimeLineSlider.hitTest( pos ) ) {
+        mTimeMarker.from_norm(mTimeLineSlider.mValueScaled);
+        seekToFrame(mTimeMarker.current_frame());
+    }
+    
+}
+
 
 void movContext::onMarked ( marker_info& t)
 {
-    seekToFrame(std::floor(t.norm_pos.x *= getNumFrames ()));
+    seekToFrame(t.current_frame());
 }
 
 
@@ -325,6 +334,8 @@ void movContext::loadMovieFile()
                 mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
                 getWindow()->getApp()->setFrameRate(m_movie->getFramerate() / 3);
                 m_fc = m_movie->getNumFrames ();
+                
+                mTimeMarker = marker_info (m_movie->getNumFrames (), m_movie->getDuration());
 
                 vl.normSinglePlotSize (vec2 (0.25, 0.1));
 
@@ -334,6 +345,8 @@ void movContext::loadMovieFile()
                 // Setup Plot area
                 std::lock_guard<std::mutex> lock(m_track_mutex);
                 vl.plot_rects(m_track_rects);
+                
+                
                 
                 assert (m_track_rects.size() >= 1);
                 m_tracks.resize (0);
@@ -352,6 +365,11 @@ void movContext::loadMovieFile()
                 {
                     m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
                 }
+                
+                mTimeLineSlider.mBounds = vl.display_timeline_rect();
+                mTimeLineSlider.mTitle = "Time Line";
+                m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mTimeLineSlider, std::placeholders::_1));
+                mWidgets.push_back( &mTimeLineSlider );
                 
                 // Launch Average Luminance Computation
                 m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance,

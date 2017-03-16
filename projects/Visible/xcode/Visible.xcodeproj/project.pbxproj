@@ -226,7 +226,7 @@
 		C21946761CE4DC7100976025 /* visible_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_impl.cpp; path = ../src/visible_impl.cpp; sourceTree = "<group>"; };
 		C21946771CE4DC7100976025 /* VisibleApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VisibleApp.cpp; path = ../src/VisibleApp.cpp; sourceTree = "<group>"; };
 		C219468A1CE4EA4900976025 /* AudioDrawUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioDrawUtils.h; path = ../include/AudioDrawUtils.h; sourceTree = "<group>"; };
-		C219468B1CE4EA4900976025 /* AudioTestGui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioTestGui.h; path = ../include/AudioTestGui.h; sourceTree = "<group>"; };
+		C219468B1CE4EA4900976025 /* TinyUi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TinyUi.h; path = ../include/TinyUi.h; sourceTree = "<group>"; };
 		C219468C1CE4EA4900976025 /* base_signaler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_signaler.h; path = ../include/base_signaler.h; sourceTree = "<group>"; };
 		C219468F1CE4EA4900976025 /* cimovinggraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cimovinggraph.h; path = ../include/cimovinggraph.h; sourceTree = "<group>"; };
 		C21946931CE4EA4900976025 /* grabber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = grabber.h; path = ../include/grabber.h; sourceTree = "<group>"; };
@@ -9912,7 +9912,7 @@
 				C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */,
 				C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */,
 				C219468A1CE4EA4900976025 /* AudioDrawUtils.h */,
-				C219468B1CE4EA4900976025 /* AudioTestGui.h */,
+				C219468B1CE4EA4900976025 /* TinyUi.h */,
 				C219468C1CE4EA4900976025 /* base_signaler.h */,
 				C219468F1CE4EA4900976025 /* cimovinggraph.h */,
 				C221D91A1E4B176800AF74CE /* directoryPlayer.h */,
@@ -26384,6 +26384,7 @@
 				C26A05401E771CCF00BDC954 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
