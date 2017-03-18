@@ -23,9 +23,14 @@ typedef std::shared_ptr<class sm_producer> smProducerRef;
 class sm_producer
 {
 public:
+    
+    enum sizeMappingOption : int { dontCare = 0,  mostCommon = 1, reportFail = 2 };
+    
     typedef std::vector<roiWindow<P8U> > images_vector_t;
     typedef std::deque<double> sMatrixProjection_t;
     typedef std::deque< std::deque<double> > sMatrix_t;
+
+    
     typedef void (sig_cb_content_loaded) ();
     typedef void (sig_cb_frame_loaded) (int&, double&);
     typedef void (sig_cb_frames_cached) ();
@@ -34,7 +39,7 @@ public:
     sm_producer (bool auto_on_off = false);
     
     bool load_content_file (const string& fq_path);
-    bool load_image_directory (const string& fq_path);
+    bool load_image_directory (const string& fq_path, sizeMappingOption szmap = dontCare);
     void load_images (const images_vector_t&);
     
     bool operator () (int start_frame = 0, int frames = 0) const;
@@ -76,6 +81,7 @@ public:
     bool providesCallback () const;
     
     images_vector_t& images () const;
+    const std::vector< ci::fs::path >& paths () const;
     
 private:
     class spImpl;

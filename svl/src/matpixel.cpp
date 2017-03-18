@@ -23,6 +23,30 @@ using namespace svl;
 
 using namespace stl_utils;
 
+namespace
+{
+    
+    std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr)
+    {
+        return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
+    }
+    
+    std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename)
+    {
+        return make_shared_ofstream(new std::ofstream(filename, std::ofstream::out));
+    }
+    
+    std::shared_ptr<std::ifstream> make_shared_ifstream(std::ifstream * ifstream_ptr)
+    {
+        return std::shared_ptr<std::ifstream>(ifstream_ptr, ifStreamDeleter());
+    }
+    
+    std::shared_ptr<std::ifstream> make_shared_ifstream(std::string filename)
+    {
+        return make_shared_ifstream(new std::ifstream(filename, std::ifstream::in));
+    }
+    
+}
 template <typename P>
 void roiWindow<P>::randomFill( uint32_t seed )
 {
@@ -182,26 +206,6 @@ bool roiWindow<P>::copy_pixels_to(roiWindow<P> & other)
     return true;
 }
 
-
-std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr)
-{
-    return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
-}
-
-std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename)
-{
-    return make_shared_ofstream(new std::ofstream(filename, std::ofstream::out));
-}
-
-std::shared_ptr<std::ifstream> make_shared_ifstream(std::ifstream * ifstream_ptr)
-{
-    return std::shared_ptr<std::ifstream>(ifstream_ptr, ifStreamDeleter());
-}
-
-std::shared_ptr<std::ifstream> make_shared_ifstream(std::string filename)
-{
-    return make_shared_ifstream(new std::ifstream(filename, std::ifstream::in));
-}
 
 
 template <typename P>
@@ -385,44 +389,6 @@ roiWindow<P> roiWindow<P>::window(int32_t tl_x, int32_t tl_y, int32_t width, int
     return roiWindow<P>();
 }
 
-//// Assignment operators
-//template <typename T>
-//sharedRoot<T> & sharedRoot<T>::operator=(const sharedRoot<T> & p)
-//{
-//    if (mFrameBuf == p)
-//        return *this;
-//
-//    mFrameBuf = p.mFrameBuf;
-//    if (mFrameBuf)
-//    {
-//        mFrameBuf->addRef();
-//    }
-//    return *this;
-//}
-//
-//template <typename T>
-//sharedRoot<T> & sharedRoot<T>::operator=(root<T> * p)
-//{
-//    if (mFrameBuf == p)
-//        return *this;
-//
-//    mFrameBuf = p;
-//    if (mFrameBuf)
-//    {
-//        mFrameBuf->addRef();
-//    }
-//
-//    return *this;
-//}
-//
-//
-//template <typename T>
-//sharedRoot<T>::~sharedRoot()
-//{
-//    if (mFrameBuf)
-//        mFrameBuf->remRef();
-//}
-//
 
  template <typename T, typename trait_t, int W, int H>
 roiMultiWindow<T,trait_t,W,H>::roiMultiWindow ()
@@ -535,14 +501,6 @@ namespace svl
     template class root<P8UC3>;
     template class root<P8UC4>;
     
-#if 0
-    template class sharedRoot<P8U>;
-    template class sharedRoot<P16U>;
-    template class sharedRoot<P32F>;
-    template class sharedRoot<P32S>;
-    template class sharedRoot<P8UC3>;
-    template class sharedRoot<P8UC4>;
-#endif
     
     template class roiWindow<P8U>;
     template class roiWindow<P16U>;

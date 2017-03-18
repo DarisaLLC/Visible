@@ -705,22 +705,6 @@ namespace stl_utils
         return out;
     }
   
-#if 0
-    template<class A,class B>
-    inline ostream& operator<<(ostream& out, const map<A,B>& m)
-    {
-        out << "{{";
-        for (typename map<A,B>::const_iterator it = m.begin();
-             it != m.end();
-             ++it) {
-            if (it != m.begin()) out << ",";
-            out << it->first << "=" << &it->second;
-        }
-        out << "}}";
-        return out;
-    }
-#endif
-    
 }
 
 

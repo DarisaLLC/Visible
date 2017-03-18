@@ -45,7 +45,8 @@ public:
     }
     
     bool load_content_file (const std::string& movie_fqfn);
-    int loadImageDirectory (const std::string& image_dir, const std::vector<std::string>& supported_extensions = { ".jpg", ".png", ".JPG", ".jpeg"});
+    int loadImageDirectory (const std::string& image_dir, sm_producer::sizeMappingOption szmap,
+                            const std::vector<std::string>& supported_extensions = { ".jpg", ".png", ".JPG", ".jpeg"});
     
     void loadImages ( const images_vector_t& );
     
@@ -60,6 +61,7 @@ public:
     void asset_reader_done_cb ();
     
     images_vector_t& images () const { return m_loaded_ref; }
+    const std::vector< ci::fs::path >& frame_paths () const { return m_framePaths; }
     
 private:
     int32_t loadMovie( const std::string& movieFile );
@@ -78,6 +80,8 @@ private:
     void pusher ();
     void stop ();
 
+    typedef std::vector< ci::fs::path > paths_vector_t;
+    
     std::chrono::milliseconds m_frame_time;
 
     mutable mutex_t   m_mutex;
@@ -96,7 +100,7 @@ private:
     std::shared_ptr<qTimeFrameCache>   m_qtime_cache_ref;
 
     std::queue<float> m_queue;
-    std::vector< ci::fs::path > m_framePaths;
+    paths_vector_t m_framePaths;
     
     deque<deque<double> >        m_SMatrix;   // Used in eExhaustive and
     deque<double>                m_entropies; // Final entropy signal

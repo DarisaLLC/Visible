@@ -12,8 +12,8 @@ namespace po = boost::program_options;
 #include <iostream>
 #include <fstream>
 #include <iterator>
-
-
+#include <strstream>
+#include "core/stl_utils.hpp"
 #include <iostream>
 #include <string>
 #include "sm_producer.h"
@@ -21,7 +21,11 @@ namespace po = boost::program_options;
 
 using namespace std;
 
-using namespace std;
+using namespace stl_utils;
+using namespace boost;
+
+namespace fs=boost::filesystem;
+
 
 // A helper function to simplify the main part.
 template<class T>
@@ -40,6 +44,10 @@ void Out(const std::deque<Val>& v)
         std::cout << v.back() << std::endl;
 }
 
+typedef std::deque<std::string> string_deque_t;
+typedef std::deque<string_deque_t> string_deque_array_t;
+
+size_t imageDirectoryOutput (  std::shared_ptr<sm_producer>& sp,   string_deque_array_t&  output);
 
 struct cb_similarity_producer
 {
@@ -47,6 +55,7 @@ struct cb_similarity_producer
     {
         m_imagedir = imageDir;
         m_auto = auto_run;
+        last_output.resize(0);
     }
     
     int run ()
@@ -59,23 +68,15 @@ struct cb_similarity_producer
             boost::signals2::connection fl_connection = sp->registerCallback(frame_loaded_cb);
             boost::signals2::connection ml_connection = sp->registerCallback(content_loaded_cb);
             
-            int error;
-            //            if (m_auto) sp->set_auto_run_on ();
-           
-            sp->load_image_directory(m_imagedir);
+            sp->load_image_directory(m_imagedir,  sm_producer::sizeMappingOption::mostCommon);
             sp->operator()(0, sp->frames_in_content());
-            Out(sp->shannonProjection());
-            
-//            auto fdone = std::async(&sm_producer::load_image_directory, sp, m_imagedir);
-//            fdone.wait();
-            
-//            if (fdone.get() )
-//            {
-//            }
+            auto resc = imageDirectoryOutput ( sp,  last_output);
+        
             
         }
-        catch (...)
+         catch ( const std::exception & ex )
         {
+            std::cout << ex.what () << std::endl;
             return 1;
         }
         return 0;
@@ -98,6 +99,7 @@ struct cb_similarity_producer
     std::vector<int> frame_indices;
     std::vector<double> frame_times;
     std::string m_imagedir;
+    string_deque_array_t  last_output;
 
     bool movie_loaded;
     void clear_movie_loaded () { movie_loaded = false; }
@@ -107,6 +109,48 @@ struct cb_similarity_producer
    };
 
 
+std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr)
+{
+    return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
+}
+
+std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename)
+{
+    return make_shared_ofstream(new std::ofstream(filename, std::ofstream::out));
+}
+
+std::shared_ptr<std::ifstream> make_shared_ifstream(std::ifstream * ifstream_ptr)
+{
+    return std::shared_ptr<std::ifstream>(ifstream_ptr, ifStreamDeleter());
+}
+
+std::shared_ptr<std::ifstream> make_shared_ifstream(std::string filename)
+{
+    return make_shared_ifstream(new std::ifstream(filename, std::ifstream::in));
+}
+
+size_t imageDirectoryOutput (  std::shared_ptr<sm_producer>& sp,   string_deque_array_t&  output)
+{
+    if (! sp || sp->paths().size() != sp->shannonProjection().size ()) return 0;
+    
+    output.clear();
+    auto cnt = sp->paths().size();
+    auto pathItr = sp->paths().begin();
+    auto entItr = sp->shannonProjection().begin();
+    
+    
+    for (auto ff = 0; ff < cnt; ff++, pathItr++, entItr++)
+    {
+        
+        string_deque_t row;
+        row.push_back(to_string(ff));
+        row.push_back(to_string(*entItr));
+        row.push_back(pathItr->string());
+        output.emplace_back(row);
+    }
+    
+    return output.size();
+}
 
 int main(int ac, char* av[])
 {
@@ -115,9 +159,6 @@ int main(int ac, char* av[])
     
     try {
         std::string inputPth, outputPth;
-        unsigned int processedLevel;
-        int component;
-        float lowerThreshold, upperThreshold;
         po::options_description desc("Options");
         desc.add_options()
         ("help,h", "Displays this message")
@@ -127,7 +168,6 @@ int main(int ac, char* av[])
 //        ("component,c", po::value<int>(&component)->default_value(-1), "Color component to select for threshold, if none, threshold all.")
         ;
         
-
         po::variables_map vm;
         try {
             po::store(po::parse_command_line(ac, av, desc),vm);
@@ -137,8 +177,11 @@ int main(int ac, char* av[])
             else
             {
                 image_dir = vm["input"].as<std::string>();
+                output_file = vm["output"].as<std::string>();
                 
                 cout << vm["input"].as<std::string>() << std::endl;
+                cout << vm["output"].as<std::string>() << std::endl;
+                
             }
             
             if (vm.count("help")) {
@@ -163,6 +206,25 @@ int main(int ac, char* av[])
     {
         cb_similarity_producer runner (image_dir);
         runner.run();
+        std::string delim (",");
+        fs::path opath (output_file);
+        auto papa = opath.parent_path ();
+        if (fs::exists(papa) && ! runner.last_output.empty())
+        {
+            std::shared_ptr<std::ofstream> myfile = make_shared_ofstream(output_file);
+            for (string_deque_t& row : runner.last_output)
+            {
+                auto cnt = 0;
+                auto cols = row.size() - 1;
+                for (std::string& col : row)
+                {
+                    *myfile << col;
+                    if (cnt++ < cols)
+                        *myfile << delim;
+                }
+                *myfile << std::endl;
+            }
+        }
         
     }
 }
