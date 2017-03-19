@@ -131,12 +131,12 @@ public:
     requires   This ccHistoStats was not default constructed.
   */
 
-    const vector<uint32_t> & histogram() const { return histogram_; }
+    const vector<uint32_t> & histogram() const; 
     /*
     returns    Histogram given at construction
   */
     
-    const vector<uint8_t> & valids() const { return valid_bins_; }
+    const vector<uint8_t> & valids() const;
 
     /*
      returns    vector of valid bins
@@ -151,6 +151,9 @@ private:
                                          //   return ic_[percent]
     void computeMoments();               // compute mean,sDev,var,energry
 
+    template<typename P>
+    void init (const std::array<uint32_t, PixelBinSize<P>::bins>&);
+    
     vector<uint32_t> histogram_; // histogram given at construction
 
     /* flags for already computed answers */
@@ -167,6 +170,8 @@ private:
     vector<long> ic_; // valid if computeIC_
     uint32_t bins_;   // always valid
     vector<uint8_t> valid_bins_;
+    
+    mutable std::mutex m_mutex;
 };
 
 void hysteresisThreshold(const roiWindow<P8U> & magImage,

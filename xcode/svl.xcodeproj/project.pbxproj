@@ -43,11 +43,9 @@
 		C20E3E841CF378470074C47A /* drawUtils.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC621CF3780F0074C47A /* drawUtils.hpp */; };
 		C20E3E851CF378470074C47A /* edgel.h in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC631CF3780F0074C47A /* edgel.h */; };
 		C20E3E861CF378470074C47A /* gauss.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC641CF3780F0074C47A /* gauss.hpp */; };
-		C20E3E871CF378470074C47A /* genHistogram.h in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC651CF3780F0074C47A /* genHistogram.h */; };
 		C20E3E881CF378470074C47A /* gmorph.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC661CF3780F0074C47A /* gmorph.hpp */; };
 		C20E3E891CF378470074C47A /* gradient.h in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC671CF3780F0074C47A /* gradient.h */; };
 		C20E3E8A1CF378470074C47A /* histo.h in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC681CF3780F0074C47A /* histo.h */; };
-		C20E3E8B1CF378470074C47A /* histogram.h in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC691CF3780F0074C47A /* histogram.h */; };
 		C20E3E8C1CF378470074C47A /* ipUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC6A1CF3780F0074C47A /* ipUtils.h */; };
 		C20E3E8D1CF378470074C47A /* labelconnect.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC6B1CF3780F0074C47A /* labelconnect.hpp */; };
 		C20E3E8E1CF378470074C47A /* localvariance.h in Headers */ = {isa = PBXBuildFile; fileRef = C20EDC6C1CF3780F0074C47A /* localvariance.h */; };
@@ -286,11 +284,9 @@
 		C20EDC621CF3780F0074C47A /* drawUtils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = drawUtils.hpp; sourceTree = "<group>"; };
 		C20EDC631CF3780F0074C47A /* edgel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = edgel.h; sourceTree = "<group>"; };
 		C20EDC641CF3780F0074C47A /* gauss.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = gauss.hpp; sourceTree = "<group>"; };
-		C20EDC651CF3780F0074C47A /* genHistogram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = genHistogram.h; sourceTree = "<group>"; };
 		C20EDC661CF3780F0074C47A /* gmorph.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = gmorph.hpp; sourceTree = "<group>"; };
 		C20EDC671CF3780F0074C47A /* gradient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gradient.h; sourceTree = "<group>"; };
 		C20EDC681CF3780F0074C47A /* histo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = histo.h; sourceTree = "<group>"; };
-		C20EDC691CF3780F0074C47A /* histogram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = histogram.h; sourceTree = "<group>"; };
 		C20EDC6A1CF3780F0074C47A /* ipUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ipUtils.h; sourceTree = "<group>"; };
 		C20EDC6B1CF3780F0074C47A /* labelconnect.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = labelconnect.hpp; sourceTree = "<group>"; };
 		C20EDC6C1CF3780F0074C47A /* localvariance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = localvariance.h; sourceTree = "<group>"; };
@@ -732,11 +728,9 @@
 				C20EDC621CF3780F0074C47A /* drawUtils.hpp */,
 				C20EDC631CF3780F0074C47A /* edgel.h */,
 				C20EDC641CF3780F0074C47A /* gauss.hpp */,
-				C20EDC651CF3780F0074C47A /* genHistogram.h */,
 				C20EDC661CF3780F0074C47A /* gmorph.hpp */,
 				C20EDC671CF3780F0074C47A /* gradient.h */,
 				C20EDC681CF3780F0074C47A /* histo.h */,
-				C20EDC691CF3780F0074C47A /* histogram.h */,
 				C20EDC6A1CF3780F0074C47A /* ipUtils.h */,
 				C20EDC6B1CF3780F0074C47A /* labelconnect.hpp */,
 				C20EDC6C1CF3780F0074C47A /* localvariance.h */,
@@ -825,7 +819,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C20E3E871CF378470074C47A /* genHistogram.h in Headers */,
 				C20E3E841CF378470074C47A /* drawUtils.hpp in Headers */,
 				C20E3E861CF378470074C47A /* gauss.hpp in Headers */,
 				C24B1FB91D8B590100292F85 /* metric.hpp in Headers */,
@@ -834,7 +827,6 @@
 				C20E3E741CF378470074C47A /* pimpl.hpp in Headers */,
 				C20E3E6C1CF378470074C47A /* ConcurrentMap.h in Headers */,
 				C20E3E991CF378470074C47A /* ss_segmenter.hpp in Headers */,
-				C20E3E8B1CF378470074C47A /* histogram.h in Headers */,
 				C20E3E621CF378470074C47A /* affine_rectangle.h in Headers */,
 				C29854281D95E147005F59EF /* roiMultiWindow.h in Headers */,
 				C20E3E921CF378470074C47A /* roiRoot.h in Headers */,

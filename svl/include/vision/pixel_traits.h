@@ -401,6 +401,35 @@ namespace svl
     template <typename P>
     class PixelLayout;
     
+    // Primary template class
+    template <typename P>
+    struct PixelBinSize;
+    
+    template <>
+    struct PixelBinSize<P8U>
+    {
+        const static int bins = 256;
+    };
+    
+    template <>
+    struct PixelBinSize<P8S>
+    {
+        const static int bins = 256;
+    };
+    
+    template <>
+    struct PixelBinSize<P16U>
+    {
+        const static int bins = 256*256;
+    };
+    
+    template <>
+    struct PixelBinSize<P16S>
+    {
+        const static int bins = 256*256;
+    };
+
+    
     template <>
     class PixelLayout<P8U>
     {

@@ -55,7 +55,7 @@ static int32_t log2max(int32_t n);
 
 template<typename P>
 self_similarity_producer<P>::self_similarity_producer() : _matrixSz (0), _maskValid(false), _cacheSz (0),
-_depth (P::depth()),  _cdl (eNorm),  _notify(NULL), _finished(true),_guiUpdate(NULL), _tiny(1e-10)
+_depth (P::depth()),  _notify(NULL), _finished(true),_guiUpdate(NULL), _tiny(1e-10)
 {
     _corr_fn = std::bind(&defaultMatchers::norm_correlate, std::placeholders::_1, std::placeholders::_2);
     
@@ -64,16 +64,17 @@ _depth (P::depth()),  _cdl (eNorm),  _notify(NULL), _finished(true),_guiUpdate(N
 template<typename P>
 self_similarity_producer<P>::self_similarity_producer(uint32_t matrixSz,
 			     uint32_t cacheSz,
-			     rcCorrelationDefinition cdl,
+                 const similarity_fn_t& simFunc,
 			     bool notify,
 			     rcProgressIndicator* guiUpdate,
 			     double tiny)
   : _maskValid(false),  _matrixSz(matrixSz),
-    _cacheSz(cacheSz),  _cdl (cdl),
+    _cacheSz(cacheSz),
     _notify(notify), _finished(true),
     _guiUpdate(guiUpdate), _tiny(tiny)
 {
-    _corr_fn = std::bind(&defaultMatchers::norm_correlate, std::placeholders::_1, std::placeholders::_2);
+
+    _corr_fn = (simFunc) ? simFunc : std::bind(&defaultMatchers::norm_correlate, std::placeholders::_1, std::placeholders::_2);
     
     _depth = P::depth();
   _log2MSz = log2(_matrixSz);
@@ -86,7 +87,7 @@ self_similarity_producer<P>::self_similarity_producer(uint32_t matrixSz,
 			     bool notify,
 			     double tiny)
   : _maskValid(false), _matrixSz(matrixSz), _notify(notify), _finished(true),_tiny(tiny), _cacheSz (matrixSz),
-    _cdl (eNorm), _guiUpdate (NULL)
+    _guiUpdate (NULL)
 {
     _depth = P::depth();
   _log2MSz = log2(_matrixSz);
@@ -512,7 +513,7 @@ bool self_similarity_producer<P>::ssMatrixUpdate(deque<image_t>& tWin)
   assert(_SMatrix.size() == _matrixSz);
   assert(!tWin.empty());
 
-  const uint32_t lastImgIndex = tWin.size() - 1;
+  const auto lastImgIndex = tWin.size() - 1;
   assert(lastImgIndex < _matrixSz);
 
 //  progressNotification* progress = 0;
@@ -538,19 +539,9 @@ bool self_similarity_producer<P>::ssMatrixUpdate(deque<image_t>& tWin)
 }
 
 
-//template <typename P>
-//double self_similarity_producer<P>::correlate(image_t& i, image_t& m) const
-//{
-//    CorrelationParts cp;
-//
-//// @todo support mask
-//    Correlation::point(i, m, cp);
-//    return cp.r();
-//}
-
 
 template <typename P>
-bool self_similarity_producer<P>::genMatrixEntropy(uint32_t tWinSz)
+bool self_similarity_producer<P>::genMatrixEntropy(size_t tWinSz)
 {
   if (tWinSz != _matrixSz)
     return false;
@@ -599,7 +590,6 @@ bool self_similarity_producer<P>::genMatrixEntropy(uint32_t tWinSz)
     for (int ii = 0; ii < _sums.size (); ii++)
     {
         _sums[ii] /= _matrixSz;
-//        _sums[ii] = _sums[ii] - 1;
     }
 
   return true;
@@ -635,119 +625,6 @@ ostream& operator<< (ostream& ous, const self_similarity_producer<P>& rc)
   }
   return ous;
 }
-
-#if 0
-  
-template <class T>
-bool self_similarity_producer::filterOp (vector<T>& signal)
-{
-  float zf (0.0f);
-  Vec_O_DP tmp(9);
-
-  _kernel.resize(9);
-
-  NR::savgol (tmp, _kernel.size(),_kernel.size()/2,
-	      _kernel.size()/2,0,4);
-
-  // Copy from the wrap arounb order of savgol
-  int32_t i (0), j;
-  for (j = 0, i = (int32_t) _kernel.size()/2; i>= 0; i--, j++)
-    _kernel[j] = tmp[i];
-  for (i = 0; i < (int32_t) _kernel.size()/2; i++, j++)
-    _kernel[j] = tmp[_kernel.size()-i-1];
-
-  int32_t pow2 = log2max (signal.size());
-  vector<double> dSig (1 << pow2, zf);
-  dSig.assign (signal.begin(), signal.end());
-  if ((1 << pow2) != (int32_t) dSig.size())
-    dSig.resize (1<< pow2, zf);
-
-  Vec_O_DP vsig (&dSig[0], dSig.size());
-  Vec_O_DP vfilt (dSig.size());
-  
-  NR::convlv (vsig, tmp, 1, vfilt);
-
-  for (i = 0; i < (int32_t) signal.size(); i++)
-    signal[i] = vfilt[i];
-
-  return true;
-}
-
-template <class T>
-double self_similarity_producer::genPeriodicity (const vector<T>& signal, const vector<T>& absc, rcDPair& freq)
-{
-  const double ofac (4.0f);
-  const double hfac (1.0f);
-  const double nout (0.5f * ofac * hfac * signal.size());
-  Vec_O_DP px (signal.size() * 2);
-  Vec_O_DP py (px.size());
-  double prob;
-  int32_t jmax, nf;
-
-  Vec_O_DP dSig (&signal[0], signal.size());
-  Vec_O_DP vSig (&absc[0], absc.size());
-
-  NR::period (vSig, dSig, ofac, hfac, px, py, nf, jmax, prob);
-
-  freq.x() = jmax;
-  freq.y() = py[jmax];
-
-  vector<uint32_t> peakLocs;
-  vector<double> interLocs, interVals, dSigVec (py.size());
-  for (int32 i = 0; i < py.size(); i++)
-    dSigVec[i] = py[i];
-
-  rf1DPeakDetect(dSigVec, peakLocs, interLocs,
-		 interVals, 0.10);
-
-  // Assume min frequency is 1/2 as many frames per period
-  // ==> 2 
-  float minFrequency = 2.0;
-
-  /* Find the the frequency, greater than minFrequency, with the
-   * greatest amplitude.
-   */
-  uint32_t maxFreqIndex = 0;
-  double maxAmplitude = -1.0;
-  for (uint32_t ii = 0; ii < peakLocs.size(); ii++) {
-    if ((interLocs[ii] > minFrequency) && (interVals[ii] > maxAmplitude)) {
-      maxFreqIndex = ii;
-      maxAmplitude = interVals[ii];
-    }
-    if (1)
-      fprintf(stderr, " (%d %f) inter: (%f, %f)\n",
-	      peakLocs[ii], dSigVec[peakLocs[ii]],
-	      interLocs[ii], interVals[ii]);
-  }
-  
-  if (1)
-    fprintf(stderr, "maxAmplitude %f maxFreqIndex %d minFrequency %f\n",
-	    maxAmplitude, maxFreqIndex, minFrequency);
-
-  if (maxAmplitude == -1.0)
-    return 0.0;
-
-  if (1)
-    fprintf(stderr, "Return max peak - @ %d: loc %f amp %f\n",
-	    maxFreqIndex, interLocs[maxFreqIndex],
-	    interVals[maxFreqIndex]);
-
-  return interLocs[maxFreqIndex]/nout;
-
-}
-
-
-bool self_similarity_producer::filter (vector<double>& signal)
-{
-  return filterOp (signal);
-}
-
-double self_similarity_producer::periodicity (const vector<double>& signal, const vector<double>& absc, rcDPair& freq)
-{
-  return genPeriodicity (signal, absc, freq);
-}
-
-#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////

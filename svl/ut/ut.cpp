@@ -398,11 +398,12 @@ TEST (ut_lifFile, single_channel)
     EXPECT_NEAR(stats.at(0), 44.0, 0.001);
     EXPECT_NEAR(stats.at(1), 255.0, 0.001);
     EXPECT_NEAR(stats.at(2), 114.271, 0.001);
-    
+
+#ifdef _INTERACTIVE
     cimg_library::CImgDisplay dsp (512, 128);
     cimg_library::CImg<uint8_t> project = vol.get_projections2d(0,0,0);
     
-#ifdef _INTERACTIVE
+
     //  project.display(dsp, True);
 #endif
     
@@ -583,7 +584,7 @@ TEST (ut_lifFile, triple_channel)
     
 }
 
-#if 0
+
 TEST (ut_similarity, run)
 {
     UT_similarity tester;
@@ -610,7 +611,7 @@ TEST(basicU8, png_io)
     EXPECT_TRUE(res.second);
     {
         std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
-        roiWindow<P8U> rootwin = svl::NewFromChannel(*wp.second);
+        roiWindow<P8U> rootwin = svl::NewFromChannel(*wp.second, 0);
         EXPECT_EQ(rootwin.width(), 512);
         EXPECT_EQ(rootwin.height(), 512);
     }
@@ -627,7 +628,7 @@ TEST(basicU8, jpg_io)
         EXPECT_TRUE(res.second);
         {
             std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
-            roiWindow<P8U> rootwin = svl::NewFromChannel(*wp.second);
+            roiWindow<P8U> rootwin = svl::NewFromChannel(*wp.second, 0);
             EXPECT_EQ(rootwin.width(), 962);
             EXPECT_EQ(rootwin.height(), 602);
         }
@@ -677,7 +678,7 @@ TEST(basicip, timing)
     if (res.second)
     {
         std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
-        roiWindow<P8U> rootwin = svl::NewFromChannel(*wp.second);
+        roiWindow<P8U> rootwin = svl::NewFromChannel(*wp.second, 0);
         int width = rootwin.width();
         int height = rootwin.height();
         
@@ -843,7 +844,8 @@ TEST(basicU8, histo)
 {
     
     const char * frame[] =
-    {"00000000000000000000",
+       {
+        "00000000000000000000",
         "00001020300000000000",
         "00000000000000000000",
         "00000000012300000000",
@@ -852,6 +854,8 @@ TEST(basicU8, histo)
     
     roiWindow<P8U> pels(20, 5);
     DrawShape(pels, frame);
+    pels.output();
+    
     histoStats hh;
     hh.from_image<P8U>(pels);
     EXPECT_EQ(hh.max(0), 3);
@@ -877,7 +881,9 @@ TEST(basicU8, hyst)
     roiWindow<P8U> dst;
     int32_t got = -1;
     hystheresisThreshold::U8(fpels, dst, 1, 3, got, 0);
+#ifdef _INTERACTIVE
     dst.output();
+#endif
     EXPECT_EQ(5, got);
 }
 
@@ -955,7 +961,7 @@ TEST(timing16, corr)
     std::cout << " Correlation: 1920 * 1080 * 16 bit " << endtime * scale << " millieseconds per " << std::endl;
 }
 
-#endif
+
 
 /***
  **  Use --gtest-filter=*NULL*.*shared" to select https://code.google.com/p/googletest/wiki/V1_6_AdvancedGuide#Running_Test_Programs%3a_Advanced_Options
@@ -1010,8 +1016,10 @@ int main(int argc, char ** argv)
     
     testing::InitGoogleTest(&argc, argv);
     RUN_ALL_TESTS();
+#ifdef _INTERACTIVE
     while (true)
         ;
+#endif
 }
 
 

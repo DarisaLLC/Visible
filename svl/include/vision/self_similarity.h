@@ -41,42 +41,6 @@ class self_similarity_producer
  // Destructor
   virtual ~self_similarity_producer();
 
-    template<typename OUT>
-    class image_pairwise
-    {
-    public:
-        virtual double operator()(const image_t&,
-                                  const image_t&, OUT&) = 0;
-    };
-    
-    
-    class svl_corr : image_pairwise<CorrelationParts>
-    {
-    public:
-        double operator()(const image_t& i,
-                          const image_t& m, CorrelationParts& cp)
-        {
-            Correlation::point(i, m, cp);
-            return cp.r();
-        }
-    };
-    
-    
-    
-  /*
-   * Correlation Definition Control
-   *
-   * eNorm:      Normalized Correlation
-   * eRelative:  Relative Correlation
-   *
-   */
-  enum rcCorrelationDefinition {
-    eNorm,
-    eRelative,
-    eHintersect,
-    eLowSpT,
-    eShading
-  };
 
   /* ctor - Build an self_similarity_producer object that will generate entropy
    * based upon the following arguments:
@@ -109,17 +73,15 @@ class self_similarity_producer
    * 2nd ctor is for exhaustive a double scalar data
    *
    */
-  self_similarity_producer(uint32_t matrixSz, uint32_t cacheSz,	rcCorrelationDefinition cdl = eNorm,
+  self_similarity_producer(uint32_t matrixSz, uint32_t cacheSz,
+        const similarity_fn_t& sf = self_similarity_producer<P>::similarity_fn_t (), 
 		bool notify = false,
 		rcProgressIndicator* guiUpdate = 0,
 		double tiny = 1e-10);
 
-  self_similarity_producer(uint32_t matrixSz, 	bool notify,		double tiny);
+  self_similarity_producer(uint32_t matrixSz, 	bool notify,		double tiny );
 
-    /* Default similarity function is correlation
-     * 
-     */
-    void setSimilarityFunction (similarity_fn_t);
+
     
   /* Mutator Functions
    */
@@ -195,16 +157,6 @@ class self_similarity_producer
    */
   bool selfSimilarityMatrix(deque<deque<double> >& matrix) const;
 
-  /*
-   * Filtering operation on output signal
-   */
-  bool filter (vector<double>&);
- // double periodicity (const vector<double>& signal, const vector<double>& absc, rcDPair& freq);
-
-  /*
-   * Mutual Information Measurement of a Signal
-   */
-  void mu (vector<double>& src, vector<double>& dst);
     
   /*
    * Timing Information
@@ -294,13 +246,13 @@ class self_similarity_producer
    * is available, generate an entropy signal and return true.
    * Otherwise, just return false.
    */
-  bool genMatrixEntropy(uint32_t tWinSz);
+  bool genMatrixEntropy(size_t tWinSz);
 
   /* genListEntropy - If a full list worth of self-similarity info
    * is available, generate an entropy signal and return true.
    * Otherwise, just return false.
    */
-  bool genListEntropy(uint32_t tWinSz);
+  bool genListEntropy(size_t tWinSz);
 
   /*
    * Filtering operation on output signal
@@ -331,7 +283,6 @@ class self_similarity_producer
    int32_t                _depth;
   const uint32_t                     _matrixSz;
   const uint32_t                     _cacheSz;
-  const rcCorrelationDefinition      _cdl;
   const bool                         _notify;
   bool                               _finished;
   rcProgressIndicator*         const _guiUpdate;

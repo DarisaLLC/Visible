@@ -68,7 +68,7 @@ public:
         vector<roiWindow<P8U>> images(4);
         double tiny = 1e-10;
         
-        self_similarity_producer<P8U> sm((uint32_t) images.size(),0, self_similarity_producer<P8U>::eNorm,
+        self_similarity_producer<P8U> sm((uint32_t) images.size(),0, self_similarity_producer<P8U>::similarity_fn_t (),
                          false,
                          0,
                          tiny);
@@ -125,7 +125,7 @@ public:
       //  rfDumpMatrix (matrix);
         
         // Test RefSimilarator
-        self_similarity_producerRef simi (new self_similarity_producer<P8U> (7, 0));
+        self_similarity_producerRef simi (new self_similarity_producer<P8U> (7, 0, self_similarity_producer<P8U>::similarity_fn_t ()));
         EXPECT_EQ (simi.use_count() , 1);
         self_similarity_producerRef simi2 (simi);
         EXPECT_EQ (simi.use_count() , 2);
@@ -153,7 +153,7 @@ public:
         
         vector<roiWindow<P8U>> imagevector;
         
-        self_similarity_producer<P8U> simu( winSz, 0);
+        self_similarity_producer<P8U> simu( winSz, 0, self_similarity_producer<P8U>::similarity_fn_t ());
         
         EXPECT_EQ (simu.longTermCache() , false);
         EXPECT_EQ (simu.longTermCache (true) , true);
@@ -169,7 +169,7 @@ public:
         
         for (uint32_t i = 0; i < icnt; i++)
         {
-            self_similarity_producer<P8U> simf( winSz, 0);
+            self_similarity_producer<P8U> simf( winSz, 0, self_similarity_producer<P8U>::similarity_fn_t ());
             
             EXPECT_EQ (simf.longTermCache() , false);
             EXPECT_EQ (simf.longTermCache (true) , true);
