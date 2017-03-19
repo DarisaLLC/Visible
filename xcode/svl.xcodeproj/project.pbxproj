@@ -142,6 +142,10 @@
 		C2B6E66B1D060E0E00235FB7 /* GLMmath.h in Headers */ = {isa = PBXBuildFile; fileRef = C2B6E66A1D060E0E00235FB7 /* GLMmath.h */; };
 		C2B6E66D1D060F7000235FB7 /* coreGLM.h in Headers */ = {isa = PBXBuildFile; fileRef = C2B6E66C1D060F7000235FB7 /* coreGLM.h */; };
 		C2B6E66F1D060FF600235FB7 /* vImageRef.h in Headers */ = {isa = PBXBuildFile; fileRef = C2B6E66E1D060FF600235FB7 /* vImageRef.h */; };
+		C2DA194E1E7DEA3D00062DBC /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA194D1E7DEA3D00062DBC /* rand_support.cpp */; };
+		C2DA194F1E7DEA4100062DBC /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA194D1E7DEA3D00062DBC /* rand_support.cpp */; };
+		C2DA19531E7DEF0300062DBC /* make_function.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C2DA19521E7DEF0300062DBC /* make_function.hpp */; };
+		C2DA19551E7E030000062DBC /* ip_functors.hpp in Headers */ = {isa = PBXBuildFile; fileRef = C2DA19541E7E030000062DBC /* ip_functors.hpp */; };
 		C2EDE0941DA2F84D005AF917 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20E3D0D1CF378460074C47A /* opencv_utils.cpp */; };
 		C2EDE0951DA2F84E005AF917 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20E3D0D1CF378460074C47A /* opencv_utils.cpp */; };
 /* End PBXBuildFile section */
@@ -359,6 +363,9 @@
 		C2B6E66A1D060E0E00235FB7 /* GLMmath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLMmath.h; sourceTree = "<group>"; };
 		C2B6E66C1D060F7000235FB7 /* coreGLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coreGLM.h; sourceTree = "<group>"; };
 		C2B6E66E1D060FF600235FB7 /* vImageRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vImageRef.h; sourceTree = "<group>"; };
+		C2DA194D1E7DEA3D00062DBC /* rand_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rand_support.cpp; sourceTree = "<group>"; };
+		C2DA19521E7DEF0300062DBC /* make_function.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = make_function.hpp; sourceTree = "<group>"; };
+		C2DA19541E7E030000062DBC /* ip_functors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ip_functors.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -429,6 +436,7 @@
 		C20E3D031CF378450074C47A /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C2DA194D1E7DEA3D00062DBC /* rand_support.cpp */,
 				C26840BF1DBAE51A003BBBEF /* cinder_support.cpp */,
 				C222930B1D949CE100F978DC /* tinystr.cpp */,
 				C222930C1D949CE100F978DC /* tinyxml.cpp */,
@@ -683,6 +691,7 @@
 		C20EDC461CF3780F0074C47A /* core */ = {
 			isa = PBXGroup;
 			children = (
+				C2DA19521E7DEF0300062DBC /* make_function.hpp */,
 				C2B6E66E1D060FF600235FB7 /* vImageRef.h */,
 				C2B6E66C1D060F7000235FB7 /* coreGLM.h */,
 				C2B6E66A1D060E0E00235FB7 /* GLMmath.h */,
@@ -716,6 +725,7 @@
 		C20EDC5E1CF3780F0074C47A /* vision */ = {
 			isa = PBXGroup;
 			children = (
+				C2DA19541E7E030000062DBC /* ip_functors.hpp */,
 				C20EDC5F1CF3780F0074C47A /* colorhistogram.hpp */,
 				C20EDC601CF3780F0074C47A /* corners.hpp */,
 				C20EDC611CF3780F0074C47A /* disjoint-set.h */,
@@ -857,12 +867,14 @@
 				C20E3E7F1CF378470074C47A /* timing.hpp in Headers */,
 				C20E3E731CF378470074C47A /* pair.hpp in Headers */,
 				C20E3E701CF378470074C47A /* fit.hpp in Headers */,
+				C2DA19531E7DEF0300062DBC /* make_function.hpp in Headers */,
 				C24B1FB61D8B55E500292F85 /* cardiomyocyte_model.hpp in Headers */,
 				C20E3E881CF378470074C47A /* gmorph.hpp in Headers */,
 				C20E3E781CF378470074C47A /* simple_timing.hpp in Headers */,
 				C20E3E801CF378470074C47A /* vector2d.hpp in Headers */,
 				C20E3E971CF378470074C47A /* self_similarity.h in Headers */,
 				C20E3E6B1CF378470074C47A /* ConcurrentDeque.h in Headers */,
+				C2DA19551E7E030000062DBC /* ip_functors.hpp in Headers */,
 				C20E3E6F1CF378470074C47A /* cv_gabor.hpp in Headers */,
 				C20E3E671CF378470074C47A /* AccordionItem.h in Headers */,
 				C20E3E771CF378470074C47A /* shared_queue.hpp in Headers */,
@@ -976,6 +988,7 @@
 			files = (
 				C2B6E6691D060A7400235FB7 /* vImageRef.mm in Sources */,
 				C22293131D949F1400F978DC /* lifFile.cpp in Sources */,
+				C2DA194F1E7DEA4100062DBC /* rand_support.cpp in Sources */,
 				C212EF0E1D979CDA009F5F1A /* ip_utils.cpp in Sources */,
 				C2060FC61D9B10DB008A2F21 /* lineseg.cpp in Sources */,
 				C2EDE0951DA2F84E005AF917 /* opencv_utils.cpp in Sources */,
@@ -988,6 +1001,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2DA194E1E7DEA3D00062DBC /* rand_support.cpp in Sources */,
 				C222930F1D949CE100F978DC /* tinystr.cpp in Sources */,
 				C22293121D949CE100F978DC /* tinyxmlparser.cpp in Sources */,
 				C20E936D1CF3786F0074C47A /* time_spec.cpp in Sources */,

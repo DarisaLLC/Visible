@@ -47,7 +47,8 @@ void Out(const std::deque<Val>& v)
 typedef std::deque<std::string> string_deque_t;
 typedef std::deque<string_deque_t> string_deque_array_t;
 
-size_t imageDirectoryOutput (  std::shared_ptr<sm_producer>& sp,   string_deque_array_t&  output);
+size_t imageDirectoryOutput (  std::shared_ptr<sm_producer>& sp,   string_deque_array_t&  output,
+                             sm_producer::outputOrderOption ooo = sm_producer::outputOrderOption::sorted);
 
 struct cb_similarity_producer
 {
@@ -129,23 +130,24 @@ std::shared_ptr<std::ifstream> make_shared_ifstream(std::string filename)
     return make_shared_ifstream(new std::ifstream(filename, std::ifstream::in));
 }
 
-size_t imageDirectoryOutput (  std::shared_ptr<sm_producer>& sp,   string_deque_array_t&  output)
+size_t imageDirectoryOutput (  std::shared_ptr<sm_producer>& sp,   string_deque_array_t&  output,
+                             sm_producer::outputOrderOption ooo )
 {
     if (! sp || sp->paths().size() != sp->shannonProjection().size ()) return 0;
     
+    const sm_producer::ordered_outuple_t& ordered_output = sp->ordered_input_output(ooo);
+    
+    
     output.clear();
-    auto cnt = sp->paths().size();
-    auto pathItr = sp->paths().begin();
-    auto entItr = sp->shannonProjection().begin();
+    auto cnt = ordered_output.size();
     
-    
-    for (auto ff = 0; ff < cnt; ff++, pathItr++, entItr++)
+    for (auto ff = 0; ff < cnt; ff++)
     {
-        
+        const auto oo = ordered_output[ff];
         string_deque_t row;
         row.push_back(to_string(ff));
-        row.push_back(to_string(*entItr));
-        row.push_back(pathItr->string());
+        row.push_back(to_string(std::get<1>(oo)));
+        row.push_back(std::get<2>(oo).string());
         output.emplace_back(row);
     }
     

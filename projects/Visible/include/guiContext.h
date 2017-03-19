@@ -175,6 +175,11 @@ private:
 	float			mItemRelaxedWidth;
 	float			mItemHeight;
 	
+	csv::matf_t mdat;
+	bool m_normalize;
+	size_t m_frames, m_file_frames, m_read_pos;
+	size_t m_rows, m_columns;
+	
 	list<AccordionItem>				mItems;
 	std::vector<gl::TextureRef>			mTextures;
 	std::vector<SurfaceRef>			mSurfaces;

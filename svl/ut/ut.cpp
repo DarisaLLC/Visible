@@ -292,7 +292,7 @@ TEST (ut_mi, basic)
         if (res.second)
         {
             std::pair<Surface8uRef, Channel8uRef> wp = svl::image_io_read_surface(res.first);
-            images.push_back (svl::NewFromChannel(*wp.second));
+            images.push_back (svl::NewFromChannel(*wp.second, 0));
             //   cv::Mat mv;
             //   NewFromSVL (images.back(), mv);
             //   imshow( "Image View", mv );
@@ -532,7 +532,7 @@ TEST (ut_lifFile, triple_channel)
                 lls.fill2DBuffer(oneBy3.rowPointer(0), tt);
                 voxel.emplace_back(oneBy3);
                 CopyFromSVL (oneBy3.plane(2), *mv);
-                smear.add(*mv);
+                smear.add_to_smear(*mv);
                 cv::min(*mv, *bots, *bots);
                 cv::max(*mv, *tops, *tops);
                 

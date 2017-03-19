@@ -11,9 +11,21 @@
 #include <vector>
 #include <deque>
 #include <iterator>
+#include <functional>
 
-//#include  "image_correlation.h"
-//#include "vf_math.h"
+namespace defaultMatchers
+{
+    
+    double norm_correlate(const roiWindow<P8U>& i, const roiWindow<P8U>& m)
+    {
+        CorrelationParts cp;
+        
+        // @todo support mask
+        Correlation::point(i, m, cp);
+        return cp.r();
+    }
+
+}
 
 using namespace svl;
 
@@ -45,6 +57,8 @@ template<typename P>
 self_similarity_producer<P>::self_similarity_producer() : _matrixSz (0), _maskValid(false), _cacheSz (0),
 _depth (P::depth()),  _cdl (eNorm),  _notify(NULL), _finished(true),_guiUpdate(NULL), _tiny(1e-10)
 {
+    _corr_fn = std::bind(&defaultMatchers::norm_correlate, std::placeholders::_1, std::placeholders::_2);
+    
 }
 
 template<typename P>
@@ -59,8 +73,8 @@ self_similarity_producer<P>::self_similarity_producer(uint32_t matrixSz,
     _notify(notify), _finished(true),
     _guiUpdate(guiUpdate), _tiny(tiny)
 {
-//    _corrParams.pd = ByteWise; // use each byte of a multibyte pixel
-
+    _corr_fn = std::bind(&defaultMatchers::norm_correlate, std::placeholders::_1, std::placeholders::_2);
+    
     _depth = P::depth();
   _log2MSz = log2(_matrixSz);
   _ltOn = false;
@@ -353,7 +367,7 @@ bool self_similarity_producer<P>::ssMatrixFill(deque<image_t >& tWin)
 	assert((j >= 0) && (j < tWinSz));
 	assert((k >= 0) && (k < tWinSz));
     chronometer timeit;
-	const double r = correlate(tWin[j], tWin[k]);
+	const double r = _corr_fn (tWin[j], tWin[k]);
   _corrTimes.add((float) timeit.getTime ());          
 	_SMatrix[j][k] = _SMatrix[k][j] = r;
 //	tWin[k].frameBuf().unlock();
@@ -380,7 +394,7 @@ bool self_similarity_producer<P>::ssMatrixFill(deque<image_t >& tWin)
 	assert((j >= 0) && (j < tWinSz));
 	assert((k >= 0) && (k < tWinSz));
           chronometer timeit;
-	const double r = correlate(tWin[j], tWin[k]);
+	const double r = _corr_fn(tWin[j], tWin[k]);
           _corrTimes.add((float) timeit.getTime ());
           
 	_SMatrix[j][k] = _SMatrix[k][j] = r;
@@ -410,7 +424,7 @@ bool self_similarity_producer<P>::ssListFill(deque<image_t >& tWin)
   assert(_SList.size() >= (tWin.size()-1));
 
   for (uint32_t i = 1; i < tWin.size(); i++) {
-    _SList[i-1] = correlate(tWin[i-1], tWin[i]);
+    _SList[i-1] = _corr_fn(tWin[i-1], tWin[i]);
   //  tWin[i-1].frameBuf().unlock();
 //    if (progress && progress->update()) {
 //      tWin[i].frameBuf().unlock();
@@ -509,7 +523,7 @@ bool self_similarity_producer<P>::ssMatrixUpdate(deque<image_t>& tWin)
 
   for (uint32_t i = 0; i < lastImgIndex; i++) {
     _SMatrix[i][lastImgIndex] = _SMatrix[lastImgIndex][i] = 
-      correlate(tWin[i], tWin[lastImgIndex]);
+      _corr_fn (tWin[i], tWin[lastImgIndex]);
  //   tWin[i].frameBuf().unlock();
 //    if (progress && progress->update()) {
 //      tWin[lastImgIndex].frameBuf().unlock();
@@ -524,15 +538,15 @@ bool self_similarity_producer<P>::ssMatrixUpdate(deque<image_t>& tWin)
 }
 
 
-template <typename P>
-double self_similarity_producer<P>::correlate(image_t& i, image_t& m) const
-{
-    CorrelationParts cp;
-
-// @todo support mask
-    Correlation::point(i, m, cp);
-    return cp.r();
-}
+//template <typename P>
+//double self_similarity_producer<P>::correlate(image_t& i, image_t& m) const
+//{
+//    CorrelationParts cp;
+//
+//// @todo support mask
+//    Correlation::point(i, m, cp);
+//    return cp.r();
+//}
 
 
 template <typename P>

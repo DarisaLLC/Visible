@@ -8,6 +8,7 @@
 #include "qtime_frame_cache.hpp"
 #include <typeinfo>
 #include <string>
+#include <tuple>
 #include "base_signaler.h"
 #include "roiWindow.h"
 #include <chrono>
@@ -25,12 +26,15 @@ class sm_producer
 public:
     
     enum sizeMappingOption : int { dontCare = 0,  mostCommon = 1, reportFail = 2 };
+    enum outputOrderOption : int { input = 0,  sorted = 1, binned = 2 };
     
-    typedef std::vector<roiWindow<P8U> > images_vector_t;
+    typedef roiWindow<P8U> image_t;
+    typedef std::vector<image_t> images_vector_t;
     typedef std::deque<double> sMatrixProjection_t;
     typedef std::deque< std::deque<double> > sMatrix_t;
+    typedef std::tuple<size_t, double, fs::path, image_t> outuple_t;
+    typedef std::vector<outuple_t> ordered_outuple_t;    
 
-    
     typedef void (sig_cb_content_loaded) ();
     typedef void (sig_cb_frame_loaded) (int&, double&);
     typedef void (sig_cb_frames_cached) ();
@@ -61,12 +65,27 @@ public:
     int process_last_frame () const;
     int process_count () const;
     
+    /**
+     *  Results Output & Options
+     */
     const sMatrix_t& similarityMatrix () const;
     
-    const sMatrixProjection_t& meanProjection () const;
+    const sMatrixProjection_t& meanProjection (outputOrderOption ooo = input) const;
     
-    const sMatrixProjection_t& shannonProjection () const;
+    const sMatrixProjection_t& shannonProjection (outputOrderOption ooo = input) const;
     
+    /**
+     *  Image Directory Output & Options
+     *  The first two functions return the natural order ( i.e. input order )
+     *
+     */
+    images_vector_t& images () const;
+    const std::vector<fs::path >& paths () const;
+    const ordered_outuple_t& ordered_input_output (const outputOrderOption) const;
+    
+    /**
+     *  Callback Registration
+     */
     /** \brief registers a callback function/method to a signal with the corresponding signature
      * \param[in] callback: the callback function/method
      * \return Connection object, that can be used to disconnect the callback method from the signal again.
@@ -80,8 +99,6 @@ public:
     template<typename T>
     bool providesCallback () const;
     
-    images_vector_t& images () const;
-    const std::vector< ci::fs::path >& paths () const;
     
 private:
     class spImpl;

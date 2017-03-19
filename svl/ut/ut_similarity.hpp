@@ -16,8 +16,8 @@ public:
     void testCorrelation (int32_t width, int32_t height, bool useAltivec )
     {
         
-        sharedRoot<P> ptr (new root<P8U>(width, height));
-        sharedRoot<P> ptr2 (new root<P8U>( width, height));
+        std::shared_ptr<root<P>> ptr (new root<P8U>(width, height));
+        std::shared_ptr<root<P>> ptr2 (new root<P8U>( width, height));
         
         roiWindow<P> imgA (ptr, 0, 0, width, height);
         roiWindow<P> imgB (ptr2, 0, 0, width, height);

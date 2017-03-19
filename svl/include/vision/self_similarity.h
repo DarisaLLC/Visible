@@ -12,7 +12,7 @@
 #include <algorithm>
 #include "simple_timing.hpp"
 #include "core/stats.hpp"
-
+#include "registration.h"
 #include "roiWindow.h"
 
 class rcProgressIndicator;
@@ -35,11 +35,34 @@ class self_similarity_producer
     typedef svl::roiWindow<pixel_t> image_t;
     typedef typename std::vector<image_t>::iterator image_vector_iter_t;
     typedef typename std::deque<image_t>::iterator image_deque_iter_t;
+    typedef std::function<double(const image_t&, const image_t&)> similarity_fn_t;
     
     
  // Destructor
   virtual ~self_similarity_producer();
 
+    template<typename OUT>
+    class image_pairwise
+    {
+    public:
+        virtual double operator()(const image_t&,
+                                  const image_t&, OUT&) = 0;
+    };
+    
+    
+    class svl_corr : image_pairwise<CorrelationParts>
+    {
+    public:
+        double operator()(const image_t& i,
+                          const image_t& m, CorrelationParts& cp)
+        {
+            Correlation::point(i, m, cp);
+            return cp.r();
+        }
+    };
+    
+    
+    
   /*
    * Correlation Definition Control
    *
@@ -93,6 +116,11 @@ class self_similarity_producer
 
   self_similarity_producer(uint32_t matrixSz, 	bool notify,		double tiny);
 
+    /* Default similarity function is correlation
+     * 
+     */
+    void setSimilarityFunction (similarity_fn_t);
+    
   /* Mutator Functions
    */
   /* fill - Allow client to specify an initial temporal window's worth
@@ -246,6 +274,7 @@ class self_similarity_producer
     bool ssMatrixApproxUpdate(deque<image_t >& tWin);
     bool ssListUpdate(deque<image_t >& tWin);
 
+    
   /* correlate - Perform correlation on the given two images and
    * return the correlation score.
    */
@@ -289,7 +318,8 @@ class self_similarity_producer
 
   double shannon (double r) const { return (-1.0 * r * log2 (r)); }
 
-
+  similarity_fn_t               _corr_fn;
+    
   /* Masking related information
    */
   bool                               _maskValid;

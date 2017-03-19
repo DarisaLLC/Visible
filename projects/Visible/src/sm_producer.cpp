@@ -11,7 +11,7 @@
 #include <memory>
 #include <functional>
 #include "app_utils.hpp"
-#include "cinder/qtime/Quicktime.h"
+//#include "cinder/qtime/Quicktime.h"
 #include "cinder_xchg.hpp"
 #include "core/simple_timing.hpp"
 #include "core/stl_utils.hpp"
@@ -23,6 +23,8 @@
 using namespace std::chrono;
 
 using namespace boost;
+
+namespace fs=boost::filesystem;
 
 using namespace ci;
 
@@ -37,6 +39,21 @@ namespace anonymous
         string extension = pp.extension().string();
         return extension.length() == 0 && pp.filename().string().length() == check_size;
     }
+
+    struct greaterScore {
+        bool operator () (const sm_producer::outuple_t& left, const sm_producer::outuple_t& right)
+        { // Score is at Index 1
+            return std::get<1>(left) > std::get<1>(right);
+        }
+    };
+    
+    template <int index> struct TupleMore {
+        template <typename Tuple>
+        bool operator () (const Tuple& left, const Tuple& right) const {
+            return std::get<index>(left) > std::get<index>(right); }
+};
+    
+    
 }
 
 sm_producer::sm_producer (bool auto_on_off)
@@ -46,11 +63,6 @@ sm_producer::sm_producer (bool auto_on_off)
     if (auto_on_off)
         set_auto_run_on();
     
-}
-
-std::vector<roiWindow<P8U>>& sm_producer::images () const
-{
-    return _impl->images ();
 }
 
 bool sm_producer::load_content_file (const std::string& movie_fqfn)
@@ -107,13 +119,54 @@ int sm_producer::frames_in_content() const { return (_impl) ? (int) _impl->frame
 
 const sm_producer::sMatrix_t& sm_producer::similarityMatrix () const { return _impl->m_SMatrix; }
 
-const sm_producer::sMatrixProjection_t& sm_producer::meanProjection () const { assert(false); }
+const sm_producer::sMatrixProjection_t& sm_producer::meanProjection (outputOrderOption ooo) const { assert(false); }
 
-const sm_producer::sMatrixProjection_t& sm_producer::shannonProjection () const { return _impl->m_entropies; }
+const sm_producer::sMatrixProjection_t& sm_producer::shannonProjection (outputOrderOption ooo) const { return _impl->m_entropies; }
 
 
-const std::vector< ci::fs::path >& sm_producer::paths () const { return _impl->frame_paths(); }
+std::vector<roiWindow<P8U>>& sm_producer::images () const
+{
+    return _impl->images ();
+}
 
+const std::vector< fs::path >& sm_producer::paths () const
+{
+    return _impl->frame_paths();
+}
+
+
+
+const sm_producer::ordered_outuple_t& sm_producer::ordered_input_output (const sm_producer::outputOrderOption ooo) const
+{
+    return _impl->ordered_input_output (ooo);
+}
+
+const sm_producer::ordered_outuple_t& sm_producer::spImpl::ordered_input_output (const sm_producer::outputOrderOption ooo) const
+{
+    std::unique_lock <std::mutex> lock(m_mutex, std::try_to_lock);
+    
+    if (m_output_repo.empty())
+    {
+        static ordered_outuple_t default_empty_outuple;
+        return default_empty_outuple;
+    }
+    
+    auto output =  stl_utils::safe_get(m_output_repo, ooo, ordered_outuple_t ());
+    
+    // Not in the repo. Generate it if possible
+    if (output.empty() && ! m_output_repo.empty() && ooo == sorted)
+    {
+        const ordered_outuple_t& canon = m_output_repo[input];
+        // Copy the naturally ordered one: i.e. input
+        output = canon;
+        // Now sort them
+        sort (output.begin(), output.end(), anonymous::TupleMore<1> ()) ;
+        m_output_repo[sorted] = output;
+    }
+    
+    return m_output_repo[ooo];
+    
+}
 
 void sm_producer::spImpl::asset_reader_done_cb ()
 {
@@ -127,7 +180,8 @@ void sm_producer::spImpl::asset_reader_done_cb ()
  */
 int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_producer::sizeMappingOption szmap, const std::vector<std::string>& supported_extensions)
 {
-    using namespace ci::fs;
+
+    m_source_type = imageFileDirectory;
     
     paths_vector_t tmp_framePaths;
     
@@ -160,12 +214,12 @@ int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_pr
     }
     
     if (tmp_framePaths.empty()) return -1;
-
+    
     m_framePaths.clear();
     m_loaded_ref.resize(0);
     
     std::cout << m_framePaths.size () << " Files "  << std::endl;
-
+    
     // Paths and Image vectors will be
     // Get a map of the sizes
     std::map<iPair, int32_t> size_map;
@@ -263,6 +317,7 @@ int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_pr
 int sm_producer::spImpl::loadMovie( const std::string& movieFile )
 {
     std::unique_lock <std::mutex> lock(m_mutex);
+    m_source_type = movie;
     
     {
         ScopeTimer timeit("avReader");
@@ -294,6 +349,7 @@ int sm_producer::spImpl::loadMovie( const std::string& movieFile )
 
 void sm_producer::spImpl::loadImages (const images_vector_t& images)
 {
+    m_source_type = imageInMemory;
     m_loaded_ref.resize(0);
     vector<roiWindow<P8U> >::const_iterator vitr = images.begin();
     do
@@ -314,6 +370,30 @@ bool sm_producer::spImpl::done_grabbing () const
     return _frameCount != 0 && m_qtime_cache_ref->count() == _frameCount;
 }
 
+bool  sm_producer::spImpl::image_file_entropy_result_ok () const
+{
+    assert (type() == imageFileDirectory);
+    bool ok = _frameCount != 0 && !m_entropies.empty();
+    ok = m_loaded_ref.size() == m_framePaths.size();
+    ok &= m_entropies.size() == m_loaded_ref.size();
+    return ok;
+}
+
+bool sm_producer::spImpl::setup_image_directory_result_repo () const
+{
+    if (! image_file_entropy_result_ok()) return false;
+    
+    // Setup new results results tuple
+    ordered_outuple_t input_result;
+    for (size_t rr = 0; rr < m_loaded_ref.size(); rr++)
+    {
+        outuple_t ot (rr, m_entropies[rr], m_framePaths[rr], m_loaded_ref[rr]);
+        input_result.push_back(ot);
+    }
+    m_output_repo[outputOrderOption::input] = input_result;
+    return true;
+    
+}
 // @todo add sampling and offset
 bool sm_producer::spImpl::generate_ssm (int start_frames, int frames)
 {
@@ -321,17 +401,24 @@ bool sm_producer::spImpl::generate_ssm (int start_frames, int frames)
     
     std::unique_lock<std::mutex> lock( m_mutex, std::try_to_lock );
     
+    // Get a new similarity engine
+    // Note: get execution times with   svl::stats<float>::PrintTo(simi->timeStats(), & std::cout);
     self_similarity_producerRef simi = std::make_shared<self_similarity_producer<P8U> > (frames, 0);
     
+    // Invalidate last results map
+    m_output_repo.clear();
     
     simi->fill(m_loaded_ref);
     m_entropies.resize (0);
-    bool ok = simi->entropies (m_entropies);
     m_SMatrix.resize (0);
-    simi->selfSimilarityMatrix(m_SMatrix);
-    std::cout << simi->matrixSz() << std::endl;
-    //    svl::stats<float>::PrintTo(simi->timeStats(), & std::cout);
+    bool ok = simi->entropies (m_entropies);
+    if (!ok) return ok;
     
+    // Fetch the SS matrix
+    simi->selfSimilarityMatrix(m_SMatrix);
+
+    if (type() == imageFileDirectory)
+        ok = setup_image_directory_result_repo();
     
     return ok;
 }

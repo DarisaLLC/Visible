@@ -15,6 +15,7 @@
 #include <thread>
 #include <mutex>
 #include <queue>
+#include <tuple>
 #include <condition_variable>
 
 #include "app_utils.hpp"
@@ -33,6 +34,8 @@ public:
     friend class sm_producer;
     
     typedef std::mutex mutex_t;
+
+    enum source_type : int { movie = 0, imageFileDirectory = 1, imageInMemory = 2, Unknown = -1 };
     
     spImpl () :  m_auto_run (false)
     {
@@ -42,6 +45,7 @@ public:
         signal_sm1d_available = createSignal<sm_producer::sig_cb_sm1d_available> ();
         signal_sm2d_available = createSignal<sm_producer::sig_cb_sm2d_available> ();
         m_loaded_ref.resize(0);
+        m_source_type = Unknown;
     }
     
     bool load_content_file (const std::string& movie_fqfn);
@@ -53,16 +57,22 @@ public:
     bool set_auto_run_on () { bool tmp = m_auto_run; m_auto_run = true; return tmp; }
     bool set_auto_run_off () { bool tmp = m_auto_run; m_auto_run = false; return tmp; }
 
-
+    const source_type type () const { return m_source_type; }
+    
     bool done_grabbing () const;
     bool generate_ssm (int start_frame, int frames);
     int64_t frame_count () { return _frameCount; }
     std::string  getName () const { return m_name; }
+    bool image_file_entropy_result_ok () const;
+    
     void asset_reader_done_cb ();
     
+    // They always return the input order. To get other orders use the Tuple Interface
     images_vector_t& images () const { return m_loaded_ref; }
-    const std::vector< ci::fs::path >& frame_paths () const { return m_framePaths; }
+    const std::vector<fs::path >& frame_paths () const { return m_framePaths; }
+    const ordered_outuple_t& ordered_input_output (const outputOrderOption) const;
     
+  
 private:
     int32_t loadMovie( const std::string& movieFile );
     
@@ -73,15 +83,15 @@ protected:
     boost::signals2::signal<sm_producer::sig_cb_sm2d_available>* signal_sm2d_available;
     
 private:
-    mutable bool m_auto_run;
-    void get_next_frame ();
-    void start ();
-    void loadder ();
-    void pusher ();
-    void stop ();
-
-    typedef std::vector< ci::fs::path > paths_vector_t;
     
+    bool setup_image_directory_result_repo () const;
+    mutable bool m_auto_run;
+    mutable source_type m_source_type;
+    
+    void get_next_frame ();
+
+    typedef std::vector<fs::path > paths_vector_t;
+  
     std::chrono::milliseconds m_frame_time;
 
     mutable mutex_t   m_mutex;
@@ -101,14 +111,13 @@ private:
 
     std::queue<float> m_queue;
     paths_vector_t m_framePaths;
+    mutable std::map<outputOrderOption, ordered_outuple_t> m_output_repo;
     
     deque<deque<double> >        m_SMatrix;   // Used in eExhaustive and
     deque<double>                m_entropies; // Final entropy signal
     deque<double>                m_means; // Final entropy signal
-    int                   m_depth;
+    int                          m_depth;
     std::string                  m_name;
-    std::shared_ptr<std::thread> m_grabber_thread;
-    std::shared_ptr<std::thread> m_pusher_thread;
     
 };
 

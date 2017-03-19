@@ -86,7 +86,20 @@ bool imageDirContext::is_valid ()
 
 void imageDirContext::setup()
 {
-    // Browse for the image folder
+    // Browse for the Classification Result
+    auto sorted_res = getOpenFilePath();
+    
+    mdat.clear ();
+    bool c2v_ok = csv::csv2vectors ( fqfn, mdat, false, true, true);
+    if ( c2v_ok )
+    {
+        m_columns = mdat.size ();
+        m_rows = mdat[0].size();
+        m_frames = m_file_frames = m_rows;
+        m_read_pos = 0;
+        m_valid = true;
+    }
+    
     if (mFolderPath == boost::filesystem::path ())
     {
         mFolderPath = browseToFolder ();
