@@ -25,6 +25,7 @@
 #include "vision/opencv_utils.hpp"
 #include "vision/histo.h"
 #include "core/stl_utils.hpp"
+#include "sm_producer.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -47,24 +48,23 @@ namespace
         return AppBase::get()->getElapsedSeconds();
     }
     
- 
+    
     static layout vl (ivec2 (10, 10));
     
     
-    tracksD1_t get_mean_luminance (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names, bool test_data = false)
+    tracksD1_t get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+                                           bool test_data = false)
     {
+        
         tracksD1_t tracks;
-        
-        if (names.empty() || (names.size() != 1 && names.size() != 3))
-            return tracks;
-        
-        // We either have 3 channels or a single one ( that is content is same in all 3 channels ) --
-        // Note that Alpha channel is not processed
-        
         tracks.resize (names.size ());
         for (auto tt = 0; tt < names.size(); tt++)
             tracks[tt].first = names[tt];
         
+        std::vector<roiWindow<P8U>> images;
+        auto fcnt = frames->count();
+        
+        // If it is 3 channels. We will use multiple window
         int64_t fn = 0;
         while (frames->checkFrame(fn))
         {
@@ -73,21 +73,12 @@ namespace
             auto channels = names.size();
             
             std::vector<roiWindow<P8U> > rois;
-            switch (channels)
-            {
-                case 1:
-                {
-                    rois.emplace_back(svl::NewRedFromSurface(su8));
-                    break;
-                }
-                case 3:
-                {
-                    rois.emplace_back(svl::NewRedFromSurface(su8));
-                    rois.emplace_back(svl::NewGreenFromSurface(su8));
-                    rois.emplace_back(svl::NewBlueFromSurface(su8));
-                    break;
-                }
-            }
+            auto m1 = svl::NewRedFromSurface(su8);
+            rois.emplace_back(m1);
+            auto m2 = svl::NewGreenFromSurface(su8);
+            rois.emplace_back(m2);
+            auto m3 = svl::NewBlueFromSurface(su8);
+            rois.emplace_back(m3);
             
             assert (rois.size () == tracks.size());
             
@@ -95,23 +86,49 @@ namespace
             int index = 0;
             for (roiWindow<P8U> roi : rois)
             {
+//                if (index == 2)
+//                {
+//                    images.push_back(roi);
+//                    break;
+//                }
                 index_time_t ti;
                 ti.first = fn;
                 timed_double_t res;
                 res.first = ti;
                 auto nmg = histoStats::mean(roi) / 256.0;
-                res.second = (! test_data) ? nmg :  (((float) fn) / frames->count() );
+                res.second = (! test_data) ? nmg :  (((float) fn) / fcnt );
                 tracks[index++].second.emplace_back(res);
             }
-            
-            std::cout << fn << std::endl;
-            
             // TBD: call progress reporter
         }
+    
+#if 0
+        // Now Do Aci on the 3rd channel
+        assert(images.size() == fcnt && fcnt > 0);
         
+        auto sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
+        sp->load_images (images);
+        
+        std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
+        std::future<bool>  future_ss = task.get_future();  // get a future
+        std::thread(std::move(task)).detach(); // launch on a thread
+        future_ss.wait();
+        auto entropies = sp->shannonProjection ();
+        sm_producer::sMatrixProjection_t::const_iterator bee = entropies.begin();
+        for (auto ss = 0; bee != entropies.end() && ss < fcnt; ss++, bee++)
+        {
+            index_time_t ti;
+            ti.first = ss;
+            timed_double_t res;
+            res.first = ti;
+            res.second = *bee;
+            tracks[2].second.emplace_back(res);
+        }
+#endif
         
         return tracks;
     }
+    
     
     
 }
@@ -129,7 +146,7 @@ movContext::movContext(WindowRef& ww, const boost::filesystem::path& dp)
     
     if (mPath.string().empty())
         mPath = getOpenFilePath();
-
+    
     m_valid = ! mPath.string().empty() && exists(mPath);
     
     if (is_valid())
@@ -166,7 +183,12 @@ bool movContext::looping ()
 void movContext::play ()
 {
     if (! m_movie->isPlaying() )
+    {
+        if (m_movie->isDone())
+            m_movie->seekToStart();
+        
         m_movie->play ();
+    }
 }
 
 void movContext::pause ()
@@ -186,11 +208,16 @@ void movContext::play_pause_button ()
 
 void movContext::loop_no_loop_button ()
 {
-    if (! have_movie () || ! m_movie->isPlaying()) return;
+    if (! have_movie ()) return;
     if (looping())
         looping(false);
     else
+    {
         looping(true);
+        if (m_movie->isDone())
+            m_movie->seekToStart();
+    }
+    
 }
 bool movContext::have_movie ()
 {
@@ -219,9 +246,7 @@ time_spec_t movContext::getCurrentTime ()
 
 int movContext::getCurrentFrame ()
 {
-    auto ft = m_movie->getCurrentTime();
-    return std::floor(m_movie->getFramerate() * ft);
-
+    return std::floor ((m_movie->getCurrentTime() * m_movie->getNumFrames ()) /  m_movie->getDuration() );
 }
 
 void movContext::seekToFrame (int mark)
@@ -287,11 +312,11 @@ void movContext::setup()
         mMovieParams.addSeparator();
         mMovieParams.addButton(" Loop ", bind( &movContext::loop_no_loop_button, this ) );
         
-//        {
-//            const std::function<void (float)> setter = std::bind(&movContext::setZoom, this, std::placeholders::_1);
-//            const std::function<float (void)> getter = std::bind(&movContext::getZoom, this);
-//            mMovieParams.addParam( "Zoom", setter, getter);
-//        }
+        //        {
+        //            const std::function<void (float)> setter = std::bind(&movContext::setZoom, this, std::placeholders::_1);
+        //            const std::function<float (void)> getter = std::bind(&movContext::getZoom, this);
+        //            mMovieParams.addParam( "Zoom", setter, getter);
+        //        }
         
     }
 }
@@ -328,17 +353,17 @@ void movContext::loadMovieFile()
             {
                 getWindow()->setTitle( mPath.filename().string() );
                 mMovieParams = params::InterfaceGl( "Movie Player", vec2( 260, 260 ) );
-
+                
                 // TBD: wrap these into media_info
                 mScreenSize = vec2(std::fabs(m_movie->getWidth()), std::fabs(m_movie->getHeight()));
                 mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
-                getWindow()->getApp()->setFrameRate(m_movie->getFramerate() / 3);
+                getWindow()->getApp()->setFrameRate(m_movie->getFramerate());
                 m_fc = m_movie->getNumFrames ();
                 
                 mTimeMarker = marker_info (m_movie->getNumFrames (), m_movie->getDuration());
-
+                
                 vl.normSinglePlotSize (vec2 (0.25, 0.1));
-
+                
                 ivec2 window_size (vl.desired_window_size());
                 setWindowSize(window_size);
                 
@@ -350,8 +375,8 @@ void movContext::loadMovieFile()
                 
                 assert (m_track_rects.size() >= 1);
                 m_tracks.resize (0);
-
-               
+                
+                
                 for (int cc = 0; cc < names.size() ; cc++)
                 {
                     m_tracks.push_back( Graph1DRef (new graph1D (names[cc], m_track_rects [cc])));
@@ -371,9 +396,7 @@ void movContext::loadMovieFile()
                 m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mTimeLineSlider, std::placeholders::_1));
                 mWidgets.push_back( &mTimeLineSlider );
                 
-                // Launch Average Luminance Computation
-                m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance,
-                                                      mFrameSet, names, false);
+                getWindow()->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
                 
                 
                 ci_console() << "Dimensions:" <<m_movie->getWidth() << " x " <<m_movie->getHeight() << std::endl;
@@ -391,17 +414,13 @@ void movContext::loadMovieFile()
     }
 }
 
-void movContext::mouseDown( MouseEvent event )
-{
-    mMetaDown = event.isMetaDown();
-    mMouseIsDown = true;
-}
 
 void movContext::mouseMove( MouseEvent event )
 {
-    mMousePos = event.getPos();
     mMouseInImage = false;
     mMouseInGraphs  = -1;
+    
+    if (! have_movie () ) return;
     
     mMouseInImage = get_image_display_rect().contains(event.getPos());
     if (mMouseInImage) return;
@@ -411,14 +430,34 @@ void movContext::mouseMove( MouseEvent event )
     
     auto min_iter = std::min_element(dds.begin(),dds.end());
     mMouseInGraphs = min_iter - dds.begin();
-    
 }
+
 
 void movContext::mouseDrag( MouseEvent event )
 {
-    mMousePos = event.getPos();
-    mMouseIsDragging  = true;
+    for (Graph1DRef graphRef : m_tracks)
+        graphRef->mouseDrag( event );
 }
+
+
+void movContext::mouseDown( MouseEvent event )
+{
+    for (Graph1DRef graphRef : m_tracks )
+    {
+        graphRef->mouseDown( event );
+        graphRef->get_marker_position(mTimeMarker);
+        signalMarker.emit(mTimeMarker);
+    }
+}
+
+
+void movContext::mouseUp( MouseEvent event )
+{
+    for (Graph1DRef graphRef : m_tracks)
+        graphRef->mouseUp( event );
+}
+
+
 
 
 void movContext::keyDown( KeyEvent event )
@@ -433,15 +472,12 @@ void movContext::keyDown( KeyEvent event )
     // these keys only make sense if there is an active movie
     if( m_movie ) {
         if( event.getCode() == KeyEvent::KEY_LEFT ) {
-            pause();
-            seekToFrame (getCurrentFrame() - 1);
+            m_movie->stepBackward();
         }
         if( event.getCode() == KeyEvent::KEY_RIGHT ) {
-            pause();
-            seekToFrame (getCurrentFrame() + 1);
+            m_movie->stepForward();
         }
-        
-        
+
         if( event.getChar() == ' ' ) {
             play_pause_button();
         }
@@ -449,13 +485,6 @@ void movContext::keyDown( KeyEvent event )
     }
 }
 
-
-
-void movContext::mouseUp( MouseEvent event )
-{
-    mMouseIsDown = false;
-    mMouseIsDragging = false;
-}
 
 
 //
@@ -469,29 +498,38 @@ bool movContext::is_valid () { return m_valid && is_context_type(guiContext::qti
 
 void movContext::resize ()
 {
+      if (! have_movie () ) return;
+    
+    vl.update_window_size(getWindowSize ());
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     vl.plot_rects(m_track_rects);
     for (int cc = 0; cc < m_tracks.size(); cc++)
     {
         m_tracks[cc]->setRect (m_track_rects[cc]);
     }
-
+    
+    mTimeLineSlider.mBounds = vl.display_timeline_rect();
+    
     
 }
 void movContext::update ()
 {
-//    if ( is_ready (m_async_luminance_tracks) &&  m_async_luminance_tracks.get().size() == m_tracks.size ())
-//    {
-//        m_luminance_tracks = m_async_luminance_tracks.get();
-//
-//        for (int cc = 0; cc < m_luminance_tracks.size(); cc++)
-//        {
-//            m_tracks[cc]->setup(m_luminance_tracks[cc]);
-//        }
-//    }
+    // Launch Average Luminance Computation
+//    m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance_and_aci,mFrameSet, names, false);
+    
+
+    if ( is_ready (m_async_luminance_tracks))
+    {
+        m_luminance_tracks = m_async_luminance_tracks.get();
+        assert (m_luminance_tracks.size() == m_tracks.size ());
+        for (int cc = 0; cc < m_luminance_tracks.size(); cc++)
+        {
+            m_tracks[cc]->setup(m_luminance_tracks[cc]);
+        }
+    }
     
     if (! have_movie () ) return;
-
+    
     time_spec_t new_time = m_movie->getCurrentTime();
     if (mFrameSet->checkFrame(new_time))
         mSurface = mFrameSet->getFrame(new_time);
@@ -503,9 +541,10 @@ void movContext::update ()
             mFrameSet->loadFrame(mSurface, new_time);
         }
     }
-
-
     
+    if (mFrameSet) std::cout << mFrameSet->count() << std::endl;
+    
+#if 0
     std::string image_location (" In Image ");
     std::string graph_location (" In Graph ");
     graph_location += to_string (mMouseInGraphs);
@@ -516,13 +555,13 @@ void movContext::update ()
     
     std::string frame_str = msg.str();
     update_log (frame_str);
-    
+#endif
     
 }
 
 void movContext::draw ()
 {
-  
+    
     if( ! have_movie()  || ( ! mSurface ) )
     {
         std::cout << " no have movie or surface " << std::endl;
@@ -531,7 +570,7 @@ void movContext::draw ()
     
     Rectf dr = get_image_display_rect();
     mImage = gl::Texture::create(*mSurface);
-  //  mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
+    //  mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
     gl::draw (mImage, dr);
     
     
@@ -567,13 +606,7 @@ void  movContext::update_log (const std::string& message)
 Rectf movContext::get_image_display_rect ()
 {
     return vl.display_frame_rect();
-//    ivec2 ivf = vl.image_frame_size();
-//    ivec2 tl = vl.trim();
-//    
-//    ivf.y /= 3;
-//    
-//    ivec2 lr = tl + ivf;
-//    return Rectf (tl, lr);
+  
 }
 
 
@@ -581,12 +614,27 @@ void movContext::draw_info ()
 {
     if (! have_movie () ) return;
     
-
+    
     std::string seri_str = mPath.filename().string();
     
     gl::setMatricesWindow( getWindowSize() );
     
     gl::ScopedBlendAlpha blend_;
+    
+    {
+        gl::ScopedColor (ColorA::gray(1.0));
+        gl::drawStrokedRect(get_image_display_rect(), 3.0f);
+    }
+    {
+        gl::ScopedColor (ColorA::gray(0.0));
+        gl::drawStrokedRect(vl.display_timeline_rect(), 3.0f);
+    }
+    {
+        gl::ScopedColor (ColorA::gray(0.75));
+        gl::drawStrokedRect(vl.display_plots_rect(), 3.0f);
+    }
+    
+    
     TextLayout layoutL;
     
     layoutL.clear( ColorA::gray( 0.2f, 0.5f ) );
@@ -599,11 +647,11 @@ void movContext::draw_info ()
     gl::draw( texR, vec2( 10, 10 ) );
     gl::clearColor(ColorA::gray( 0.2f, 0.5f ));
     
-    if (mTextTexture)
-    {
-        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
-        gl::draw(mTextTexture, textrect);
-    }
+//    if (mTextTexture)
+//    {
+//        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
+//        gl::draw(mTextTexture, textrect);
+//    }
     
 }
 

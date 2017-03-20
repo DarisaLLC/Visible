@@ -64,6 +64,7 @@ public:
     void setup()override;
     void create_qmovie_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
     void create_movie_dir_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
+    void create_result_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
     void create_clip_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
     void create_lif_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
     
@@ -137,6 +138,17 @@ void VisibleApp::create_qmovie_viewer (const boost::filesystem::path& pp)
     Window::Format format( RendererGl::create() );
     WindowRef ww = createConnectedWindow(format);
     mContexts.push_back(std::shared_ptr<movContext>( new movContext(ww, pp) ) );
+}
+
+//
+// We allow one movie and multiple clips or matrix view.
+// And movie of a directory
+//
+void VisibleApp::create_result_viewer (const boost::filesystem::path& pp)
+{
+    Window::Format format( RendererGl::create() );
+    WindowRef ww = createConnectedWindow(format);
+    mContexts.push_back(std::shared_ptr<imageDirContext>( new imageDirContext(ww, pp) ) );
 }
 
 
@@ -221,6 +233,11 @@ void VisibleApp::setup()
     
     mTopParams->addSeparator();
    	mTopParams->addButton( "Import Image Directory ", std::bind( &VisibleApp::create_movie_dir_viewer, this, boost::filesystem::path () ) );
+    
+    mTopParams->addSeparator();
+    
+    mTopParams->addSeparator();
+   	mTopParams->addButton( "View Sorted Result ", std::bind( &VisibleApp::create_result_viewer, this, boost::filesystem::path () ) );
     
     mTopParams->addSeparator();
     

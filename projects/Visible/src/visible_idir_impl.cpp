@@ -7,6 +7,8 @@
 #include "guiContext.h"
 #include "core/stl_utils.hpp"
 #include <stdlib.h>
+#include "core/csv.hpp"
+
 
 using namespace ci;
 using namespace ci::app;
@@ -72,6 +74,11 @@ imageDirContext::imageDirContext( WindowRef& ww, const boost::filesystem::path& 
     const char* extensions[] = { "jpg", "png", "JPG", "jpeg"};
     mSupportedExtensions = vector<string>( extensions, extensions + 4 );
     
+    // Browse for the Classification Result
+    mFolderPath = getOpenFilePath();
+    std::cout << mFolderPath.string() << std::endl;
+    
+    
     setup ();
     if (is_valid())
     {
@@ -86,26 +93,20 @@ bool imageDirContext::is_valid ()
 
 void imageDirContext::setup()
 {
-    // Browse for the Classification Result
-    auto sorted_res = getOpenFilePath();
     
-    mdat.clear ();
-    bool c2v_ok = csv::csv2vectors ( fqfn, mdat, false, true, true);
-    if ( c2v_ok )
+    std::ifstream file(mFolderPath.c_str(), std::ios_base::in|std::ios_base::binary);
+    spiritcsv::Parser p(file);
+    auto rows = p.getRows ();
+    for (const auto & ss : rows)
     {
-        m_columns = mdat.size ();
-        m_rows = mdat[0].size();
-        m_frames = m_file_frames = m_rows;
-        m_read_pos = 0;
-        m_valid = true;
+        if (ss.size() == 3)
+        {
+            boost::filesystem::path pp (ss[2]);
+            mImageFiles.push_back(pp);
+        }
     }
     
-    if (mFolderPath == boost::filesystem::path ())
-    {
-        mFolderPath = browseToFolder ();
-    }
-    
-    loadImageDirectory(mFolderPath);
+    m_valid = mImageFiles.size() > 0;
     
     if ( mImageFiles.empty () ) return;
     
@@ -135,7 +136,7 @@ void imageDirContext::setup()
             //            mTextures.push_back(cinder::gl::Texture2d::create( loadImage( pItr->string())) );
             
             auto bounds = sref->getBounds();
-            dref = Surface8u::create(bounds.getWidth()/8, bounds.getHeight()/8, false);
+            dref = Surface8u::create(bounds.getWidth()/3, bounds.getHeight()/3, false);
             
             cinder::ip::resize(*sref, dref.get());
             mt = cinder::gl::Texture2d::create(*dref);
@@ -161,11 +162,11 @@ void imageDirContext::setup()
     assert(maxi >= 0 && maxi < areas.size());
     mLarge = sizes[maxi];
     
-    App::get()->setWindowSize(mLarge.first/2, mLarge.second/2);
+    App::get()->setWindowSize(mLarge.first + 20, mLarge.second + 20);
     
-    mItemExpandedWidth = mLarge.first/4;
+    mItemExpandedWidth = mLarge.first;
     mItemHeight = mLarge.second;
-    mItemRelaxedWidth = mLarge.first/2 / mTotalItems;
+    mItemRelaxedWidth = mLarge.first / mTotalItems;
     
     
     

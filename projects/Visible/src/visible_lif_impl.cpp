@@ -618,16 +618,16 @@ void lifContext::update ()
     
     if (m_is_playing ) seekToFrame (getCurrentFrame() + 1);
     
-    std::string image_location (" In Image ");
-    std::string graph_location (" In Graph ");
-    graph_location += to_string (mMouseInGraphs);
-    std::string which = mMouseInImage ? image_location : mMouseInGraphs >= 0 ? graph_location : " Outside ";
-    std::strstream msg;
-    msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << m_is_playing <<
-    " F " << setw(12) << int( getCurrentFrame () ) << which;
-    
-    std::string frame_str = msg.str();
-    update_log (frame_str);
+//    std::string image_location (" In Image ");
+//    std::string graph_location (" In Graph ");
+//    graph_location += to_string (mMouseInGraphs);
+//    std::string which = mMouseInImage ? image_location : mMouseInGraphs >= 0 ? graph_location : " Outside ";
+//    std::strstream msg;
+//    msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << m_is_playing <<
+//    " F " << setw(12) << int( getCurrentFrame () ) << which;
+//    
+//    std::string frame_str = msg.str();
+//    update_log (frame_str);
     
 }
 
