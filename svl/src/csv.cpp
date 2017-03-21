@@ -1,6 +1,6 @@
 #include "core/csv.hpp"
 
-#include <fstream>
+
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
@@ -231,6 +231,32 @@ namespace spiritcsv
             m_rows.push_back(columns);
         }
     }
+    
+    
+    std::shared_ptr<std::vector<entry_t>> spiritcsv::rankOutput (const std::string& str,
+                                                      std::string const& escape,
+                                                      std::string const& quote,
+                                                      std::string const& separator,
+                                                      bool no_header)
+    {
+        std::shared_ptr<std::vector<entry_t>> entries = std::shared_ptr<std::vector<entry_t>> (new std::vector<entry_t> );
+        std::ifstream file(str.c_str(), std::ios_base::in|std::ios_base::binary);
+        spiritcsv::Parser p(file, escape, quote, separator, no_header);
+        
+        auto rows = p.getRows ();
+        for (const auto & ss : rows)
+        {
+            if (ss.size() == 3)
+            {
+                uint32_t rank = std::stoi(ss[0]);
+                double score = std::stod(ss[1]);
+                entry_t et = std::make_tuple(rank, score, ss[2]);
+                entries->push_back (et);
+            }
+        }
+        return entries;
+    }
+    
     
 }
 

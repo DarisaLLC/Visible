@@ -1,9 +1,6 @@
 #include "cinder/Cinder.h"
 #include <AvailabilityMacros.h>
 
-// This path is used on iOS or Mac OS X 10.8+
-#if defined( CINDER_COCOA_TOUCH ) || ( defined( CINDER_MAC ) && ( MAC_OS_X_VERSION_MIN_REQUIRED >= 1080 ) )
-
 #include "cinder/gl/platform.h"
 #include "cinder/app/AppBase.h"
 #include "cinder/app/RendererGl.h"
@@ -69,8 +66,28 @@ void qtimeAvfLink::MovieBaseSeekToStart(MovieSurfaceRef& movie)
 }
 
 
+void qtimeAvfLink::GetTocOfMovie(MovieSurfaceRef& movie, std::vector<cm_time>& toc)
+{
+    toc.resize(0);
+    
+    AVPlayer* player = movie->getPlayerHandle();
+    if ( ! player ) return;
+
+    uint32_t frame_count = movie->getNumFrames();
+    if (frame_count < 2) return;
+    
+    CMTime currentTime = [player currentTime];
+    currentTime.timescale = 600;
+    CMTime oneFrame = CMTimeMakeWithSeconds(1.0 / movie->getFramerate(), currentTime.timescale);
+    CMTime startTime = kCMTimeZero;
+
+    toc.push_back (cm_time(startTime));
+    cm_time frameOne (oneFrame);
+    
+    for (uint32_t ff = 1; ff < frame_count; ff++)
+    {
+        toc.push_back(toc[toc.size()-1] + frameOne);
+    }
+}
 
 
-
-
-#endif // defined( CINDER_COCOA_TOUCH ) || ( defined( CINDER_MAC ) && ( MAC_OS_X_VERSION_MIN_REQUIRED >= 1080 ) )

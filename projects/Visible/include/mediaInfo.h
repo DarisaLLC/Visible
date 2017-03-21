@@ -43,7 +43,8 @@ struct tiny_media_info
     }
     
 #ifdef __cplusplus
-    
+    tiny_media_info () { clear (); }
+    void clear () { std::memset(this, 0, sizeof (tiny_media_info)); }
     BOOL isImageFolder () const { return mIsImageFolder; }
     int32_t getWidth () const { return size.width; }
     int32_t getHeight () const { return size.height; }

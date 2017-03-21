@@ -156,11 +156,13 @@
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2B6E6701D0618E400235FB7 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2BECECE1DD6D4F80001E2BA /* visible_idir_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */; };
-		C2BECECF1DD6D4FA0001E2BA /* visible_idir_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */; };
 		C2BECED11DD6D8BA0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
 		C2BECED21DD6D8DE0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
+		C2DA19571E7F30D800062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
+		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
+		C2DA195B1E80E4E200062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C2FC7DAF1CF4F46100D18193 /* qtime_frame_cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */; };
 /* End PBXBuildFile section */
 
@@ -361,11 +363,9 @@
 		C2600A031CED3E010045FF57 /* drawUtils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = drawUtils.hpp; sourceTree = "<group>"; };
 		C2600A041CED3E010045FF57 /* edgel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = edgel.h; sourceTree = "<group>"; };
 		C2600A051CED3E010045FF57 /* gauss.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = gauss.hpp; sourceTree = "<group>"; };
-		C2600A061CED3E010045FF57 /* genHistogram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = genHistogram.h; sourceTree = "<group>"; };
 		C2600A071CED3E010045FF57 /* gmorph.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = gmorph.hpp; sourceTree = "<group>"; };
 		C2600A081CED3E010045FF57 /* gradient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gradient.h; sourceTree = "<group>"; };
 		C2600A091CED3E010045FF57 /* histo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = histo.h; sourceTree = "<group>"; };
-		C2600A0A1CED3E010045FF57 /* histogram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = histogram.h; sourceTree = "<group>"; };
 		C2600A0B1CED3E010045FF57 /* ipUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ipUtils.h; sourceTree = "<group>"; };
 		C2600A0C1CED3E010045FF57 /* labelconnect.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = labelconnect.hpp; sourceTree = "<group>"; };
 		C2600A0D1CED3E010045FF57 /* localvariance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = localvariance.h; sourceTree = "<group>"; };
@@ -9650,6 +9650,9 @@
 		C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccordionItem.h; path = ../include/AccordionItem.h; sourceTree = "<group>"; };
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
 		C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cinder_support.cpp; sourceTree = "<group>"; };
+		C2DA19561E7F30D800062DBC /* csv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = csv.cpp; sourceTree = "<group>"; };
+		C2DA19581E7F30E800062DBC /* csv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = csv.hpp; sourceTree = "<group>"; };
+		C2DA19591E8091FA00062DBC /* kmeans1d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kmeans1d.hpp; sourceTree = "<group>"; };
 		C2E321FE1D038B16006DFE5E /* AVReader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AVReader.hpp; path = ../include/AVReader.hpp; sourceTree = "<group>"; };
 		C2E321FF1D0480E4006DFE5E /* mediaInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mediaInfo.h; path = ../include/mediaInfo.h; sourceTree = "<group>"; };
 		C2E322001D05B90C006DFE5E /* time_index.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time_index.h; path = ../include/time_index.h; sourceTree = "<group>"; };
@@ -10107,6 +10110,7 @@
 		C26009EA1CED3E010045FF57 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				C2DA19581E7F30E800062DBC /* csv.hpp */,
 				C2601BBB1E6B446A004415A3 /* make_function.hpp */,
 				C2601BB61E6903D2004415A3 /* bitvector.h */,
 				C20BBC0F1E4E3CB5002C7D68 /* rand_support.h */,
@@ -10133,6 +10137,7 @@
 				C26009F91CED3E010045FF57 /* singleton.hpp */,
 				C26009FA1CED3E010045FF57 /* static.hpp */,
 				C26009FB1CED3E010045FF57 /* stats.hpp */,
+				C2DA19591E8091FA00062DBC /* kmeans1d.hpp */,
 				C26009FC1CED3E010045FF57 /* stl_utils.hpp */,
 				C26009FD1CED3E010045FF57 /* timing.hpp */,
 				C26009FE1CED3E010045FF57 /* vector2d.hpp */,
@@ -10152,11 +10157,9 @@
 				C2600A031CED3E010045FF57 /* drawUtils.hpp */,
 				C2600A041CED3E010045FF57 /* edgel.h */,
 				C2600A051CED3E010045FF57 /* gauss.hpp */,
-				C2600A061CED3E010045FF57 /* genHistogram.h */,
 				C2600A071CED3E010045FF57 /* gmorph.hpp */,
 				C2600A081CED3E010045FF57 /* gradient.h */,
 				C2600A091CED3E010045FF57 /* histo.h */,
-				C2600A0A1CED3E010045FF57 /* histogram.h */,
 				C2600A0B1CED3E010045FF57 /* ipUtils.h */,
 				C2600A0C1CED3E010045FF57 /* labelconnect.hpp */,
 				C2600A0D1CED3E010045FF57 /* localvariance.h */,
@@ -25677,6 +25680,7 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C2DA19561E7F30D800062DBC /* csv.cpp */,
 				C2601BB71E690409004415A3 /* bitvector.cpp */,
 				C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */,
 				C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */,
@@ -25854,6 +25858,7 @@
 				C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */,
 				C2606DAB1CED3E2E0045FF57 /* ip_utils.cpp in Sources */,
 				C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */,
+				C2DA19571E7F30D800062DBC /* csv.cpp in Sources */,
 				C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */,
 				C2606DAC1CED3E2E0045FF57 /* labelconnect.cpp in Sources */,
 				C2606DB11CED3E2E0045FF57 /* registration.cpp in Sources */,
@@ -25881,8 +25886,8 @@
 				C20EDBB71CEFC2E70074C47A /* rowfunc.cpp in Sources */,
 				C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */,
 				C21FFE721CFE0AA300C97013 /* sm_producer.cpp in Sources */,
+				C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */,
 				C20BBC081E4E34D5002C7D68 /* visible_impl.cpp in Sources */,
-				C2BECECF1DD6D4FA0001E2BA /* visible_idir_impl.cpp in Sources */,
 				C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
 				C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */,
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
@@ -25925,6 +25930,7 @@
 				C26A05711E777ECC00BDC954 /* gradient.cpp in Sources */,
 				C26A055D1E77759D00BDC954 /* lifFile.cpp in Sources */,
 				C26A05601E7775A700BDC954 /* ExtraQuickTimeImplAvf.mm in Sources */,
+				C2DA195B1E80E4E200062DBC /* csv.cpp in Sources */,
 				C26A05651E777DF300BDC954 /* registration.cpp in Sources */,
 				C26A057D1E77A90600BDC954 /* histo.cpp in Sources */,
 				C26A056B1E777E3A00BDC954 /* rowfunc.cpp in Sources */,

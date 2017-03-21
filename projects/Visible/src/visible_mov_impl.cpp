@@ -26,6 +26,7 @@
 #include "vision/histo.h"
 #include "core/stl_utils.hpp"
 #include "sm_producer.h"
+#include "qtimeAvfLink.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -332,6 +333,7 @@ void movContext::clear_movie_params ()
 }
 
 
+
 void movContext::loadMovieFile()
 {
     if ( ! mPath.empty () )
@@ -340,11 +342,22 @@ void movContext::loadMovieFile()
         
         try {
             
-            m_movie = qtime::MovieSurface::create( mPath.string() );
+            m_movie = qtime::MovieSurface::create(mPath.string() );
             m_valid = m_movie->isPlayable ();
             std::vector<std::string> names = { "red", "green", "blue"};
             
             mFrameSet = qTimeFrameCache::create (m_movie);
+            
+            std::vector<cm_time> toc;
+            qtimeAvfLink::GetTocOfMovie(m_movie, toc);
+            stl_utils::Out(toc);
+            
+//            for (auto ff = 0; ff < m_movie->getNumFrames(); ff++)
+//            {
+//                m_movie->seekToTime(toc[ff].operator double());
+//                mFrameSet->loadFrame(m_movie->getSurface(), m_movie->getCurrentTime());
+//            }
+        
             mFrameSet->channel_names(names);
             
             vl.init (app::getWindow(), mFrameSet->media_info());
@@ -357,7 +370,7 @@ void movContext::loadMovieFile()
                 // TBD: wrap these into media_info
                 mScreenSize = vec2(std::fabs(m_movie->getWidth()), std::fabs(m_movie->getHeight()));
                 mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
-                getWindow()->getApp()->setFrameRate(m_movie->getFramerate());
+                getWindow()->getApp()->setFrameRate(1);
                 m_fc = m_movie->getNumFrames ();
                 
                 mTimeMarker = marker_info (m_movie->getNumFrames (), m_movie->getDuration());
@@ -530,12 +543,13 @@ void movContext::update ()
     
     if (! have_movie () ) return;
     
-    time_spec_t new_time = m_movie->getCurrentTime();
-    if (mFrameSet->checkFrame(new_time))
-        mSurface = mFrameSet->getFrame(new_time);
-    else
+    if (m_movie->checkNewFrame())
     {
-        if (m_movie->checkNewFrame())
+        
+        time_spec_t new_time = m_movie->getCurrentTime();
+        if (mFrameSet->checkFrame(new_time))
+            mSurface = mFrameSet->getFrame(new_time);
+        else
         {
             mSurface = m_movie->getSurface();
             mFrameSet->loadFrame(mSurface, new_time);

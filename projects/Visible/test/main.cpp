@@ -31,11 +31,16 @@
 #include "ut_util.hpp"
 #include "ut_algo.hpp"
 #include "getLuminanceAlgo.hpp"
+#include "core/csv.hpp"
+#include "core/kmeans1d.hpp"
 
 using namespace boost;
 
 using namespace ci;
 using namespace ci::ip;
+using namespace spiritcsv;
+using namespace kmeans1D;
+
 namespace fs = boost::filesystem;
 
 
@@ -64,6 +69,25 @@ void done_callback (void)
 {
         std::cout << "Done"  << std::endl;
 }
+
+TEST (UT_kmeans, one_d)
+{
+    std::string name = "imagine.csv";
+    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    
+    auto vec_tuple = rankOutput (res.first.string() );
+    std::vector<double> data;
+    for (auto const tpl : *vec_tuple)
+    {
+        data.push_back(std::get<1>(tpl));
+    }
+    
+    auto km = kmeans(data, 10);
+    
+}
+
 
 TEST (UT_make_function, make_function)
 {
@@ -119,10 +143,7 @@ TEST(ut_similarity, run)
     vector<roiWindow<P8U>> images(4);
     double tiny = 1e-10;
     
-    self_similarity_producer<P8U> sm((uint32_t) images.size(),0, self_similarity_producer<P8U>::eNorm,
-                                     false,
-                                     0,
-                                     tiny);
+    self_similarity_producer<P8U> sm((uint32_t) images.size(),0);
     
     EXPECT_EQ(sm.depth() , D_8U);
     EXPECT_EQ(sm.matrixSz() , images.size());
@@ -374,7 +395,7 @@ TEST (UT_surface_roi_conversion, run)
     Channel8uRef gray = Channel8u::create(s8->getWidth(), s8->getHeight());
     ip::grayscale(*s8, gray.get());
     
-    roiWindow<P8U> u8 = svl::NewFromChannel(*gray);
+    roiWindow<P8U> u8 = svl::NewFromChannel(*gray, 0);
     EXPECT_EQ(uc4.width(), u8.width());
     EXPECT_EQ(uc4.height(), u8.height());
     

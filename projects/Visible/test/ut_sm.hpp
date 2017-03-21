@@ -94,7 +94,7 @@ struct dir_producer
             int error;
             //            if (m_auto) sp->set_auto_run_on ();
             
-            auto fdone = std::async(&sm_producer::load_image_directory, sp, m_imagedir);
+            auto fdone = std::async(&sm_producer::load_image_directory, sp, m_imagedir, sm_producer::sizeMappingOption::mostCommon);
             
             
             if (fdone.get() )
