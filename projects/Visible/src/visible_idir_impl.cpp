@@ -8,7 +8,7 @@
 #include "core/stl_utils.hpp"
 #include <stdlib.h>
 #include "core/csv.hpp"
-
+#include "core/kmeans1d.hpp"
 
 using namespace ci;
 using namespace ci::app;
@@ -93,18 +93,19 @@ bool imageDirContext::is_valid ()
 
 void imageDirContext::setup()
 {
-    
     std::ifstream file(mFolderPath.c_str(), std::ios_base::in|std::ios_base::binary);
     spiritcsv::Parser p(file);
     auto rows = p.getRows ();
-    for (const auto & ss : rows)
+    
+    auto vec_tuple = spiritcsv::rankOutput (mFolderPath.string() );
+    std::vector<double> data;
+    for (auto const tpl : *vec_tuple)
     {
-        if (ss.size() == 3)
-        {
-            boost::filesystem::path pp (ss[2]);
-            mImageFiles.push_back(pp);
-        }
+        data.push_back(std::get<1>(tpl));
+        mImageFiles.push_back(std::get<2>(tpl));
     }
+    
+    auto km = kmeans1D::kmeans(data, 7);
     
     m_valid = mImageFiles.size() > 0;
     
@@ -112,16 +113,19 @@ void imageDirContext::setup()
     
     mTotalItems = mImageFiles.size();
     
-    float xPos = 0;
+    float xPos = 10;
     
     // @to_improve
     // Load textures at full size to get the size information ( could have used sips cli in OS X )
     std::map<std::pair<int,int>,int> size_hist;
     std::vector<std::pair<int,int> > sizes;
+    std::vector<int> clusters;
     
     std::vector<filesystem::path>::const_iterator pItr = mImageFiles.begin();
     std::vector<filesystem::path> good_files;
-    for (; pItr < mImageFiles.end(); pItr++)
+    std::vector<int>::const_iterator cItr = km.cluster.begin();
+    
+    for (; pItr < mImageFiles.end(); pItr++, cItr++)
     {
         Surface8uRef sref, dref;
         cinder::gl::Texture2dRef mt;
@@ -151,6 +155,7 @@ void imageDirContext::setup()
         const std::pair<int,int> sz (mTextures.back()->getSize().x, mTextures.back()->getSize().y);
         sizes.push_back(sz);
         good_files.push_back(*pItr);
+        clusters.push_back(*cItr);
     }
     std::cout << mTextures.size () << std::endl;
     
@@ -172,8 +177,8 @@ void imageDirContext::setup()
     
     pItr = good_files.begin();
     std::vector<gl::TextureRef>::const_iterator tItr = mTextures.begin();
-    
-    for (; pItr < good_files.end(); pItr++, tItr++)
+    cItr = clusters.begin();
+    for (; pItr < good_files.end(); pItr++, tItr++, cItr++)
     {
         mItems.push_back( AccordionItem( timeline(),
                                         xPos,
@@ -182,7 +187,7 @@ void imageDirContext::setup()
                                         mItemRelaxedWidth,
                                         mItemExpandedWidth,
                                         *tItr,
-                                        pItr->parent_path().string(),
+                                        to_string(*cItr),
                                         pItr->filename().string()));
         xPos += mItemRelaxedWidth;
     }
