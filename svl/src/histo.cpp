@@ -201,8 +201,6 @@ long histoStats::computeInverseCum(int p)
         }
     }
     
-    stl_utils::Out(ic_);
-    
     // validate inverseCum...
     computedIC_ = 1;
     return ic_[p];

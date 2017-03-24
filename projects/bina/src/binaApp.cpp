@@ -539,9 +539,11 @@ void MainApp::process ()
     m_rank_score.valid = false;
     get_output(segres.second, 180, segres.first, m_rank_score);
     m_rank_score.texture_score = 1.0f / (1 + (float) getPSNR(mHSV[0], original));
+    mSkinHue[0] = cv::Scalar(segres.first-5, 0, 0);
+    mSkinHue[1] = cv::Scalar(segres.first+5, 255, 255);
     
     cv::inRange(hsv,mSkinHue[0], mSkinHue[1], mask);
-    mOverlays[1] = gl::Texture::create(fromOcv(clear));
+    mOverlays[1] = gl::Texture::create(fromOcv(mask));
     mTextures[1] = mTextures[0];
     
     
