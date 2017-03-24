@@ -18,7 +18,6 @@
 #include "core/stats.hpp"
 #include "vision/ss_segmenter.hpp"
 #include "vision/ColorHistogram.hpp"
-#include "vision/histogram.h"
 #include "cinder/affine_rectangle.h"
 #include "vision/opencv_utils.hpp"
 #include "boost/filesystem.hpp"
@@ -30,9 +29,21 @@
 #include <vector>
 #include "core/singleton.hpp"
 
+using namespace boost;
+namespace filesystem = boost::filesystem;
 using namespace ci;
 using namespace ci::app;
 using namespace std;
+
+
+namespace
+{
+    bool is_anaonymous_name (const filesystem::path& pp, size_t check_size = 36)
+    {
+        string extension = pp.extension().string();
+        return extension.length() == 0 && pp.filename().string().length() == check_size;
+    }
+}
 
 
 class woundprocess   : internal_singleton<woundprocess>
@@ -64,7 +75,7 @@ void get_output (std::vector<std::pair <uint8_t, int> >& raw, const uint8_t  goa
     outp.goal.first = goal;
     got_goal = true;
     
-   for (auto cc : raw)
+    for (auto cc : raw)
     {
         auto val = cc.first;
         if (val == goal)
@@ -88,7 +99,7 @@ void get_output (std::vector<std::pair <uint8_t, int> >& raw, const uint8_t  goa
             break;
         }
     }
-   
+    
 }
 
 
@@ -105,12 +116,10 @@ public:
     void mouseUp( MouseEvent event ) override;
     void keyDown(KeyEvent event) override;
     void mouseDrag( MouseEvent event ) override;
-    void saveModel ();
-    void loadModel ();
     void saveImage(const cv::Mat & image, const std::string & filename);
     cv::Mat create_stitch_mask (const cv::Mat & image);
-
-    void get_all(const fs::path& root, const string& ext, const std::string& prefix, vector<fs::path>& ret);
+    
+    Surface8uRef  loadImageFromPath (const filesystem::path&);
     void fileDrop( FileDropEvent event ) override;
     void draw()override;
     void process ();
@@ -118,7 +127,6 @@ public:
     std::string resultInfo (const rank_output& output);
     void drawEditableRect ();
     void openFile();
-    void trainWoundTemplate ();
     static cv::Mat affineCrop (cv::Mat& src, cv::RotatedRect& rect);
     vec2 matStats (const cv::Mat& image);
     Surface8uRef   mImage;
@@ -171,49 +179,6 @@ public:
     std::string mExtension;
     std::string mToken;
     
-    void compute_col (const cv::Mat& mat, vec2 center, float& direction)
-    {
-
-//        assert( CV_MAT_CN( mat.type() ) == 1 );
-//        
-//        CvMoments moments = cv::moments(mat);
-//        
-//        // Use rule for specular reflection
-//        double inv_m00 = moments.inv_sqrt_m00*moments.inv_sqrt_m00;
-//        Point2f com (( moments.m10 * inv_m00), moments.m01 * inv_m00 );
-//        std::cout << com << std::endl;
-//       // Histogram1D ocvhist;
-//      //  ocvhist.getHistogram(mat);
-//      //  histoStats hh (mat);
-//        
-//        uint8_t average = (moments.m00 / (float)(mat.rows*mat.cols));
-//        std::cout << "Average: " << average << std::endl;
-//        
-//        float r2 = 0.0f;
-//        for (int h = 0; h < mat.rows; h++)
-//            for (int w = 0; w < mat.cols; w++)
-//            {
-//                if (mat.at<uint8_t>(h,w) < average) continue;
-//                r2 = std::max(r2, (h-com.y)*(h-com.y)+(w-com.x)*(w-com.x));
-//            }
-//        float r (std::sqrt(r2));
-//        float dx = com.x - mat.cols/2.0f;
-//        float dy = mat.rows/2.0f - com.y;
-//        float prod = r2 - dx*dx - dy*dy;
-//        Mat N (Vec3f(dx/r, dy/r, std::sqrt(prod)/r));
-//        std::cout << N << std::endl;
-//        Mat R (Vec3f(0.0f,0.0f,1.0f));
-//        cv::Mat L = N.dot(R)*N - R;
-//        //L = (cosτ ·sinσ, sinσ ·sinτ, cosσ) is the unit vector towards the light source;
-//        //σ and τ are the illuminant vector’s slant and tilt angles
-//        std::cout << L << std::endl;
-//        float slant = acos(L.at<float>(0,2));
-//        float tilt = asin(L.at<float>(0,1)/sin(slant));
-//        std::cout << "Slant: " << toDegrees(slant) << "Tilt: " << toDegrees(tilt) << std::endl;
-//        
-        
-        
-    }
     
     std::string get_timestamp_filename ()
     {
@@ -229,6 +194,18 @@ public:
 };
 
 
+Surface8uRef MainApp::loadImageFromPath (const filesystem::path& path)
+{
+    Surface8uRef sref;
+    
+    if (is_anaonymous_name(path))
+        sref = Surface8u::create( loadImage( path.string(), ImageSource::Options(), "jpg"));
+    else
+        sref = Surface8u::create( loadImage( path.string() ) );
+    return sref;
+    
+}
+
 vec2 MainApp::matStats (const cv::Mat& image)
 {
     // compute statistics for Hue value
@@ -242,27 +219,6 @@ void MainApp::resize()
     vec2 newsize = mRectangle.scale_map(getWindowSize());
     mRectangle = affineRectangle (Rectf(0,0,newsize[0], newsize[1]));
     mRectangle.position (vec2(newsize[0]/2, newsize[1]/2));
-}
-void MainApp::saveModel()
-{
-    std::ostringstream ss;
-    std::string filename = get_timestamp_filename();
-    ss << mFolderPath.string()  << "/" << filename + ".png";
-    const string dirAndFilename = ss.str();
-    cout << "Saving " << dirAndFilename << endl;
-    cv::imwrite(dirAndFilename, mModel);
-}
-
-void MainApp::loadModel()
-{
-    std::vector<fs::path> models;
-    get_all(mFolderPath, mExtension, mToken, models);
-    if(models.size())
-    {
-        auto ir = loadImage( mFolderPath.string() + "/" + models[0].string() );
-        mModelImage = Surface::create( ir );
-        mModel = cv::Mat ( toOcv ( *mModelImage) );
-    }
 }
 
 double getPSNR(const Mat& I1, const Mat& I2)
@@ -286,36 +242,14 @@ double getPSNR(const Mat& I1, const Mat& I2)
     }
 }
 
-// return the filenames of all files that have the specified extension
-// in the specified directory and all subdirectories
-void MainApp::get_all(const fs::path& root, const string& ext, const std::string& prefix, vector<fs::path>& ret)
-{
-    if(!fs::exists(root) || !fs::is_directory(root)) return;
-    
-    fs::recursive_directory_iterator it(root);
-    fs::recursive_directory_iterator endit;
-    
-    while(it != endit)
-    {
-        if(fs::is_regular_file(*it) &&
-           it->path().extension() == ext &&
-           it->path().filename().string().substr(0, prefix.size()) == prefix)
-            ret.push_back(it->path().filename());
-        ++it;
-        
-    }
-}
-
 
 
 void MainApp::openFile()
 {
     try {
-        fs::path path = getOpenFilePath( "", ImageIo::getLoadExtensions() );
-        if( ! path.empty() )
+        mImage = loadImageFromPath(getOpenFilePath());
+        if (mImage)
         {
-            auto ir = loadImage( path );
-            mImage = Surface::create( ir );
             resize();
             process();
         }
@@ -360,14 +294,6 @@ void MainApp::setup()
     
     mParams->addButton( "Add image ",
                        std::bind( &MainApp::openFile, this ) );
-    mParams->addSeparator();
-    mParams->addButton( "Grab First Look",
-                       std::bind( &MainApp::trainWoundTemplate, this ) );
-    mParams->addButton( "Save First Look ",
-                       std::bind( &MainApp::saveModel, this ) );
-    mParams->addSeparator();
-    mParams->addButton( "Load First Look ",
-                       std::bind( &MainApp::loadModel, this ) );
     mParams->addSeparator();
     
     
@@ -444,7 +370,7 @@ std::string MainApp::resultInfo (const rank_output& output)
     ostringstream oss( ostringstream::ate );
     oss << "Redness: " << to_string(m_rank_score.score) << "   " << "Texture: " << to_string(m_rank_score.texture_score);
     return oss.str();
-
+    
 }
 
 void MainApp::mouseMove( MouseEvent event )
@@ -483,10 +409,12 @@ void MainApp::mouseDrag( MouseEvent event )
 void MainApp::fileDrop( FileDropEvent event )
 {
     try {
-        mImage = Surface::create( loadImage( loadFile( event.getFile( 0 ) ) ) );
-
-        mWorkingRect = Rectf (0, 0, mImage->getWidth(), mImage->getHeight());
-        process();
+        mImage = loadImageFromPath (event.getFile( 0 ));
+        if (mImage)
+        {
+            mWorkingRect = Rectf (0, 0, mImage->getWidth(), mImage->getHeight());
+            process();
+        }
     }
     catch( std::exception &exc ) {
         CI_LOG_EXCEPTION( "failed to load image: " << event.getFile( 0 ), exc );
@@ -527,7 +455,7 @@ void MainApp::keyDown( KeyEvent event )
         case KeyEvent::KEY_QUOTE:
             mRectangle.area().inflate(vec2(0,-1));
             break;
-
+            
         case KeyEvent::KEY_c:
             if (event.isMetaDown() )
                 Clipboard::setImage( copyWindowSurface() );
@@ -536,7 +464,7 @@ void MainApp::keyDown( KeyEvent event )
             
         case KeyEvent::KEY_v:
             if (event.isMetaDown() && Clipboard::hasImage())
-
+                
                 try {
                     mImage = Surface::create( Clipboard::getImage() );
                     
@@ -579,10 +507,10 @@ void MainApp::process ()
     
     cv::Mat hsv;
     cv::Mat mask;
-   
+    
     mInputMat = cv::Mat ( toOcv ( *mImage) );
     
-
+    
     
     // resize it with aspect in tact
     int size = std::sqrt( 1 + (mInputMat.rows * mInputMat.cols) / 500000.);
@@ -599,11 +527,11 @@ void MainApp::process ()
     cvtColor(mInputMat, hsv, cv::COLOR_RGB2HSV_FULL);
     split(hsv, mHSV);
     mHSLImage = Surface8u::create (fromOcv(hsv));
-
+    
     roiWindow<P8U> hueroi (mHSV[0].cols, mHSV[0].rows);
     cv::Mat original = mHSV[0].clone();
     cv::GaussianBlur(mHSV[0], mHSV[0], cv::Size(21,21), 0.0f, 0.0f);
-
+    
     NewFromOCV(mHSV[0], hueroi);
     std::pair<uint8_t,std::vector<std::pair< uint8_t, int> > > segres;
     segres = segmentationByInvaraintStructure(hueroi);
@@ -615,8 +543,8 @@ void MainApp::process ()
     cv::inRange(hsv,mSkinHue[0], mSkinHue[1], mask);
     mOverlays[1] = gl::Texture::create(fromOcv(clear));
     mTextures[1] = mTextures[0];
-
-     
+    
+    
     setWindowSize(mInputMat.cols, mInputMat.rows);
 }
 
@@ -651,7 +579,7 @@ void MainApp::draw()
         if (m_rank_score.valid)
         {
             gl::pushModelView();
-
+            
             Rectf frac (0.30f, 0.02f, 0.95f, 0.15f);
             Rectf box (frac.x1*getWindowWidth(),frac.y1*getWindowHeight(),
                        frac.x2*getWindowWidth(),frac.y2*getWindowHeight());
@@ -664,7 +592,7 @@ void MainApp::draw()
             mTextureScoreFont->drawString( resultInfo (m_rank_score),
                                           ivec2( box.x1+10, (box.y1+box.y2)/2));
             gl::popModelView();
- 
+            
         }
     }
     
@@ -728,43 +656,6 @@ void MainApp::drawEditableRect()
     
 }
 
-cv::Mat MainApp::create_stitch_mask (const cv::Mat& image)
-{
-    
-    Mat mhFiltered; // resulting (MHat-filtered image)
-    Mat gaussianBlurredImage;
-    Mat in_1, diff16;
-    cvtColor(image, mhFiltered, COLOR_BGR2GRAY );
-    mhFiltered.convertTo(in_1, CV_16SC1);
-    cv::GaussianBlur(mhFiltered, gaussianBlurredImage, cv::Size(19,19), 5.00);
-    gaussianBlurredImage.convertTo(diff16, CV_16SC1);
-    cv::subtract(in_1, diff16, diff16);
- 
-    // find minimum and maximum values:
-    double min, max;
-    cv::minMaxLoc(diff16, &min, &max);
-    std::cout << "min pixel value: " << max - min << std::endl;
-    // scale the pixel values so that the smalles value is 0 and the largest one is 255
-    diff16.convertTo(mConvertedTmp,CV_8UC1, 255.0/(max-min), -min);
-    //    // histogram of 16 bins
-    Histogram1D h;
-    h.setNBins(256);
-//    cv::namedWindow("Reference Histogram");
-//    cv::imshow("Reference Histogram",h.getHistogramImage(mConvertedTmp));
-    std::cout << h.getHistogram(mConvertedTmp) << std::endl;
-    cv::threshold(mConvertedTmp, mConvertedTmp, 50, 255, cv::THRESH_BINARY);
-    cv::Mat copy = image.clone();
-    for (int h = 0; h < mConvertedTmp.rows; h++)
-        for (int v = 0; v < mConvertedTmp.cols; v++)
-        {
-            if(mConvertedTmp.at<uint8_t>(h,v) == 0)
-                copy.at<Vec3b>(h,v)[2] = 255;
-        }
-    
-    return copy;
-    
-  
-}
 
 cv::Mat MainApp::affineCrop (cv::Mat& src, cv::RotatedRect& rect)
 {
@@ -780,35 +671,6 @@ cv::Mat MainApp::affineCrop (cv::Mat& src, cv::RotatedRect& rect)
     // crop the resulting image
     getRectSubPix(rotated, rect_size, rect.center, cropped);
     return cropped;
-}
-
-
-void MainApp::trainWoundTemplate ()
-{
-    cv::Mat canvas = cv::Mat ( toOcv ( *mImage) );
-    mModel = MainApp::affineCrop(canvas, mAffineRect);
-    {
-        Scalar color = Scalar( 255, 128, 0 );
-        
-        cv_drawCross(canvas, mAffineRect.center, Scalar (0,128,192), 30);
-        cv_drawCross(canvas, Point2i(10, 10), Scalar (0,255,0), 30);
-        
-        Point2f rect_points[4]; mAffineRect.points( rect_points );
-        
-        for( int j = 0; j < 4; j++ )
-            line( canvas, rect_points[j], rect_points[(j+1)%4], color, 1, 8 );
-        
-        cv::Mat masked = create_stitch_mask(mModel);
-        cv::imshow("Main", masked);
-        
-        cv::Mat modelcpy = mModel.clone();
-        cv::rectangle(modelcpy, cv::Point(0,0), cv::Point(mModel.cols-1, mModel.rows-1), Scalar(1,0,0));
-        cv::namedWindow("Affine Crop", CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED);
-        cv::imshow("Affine Crop", modelcpy);
-        cv::resizeWindow("Affine Crop", mModel.cols, mModel.rows);
-    }
-    
-    
 }
 
 
