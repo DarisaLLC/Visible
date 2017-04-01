@@ -303,6 +303,50 @@ bool self_similarity_producer<P>::internalFill(Iterator start, Iterator end,  de
 }
 
 
+template<typename P>
+bool self_similarity_producer<P>::median_levelset_similarities (deque<double>& signal, float use_pct ) const
+{
+    if (_finished && !_entropies.empty() && use_pct <= 1.0)
+    {
+        vector<double> entcpy;
+        
+        for (const auto val : _entropies)
+            entcpy.push_back(1.0 - val);
+        
+        auto median_value = svl::Median(entcpy);
+        
+        // Subtract median from all
+        for (double& val : entcpy)
+            val = std::abs(val - median_value );
+
+        // Sort according to distance to the median. small to high
+        std::vector<int> ranks(entcpy.size());
+        std::iota(ranks.begin(), ranks.end(), 0);
+        auto comparator = [&entcpy](double a, double b){ return entcpy[a] < entcpy[b]; };
+        std::sort(ranks.begin(), ranks.end(), comparator);
+        
+        size_t count = std::floor (entcpy.size () * use_pct);
+
+        signal.resize(entcpy.size(), 0.0);
+        
+        for (auto ii = 0; ii < signal.size(); ii++)
+        {
+            double val = 0;
+            for (int index = 0; index < count; index++)
+            {
+                // get the index
+                auto jj = ranks[index];
+                // fetch the cross match value for
+                val += _SMatrix[jj][ii];
+            }
+            signal[ii] = val;
+        }
+        
+        return true;
+    }
+    return false;
+}
+
 
 template <typename P>
 bool self_similarity_producer<P>::ssMatrixFill(deque<image_t >& tWin)

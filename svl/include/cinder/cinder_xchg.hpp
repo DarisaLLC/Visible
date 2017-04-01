@@ -60,7 +60,9 @@ namespace svl
         return mwRef;
     }
     
-    static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromSurface (const Surface8uRef& src, const std::vector<std::string>& names_l2r, int64_t timestamp = 0)
+    static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromSurface (const Surface8uRef& src,
+                                                                          const std::vector<std::string>& names_l2r = {"Red", "Green","Blue"},
+                                                                          int64_t timestamp = 0)
     {
         return NewRefMultiFromChannel (src->getChannel(0), names_l2r, timestamp);
     }

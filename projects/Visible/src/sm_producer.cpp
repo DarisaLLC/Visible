@@ -58,10 +58,11 @@ namespace anonymous
 
 sm_producer::sm_producer (bool auto_on_off)
 {
-    
     _impl = std::shared_ptr<sm_producer::spImpl> (new sm_producer::spImpl);
     if (auto_on_off)
         set_auto_run_on();
+    
+
     
 }
 
@@ -111,6 +112,13 @@ sm_producer::providesCallback () const
     return _impl->providesCallback<T> ();
 }
 
+void  sm_producer::set_median_levelset_pct (float frac) const
+{
+    _impl->set_median_levelset_pct(frac);
+}
+
+float  sm_producer::get_median_levelset_pct () const { return _impl->get_median_levelset_pct(); }
+
 bool sm_producer::set_auto_run_on() const { return (_impl) ? _impl->set_auto_run_on() : false; }
 bool sm_producer::set_auto_run_off() const { return (_impl) ? _impl->set_auto_run_off() : false; }
 int sm_producer::frames_in_content() const { return (_impl) ? (int) _impl->frame_count(): -1; }
@@ -123,6 +131,13 @@ const sm_producer::sMatrixProjection_t& sm_producer::meanProjection (outputOrder
 
 const sm_producer::sMatrixProjection_t& sm_producer::shannonProjection (outputOrderOption ooo) const { return _impl->m_entropies; }
 
+
+
+
+const sm_producer::sMatrixProjection_t& sm_producer::medianLeveledProjection () const
+{
+    return _impl->m_median_leveled;
+}
 
 std::vector<roiWindow<P8U>>& sm_producer::images () const
 {
@@ -413,6 +428,10 @@ bool sm_producer::spImpl::generate_ssm (int start_frames, int frames)
     m_SMatrix.resize (0);
     bool ok = simi->entropies (m_entropies);
     if (!ok) return ok;
+    
+    ok = simi->median_levelset_similarities (m_median_leveled, get_median_levelset_pct());
+    if (!ok)
+        std::cout << " ERR OR " << std::endl;
     
     // Fetch the SS matrix
     simi->selfSimilarityMatrix(m_SMatrix);

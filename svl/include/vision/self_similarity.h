@@ -146,6 +146,15 @@ class self_similarity_producer
    * in signal and return true. Otherwise, return false.
    */
   bool entropies(deque<double>& signal) const;
+    
+    /* Accessor Functions
+     */
+    /* entropies - If an entropy signal has been calculated, 
+     * take, produce average similarities to for every frame in the set around the median
+     * in signal and return true. Otherwise, return false.
+     */
+   bool median_levelset_similarities (deque<double>& signal, float rand_around_mean ) const;
+    
 
   /* sequential correlations - 
    *

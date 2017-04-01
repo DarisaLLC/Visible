@@ -12,6 +12,7 @@
 #include "base_signaler.h"
 #include "roiWindow.h"
 #include <chrono>
+#include "core/singleton.hpp"
 
 using namespace std;
 using namespace boost;
@@ -48,6 +49,10 @@ public:
     
     bool operator () (int start_frame = 0, int frames = 0) const;
     
+    void set_median_levelset_pct (float frac) const;
+    float get_median_levelset_pct () const;
+    
+    
     bool set_auto_run_on () const;
     bool set_auto_run_off () const;
     
@@ -73,6 +78,8 @@ public:
     const sMatrixProjection_t& meanProjection (outputOrderOption ooo = input) const;
     
     const sMatrixProjection_t& shannonProjection (outputOrderOption ooo = input) const;
+
+    const sMatrixProjection_t& medianLeveledProjection () const;
     
     /**
      *  Image Directory Output & Options
@@ -103,7 +110,6 @@ public:
 private:
     class spImpl;
     std::shared_ptr<spImpl> _impl;
-    
     
 };
 

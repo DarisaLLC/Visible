@@ -34,6 +34,7 @@
 #include "vision/histo.h"
 #include "core/stl_utils.hpp"
 #include "sm_producer.h"
+#include "algo_registry.hpp"
 
 using namespace ci;
 using namespace ci::app;
@@ -58,95 +59,137 @@ namespace
     static layout vl ( ivec2 (10, 10));
     
     
-    
-    tracksD1_t get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
-                                           bool test_data = false)
+    class algo_processor : public SingletonLight<algo_processor>
     {
-        
-        tracksD1_t tracks;
-        tracks.resize (names.size ());
-        for (auto tt = 0; tt < names.size(); tt++)
-            tracks[tt].first = names[tt];
-        
-        std::vector<roiWindow<P8U>> images;
-        auto fcnt = frames->count();
-        
-        // If it is 3 channels. We will use multiple window
-        int64_t fn = 0;
-        while (frames->checkFrame(fn))
+    public:
+        algo_processor ()
         {
-            auto su8 = frames->getFrame(fn++);
+            m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
+        }
+
+    private:
+        const smProducerRef sm () const { return m_sm; }
+        
+        bool load_channels_from_images (const std::shared_ptr<qTimeFrameCache>& frames, bool LIF_data = true,
+                                        uint8_t channel = 2)
+        {
+            // If it LIF data We will use multiple window.
+            int64_t fn = 0;
+            m_channel_images.clear();
+            m_channel_images.resize (3);
             
-            auto channels = names.size();
+            std::vector<std::string> names = {"Red", "Green","Blue"};
             
-            std::vector<roiWindow<P8U> > rois;
-            switch (channels)
+            while (frames->checkFrame(fn))
             {
-                case 1:
-                {
-                    auto m1 = svl::NewRedFromSurface(su8);
-                    rois.emplace_back(m1);
-                    break;
-                }
-                case 3:
+                auto su8 = frames->getFrame(fn++);
+                if (LIF_data)
                 {
                     auto m3 = svl::NewRefMultiFromSurface (su8, names, fn);
                     for (auto cc = 0; cc < m3->planes(); cc++)
-                        rois.emplace_back(m3->plane(cc));
-                    break;
+                        m_channel_images[cc].emplace_back(m3->plane(cc));
                 }
-            }
-            
-            assert (rois.size () == tracks.size());
-            
-            // Now get average intensity for each channel
-            int index = 0;
-            for (roiWindow<P8U> roi : rois)
-            {
-                if (index == 2)
+                else
                 {
-                    images.push_back(roi);
-                    break;
+                    // assuming 3 channels
+                    for (auto cc = 0; cc < 3; cc++)
+                    {
+                        auto m1 = svl::NewChannelFromSurfaceAtIndex(su8,cc);
+                        m_channel_images[cc].emplace_back(m1);
+                    }
                 }
-                index_time_t ti;
-                ti.first = fn;
-                timed_double_t res;
-                res.first = ti;
-                auto nmg = histoStats::mean(roi) / 256.0;
-                res.second = (! test_data) ? nmg :  (((float) fn) / fcnt );
-                tracks[index++].second.emplace_back(res);
             }
-            // TBD: call progress reporter
+            
         }
         
-        // Now Do Aci on the 3rd channel
-        assert(images.size() == fcnt && fcnt > 0);
-        
-        auto sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
-        sp->load_images (images);
-
-        std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
-        std::future<bool>  future_ss = task.get_future();  // get a future
-        std::thread(std::move(task)).detach(); // launch on a thread
-        future_ss.wait();
-        auto entropies = sp->shannonProjection ();
-        sm_producer::sMatrixProjection_t::const_iterator bee = entropies.begin();
-        for (auto ss = 0; bee != entropies.end() && ss < fcnt; ss++, bee++)
+        timed_double_t computeIntensityStatisticsResults (const roiWindow<P8U>& roi)
         {
             index_time_t ti;
-            ti.first = ss;
             timed_double_t res;
             res.first = ti;
-            res.second = *bee;
-            tracks[2].second.emplace_back(res);
+            res.second = histoStats::mean(roi) / 256.0;
+            return res;
+        }
+        
+        void entropiesToTracks (smProducerRef& sp, trackD1_t& track)
+        {
+            auto entropies = sp->shannonProjection ();
+            auto medianLevel = sp->medianLeveledProjection();
+            sm_producer::sMatrixProjection_t::const_iterator bee = entropies.begin();
+            sm_producer::sMatrixProjection_t::const_iterator mee = medianLevel.begin();
+            for (auto ss = 0; bee != entropies.end() && ss < frame_count(); ss++, bee++, mee++)
+            {
+                index_time_t ti;
+                ti.first = ss;
+                timed_double_t res;
+                res.first = ti;
+//                res.second = *bee;
+                res.second = *mee;
+                track.second.emplace_back(res);
+            }
+        }
+        
+        size_t frame_count () const
+        {
+            if (m_channel_images[0].size() == m_channel_images[1].size() && m_channel_images[1].size() == m_channel_images[2].size())
+                return m_channel_images[0].size();
+            else return 0;
+        }
+        
+    public:
+        tracksD1_t run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+                                               // TBD and 3 callbacks from algo registry to call
+                                               bool test_data = false)
+        {
+            
+            load_channels_from_images(frames);
+            
+            tracksD1_t tracks;
+            tracks.resize (names.size ());
+            for (auto tt = 0; tt < names.size(); tt++)
+                tracks[tt].first = names[tt];
+            
+            // Run Histogram on channels 0 and 1
+            // Filling up tracks 0 and 1
+            // Now Do Aci on the 3rd channel
+            
+            
+            channel_images_t c0 = m_channel_images[0];
+            channel_images_t c1 = m_channel_images[1];
+            channel_images_t c2 = m_channel_images[2];
+            
+            for (auto ii = 0; ii < m_channel_images[0].size(); ii++)
+            {
+                tracks[0].second.emplace_back(computeIntensityStatisticsResults(c0[ii]));
+                tracks[1].second.emplace_back(computeIntensityStatisticsResults(c1[ii]));
+            }
+            
+            auto sp =  instance().sm();
+            sp->load_images (c2);
+            std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
+            std::future<bool>  future_ss = task.get_future();  // get a future
+            std::thread(std::move(task)).detach(); // launch on a thread
+            future_ss.wait();
+            entropiesToTracks(sp, tracks[2]);
+            
+            return tracks;
         }
         
         
-        return tracks;
+        
+    private:
+        typedef std::vector<roiWindow<P8U>> channel_images_t;
+        smProducerRef m_sm;
+        channel_images_t m_images;
+        std::vector<channel_images_t> m_channel_images;
+    };
+    
+    tracksD1_t     get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+                    bool test_data = false)
+    {
+        return algo_processor().instance().run(frames, names, test_data);
     }
-    
-    
-    
+
 }
 
 
@@ -476,7 +519,7 @@ void lifContext::processDrag( ivec2 pos )
         mTimeMarker.from_norm(mTimeLineSlider.mValueScaled);
         seekToFrame(mTimeMarker.current_frame());
     }
-
+    
 }
 
 
@@ -618,16 +661,16 @@ void lifContext::update ()
     
     if (m_is_playing ) seekToFrame (getCurrentFrame() + 1);
     
-//    std::string image_location (" In Image ");
-//    std::string graph_location (" In Graph ");
-//    graph_location += to_string (mMouseInGraphs);
-//    std::string which = mMouseInImage ? image_location : mMouseInGraphs >= 0 ? graph_location : " Outside ";
-//    std::strstream msg;
-//    msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << m_is_playing <<
-//    " F " << setw(12) << int( getCurrentFrame () ) << which;
-//    
-//    std::string frame_str = msg.str();
-//    update_log (frame_str);
+    //    std::string image_location (" In Image ");
+    //    std::string graph_location (" In Graph ");
+    //    graph_location += to_string (mMouseInGraphs);
+    //    std::string which = mMouseInImage ? image_location : mMouseInGraphs >= 0 ? graph_location : " Outside ";
+    //    std::strstream msg;
+    //    msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << m_is_playing <<
+    //    " F " << setw(12) << int( getCurrentFrame () ) << which;
+    //
+    //    std::string frame_str = msg.str();
+    //    update_log (frame_str);
     
 }
 
@@ -641,7 +684,7 @@ void lifContext::draw_info ()
     gl::setMatricesWindow( getWindowSize() );
     
     gl::ScopedBlendAlpha blend_;
-
+    
     {
         gl::ScopedColor (ColorA::gray(1.0));
         gl::drawStrokedRect(get_image_display_rect(), 3.0f);
@@ -670,11 +713,11 @@ void lifContext::draw_info ()
     
     tinyUi::drawWidgets(mWidgets);
     
-//    if (mTextTexture)
-//    {
-//        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
-//        gl::draw(mTextTexture, textrect);
-//    }
+    //    if (mTextTexture)
+    //    {
+    //        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
+    //        gl::draw(mTextTexture, textrect);
+    //    }
     
 }
 
