@@ -117,7 +117,8 @@ public:
     void keyDown(KeyEvent event) override;
     void mouseDrag( MouseEvent event ) override;
     void saveImage(const cv::Mat & image, const std::string & filename);
-    cv::Mat create_stitch_mask (const cv::Mat & image);
+    void RGBtoYxy(cv::Mat source, cv::Mat &destination);
+    void gmLuminance(cv::Mat source, cv::Mat &destination);
     
     Surface8uRef  loadImageFromPath (const filesystem::path&);
     void fileDrop( FileDropEvent event ) override;
@@ -497,6 +498,68 @@ void MainApp::keyDown( KeyEvent event )
     
 }
 
+
+
+void MainApp::gmLuminance(cv::Mat source, cv::Mat &destination){
+    
+    double eps=2.2204e-16;
+    cv::Mat result;
+    std::vector<cv::Mat> channels;
+    cv::split(source, channels);
+    cv::Mat prod = channels[0].clone();
+    cv::multiply(channels[0], channels[1], prod);
+    cv::multiply(prod, channels[2], prod);
+    prod+=eps;
+    prod.convertTo(result, CV_32F);
+    cv::pow(result, 1.0/3.0, result);
+    destination = result;
+    
+
+}
+
+void MainApp::RGBtoYxy(cv::Mat source, cv::Mat &destination){
+    
+    cv::Mat scaled;
+    source.copyTo(scaled);
+    scaled.convertTo(scaled, CV_64F);
+    
+    cv::Mat sRGBtoXYZ=(cv::Mat_<double>(3, 3) << 0.4124564,  0.3575761,  0.1804375, 0.2126729,  0.7151522,  0.0721750, 0.0193339, 0.1191920, 0.9503041);
+    int rows=source.rows;
+    int cols=source.cols;
+    
+    cv::Mat reshaped=scaled.reshape(1, rows*cols);
+    cv::transpose(reshaped, reshaped);
+    cv::Mat xyz=sRGBtoXYZ*reshaped;
+    
+    cv::transpose(xyz, xyz);
+    xyz=xyz.reshape(3, rows);
+    
+    double eps=2.2204e-16;
+    std::vector<cv::Mat> channels;
+    cv::split(xyz, channels);
+    cv::Mat sum;
+    channels[0].copyTo(sum);
+    for (int i=1;i<3;++i){
+        sum+=channels[i];
+    }
+    sum+=eps;
+    
+    cv::Mat x;
+    cv::divide(channels[0], sum, x);
+    cv::Mat y;
+    cv::divide(channels[1], sum, y);
+    
+    std::vector<cv::Mat> resultChannels;
+    resultChannels.push_back(channels[1]);
+    resultChannels.push_back(x);
+    resultChannels.push_back(y);
+    
+    cv::Mat result;
+    cv::merge(resultChannels, result);
+    
+    result.copyTo(destination);
+}
+
 void MainApp::process ()
 {
     
@@ -507,6 +570,7 @@ void MainApp::process ()
     
     cv::Mat hsv;
     cv::Mat mask;
+    cv::Mat xyz;
     
     mInputMat = cv::Mat ( toOcv ( *mImage) );
     
@@ -521,13 +585,18 @@ void MainApp::process ()
     mTextures[0] = gl::Texture::create(fromOcv(tmpi));
     mOverlays[0] = gl::Texture::create(fromOcv(clear));
     
+    gmLuminance(mInputMat, xyz);
+    
+    mTextures[1] =  gl::Texture::create(fromOcv(xyz));
+    mOverlays[1] = gl::Texture::create(fromOcv(clear));
+
     // convert to hsv and show hue
     // get the vector of Mats for processing
     // Surface for display
+#if 0
     cvtColor(mInputMat, hsv, cv::COLOR_RGB2HSV_FULL);
-    split(hsv, mHSV);
     mHSLImage = Surface8u::create (fromOcv(hsv));
-    
+    split(hsv, mHSV);
     roiWindow<P8U> hueroi (mHSV[0].cols, mHSV[0].rows);
     cv::Mat original = mHSV[0].clone();
     cv::GaussianBlur(mHSV[0], mHSV[0], cv::Size(21,21), 0.0f, 0.0f);
@@ -544,8 +613,7 @@ void MainApp::process ()
     
     cv::inRange(hsv,mSkinHue[0], mSkinHue[1], mask);
     mOverlays[1] = gl::Texture::create(fromOcv(mask));
-    mTextures[1] = mTextures[0];
-    
+#endif
     
     setWindowSize(mInputMat.cols, mInputMat.rows);
 }
@@ -559,7 +627,7 @@ void MainApp::draw()
     {
         //    gl::ScopedViewport vp(getWindowPos(), getWindowSize());
         gl::enableAlphaBlending();
-        gl::draw(*textureToDisplay, getWindowBounds());
+        gl::draw(mTextures[mOption], getWindowBounds());
         
         
         

@@ -28,10 +28,10 @@ LOCAL_CIMG = $(LOCAL_3rdParty)/cImg
 
 HEADER_SEARCH_PATHS = $(SRCROOT)/include/** /usr/local/include $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_TINYXML) $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG) $(SVL_X11_ROOT)/include
 
-LIBRARY_SEARCH_PATHS = /usr/local/Cellar/libpng/1.6.21/lib $(LOCAL_OCV)/lib/macosx
+LIBRARY_SEARCH_PATHS = $(LOCAL_OCV)/lib/macosx
 
 
 //:configuration = Debug
-OTHER_LDFLAGS = $(LOCAL_CINDER)/lib/libcinder_d.a $(LOCAL_OCV)/lib/macosx/libopencv_core.a $(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a $(LOCAL_OCV)/lib/macosx/libippicv.a $(LOCAL_OCV)/lib/macosx/libopencv_highgui.a $(LOCAL_OCV)/lib/macosx/libopencv_hal.a $(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a $(LOCAL_OCV)/lib/macosx/libzlib.a $(LOCAL_BOOST)/lib/libboost_system.a $(LOCAL_BOOST)/lib/libboost_filesystem.a
+OTHER_LDFLAGS = $(LOCAL_CINDER)/lib/libcinder_d.a $(LOCAL_OCV)/lib/macosx/libopencv_core.a $(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a $(LOCAL_OCV)/lib/macosx/libippicv.a $(LOCAL_OCV)/lib/macosx/libopencv_highgui.a $(LOCAL_OCV)/lib/macosx/libopencv_hal.a $(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a $(LOCAL_OCV)/lib/macosx/libzlib.a 
 
 
