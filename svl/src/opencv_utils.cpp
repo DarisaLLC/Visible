@@ -3,27 +3,49 @@
 #include <algorithm>
 #include <iostream>
 
-#include <opencv2/opencv.hpp>
 #include "vision/opencv_utils.hpp"
 #include "vision/gradient.h"
+#include "boost/variant.hpp"
+#include <cstdio>
+#include <iostream>
+
 
 using namespace std;
 using namespace cv;
 using namespace ci;
+using namespace svl;
 
 namespace svl
 {
-    void NewFromOCV (const cv::Mat& mat, roiWindow<P8U>& roi)
+    roiVP8UC NewFromOCV (const cv::Mat& mat)
     {
-        if (! roi.frameBuf() || !roi.isBound() ||
-            mat.cols != roi.width() || mat.rows != roi.height())
+        switch (mat.channels())
         {
-            roiWindow<P8U> win (mat.cols, mat.rows);
-            roi = win;
+            case 1:
+            {
+                roiWindow_P8U_t win (mat.cols, mat.rows);
+                for (uint32_t row = 0; row < mat.rows; row++)
+                    std::memmove(win.rowPointer(row), mat.ptr(row), mat.cols * win.bytes());
+                return (roiVP8UC(win));
+            }
+            case 3:
+            {
+                roiWindow_P8UC3_t win (mat.cols, mat.rows);
+                for (uint32_t row = 0; row < mat.rows; row++)
+                    std::memmove(win.rowPointer(row), mat.ptr(row), mat.cols * win.bytes());
+                return (roiVP8UC(win));
+            }
+            case 4:
+            {
+                roiWindow_P8UC4_t win (mat.cols, mat.rows);
+                for (uint32_t row = 0; row < mat.rows; row++)
+                    std::memmove(win.rowPointer(row), mat.ptr(row), mat.cols * win.bytes());
+                return (roiVP8UC(win));
+            }
+            default:
+                assert(false);
         }
-        for (uint32_t row = 0; row < mat.rows; row++)
-            std::memmove(roi.rowPointer(row), mat.ptr(row), mat.cols);
-        
+        return roiVP8UC ();
     }
     
     std::shared_ptr<roiWindow<P8U>> NewRefFromOCV (const cv::Mat& mat)
@@ -36,19 +58,205 @@ namespace svl
         return std::shared_ptr<roiWindow<P8U>> (new roiWindow<P8U>(rootref, 0, 0, mat.cols, mat.rows));
         
     }
-
+    template<>
+    void CopyFromSVL<roiWindow<P8U>> (const roiWindow<P8U>& roi, cv::Mat& mat)
+    {
+        assert (!mat.empty() && mat.cols == roi.width() && mat.rows == roi.height());
+        for (uint32_t row = 0; row < mat.rows; row++)
+            std::memmove(mat.ptr(row), roi.rowPointer(row), mat.cols);
+    }
     
-    void NewFromSVL (const roiWindow<P8U>& roi, cv::Mat& mat)
+    template<>
+    void CopyFromSVL<roiWindow<P8UC3>> (const roiWindow<P8UC3>& roi, cv::Mat& mat)
+    {
+        assert (!mat.empty() && mat.cols == roi.width() && mat.rows == roi.height());
+        for (uint32_t row = 0; row < mat.rows; row++)
+            std::memmove(mat.ptr(row), roi.rowPointer(row), mat.cols * 3);
+    }
+    
+    template<>
+    void CopyFromSVL<roiWindow<P8UC4>> (const roiWindow<P8UC4>& roi, cv::Mat& mat)
+    {
+        assert (!mat.empty() && mat.cols == roi.width() && mat.rows == roi.height());
+        for (uint32_t row = 0; row < mat.rows; row++)
+            std::memmove(mat.ptr(row), roi.rowPointer(row), mat.cols * 4);
+    }
+    
+    
+    template<>
+    void NewFromSVL<roiWindow<P8U>> (const roiWindow<P8U>& roi, cv::Mat& mat)
     {
         mat.create(roi.height(), roi.width(), CV_8U);
         CopyFromSVL(roi, mat);
     }
     
-    void CopyFromSVL (const roiWindow<P8U>& roi, cv::Mat& mat)
+    template <>
+    void NewFromSVL<roiWindow<P8UC3>> (const roiWindow<P8UC3>& roi, cv::Mat& mat)
     {
-        assert (!mat.empty() && mat.cols == roi.width() && mat.rows == roi.height());
-        for (uint32_t row = 0; row < mat.rows; row++)
-            std::memmove(mat.ptr(row), roi.rowPointer(row), mat.cols);
+        mat.create(roi.height(), roi.width(), CV_8UC3);
+        CopyFromSVL(roi, mat);
+    }
+    
+    template <>
+    void NewFromSVL<roiWindow<P8UC4>> (const roiWindow<P8UC4>& roi, cv::Mat& mat)
+    {
+        mat.create(roi.height(), roi.width(), CV_8UC4);
+        CopyFromSVL(roi, mat);
+    }
+    
+    
+    template void NewFromSVL (const roiWindow<P8UC3>&, cv::Mat&);
+    template void NewFromSVL (const roiWindow<P8UC4>&, cv::Mat&);
+    template void NewFromSVL (const roiWindow<P8U>&, cv::Mat&);
+    
+    template void CopyFromSVL (const roiWindow<P8UC3>&, cv::Mat&);
+    template void CopyFromSVL (const roiWindow<P8UC4>&, cv::Mat&);
+    template void CopyFromSVL (const roiWindow<P8U>&, cv::Mat&);
+    
+    // P is roiWindow<>
+    template<typename P>
+    void cvResize (const P& roi, P& dst, float col_sample, float row_sample)
+    {
+        cv::Mat m4;
+        NewFromSVL(roi, m4);
+        cv::Size ds (round(col_sample*m4.cols), round(row_sample*m4.rows));
+        cv::resize(m4, m4, ds);
+        auto roivar = NewFromOCV(m4);
+        dst = boost::get<P>(roivar);
+    }
+    
+    template void cvResize (const roiWindow<P8U>&, roiWindow<P8U>&, float, float);
+    template void cvResize (const roiWindow<P8UC3>&, roiWindow<P8UC3>&, float, float);
+    template void cvResize (const roiWindow<P8UC4>&, roiWindow<P8UC4>&, float, float);
+    
+    
+    double getPSNR(const Mat& I1, const Mat& I2)
+    {
+        Mat s1;
+        absdiff(I1, I2, s1);       // |I1 - I2|
+        s1.convertTo(s1, CV_32F);  // cannot make a square on 8 bits
+        s1 = s1.mul(s1);           // |I1 - I2|^2
+        
+        Scalar s = sum(s1);         // sum elements per channel
+        
+        double sse = s.val[0] + s.val[1] + s.val[2]; // sum channels
+        
+        if( sse <= 1e-10) // for small values return zero
+            return 0;
+        else
+        {
+            double  mse =sse /(double)(I1.channels() * I1.total());
+            double psnr = 10.0*log10((255*255)/mse);
+            return psnr;
+        }
+    }
+    
+    void skinMaskYCrCb (const cv::Mat &src, cv::Mat &dst)
+    {
+        Mat m;
+        cvtColor(src, m, CV_BGR2YCrCb);
+        std::vector<Mat> mv;
+        split(m, mv);
+        Mat mask = Mat(m.rows, m.cols, CV_8UC1);
+        
+        for (int i=0; i<m.rows; i++) {
+            for (int j=0; j<m.cols; j++) {
+                int Cr= mv[1].at<uint8_t>(i,j);
+                int Cb =mv[2].at<uint8_t>(i,j);
+                mask.at<uint8_t>(i, j) = (Cr>130 && Cr<170) && (Cb>70 && Cb<125) ? 255 : 0;
+            }
+        }
+        dst = mask;
+    }
+    
+    float crossMatch (const cv::Mat& img, const cv::Mat& model, cv::Mat& space, bool squareit)
+    {
+        int result_cols =  img.cols - model.cols + 1;
+        int result_rows = img.rows - model.rows + 1;
+        space.create(result_rows, result_cols, CV_32FC1);
+        cv::matchTemplate ( img, model, space, CV_TM_CCORR_NORMED);
+        if (squareit)
+            space.mul(space);
+        return space.at<float>(0,0);
+    }
+    
+    cv::Mat selfMatch (const cv::Mat& img, int32_t dia, bool squareit)
+    {
+        auto width = img.cols - 2 * dia;
+        auto height = img.rows - 2 * dia;
+        cv::Rect inner (dia, dia, width, height);
+        cv::Mat model (img, inner);
+        cv::Mat space (height, width, CV_32FC1);
+        crossMatch (img, model, space, squareit);
+        return space;
+    }
+    
+    cv::Mat1b prepare_acf (const cv::Mat& space, uint32_t precision)
+    {
+        float mult = pow(10.0f, precision);
+        cv::Mat1b acf (space.rows, space.cols);
+        
+        for (auto row = 0; row < space.rows; row++)
+        {
+            const float* floatPtr = reinterpret_cast<const float*>(space.ptr(row));
+            uint8_t* uint8Ptr = acf.ptr(row);
+            for (auto col = 0; col < space.cols; col++, floatPtr++, uint8Ptr++)
+            {
+                int32_t vap = std::floor((1.0f - *floatPtr) * mult);
+                *uint8Ptr = (uint8_t) (vap == 0 ? 1 : 0);
+            }
+        }
+        return acf;
+    }
+    
+   size_t writeSpaceToStl (const cv::Mat& space,  std::vector<std::vector<float>> out)
+    {
+        out.resize(space.rows);
+        size_t total = 0;
+        for (auto row = 0; row < space.rows; row++)
+        {
+            const float* floatPtr = reinterpret_cast<const float*>(space.ptr(row));
+            std::vector<float>& row_vector = out[row];
+            row_vector.resize (space.cols);
+            for (auto col = 0; col < space.cols; col++, floatPtr++)
+            {
+                row_vector[col] = *floatPtr;
+            }
+            total += row_vector.size();
+        }
+        return total;
+    }
+
+    
+    cv::Mat1b acf (const cv::Mat& img, int32_t dia, uint32_t precision )
+    {
+        cv::Mat space = selfMatch(img, dia);
+        return prepare_acf(space,precision);
+    }
+    
+    
+    bool colorDivergence (const cv::Mat& img, int32_t dia, colorDiv& cdiv)
+    {
+        cdiv.isValid = false;
+        cdiv.raw_acf = selfMatch(img, dia);
+        
+        cdiv.acf = prepare_acf(cdiv.raw_acf, cdiv.precision());
+        
+        cdiv.point_set.clear();
+        findContours(cdiv.acf, cdiv.point_set, RETR_LIST, CHAIN_APPROX_NONE);
+        cdiv.acf_contours = cdiv.point_set.size();
+        bool empty = cdiv.point_set.empty();
+        if (empty) return false;
+        
+        // Only process the first one
+        size_t count = cdiv.point_set[0].size();
+        if( count < 6 )
+            return false;
+        Mat(cdiv.point_set[0]).convertTo(cdiv.peak, CV_32F);
+        cdiv.affineRect = fitEllipse(cdiv.peak);
+        
+        cdiv.isValid = true;
+        return cdiv.isValid;
     }
     
     bool matIsEqual(const cv::Mat mat1, const cv::Mat mat2){
@@ -114,6 +322,13 @@ namespace svl
         corners[3].y = 2 * rect.center.y - corners[1].y;
     }
     
+    void getRangeC (const cv::Mat& onec, vec2& range)
+    {
+        double lmin, lmax;
+        cv::minMaxLoc(onec, &lmin, &lmax);
+        range.x = lmin;
+        range.y = lmax;
+    }
     
     
     void getLuminanceCenterOfMass (const cv::Mat& gray, cv::Point2f& com)
@@ -123,19 +338,38 @@ namespace svl
         com = cv::Point2f ((moms.m10 * inv_m00), moms.m01 * inv_m00);
     }
     
-    bool direction_moments (cv::Mat image, ellipse_parms& res)
+    momento::momento(const cv::Mat& image)
     {
-        Moments mu =  moments(image, false);
-        Point2d mc(mu.m10/mu.m00, mu.m01/mu.m00);
-        double m11 = mu.m11 ;
-        double m20 = mu.m20 ;
-        double m02 = mu.m02 ;
+        CvMoments mu =  cv::moments(image, false);
+        *((Moments*)this) = mu;
+        
+        inv_m00 = mu.inv_sqrt_m00 * mu.inv_sqrt_m00;
+        
+        mc = Point2f ((m10 * inv_m00), m01 * inv_m00);
+    }
+    
+    vec2 momento::getEllipseAspect () const
+    {
+        getDirectionals ();
+        return vec2(a,b);
+    }
+    
+    double momento::getOrientation () const
+    {
+        getDirectionals ();
+        return theta;
+    }
+    
+    void momento::getDirectionals () const
+    {
+        if (eigen_done) return;
+        
         Mat M = (Mat_<double>(2,2) << m20, m11, m11, m02);
         
         //Compute and store the eigenvalues and eigenvectors of covariance matrix CvMat* e_vect = cvCreateMat( 2 , 2 , CV_32FC1 );
         Mat e_vects = (Mat_<float>(2,2) << 0.0,0.0,0.0,0.0);
         Mat e_vals = (Mat_<float>(1,2) << 0.0,0.0);
-
+        
         bool eigenok = cv::eigen(M, e_vals, e_vects);
         int ev = (e_vals.at<float>(0,0) > e_vals.at<float>(0,1)) ? 0 : 1;
         double angle = atan2 (e_vects.at<float>(ev, 0),e_vects.at<float>(ev, 1));
@@ -143,7 +377,7 @@ namespace svl
         
         double mm2 = m20 - m02;
         auto tana = mm2 + std::sqrt (4*m11*m11 + mm2*mm2);
-        double theta = atan(2*m11 / tana);
+        theta = atan(2*m11 / tana);
         
         double cos2 = cos(theta)*cos(theta);
         double sin2 = sin(theta)*sin(theta);
@@ -152,62 +386,42 @@ namespace svl
         double lambda1 = m20*cos2 + m11 * sin2x + m02*sin2;
         double lambda2 = m20*cos2 - m11 * sin2x + m02*sin2;
         
-        res.mu = mu;
-        res.mc = mc;
-        res.a = 2.0 * std::sqrt(lambda1/mu.m00);
-        res.b = 2.0 * std::sqrt(lambda2/mu.m00);
-        res.theta = theta;
-        res.eigen_angle = angle;
-        res.eigen_ok = eigenok;
-        
-        return true;
+        a = 2.0 * std::sqrt(lambda1/m00);
+        b = 2.0 * std::sqrt(lambda2/m00);
+        eigen_angle = angle;
+        eigen_ok = eigenok;
+        eigen_done = true;
     }
     
-    void computeNormalizedColorHist(const Mat& image, Mat& hist, int N, double minProb)
+    
+    void generate_mask (const cv::Mat& rg, cv::Mat& mask, float left_tail_post, bool debug_output)
     {
-        const int histSize[] = {N, N, N};
+        cv::Mat1b msk = rg.clone();
+        msk = 0;
         
-        // make sure that the histogram has a proper size and type
-        hist.create(3, histSize, CV_32F);
+        int rows, cols;
+        cv::Size s = rg.size();
+        rows = s.height;
+        cols = s.width;
         
-        // and clear it
-        hist = Scalar(0);
-        
-        // the loop below assumes that the image
-        // is a 8-bit 3-channel. check it.
-        CV_Assert(image.type() == CV_8UC3);
-        MatConstIterator_<Vec3b> it = image.begin<Vec3b>(),
-        it_end = image.end<Vec3b>();
-        for( ; it != it_end; ++it )
+        int tail_post = svl::leftTailPost (rg, left_tail_post);
+        tail_post = svl::Clamp(tail_post, 2, 10);
+        if (tail_post < 0 || tail_post > 255)
         {
-            const Vec3b& pix = *it;
-            hist.at<float>(pix[0]*N/256, pix[1]*N/256, pix[2]*N/256) += 1.f;
+            if (debug_output) std::cout << " tail_post " << tail_post << std::endl;
+            return;
         }
         
-        minProb *= image.rows*image.cols;
-        
-        // intialize iterator (the style is different from STL).
-        // after initialization the iterator will contain
-        // the number of slices or planes the iterator will go through.
-        // it simultaneously increments iterators for several matrices
-        // supplied as a null terminated list of pointers
-        const Mat* arrays[] = {&hist, 0};
-        Mat planes[1];
-        NAryMatIterator itNAry(arrays, planes, 1);
-        double s = 0;
-        // iterate through the matrix. on each iteration
-        // itNAry.planes[i] (of type Mat) will be set to the current plane
-        // of the i-th n-dim matrix passed to the iterator constructor.
-        for(int p = 0; p < itNAry.nplanes; p++, ++itNAry)
+        for (auto row = 0; row < rows; row++)
         {
-            threshold(itNAry.planes[0], itNAry.planes[0], minProb, 0, THRESH_TOZERO);
-            s += sum(itNAry.planes[0])[0];
+            for (auto col = 0; col < cols; col++)
+            {
+                uint8_t rgpel = rg.at<uint8_t>(row, col);
+                if (rgpel <= tail_post)
+                    msk.at<uint8_t>(row, col) = 255;
+            }
         }
-        
-        s = 1./s;
-        itNAry = NAryMatIterator(arrays, planes, 1);
-        for(int p = 0; p < itNAry.nplanes; p++, ++itNAry)
-            itNAry.planes[0] *= s;
+        mask = msk;
     }
     
     void drawPolygon(
@@ -242,135 +456,465 @@ namespace svl
     }
     
     
-    //////////  Motion Smear Implementation /////////////////
+    ////////// Gaussian Template  /////////////////
     /////////////////////////////////////////////////////////
     
-    motionSmear::motionSmear () : m_done (false), m_count(0) {}
-    void motionSmear::add_to_smear(const cv::Mat& src) const
+    
+    
+    cv::Mat gaussianTemplate(const std::pair<uint32_t,uint32_t>& dims, const vec2& sigma, const vec2& ctr)
     {
-        if (m_min.empty() || m_max.empty() || m_sig.empty())
+        int w = dims.first, h = dims.second;
+        cv::Mat ret ( h, w, CV_32F);
+        cv::Mat ret8 (h, w, CV_8U);
+        std::pair<float,float> maxVar (std::numeric_limits<float>::max (), std::numeric_limits<float>::min ());
+        vec2 center (ctr.x * w, ctr.y * h);
+        
+        float fac = 0.5f / (M_1_PI * sigma.x * sigma.y);
+        float vx = -0.5f / (sigma.x * sigma.x);
+        float vy = -0.5f / (sigma.y * sigma.y);
+        for (int jj = 0; jj < h; jj ++)
         {
-            m_min = src.clone();//m_min = 0.0;
-            m_max = src.clone();//m_max = 0.0;
-            m_sig = src.clone();m_sig = 0.0;
+            float vydy2 = float(jj - center.y)/h; vydy2 *= vydy2 * vy;
+            float* pelPtr = (float*) ret.ptr(jj);
+            for (int ii = 0; ii < w; ii ++, pelPtr++)
+            {
+                float dx2 = float(ii - center.x)/w; dx2 *= dx2;
+                dx2 = (fac * expf(vx * dx2 + vydy2));
+                *pelPtr = dx2;
+                maxVar.first = (dx2 < maxVar.first) ? dx2 : maxVar.first;
+                maxVar.second = (dx2 > maxVar.second) ? dx2 : maxVar.second;
+            }
         }
-        cv::min(src, m_min, m_min);
-        cv::max(src, m_max, m_max);
-        cv::subtract(m_max, m_min, m_sig);
-        m_count += 1;
+        
+        float range = maxVar.second - maxVar.first;
+        for (int jj = 0; jj < h; jj ++)
+        {
+            uint8_t* pel8Ptr = ret8.ptr(jj);
+            float* pelPtr = (float*) ret.ptr(jj);
+            for (int ii = 0; ii < w; ii ++, pelPtr++, pel8Ptr++)
+            {
+                float dx2 = *pelPtr;
+                dx2 = (dx2 - maxVar.first) / range;
+                *pel8Ptr = (uchar) (dx2*255);
+            }
+        }
+        return ret8;
     }
     
-    void motionSmear::add_to_deform(const cv::Mat& src, const fPair & trim) const
-    {
-        assert(src.channels() == 1);
-        
-        if (m_prev.empty() )
-        {
-            m_prev = src.clone();//m_min = 0.0;
-            cv::GaussianBlur(m_prev, m_prev, cv::Size(11,11), 5.00);
-            return;
-        }
-        
-        cv::Mat gm = src.clone ();
-        vec2 isize (gm.cols, gm.rows);
-        
-        cv::GaussianBlur(src, gm, cv::Size(11,11), 5.00);
-        
-        roiWindow<P8U> rw;
-        NewFromOCV(gm, rw);
-        roiWindow<P8U> roi (rw.frameBuf(), trim.first, trim.second, rw.width() - 2*trim.first, rw.height() - 2*trim.second );
-        fPair center;
-        GetMotionCenter(roi, center, 10);
-        center += trim;
-        m_prev_com = m_com;
-        m_com = vec2(center.first, center.second);
-        
-        cv::Point2f com (m_com.x , m_com.y );
-        m_com.x = m_com.x / isize.x;
-        m_com.y = m_com.y / isize.y;
+    
+    /////////////////////////////////////////////////////////
 
+    cv::Mat redRain (const cv::Mat& hue, float red_spread)
+    {
+        red_spread = std::fmod (red_spread, 1.0f);
+        cv::Mat cvlut (1, 256, CV_8UC1);
+        cvlut = uint8_t(0);
         
-        cv::absdiff(gm, m_prev, m_prev);
-        cv::Point2f dcom;
-        getLuminanceCenterOfMass (m_prev, dcom);
-        vec2 m (dcom.x , dcom.y );
-        dcom.x = dcom.x / isize.x;
-        dcom.y = dcom.y / isize.y;
+        std::vector<uint32_t> lut (256, 0);
+        float range = std::floor (red_spread * 256);
+        std::vector<uint32_t>::iterator be = lut.begin();
+        std::vector<uint32_t>::iterator en = lut.begin();
+        std::advance (en, 180);
         
-        m = m_com - m_prev_com;
-        
-        m_count += 1;
-    }
-    
-    const cv::Mat& motionSmear::signature (ellipse_parms& ep) const
-    {
-        direction_moments (m_sig, ep);
-        return m_sig;
-    }
-    
-    const uint32_t motionSmear::count () const
-    {
-        return m_count;
-    }
-    
-    
-    const vec2 motionSmear::deform () const
-    {
-        return m_com - m_prev_com;
-    }
-    
-    
-    /////////////////////////////////////////////////////////
-    
-    
-#if 0
-    template <typename ElemT, int cn>
-    inline float vecNormSqrd(const cv::Vec<ElemT, cn> &v)
-    {
-        float s = 0;
-        for (int i = 0; i < cn; i++) {
-            s += float(v[i] * v[i]);
+        for (float index = 1.0f; index <= range; index+=1.0f)
+        {
+            float fv = std::tanh(M_PI / index) * 255;
+            uint32_t iv = std::floor(fv);
+            *be++ = iv;
+            *en-- = iv;
         }
-        return s;
-    }
-    
-    float vecAngle(const Vec2f &a, const Vec2f &b)
-    {
-        float dp = float(a.dot(b));
-        float cross = float(b[1] * a[0] - b[0] * a[1]);
-        dp /= sqrt(float((vecNormSqrd(a) * vecNormSqrd(b))));
+
+        for (auto ll = 0;ll < 256; ll++)
+        {
+            cvlut.at<uint8_t>(0,ll) = uint8_t(lut[ll]);
+  //          std::cout << "{" << ll << "," << setprecision(3) << lut[ll] << "},";
+        }
+        cv::Mat dst = hue.clone ();
+        cv::LUT(hue, cvlut, dst);
+        return dst;
         
-        return acos(dp) * float(std::signbit(cross));
     }
-    
-    float orintedAngle (const cv::Point2f &a, const cv::Point2f &b, const cv::Point2f &c) {
-        return vecAngle((a - b), (c - b));
-    }
-    
-    
-    Mat &svl::getRotatedROI(const Mat &src, const RotatedRect &r, Mat &dest)
+    // Silly Implementation: calculates the median value of a single channel
+    // based on https://github.com/arnaudgelas/OpenCVExamples/blob/master/cvMat/Statistics/Median/Median.cpp
+    double median( cv::Mat channel )
     {
-        Mat transMat;
-        xformMat(src, dest, r.angle, 1.0, &transMat);
-        cv::Point newPt = svl::warpAffinePt(transMat, r.center);
-        dest = dest(cv::Rect(Point2f(float(newPt.x) - r.size.width * 0.5f, float(newPt.y) - r.size.height * 0.5f), r.size));
-        return dest;
-    }
-    
-    
-    
-    
-    {
-        ostream &cv::operator<<(ostream &out, const Scalar s) {
-            out << "<Scalar (" << s[0] << ", " << s[1] << ", " << s[2] << ", " << s[3] << ")>";
-            return out;
+        double m = (channel.rows*channel.cols) / 2;
+        int bin = 0;
+        double med = -1.0;
+        
+        int histSize = 256;
+        float range[] = { 0, 256 };
+        const float* histRange = { range };
+        bool uniform = true;
+        bool accumulate = false;
+        cv::Mat hist;
+        cv::calcHist( &channel, 1, 0, cv::Mat(), hist, 1, &histSize, &histRange, uniform, accumulate );
+        
+        for ( int i = 0; i < histSize && med < 0.0; ++i )
+        {
+            bin += cvRound( hist.at< float >( i ) );
+            if ( bin > m && med < 0.0 )
+                med = i;
         }
         
-        ostream &cv::operator<<(ostream &out, const uchar c) {
-            out << unsigned(c);
-            return out;
+        return med;
+    }
+
+    float Median1dF (const cv::Mat& fmat, size_t& loc)
+    {
+        assert((1 == fmat.rows) || (1 == fmat.cols));
+        
+        const int32_t length =  fmat.cols == 1 ? fmat.rows : fmat.cols;
+        std::vector<float> array;
+        auto sum = std::accumulate(fmat.begin<float>(), fmat.end<float>(), 0.0f);
+        auto med_target = sum / 2;
+        auto sofar = 0;
+        for (auto mItr = fmat.begin<float>(); mItr < fmat.end<float>(); mItr++)
+        {
+            sofar += *mItr;
+            array.push_back ((sofar - med_target) * (sofar - med_target));
+        }
+        
+        
+        // Find where it was closest
+        auto closest_to_median = std::min_element(array.begin(), array.end());
+        loc = std::distance (array.begin(), closest_to_median);
+        return med_target;
+    }
+    
+
+    void horizontal_vertical_projections (const cv::Mat& mat, cv::Mat& hz, cv::Mat& vt)
+    {
+//        @param dim dimension index along which the matrix is reduced. 0 means that the matrix is reduced to
+//        a single row. 1 means that the matrix is reduced to a single column.
+        reduce(mat,vt,1,CV_REDUCE_SUM,CV_32F);
+        reduce(mat,hz,0,CV_REDUCE_SUM,CV_32F);
+    }
+    
+    std::pair<size_t, size_t> medianPoint (const cv::Mat& mat)
+    {
+        Mat vertMat, horzMat;
+        horizontal_vertical_projections(mat, horzMat, vertMat);
+        std::pair<size_t,size_t> med;
+        Median1dF(vertMat, med.second);
+        Median1dF(horzMat, med.first);
+        return med;
+    }
+    
+    
+    void sobel_opencv (const cv::Mat& input_gray, cv::Mat& mag, cv::Mat& ang, bool output8U)
+    {
+        
+        // compute the gradients on both directions x and y
+        Mat grad_x, grad_y;
+        Mat abs_grad_x, abs_grad_y;
+        int ddepth = CV_32F; // use 16 bits unsigned to avoid overflow
+        
+        Sobel( input_gray, grad_x, ddepth, 1, 0); //kx, scale, delta, BORDER_DEFAULT );
+        Sobel( input_gray, grad_y, ddepth, 0, 1); // , ky, scale, delta, BORDER_DEFAULT );
+        cv::Mat sobel_mag;
+        cv::Mat sobel_ang;
+        cv::cartToPolar(grad_x, grad_y, sobel_mag, sobel_ang, true);
+        
+        
+        if (output8U)
+        {
+            double minval, maxval;
+            // cv::minMaxLoc(sobel_mag,&minval,&maxval);
+            sobel_mag.convertTo(mag,CV_8U);
+            sobel_ang.convertTo(ang,CV_8U,256.0/360.0);
         }
     }
-#endif
+    
+    // Computes the 1D histogram.
+    cv::Mat getHistogram(const cv::Mat1b &image, const cv::Mat1b &mask)
+    {
+        cv::Mat hist;
+        
+        int histSize[1];         // number of bins in histogram
+        float hranges[2];        // range of values
+        const float* ranges[1];  // pointer to the different value ranges
+        int channels[1];         // channel number to be examined
+        histSize[0]= 256;   // 256 bins
+        hranges[0]= 0.0;    // from 0 (inclusive)
+        hranges[1]= 256.0;  // to 256 (exclusive)
+        ranges[0]= hranges;
+        channels[0]= 0;     // we look at channel 0
+        
+        // Compute histogram
+        cv::calcHist(&image,
+                     1,			// histogram of 1 image only
+                     0,	// the channel used
+                     mask,	// no mask is used
+                     hist,		// the resulting histogram
+                     1,			// it is a 1D histogram
+                     histSize,	// number of bins
+                     ranges		// pixel value range
+                     );
+        
+        return hist;
+    }
+    
+    
+    // Return -1 or 0-255 for left_tail
+    void toHistVector (const cv::Mat& hist, std::vector<float>& vh)
+    {
+        vh.clear ();
+        if (hist.rows != 256) return;
+        
+        for (int i=0; i<256 ;i++)
+            vh.push_back(hist.at<float>(i));
+    }
+    
+    
+    // Return -1 or 0-255 for left_tail
+    int leftTailPost (const cv::Mat1b& image, float left_tail_fraction)
+    {
+        auto hist = getHistogram (image);
+        float left_fraction_n = left_tail_fraction * image.rows * image.cols;
+        float ncount = 0;
+        int left_tail_value = 0;
+        for (int i=0; i<256 ;i++)
+        {
+            ncount += hist.at<float>(i);
+            if (ncount > left_fraction_n)
+            {
+                left_tail_value = i;
+                break;
+            }
+        }
+        return std::max(1,left_tail_value);
+    }
+    
+    
+    void output(Mat mat, int prec, float base, char be, char en)
+    {
+        auto mulp = std::pow(10.0, prec);
+        cout << be;
+        for(int i=0; i<mat.size().height; i++)
+        {
+            cout << be;
+            for(int j=0; j<mat.size().width; j++)
+            {
+                cout << setprecision(prec) << static_cast<int32_t>(mulp * (base - mat.at<float>(i,j)));
+                if(j != mat.size().width-1)
+                    cout << ", ";
+                else
+                    cout << en << endl;
+            }
+            if(i != mat.size().height-1)
+                cout << ", ";
+            else
+                cout << en << endl;
+        }
+    }
+    
+
+    void outputU8 (const Mat& mat, char be, char en)
+    {
+        cout << be;
+        for(int i=0; i<mat.size().height; i++)
+        {
+            cout << be;
+            for(int j=0; j<mat.size().width; j++)
+            {
+                cout << static_cast<int32_t>(mat.at<uint8_t>(i,j));
+                if(j != mat.size().width-1)
+                    cout << ", ";
+                else
+                    cout << en << endl;
+            }
+            if(i != mat.size().height-1)
+                cout << ", ";
+            else
+                cout << en << endl;
+        }
+    }
+    
+    void CreateGaussSpace(const cv::Mat& img, std::vector<cv::Mat>& blured, float tmin, float tmax, float tdelta)
+    {
+        int L = (int)((tmax - tmin) / tdelta) + 1;
+        std::string displayName ("Gauss Space");
+        
+        cv::namedWindow(displayName, CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED);
+        
+        blured.resize(0);
+        
+        // create level-1 image
+        double tI = tmin;
+        float sigmaI = exp(tI);
+        
+        cv::Mat tmp = img.clone ();
+        cv::GaussianBlur(img, tmp, cv::Size(0,0), sigmaI);
+        
+        blured.push_back(tmp);
+        tI += tdelta;
+        
+        for(int i = 1; i < L; i++)
+        {
+            float sigmaI_tmp = exp(tI);
+            float sigmaI_new = sqrt(sigmaI_tmp*sigmaI_tmp - sigmaI*sigmaI);
+            cv::Mat next = img.clone ();
+            std::cout << sigmaI_new << std::endl;
+            
+            cv::GaussianBlur(img, next, cv::Size(0,0), sigmaI_new);
+            blured.push_back(next);
+            sigmaI = sigmaI_tmp;
+            tI += tdelta;
+        }
+    }
+    
+    void CreateScaleSpace(const cv::Mat& img, std::vector<cv::Mat>& blured, float tmin, float tmax, float tdelta,
+                          std::vector<cv::Mat>& scaled,
+                          std::vector<ssBlob>& blobs)
+    {
+        
+        CreateGaussSpace(img,blured,tmin,tmax,tdelta);
+        
+        scaled.resize (0);
+        // apply laplacian filter
+        for(int i = 0; i < blured.size(); i++)
+        {
+            cv::Mat laplace;
+            cv::Laplacian(blured[i],laplace, CV_32F);
+            scaled.push_back(laplace);
+        }
+        
+        // find maxima - detect blobs
+        blobs.resize (0);
+        
+        // traverse the scale space
+        for(int s = 0; s < blured.size(); s++)
+        {
+            const cv::Mat& imgS = blured[s];
+            for(int j = 4; j < imgS.cols-4; j++)
+            {
+                for(int i = 4; i < imgS.rows-4; i++)
+                {
+                    float lum = imgS.at<float>(i,j);
+                    
+                    if (isnan(lum))
+                        continue;
+                    
+                    if(lum < 0.75f) continue;
+                    
+                    int w = 5;
+                    bool max = true;
+                    for(int k = 0; k < w; k++)
+                    {
+                        for(int l=0; l < w; l++)
+                        {
+                            if(k - w/2 == 0 && l - w/2 == 0) continue;
+                            if(lum <= imgS.at<float>(i + k - w/2, j + l - w/2))
+                            {
+                                max = false;
+                                break;
+                            }
+                        }
+                        if(!max) break;
+                    }
+                    
+                    if(max)
+                    {
+                        if(s != 0)
+                        {
+                            if(lum <= scaled[s-1].at<float>(i,j) ||
+                               lum <= scaled[s-1].at<float>(i-1,j) ||
+                               lum <= scaled[s-1].at<float>(i+1,j) ||
+                               lum <= scaled[s-1].at<float>(i,j-1) ||
+                               lum <= scaled[s-1].at<float>(i,j+1) ||
+                               lum <= scaled[s-1].at<float>(i-1,j-1) ||
+                               lum <= scaled[s-1].at<float>(i+1,j+1) ||
+                               lum <= scaled[s-1].at<float>(i-1,j+1) ||
+                               lum <= scaled[s-1].at<float>(i+1,j-1))
+                            {
+                                max = false;
+                                continue;
+                            }
+                        }
+                        
+                        if(s != scaled.size()-1)
+                        {
+                            if(lum <= scaled[s+1].at<float>(i,j) ||
+                               lum <= scaled[s+1].at<float>(i-1,j) ||
+                               lum <= scaled[s+1].at<float>(i+1,j) ||
+                               lum <= scaled[s+1].at<float>(i,j-1) ||
+                               lum <= scaled[s+1].at<float>(i,j+1) ||
+                               lum <= scaled[s+1].at<float>(i-1,j-1) ||
+                               lum <= scaled[s+1].at<float>(i+1,j+1) ||
+                               lum <= scaled[s+1].at<float>(i-1,j+1) ||
+                               lum <= scaled[s+1].at<float>(i+1,j-1))
+                            {
+                                max = false;
+                                continue;
+                            }
+                        }
+                        
+                        ssBlob sb;
+                        sb.loc.x = j; sb.loc.y = i;
+                        sb.radius = 1.41f * (exp(tmin) + s*tdelta);
+                        sb.ss_val = s;
+                        blobs.push_back(sb);
+                    }
+                }
+            }
+        }
+        
+    }
+    
     
 }
+
+
+
+
+#if 0
+template <typename ElemT, int cn>
+inline float vecNormSqrd(const cv::Vec<ElemT, cn> &v)
+{
+    float s = 0;
+    for (int i = 0; i < cn; i++) {
+        s += float(v[i] * v[i]);
+    }
+    return s;
+}
+
+float vecAngle(const Vec2f &a, const Vec2f &b)
+{
+    float dp = float(a.dot(b));
+    float cross = float(b[1] * a[0] - b[0] * a[1]);
+    dp /= sqrt(float((vecNormSqrd(a) * vecNormSqrd(b))));
+    
+    return acos(dp) * float(std::signbit(cross));
+}
+
+float orintedAngle (const cv::Point2f &a, const cv::Point2f &b, const cv::Point2f &c) {
+    return vecAngle((a - b), (c - b));
+}
+
+
+Mat &svl::getRotatedROI(const Mat &src, const RotatedRect &r, Mat &dest)
+{
+    Mat transMat;
+    xformMat(src, dest, r.angle, 1.0, &transMat);
+    cv::Point newPt = svl::warpAffinePt(transMat, r.center);
+    dest = dest(cv::Rect(Point2f(float(newPt.x) - r.size.width * 0.5f, float(newPt.y) - r.size.height * 0.5f), r.size));
+    return dest;
+}
+
+
+
+
+{
+    ostream &cv::operator<<(ostream &out, const Scalar s) {
+        out << "<Scalar (" << s[0] << ", " << s[1] << ", " << s[2] << ", " << s[3] << ")>";
+        return out;
+    }
+    
+    ostream &cv::operator<<(ostream &out, const uchar c) {
+        out << unsigned(c);
+        return out;
+    }
+}
+#endif
+

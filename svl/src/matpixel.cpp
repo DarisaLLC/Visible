@@ -17,6 +17,7 @@
 #include "core/timestamp.h"
 #include "core/rand_support.h"
 #include <random>
+#include "vision/roiVariant.hpp"
 
 using namespace svl;
 
@@ -47,6 +48,25 @@ namespace
     }
     
 }
+
+bool svl::vroiIsBound ( roiVP8UC& vr)
+{
+    isBoundVisitor bv;
+    return boost::apply_visitor(bv, vr);
+}
+
+int32_t svl::vroiChannels ( roiVP8UC& vr)
+{
+    channelVisitor iv;
+    return boost::apply_visitor(iv, vr);
+}
+
+iPair svl::vroiSize (roiVP8UC& vr)
+{
+    sizeVisitor sv;
+    return boost::apply_visitor(sv, vr);
+}
+
 template <typename P>
 void roiWindow<P>::randomFill( uint32_t seed )
 {

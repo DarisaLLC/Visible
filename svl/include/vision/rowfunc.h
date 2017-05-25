@@ -248,7 +248,7 @@ class basicCorrRowFunc : public rowFuncTwoSource<T>
 {
 public:
     basicCorrRowFunc(const T * baseA, const T * baseB, uint32_t rupA, uint32_t rupB,
-                     uint32_t width, uint32_t height);
+                     uint32_t width, uint32_t height, bool ffMaskOn = false);
 
     virtual void prolog();
     virtual void rowFunc();
@@ -259,6 +259,8 @@ public:
 
 private:
     CorrelationParts mRes;
+    uint32_t mMaskPels;
+    bool mffMaskOn;
     std::pair<uint32_t, uint32_t> mRUP;
     sSqrTable<T> m_squareTable;
 };

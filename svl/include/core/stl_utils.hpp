@@ -521,7 +521,7 @@ namespace stl_utils
     }
     
     /**
-     * Get teh set of keys in a map as a vector
+     * Get the set of keys in a map as a vector
      */
     template <typename Key, typename T>
     std::vector<Key> keys_as_vector(const std::map<Key, T>& map) {

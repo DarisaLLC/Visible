@@ -17,8 +17,8 @@ ostream & operator<<(ostream & os, const CorrelationParts & corr)
 
 template <class T>
 basicCorrRowFunc<T>::basicCorrRowFunc(const T * baseA, const T * baseB, uint32_t rowPelsA, uint32_t rowPelsB,
-                                      uint32_t width, uint32_t height)
-    : mRUP(rowPelsA, rowPelsB)
+                                      uint32_t width, uint32_t height, bool ffMaskOn)
+    : mRUP(rowPelsA, rowPelsB), mffMaskOn(ffMaskOn)
 {
     rowFuncTwoSource<T>::mWidth = width;
     rowFuncTwoSource<T>::mHeight = height;
@@ -117,17 +117,41 @@ inline void basicCorrRowFunc<uint8_t>::rowFunc()
         onetime = square_table().validate();
     }
     
-    for (const uint8_t * pEnd = mFirst + mWidth; pFirst < pEnd; ++pFirst, ++pSecond)
+    if (! mffMaskOn)
     {
-        const uint32_t i = *pFirst;
-        const uint32_t j = *pSecond;
+        for (const uint8_t * pEnd = mFirst + mWidth; pFirst < pEnd; ++pFirst, ++pSecond)
+        {
+            const uint32_t i = *pFirst;
+            const uint32_t j = *pSecond;
 
-        Si += i;
-        Sm += j;
-        Sii += sqr_lut[i];
-        Smm += sqr_lut[j];
-        Sim += sqr_lut[i + j];
+            Si += i;
+            Sm += j;
+            Sii += sqr_lut[i];
+            Smm += sqr_lut[j];
+            Sim += sqr_lut[i + j];
+        }
     }
+    else
+    {
+        for (const uint8_t * pEnd = mFirst + mWidth; pFirst < pEnd; ++pFirst, ++pSecond)
+        {
+            uint32_t i = *pFirst;
+            uint32_t j = *pSecond;
+            auto ii = (i == uint8_t(255)) ? 1 : 0;
+            ii += (j == uint8_t(255)) ? 1 : 0;
+
+            mMaskPels += ii;
+            if (ii != 0) continue;
+            
+            Si += i;
+            Sm += j;
+            Sii += sqr_lut[i];
+            Smm += sqr_lut[j];
+            Sim += sqr_lut[i + j];
+        }
+  
+    }
+    
     mRes.accumulate(Sim, Sii, Smm, Si, Sm);
 
     mFirst += mRUP.first;

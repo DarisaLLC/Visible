@@ -273,6 +273,9 @@
 		C24FC84C1E5E40130071AA1A /* async_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = async_producer.h; path = ../include/async_producer.h; sourceTree = "<group>"; };
 		C24FC84D1E5E56960071AA1A /* roiMultiWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = roiMultiWindow.h; sourceTree = "<group>"; };
 		C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_mov_impl.cpp; path = ../src/visible_mov_impl.cpp; sourceTree = "<group>"; };
+		C259982B1ECF668F0015EE7B /* cardiomyocyte_model.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cardiomyocyte_model.hpp; path = ../../../svl/include/cardio_model/cardiomyocyte_model.hpp; sourceTree = "<group>"; };
+		C259982C1ECF668F0015EE7B /* cerruti_rectangle_integral.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cerruti_rectangle_integral.hpp; path = ../../../svl/include/cardio_model/cerruti_rectangle_integral.hpp; sourceTree = "<group>"; };
+		C259982D1ECF668F0015EE7B /* metric.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metric.hpp; path = ../../../svl/include/cardio_model/metric.hpp; sourceTree = "<group>"; };
 		C260099D1CED3E010045FF57 /* check_rgb8.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = check_rgb8.jpg; sourceTree = "<group>"; };
 		C260099E1CED3E010045FF57 /* check_u8.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = check_u8.jpg; sourceTree = "<group>"; };
 		C260099F1CED3E010045FF57 /* check_u8.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = check_u8.png; sourceTree = "<group>"; };
@@ -9966,6 +9969,17 @@
 			path = ../test;
 			sourceTree = "<group>";
 		};
+		C259982E1ECF66950015EE7B /* cardio */ = {
+			isa = PBXGroup;
+			children = (
+				C259982B1ECF668F0015EE7B /* cardiomyocyte_model.hpp */,
+				C259982C1ECF668F0015EE7B /* cerruti_rectangle_integral.hpp */,
+				C259982D1ECF668F0015EE7B /* metric.hpp */,
+			);
+			name = cardio;
+			path = ../../projects/Visible/xcode;
+			sourceTree = "<group>";
+		};
 		C260099A1CED3E010045FF57 /* svl */ = {
 			isa = PBXGroup;
 			children = (
@@ -10092,6 +10106,7 @@
 		C26009DF1CED3E010045FF57 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C259982E1ECF66950015EE7B /* cardio */,
 				C23D0F491E29826F0049ADDB /* otherIO */,
 				C26009E01CED3E010045FF57 /* cinder */,
 				C26009EA1CED3E010045FF57 /* core */,
@@ -25737,6 +25752,7 @@
 				8D1107290486CEB800E47090 /* Resources */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
+				C259982F1ECF7C270015EE7B /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -25790,6 +25806,10 @@
 			attributes = {
 				LastUpgradeCheck = 0420;
 				TargetAttributes = {
+					8D1107260486CEB800E47090 = {
+						DevelopmentTeam = W4F7HL2GN5;
+						ProvisioningStyle = Automatic;
+					};
 					C24CD87B1CEA5B1B0008C72B = {
 						CreatedOnToolsVersion = 7.3;
 					};
@@ -25832,6 +25852,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C259982F1ECF7C270015EE7B /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "./Fabric.framework/run 6c107bbc4d9b676f55d670b4a1baacbff9754c65 1190b5b2eda58cb562659f650e2800609eae0587f4a139ce86370628e5ce54d0\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8D11072C0486CEB800E47090 /* Sources */ = {
@@ -25948,9 +25984,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = beta;
 				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = W4F7HL2GN5;
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
 				ENABLE_ON_DEMAND_RESOURCES = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -25984,8 +26023,9 @@
 					"$(LOCAL_OCV)/lib/osx/libzlib.a",
 					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.darisallc.visible;
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				USER_HEADER_SEARCH_PATHS = include;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
@@ -25996,10 +26036,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = beta;
 				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = W4F7HL2GN5;
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
 				ENABLE_ON_DEMAND_RESOURCES = NO;
 				GCC_FAST_MATH = YES;
@@ -26032,8 +26074,9 @@
 					"$(LOCAL_OCV)/lib/osx/libopencv_objdetect.a",
 					"$(LOCAL_OCV)/lib/osx/libzlib.a",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.darisallc.visible;
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = include;
 				WRAPPER_EXTENSION = app;

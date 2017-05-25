@@ -23,7 +23,8 @@ class CorrelationParts
 public:
     typedef int64_t sumproduct_t;
     
-    CorrelationParts () : mR(0.0), mSi(0), mSm (0), mSii (0), mSmm (0), mSim (0), mN(0), mRp(0), mEim (0), mCosine (0) {}
+    CorrelationParts () : mR(0.0), mSi(0), mSm (0), mSii (0), mSmm (0), mSim (0), mN(0), mRp(0), mEim (0),
+        mffMaskOn (false), mCosine (0) {}
     
     // default copy, assignment, dtor ok
     
@@ -63,6 +64,10 @@ public:
         assert( mSm >= 0.0 );
         return std::sqrt (r () );
     }
+    
+    // Masking: 255 on either image is excluded from operation and are not counted
+    inline bool isffMaskOn () { return mffMaskOn; }
+    inline void xffMask (bool which) { mffMaskOn = which; }
     
     inline void accumulate (sumproduct_t& sim,
                             sumproduct_t& sii,
@@ -116,6 +121,7 @@ private:
     sumproduct_t mSii, mSmm, mSim;
     int mN;
     bool mRp;
+    bool mffMaskOn;
 };
 
 // Stream output operator
@@ -242,7 +248,7 @@ class basicCorrRowFunc : public rowFuncTwoSource<T>
 {
 public:
     basicCorrRowFunc (const T* baseA, const T* baseB, uint32_t rupA, uint32_t rupB,
-                      uint32_t width, uint32_t height);
+                      uint32_t width, uint32_t height, bool ffMaskOn);
     
     virtual void prolog ();
     virtual void rowFunc ();
@@ -253,6 +259,8 @@ public:
     
 private:
     CorrelationParts   mRes;
+    uint32_t mMaskPels;
+    bool mffMaskOn;
     std::pair<uint32_t,uint32_t> mRUP;
     static sSqrTable <T> m_squareTable;
 };
@@ -264,8 +272,8 @@ private:
 
 template <class T>
 basicCorrRowFunc<T>::basicCorrRowFunc (const T* baseA, const T* baseB, uint32_t rowPelsA, uint32_t rowPelsB,
-                                       uint32_t width, uint32_t height) :
-mRUP( rowPelsA , rowPelsB  )
+                                       uint32_t width, uint32_t height, bool ffMaskOn) :
+mRUP( rowPelsA , rowPelsB  ), mffMaskOn(ffMaskOn), mMaskPels (0)
 {
     rowFuncTwoSource<T>::mWidth = width;
     rowFuncTwoSource<T>::mHeight = height;
@@ -287,7 +295,8 @@ void basicCorrRowFunc<T>::areaFunc ()
 template <class T>
 void basicCorrRowFunc<T>::epilog (CorrelationParts& res)
 {
-    mRes.n (rowFuncTwoSource<T>::mWidth * rowFuncTwoSource<T>::mHeight);
+    auto mpels = mffMaskOn ? mMaskPels : 0;
+    mRes.n ((rowFuncTwoSource<T>::mWidth * rowFuncTwoSource<T>::mHeight) - mpels );
     mRes.compute ();
     res = mRes;
 }

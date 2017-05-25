@@ -364,7 +364,7 @@ void VisibleApp::update()
 
 void VisibleApp::draw ()
 {
-    gl::clear( Color( 0.3f, 0.3f, 0.3f ) );
+    gl::clear( Color( 0.87f, 0.33f, 0.33f ) );
     
     guiContext  *data = getWindow()->getUserData<guiContext>();
     

@@ -267,7 +267,10 @@ protected:
 
 };
 
-
+    typedef roiWindow<P8U> roiWindow_P8U_t;
+    typedef roiWindow<P8UC3> roiWindow_P8UC3_t;
+    typedef roiWindow<P8UC4> roiWindow_P8UC4_t;
+    
 }
 
 #endif // _WINDOW_H_

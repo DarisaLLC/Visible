@@ -47,7 +47,7 @@ namespace svl
         
         // Constructors
         roiMultiWindow();
-        roiMultiWindow(const std::vector<std::string>& names_l2r = {"Red", "Green", "Blue"} , int64_t timestamp = 0,
+        roiMultiWindow(const std::vector<std::string>& names_l2r, int64_t timestamp = 0,
                        image_memory_alignment_policy im = image_memory_alignment_policy::align_first_row);
         
         

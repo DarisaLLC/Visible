@@ -1,28 +1,33 @@
-#ifndef __CINDER_SUPPORT__
-#define __CINDER_SUPPORT__
+#ifndef __CINDER_XCHG__
+#define __CINDER_XCHG__
 
 #include <boost/filesystem.hpp>
 #include <cinder/Channel.h>
 #include <cinder/Area.h>
 #include <limits>
-#include "cinder/ImageIo.h"
+//#include "cinder/ImageIo.h"
 #include "cinder/Utilities.h"
 #include "vision/roiWindow.h"
+#include "vision/roiVariant.hpp"
 #include "vision/roiMultiWindow.h"
 #include "core/vector2d.hpp"
 #include <fstream>
-#include "core/singleton.hpp"
+//#include "core/singleton.hpp"
 #include "cinder/ImageSourcePng.h"
 #include "cinder/ip/Grayscale.h"
 
 
+
+
 using namespace std;
 using namespace svl;
+namespace ip=ci::ip;
 
 namespace fs = boost::filesystem;
 
 namespace svl
 {
+    
     
     inline vec2 fromSvl( const fVector_2d &point )
     {
@@ -33,14 +38,29 @@ namespace svl
     {
         return fVector_2d ( point.x, point.y );
     }
-
- 
-    template<typename D>
-    struct fromSurface8UCloner
+    
+    template<typename C, typename S>
+    struct imageRep;
+    
+    template<typename C, typename S>
+    struct imageRep
     {
-        void operator () (const Surface8uRef&, roiWindow<D>&);
+        static const bool mapsTo = false;
     };
-
+    
+    template<> struct imageRep<Surface8u,roiWindow<P8UC4>>
+    {
+        static const bool mapsTo = true;
+    };
+    
+    template<> struct imageRep<Channel8u,roiWindow<P8U>>
+    {
+        static bool const mapsTo = true;
+    };
+     
+    ci::Surface8uRef load_from_path (const fs::path& path, bool assume_jpg_if_no_extension = true);
+//    cv::Mat load_from_path_ocv (const fs::path& path,  bool assume_jpg_if_no_extension = true);
+    
     static std::shared_ptr<roiWindow<P8U>> NewRefFromChannel ( ChannelT<uint8_t>& onec)
     {
         uint8_t* pixels = onec.getData();
@@ -49,31 +69,15 @@ namespace svl
         return std::shared_ptr<roiWindow<P8U>> (new roiWindow<P8U>(rootref, 0, 0, onec.getWidth(), onec.getHeight()));
     }
     
-    // P8UP3 is 3 planes mapped as in the header file
-    static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromChannel ( ChannelT<uint8_t>& onec,
-                                                                          const std::vector<std::string>& names_l2r, int64_t timestamp = 0)
-    {
-        uint8_t* pixels = onec.getData();
-        std::shared_ptr<roiMultiWindow<P8UP3>> mwRef (new roiMultiWindow<P8UP3>(names_l2r, timestamp));
-        assert (onec.getWidth() == mwRef->width() && onec.getHeight() == mwRef->height());
-        mwRef->copy_pixels_from(pixels, onec.getWidth (),onec.getHeight (), (int32_t) onec.getRowBytes ());
-        return mwRef;
-    }
     
-    static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromSurface (const Surface8uRef& src,
-                                                                          const std::vector<std::string>& names_l2r = {"Red", "Green","Blue"},
-                                                                          int64_t timestamp = 0)
-    {
-        return NewRefMultiFromChannel (src->getChannel(0), names_l2r, timestamp);
-    }
     
-
+    // ci is the step number for channel.
     static roiWindow<P8U> NewFromChannel ( ChannelT<uint8_t>& onec, uint8_t ci)
     {
         assert(ci >= 0 && ci < 4);
         
         uint8_t* pixels = onec.getData();
-        roiWindow<P8U> window (onec.getWidth (),onec.getHeight ());
+        roiWindow<P8U> window (onec.getWidth (),onec.getHeight (), image_memory_alignment_policy::align_first_row);
         
         window.copy_pixels_from(pixels, onec.getWidth (),onec.getHeight (), (int32_t) onec.getRowBytes (), ci);
         return window;
@@ -81,18 +85,37 @@ namespace svl
     
     static roiWindow<P8U> NewChannelFromSurfaceAtIndex (const Surface8uRef& src, uint8_t ci)
     {
-        return NewFromChannel (src->getChannel(src->getRedOffset()), ci);
+        return NewFromChannel (src->getChannel(ci), ci);
     }
     
-    static roiWindow<P8UC4> NewFromSurface ( Surface8u *ones)
+    
+    static roiVP8UC  NewFromSurface (const Surface8u *ones)
     {
+        roiVP8UC unknown;
         uint8_t* pixels = (uint8_t*) ones->getData();
-        roiWindow<P8UC4> window (ones->getWidth (),ones->getHeight ());
-        window.copy_pixels_from(pixels, ones->getWidth (),ones->getHeight (), (int32_t) ones->getRowBytes ());
-        return window;
+        switch(ones->getPixelInc())
+        {
+            case 3:
+            {
+                roiWindow<P8UC3> window3 (ones->getWidth (),ones->getHeight ());
+                window3.copy_pixels_from(pixels, ones->getWidth (),ones->getHeight (), (int32_t) ones->getRowBytes ());
+                unknown = window3;
+            }
+                break;
+            case 4:
+            {
+                roiWindow<P8UC4> window4 (ones->getWidth (),ones->getHeight ());
+                window4.copy_pixels_from(pixels, ones->getWidth (),ones->getHeight (), (int32_t) ones->getRowBytes ());
+                unknown = window4;
+            }
+                break;
+            default:
+                assert(false);
+                break;
+        }
+        return unknown;
     }
     
- 
     
     static roiWindow<P8U> NewRedFromSurface (const Surface8uRef& src)
     {
@@ -108,13 +131,16 @@ namespace svl
     {
         return NewFromChannel (src->getChannel(src->getGreenOffset()), src->getGreenOffset());
     }
-
+    
     static roiWindow<P8U> NewGrayFromSurface (const Surface8uRef& src)
     {
         Channel8uRef ci8 = ChannelT<uint8_t>::create(src->getWidth(), src->getHeight());
-        ci::ip::grayscale (*src, ci8.get());
+        ip::grayscale (*src, ci8.get());
         return NewFromChannel (*ci8, 0);
     }
+
+    
+    
     
     template<typename P, class pixel_t = typename PixelType<P>::pixel_t>
     static std::shared_ptr<ChannelT<pixel_t> >  newCiChannel (const roiWindow<P>& w)
@@ -139,7 +165,24 @@ namespace svl
     }
     
     std::pair<Surface8uRef, Channel8uRef> image_io_read_surface (const boost::filesystem::path & pp);
-      
+    
+    
+    /*
+     * Returns a channel if the color order indicates monochrome, then a channel is returned, otherwise a surface
+     */
+    
+    svl::roiVP8UC image_io_read_varoi (const boost::filesystem::path & pp, const std::string& = "red", uint32_t dst_channels = 1);
+    
+    
+    //! Converts Surface \a srcSurface to grayscale and stores the result in Surface \a dstSurface. Uses primary weights dictated by the Rec. 709 Video Standard
+    template<typename T>
+    void graygmean( const SurfaceT<T> &srcSurface, SurfaceT<T> *dstSurface );
+    //! Converts Surface \a srcSurface to grayscale and stores the result in Channel \a dstChannel. Uses primary weights dictated by the Rec. 709 Video Standard
+    template<typename T>
+    void graygmean ( const SurfaceT<T> &srcSurface, ChannelT<T> *dstChannel );
+    
+    
+    
     
 }
 
