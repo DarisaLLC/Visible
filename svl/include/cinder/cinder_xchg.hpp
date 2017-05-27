@@ -181,7 +181,25 @@ namespace svl
     template<typename T>
     void graygmean ( const SurfaceT<T> &srcSurface, ChannelT<T> *dstChannel );
     
+
+    // LIF File Support 
+    // P8UP3 is 3 planes mapped as in the header file
+    static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromChannel ( ChannelT<uint8_t>& onec,
+                                                                          const std::vector<std::string>& names_l2r, int64_t timestamp = 0)
+    {
+        uint8_t* pixels = onec.getData();
+        std::shared_ptr<roiMultiWindow<P8UP3>> mwRef (new roiMultiWindow<P8UP3>(names_l2r, timestamp));
+        assert (onec.getWidth() == mwRef->width() && onec.getHeight() == mwRef->height());
+        mwRef->copy_pixels_from(pixels, onec.getWidth (),onec.getHeight (), (int32_t) onec.getRowBytes ());
+        return mwRef;
+    }
     
+    static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromSurface (const Surface8uRef& src,
+                                                                          const std::vector<std::string>& names_l2r = {"Red", "Green","Blue"},
+                                                                          int64_t timestamp = 0)
+    {
+        return NewRefMultiFromChannel (src->getChannel(0), names_l2r, timestamp);
+    }
     
     
 }
