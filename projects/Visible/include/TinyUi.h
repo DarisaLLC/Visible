@@ -181,7 +181,7 @@ namespace tinyUi
             mValue = mValueScaled = 0.0f;
             mMin = 0.0f;
             mMax = 1.0f;
-            mBackgroundColor = ColorA( "DarkGreen", 0.75f );
+            mBackgroundColor = ColorA( 0.67, 0.67, 0.67, 0.75f );
             mValueColor = ColorA( "SpringGreen", 0.75f );
             mTextColor = Color::white();
         }
@@ -224,22 +224,25 @@ namespace tinyUi
                 mTexFont = tinyUi::getWidgetTexFont();
             
             {
-                gl::ScopedColor A ( mBackgroundColor );
-                gl::drawSolidRect( mBounds );
-                
+                {
+                    gl::ScopedColor A ( mBackgroundColor );
+                    gl::drawSolidRect( mBounds );
+                }
                 auto valFormatted = boost::format( "%0.3f" ) % mValueScaled;
                 
                 std::string str = mTitle + ": " + valFormatted.str();
-                gl::color( mTextColor );
-                mTexFont->drawString( str, vec2( mBounds.x1 + mPadding, mBounds.getCenter().y + mTexFont->getFont().getDescent() ) );
+                {
+                    gl::ScopedColor B ( mTextColor );
+                    mTexFont->drawString( str, vec2( mBounds.x1 + mPadding, mBounds.getCenter().y + mTexFont->getFont().getDescent() ) );
+                }
             }
             
             {
-                gl::ScopedColor A ( mValueColor );
+                gl::ScopedColor A ( ColorA(0.25f, 0.5f, 1, 1 ) );
                 gl::drawStrokedRect( mBounds );
                 
                 float offset = mBounds.x1 + mBounds.getWidth() * mValue;
-                float w = 2.0f;
+                float w = 3.0f;
                 Rectf valRect( offset - w, mBounds.y1, offset + w, mBounds.y2 );
                 gl::drawSolidRoundedRect( valRect, w );
             }
