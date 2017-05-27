@@ -9,10 +9,12 @@
 #include "cinder/Function.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/gl/TextureFont.h"
-#include <Iterator>
-#include <Functional>
+#include <iterator>
+#include <functional>
 
+#include "cinder/TriMesh.h"
 #include "cinder/Timeline.h"
+#include "cinder/Triangulate.h"
 
 #include "InteractiveObject.h"
 #include "async_producer.h"
@@ -88,6 +90,7 @@ public:
             mBuffer.push_back (*reader++);
         }
         m_CB = bind (&graph1D::get, this, std::placeholders::_1);
+        make_plot_mesh ();
         mIsSet = true;
     }
     
@@ -110,6 +113,7 @@ public:
         }
         
         m_CB = bind (&graph1D::get, this, std::placeholders::_1);
+        make_plot_mesh ();
         mIsSet = mBuffer.size() == ds.size();
     }
     
@@ -138,7 +142,7 @@ public:
     void draw_value_label (float v, float x, float y) const
     {
         TextLayout layout;
-        layout.clear( cinder::Color::white() );
+        layout.clear(ColorA::gray(0.75) );
         layout.setFont( sSmallFont );
         layout.setColor( Color(0.5f, 0.5f, 0.5f ) );
         
@@ -149,33 +153,46 @@ public:
         ci::gl::draw( counter, vec2(x, y));
     }
     
+    void make_plot_mesh ()
+    {
+        const Rectf& content = getRect ();
+        mPoly.resize(0);
+        mPoly.push_back( PolyLine2f() );
+        
+        for( float x = 0; x < content.getWidth(); x ++ )
+        {
+            float y = m_CB ( x / content.getWidth());
+            if (y < 0) continue;
+            y = 1.0f - y;
+            mPoly.back().push_back( vec2( x , y * content.getHeight() ) + content.getUpperLeft());
+        }
+        
+        Triangulator triangulator;
+        for( vector<PolyLine2f>::const_iterator polyIt = mPoly.begin(); polyIt != mPoly.end(); ++polyIt )
+            triangulator.addPolyLine( *polyIt );
+        
+        mMesh = make_shared<TriMesh>( triangulator.calcMesh() );
+
+    }
     void draw() const
     {
         
         const Rectf& content = getRect ();
         
         {
-            gl::ScopedColor Color( 0.25f, 0.25f, 0.25f);
+            gl::ScopedColor A (ColorA ( 0.25f, 0.25f, 0.25f, 1.0));
             ci::gl::drawStrokedRect(content);
         }
         if (! mIsSet) return;
         
         // draw graph
         {
-            gl::ScopedColor ColorA( 0.0f, 0.0f, 1.0f, 1.0f );
-            gl::begin( GL_LINE_STRIP );
-            for( float x = 0; x < content.getWidth(); x ++ )
-            {
-                float y = m_CB ( x / content.getWidth());
-                if (y < 0) continue;
-                y = 1.0f - y;
-                ci::gl::vertex(vec2( x , y * content.getHeight() ) + content.getUpperLeft() );
-            }
-            gl::end();
+            gl::ScopedColor B (ColorA ( 0.0f, 0.0f, 1.0f, 1.0f ));
+            gl::draw(*mMesh);
         }
         
         {
-            gl::ScopedColor Color( 0.75f, 0.5f, 0.25f );
+            gl::ScopedColor C (ColorA(0.75f, 0.5f, 1, 1 ));
             glLineWidth(25.f);
             float px = norm_pos().x * content.getWidth();
             float mVal = m_CB (norm_pos().x);
@@ -204,6 +221,9 @@ private:
     mutable bool mIsSet;
     mutable float mVal;
     mutable int32_t mIndex;
+    std::vector<PolyLine2f>             mPoly;
+    TriMeshRef                          mMesh;
+    
     std::vector<float>                   mBuffer;
     
     bool empty () const { return mBuffer.empty (); }
