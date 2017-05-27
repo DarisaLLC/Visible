@@ -209,20 +209,20 @@ void movDirContext::setup()
     {
         
         getWindow()->setTitle( mPath.filename().string() );
-        mMovieParams = params::InterfaceGl( "Directory Player", vec2( getWindowWidth()/2, getWindowHeight()/2 ) );
+        mUIParams = params::InterfaceGl( "Directory Player", vec2( getWindowWidth()/2, getWindowHeight()/2 ) );
         
         
         std::string max = to_string( m_Dm->getDuration() );
         {
             const std::function<void (int)> setter = std::bind(&directoryPlayer::seekToFrame, m_Dm, std::placeholders::_1);
             const std::function<int ()> getter = std::bind(&directoryPlayer::getCurrentFrame, m_Dm);
-            mMovieParams.addParam (" Mark ", setter, getter);
+            mUIParams.addParam (" Mark ", setter, getter);
         }
         
-        mMovieParams.addSeparator();
-        mMovieParams.addButton(" Play / Pause ", bind( &movDirContext::play_pause_button, this ) );
-        mMovieParams.addSeparator();
-        mMovieParams.addButton(" Loop ", bind( &movDirContext::loop_no_loop_button, this ) );
+        mUIParams.addSeparator();
+        mUIParams.addButton(" Play / Pause ", bind( &movDirContext::play_pause_button, this ) );
+        mUIParams.addSeparator();
+        mUIParams.addButton(" Loop ", bind( &movDirContext::loop_no_loop_button, this ) );
         
         
     }
@@ -360,7 +360,7 @@ void movDirContext::draw ()
     m_Dm->draw (dr);
     
     draw_info ();
-    mMovieParams.draw();
+    mUIParams.draw();
     
 }
 

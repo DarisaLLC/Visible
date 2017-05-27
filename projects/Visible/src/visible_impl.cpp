@@ -289,7 +289,7 @@ void clipContext::loadAll (const  std::vector<vector<float> > & src)
     //    mClipParams = params::InterfaceGl (" Clip ", vec2( 200, 400) );
     
     //        string max = ci::toString( m_movie.getDuration() );
-    //        mMovieParams.addParam( "Column", &m_column_select, "min=0 max=" + columns );
+    //        mUIParams.addParam( "Column", &m_column_select, "min=0 max=" + columns );
 }
 
 

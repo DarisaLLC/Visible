@@ -305,18 +305,18 @@ void movContext::setup()
         {
             const std::function<void (int)> setter = std::bind(&movContext::seekToFrame, this, std::placeholders::_1);
             const std::function<int ()> getter = std::bind(&movContext::getCurrentFrame, this);
-            mMovieParams.addParam ("Current Time Step", setter, getter);
+            mUIParams.addParam ("Current Time Step", setter, getter);
         }
         
-        mMovieParams.addSeparator();
-        mMovieParams.addButton("Play / Pause ", bind( &movContext::play_pause_button, this ) );
-        mMovieParams.addSeparator();
-        mMovieParams.addButton(" Loop ", bind( &movContext::loop_no_loop_button, this ) );
+        mUIParams.addSeparator();
+        mUIParams.addButton("Play / Pause ", bind( &movContext::play_pause_button, this ) );
+        mUIParams.addSeparator();
+        mUIParams.addButton(" Loop ", bind( &movContext::loop_no_loop_button, this ) );
         
         //        {
         //            const std::function<void (float)> setter = std::bind(&movContext::setZoom, this, std::placeholders::_1);
         //            const std::function<float (void)> getter = std::bind(&movContext::getZoom, this);
-        //            mMovieParams.addParam( "Zoom", setter, getter);
+        //            mUIParams.addParam( "Zoom", setter, getter);
         //        }
         
     }
@@ -365,7 +365,7 @@ void movContext::loadMovieFile()
             if (m_valid)
             {
                 getWindow()->setTitle( mPath.filename().string() );
-                mMovieParams = params::InterfaceGl( "Movie Player", vec2( 260, 260 ) );
+                mUIParams = params::InterfaceGl( "Movie Player", vec2( 260, 260 ) );
                 
                 // TBD: wrap these into media_info
                 mScreenSize = vec2(std::fabs(m_movie->getWidth()), std::fabs(m_movie->getHeight()));
@@ -593,7 +593,7 @@ void movContext::draw ()
     for(Graph1DRef gg : m_tracks)
         gg->draw ();
     
-    mMovieParams.draw();
+    mUIParams.draw();
     
 }
 
