@@ -19,11 +19,11 @@ using namespace ci::signals;
  *   Visible Layout
  
  ************************    **********
- *                      *    * Plots  *
- *  Image               *    **********
- *                      *    *        *
- *                      *    **********
- *                      *    *        *
+ *   Image      C0      *    * Plots  *
+ * ******************   *    **********
+ *              C1      *    *        *
+ * ******************   *    **********
+ *              C2      *    *        *
  ************************    **********
  
  ************************    **********
@@ -32,7 +32,7 @@ using namespace ci::signals;
  
  **************************************
  *  Log Output                        *
-     **************************************
+ **************************************
  
  
  */
@@ -106,21 +106,27 @@ public:
             //       it.offset(-it.getUpperLeft());
             rawf = it;
         }
+        m_display2image = RectMapping (rawf, m_image_rect, true);
+        
         return rawf;
+    }
+    
+    inline const ivec2 display2image (const ivec2& pixel_loc)
+    {
+        return m_display2image.map(pixel_loc);
     }
     
     inline Rectf display_timeline_rect ()
     {
         assert (m_image_frame_size_norm.x == m_timeline_size_norm.x);
-        vec2 scali (1.0, m_timeline_size_norm.y / m_image_frame_size_norm.y);
+        auto timeline_size = timeline_frame_size ();
         // Get the image frame rect
+        // Set width to the actual image display width
+        // Space it in y at half of its expected size
         Rectf ir = display_frame_rect ();
-        // Move it down the height of the image rect + trim
-        vec2 offset (ir.getCenter().x, ir.getY2() + ir.getY1());
-        ir.offsetCenterTo (offset);
-        // Cut the height to timeline height
-        ir.scaleCentered (scali);
-        return ir;
+        vec2 TL (ir.getLowerLeft().x,ir.getLowerLeft().y + timeline_size.y / 2);
+        vec2 BR (TL.x + ir.getWidth() , TL.y + timeline_size.y);
+        return Rectf (TL, BR);
     }
     
     // Modify window size
@@ -210,6 +216,14 @@ private:
         vec2& np = image_frame_size_norm ();
         return ivec2 (np.x * desired_window_size().x, np.y * desired_window_size().y);
     }
+             
+  inline vec2& timeline_size_norm (){ return m_timeline_size_norm;}
+                              
+  inline ivec2 timeline_frame_size ()
+  {
+      vec2& np = timeline_size_norm ();
+      return ivec2 (np.x * desired_window_size().x, np.y * desired_window_size().y);
+  }
     
     // Plot areas on the right
     inline vec2 plots_frame_position_norm ()
@@ -275,6 +289,9 @@ private:
     LayoutSignalWindowSize_t m_windowSizeSignal;
     
     static float aspect (const ivec2& s) { return s.x / (float) s.y; }
+    
+    mutable RectMapping m_display2image;
+    
     
 };
 

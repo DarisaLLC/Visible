@@ -63,15 +63,18 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifse
     std::vector<std::string> names { "green", "red", "gray" };
     
     tiny_media_info tm;
-    tm.count = lifserie.getNbTimeSteps();
+    tm.count = (uint32_t)lifserie.getNbTimeSteps();
     auto dims = lifserie.getSpatialDimensions();
-    tm.size.width = static_cast<int>(dims[0]);
-    tm.size.height = static_cast<int>(dims[1]);
     tm.duration = lifserie.frame_duration_ms();
     tm.mFps = lifserie.frame_rate();
     tm.mIsLifSerie = true;
     tm.mIsImageFolder = false;
-    tm.mChannels = lifserie.getChannels().size();
+    tm.mChannels = (uint32_t)lifserie.getChannels().size();
+    
+    tm.channel_size.width = static_cast<int>(dims[0]);
+    tm.channel_size.height = static_cast<int>(dims[1]);
+    tm.size = tm.channel_size;
+    tm.size.height *= tm.mChannels;
     auto frame_count = 0;
     cm_time frame_time;
     

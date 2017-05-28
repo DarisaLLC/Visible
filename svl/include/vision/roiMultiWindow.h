@@ -18,7 +18,7 @@ using namespace std;
 
 namespace svl
 {
-    
+    // It is top center and bottom 
     /* +---------------+---------------+---------------+ */
     /* |               |               |               | */
     /* |               |               |               | */
@@ -82,6 +82,11 @@ namespace svl
         const std::string& name (const uint32_t& index)
         {
             return m_names[index];
+        }
+        
+        const iRect& roi (const uint32_t& index)
+        {
+            return m_bounds[index];
         }
         
         int32_t index (const std::string& name)

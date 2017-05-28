@@ -5,7 +5,7 @@
 #include "cinder/gl/Vbo.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rect.h"
-#include "cinder/qtime/QuicktimeGl.h"
+#include "cinder/qtime/QuickTimeGl.h"
 #include "cinder/CameraUi.h"
 #include "cinder/params/Params.h"
 #include "cinder/Timeline.h"
@@ -429,7 +429,7 @@ public:
 	
     const params::InterfaceGl& ui_params ()
     {
-        return mMovieParams;
+        return mUIParams;
     }
     
 	void setShowMotionCenter (bool b)  { mShowMotionCenter = b; }
@@ -462,8 +462,8 @@ private:
     vec2 mScreenSize;
     gl::TextureRef mImage;
     ci::qtime::MovieSurfaceRef m_movie;
-    size_t m_fc;
-    params::InterfaceGl         mMovieParams;
+    size_t m_frameCount;
+    params::InterfaceGl         mUIParams;
     vec2 m_zoom;
 	vec2		mMousePos;
 	std::shared_ptr<qTimeFrameCache> mFrameSet;
@@ -548,7 +548,7 @@ private:
 	
 	mutable boost::filesystem::path mPath;
 	
-	params::InterfaceGl         mMovieParams;	
+	params::InterfaceGl         mUIParams;	
 	bool mMoviePlay;
 	bool mMovieLoop;
 	void play_pause_button ();
@@ -624,11 +624,12 @@ public:
 		
 	};
 	
+	
 	// From just a name, use the open file dialog to get the file
 	// From a name and a path
 	lifContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
 	
-	Signal <void(bool)> signalShowMotioncenter;
+	Signal <void(bool)> signalManualEditMode;
 	
 	static const std::string& caption () { static std::string cp ("Lif Viewer # "); return cp; }
 	virtual void draw ();
@@ -656,11 +657,14 @@ public:
 	
 	const params::InterfaceGl& ui_params ()
 	{
-		return mMovieParams;
+		return mUIParams;
 	}
 	
-	void setShowMotionCenter (bool b)  { mShowMotionCenter = b; }
-	bool getShowMotionCenter ()  { return mShowMotionCenter; }
+	const ivec2& imagePos () const { return m_instant_mouse_image_pos; }
+	const uint32_t& channelIndex () const { return m_instant_channel; }
+	
+	void setManualEditMode (bool b)  { mManualEditMode = b; }
+	bool getManualEditMode ()  { return mManualEditMode; }
 	
 	void setShowMotionBubble (bool b)  { mShowMotionBubble = b; }
 	bool getShowMotionBubble ()  { return mShowMotionBubble; }
@@ -672,10 +676,14 @@ public:
 	
 	void play_pause_button ();
 	void loop_no_loop_button ();
+	void edit_no_edit_button ();
 	
 	void receivedEvent ( InteractiveObjectEvent event );
 	
+	const tiny_media_info& media () const { return mMediaInfo; }
+	
 private:
+	gl::TextureRef pixelInfoTexture ();
 	void loadLifFile();
 	void loadCurrentSerie ();
 	bool have_movie ();
@@ -731,13 +739,18 @@ private:
 	void seek( size_t xPos );
 	void clear_movie_params ();
 	vec2 texture_to_display_zoom ();
+	void update_instant_image_mouse ();
+	
 	vec2 mScreenSize;
 	gl::TextureRef mImage;
 	series_info m_serie;
 	
-	size_t m_fc;
-	params::InterfaceGl         mMovieParams;
+	ivec2 m_instant_mouse_image_pos;
+	uint32_t m_instant_channel;
 	
+	size_t m_frameCount;
+	params::InterfaceGl         mUIParams;
+	tiny_media_info      mMediaInfo;
 	
 	int64_t m_seek_position;
 
@@ -756,9 +769,10 @@ private:
 	bool mMetaDown;
 	
 	int mMouseInGraphs; // -1 if not, 0 1 2
-	bool mMouseInImage; // if in Image, mMouseInGraph is -1 
+	bool mMouseInImage; // if in Image, mMouseInGraph is -1
+	ivec2 mMouseInImagePosition;
 	
-	bool mShowMotionCenter, mShowMotionBubble;
+	bool mManualEditMode, mShowMotionBubble;
 	std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
 	int mButton_title_index;
 	std::string mButton_title;

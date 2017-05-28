@@ -5,6 +5,7 @@
 #include "cinder/Rand.h"
 #include "cinder/Utilities.h"
 #include "cinder/Log.h"
+#include "cinder/Display.h"
 #include "guiContext.h"
 #include "boost/filesystem.hpp"
 #include <functional>
@@ -49,11 +50,11 @@ void prepareSettings( App::Settings *settings )
     settings->setWindowSize( 848, 564 );
     settings->setFrameRate( 60 );
     settings->setResizable( false );
-    
     //    settings->setWindowSize( 640, 480 );
     //    settings->setFullScreen( false );
     //    settings->setResizable( true );
 }
+
 
 class VisibleApp : public App, public SingletonLight<VisibleApp>
 {
@@ -90,17 +91,20 @@ public:
     bool shouldQuit();
     WindowRef createConnectedWindow (Window::Format& format);
     
-    
     params::InterfaceGlRef         mTopParams;
     
     
     gl::TextureRef		mTextTexture;
     vec2				mSize;
+    vec2                mDisplayTL;
     Font				mFont;
     std::string			mLog;
     
+    Rectf						mGlobalBounds;
+    
     mutable std::list <std::shared_ptr<guiContext> > mContexts;
     
+  
 };
 
 WindowRef  VisibleCentral::getConnectedWindow (Window::Format& format )
@@ -213,9 +217,20 @@ void VisibleApp::fileDrop( FileDropEvent event )
 
 void VisibleApp::setup()
 {
+      
+    for( auto display : Display::getDisplays() )
+    {
+        mGlobalBounds.include(display->getBounds());
+        CI_LOG_V( "display name: '" << display->getName() << "', bounds: " << display->getBounds() );
+    }
+    
+    ci::Area windowArea = getDisplay()->getBounds();
+    mDisplayTL = windowArea.getUL();
+    setWindowPos(getWindowSize()/3);
+    
     WindowRef ww = getWindow ();
     ww->setTitle ("Visible");
-    mFont = Font( "Menlo", 12 );
+    mFont = Font( "Menlo", 18 );
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     
     ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
@@ -223,14 +238,15 @@ void VisibleApp::setup()
     // Setup the parameters
     mTopParams = params::InterfaceGl::create( "Visible", ivec2( getWindowWidth()/2, getWindowHeight()/2 ) );
     
-    mTopParams->addSeparator();
-    mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this, boost::filesystem::path () ) );
+    //mTopParams->addSeparator();
+    //mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this, boost::filesystem::path () ) );
     //  mTopParams->addSeparator();
     // 	mTopParams->addButton( "Import SS Matrix", std::bind( &VisibleApp::create_matrix_viewer, this ) );
     
     mTopParams->addSeparator();
    	mTopParams->addButton( "Import LIF  ", std::bind( &VisibleApp::create_lif_viewer, this, boost::filesystem::path () ) );
     
+#if 0
     mTopParams->addSeparator();
    	mTopParams->addButton( "Import Image Directory ", std::bind( &VisibleApp::create_movie_dir_viewer, this, boost::filesystem::path () ) );
     
@@ -245,7 +261,8 @@ void VisibleApp::setup()
     mTopParams->addSeparator();
     mTopParams->addButton( "Import A CSV File", std::bind( &VisibleApp::create_clip_viewer, this, boost::filesystem::path () ) );
     mTopParams->addSeparator();
-    
+
+#endif
     getSignalShouldQuit().connect( std::bind( &VisibleApp::shouldQuit, this ) );
     
     getWindow()->getSignalMove().connect( std::bind( &VisibleApp::windowMove, this ) );
@@ -256,6 +273,8 @@ void VisibleApp::setup()
     
     getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
     getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
+    
+    getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
     
     gl::enableVerticalSync();
     
@@ -280,7 +299,12 @@ void VisibleApp::windowMove()
 
 void VisibleApp::displayChange()
 {
+    ci::Area windowArea = getDisplay()->getBounds();
+    mDisplayTL = windowArea.getUL();
+    
     update_log ( "window display changed: " + toString(getWindow()->getDisplay()->getBounds()));
+    console() << "ContentScale = " << getWindowContentScale() << endl;
+    console() << "getWindowCenter() = " << getWindowCenter() << endl;
 }
 
 
@@ -364,7 +388,7 @@ void VisibleApp::update()
 
 void VisibleApp::draw ()
 {
-    gl::clear( Color( 0.87f, 0.33f, 0.33f ) );
+    gl::clear( Color::gray( 0.5f ) );
     
     guiContext  *data = getWindow()->getUserData<guiContext>();
     
@@ -372,14 +396,27 @@ void VisibleApp::draw ()
     
     if (valid_data) data->draw();
     else
-    {
         mTopParams->draw ();
-//        if (mTextTexture)
-//        {
-//            Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
-//            gl::draw(mTextTexture, textrect);
-//        }
-    }
+
+   
+ 
+#if 0
+    gl::enableAlphaBlending();
+    
+    Rectf scaledBounds = mGlobalBounds;
+    if( mGlobalBounds.getAspectRatio() > getWindowAspectRatio() )
+        scaledBounds.scaleCentered( vec2( 1, mGlobalBounds.getAspectRatio() / getWindowAspectRatio() ) );
+    else
+        scaledBounds.scaleCentered( vec2(getWindowAspectRatio() / mGlobalBounds.getAspectRatio(), 1 ) );
+//    scaledBounds.scaleCentered( 1.1f );
+//    gl::clear( Color( 0, 0, 0 ) );
+    gl::setMatrices( CameraOrtho( scaledBounds.getLowerLeft().x, scaledBounds.getLowerRight().x, scaledBounds.getLowerLeft().y, scaledBounds.getUpperLeft().y, -1, 1 ) );
+    
+    gl::translate(mDisplayTL);
+#endif
+    
+    
+
     
     
 }

@@ -15,11 +15,11 @@
 #include "cinder/Timeline.h"
 #include "cinder/Timer.h"
 #include "cinder/Camera.h"
-#include "cinder/qtime/Quicktime.h"
+#include "cinder/qtime/QuickTime.h"
 #include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"
 #include "CinderOpenCV.h"
-#include "Cinder/ip/Blend.h"
+#include "cinder/ip/Blend.h"
 #include "opencv2/highgui.hpp"
 #include "cinder/ip/Flip.h"
 #include "otherIO/lifFile.hpp"
@@ -35,6 +35,7 @@
 #include "core/stl_utils.hpp"
 #include "sm_producer.h"
 #include "algo_registry.hpp"
+#include "tracker.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -77,6 +78,7 @@ namespace
             int64_t fn = 0;
             m_channel_images.clear();
             m_channel_images.resize (3);
+            m_rois.resize (0);
             
             std::vector<std::string> names = {"Red", "Green","Blue"};
             
@@ -88,6 +90,19 @@ namespace
                     auto m3 = svl::NewRefMultiFromSurface (su8, names, fn);
                     for (auto cc = 0; cc < m3->planes(); cc++)
                         m_channel_images[cc].emplace_back(m3->plane(cc));
+                    
+                    // Assumption: all have the same 3 channel concatenated structure
+                    // Fetch it only once
+                    if (m_rois.empty())
+                    {
+                        for (auto cc = 0; cc < m3->planes(); cc++)
+                        {
+                            const iRect& ir = m3->roi(cc);
+                            m_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
+                        }
+
+
+                    }
                 }
                 else
                 {
@@ -175,6 +190,7 @@ namespace
             return tracks;
         }
         
+        const std::vector<Rectf>& rois () const { return m_rois; }
         
         
     private:
@@ -182,6 +198,8 @@ namespace
         smProducerRef m_sm;
         channel_images_t m_images;
         std::vector<channel_images_t> m_channel_images;
+        std::vector<Rectf> m_rois;
+        Rectf m_all; 
     };
     
     tracksD1_t     get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
@@ -224,6 +242,8 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
 void lifContext::looping (bool what)
 {
     m_is_looping = what;
+    if (m_is_looping)
+        mUIParams.setOptions( "mode", "label=`Looping`" );
 }
 
 
@@ -236,12 +256,14 @@ void lifContext::play ()
 {
     if (! have_movie() || m_is_playing ) return;
     m_is_playing = true;
+    mUIParams.setOptions( "mode", "label=`At Playing`" );
 }
 
 void lifContext::pause ()
 {
     if (! have_movie() || ! m_is_playing ) return;
     m_is_playing = false;
+    mUIParams.setOptions( "mode", "label=`At Pause`" );
 }
 
 void lifContext::play_pause_button ()
@@ -262,26 +284,53 @@ void lifContext::loop_no_loop_button ()
         looping(true);
 }
 
+void lifContext::edit_no_edit_button ()
+{
+    if (! have_movie () )
+        return;
 
+    // Flip
+    setManualEditMode(!getManualEditMode());
+    
+   // If we are in Edit mode. Stop and Go to Start
+    if (getManualEditMode())
+    {
+        mUIParams.setOptions( "mode", "label=`Edit`" );
+        if (looping())
+        {
+            mUIParams.setOptions( "mode", "label=`Stopping`" );
+            looping(false);
+            seekToStart();
+        }
+    }
+    else
+        mUIParams.setOptions( "mode", "label=`Browse`" );
+    
+}
 
 bool lifContext::have_movie ()
 {
-    return m_lifRef && m_current_serie_ref >= 0 && mFrameSet && vl.isSet();
+    bool have = m_lifRef && m_current_serie_ref >= 0 && mFrameSet && vl.isSet();
+  //  if (! have )
+   //     mUIParams.setOptions( "mode", "label=`Nothing Loaded`" );
+    return have;
 }
 
 void lifContext::seekToEnd ()
 {
     seekToFrame (getNumFrames() - 1);
+    mUIParams.setOptions( "mode", "label=`@ End`" );
 }
 
 void lifContext::seekToStart ()
 {
     seekToFrame(0);
+    mUIParams.setOptions( "mode", "label=`@ Start`" );
 }
 
 int lifContext::getNumFrames ()
 {
-    return m_fc;
+    return m_frameCount;
 }
 
 int lifContext::getCurrentFrame ()
@@ -325,8 +374,8 @@ void lifContext::setZoom (vec2 zoom)
 
 void lifContext::setup()
 {
-    mMovieParams = params::InterfaceGl( "Lif Player ", vec2( 260, 260) );
-    mMovieParams.setPosition(getWindowSize() / 2);
+    mUIParams = params::InterfaceGl( "Lif Player ", toPixels( ivec2( 200, 300 )));
+    mUIParams.setPosition(getWindowSize() / 3);
     
     
     // Load the validated movie file
@@ -337,22 +386,21 @@ void lifContext::setup()
     if( m_valid )
     {
        	m_type = Type::qtime_viewer;
-        mMovieParams.addSeparator();
+        mUIParams.addSeparator();
         
         m_series_names.clear ();
         for (auto ss = 0; ss < m_series_book.size(); ss++)
             m_series_names.push_back (m_series_book[ss].name);
         
         m_perform_names.clear ();
-        for (auto ss = 0; ss < m_series_book.size(); ss++)
-            m_perform_names.push_back (m_series_book[ss].name);
+        m_perform_names.push_back("Manual Cell End Tracing");
         
         // Add an enum (list) selector.
         
         m_selected_serie_index = 0;
         m_current_serie_ref = std::shared_ptr<lifIO::LifSerie>();
         
-        mMovieParams.addParam( "Series ", m_series_names, &m_selected_serie_index )
+        mUIParams.addParam( "Series ", m_series_names, &m_selected_serie_index )
         //        .keyDecr( "[" )
         //        .keyIncr( "]" )
         .updateFn( [this]
@@ -367,38 +415,29 @@ void lifContext::setup()
                   });
         
         
-        mMovieParams.addSeparator();
+        mUIParams.addSeparator();
         {
             const std::function<void (int)> setter = std::bind(&lifContext::seekToFrame, this, std::placeholders::_1);
             const std::function<int ()> getter = std::bind(&lifContext::getCurrentFrame, this);
-            mMovieParams.addParam ("Current Time Step", setter, getter);
+            mUIParams.addParam ("Current Time Step", setter, getter);
         }
         
-        mMovieParams.addSeparator();
-        mMovieParams.addButton("Play / Pause ", bind( &lifContext::play_pause_button, this ) );
-        mMovieParams.addSeparator();
-        mMovieParams.addButton(" Loop ", bind( &lifContext::loop_no_loop_button, this ) );
-        mMovieParams.addSeparator();
+        mUIParams.addSeparator();
+        mUIParams.addButton("Play / Pause ", bind( &lifContext::play_pause_button, this ) );
+        mUIParams.addSeparator();
+        mUIParams.addButton(" Loop ", bind( &lifContext::loop_no_loop_button, this ) );
+        mUIParams.addSeparator();
         
-        mMovieParams.addParam( "Perform ", m_perform_names, &m_selected_perform_index )
-        //        .keyDecr( "[" )
-        //        .keyIncr( "]" )
-        .updateFn( [this]
-                  {
-                      if (m_selected_perform_index >= 0 && m_selected_perform_index < m_perform_names.size() )
-                      {
-                          m_serie = m_series_book[m_selected_serie_index];
-                          m_current_serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(m_selected_serie_index), stl_utils::null_deleter());
-                          loadCurrentSerie ();
-                          console() << "selected serie updated: " << m_series_names [m_selected_serie_index] << endl;
-                      }
-                  });
+        mUIParams.addSeparator();
+        mUIParams.addButton(" Edit ", bind( &lifContext::edit_no_edit_button, this ) );
+        mUIParams.addSeparator();
+        mUIParams.addText( "mode", "label=`Browse`" );
         
-        
+           
         //        {
         //            const std::function<void (float)> setter = std::bind(&lifContext::setZoom, this, std::placeholders::_1);
         //            const std::function<float (void)> getter = std::bind(&lifContext::getZoom, this);
-        //            mMovieParams.addParam( "Zoom", setter, getter);
+        //            mUIParams.addParam( "Zoom", setter, getter);
         //        }
         
         
@@ -443,8 +482,10 @@ void lifContext::loadCurrentSerie ()
     try {
         
         // Create the frameset and assign the channel names
+        // Fetch the media info
         mFrameSet = qTimeFrameCache::create (*m_current_serie_ref);
         mFrameSet->channel_names (m_series_book[m_selected_serie_index].channel_names);
+        mMediaInfo = mFrameSet->media_info();
         
         vl.init (app::getWindow(), mFrameSet->media_info());
         
@@ -458,7 +499,7 @@ void lifContext::loadCurrentSerie ()
             getWindow()->getApp()->setFrameRate(tm.getFramerate() / 5.0);
             
             mScreenSize = tm.getSize();
-            m_fc = tm.getNumFrames ();
+            m_frameCount = tm.getNumFrames ();
             mTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
             
             
@@ -532,13 +573,21 @@ void lifContext::mouseMove( MouseEvent event )
     if (! have_movie () ) return;
     
     mMouseInImage = get_image_display_rect().contains(event.getPos());
-    if (mMouseInImage) return;
+    if (mMouseInImage)
+    {
+        mMouseInImagePosition = event.getPos();
+        update_instant_image_mouse ();
+    }
     
-    std::vector<float> dds (m_track_rects.size());
-    for (auto pp = 0; pp < m_track_rects.size(); pp++) dds[pp] = m_track_rects[pp].distanceSquared(event.getPos());
+    if (vl.display_timeline_rect().contains(event.getPos()))
+    {
+        std::vector<float> dds (m_track_rects.size());
+        for (auto pp = 0; pp < m_track_rects.size(); pp++) dds[pp] = m_track_rects[pp].distanceSquared(event.getPos());
     
-    auto min_iter = std::min_element(dds.begin(),dds.end());
-    mMouseInGraphs = min_iter - dds.begin();
+        auto min_iter = std::min_element(dds.begin(),dds.end());
+        mMouseInGraphs = min_iter - dds.begin();
+    }
+    
 }
 
 
@@ -616,9 +665,6 @@ Rectf lifContext::get_image_display_rect ()
     return vl.display_frame_rect();
 }
 
-
-
-
 bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif_file_viewer); }
 
 void lifContext::resize ()
@@ -661,17 +707,42 @@ void lifContext::update ()
     
     if (m_is_playing ) seekToFrame (getCurrentFrame() + 1);
     
-    //    std::string image_location (" In Image ");
-    //    std::string graph_location (" In Graph ");
-    //    graph_location += to_string (mMouseInGraphs);
-    //    std::string which = mMouseInImage ? image_location : mMouseInGraphs >= 0 ? graph_location : " Outside ";
-    //    std::strstream msg;
-    //    msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << m_is_playing <<
-    //    " F " << setw(12) << int( getCurrentFrame () ) << which;
-    //
-    //    std::string frame_str = msg.str();
-    //    update_log (frame_str);
+}
+
+void lifContext::update_instant_image_mouse ()
+{
+    uint32_t m_instance_channel;
+    auto mouseInChannelPos = mMouseInImagePosition;
+    auto image_pos = vl.display2image(mMouseInImagePosition);
+    // LIF 3 channel organization. Channel height is 1/3 of image height
+    // Channel Index is pos.y / channel_height,
+    // In channel x is pos.x, In channel y is pos.y % channel_height
+    uint32_t channel_height = mMediaInfo.getChannelSize().y;
     
+    m_instance_channel = (int) image_pos.y / (int) channel_height;
+    image_pos.y = ((int) image_pos.y) % channel_height;
+    m_instant_mouse_image_pos = image_pos;
+}
+
+gl::TextureRef lifContext::pixelInfoTexture ()
+{
+    if (! mMouseInImage) return gl::TextureRef ();
+    TextLayout lout;
+    
+    std::string pos = " c: " + toString(channelIndex()) +  "[" + to_string(mMouseInImagePosition.x) + "," + to_string(mMouseInImagePosition.y) + "] i [" +
+    to_string(imagePos().x) + "," + to_string(imagePos().y) + "]";
+    
+
+    
+    lout.clear( ColorA::gray( 0.2f, 0.5f ) );
+    lout.setFont( Font( "Menlo", 14 ) );
+    lout.setColor( ColorA(0.8,0.2,0.1,1.0) );
+    lout.setLeadingOffset( 3 );
+    lout.addRightLine( pos );
+    
+    
+    return gl::Texture::create( lout.render( true ));
+
 }
 
 
@@ -680,13 +751,12 @@ void lifContext::draw_info ()
     if (! m_lifRef) return;
     
     std::string seri_str = m_serie.info();
-    
     gl::setMatricesWindow( getWindowSize() );
     
     gl::ScopedBlendAlpha blend_;
     
     {
-        gl::ScopedColor (ColorA::gray(1.0));
+        gl::ScopedColor (getManualEditMode() ? ColorA( 0.25f, 0.5f, 1, 1 ) : ColorA::gray(1.0));
         gl::drawStrokedRect(get_image_display_rect(), 3.0f);
     }
     {
@@ -694,7 +764,7 @@ void lifContext::draw_info ()
         gl::drawStrokedRect(vl.display_timeline_rect(), 3.0f);
     }
     {
-        gl::ScopedColor (ColorA::gray(0.75));
+        gl::ScopedColor (ColorA::gray(0.1));
         gl::drawStrokedRect(vl.display_plots_rect(), 3.0f);
     }
     
@@ -709,16 +779,12 @@ void lifContext::draw_info ()
     
     
     auto texR = gl::Texture::create( layoutR.render( true ) );
-    gl::draw( texR, vec2( 10, 10 ) );
+    Rectf tbox = texR->getBounds();
+    tbox = tbox.getCenteredFit(getWindowBounds(), true);
+    tbox.offset(vec2(0,getWindowHeight() - tbox.getHeight() - tbox.getY1()));
+    gl::draw( texR, tbox);
     
     tinyUi::drawWidgets(mWidgets);
-    
-    //    if (mTextTexture)
-    //    {
-    //        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
-    //        gl::draw(mTextTexture, textrect);
-    //    }
-    
 }
 
 
@@ -743,6 +809,13 @@ void lifContext::draw ()
                 gl::draw (mImage, dr);
                 break;
         }
+        
+        auto pt = pixelInfoTexture ();
+        if (pt)
+        {
+            gl::draw(pt, dr.scaled(0.2));
+        }
+        
         draw_info ();
         
         if (m_serie.channelCount)
@@ -754,7 +827,7 @@ void lifContext::draw ()
         }
     }
     
-    mMovieParams.draw();
+    mUIParams.draw();
     
     
 }

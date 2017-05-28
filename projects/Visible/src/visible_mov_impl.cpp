@@ -237,7 +237,7 @@ void movContext::seekToStart ()
 
 int movContext::getNumFrames ()
 {
-    return m_fc;
+    return m_frameCount;
 }
 
 time_spec_t movContext::getCurrentTime ()
@@ -371,7 +371,7 @@ void movContext::loadMovieFile()
                 mScreenSize = vec2(std::fabs(m_movie->getWidth()), std::fabs(m_movie->getHeight()));
                 mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
                 getWindow()->getApp()->setFrameRate(1);
-                m_fc = m_movie->getNumFrames ();
+                m_frameCount = m_movie->getNumFrames ();
                 
                 mTimeMarker = marker_info (m_movie->getNumFrames (), m_movie->getDuration());
                 
@@ -503,7 +503,7 @@ void movContext::keyDown( KeyEvent event )
 //
 //void movContext::seek( size_t xPos )
 //{
-//    if (is_valid()) mMovieIndexPosition = movContext::Normal2Index ( getWindowBounds(), xPos, m_fc);
+//    if (is_valid()) mMovieIndexPosition = movContext::Normal2Index ( getWindowBounds(), xPos, m_frameCount);
 //}
 
 

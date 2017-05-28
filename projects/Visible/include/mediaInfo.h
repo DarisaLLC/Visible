@@ -20,6 +20,7 @@ struct tiny_media_info
     double duration;
     double mFps;
     CGSize size;
+    CGSize channel_size;
     CMTimeRange timerange;
     CGAffineTransform  embedded;
     CGAffineTransform  toSize;
@@ -46,15 +47,17 @@ struct tiny_media_info
     tiny_media_info () { clear (); }
     void clear () { std::memset(this, 0, sizeof (tiny_media_info)); }
     BOOL isImageFolder () const { return mIsImageFolder; }
+    BOOL isLIFSerie () const { return mIsLifSerie; }
     int32_t getWidth () const { return size.width; }
     int32_t getHeight () const { return size.height; }
     glm::vec2 getSize () const { return glm::vec2(size.width, size.height); }
+    glm::vec2 getChannelSize () const { return glm::vec2(channel_size.width, channel_size.height); }
     
     double getDuration () const { return duration; }
     double getFramerate () const { return mFps; }
     double getNumFrames () const { return count; }
     double getFrameDuration () const { return getDuration () / getNumFrames (); }
-    double getNumChannels () const { return mChannels; }
+    uint32_t getNumChannels () const { return mChannels; }
     
     
     const std::ostream& operator<< (std::ostream& std_stream)

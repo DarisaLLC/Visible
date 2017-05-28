@@ -18,7 +18,7 @@
 #include "timestamp.h"
 #include "mediaInfo.h"
 #include "time_index.h"
-#include "avReader.hpp"
+#include "AVReader.hpp"
 #include "lifFile.hpp"
 
 
@@ -113,6 +113,7 @@ private:
     mutable std::mutex			mMutex;
 };
 
+typedef std::shared_ptr<qTimeFrameCache> qFrameCacheRef;
 
 
 
