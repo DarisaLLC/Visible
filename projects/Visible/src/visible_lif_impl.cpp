@@ -595,6 +595,11 @@ void lifContext::mouseDrag( MouseEvent event )
 {
     for (Graph1DRef graphRef : m_tracks)
         graphRef->mouseDrag( event );
+    
+    if (getManualEditMode() && mMouseInImage && channelIndex() == 2)
+    {
+       mLengthPoints.second = event.getPos();
+    }
 }
 
 
@@ -605,6 +610,13 @@ void lifContext::mouseDown( MouseEvent event )
         graphRef->mouseDown( event );
         graphRef->get_marker_position(mTimeMarker);
         signalMarker.emit(mTimeMarker);
+    }
+
+    // If we are in the Visible Channel
+    if (getManualEditMode() && mMouseInImage && channelIndex() == 2)
+    {
+        mLengthPoints.first = event.getPos();
+        mLengthPoints.second = mLengthPoints.first;
     }
 }
 
@@ -814,6 +826,12 @@ void lifContext::draw ()
         if (pt)
         {
             gl::draw(pt, dr.scaled(0.2));
+        }
+        
+        if (getManualEditMode())
+        {
+            gl::ScopedColor (ColorA( 0.25f, 0.5f, 1, 1 ));
+            gl::drawLine(mLengthPoints.first, mLengthPoints.second);
         }
         
         draw_info ();

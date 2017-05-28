@@ -741,6 +741,7 @@ private:
 	vec2 texture_to_display_zoom ();
 	void update_instant_image_mouse ();
 	
+	std::pair<vec2,vec2> mLengthPoints;
 	vec2 mScreenSize;
 	gl::TextureRef mImage;
 	series_info m_serie;
