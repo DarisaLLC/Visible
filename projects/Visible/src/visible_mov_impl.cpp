@@ -53,11 +53,11 @@ namespace
     static layout vl (ivec2 (10, 10));
     
     
-    tracksD1_t get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+    vector_of_trackD1s_t get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
                                            bool test_data = false)
     {
         
-        tracksD1_t tracks;
+        vector_of_trackD1s_t tracks;
         tracks.resize (names.size ());
         for (auto tt = 0; tt < names.size(); tt++)
             tracks[tt].first = names[tt];

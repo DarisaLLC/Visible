@@ -23,7 +23,25 @@ using namespace cinder;
 using namespace cinder::qtime;
 
 
+bool qtimeAvfLink::MovieBaseFrameReadyConnect(MovieSurfaceRef& movie, void (*frame_ready)())
+{
+    AVPlayer* player = movie->getPlayerHandle();
+    if ( ! player ) return false;
     
+    movie->getNewFrameSignal().connect(frame_ready);
+    return true;
+}
+
+
+cm_time qtimeAvfLink::MovieBaseGetCurrentCTime(MovieSurfaceRef& movie)
+{
+    AVPlayer* player = movie->getPlayerHandle();
+    if ( ! player ) return - 1.0;
+    
+    return cm_time ([player currentTime]);
+}
+
+
 float qtimeAvfLink::MovieBaseGetCurrentTime(MovieSurfaceRef& movie)
 {
     AVPlayer* player = movie->getPlayerHandle();
@@ -66,7 +84,7 @@ void qtimeAvfLink::MovieBaseSeekToStart(MovieSurfaceRef& movie)
 }
 
 
-void qtimeAvfLink::GetTocOfMovie(MovieSurfaceRef& movie, std::vector<cm_time>& toc)
+void qtimeAvfLink::GetTocOfMovie(const MovieSurfaceRef& movie, std::vector<cm_time>& toc)
 {
     toc.resize(0);
     
@@ -77,7 +95,7 @@ void qtimeAvfLink::GetTocOfMovie(MovieSurfaceRef& movie, std::vector<cm_time>& t
     if (frame_count < 2) return;
     
     CMTime currentTime = [player currentTime];
-    currentTime.timescale = 600;
+    currentTime.timescale = 1000000000;
     CMTime oneFrame = CMTimeMakeWithSeconds(1.0 / movie->getFramerate(), currentTime.timescale);
     CMTime startTime = kCMTimeZero;
 

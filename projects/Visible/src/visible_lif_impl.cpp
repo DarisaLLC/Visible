@@ -63,6 +63,10 @@ namespace
     class algo_processor : public SingletonLight<algo_processor>
     {
     public:
+        
+      typedef std::vector<roiWindow<P8U>> vector_roi8_t;
+      typedef std::vector<vector_roi8_t>::iterator vector_of_vector_roi8;
+        
         algo_processor ()
         {
             m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
@@ -71,7 +75,9 @@ namespace
     private:
         const smProducerRef sm () const { return m_sm; }
         
-        bool load_channels_from_images (const std::shared_ptr<qTimeFrameCache>& frames, bool LIF_data = true,
+        const std::vector<vector_roi8_t>& channelImages () const { return m_channel_images; }
+        
+         std::vector<vector_roi8_t>& load_channels_from_images (const std::shared_ptr<qTimeFrameCache>& frames, bool LIF_data = true,
                                         uint8_t channel = 2)
         {
             // If it LIF data We will use multiple window.
@@ -114,8 +120,9 @@ namespace
                     }
                 }
             }
-            
+            return m_channel_images;
         }
+        
         
         timed_double_t computeIntensityStatisticsResults (const roiWindow<P8U>& roi)
         {
@@ -152,40 +159,65 @@ namespace
         }
         
     public:
-        tracksD1_t run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
-                                               // TBD and 3 callbacks from algo registry to call
-                                               bool test_data = false)
+        vector_of_trackD1s_t loadImageSetupTracks (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names, bool test_data = false)
         {
-            
             load_channels_from_images(frames);
             
-            tracksD1_t tracks;
+            auto sp =  instance().sm();
+            sp->load_images (channelImages()[2]);
+            
+            vector_of_trackD1s_t tracks;
             tracks.resize (names.size ());
             for (auto tt = 0; tt < names.size(); tt++)
                 tracks[tt].first = names[tt];
+            return tracks;
+        }
+        
+        bool run_channel_histogram_stats (trackD1_t& track, const vector_roi8_t& channel)
+        {
+            track.second.clear();
+            for (auto ii = 0; ii < channel.size(); ii++)
+            {
+                track.second.emplace_back(computeIntensityStatisticsResults(channel[ii]));
+            }
+            return track.second.size() == channel.size();
             
+        }
+
+        void run_histogram_stats (vector_of_trackD1s_t& tracks)
+        {
             // Run Histogram on channels 0 and 1
             // Filling up tracks 0 and 1
             // Now Do Aci on the 3rd channel
-            
-            
-            channel_images_t c0 = m_channel_images[0];
-            channel_images_t c1 = m_channel_images[1];
-            channel_images_t c2 = m_channel_images[2];
-            
-            for (auto ii = 0; ii < m_channel_images[0].size(); ii++)
-            {
-                tracks[0].second.emplace_back(computeIntensityStatisticsResults(c0[ii]));
-                tracks[1].second.emplace_back(computeIntensityStatisticsResults(c1[ii]));
-            }
-            
+            auto chanIter = channelImages().begin();
+                    run_channel_histogram_stats(tracks[0], *chanIter++);
+                    run_channel_histogram_stats(tracks[1], *chanIter);
+        }
+        
+        void run_similarity_runner (vector_of_trackD1s_t& tracks)
+        {
             auto sp =  instance().sm();
-            sp->load_images (c2);
             std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
             std::future<bool>  future_ss = task.get_future();  // get a future
             std::thread(std::move(task)).detach(); // launch on a thread
             future_ss.wait();
             entropiesToTracks(sp, tracks[2]);
+        }
+         vector_of_trackD1s_t run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+                                               // TBD and 3 callbacks from algo registry to call
+                                               bool test_data = false)
+        {
+            
+            vector_of_trackD1s_t tracks = loadImageSetupTracks (frames, names, false);
+            
+            // Run Histogram on channels 0 and 1
+            // Filling up tracks 0 and 1
+            // Now Do Aci on the 3rd channel
+            
+            run_histogram_stats(tracks);
+
+            
+            run_similarity_runner(tracks);
             
             return tracks;
         }
@@ -194,15 +226,14 @@ namespace
         
         
     private:
-        typedef std::vector<roiWindow<P8U>> channel_images_t;
         smProducerRef m_sm;
-        channel_images_t m_images;
-        std::vector<channel_images_t> m_channel_images;
+        vector_roi8_t m_images;
+        std::vector<vector_roi8_t> m_channel_images;
         std::vector<Rectf> m_rois;
         Rectf m_all; 
     };
     
-    tracksD1_t     get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+    vector_of_trackD1s_t     get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
                     bool test_data = false)
     {
         return algo_processor().instance().run(frames, names, test_data);

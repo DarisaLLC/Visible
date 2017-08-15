@@ -367,8 +367,8 @@ protected:
 	
 	std::mutex m_track_mutex;
 	
-	tracksD1_t m_luminance_tracks;
-	async_tracksD1_t m_async_luminance_tracks;
+	vector_of_trackD1s_t m_luminance_tracks;
+	async_vector_of_trackD1s_t m_async_luminance_tracks;
 	
 	std::vector<size_t> m_spatial_dims;
 	std::vector<std::string> m_perform_names;
