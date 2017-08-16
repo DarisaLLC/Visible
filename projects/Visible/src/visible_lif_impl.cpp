@@ -72,8 +72,10 @@ namespace
             m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
         }
 
-    private:
         const smProducerRef sm () const { return m_sm; }
+        
+    private:
+
         
         const std::vector<vector_roi8_t>& channelImages () const { return m_channel_images; }
         
@@ -166,11 +168,11 @@ namespace
             auto sp =  instance().sm();
             sp->load_images (channelImages()[2]);
             
-            vector_of_trackD1s_t tracks;
-            tracks.resize (names.size ());
+            m_tracks.clear ();
+            m_tracks.resize (names.size ());
             for (auto tt = 0; tt < names.size(); tt++)
-                tracks[tt].first = names[tt];
-            return tracks;
+                m_tracks[tt].first = names[tt];
+            return m_tracks;
         }
         
         bool run_channel_histogram_stats (trackD1_t& track, const vector_roi8_t& channel)
@@ -184,48 +186,49 @@ namespace
             
         }
 
-        void run_histogram_stats (vector_of_trackD1s_t& tracks)
+        void run_histogram_stats ()
         {
+            if (m_tracks.empty()) return;
+            
             // Run Histogram on channels 0 and 1
             // Filling up tracks 0 and 1
             // Now Do Aci on the 3rd channel
             auto chanIter = channelImages().begin();
-                    run_channel_histogram_stats(tracks[0], *chanIter++);
-                    run_channel_histogram_stats(tracks[1], *chanIter);
+            run_channel_histogram_stats(m_tracks[0], *chanIter++);
+            if (m_tracks.size() > 1)
+                run_channel_histogram_stats(m_tracks[1], *chanIter);
         }
         
-        void run_similarity_runner (vector_of_trackD1s_t& tracks)
+        void run_similarity_runner ()
         {
+            if (m_tracks.empty() || m_tracks.size () != 3) return;
             auto sp =  instance().sm();
             std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
             std::future<bool>  future_ss = task.get_future();  // get a future
             std::thread(std::move(task)).detach(); // launch on a thread
             future_ss.wait();
-            entropiesToTracks(sp, tracks[2]);
+            entropiesToTracks(sp, m_tracks[2]);
         }
-         vector_of_trackD1s_t run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+        void run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
                                                // TBD and 3 callbacks from algo registry to call
                                                bool test_data = false)
         {
             
-            vector_of_trackD1s_t tracks = loadImageSetupTracks (frames, names, false);
+            loadImageSetupTracks (frames, names, false);
             
             // Run Histogram on channels 0 and 1
             // Filling up tracks 0 and 1
             // Now Do Aci on the 3rd channel
             
-            run_histogram_stats(tracks);
-
-            
-            run_similarity_runner(tracks);
-            
-            return tracks;
+            run_histogram_stats();
+            run_similarity_runner();
         }
         
         const std::vector<Rectf>& rois () const { return m_rois; }
         
         
     private:
+        vector_of_trackD1s_t m_tracks;
         smProducerRef m_sm;
         vector_roi8_t m_images;
         std::vector<vector_roi8_t> m_channel_images;
@@ -233,7 +236,7 @@ namespace
         Rectf m_all; 
     };
     
-    vector_of_trackD1s_t     get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+    void get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
                     bool test_data = false)
     {
         return algo_processor().instance().run(frames, names, test_data);
@@ -402,6 +405,23 @@ void lifContext::setZoom (vec2 zoom)
     update ();
 }
 
+void lifContext::setMedianCutOff (uint32_t newco)
+{
+    uint32_t tmp = newco % 100; // pct
+    auto sp =  algo_processor::instance().sm();
+    uint32_t current (sp->get_median_levelset_pct () * 100);
+    if (tmp == current) return;
+    sp->set_median_levelset_pct (tmp / 100.0f);
+    algo_processor::instance().run_similarity_runner();
+    update ();
+}
+
+uint32_t lifContext::getMedianCutOff () const
+{
+    auto sp =  algo_processor::instance().sm();    
+    uint32_t current (sp->get_median_levelset_pct () * 100);
+    return current;
+}
 
 void lifContext::setup()
 {
@@ -462,7 +482,18 @@ void lifContext::setup()
         mUIParams.addSeparator();
         mUIParams.addButton(" Edit ", bind( &lifContext::edit_no_edit_button, this ) );
         mUIParams.addSeparator();
-        mUIParams.addText( "mode", "label=`Browse`" );
+        mUIParams.addText( "mode", "label=`Params`" );
+        
+        {
+        // Add a param with no target, but instead provide setter and getter functions.
+        const std::function<void(uint32_t)> setter	= bind(&lifContext::setMedianCutOff, this, placeholders::_1 );
+        const std::function<uint32_t()> getter	= bind( &lifContext::getMedianCutOff, this);
+        
+        // Attach a callback that is fired after a target is updated.
+        mUIParams.addParam( "CutOff Pct", setter, getter );
+        }
+        
+        
         
            
         //        {
@@ -575,8 +606,7 @@ void lifContext::loadCurrentSerie ()
             }
             
             // Launch Average Luminance Computation
-            m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance_and_aci,
-                                                  mFrameSet, m_serie.channel_names, false);
+            std::async(std::launch::async, get_mean_luminance_and_aci, mFrameSet, m_serie.channel_names, false);
         }
     }
     catch( const std::exception &ex ) {

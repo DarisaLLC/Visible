@@ -671,7 +671,8 @@ public:
 	
 	void setZoom (vec2);
 	vec2 getZoom ();
-
+	void setMedianCutOff (uint32_t newco);
+	uint32_t getMedianCutOff () const;
 
 	
 	void play_pause_button ();
@@ -756,6 +757,8 @@ private:
 	int64_t m_seek_position;
 
 	bool m_is_playing, m_is_looping;
+	uint32_t m_cutoff_pct;
+	
 	
 	
 	vec2 m_zoom;
