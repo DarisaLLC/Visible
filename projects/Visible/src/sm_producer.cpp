@@ -319,6 +319,10 @@ int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_pr
     if (m_loaded_ref.empty()) return -1;
     
     _frameCount = m_loaded_ref.size ();
+
+    // Call the content loaded cb if any
+    if (signal_content_loaded && signal_content_loaded->num_slots() > 0 ) signal_content_loaded->operator()();
+    
     if (m_auto_run) generate_ssm (0,0);
     
     std::cout << m_loaded_ref.size() << " Loaded "  << std::endl;
@@ -373,7 +377,11 @@ void sm_producer::spImpl::loadImages (const images_vector_t& images)
     }
     while (vitr != images.end());
     _frameCount = m_loaded_ref.size ();
+    // Call the content loaded cb if any
+    if (signal_content_loaded && signal_content_loaded->num_slots() > 0 ) signal_content_loaded->operator()();
+    
     if (m_auto_run) generate_ssm (0,0);
+    
     
 }
 

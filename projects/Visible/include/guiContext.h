@@ -356,6 +356,8 @@ public:
 	virtual void processDrag( ivec2 pos ) = 0;
 	
 	MarkerSignalInfo_t& markerSignal () const { return m_marker_signal; }
+	
+	virtual bool have_tracks () const { return m_have_tracks; }
 
 	
 protected:
@@ -368,7 +370,9 @@ protected:
 	std::mutex m_track_mutex;
 	
 	vector_of_trackD1s_t m_luminance_tracks;
-	async_vector_of_trackD1s_t m_async_luminance_tracks;
+	future_vector_of_trackD1s_t m_async_luminance_tracks;
+	promised_tracks_t m_promised_tracks;
+	bool m_have_tracks;
 	
 	std::vector<size_t> m_spatial_dims;
 	std::vector<std::string> m_perform_names;
