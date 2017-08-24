@@ -1,11 +1,11 @@
 #include "core/csv.hpp"
 
 
-#include <boost/tokenizer.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
+#include </usr/local/include/boost/tokenizer.hpp>
+#include </usr/local/include/boost/lexical_cast.hpp>
+#include </usr/local/include/boost/algorithm/string.hpp>
+#include </usr/local/include/boost/spirit/include/qi.hpp>
+#include </usr/local/include/boost/spirit/include/phoenix_operator.hpp>
 
 
 namespace spiritcsv

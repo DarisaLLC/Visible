@@ -66,6 +66,7 @@
 		C24CD8B71CEB841E0008C72B /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995591B128DF400A5C623 /* IOSurface.framework */; };
 		C24CD8B81CEB841E0008C72B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731819953389008149E2 /* AVFoundation.framework */; };
 		C24CD8B91CEB841E0008C72B /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731919953389008149E2 /* CoreMedia.framework */; };
+		C254BE841F4F912E00977307 /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C25822461CE6478400D83AB0 /* visible_mov_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */; };
 		C2601BB81E690409004415A3 /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
 		C2601BB91E69042B004415A3 /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
@@ -160,7 +161,6 @@
 		C2BECED21DD6D8DE0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
-		C2DA19571E7F30D800062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C2DA195B1E80E4E200062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C2FA97191E82EFB1006EC61E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2FA97181E82EFB1006EC61E /* Images.xcassets */; };
@@ -25900,7 +25900,7 @@
 				C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */,
 				C2606DAB1CED3E2E0045FF57 /* ip_utils.cpp in Sources */,
 				C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */,
-				C2DA19571E7F30D800062DBC /* csv.cpp in Sources */,
+				C254BE841F4F912E00977307 /* csv.cpp in Sources */,
 				C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */,
 				C2606DAC1CED3E2E0045FF57 /* labelconnect.cpp in Sources */,
 				C2606DB11CED3E2E0045FF57 /* registration.cpp in Sources */,
@@ -26001,8 +26001,9 @@
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include",
 					"$(LOCAL_CINDER)/include",
+					"$(LOCAL_BOOST)",
+					"$(SRCROOT)/include",
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
 					"$(LOCAL_TINYXML)",
@@ -26012,16 +26013,17 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(LOCAL_OCV)/lib/macosx",
 					"$(LOCAL_CINDER)/lib/macosx",
+					"$(LOCAL_BOOST)/lib",
 				);
 				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/libcinder_d.a",
-					"$(LOCAL_OCV)/lib/osx/libopencv_core.a",
-					"$(LOCAL_OCV)/lib/osx/libopencv_imgproc.a",
-					"$(LOCAL_OCV)/lib/osx/libippicv.a",
-					"$(LOCAL_OCV)/lib/osx/libopencv_highgui.a",
-					"$(LOCAL_OCV)/lib/osx/libopencv_hal.a",
-					"$(LOCAL_OCV)/lib/osx/libopencv_objdetect.a",
-					"$(LOCAL_OCV)/lib/osx/libzlib.a",
+					"$(LOCAL_CINDER)/lib/macosx/Debug/libcinder.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
+					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_highgui.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_hal.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a",
+					"$(LOCAL_OCV)/lib/macosx/libzlib.a",
 					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
@@ -26052,8 +26054,9 @@
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include",
 					"$(LOCAL_CINDER)/include",
+					"$(LOCAL_BOOST)/include",
+					"$(SRCROOT)/include",
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
 					"$(LOCAL_TINYXML)",
@@ -26063,16 +26066,18 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(LOCAL_OCV)/lib/macosx",
 					"$(LOCAL_CINDER)/lib/macosx",
+					"$(LOCAL_BOOST)/lib",
 				);
 				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/libcinder_d.a",
-					"$(LOCAL_OCV)/lib/osx/libopencv_core.a",
-					"$(LOCAL_OCV)/lib/osx/libopencv_imgproc.a",
-					"$(LOCAL_OCV)/lib/osx/libippicv.a",
-					"$(LOCAL_OCV)/lib/osx/libopencv_highgui.a",
-					"$(LOCAL_OCV)/lib/osx/libopencv_hal.a",
-					"$(LOCAL_OCV)/lib/osx/libopencv_objdetect.a",
-					"$(LOCAL_OCV)/lib/osx/libzlib.a",
+					"$(LOCAL_CINDER)/lib/macosx/Release/libcinder.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
+					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_highgui.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_hal.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a",
+					"$(LOCAL_OCV)/lib/macosx/libzlib.a",
+					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;

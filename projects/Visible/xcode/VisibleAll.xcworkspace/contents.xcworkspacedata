@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:VisibleAll.xcconfig">
+   </FileRef>
+   <FileRef
+      location = "group:Visible.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../externals/cinder/proj/xcode/cinder.xcodeproj">
+   </FileRef>
+</Workspace>

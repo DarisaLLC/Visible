@@ -532,7 +532,7 @@ void lifContext::setup()
         
         {
         // Add a param with no target, but instead provide setter and getter functions.
-            const std::function<void(uint32_t)> setter	= std::bind(&lifContext::setMedianCutOff, this, placeholders::_1 );
+            const std::function<void(uint32_t)> setter	= std::bind(&lifContext::setMedianCutOff, this, std::placeholders::_1 );
             const std::function<uint32_t()> getter	= std::bind( &lifContext::getMedianCutOff, this);
         
         // Attach a callback that is fired after a target is updated.

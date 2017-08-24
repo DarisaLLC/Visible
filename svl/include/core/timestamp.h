@@ -17,14 +17,13 @@
 #include <fstream>
 #include <mutex>
 #include <string>
-#include <condition_variable>
+
 
 #include <boost/operators.hpp>
 #include <ctime>
 
 #include <sys/param.h>
 #include <mach-o/dyld.h>
-#include <boost/scoped_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "core/cm_time.hpp"
 
@@ -58,7 +57,7 @@ public:
     
     long get_tick_count(double tick_rate) const
     {
-        return boost::math::iround(this->get_frac_secs()*tick_rate);
+        return this->get_frac_secs()*tick_rate; //boost::math::iround(this->get_frac_secs()*tick_rate);
     }
     
     double secs(void) const
