@@ -238,13 +238,15 @@ void VisibleApp::setup()
     // Setup the parameters
     mTopParams = params::InterfaceGl::create( "Visible", ivec2( getWindowWidth()/2, getWindowHeight()/2 ) );
     
-    //mTopParams->addSeparator();
-    //mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this, boost::filesystem::path () ) );
+    mTopParams->addSeparator();
+    mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this, boost::filesystem::path () ) );
     //  mTopParams->addSeparator();
     // 	mTopParams->addButton( "Import SS Matrix", std::bind( &VisibleApp::create_matrix_viewer, this ) );
     
     mTopParams->addSeparator();
    	mTopParams->addButton( "Import LIF  ", std::bind( &VisibleApp::create_lif_viewer, this, boost::filesystem::path () ) );
+    mTopParams->addSeparator();
+    mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this, boost::filesystem::path () ) );
     
 #if 0
     mTopParams->addSeparator();

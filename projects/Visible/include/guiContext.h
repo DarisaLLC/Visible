@@ -38,7 +38,7 @@
 #include "qtimeAvfLink.h"
 #include "timeMarker.h"
 #include "TinyUi.h"
-
+#include "OcvVideo.h"
 #include <sstream>
 
 using namespace tinyUi;
@@ -416,7 +416,7 @@ public:
   	virtual void mouseUp( MouseEvent event );
     virtual void mouseDrag( MouseEvent event );
     virtual void keyDown( KeyEvent event );
-
+	
 	virtual void seekToStart ();
 	virtual void seekToEnd ();
 	virtual void seekToFrame (int);
@@ -447,9 +447,17 @@ public:
 
 	void play_pause_button ();
 	void loop_no_loop_button ();
+	bool isMouseDown () { return mMouseIsDown; }
+	bool isMouseIsMoving () {return mMouseIsMoving;}
+	bool isMouseIsDragging () {return mMouseIsDragging;}
 	
 	
 private:
+	const ivec2& imagePos () const { return m_instant_mouse_image_pos; }
+	const uint32_t& channelIndex () const { return m_instant_channel; }
+	
+	gl::TextureRef pixelInfoTexture ();
+	void update_instant_image_mouse ();	
     void loadMovieFile();
 	bool have_movie ();
 	void play ();
@@ -459,13 +467,14 @@ private:
     void clear_movie_params ();
     vec2 texture_to_display_zoom ();
 	
-	
+	ivec2 m_instant_mouse_image_pos;
+	uint32_t m_instant_channel;
 	mutable boost::filesystem::path mPath;
 
 	bool m_looping;
     vec2 mScreenSize;
     gl::TextureRef mImage;
-    ci::qtime::MovieSurfaceRef m_movie;
+    ocvPlayerRef m_movie;
     size_t m_frameCount;
     params::InterfaceGl         mUIParams;
     vec2 m_zoom;
@@ -477,6 +486,7 @@ private:
 	vec2 m_prev_com;
 	int64_t m_index;
 	bool movie_error_do_flip;
+	tiny_media_info      mMediaInfo;	
 	
     bool mMouseIsDown;
     bool mMouseIsMoving;
@@ -485,6 +495,8 @@ private:
 	
 	int mMouseInGraphs; // -1 if not, 0 1 2
 	bool mMouseInImage; // if in Image, mMouseInGraph is -1
+	ivec2 mMouseInImagePosition;
+	
 	
 	bool mShowMotionCenter, mShowMotionBubble;
 	std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};

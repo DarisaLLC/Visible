@@ -105,3 +105,5 @@ protected:
 	ci::ivec2				mSize;
 	float					mSpeed			= 1.0f;
 };
+
+typedef std::shared_ptr<OcvVideoPlayer>			ocvPlayerRef;

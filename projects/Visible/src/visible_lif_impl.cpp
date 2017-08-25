@@ -604,12 +604,11 @@ void lifContext::loadCurrentSerie ()
             
             ci_console() <<  m_series_book.size() << "  Series  " << std::endl;
             
-            const tiny_media_info tm = mFrameSet->media_info ();
-            getWindow()->getApp()->setFrameRate(tm.getFramerate() / 5.0);
+            getWindow()->getApp()->setFrameRate(mMediaInfo.getFramerate() / 5.0);
             
-            mScreenSize = tm.getSize();
-            m_frameCount = tm.getNumFrames ();
-            mTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
+            mScreenSize = mMediaInfo.getSize();
+            m_frameCount = mMediaInfo.getNumFrames ();
+            mTimeMarker = marker_info (mMediaInfo.getNumFrames (), mMediaInfo.getDuration());
             
             
             mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
@@ -622,7 +621,7 @@ void lifContext::loadCurrentSerie ()
             
             ivec2 window_size (vl.desired_window_size());
             setWindowSize(window_size);
-            int channel_count = (int) tm.getNumChannels();
+            int channel_count = (int) mMediaInfo.getNumChannels();
             
             {
                 std::lock_guard<std::mutex> lock(m_track_mutex);
@@ -687,7 +686,7 @@ void lifContext::mouseMove( MouseEvent event )
         update_instant_image_mouse ();
     }
     
-    if (vl.display_timeline_rect().contains(event.getPos()))
+    if (vl.display_plots_rect().contains(event.getPos()))
     {
         std::vector<float> dds (m_track_rects.size());
         for (auto pp = 0; pp < m_track_rects.size(); pp++) dds[pp] = m_track_rects[pp].distanceSquared(event.getPos());
@@ -902,7 +901,7 @@ void lifContext::draw_info ()
     
     auto texR = gl::Texture::create( layoutR.render( true ) );
     Rectf tbox = texR->getBounds();
-    tbox = tbox.getCenteredFit(getWindowBounds(), true);
+    tbox = tbox.getCenteredFit(getWindowBounds(), false);
     tbox.offset(vec2(0,getWindowHeight() - tbox.getHeight() - tbox.getY1()));
     gl::draw( texR, tbox);
     

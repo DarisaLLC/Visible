@@ -292,4 +292,3 @@ void OcvVideoPlayer::setSpeed( float v )
 	}
 	mSpeed = v;
 }
- 

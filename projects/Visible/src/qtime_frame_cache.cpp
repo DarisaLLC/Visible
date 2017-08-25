@@ -119,6 +119,18 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifse
 }
 
 
+std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ocvPlayerRef& mMovie)
+{
+    tiny_media_info minfo;
+    minfo.size.width = mMovie->getSize().x;
+    minfo.size.height = mMovie->getSize().y;
+    minfo.mFps = mMovie->getFrameRate();
+    minfo.count = mMovie->getNumFrames ();
+    minfo.duration = mMovie->getDuration();
+    return std::make_shared<qTimeFrameCache>( minfo);
+    
+}
+
 std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ci::qtime::MovieSurfaceRef& mMovie)
 {
     tiny_media_info minfo;

@@ -1,7 +1,7 @@
 #ifndef __QTIME_FRAMES_
 #define __QTIME_FRAMES_
 
-//#include "cinder/app/App.h"
+#include "OcvVideo.h"
 #include <cinder/Channel.h>
 #include <cinder/Area.h>
 #include <limits>
@@ -44,6 +44,9 @@ public:
     // Cinder Movie requires rendering though the App
     static std::shared_ptr<qTimeFrameCache> create (const ci::qtime::MovieSurfaceRef& movie);
     static std::shared_ptr<qTimeFrameCache> create (const ci::qtime::MovieGlRef& movie);
+    
+    // OpenCv based movie reader
+    static std::shared_ptr<qTimeFrameCache> create (const ocvPlayerRef&);
     
     // Offline movie loader
     static std::shared_ptr<qTimeFrameCache> create (const std::shared_ptr<avcc::avReader>& assetReader);
