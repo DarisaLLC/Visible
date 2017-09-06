@@ -60,16 +60,18 @@ namespace
     static layout vl ( ivec2 (10, 10));
     
     
-    class algo_processor : public SingletonLight<algo_processor>
+    class algo_processor : public internal_singleton <algo_processor>
     {
     public:
         algo_processor ()
         {
             m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
         }
+
+        const smProducerRef sm () const { return m_sm; }
         
     private:
-        const smProducerRef sm () const { return m_sm; }
+
         
         bool load_channels_from_images (const std::shared_ptr<qTimeFrameCache>& frames, bool LIF_data = true,
                                         uint8_t channel = 2)
@@ -100,8 +102,6 @@ namespace
                             const iRect& ir = m3->roi(cc);
                             m_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
                         }
-                        
-                        
                     }
                 }
                 else
@@ -153,7 +153,6 @@ namespace
         
     public:
          vector_of_trackD1s_t run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
-                        // TBD and 3 callbacks from algo registry to call
                         bool test_data = false)
         {
             
@@ -192,6 +191,16 @@ namespace
         
         const std::vector<Rectf>& rois () const { return m_rois; }
         
+        void run_similarity_runner (vector_of_trackD1s_t& tracks)
+        {
+            auto sp =  instance().sm();
+            std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
+            std::future<bool>  future_ss = task.get_future();  // get a future
+            std::thread(std::move(task)).detach(); // launch on a thread
+            future_ss.wait();
+            entropiesToTracks(sp, tracks[2]);
+            std::cout << "similarity computed " << std::endl;
+        }
         
     private:
         typedef std::vector<roiWindow<P8U>> channel_images_t;
@@ -205,7 +214,7 @@ namespace
      vector_of_trackD1s_t    get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
                                                bool test_data = false)
     {
-        return algo_processor().instance().run(frames, names, test_data);
+        return algo_processor().get_mutable_instance().run(frames, names, test_data);
     }
     
 }
@@ -371,6 +380,24 @@ void lifContext::setZoom (vec2 zoom)
     update ();
 }
 
+void lifContext::setMedianCutOff (uint32_t newco)
+{
+    uint32_t tmp = newco % 100; // pct
+    auto sp =  algo_processor::get_mutable_instance().sm();
+    uint32_t current (sp->get_median_levelset_pct () * 100);
+    if (tmp == current) return;
+    sp->set_median_levelset_pct (tmp / 100.0f);
+
+    update ();
+}
+
+uint32_t lifContext::getMedianCutOff () const
+{
+    auto sp =  algo_processor::get_mutable_instance().sm();
+    uint32_t current (sp->get_median_levelset_pct () * 100);
+    return current;
+}
+
 
 void lifContext::setup()
 {
@@ -433,6 +460,14 @@ void lifContext::setup()
         mUIParams.addSeparator();
         mUIParams.addText( "mode", "label=`Browse`" );
         
+        {
+            // Add a param with no target, but instead provide setter and getter functions.
+            const std::function<void(uint32_t)> setter	= std::bind(&lifContext::setMedianCutOff, this, std::placeholders::_1 );
+            const std::function<uint32_t()> getter	= std::bind( &lifContext::getMedianCutOff, this);
+            
+            // Attach a callback that is fired after a target is updated.
+            mUIParams.addParam( "CutOff Pct", setter, getter );
+        }
         
         //        {
         //            const std::function<void (float)> setter = std::bind(&lifContext::setZoom, this, std::placeholders::_1);
@@ -521,15 +556,15 @@ void lifContext::loadCurrentSerie ()
                 
                 assert (m_track_rects.size() >= channel_count);
                 
-                m_tracks.resize (0);
+                m_plots.resize (0);
                 
                 for (int cc = 0; cc < channel_count; cc++)
                 {
-                    m_tracks.push_back( Graph1DRef (new graph1D (m_current_serie_ref->getChannels()[cc].getName(),
+                    m_plots.push_back( Graph1DRef (new graph1D (m_current_serie_ref->getChannels()[cc].getName(),
                                                                  m_track_rects [cc])));
                 }
                 
-                for (Graph1DRef gr : m_tracks)
+                for (Graph1DRef gr : m_plots)
                 {
                     m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
                 }
@@ -579,11 +614,11 @@ void lifContext::mouseMove( MouseEvent event )
         update_instant_image_mouse ();
     }
     
-    if (vl.display_timeline_rect().contains(event.getPos()))
+    if (vl.display_plots_rect().contains(event.getPos()))
     {
         std::vector<float> dds (m_track_rects.size());
         for (auto pp = 0; pp < m_track_rects.size(); pp++) dds[pp] = m_track_rects[pp].distanceSquared(event.getPos());
-        
+    
         auto min_iter = std::min_element(dds.begin(),dds.end());
         mMouseInGraphs = min_iter - dds.begin();
     }
@@ -593,7 +628,7 @@ void lifContext::mouseMove( MouseEvent event )
 
 void lifContext::mouseDrag( MouseEvent event )
 {
-    for (Graph1DRef graphRef : m_tracks)
+    for (Graph1DRef graphRef : m_plots)
         graphRef->mouseDrag( event );
     
     if (getManualEditMode() && mMouseInImage && channelIndex() == 2)
@@ -605,7 +640,7 @@ void lifContext::mouseDrag( MouseEvent event )
 
 void lifContext::mouseDown( MouseEvent event )
 {
-    for (Graph1DRef graphRef : m_tracks )
+    for (Graph1DRef graphRef : m_plots )
     {
         graphRef->mouseDown( event );
         graphRef->get_marker_position(mTimeMarker);
@@ -623,7 +658,7 @@ void lifContext::mouseDown( MouseEvent event )
 
 void lifContext::mouseUp( MouseEvent event )
 {
-    for (Graph1DRef graphRef : m_tracks)
+    for (Graph1DRef graphRef : m_plots)
         graphRef->mouseUp( event );
 }
 
@@ -668,7 +703,7 @@ void  lifContext::update_log (const std::string& msg)
     TextBox tbox = TextBox().alignment( TextBox::RIGHT).font( mFont ).size( mSize ).text( mLog );
     tbox.setColor( Color( 1.0f, 0.65f, 0.35f ) );
     tbox.setBackgroundColor( ColorA( 0.3f, 0.3f, 0.3f, 0.4f )  );
-    ivec2 sz = tbox.measure();
+    tbox.measure();
     mTextTexture = gl::Texture2d::create( tbox.render() );
 }
 
@@ -686,9 +721,9 @@ void lifContext::resize ()
     vl.update_window_size(getWindowSize ());
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     vl.plot_rects(m_track_rects);
-    for (int cc = 0; cc < m_tracks.size(); cc++)
+    for (int cc = 0; cc < m_plots.size(); cc++)
     {
-        m_tracks[cc]->setRect (m_track_rects[cc]);
+        m_plots[cc]->setRect (m_track_rects[cc]);
     }
     
     mTimeLineSlider.mBounds = vl.display_timeline_rect();
@@ -699,10 +734,10 @@ void lifContext::update ()
     if ( is_ready (m_async_luminance_tracks))
     {
         m_luminance_tracks = m_async_luminance_tracks.get();
-        assert (m_luminance_tracks.size() == m_tracks.size ());
+        assert (m_luminance_tracks.size() == m_plots.size ());
         for (int cc = 0; cc < m_luminance_tracks.size(); cc++)
         {
-            m_tracks[cc]->setup(m_luminance_tracks[cc]);
+            m_plots[cc]->setup(m_luminance_tracks[cc]);
         }
     }
     
@@ -838,9 +873,9 @@ void lifContext::draw ()
         
         if (m_serie.channelCount)
         {
-            for (int cc = 0; cc < m_tracks.size(); cc++)
+            for (int cc = 0; cc < m_plots.size(); cc++)
             {
-                m_tracks[cc]->draw();
+                m_plots[cc]->draw();
             }
         }
     }

@@ -377,16 +377,16 @@ void movContext::loadMovieFile()
                     std::lock_guard<std::mutex> lock(m_track_mutex);
                     vl.plot_rects(m_track_rects);
                     assert (m_track_rects.size() >= 1);
-                    m_tracks.resize (0);
+                    m_plots.resize (0);
                     
                     
                     for (int cc = 0; cc < names.size() ; cc++)
                     {
-                        m_tracks.push_back( Graph1DRef (new graph1D (names[cc], m_track_rects [cc])));
+                        m_plots.push_back( Graph1DRef (new graph1D (names[cc], m_track_rects [cc])));
                     }
                 
                     
-                    for (Graph1DRef gr : m_tracks)
+                    for (Graph1DRef gr : m_plots)
                     {
                         m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
                     }
@@ -461,7 +461,7 @@ void movContext::mouseMove( MouseEvent event )
 void movContext::mouseDrag( MouseEvent event )
 {
     mMouseIsDragging = true;
-    for (Graph1DRef graphRef : m_tracks)
+    for (Graph1DRef graphRef : m_plots)
         graphRef->mouseDrag( event );
 }
 
@@ -469,7 +469,7 @@ void movContext::mouseDrag( MouseEvent event )
 void movContext::mouseDown( MouseEvent event )
 {
     mMouseIsDown = true;
-    for (Graph1DRef graphRef : m_tracks )
+    for (Graph1DRef graphRef : m_plots )
     {
         graphRef->mouseDown( event );
         graphRef->get_marker_position(mTimeMarker);
@@ -482,7 +482,7 @@ void movContext::mouseUp( MouseEvent event )
 {
     mMouseIsDown = false;
     mMouseIsDragging = false;
-    for (Graph1DRef graphRef : m_tracks)
+    for (Graph1DRef graphRef : m_plots)
         graphRef->mouseUp( event );
 }
 
@@ -569,9 +569,9 @@ void movContext::resize ()
     vl.update_window_size(getWindowSize ());
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     vl.plot_rects(m_track_rects);
-    for (int cc = 0; cc < m_tracks.size(); cc++)
+    for (int cc = 0; cc < m_plots.size(); cc++)
     {
-        m_tracks[cc]->setRect (m_track_rects[cc]);
+        m_plots[cc]->setRect (m_track_rects[cc]);
     }
     
     mTimeLineSlider.mBounds = vl.display_timeline_rect();
@@ -587,10 +587,10 @@ void movContext::update ()
     if ( is_ready (m_async_luminance_tracks))
     {
         m_luminance_tracks = m_async_luminance_tracks.get();
-        assert (m_luminance_tracks.size() == m_tracks.size ());
+        assert (m_luminance_tracks.size() == m_plots.size ());
         for (int cc = 0; cc < m_luminance_tracks.size(); cc++)
         {
-            m_tracks[cc]->setup(m_luminance_tracks[cc]);
+            m_plots[cc]->setup(m_luminance_tracks[cc]);
         }
     }
     
@@ -649,7 +649,7 @@ void movContext::draw ()
     
     draw_info ();
     
-    for(Graph1DRef gg : m_tracks)
+    for(Graph1DRef gg : m_plots)
         gg->draw ();
 
     }
