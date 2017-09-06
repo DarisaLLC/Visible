@@ -37,7 +37,7 @@ public:
     typedef std::vector<outuple_t> ordered_outuple_t;    
 
     typedef void (sig_cb_content_loaded) ();
-    typedef void (sig_cb_frame_loaded) (int&, double&);
+    typedef void (sig_cb_frame_loaded) (int, double);
     typedef void (sig_cb_frames_cached) ();
     typedef void (sig_cb_sm1d_available) ();
     typedef void (sig_cb_sm2d_available) ();

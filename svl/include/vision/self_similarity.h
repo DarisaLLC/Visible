@@ -297,7 +297,6 @@ class self_similarity_producer
   rcProgressIndicator*         const _guiUpdate;
   const double                       _tiny;
   double                             _log2MSz;
- // rsCorrParams                       _corrParams;
   
   /* Inputs - Temporal windows used to store the images required to
    * calculate the entropy signal. Pixel depth is assumed to be same

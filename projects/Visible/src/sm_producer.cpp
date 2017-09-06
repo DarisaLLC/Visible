@@ -321,11 +321,10 @@ int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_pr
     _frameCount = m_loaded_ref.size ();
 
     // Call the content loaded cb if any
-    if (signal_content_loaded && signal_content_loaded->num_slots() > 0 ) signal_content_loaded->operator()();
+    if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+        signal_content_loaded->operator()();
     
     if (m_auto_run) generate_ssm (0,0);
-    
-    std::cout << m_loaded_ref.size() << " Loaded "  << std::endl;
     
     return (int) _frameCount;
 }
@@ -374,12 +373,19 @@ void sm_producer::spImpl::loadImages (const images_vector_t& images)
     do
     {
         m_loaded_ref.push_back (*vitr++);
+        // Call the content loaded cb if any
+        int count = static_cast<int>(m_loaded_ref.size());
+        double done_pc = (100.0 * count)/static_cast<double>(images.size());
+        if (signal_frame_loaded  && signal_frame_loaded->num_slots() > 0)
+            signal_frame_loaded->operator()(count, done_pc);
     }
     while (vitr != images.end());
     _frameCount = m_loaded_ref.size ();
+
     // Call the content loaded cb if any
-    if (signal_content_loaded && signal_content_loaded->num_slots() > 0 ) signal_content_loaded->operator()();
-    
+    if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+        signal_content_loaded->operator()();
+
     if (m_auto_run) generate_ssm (0,0);
     
     
@@ -421,8 +427,9 @@ bool sm_producer::spImpl::setup_image_directory_result_repo () const
 bool sm_producer::spImpl::generate_ssm (int start_frames, int frames)
 {
     static    double tiny = 1e-10;
-    
+    std::cout << "_sm_producer" << std::this_thread::get_id() << std::endl;
     std::unique_lock<std::mutex> lock( m_mutex, std::try_to_lock );
+    std::cout << "sm_producer_" << std::this_thread::get_id() << std::endl;
     
     // Get a new similarity engine
     // Note: get execution times with   svl::stats<float>::PrintTo(simi->timeStats(), & std::cout);
@@ -454,5 +461,7 @@ bool sm_producer::spImpl::generate_ssm (int start_frames, int frames)
 
 template boost::signals2::connection sm_producer::registerCallback(const std::function<sm_producer::sig_cb_content_loaded>&);
 template boost::signals2::connection sm_producer::registerCallback(const std::function<sm_producer::sig_cb_frame_loaded>&);
+
+
 
 

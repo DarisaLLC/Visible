@@ -66,6 +66,7 @@ typedef std::future<timed_double_vec_t > async_timed_double_vec_t;
 typedef std::pair<std::string, timed_double_vec_t> trackD1_t;
 typedef std::future<trackD1_t> future_trackD1_t;
 typedef std::vector<trackD1_t>  vector_of_trackD1s_t;
+typedef std::vector<future_trackD1_t>  vector_of_future_trackD1s_t;
 typedef std::future<vector_of_trackD1s_t>  future_vector_of_trackD1s_t;
 
 
@@ -88,6 +89,57 @@ typedef std::future<vector_of_trackD1s_t>  future_vector_of_trackD1s_t;
 typedef std::promise<std::vector<trackD1_t> > promised_tracks_t;
 typedef std::future<std::vector<trackD1_t> > future_tracks_t;
 
+// SynchronisedQueue.hpp
+//
+// A queue class that has thread synchronisation.
+//
+
+#include <string>
+#include <queue>
+
+
+// Queue class that has thread synchronisation
+template <typename T>
+class SynchronisedQueue
+{
+private:
+    std::queue<T> m_queue;				// Use stl queue to store data
+    std::mutex m_mutex;				// The mutex to synchronise on
+    std::condition_variable m_cond;	// The condition to wait for
+    
+public:
+    
+    // Add data to the queue and notify others
+    void Enqueue(const T& data)
+    {
+        // Acquire lock on the queue
+        std::unique_lock<std::mutex> lock(m_mutex);
+        
+        // Add the data to the queue
+        m_queue.push(data);
+        
+        // Notify others that data is ready
+        m_cond.notify_one();
+        
+    } // Lock is automatically released here
+    
+    // Get data from the queue. Wait for data if not available
+    T Dequeue()
+    {
+        // Acquire lock on the queue
+        std::unique_lock<std::mutex> lock(m_mutex);
+        
+        // When there is no data, wait till someone fills it.
+        // Lock is automatically released in the wait and obtained again after the wait
+        while (m_queue.size()==0) m_cond.wait(lock);
+        
+        // Retrieve the data from the queue
+        T result=m_queue.front(); m_queue.pop();
+        return result;
+        
+    } // Lock is automatically released here
+};
 
 
 #endif
+

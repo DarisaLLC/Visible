@@ -12,6 +12,7 @@
 #include <deque>
 #include <iterator>
 #include <functional>
+#include <thread>
 
 namespace defaultMatchers
 {
@@ -262,7 +263,8 @@ bool self_similarity_producer<P>::internalFill(Iterator start, Iterator end,  de
   _finished = true;
 
   for (; start < end; start++) {
-    tWin.push_back(image_t(*start));
+//      image_t cp ((*start).frameBuf(), (*start).bound());
+      tWin.emplace_back((*start).frameBuf(), (*start).bound());
   //  (*start).frameBuf().unlock();
   }
 
