@@ -65,9 +65,9 @@ typedef std::vector<timed_double_t>  timed_double_vec_t;
 typedef std::future<timed_double_vec_t > async_timed_double_vec_t;
 typedef std::pair<std::string, timed_double_vec_t> trackD1_t;
 typedef std::future<trackD1_t> future_trackD1_t;
+typedef std::vector<trackD1_t>  tracksD1_t;
 typedef std::vector<trackD1_t>  vector_of_trackD1s_t;
-typedef std::vector<future_trackD1_t>  vector_of_future_trackD1s_t;
-typedef std::future<vector_of_trackD1s_t>  future_vector_of_trackD1s_t;
+typedef std::vector<future_trackD1_t>  future_tracksD1_t;
 
 
 
@@ -85,6 +85,8 @@ typedef std::future<vector_of_trackD1s_t>  future_vector_of_trackD1s_t;
 // Using
 // template<typename R>
 // bool is_ready(std::future<R> const& f)
+
+typedef std::future<std::vector<trackD1_t> > async_tracksD1_t;
 
 typedef std::promise<std::vector<trackD1_t> > promised_tracks_t;
 typedef std::future<std::vector<trackD1_t> > future_tracks_t;
