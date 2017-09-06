@@ -178,9 +178,9 @@ namespace
 
             // Now Load images
             load_channels_from_images(frames);
+            auto sp =  instance().sm();
+            sp->load_images(channelImages()[2]);
             std::cout << "channels Loaded" << std::endl;
-                auto sp =  instance().sm();
-            
             return m_tracks;
         }
         
@@ -189,16 +189,7 @@ namespace
             std::cout << "similarity cb called " << std::endl;
            m_sm_content_loaded = true;
         }
-        void deliver_sm_images_promise ()
-        {
-            while (! m_sm_content_loaded);
-            auto sp =  instance().sm();
-            m_sm_images_promise = std::promise<bool> ();
-            m_sm_images_future = m_sm_images_promise.get_future();
-            std::thread worker (&sm_producer::load_images, sp, channelImages()[2]);
-            m_sm_images_future.get();
-            m_sm_content_loaded = true;
-        }
+      
         bool run_channel_histogram_stats (trackD1_t& track, const vector_roi8_t& channel)
         {
             track.second.clear();
@@ -240,8 +231,7 @@ namespace
         {
             m_sm_content_loaded = false;
             loadImageSetupTracks (frames, names, false);
-            deliver_sm_images_promise();
-                
+            
             // Run Histogram on channels 0 and 1
             // Filling up tracks 0 and 1
             // Now Do Aci on the 3rd channel
@@ -254,17 +244,7 @@ namespace
         const std::vector<Rectf>& rois () const { return m_rois; }
         const vector_of_trackD1s_t& tracks () const { return m_tracks; }
         
-        void promise_mean_lum ( promised_tracks_t* promisedObject)
-        {
-            // Run Histogram on channels 0 and 1
-            // Filling up tracks 0 and 1
-            // Now Do Aci on the 3rd channel
-            deliver_sm_images_promise();
-            run_histogram_stats();
-            
-            if (promisedObject)
-                promisedObject->set_value(algo_processor::instance().tracks());
-        }
+  
         
         void set_similarity_output (bool true_is_median)
         {
@@ -277,8 +257,7 @@ namespace
         
     private:
        
-        std::promise<bool> m_sm_images_promise;
-        std::future<bool> m_sm_images_future;
+        
         vector_of_trackD1s_t m_tracks;
         smProducerRef m_sm;
         vector_roi8_t m_images;
@@ -287,6 +266,8 @@ namespace
         Rectf m_all;
         bool m_show_median;
         std::atomic<bool> m_sm_content_loaded;
+        mutable std::mutex mMutex;
+        std::condition_variable m_loaded_all_images;
     };
 }
 
