@@ -23,41 +23,33 @@
 
 #pragma once
 
-#include "cinder/audio2/Buffer.h"
+#include "cinder/audio/Buffer.h"
 
 #include "cinder/Vector.h"
 #include "cinder/PolyLine.h"
-#include "cinder/TriMesh.h"
+#include "cinder/gl/VboMesh.h"
 
 #include <vector>
 
-void drawAudioBuffer( const ci::audio2::Buffer &buffer, const ci::Rectf &bounds, bool drawFrame = false, const ci::ColorA &color = ci::ColorA( 0, 0.9f, 0, 1 ) );
+void drawAudioBuffer( const ci::audio::Buffer &buffer, const ci::Rectf &bounds, bool drawFrame = false, const ci::ColorA &color = ci::ColorA( 0, 0.9f, 0, 1 ) );
 
 class Waveform {
   public:
 	enum CalcMode { MIN_MAX, AVERAGE };
     Waveform() {}
-    Waveform( const std::vector<float> &samples, const ci::Vec2i &waveSize, size_t pixelsPerVertex = 2, CalcMode mode = MIN_MAX )	{ load( samples.data(), samples.size(), waveSize, pixelsPerVertex, mode ); }
-    Waveform( const float *samples, size_t numSamples, const ci::Vec2i &waveSize, size_t pixelsPerVertex = 2, CalcMode mode = MIN_MAX )	{ load( samples, numSamples, waveSize, pixelsPerVertex, mode ); }
+    Waveform( const std::vector<float> &samples, const ci::ivec2 &waveSize, size_t pixelsPerVertex = 2, CalcMode mode = MIN_MAX )	{ load( samples.data(), samples.size(), waveSize, pixelsPerVertex, mode ); }
+    Waveform( const float *samples, size_t numSamples, const ci::ivec2 &waveSize, size_t pixelsPerVertex = 2, CalcMode mode = MIN_MAX )	{ load( samples, numSamples, waveSize, pixelsPerVertex, mode ); }
 
-	void load( const float *samples, size_t numSamples, const ci::Vec2i &waveSize, size_t pixelsPerVertex = 2, CalcMode mode = MIN_MAX );
+	void load( const float *samples, size_t numSamples, const ci::ivec2 &waveSize, size_t pixelsPerVertex = 2, CalcMode mode = MIN_MAX );
 
-    const ci::PolyLine2f& getOutline() const	{ return mOutline; }
-	const ci::TriMesh2d& getMesh() const		{ return mMesh; };
+    const ci::PolyLine2f&	getOutline() const	{ return mOutline; }
+	ci::gl::VboMeshRef		getMesh() const		{ return mMesh; };
+
     bool loaded() { return mOutline.getPoints().size() > 0; }
     
-    const size_t sections () const { return m_num_sections; }
-    const size_t section_size () const { return m_section_size; }
-    const size_t samples () const { return m_sample_size; }    
-    
-    
   private:
-    ci::PolyLine2f mOutline;
-	ci::TriMesh2d mMesh;
-    size_t m_num_sections;
-    size_t m_sample_size;
-    size_t m_section_size;    
-    
+    ci::PolyLine2f		mOutline;
+	ci::gl::VboMeshRef	mMesh;
 };
 
 class WaveformPlot {
@@ -66,10 +58,9 @@ class WaveformPlot {
 
 	void load( const std::vector<float> &samples, const ci::Rectf &bounds, size_t pixelsPerVertex = 2 );
 
-	void load( const ci::audio2::BufferRef &buffer, const ci::Rectf &bounds, size_t pixelsPerVertex = 2 );
+	void load( const ci::audio::BufferRef &buffer, const ci::Rectf &bounds, size_t pixelsPerVertex = 2 );
 
 	const std::vector<Waveform>& getWaveforms() const	{ return mWaveforms; }
-    
 	const ci::Rectf& getBounds() const					{ return mBounds; }
 
 	void draw();
@@ -104,6 +95,4 @@ class SpectrumPlot {
 	ci::Rectf				mBounds;
 	bool					mScaleDecibels, mBorderEnabled;
 	ci::ColorA				mBorderColor;
-	std::vector<ci::Vec2f>	mVerts;
-	std::vector<ci::ColorA>	mColors;
 };
