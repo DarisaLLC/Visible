@@ -37,7 +37,7 @@
 
 #include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
-
+#include "AudioDrawUtils.h"
 #include "OcvVideo.h"
 using namespace ci;
 using namespace ci::app;
@@ -49,7 +49,8 @@ class VideoPlayerApp : public App
 public:
 	VideoPlayerApp();
 
-	void					draw() override;
+    void					draw() override;
+    void					resize() override;
 	void					keyDown( ci::app::KeyEvent event ) override;
 	void					mouseDown( ci::app::MouseEvent event ) override;
 	void					mouseDrag( ci::app::MouseEvent event ) override;
@@ -60,6 +61,9 @@ private:
 	float					mPlayhead	= 0.0f;
 	ci::gl::Texture2dRef	mTexture	= nullptr;
 	OcvVideoPlayer			mVideoPlayer;
+    WaveformPlot                mWave;
+    std::vector<float>      mSignal;
+    
 };
 
 #include "cinder/app/RendererGl.h"
@@ -104,7 +108,15 @@ VideoPlayerApp::VideoPlayerApp()
 		CI_LOG_V( " > Num frames: "	<< mVideoPlayer.getNumFrames() );
 		CI_LOG_V( " > Size: "		<< mVideoPlayer.getSize() );
 
-		const ivec2& sz = mVideoPlayer.getSize();
+        std::vector<float> signal (mVideoPlayer.getNumFrames());
+        float pitch = signal.size () / 16.0;
+        for (auto ii = 0; ii < signal.size(); ii++)
+        {
+            signal[ii] = std::sin(ii / pitch);
+        }
+        mSignal = signal;
+        
+    	const ivec2& sz = mVideoPlayer.getSize();
 		setWindowSize( sz );
 		setWindowPos( ( getDisplay()->getSize() - sz ) / 2 );
 		mVideoPlayer.play();
@@ -116,12 +128,21 @@ VideoPlayerApp::VideoPlayerApp()
 
 void VideoPlayerApp::draw()
 {
+    gl::enableAlphaBlending();
 	gl::setMatricesWindow( getWindowSize() );
 	gl::clear();
-
+    Rectf loc = getWindowBounds();
+    loc.scaled(0.25);
 	if ( mTexture != nullptr ) {
-		gl::draw( mTexture, mTexture->getBounds(), getWindowBounds() );
+		gl::draw( mTexture, mTexture->getBounds(), loc );
 	}
+    
+    mWave.draw();
+    
+    // draw the current play position
+ //   float readPos = (float)getWindowWidth() * mBufferPlayerNode->getReadPosition() / mBufferPlayerNode->getNumFrames();
+//    gl::color( ColorA( 0, 1, 0, 0.7f ) );
+//    gl::drawSolidRect( Rectf( readPos - 2, 0, readPos + 2, (float)getWindowHeight() ) );
 }
 
 void VideoPlayerApp::keyDown( KeyEvent event )
@@ -144,6 +165,12 @@ void VideoPlayerApp::keyDown( KeyEvent event )
 	}
 }
 
+void VideoPlayerApp::resize()
+{
+    Rectf loc = getWindowBounds();
+    loc.scaled(0.25);
+    mWave.load( mSignal, loc, 3 );
+}
 void VideoPlayerApp::mouseDown( MouseEvent event )
 {
 	mouseDrag( event );
@@ -162,6 +189,11 @@ void VideoPlayerApp::mouseUp( MouseEvent event )
 
 void VideoPlayerApp::update()
 {
+    Rectf loc = getWindowBounds();
+    loc.scaled(0.25);
+    mWave.load (mSignal, loc , 3);
+    
+    
 	if ( mMouseDown ) {
 		mVideoPlayer.seekPosition( mPlayhead );
 	}
