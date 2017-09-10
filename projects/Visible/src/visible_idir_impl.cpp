@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "VisibleApp.h"
-#include "cinder/ip/resize.h"
+#include "cinder/ip/Resize.h"
 #include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"
 #include "guiContext.h"

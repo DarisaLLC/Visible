@@ -384,6 +384,8 @@ protected:
 	vec2				mSize;
 	Font				mFont;
 	std::string			mLog;
+	std::vector<length_time_t> mCellEnds;
+	
 	
 };
 

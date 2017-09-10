@@ -41,6 +41,8 @@
 		C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
 		C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
 		C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
+		C248DD2C1F64601A00FF72B1 /* AudioDrawUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */; };
+		C248DD2D1F646A1200FF72B1 /* AudioDrawUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */; };
 		C24CD87F1CEA5B1B0008C72B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
 		C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
 		C24CD8891CEA916E0008C72B /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
@@ -267,7 +269,6 @@
 		C20EDBC51CF277480074C47A /* timestamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timestamp.h; sourceTree = "<group>"; };
 		C21946611CE4D95E00976025 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AudioDrawUtils.cpp; path = ../src/AudioDrawUtils.cpp; sourceTree = "<group>"; };
-		C21946661CE4DC7100976025 /* AudioDrawUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioDrawUtils.h; path = ../src/AudioDrawUtils.h; sourceTree = "<group>"; };
 		C21946691CE4DC7100976025 /* directoryPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = directoryPlayer.cpp; path = ../src/directoryPlayer.cpp; sourceTree = "<group>"; };
 		C219466D1CE4DC7100976025 /* InteractiveObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InteractiveObject.cpp; path = ../src/InteractiveObject.cpp; sourceTree = "<group>"; };
 		C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = qtime_frame_cache.cpp; path = ../src/qtime_frame_cache.cpp; sourceTree = "<group>"; };
@@ -9883,7 +9884,6 @@
 				C2B005811CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm */,
 				C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */,
 				C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */,
-				C21946661CE4DC7100976025 /* AudioDrawUtils.h */,
 				C21946691CE4DC7100976025 /* directoryPlayer.cpp */,
 				C2F27E891DD8516900890E4C /* VisibleApp.h */,
 				C219466D1CE4DC7100976025 /* InteractiveObject.cpp */,
@@ -26081,6 +26081,7 @@
 				C20EDBC11CF277130074C47A /* exception.cpp in Sources */,
 				C20EDBC21CF277130074C47A /* self_similarity.cpp in Sources */,
 				C221D9171E4B043A00AF74CE /* directoryPlayer.cpp in Sources */,
+				C248DD2C1F64601A00FF72B1 /* AudioDrawUtils.cpp in Sources */,
 				C221D91B1E4B48F400AF74CE /* visible_mov_dir_impl.cpp in Sources */,
 				C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */,
 				C2606DAF1CED3E2E0045FF57 /* matpixel.cpp in Sources */,
@@ -26126,6 +26127,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C248DD2D1F646A1200FF72B1 /* AudioDrawUtils.cpp in Sources */,
 				C254BEE61F4FB56A00977307 /* VideoPlayerApp.cpp in Sources */,
 				C254BE931F4FAFCC00977307 /* OcvVideo.cpp in Sources */,
 			);
@@ -26200,6 +26202,7 @@
 					/usr/local/Cellar/libpng/1.6.29/lib,
 					/usr/local/Cellar/webp/0.5.2/lib,
 				);
+				LOCAL_BOOST = "$(EXTERNALS)";
 				OTHER_LDFLAGS = (
 					"$(LOCAL_CINDER)/lib/macosx/Debug/libcinder.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
@@ -26258,6 +26261,7 @@
 					/usr/local/Cellar/libpng/1.6.29/lib,
 					/usr/local/Cellar/webp/0.5.2/lib,
 				);
+				LOCAL_BOOST = "$(EXTERNALS)";
 				OTHER_LDFLAGS = (
 					"$(LOCAL_CINDER)/lib/macosx/Release/libcinder.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",

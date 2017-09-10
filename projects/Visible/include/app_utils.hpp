@@ -31,7 +31,6 @@
 #include <functional>
 #include <utility>
 
-#include <boost/functional/factory.hpp>
 #include "core/singleton.hpp"
 #include "stl_utils.hpp"
 

@@ -14,7 +14,6 @@
 #include "opencv2/highgui.hpp"
 #include "roiWindow.h"
 #include "vision/self_similarity.h"
-#include "cinder_buffer.hpp"
 #include "qtime_frame_cache.hpp"
 #include "cinder/qtime/Quicktime.h"
 #include "cinder/app/Renderer.h"

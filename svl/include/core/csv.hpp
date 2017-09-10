@@ -2,9 +2,8 @@
 #define __CSV__
 
 
-// boost
-#include <boost/utility.hpp> // noncopyable
-#include <boost/tokenizer.hpp> // escaped_list_separator
+#include <boost/utility.hpp>
+#include <boost/tokenizer.hpp>
 
 // stl
 #include <iosfwd>
