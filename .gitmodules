@@ -8,7 +8,7 @@
 	path = externals/Cinder-OpenCV3
 	url = git://github.com/cinder/Cinder-OpenCV3.git
 [submodule "externals/cinder/include/boost"]
-	path = externals/cinder/include
+	path = externals/cinder/include/boost
 	url = https://github.com/gmnamra/cinder_boost.git
 
 
