@@ -10,3 +10,6 @@
 [submodule "externals/cinder_boost"]
 	path = externals/cinder/include
 	url = git@github.com:gmnamra/cinder_boost.git
+[submodule "cinder_boost"]
+	path = cinder_boost
+	url = https://github.com/gmnamra/cinder_boost.git
