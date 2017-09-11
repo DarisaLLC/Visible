@@ -41,6 +41,10 @@
 #include "OcvVideo.h"
 #include <sstream>
 
+#include "DisplayObjectContainer.h"
+#include "Square.h"
+#include "Circle.h"
+
 using namespace tinyUi;
 
 using namespace boost;
@@ -54,22 +58,6 @@ using namespace params;
 using namespace std;
 namespace fs = boost::filesystem;
 
-struct Circle {
-	void posUpdate() { // make the radius the distance to the closest edge
-		mRadius = mPos().x;
-		mRadius = std::min( mRadius, getWindowWidth() - mPos().x );
-		mRadius = std::min( mRadius, mPos().y );
-		mRadius = std::min( mRadius, getWindowHeight() - mPos().y );
-	}
-	
-	void draw() {
-		gl::color( Color( 1.0f, 0.5f, 0.25f ) );
-		gl::drawSolidCircle( mPos, mRadius );
-	}
-	
-	Anim<vec2>	mPos;
-	float		mRadius;
-};
 
 
 
@@ -385,6 +373,7 @@ protected:
 	Font				mFont;
 	std::string			mLog;
 	std::vector<length_time_t> mCellEnds;
+	rph::DisplayObjectContainer mContainer;	
 	
 	
 };

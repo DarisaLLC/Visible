@@ -645,6 +645,15 @@ void lifContext::mouseDown( MouseEvent event )
         graphRef->mouseDown( event );
         graphRef->get_marker_position(mTimeMarker);
         signalMarker.emit(mTimeMarker);
+        {
+            Circle *c = new Circle();
+            c->setRegPoint(rph::DisplayObject2D::RegistrationPoint::CENTERCENTER);
+            c->setColor(Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat()));
+            c->setScale(Rand::randInt(50,100));
+            c->setPos( event.getPos() );
+            c->fadeOutAndDie();
+            mContainer.addChild(c);
+        }
     }
     
     // If we are in the Visible Channel
@@ -652,7 +661,18 @@ void lifContext::mouseDown( MouseEvent event )
     {
         mLengthPoints.first = event.getPos();
         mLengthPoints.second = mLengthPoints.first;
+        {
+            Square *s = new Square();
+            s->setRegPoint(rph::DisplayObject2D::RegistrationPoint::CENTERCENTER);
+            s->setColor(Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat()));
+            s->setSize(Rand::randInt(50,100),Rand::randInt(50,100));
+            s->setPos( event.getPos() );
+            s->fadeOutAndDie();
+            mContainer.addChild(s);
+        }
+        
     }
+    
 }
 
 
@@ -731,6 +751,8 @@ void lifContext::resize ()
 }
 void lifContext::update ()
 {
+  mContainer.update();
+    
     if ( is_ready (m_async_luminance_tracks))
     {
         m_luminance_tracks = m_async_luminance_tracks.get();
@@ -837,8 +859,7 @@ void lifContext::draw_info ()
 
 void lifContext::draw ()
 {
-    
-    
+   
     if( have_movie()  && mSurface )
     {
         Rectf dr = get_image_display_rect();
@@ -878,6 +899,8 @@ void lifContext::draw ()
                 m_plots[cc]->draw();
             }
         }
+        
+        mContainer.draw();        
     }
     
     mUIParams.draw();
