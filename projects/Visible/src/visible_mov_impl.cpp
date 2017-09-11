@@ -282,11 +282,12 @@ void movContext::setZoom (vec2 zoom)
 
 void movContext::setup()
 {
-    
+    clear_movie_params();
+
     // Load the validated movie file
     loadMovieFile ();
     
-    clear_movie_params();
+
     
     if( m_valid )
     {
@@ -343,9 +344,6 @@ void movContext::loadMovieFile()
             CI_LOG_V( " > Num frames: "	<< m_movie->getNumFrames() );
             CI_LOG_V( " > Size: "		<< m_movie->getSize() );
             
-            const ivec2& sz = m_movie->getSize();
-            setWindowSize( sz );
-            setWindowPos( ( getWindow()->getSize() - sz ) / 2 );
             m_valid = m_movie->isLoaded();
             std::vector<std::string> names = {  "blue", "green", "red"};
             mFrameSet = qTimeFrameCache::create (m_movie);
@@ -397,8 +395,10 @@ void movContext::loadMovieFile()
                     mWidgets.push_back( &mTimeLineSlider );
                     
                     getWindow()->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
+                    
+                    play ();
                 }
-                
+
                 
                 ci_console() << "Dimensions:" <<m_movie->getSize() << std::endl;
                 ci_console() << "Duration:  " <<m_movie->getDuration() << " seconds" << std::endl;
@@ -438,25 +438,7 @@ void movContext::mouseMove( MouseEvent event )
     }
     
 }
-#if 0
-void movContext::mouseMove( MouseEvent event )
-{
-    mMouseInImage = false;
-    mMouseInGraphs  = -1;
-    mMouseIsMoving = true;
-    
-    if (! have_movie () ) return;
-    
-    mMouseInImage = get_image_display_rect().contains(event.getPos());
-    if (mMouseInImage) return;
-    
-    std::vector<float> dds (m_track_rects.size());
-    for (auto pp = 0; pp < m_track_rects.size(); pp++) dds[pp] = m_track_rects[pp].distanceSquared(event.getPos());
-    
-    auto min_iter = std::min_element(dds.begin(),dds.end());
-    mMouseInGraphs = min_iter - dds.begin();
-}
-#endif
+
 
 void movContext::mouseDrag( MouseEvent event )
 {
@@ -518,17 +500,17 @@ void movContext::keyDown( KeyEvent event )
 
 void movContext::update_instant_image_mouse ()
 {
-    uint32_t m_instance_channel;
-    auto mouseInChannelPos = mMouseInImagePosition;
     auto image_pos = vl.display2image(mMouseInImagePosition);
     // LIF 3 channel organization. Channel height is 1/3 of image height
     // Channel Index is pos.y / channel_height,
     // In channel x is pos.x, In channel y is pos.y % channel_height
-    uint32_t channel_height = mMediaInfo.getHeight() / 3;
-    
-    m_instance_channel = (int) image_pos.y / (int) channel_height;
+    uint32_t channel_height = mMediaInfo.getHeight();
     image_pos.y = ((int) image_pos.y) % channel_height;
     m_instant_mouse_image_pos = image_pos;
+    if (mSurface)
+    {
+        m_instant_pixel_Color = mSurface->getPixel(m_instant_mouse_image_pos);
+    }
 }
 
 gl::TextureRef movContext::pixelInfoTexture ()
@@ -536,13 +518,14 @@ gl::TextureRef movContext::pixelInfoTexture ()
     if (! mMouseInImage) return gl::TextureRef ();
     TextLayout lout;
     
-    std::string pos = " c: " + toString(channelIndex()) +  "[" + to_string(mMouseInImagePosition.x) + "," + to_string(mMouseInImagePosition.y) + "] i [" +
+    std::string pos =  toString(m_instant_pixel_Color) +
+    "[" + to_string(mMouseInImagePosition.x) +
+    "," + to_string(mMouseInImagePosition.y) +
+    "] i [" +
     to_string(imagePos().x) + "," + to_string(imagePos().y) + "]";
     
-    
-    
     lout.clear( ColorA::gray( 0.2f, 0.5f ) );
-    lout.setFont( Font( "Menlo", 14 ) );
+    lout.setFont( Font( "Menlo", 10 ) );
     lout.setColor( ColorA(0.8,0.2,0.1,1.0) );
     lout.setLeadingOffset( 3 );
     lout.addRightLine( pos );
@@ -552,12 +535,6 @@ gl::TextureRef movContext::pixelInfoTexture ()
     
 }
 
-
-//
-//void movContext::seek( size_t xPos )
-//{
-//    if (is_valid()) mMovieIndexPosition = movContext::Normal2Index ( getWindowBounds(), xPos, m_frameCount);
-//}
 
 
 bool movContext::is_valid () { return m_valid && is_context_type(guiContext::qtime_viewer); }
@@ -596,10 +573,6 @@ void movContext::update ()
     
     if (! have_movie () ) return;
     
-    //    if ( mMouseDown ) {
-    //        m_movie->seekPosition(getCurrentFrame()/((double)getNumFrames()));
-    //    }
-    
     if ( m_movie->update() ) {
         
         time_spec_t new_time = m_movie->getElapsedSeconds();
@@ -613,20 +586,6 @@ void movContext::update ()
         }
     }
     
-    
-#if 0
-    std::string image_location (" In Image ");
-    std::string graph_location (" In Graph ");
-    graph_location += to_string (mMouseInGraphs);
-    std::string which = mMouseInImage ? image_location : mMouseInGraphs >= 0 ? graph_location : " Outside ";
-    std::strstream msg;
-    msg << std::boolalpha << " Loop " << looping() << std::boolalpha << " Play " << m_movie->isPlaying() <<
-    " F " << setw(12) << int( getCurrentFrame () ) << which;
-    
-    std::string frame_str = msg.str();
-    update_log (frame_str);
-#endif
-    
 }
 
 void movContext::draw ()
@@ -639,23 +598,11 @@ void movContext::draw ()
     mImage = gl::Texture::create(*mSurface);
     mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
     gl::draw (mImage, dr);
-        
-        auto pt = pixelInfoTexture ();
-        if (pt)
-        {
-            gl::draw(pt, dr.scaled(0.2));
-        }
-
-    
     draw_info ();
-    
     for(Graph1DRef gg : m_plots)
         gg->draw ();
-
     }
-    
     mUIParams.draw();
-    
 }
 
 
@@ -674,7 +621,7 @@ void  movContext::update_log (const std::string& message)
     TextBox tbox = TextBox().alignment( TextBox::RIGHT).font( mFont ).size( mSize ).text( mLog );
     tbox.setColor( Color( 1.0f, 0.65f, 0.35f ) );
     tbox.setBackgroundColor( ColorA( 0.3f, 0.3f, 0.3f, 0.4f )  );
-    ivec2 sz = tbox.measure();
+    tbox.measure();
     mTextTexture = gl::Texture2d::create( tbox.render() );
 }
 
@@ -710,84 +657,18 @@ void movContext::draw_info ()
     }
     
     
-    TextLayout layoutL;
-    
-    layoutL.clear( ColorA::gray( 0.2f, 0.5f ) );
-    layoutL.setFont( Font( "Arial", 18 ) );
-    layoutL.setColor( Color::white() );
-    layoutL.setLeadingOffset( 3 );
-    layoutL.addRightLine( seri_str);
-    
-    auto texR = gl::Texture::create( layoutL.render( true ) );
-    Rectf tbox = texR->getBounds();
-    tbox = tbox.getCenteredFit(getWindowBounds(), false);
-    tbox.offset(vec2(0,getWindowHeight() - tbox.getHeight() - tbox.getY1()));
-    gl::draw( texR, tbox);
-    
+    auto texR = pixelInfoTexture ();
+    if (texR)
+    {
+        Rectf tbox = texR->getBounds();
+        tbox = tbox.getCenteredFit(getWindowBounds(), true);
+        tbox.scale(vec2(0.5, 0.67));
+        tbox.offset(vec2(getWindowWidth() - tbox.getWidth(),getWindowHeight() - tbox.getHeight() - tbox.getY1()));
+
+        gl::draw( texR, tbox);
+    }
     tinyUi::drawWidgets(mWidgets);
     
 }
 
-#if 0
 
-// Create a clip viewer. Go through container of viewers, if there is a movie view, connect onMarked signal to it
-void movContext::add_scalar_track(const boost::filesystem::path& path)
-{
-    Window::Format format( RendererGl::create() );
-    WindowRef win = VisibleCentral::instance().getConnectedWindow(format);
-    std::shared_ptr<clipContext> new_ts ( new clipContext (win, path));
-    auto parent_size = mWindow->getSize();
-    auto parent_pos = mWindow->getPos();
-    parent_pos.y += parent_size.y;
-    parent_size.y = 100;
-    win->setSize (parent_size);
-    win->setPos (parent_pos);
-    signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(new_ts.get()), std::placeholders::_1));
-    new_ts->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(this), std::placeholders::_1));
-    VisibleCentral::instance().contexts().push_back(new_ts);
-    
-    //    VisWinMgr::key_t kk;
-    //    bool kept = VisWinMgr::instance().makePair(win, new_ts, kk);
-    //    ci_console() << "Time Series Window/Context registered: " << std::boolalpha << kept << std::endl;
-    
-}
-
-
-
-
-
-
-std::shared_ptr<guiContext> cw(std::shared_ptr<guiContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
-
-if (! cw->is_valid()) return;
-
-for (std::shared_ptr<guiContext> uip : mContexts)
-{
-    if (uip->is_context_type(guiContext::Type::qtime_viewer))
-    {
-        uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
-        cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
-    }
-}
-mContexts.push_back(cw);
-}
-
-// Create a movie viewer. Go through container of viewers, if there is a clip view, connect onMarked signal to it
-void VisibleApp::create_qmovie_viewer ()
-{
-    std::shared_ptr<guiContext> mw(new movContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize()))));
-    
-    if (! mw->is_valid()) return;
-    
-    for (std::shared_ptr<guiContext> uip : mContexts)
-    {
-        if (uip->is_context_type(guiContext::Type::clip_viewer))
-        {
-            uip->signalMarker.connect(std::bind(&movContext::onMarked, static_cast<movContext*>(mw.get()), std::placeholders::_1));
-            mw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
-        }
-    }
-    mContexts.push_back(mw);
-}
-
-#endif

@@ -68,6 +68,13 @@
 		C24CD8B71CEB841E0008C72B /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995591B128DF400A5C623 /* IOSurface.framework */; };
 		C24CD8B81CEB841E0008C72B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731819953389008149E2 /* AVFoundation.framework */; };
 		C24CD8B91CEB841E0008C72B /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731919953389008149E2 /* CoreMedia.framework */; };
+		C25261061F6611A10069F665 /* Circle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C25261011F6611A10069F665 /* Circle.cpp */; };
+		C25261071F6611A10069F665 /* DisplayObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C25261021F6611A10069F665 /* DisplayObject.cpp */; };
+		C25261081F6611A10069F665 /* ObjectContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C25261031F6611A10069F665 /* ObjectContainer.cpp */; };
+		C25261091F6611A10069F665 /* Square.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C25261041F6611A10069F665 /* Square.cpp */; };
+		C25261211F66EA910069F665 /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611F1F66EA910069F665 /* pugixml.cpp */; };
+		C25261221F66F0800069F665 /* PlistDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611E1F66EA910069F665 /* PlistDate.cpp */; };
+		C25261231F66F1610069F665 /* Plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611B1F66E95B0069F665 /* Plist.cpp */; };
 		C254BE841F4F912E00977307 /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C254BE8A1F4FAFCC00977307 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2FA97181E82EFB1006EC61E /* Images.xcassets */; };
 		C254BE931F4FAFCC00977307 /* OcvVideo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BE851F4FAF5C00977307 /* OcvVideo.cpp */; };
@@ -277,7 +284,6 @@
 		C219468A1CE4EA4900976025 /* AudioDrawUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioDrawUtils.h; path = ../include/AudioDrawUtils.h; sourceTree = "<group>"; };
 		C219468B1CE4EA4900976025 /* TinyUi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TinyUi.h; path = ../include/TinyUi.h; sourceTree = "<group>"; };
 		C219468C1CE4EA4900976025 /* base_signaler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_signaler.h; path = ../include/base_signaler.h; sourceTree = "<group>"; };
-		C219468F1CE4EA4900976025 /* cimovinggraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cimovinggraph.h; path = ../include/cimovinggraph.h; sourceTree = "<group>"; };
 		C21946931CE4EA4900976025 /* grabber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = grabber.h; path = ../include/grabber.h; sourceTree = "<group>"; };
 		C21946941CE4EA4900976025 /* graph1d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = graph1d.hpp; path = ../include/graph1d.hpp; sourceTree = "<group>"; };
 		C21946961CE4EA4900976025 /* InteractiveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InteractiveObject.h; path = ../include/InteractiveObject.h; sourceTree = "<group>"; };
@@ -289,7 +295,6 @@
 		C21946A71CE4EA4900976025 /* vf_cinder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = vf_cinder.hpp; path = ../include/vf_cinder.hpp; sourceTree = "<group>"; };
 		C21946AC1CE4EA4900976025 /* qtime_frame_cache.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = qtime_frame_cache.hpp; path = ../include/qtime_frame_cache.hpp; sourceTree = "<group>"; };
 		C21FFE6B1CFD1D9B00C97013 /* app_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = app_utils.hpp; path = ../include/app_utils.hpp; sourceTree = "<group>"; };
-		C21FFE6C1CFD1D9B00C97013 /* cinder_buffer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cinder_buffer.hpp; path = ../include/cinder_buffer.hpp; sourceTree = "<group>"; };
 		C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer_impl.h; path = ../include/sm_producer_impl.h; sourceTree = "<group>"; };
 		C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer.h; path = ../include/sm_producer.h; sourceTree = "<group>"; };
 		C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sm_producer.cpp; path = ../src/sm_producer.cpp; sourceTree = "<group>"; };
@@ -318,6 +323,24 @@
 		C24CD8A81CEB80750008C72B /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../../svl/local/cinder/cinder_0.9/lib/libcinder.a; sourceTree = "<group>"; };
 		C24FC84C1E5E40130071AA1A /* async_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = async_producer.h; path = ../include/async_producer.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		C24FC84D1E5E56960071AA1A /* roiMultiWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = roiMultiWindow.h; sourceTree = "<group>"; };
+		C25261001F6611A10069F665 /* BasicSampleApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BasicSampleApp.cpp; path = ../src/rph/BasicSampleApp.cpp; sourceTree = "<group>"; };
+		C25261011F6611A10069F665 /* Circle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Circle.cpp; path = ../src/rph/Circle.cpp; sourceTree = "<group>"; };
+		C25261021F6611A10069F665 /* DisplayObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DisplayObject.cpp; path = ../src/rph/DisplayObject.cpp; sourceTree = "<group>"; };
+		C25261031F6611A10069F665 /* ObjectContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ObjectContainer.cpp; path = ../src/rph/ObjectContainer.cpp; sourceTree = "<group>"; };
+		C25261041F6611A10069F665 /* Square.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Square.cpp; path = ../src/rph/Square.cpp; sourceTree = "<group>"; };
+		C252610A1F6613320069F665 /* Circle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Circle.h; path = ../include/Circle.h; sourceTree = "<group>"; };
+		C252610B1F6613320069F665 /* DisplayObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DisplayObject.h; path = ../include/DisplayObject.h; sourceTree = "<group>"; };
+		C252610C1F6613320069F665 /* DisplayObjectContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DisplayObjectContainer.h; path = ../include/DisplayObjectContainer.h; sourceTree = "<group>"; };
+		C252610D1F6613440069F665 /* Square.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Square.h; path = ../include/Square.h; sourceTree = "<group>"; };
+		C252610E1F6613A30069F665 /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Object.h; path = ../include/Object.h; sourceTree = "<group>"; };
+		C252610F1F6613A30069F665 /* ObjectContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ObjectContainer.h; path = ../include/ObjectContainer.h; sourceTree = "<group>"; };
+		C25261181F66E3A90069F665 /* pugixml.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = pugixml.hpp; path = ../include/pugixml.hpp; sourceTree = "<group>"; };
+		C25261191F66E8F40069F665 /* Plist.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Plist.hpp; path = ../include/Plist.hpp; sourceTree = "<group>"; };
+		C252611A1F66E8F40069F665 /* PlistDate.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PlistDate.hpp; path = ../include/PlistDate.hpp; sourceTree = "<group>"; };
+		C252611B1F66E95B0069F665 /* Plist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Plist.cpp; path = ../src/Plist.cpp; sourceTree = "<group>"; };
+		C252611D1F66EA0B0069F665 /* base64.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = base64.hpp; path = ../include/base64.hpp; sourceTree = "<group>"; };
+		C252611E1F66EA910069F665 /* PlistDate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlistDate.cpp; path = ../src/PlistDate.cpp; sourceTree = "<group>"; };
+		C252611F1F66EA910069F665 /* pugixml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pugixml.cpp; path = ../src/pugixml.cpp; sourceTree = "<group>"; };
 		C254BE851F4FAF5C00977307 /* OcvVideo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OcvVideo.cpp; path = ../src/OcvVideo.cpp; sourceTree = "<group>"; };
 		C254BE871F4FAF7100977307 /* OcvVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OcvVideo.h; path = ../include/OcvVideo.h; sourceTree = "<group>"; };
 		C254BEC91F4FAFCC00977307 /* ocvPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ocvPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -9876,6 +9899,14 @@
 		080E96DDFE201D6D7F000001 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				C252611E1F66EA910069F665 /* PlistDate.cpp */,
+				C252611F1F66EA910069F665 /* pugixml.cpp */,
+				C252611B1F66E95B0069F665 /* Plist.cpp */,
+				C25261001F6611A10069F665 /* BasicSampleApp.cpp */,
+				C25261011F6611A10069F665 /* Circle.cpp */,
+				C25261021F6611A10069F665 /* DisplayObject.cpp */,
+				C25261031F6611A10069F665 /* ObjectContainer.cpp */,
+				C25261041F6611A10069F665 /* Square.cpp */,
 				C254BEE41F4FB56600977307 /* VideoPlayerApp.cpp */,
 				C254BE851F4FAF5C00977307 /* OcvVideo.cpp */,
 				C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */,
@@ -10038,6 +10069,16 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C252611D1F66EA0B0069F665 /* base64.hpp */,
+				C25261191F66E8F40069F665 /* Plist.hpp */,
+				C252611A1F66E8F40069F665 /* PlistDate.hpp */,
+				C25261181F66E3A90069F665 /* pugixml.hpp */,
+				C252610E1F6613A30069F665 /* Object.h */,
+				C252610F1F6613A30069F665 /* ObjectContainer.h */,
+				C252610D1F6613440069F665 /* Square.h */,
+				C252610A1F6613320069F665 /* Circle.h */,
+				C252610B1F6613320069F665 /* DisplayObject.h */,
+				C252610C1F6613320069F665 /* DisplayObjectContainer.h */,
 				C254BE871F4FAF7100977307 /* OcvVideo.h */,
 				C26916141E6C78E8005C79F2 /* spimple.h */,
 				C2601BBF1E6B5EF3004415A3 /* algoFunctions.hpp */,
@@ -10045,13 +10086,11 @@
 				C2B38A541D022E9D00C70872 /* AVReader.h */,
 				C2E321FE1D038B16006DFE5E /* AVReader.hpp */,
 				C21FFE6B1CFD1D9B00C97013 /* app_utils.hpp */,
-				C21FFE6C1CFD1D9B00C97013 /* cinder_buffer.hpp */,
 				C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */,
 				C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */,
 				C219468A1CE4EA4900976025 /* AudioDrawUtils.h */,
 				C219468B1CE4EA4900976025 /* TinyUi.h */,
 				C219468C1CE4EA4900976025 /* base_signaler.h */,
-				C219468F1CE4EA4900976025 /* cimovinggraph.h */,
 				C221D91A1E4B176800AF74CE /* directoryPlayer.h */,
 				C21946931CE4EA4900976025 /* grabber.h */,
 				C21946941CE4EA4900976025 /* graph1d.hpp */,
@@ -25881,7 +25920,7 @@
 				8D1107290486CEB800E47090 /* Resources */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
-				C259982F1ECF7C270015EE7B /* ShellScript */,
+				C25261131F66D7BF0069F665 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -26014,7 +26053,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		C254BEC51F4FAFCC00977307 /* ShellScript */ = {
+		C25261131F66D7BF0069F665 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -26025,9 +26064,9 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#./Fabric.framework/run 6c107bbc4d9b676f55d670b4a1baacbff9754c65 1190b5b2eda58cb562659f650e2800609eae0587f4a139ce86370628e5ce54d0\n";
+			shellScript = "#Update build number with number of git commits if in release mode\nbuildNumber=$(git rev-list HEAD | wc -l | tr -d ' ')\necho $buildNumber\n#if [ ${CONFIGURATION} == \"Release\" ]; then\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n#fi;";
 		};
-		C259982F1ECF7C270015EE7B /* ShellScript */ = {
+		C254BEC51F4FAFCC00977307 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -26059,14 +26098,19 @@
 				C21946871CE4DC7100976025 /* visible_impl.cpp in Sources */,
 				C2FC7DAF1CF4F46100D18193 /* qtime_frame_cache.cpp in Sources */,
 				C2B38A571D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
+				C25261231F66F1610069F665 /* Plist.cpp in Sources */,
 				C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */,
 				C2606DAE1CED3E2E0045FF57 /* localvariance.cpp in Sources */,
+				C25261081F6611A10069F665 /* ObjectContainer.cpp in Sources */,
+				C25261211F66EA910069F665 /* pugixml.cpp in Sources */,
 				C2606DAD1CED3E2E0045FF57 /* lineseg.cpp in Sources */,
 				C25822461CE6478400D83AB0 /* visible_mov_impl.cpp in Sources */,
 				C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */,
 				C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */,
+				C25261091F6611A10069F665 /* Square.cpp in Sources */,
 				C21946881CE4DC7100976025 /* VisibleApp.cpp in Sources */,
 				C2606DAA1CED3E2E0045FF57 /* histo.cpp in Sources */,
+				C25261061F6611A10069F665 /* Circle.cpp in Sources */,
 				C20BBC0B1E4E39E6002C7D68 /* rand_support.cpp in Sources */,
 				C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */,
 				C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */,
@@ -26079,6 +26123,8 @@
 				C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */,
 				C2601BB91E69042B004415A3 /* bitvector.cpp in Sources */,
 				C20EDBC11CF277130074C47A /* exception.cpp in Sources */,
+				C25261221F66F0800069F665 /* PlistDate.cpp in Sources */,
+				C25261071F6611A10069F665 /* DisplayObject.cpp in Sources */,
 				C20EDBC21CF277130074C47A /* self_similarity.cpp in Sources */,
 				C221D9171E4B043A00AF74CE /* directoryPlayer.cpp in Sources */,
 				C248DD2C1F64601A00FF72B1 /* AudioDrawUtils.cpp in Sources */,
@@ -26191,6 +26237,7 @@
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
 					"$(LOCAL_TINYXML)",
+					"$(SRCROOT)/include/plistcpp",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -26250,6 +26297,7 @@
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
 					"$(LOCAL_TINYXML)",
+					"$(SRCROOT)/include/plistcpp",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";

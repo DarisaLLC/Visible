@@ -182,6 +182,8 @@ struct ChannelData
     explicit ChannelData(TiXmlElement *element);
     inline const std::string getName() const
     {
+        return LUTName;
+#if LIF3_ChannelIndex_IsAlways_0_is_fixed
         switch(channelTag)
         {
             case 0 : return "Gray";
@@ -190,7 +192,12 @@ struct ChannelData
             case 3 : return "Blue";
             default : return "Unknown color";
         }
+#endif
+        
     }
+    
+    
+    
 };
 
 /** Struct of dimension data*/

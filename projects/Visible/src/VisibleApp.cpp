@@ -8,11 +8,13 @@
 #include "cinder/Display.h"
 #include "guiContext.h"
 #include "boost/filesystem.hpp"
+#include "boost/any.hpp"
 #include <functional>
 #include <list>
 #include "core/stl_utils.hpp"
 #include "app_utils.hpp"
 #include "core/core.hpp"
+#include "Plist.hpp"
 #include <memory>
 #include <functional>
 
@@ -101,6 +103,7 @@ public:
     std::string			mLog;
     
     Rectf						mGlobalBounds;
+    map<string, boost::any> mPlist;
     
     mutable std::list <std::shared_ptr<guiContext> > mContexts;
     
@@ -126,6 +129,7 @@ WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
     return win;
     
 }
+
 
 
 bool VisibleApp::shouldQuit()
@@ -217,7 +221,12 @@ void VisibleApp::fileDrop( FileDropEvent event )
 
 void VisibleApp::setup()
 {
-      
+    const fs::path& appPath = ci::app::getAppPath();
+    const fs::path plist = appPath / "Visible.app/Contents/Info.plist";
+    std::ifstream stream(plist.c_str(), std::ios::binary);
+    Plist::readPlist(stream, mPlist);
+    
+    
     for( auto display : Display::getDisplays() )
     {
         mGlobalBounds.include(display->getBounds());
@@ -229,7 +238,8 @@ void VisibleApp::setup()
     setWindowPos(getWindowSize()/3);
     
     WindowRef ww = getWindow ();
-    ww->setTitle ("Visible");
+    std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
+    ww->setTitle ("Visible build: " + buildN);
     mFont = Font( "Menlo", 18 );
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     
@@ -279,6 +289,10 @@ void VisibleApp::setup()
     getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
     
     gl::enableVerticalSync();
+    
+    auto cistrs = getCommandLineArgs();
+    for (auto li : cistrs)
+        std::cout << li << std::endl;
     
 }
 

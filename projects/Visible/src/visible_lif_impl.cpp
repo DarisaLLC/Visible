@@ -780,39 +780,52 @@ void lifContext::update ()
 
 void lifContext::update_instant_image_mouse ()
 {
-    uint32_t m_instance_channel;
-    auto mouseInChannelPos = mMouseInImagePosition;
     auto image_pos = vl.display2image(mMouseInImagePosition);
     // LIF 3 channel organization. Channel height is 1/3 of image height
     // Channel Index is pos.y / channel_height,
     // In channel x is pos.x, In channel y is pos.y % channel_height
     uint32_t channel_height = mMediaInfo.getChannelSize().y;
-    
-    m_instance_channel = (int) image_pos.y / (int) channel_height;
-    image_pos.y = ((int) image_pos.y) % channel_height;
+    m_instant_channel = ((int) image_pos.y) / channel_height;
     m_instant_mouse_image_pos = image_pos;
+    if (mSurface)
+    {
+        m_instant_pixel_Color = mSurface->getPixel(m_instant_mouse_image_pos);
+    }
+    
+  
 }
 
 gl::TextureRef lifContext::pixelInfoTexture ()
 {
     if (! mMouseInImage) return gl::TextureRef ();
     TextLayout lout;
+    const auto names = m_series_book[m_selected_serie_index].channel_names;
+    std::string channel_name = " ";
+    if(m_instant_channel < names.size())
+        channel_name = names[m_instant_channel];
     
-    std::string pos = " c: " + toString(channelIndex()) +  "[" + to_string(mMouseInImagePosition.x) + "," + to_string(mMouseInImagePosition.y) + "] i [" +
+    std::string pos = channel_name + "[ " +
+    toString(((int)m_instant_pixel_Color.g)) + " ]" +
+    "[" + to_string(mMouseInImagePosition.x) +
+    "," + to_string(mMouseInImagePosition.y) +
+    "] i [" +
     to_string(imagePos().x) + "," + to_string(imagePos().y) + "]";
     
-    
-    
     lout.clear( ColorA::gray( 0.2f, 0.5f ) );
-    lout.setFont( Font( "Menlo", 14 ) );
-    lout.setColor( ColorA(0.8,0.2,0.1,1.0) );
+    lout.setFont( Font( "Menlo", 10 ) );
+    if (channel_name == "Red")
+        lout.setColor( ColorA(0.8,0.2,0.1,1.0) );
+    else if (channel_name == "Green")
+        lout.setColor( ColorA(0.2,0.8,0.1,1.0) );
+    else
+         lout.setColor( ColorA(0.8,0.8,0.8,1.0) );
+    
     lout.setLeadingOffset( 3 );
     lout.addRightLine( pos );
     
     
     return gl::Texture::create( lout.render( true ));
-    
-}
+  }
 
 
 void lifContext::draw_info ()
@@ -838,23 +851,19 @@ void lifContext::draw_info ()
     }
     
     
-    TextLayout layoutR;
-    
-    layoutR.clear( ColorA::gray( 0.2f, 0.5f ) );
-    layoutR.setFont( Font( "Arial", 18 ) );
-    layoutR.setColor( Color::white() );
-    layoutR.setLeadingOffset( 3 );
-    layoutR.addRightLine( seri_str  );
-    
-    
-    auto texR = gl::Texture::create( layoutR.render( true ) );
-    Rectf tbox = texR->getBounds();
-    tbox = tbox.getCenteredFit(getWindowBounds(), true);
-    tbox.offset(vec2(0,getWindowHeight() - tbox.getHeight() - tbox.getY1()));
-    gl::draw( texR, tbox);
-    
+    auto texR = pixelInfoTexture ();
+    if (texR)
+    {
+        Rectf tbox = texR->getBounds();
+        tbox = tbox.getCenteredFit(getWindowBounds(), true);
+        tbox.scale(vec2(0.5, 0.67));
+        tbox.offset(vec2(getWindowWidth() - tbox.getWidth(),getWindowHeight() - tbox.getHeight() - tbox.getY1()));
+        
+        gl::draw( texR, tbox);
+    }
     tinyUi::drawWidgets(mWidgets);
-}
+    
+ }
 
 
 void lifContext::draw ()
@@ -878,11 +887,6 @@ void lifContext::draw ()
                 break;
         }
         
-        auto pt = pixelInfoTexture ();
-        if (pt)
-        {
-            gl::draw(pt, dr.scaled(0.2));
-        }
         
         if (getManualEditMode())
         {
@@ -908,69 +912,3 @@ void lifContext::draw ()
     
 }
 
-#if 0
-
-////////   Adding Tracks
-
-
-// Create a clip viewer. Go through container of viewers, if there is a movie view, connect onMarked signal to it
-void lifContext::add_scalar_track(const boost::filesystem::path& path)
-{
-    Window::Format format( RendererGl::create() );
-    WindowRef win = VisibleCentral::instance().getConnectedWindow(format);
-    std::shared_ptr<clipContext> new_ts ( new clipContext (win, path));
-    auto parent_size = mWindow->getSize();
-    auto parent_pos = mWindow->getPos();
-    parent_pos.y += parent_size.y;
-    parent_size.y = 100;
-    win->setSize (parent_size);
-    win->setPos (parent_pos);
-    signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(new_ts.get()), std::placeholders::_1));
-    new_ts->signalMarker.connect(std::bind(&lifContext::onMarked, static_cast<lifContext*>(this), std::placeholders::_1));
-    VisibleCentral::instance().contexts().push_back(new_ts);
-    
-    //    VisWinMgr::key_t kk;
-    //    bool kept = VisWinMgr::instance().makePair(win, new_ts, kk);
-    //    ci_console() << "Time Series Window/Context registered: " << std::boolalpha << kept << std::endl;
-    
-}
-
-
-
-
-
-
-std::shared_ptr<guiContext> cw(std::shared_ptr<guiContext>(new clipContext(createWindow( Window::Format().size(mGraphDisplayRect.getSize())))));
-
-if (! cw->is_valid()) return;
-
-for (std::shared_ptr<guiContext> uip : mContexts)
-{
-    if (uip->is_context_type(guiContext::Type::qtime_viewer))
-    {
-        uip->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(cw.get()), std::placeholders::_1));
-        cw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
-    }
-}
-mContexts.push_back(cw);
-}
-
-// Create a movie viewer. Go through container of viewers, if there is a clip view, connect onMarked signal to it
-void VisibleApp::create_qmovie_viewer ()
-{
-    std::shared_ptr<guiContext> mw(new lifContext(createWindow( Window::Format().size(mMovieDisplayRect.getSize()))));
-    
-    if (! mw->is_valid()) return;
-    
-    for (std::shared_ptr<guiContext> uip : mContexts)
-    {
-        if (uip->is_context_type(guiContext::Type::clip_viewer))
-        {
-            uip->signalMarker.connect(std::bind(&lifContext::onMarked, static_cast<lifContext*>(mw.get()), std::placeholders::_1));
-            mw->signalMarker.connect(std::bind(&clipContext::onMarked, static_cast<clipContext*>(uip.get()), std::placeholders::_1));
-        }
-    }
-    mContexts.push_back(mw);
-}
-
-#endif

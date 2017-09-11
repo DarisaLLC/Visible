@@ -502,6 +502,7 @@ lifIO::ChannelData::ChannelData(TiXmlElement *element)
     // maximum of unsigned long which can be 32 bits.
     element->QueryValueAttribute<unsigned long long>("BytesInc",&bytesInc);
     element->QueryIntAttribute("BitInc",&bitInc);
+    
 }
 
 /** \brief constructor from XML  */

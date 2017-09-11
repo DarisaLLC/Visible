@@ -368,6 +368,14 @@ protected:
 
 	mutable MarkerSignalInfo_t m_marker_signal;
 	
+	ivec2 m_instant_mouse_image_pos;
+	uint32_t m_instant_channel;
+	ColorA8u m_instant_pixel_Color;
+	UInt8 m_instant_channel_pixel;
+	float m_instant_pixel_normalized;
+	float m_instant_pixel_Luminance;
+	
+	
 	gl::TextureRef		mTextTexture;
 	vec2				mSize;
 	Font				mFont;
@@ -458,8 +466,6 @@ private:
     void clear_movie_params ();
     vec2 texture_to_display_zoom ();
 	
-	ivec2 m_instant_mouse_image_pos;
-	uint32_t m_instant_channel;
 	mutable boost::filesystem::path mPath;
 
 	bool m_looping;
@@ -753,9 +759,6 @@ private:
 	vec2 mScreenSize;
 	gl::TextureRef mImage;
 	series_info m_serie;
-	
-	ivec2 m_instant_mouse_image_pos;
-	uint32_t m_instant_channel;
 	
 	size_t m_frameCount;
 	params::InterfaceGl         mUIParams;
