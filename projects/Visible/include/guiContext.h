@@ -658,6 +658,7 @@ public:
 	virtual void mouseMove( MouseEvent event );
 	virtual void mouseUp( MouseEvent event );
 	virtual void mouseDrag( MouseEvent event );
+	virtual void mouseWheel( MouseEvent event );
 	virtual void keyDown( KeyEvent event );
 	
 	virtual void seekToStart ();
@@ -784,6 +785,8 @@ private:
 	
 	int mMouseInGraphs; // -1 if not, 0 1 2
 	bool mMouseInImage; // if in Image, mMouseInGraph is -1
+	bool mMouseInTimeLine;
+	
 	ivec2 mMouseInImagePosition;
 	
 	bool mManualEditMode, mShowMotionBubble;

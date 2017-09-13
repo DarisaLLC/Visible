@@ -106,16 +106,19 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifse
                 // Step the durations number of channel times.
                 for (auto ii = 0; ii < tm.mChannels; ii++, tItr++);
             }
-        }
-        else if (tm.count == 1)
-        {
             
+            thisref->mValid = tm.count == frame_count;
+            
+            return thisref;
         }
+        else if (tm.count == 1) // @todo
+        {
+            return std::make_shared<qTimeFrameCache>();
+        }
+        else
+            return std::make_shared<qTimeFrameCache>();
+        
     }
-    assert(tm.count == frame_count);
-    
-    return thisref;
-    
 }
 
 
@@ -187,6 +190,12 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const std::vector<ci::
     return thisref;
 }
 
+qTimeFrameCache::qTimeFrameCache () : mValid(false)
+{
+    m_time_hist.resize (0);
+    m_stats.first = m_stats.second = 0;
+}
+
 qTimeFrameCache::qTimeFrameCache ( const tiny_media_info& info ) : tiny_media_info(info)
 {
     m_time_hist.resize (0);
@@ -248,7 +257,7 @@ bool qTimeFrameCache::checkFrame (int64_t offset) const
 
 bool qTimeFrameCache::isValid () const
 {
-    mValid = !mFrames.empty();
+    if (mValid) return !mFrames.empty();
     return mValid;
 }
 
