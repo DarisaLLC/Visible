@@ -113,8 +113,10 @@ xcuserdata/
 # Compiled Static libraries
 *.lai
 *.la
-*.a
-*.lib
+
+# Allowed
+#*.a
+#*.lib
 
 # Executables
 *.exe
