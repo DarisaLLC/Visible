@@ -560,7 +560,7 @@ void movContext::update ()
     // Launch Average Luminance Computation
     //    m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance_and_aci,mFrameSet, names, false);
     
-    
+#if TODO
     if ( is_ready (m_async_luminance_tracks))
     {
         m_luminance_tracks = m_async_luminance_tracks.get();
@@ -570,6 +570,7 @@ void movContext::update ()
             m_plots[cc]->setup(m_luminance_tracks[cc]);
         }
     }
+#endif
     
     if (! have_movie () ) return;
     

@@ -112,12 +112,7 @@ sm_producer::providesCallback () const
     return _impl->providesCallback<T> ();
 }
 
-void  sm_producer::set_median_levelset_pct (float frac) const
-{
-    _impl->set_median_levelset_pct(frac);
-}
 
-float  sm_producer::get_median_levelset_pct () const { return _impl->get_median_levelset_pct(); }
 
 bool sm_producer::set_auto_run_on() const { return (_impl) ? _impl->set_auto_run_on() : false; }
 bool sm_producer::set_auto_run_off() const { return (_impl) ? _impl->set_auto_run_off() : false; }
@@ -442,9 +437,6 @@ bool sm_producer::spImpl::generate_ssm (int start_frames, int frames)
     m_entropies.resize (0);
     m_SMatrix.resize (0);
     bool ok = simi->entropies (m_entropies);
-    if (!ok) return ok;
-    
-    ok = simi->median_levelset_similarities (m_median_leveled, get_median_levelset_pct());
     if (!ok)
         std::cout << " ERR OR " << std::endl;
     

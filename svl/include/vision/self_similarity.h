@@ -153,7 +153,7 @@ class self_similarity_producer
      * take, produce average similarities to for every frame in the set around the median
      * in signal and return true. Otherwise, return false.
      */
-   bool median_levelset_similarities (deque<double>& signal, float rand_around_mean ) const;
+   bool median_levelset_similarities (deque<double>& signal, float use_pct) const;
     
 
   /* sequential correlations - 

@@ -69,6 +69,8 @@ namespace
         }
 
         const smProducerRef sm () const { return m_sm; }
+        std::shared_ptr<sm_filter> smFilterRef () { return m_smfilterRef; }
+        
         
     private:
 
@@ -125,20 +127,20 @@ namespace
             res.second = histoStats::mean(roi) / 256.0;
             return res;
         }
-        
-        void entropiesToTracks (smProducerRef& sp, trackD1_t& track)
+
+        // Note tracks contained timed data. 
+        void entropiesToTracks (trackD1_t& track)
         {
-            auto entropies = sp->shannonProjection ();
-            auto medianLevel = sp->medianLeveledProjection();
-            sm_producer::sMatrixProjection_t::const_iterator bee = entropies.begin();
-            sm_producer::sMatrixProjection_t::const_iterator mee = medianLevel.begin();
-            for (auto ss = 0; bee != entropies.end() && ss < frame_count(); ss++, bee++, mee++)
+            m_medianLevel.resize(m_smfilterRef->size());
+            m_smfilterRef->median_levelset_similarities(m_medianLevel);
+            auto bee = m_smfilterRef->entropies().begin();
+            auto mee = m_medianLevel.begin();
+            for (auto ss = 0; bee != m_smfilterRef->entropies().end() && ss < frame_count(); ss++, bee++, mee++)
             {
                 index_time_t ti;
                 ti.first = ss;
                 timed_double_t res;
                 res.first = ti;
-                //                res.second = *bee;
                 res.second = *mee;
                 track.second.emplace_back(res);
             }
@@ -152,30 +154,29 @@ namespace
         }
         
     public:
-         vector_of_trackD1s_t run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+          std::shared_ptr<vector_of_trackD1s_t>  run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
                         bool test_data = false)
         {
             
             load_channels_from_images(frames);
             
-             vector_of_trackD1s_t  tracks;
-            tracks.resize (names.size ());
+            m_tracksRef = std::make_shared<vector_of_trackD1s_t> ();
+            
+            m_tracksRef->resize (names.size ());
             for (auto tt = 0; tt < names.size(); tt++)
-                tracks[tt].first = names[tt];
+                m_tracksRef->at(tt).first = names[tt];
             
             // Run Histogram on channels 0 and 1
             // Filling up tracks 0 and 1
             // Now Do Aci on the 3rd channel
-            
-            
             channel_images_t c0 = m_channel_images[0];
             channel_images_t c1 = m_channel_images[1];
             channel_images_t c2 = m_channel_images[2];
             
             for (auto ii = 0; ii < m_channel_images[0].size(); ii++)
             {
-                tracks[0].second.emplace_back(computeIntensityStatisticsResults(c0[ii]));
-                tracks[1].second.emplace_back(computeIntensityStatisticsResults(c1[ii]));
+                m_tracksRef->at(0).second.emplace_back(computeIntensityStatisticsResults(c0[ii]));
+                m_tracksRef->at(1).second.emplace_back(computeIntensityStatisticsResults(c1[ii]));
             }
             
             auto sp =  instance().sm();
@@ -184,24 +185,22 @@ namespace
             std::future<bool>  future_ss = task.get_future();  // get a future
             std::thread(std::move(task)).detach(); // launch on a thread
             future_ss.wait();
-            entropiesToTracks(sp, tracks[2]);
-            
-            return tracks;
+            auto entropies = sp->shannonProjection ();
+            auto smat = sp->similarityMatrix();
+            m_smfilterRef = std::make_shared<sm_filter> (entropies, smat);
+            update();
+            return m_tracksRef;
         }
         
         const std::vector<Rectf>& rois () const { return m_rois; }
+        const trackD1_t& similarity_track () const { return m_tracksRef->at(2); }
         
-        void run_similarity_runner (vector_of_trackD1s_t& tracks)
+        void update ()
         {
-            auto sp =  instance().sm();
-            std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
-            std::future<bool>  future_ss = task.get_future();  // get a future
-            std::thread(std::move(task)).detach(); // launch on a thread
-            future_ss.wait();
-            entropiesToTracks(sp, tracks[2]);
-            std::cout << "similarity computed " << std::endl;
+            if(m_tracksRef && !m_tracksRef->empty() && m_smfilterRef && m_smfilterRef->isValid())
+                entropiesToTracks(m_tracksRef->at(2));
         }
-        
+
     private:
         typedef std::vector<roiWindow<P8U>> channel_images_t;
         smProducerRef m_sm;
@@ -209,9 +208,12 @@ namespace
         std::vector<channel_images_t> m_channel_images;
         std::vector<Rectf> m_rois;
         Rectf m_all;
+        std::shared_ptr<sm_filter> m_smfilterRef;
+        std::deque<double> m_medianLevel;
+        std::shared_ptr<vector_of_trackD1s_t>  m_tracksRef;
     };
     
-     vector_of_trackD1s_t    get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+    std::shared_ptr<vector_of_trackD1s_t>   get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
                                                bool test_data = false)
     {
         return algo_processor().get_mutable_instance().run(frames, names, test_data);
@@ -311,6 +313,8 @@ void lifContext::edit_no_edit_button ()
             looping(false);
             seekToStart();
         }
+        if (mContainer.getNumChildren())
+            mContainer.removeChildren();
     }
     else
         mUIParams.setOptions( "mode", "label=`Browse`" );
@@ -383,19 +387,22 @@ void lifContext::setZoom (vec2 zoom)
 void lifContext::setMedianCutOff (uint32_t newco)
 {
     uint32_t tmp = newco % 100; // pct
-    auto sp =  algo_processor::get_mutable_instance().sm();
+    auto sp =  algo_processor::get_mutable_instance().smFilterRef();
     uint32_t current (sp->get_median_levelset_pct () * 100);
     if (tmp == current) return;
     sp->set_median_levelset_pct (tmp / 100.0f);
-
-    update ();
+    algo_processor::get_mutable_instance().update();
 }
 
 uint32_t lifContext::getMedianCutOff () const
 {
-    auto sp =  algo_processor::get_mutable_instance().sm();
-    uint32_t current (sp->get_median_levelset_pct () * 100);
-    return current;
+    auto sp =  algo_processor::get_mutable_instance().smFilterRef();
+    if (sp)
+    {
+        uint32_t current (sp->get_median_levelset_pct () * 100);
+        return current;
+    }
+    return 0;
 }
 
 
@@ -519,6 +526,12 @@ void lifContext::loadCurrentSerie ()
         // Create the frameset and assign the channel names
         // Fetch the media info
         mFrameSet = qTimeFrameCache::create (*m_current_serie_ref);
+        if (! mFrameSet || ! mFrameSet->isValid())
+        {
+            ci_console() << "Serie had 1 or no frames " << std::endl;
+            return;
+        }
+        
         mFrameSet->channel_names (m_series_book[m_selected_serie_index].channel_names);
         mMediaInfo = mFrameSet->media_info();
         
@@ -598,6 +611,18 @@ void lifContext::processDrag( ivec2 pos )
     
 }
 
+void  lifContext::mouseWheel( MouseEvent event )
+{
+#if 0
+    if( mMouseInTimeLine )
+        mTimeMarker.from_norm(mTimeLineSlider.mValueScaled);
+        seekToFrame(mTimeMarker.current_frame());
+    }
+    
+    mPov.adjustDist( event.getWheelIncrement() * -5.0f );
+#endif
+
+}
 
 
 void lifContext::mouseMove( MouseEvent event )
@@ -623,6 +648,35 @@ void lifContext::mouseMove( MouseEvent event )
         mMouseInGraphs = min_iter - dds.begin();
     }
     
+    mMouseInTimeLine = vl.display_timeline_rect().contains(event.getPos());
+    
+    if (mMouseInTimeLine && ! mCellEnds.empty())
+    {
+        auto cf = getCurrentFrame();
+        if (cf == mCellEnds[0].first.first)
+        {
+            Square *s = new Square();
+            s->setRegPoint(rph::DisplayObject2D::RegistrationPoint::CENTERCENTER);
+            s->setColor(Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat()));
+            s->setSize(Rand::randInt(50,100),Rand::randInt(50,100));
+            s->setPos( event.getPos() );
+            s->fadeOutAndDie();
+            mContainer.addChild(s);
+        }
+        else if (cf == mCellEnds[0].second.first)
+        {
+            Circle *c = new Circle();
+            c->setRegPoint(rph::DisplayObject2D::RegistrationPoint::CENTERCENTER);
+            c->setColor(Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat()));
+            c->setScale(Rand::randInt(50,100));
+            c->setPos( event.getPos() );
+            c->fadeOutAndDie();
+            mContainer.addChild(c);
+
+        }
+    }
+    
+    
 }
 
 
@@ -644,35 +698,32 @@ void lifContext::mouseDown( MouseEvent event )
     {
         graphRef->mouseDown( event );
         graphRef->get_marker_position(mTimeMarker);
-        signalMarker.emit(mTimeMarker);
-        {
-            Circle *c = new Circle();
-            c->setRegPoint(rph::DisplayObject2D::RegistrationPoint::CENTERCENTER);
-            c->setColor(Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat()));
-            c->setScale(Rand::randInt(50,100));
-            c->setPos( event.getPos() );
-            c->fadeOutAndDie();
-            mContainer.addChild(c);
-        }
     }
     
     // If we are in the Visible Channel
-    if (getManualEditMode() && mMouseInImage && channelIndex() == 2)
+    if (getManualEditMode() && mMouseInTimeLine )
     {
-        mLengthPoints.first = event.getPos();
-        mLengthPoints.second = mLengthPoints.first;
-        {
-            Square *s = new Square();
-            s->setRegPoint(rph::DisplayObject2D::RegistrationPoint::CENTERCENTER);
-            s->setColor(Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat()));
-            s->setSize(Rand::randInt(50,100),Rand::randInt(50,100));
-            s->setPos( event.getPos() );
-            s->fadeOutAndDie();
-            mContainer.addChild(s);
+        if( mTimeLineSlider.hitTest( event.getPos() ) ) {
+            mTimeMarker.from_norm(mTimeLineSlider.mValueScaled);
+            auto currentFrame = mTimeMarker.current_frame();
+            index_time_t tt (currentFrame, 0.0);
+            if (! mCellEnds.empty())
+            {
+                if (currentFrame > mCellEnds[0].first.first)
+                    mCellEnds[0].second = tt;
+                else if (currentFrame < mCellEnds[0].first.first)
+                {
+                    mCellEnds[0].second  = mCellEnds[0].first;
+                    mCellEnds[0].first = tt;
+                }
+            }
+            else // (mCellEnds.empty())
+            {
+                length_time_t lt (tt,tt);
+                mCellEnds.push_back(lt);
+            }
         }
-        
     }
-    
 }
 
 
@@ -753,13 +804,13 @@ void lifContext::update ()
 {
   mContainer.update();
     
-    if ( is_ready (m_async_luminance_tracks))
+  if ( is_ready (m_async_luminance_tracks))
     {
-        m_luminance_tracks = m_async_luminance_tracks.get();
-        assert (m_luminance_tracks.size() == m_plots.size ());
-        for (int cc = 0; cc < m_luminance_tracks.size(); cc++)
+        auto tracksRef = m_async_luminance_tracks.get();
+        assert (tracksRef->size() == m_plots.size ());
+        for (int cc = 0; cc < tracksRef->size(); cc++)
         {
-            m_plots[cc]->setup(m_luminance_tracks[cc]);
+            m_plots[cc]->setup(tracksRef->at(cc));
         }
     }
     

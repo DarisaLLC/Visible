@@ -37,7 +37,7 @@ public:
 
     enum source_type : int { movie = 0, imageFileDirectory = 1, imageInMemory = 2, Unknown = -1 };
     
-    spImpl () :  m_auto_run (false), m_median_levelset_frac (0.1)
+    spImpl () :  m_auto_run (false)
     {
         m_name = get_name_generator().get_anew();
         signal_content_loaded = createSignal<sm_producer::sig_cb_content_loaded>();
@@ -57,8 +57,6 @@ public:
     bool set_auto_run_on () { bool tmp = m_auto_run; m_auto_run = true; return tmp; }
     bool set_auto_run_off () { bool tmp = m_auto_run; m_auto_run = false; return tmp; }
 
-    void set_median_levelset_pct (float frac) const { m_median_levelset_frac = frac; }
-    float get_median_levelset_pct () const { return m_median_levelset_frac; }
     
     const source_type type () const { return m_source_type; }
     
@@ -90,7 +88,6 @@ private:
     bool setup_image_directory_result_repo () const;
     mutable bool m_auto_run;
     mutable source_type m_source_type;
-    mutable float m_median_levelset_frac;
     
     void get_next_frame ();
 

@@ -86,7 +86,7 @@ typedef std::vector<future_trackD1_t>  future_tracksD1_t;
 // template<typename R>
 // bool is_ready(std::future<R> const& f)
 
-typedef std::future<std::vector<trackD1_t> > async_tracksD1_t;
+typedef std::future<std::shared_ptr<std::vector<trackD1_t>>> async_tracksD1_t;
 
 typedef std::promise<std::vector<trackD1_t> > promised_tracks_t;
 typedef std::future<std::vector<trackD1_t> > future_tracks_t;
