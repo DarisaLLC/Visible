@@ -1767,7 +1767,7 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(LOCAL_CINDER)/include",
-					"$(LOCAL_BOOST)/include",
+					"$(LOCAL_BOOST)",
 					"$(SRCROOT)/include",
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
