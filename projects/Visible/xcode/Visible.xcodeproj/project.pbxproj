@@ -47,13 +47,13 @@
 		C2309DA31F69B9EC00A0E908 /* libIlmImf.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C26A057A1E777F8600BDC954 /* libIlmImf.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DA41F69BA0D00A0E908 /* libboost_date_time.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C26A05611E77763000BDC954 /* libboost_date_time.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DA51F69BA0F00A0E908 /* libboost_signals.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C26A05571E77741300BDC954 /* libboost_signals.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		C2309DA61F69BA4200A0E908 /* libcinder.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C24CD8A81CEB80750008C72B /* libcinder.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DA71F69BA4E00A0E908 /* liblibwebp.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C254BEE21F4FB3E900977307 /* liblibwebp.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DA81F69BA7600A0E908 /* libopencv_imgcodecs.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2AF87F71CFBCC5900CFC191 /* libopencv_imgcodecs.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DA91F69BA7900A0E908 /* libopencv_core.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2AF87F31CFBC7ED00CFC191 /* libopencv_core.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DAA1F69BA8900A0E908 /* libopencv_imgproc.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2AF87F81CFBCC5900CFC191 /* libopencv_imgproc.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DAC1F69BDDF00A0E908 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DAB1F69BDDF00A0E908 /* libboost_system.a */; };
 		C2309DAD1F69BDFE00A0E908 /* libboost_system.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2309DAB1F69BDDF00A0E908 /* libboost_system.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		C2309DC71F6B4D6500A0E908 /* libcinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC61F6B4D6500A0E908 /* libcinder.a */; };
 		C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */; };
 		C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
 		C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
@@ -70,7 +70,6 @@
 		C24CD88C1CEA916E0008C72B /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8871CEA916E0008C72B /* libz.a */; };
 		C24CD88F1CEA91910008C72B /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD88D1CEA91910008C72B /* libgtest_main.a */; };
 		C24CD8901CEA91910008C72B /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD88E1CEA91910008C72B /* libgtest.a */; };
-		C24CD8A91CEB80750008C72B /* libcinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8A81CEB80750008C72B /* libcinder.a */; };
 		C24CD8AA1CEB840C0008C72B /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784AF0FF439BC000DE1D7 /* Accelerate.framework */; };
 		C24CD8AB1CEB840C0008C72B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */; };
 		C24CD8AC1CEB840C0008C72B /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B10FF439BC000DE1D7 /* AudioUnit.framework */; };
@@ -264,7 +263,6 @@
 				C2309DA51F69BA0F00A0E908 /* libboost_signals.a in CopyFiles */,
 				C2309DA41F69BA0D00A0E908 /* libboost_date_time.a in CopyFiles */,
 				C2309D9B1F69B9DD00A0E908 /* liblibjasper.a in CopyFiles */,
-				C2309DA61F69BA4200A0E908 /* libcinder.a in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -348,6 +346,7 @@
 		C221D9181E4B130400AF74CE /* visible_mov_dir_impl.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = visible_mov_dir_impl.cpp; path = ../src/visible_mov_dir_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C221D91A1E4B176800AF74CE /* directoryPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = directoryPlayer.h; path = ../include/directoryPlayer.h; sourceTree = "<group>"; };
 		C2309DAB1F69BDDF00A0E908 /* libboost_system.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libboost_system.a; sourceTree = "<group>"; };
+		C2309DC61F6B4D6500A0E908 /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcinder.a; sourceTree = "<group>"; };
 		C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_lif_impl.cpp; path = ../src/visible_lif_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C23D0F481E2982690049ADDB /* lifFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lifFile.hpp; path = ../../../svl/include/otherIO/lifFile.hpp; sourceTree = "<group>"; };
 		C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lifFile.cpp; sourceTree = "<group>"; };
@@ -364,9 +363,7 @@
 		C24CD8871CEA916E0008C72B /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = ../../../svl/local/boost/lib/libz.a; sourceTree = "<group>"; };
 		C24CD88D1CEA91910008C72B /* libgtest_main.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest_main.a; path = ../../../svl/local/gtest/lib/Release/libgtest_main.a; sourceTree = "<group>"; };
 		C24CD88E1CEA91910008C72B /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = ../../../svl/local/gtest/lib/Release/libgtest.a; sourceTree = "<group>"; };
-		C24CD8961CEB70E30008C72B /* libcinder_d.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder_d.a; path = ../../../svl/local/cinder/cinder_0.9/lib/libcinder_d.a; sourceTree = "<group>"; };
 		C24CD8A51CEB726B0008C72B /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
-		C24CD8A81CEB80750008C72B /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../../svl/local/cinder/cinder_0.9/lib/libcinder.a; sourceTree = "<group>"; };
 		C24FC84C1E5E40130071AA1A /* async_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = async_producer.h; path = ../include/async_producer.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		C24FC84D1E5E56960071AA1A /* roiMultiWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = roiMultiWindow.h; sourceTree = "<group>"; };
 		C25261001F6611A10069F665 /* BasicSampleApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BasicSampleApp.cpp; path = ../src/rph/BasicSampleApp.cpp; sourceTree = "<group>"; };
@@ -643,6 +640,7 @@
 				C254BEEB1F4FC41300977307 /* liblibjasper.a in Frameworks */,
 				C254BEEC1F4FC41300977307 /* liblibjpeg.a in Frameworks */,
 				C254BEED1F4FC41300977307 /* libIlmImf.a in Frameworks */,
+				C2309DC71F6B4D6500A0E908 /* libcinder.a in Frameworks */,
 				C254BEEE1F4FC41300977307 /* libtiff.a in Frameworks */,
 				C254BEEF1F4FC42B00977307 /* libpng16.a in Frameworks */,
 				C254BEF11F4FC46100977307 /* libwebp.a in Frameworks */,
@@ -693,7 +691,6 @@
 				C24CD8B71CEB841E0008C72B /* IOSurface.framework in Frameworks */,
 				C24CD8B81CEB841E0008C72B /* AVFoundation.framework in Frameworks */,
 				C24CD8B91CEB841E0008C72B /* CoreMedia.framework in Frameworks */,
-				C24CD8A91CEB80750008C72B /* libcinder.a in Frameworks */,
 				C24CD88F1CEA91910008C72B /* libgtest_main.a in Frameworks */,
 				C24CD8901CEA91910008C72B /* libgtest.a in Frameworks */,
 				C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */,
@@ -860,6 +857,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C2309DC61F6B4D6500A0E908 /* libcinder.a */,
 				C254BEE21F4FB3E900977307 /* liblibwebp.a */,
 				C254BEE01F4FB3D300977307 /* QTKit.framework */,
 				C254BED81F4FB39E00977307 /* libIlmImf.a */,
@@ -919,9 +917,7 @@
 				53E3CDFB0E86099300238D2B /* Carbon.framework */,
 				0091D8F80E81B9330029341E /* OpenGL.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
-				C24CD8A81CEB80750008C72B /* libcinder.a */,
 				C24CD8A51CEB726B0008C72B /* QuickTime.framework */,
-				C24CD8961CEB70E30008C72B /* libcinder_d.a */,
 				C24CD88D1CEA91910008C72B /* libgtest_main.a */,
 				C24CD88E1CEA91910008C72B /* libgtest.a */,
 				C24CD8831CEA916E0008C72B /* libboost_date_time.a */,
@@ -1396,7 +1392,7 @@
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
 				C2309D981F69B99B00A0E908 /* CopyFiles */,
-				C25261131F66D7BF0069F665 /* ShellScript */,
+				C25261131F66D7BF0069F665 /* Build Number */,
 			);
 			buildRules = (
 			);
@@ -1529,13 +1525,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		C25261131F66D7BF0069F665 /* ShellScript */ = {
+		C25261131F66D7BF0069F665 /* Build Number */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
+			name = "Build Number";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1718,17 +1715,17 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
+					"$(PROJECT_DIR)",
 					"$(LOCAL_OCV)/lib/macosx",
 					"$(LOCAL_CINDER)/lib/macosx",
 					/usr/local/Cellar/openexr/2.2.0/lib,
 					/usr/local/Cellar/libtiff/4.0.8/lib,
 					/usr/local/Cellar/libpng/1.6.29/lib,
 					/usr/local/Cellar/webp/0.5.2/lib,
-					"$(PROJECT_DIR)",
 				);
 				LOCAL_BOOST = "$(EXTERNALS)";
 				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/macosx/Debug/libcinder.a",
+					"$(PROJECT_DIR)/libcinder.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
 					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
@@ -1780,17 +1777,17 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
+					"$(PROJECT_DIR)",
 					"$(LOCAL_OCV)/lib/macosx",
 					"$(LOCAL_CINDER)/lib/macosx",
 					/usr/local/Cellar/openexr/2.2.0/lib,
 					/usr/local/Cellar/libtiff/4.0.8/lib,
 					/usr/local/Cellar/libpng/1.6.29/lib,
 					/usr/local/Cellar/webp/0.5.2/lib,
-					"$(PROJECT_DIR)",
 				);
 				LOCAL_BOOST = "$(EXTERNALS)";
 				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/macosx/Release/libcinder.a",
+					"$(PROJECT_DIR)/libcinder.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
 					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
@@ -1824,7 +1821,7 @@
 				HEADER_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/libcinder_d.a",
+					"$(PROJECT_DIR)/libcinder_d.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
 					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
@@ -1855,7 +1852,7 @@
 				HEADER_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/libcinder.a",
+					"$(PROJECT_DIR)/libcinder.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
 					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
@@ -2020,7 +2017,7 @@
 					/usr/local/Cellar/openexr/2.2.0/lib,
 				);
 				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/macosx/Debug/libcinder.a",
+					"$(PROJECT_DIR)/libcinder.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
 					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
@@ -2077,7 +2074,7 @@
 					/usr/local/Cellar/openexr/2.2.0/lib,
 				);
 				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/macosx/Release/libcinder.a",
+					"$(PROJECT_DIR)/libcinder.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
 					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
@@ -2157,7 +2154,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/libcinder_d.a",
+					"$(PROJECT_DIR)/libcinder_d.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
 					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
@@ -2226,7 +2223,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/libcinder_d.a",
+					"$(PROJECT_DIR)/libcinder_d.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
 					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
