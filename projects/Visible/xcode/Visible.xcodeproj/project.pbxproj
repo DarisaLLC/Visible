@@ -46,13 +46,14 @@
 		C2309DAA1F69BA8900A0E908 /* libopencv_imgproc.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2AF87F81CFBCC5900CFC191 /* libopencv_imgproc.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DAC1F69BDDF00A0E908 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DAB1F69BDDF00A0E908 /* libboost_system.a */; };
 		C2309DAD1F69BDFE00A0E908 /* libboost_system.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2309DAB1F69BDDF00A0E908 /* libboost_system.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		C2309DC71F6B4D6500A0E908 /* libcinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC61F6B4D6500A0E908 /* libcinder.a */; };
 		C2309DCD1F6C66F700A0E908 /* liblibjasper.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC81F6C66F700A0E908 /* liblibjasper.a */; };
 		C2309DCE1F6C66F700A0E908 /* liblibjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC91F6C66F700A0E908 /* liblibjpeg.a */; };
 		C2309DCF1F6C66F700A0E908 /* liblibpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCA1F6C66F700A0E908 /* liblibpng.a */; };
 		C2309DD01F6C66F700A0E908 /* liblibtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCB1F6C66F700A0E908 /* liblibtiff.a */; };
 		C2309DD11F6C66F700A0E908 /* liblibwebp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCC1F6C66F700A0E908 /* liblibwebp.a */; };
 		C2309DD31F6C677100A0E908 /* libIlmImf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DD21F6C677100A0E908 /* libIlmImf.a */; };
+		C2309DD41F6CA47600A0E908 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8871CEA916E0008C72B /* libz.a */; };
+		C2309DD61F6CA53100A0E908 /* libcinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DD51F6CA53100A0E908 /* libcinder.a */; };
 		C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */; };
 		C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
 		C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
@@ -326,6 +327,7 @@
 		C2309DCB1F6C66F700A0E908 /* liblibtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = liblibtiff.a; sourceTree = "<group>"; };
 		C2309DCC1F6C66F700A0E908 /* liblibwebp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = liblibwebp.a; sourceTree = "<group>"; };
 		C2309DD21F6C677100A0E908 /* libIlmImf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libIlmImf.a; sourceTree = "<group>"; };
+		C2309DD51F6CA53100A0E908 /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../../externals/cinder/lib/macosx/Debug/libcinder.a; sourceTree = "<group>"; };
 		C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_lif_impl.cpp; path = ../src/visible_lif_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C23D0F481E2982690049ADDB /* lifFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lifFile.hpp; path = ../../../svl/include/otherIO/lifFile.hpp; sourceTree = "<group>"; };
 		C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lifFile.cpp; sourceTree = "<group>"; };
@@ -601,9 +603,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				C254BEF01F4FC44700977307 /* QTKit.framework in Frameworks */,
+				C2309DD61F6CA53100A0E908 /* libcinder.a in Frameworks */,
 				C2309DCD1F6C66F700A0E908 /* liblibjasper.a in Frameworks */,
 				C254BEEA1F4FC41300977307 /* libippicv.a in Frameworks */,
-				C2309DC71F6B4D6500A0E908 /* libcinder.a in Frameworks */,
 				C2AF87F91CFBCC5900CFC191 /* libopencv_imgcodecs.a in Frameworks */,
 				C2AF87FA1CFBCC5900CFC191 /* libopencv_imgproc.a in Frameworks */,
 				C2AF87F41CFBC7ED00CFC191 /* libopencv_core.a in Frameworks */,
@@ -631,6 +633,7 @@
 				C276EC9E1C72B26300242CDB /* OpenGL.framework in Frameworks */,
 				C276EC9F1C72B26300242CDB /* Cocoa.framework in Frameworks */,
 				C2AF87F11CFBC74200CFC191 /* libopencv_highgui.a in Frameworks */,
+				C2309DD41F6CA47600A0E908 /* libz.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -810,6 +813,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C2309DD51F6CA53100A0E908 /* libcinder.a */,
 				C2309DC81F6C66F700A0E908 /* liblibjasper.a */,
 				C2309DC91F6C66F700A0E908 /* liblibjpeg.a */,
 				C2309DCA1F6C66F700A0E908 /* liblibpng.a */,
@@ -1413,7 +1417,7 @@
 				TargetAttributes = {
 					8D1107260486CEB800E47090 = {
 						DevelopmentTeam = W4F7HL2GN5;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					C24CD87B1CEA5B1B0008C72B = {
 						CreatedOnToolsVersion = 7.3;
@@ -1634,8 +1638,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LIBRARY = "libc++";
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Arman Garakani (W4F7HL2GN5)";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -1683,9 +1688,11 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE = "5b733443-15a0-4b41-b730-296eb5fb1052";
+				PROVISIONING_PROFILE_SPECIFIER = "XC OSX: net.darisallc.*";
+				STRIP_INSTALLED_PRODUCT = NO;
 				USER_HEADER_SEARCH_PATHS = include;
+				VALID_ARCHS = x86_64;
 				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
@@ -1696,8 +1703,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LIBRARY = "libc++";
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Arman Garakani (W4F7HL2GN5)";
 				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -1745,10 +1753,11 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				STRIP_INSTALLED_PRODUCT = YES;
+				PROVISIONING_PROFILE = "5b733443-15a0-4b41-b730-296eb5fb1052";
+				PROVISIONING_PROFILE_SPECIFIER = "XC OSX: net.darisallc.*";
+				STRIP_INSTALLED_PRODUCT = NO;
 				USER_HEADER_SEARCH_PATHS = include;
+				VALID_ARCHS = x86_64;
 				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1762,9 +1771,12 @@
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "$(PROJECT_DIR)/Info.plist";
+				MACH_O_TYPE = mh_bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_LDFLAGS = (
 					"$(PROJECT_DIR)/libcinder_d.a",
@@ -1793,9 +1805,12 @@
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "$(PROJECT_DIR)/Info.plist";
+				MACH_O_TYPE = mh_bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_LDFLAGS = (
 					"$(PROJECT_DIR)/libcinder.a",
