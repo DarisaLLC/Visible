@@ -118,7 +118,7 @@ public:
     void mouseDrag( MouseEvent event ) override;
     void saveImage(const cv::Mat & image, const std::string & filename);
     void RGBtoYxy(cv::Mat source, cv::Mat &destination);
-    void gmLuminance(cv::Mat source, cv::Mat &destination);
+    void hueMappedOrientation(cv::Mat source, cv::Mat &destination);
     
     Surface8uRef  loadImageFromPath (const filesystem::path&);
     void fileDrop( FileDropEvent event ) override;
@@ -139,6 +139,7 @@ public:
     cv::Mat mEdge;
     vector<cv::Mat> mLogs;
     vector<cv::Mat> mHSV;
+    vector<cv::Mat> mRGB;
     
     std::vector<gl::TextureRef> mTextures;
     std::vector<gl::TextureRef> mOverlays;
@@ -149,7 +150,7 @@ public:
     
     int mOption;
     params::InterfaceGlRef	mParams;
-    vector<string> mNames = { "Input", "Redness"};
+    vector<string> mNames = { "Input", "Dithering", "Orientation", "CG"};
     ivec2			mMousePos;
     vector<vector<cv::Point> > contours;
     vector<Vec4i> hierarchy;
@@ -275,7 +276,7 @@ void MainApp::setup()
     
     assert(exists(mFolderPath));
     
-    cv::namedWindow("Main");
+    cv::namedWindow(" Bina ");
     mOption = 1;
     mSkinHue[0] = Scalar(3, 40, 90);
     mSkinHue[1] = Scalar(33, 255, 255);
@@ -500,21 +501,31 @@ void MainApp::keyDown( KeyEvent event )
 
 
 
-void MainApp::gmLuminance(cv::Mat source, cv::Mat &destination){
-    
-    double eps=2.2204e-16;
-    cv::Mat result;
+void MainApp::hueMappedOrientation(cv::Mat source, cv::Mat &destination){
+   
+    cv::Mat gray, mag, ang, hsv;
     std::vector<cv::Mat> channels;
-    cv::split(source, channels);
-    cv::Mat prod = channels[0].clone();
-    cv::multiply(channels[0], channels[1], prod);
-    cv::multiply(prod, channels[2], prod);
-    prod+=eps;
-    prod.convertTo(result, CV_32F);
-    cv::pow(result, 1.0/3.0, result);
-    destination = result;
+    channels.resize(source.channels());
     
+    cv::cvtColor(source, gray, CV_RGB2GRAY);
+    
+    svl::sobel_opencv(gray,mag, ang);
 
+    // Map to Hue Hue is 180 degrees
+    // Scales, calculates absolute values, and converts the result to 8-bit.
+    ang.convertTo(ang,CV_8U,256.0/180.0);
+    cv::convertScaleAbs(ang,ang);
+    cv::multiply(mag, cv::Scalar(2.0), mag);
+    mag.convertTo(mag,CV_8U);
+
+    
+    hsv = source.clone();
+    channels[0] = ang; // set orientation as hue channel
+    channels[1] = mag;
+    channels[2] = mag;
+    
+    cv::merge(channels, hsv);
+    cv::cvtColor(hsv, destination, CV_HSV2RGB);
 }
 
 void MainApp::RGBtoYxy(cv::Mat source, cv::Mat &destination){
@@ -571,28 +582,50 @@ void MainApp::process ()
     cv::Mat hsv;
     cv::Mat mask;
     cv::Mat xyz;
-    
+
     mInputMat = cv::Mat ( toOcv ( *mImage) );
-    
-    
     
     // resize it with aspect in tact
     int size = std::sqrt( 1 + (mInputMat.rows * mInputMat.cols) / 500000.);
     cv::resize(mInputMat, mInputMat, cv::Size(mInputMat.cols / size , mInputMat.rows / size ));
     cv::Mat clear = mInputMat.clone();
     clear = 0;
-    cv::Mat tmpi = mInputMat.clone();
-    mTextures[0] = gl::Texture::create(fromOcv(tmpi));
+    
+    
+    cv::Mat none = mInputMat.clone();
+    mTextures[0] = gl::Texture::create(fromOcv(none));
     mOverlays[0] = gl::Texture::create(fromOcv(clear));
     
-    gmLuminance(mInputMat, xyz);
+    cv::pyrDown(mInputMat,mInputMat);
+    cv::pyrDown(mInputMat,mInputMat);
+    cv::pyrMeanShiftFiltering(mInputMat,mInputMat, 5, 40.0);
+    cv::pyrUp(mInputMat,mInputMat);
+    cv::pyrUp(mInputMat,mInputMat);
     
-    mTextures[1] =  gl::Texture::create(fromOcv(xyz));
-    mOverlays[1] = gl::Texture::create(fromOcv(clear));
 
+    cv::Mat tmpi = mInputMat.clone();
+    mTextures[1] = gl::Texture::create(fromOcv(tmpi));
+    mOverlays[1] = gl::Texture::create(fromOcv(clear));
+    
+    hueMappedOrientation(tmpi, xyz);
+    
+    mTextures[2] =  gl::Texture::create(fromOcv(xyz));
+    mOverlays[2] = gl::Texture::create(fromOcv(clear));
+
+    cv::Mat mag, ang;
+    float maxVal;
+    svl::cumani_opencv (mInputMat, mag, ang, maxVal);
+    std::cout << maxVal << std::endl;
+    
+    mTextures[3] =  gl::Texture::create(fromOcv(tmpi));
+    mOverlays[3] = gl::Texture::create(fromOcv(ang));
+    
     // convert to hsv and show hue
     // get the vector of Mats for processing
     // Surface for display
+
+
+
 #if 0
     cvtColor(mInputMat, hsv, cv::COLOR_RGB2HSV_FULL);
     mHSLImage = Surface8u::create (fromOcv(hsv));

@@ -1417,7 +1417,7 @@
 				TargetAttributes = {
 					8D1107260486CEB800E47090 = {
 						DevelopmentTeam = W4F7HL2GN5;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 					};
 					C24CD87B1CEA5B1B0008C72B = {
 						CreatedOnToolsVersion = 7.3;
@@ -1640,10 +1640,11 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LIBRARY = "libc++";
-				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Arman Garakani (W4F7HL2GN5)";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 2;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = W4F7HL2GN5;
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
 				ENABLE_ON_DEMAND_RESOURCES = NO;
@@ -1675,6 +1676,8 @@
 					/usr/local/Cellar/webp/0.5.2/lib,
 				);
 				LOCAL_BOOST = "$(EXTERNALS)";
+				MACH_O_TYPE = mh_execute;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"$(PROJECT_DIR)/libcinder.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
@@ -1688,11 +1691,11 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
-				PROVISIONING_PROFILE = "5b733443-15a0-4b41-b730-296eb5fb1052";
-				PROVISIONING_PROFILE_SPECIFIER = "XC OSX: net.darisallc.*";
-				STRIP_INSTALLED_PRODUCT = NO;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = include;
-				VALID_ARCHS = x86_64;
+				VALID_ARCHS = "i386 x86_64";
 				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
@@ -1705,7 +1708,8 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LIBRARY = "libc++";
-				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Arman Garakani (W4F7HL2GN5)";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COMBINE_HIDPI_IMAGES = NO;
 				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -1740,6 +1744,8 @@
 					/usr/local/Cellar/webp/0.5.2/lib,
 				);
 				LOCAL_BOOST = "$(EXTERNALS)";
+				MACH_O_TYPE = mh_execute;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"$(PROJECT_DIR)/libcinder.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
@@ -1753,11 +1759,11 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
-				PROVISIONING_PROFILE = "5b733443-15a0-4b41-b730-296eb5fb1052";
-				PROVISIONING_PROFILE_SPECIFIER = "XC OSX: net.darisallc.*";
-				STRIP_INSTALLED_PRODUCT = NO;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = include;
-				VALID_ARCHS = x86_64;
+				VALID_ARCHS = "i386 x86_64";
 				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = app;
 			};

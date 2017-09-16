@@ -234,30 +234,64 @@ namespace svl
         return prepare_acf(space,precision);
     }
     
-    
-    bool colorDivergence (const cv::Mat& img, int32_t dia, colorDiv& cdiv)
+    void cumani_opencv (const cv::Mat& input_bgr, cv::Mat& gradAbs, cv::Mat& orientation, float& maxVal)
     {
-        cdiv.isValid = false;
-        cdiv.raw_acf = selfMatch(img, dia);
         
-        cdiv.acf = prepare_acf(cdiv.raw_acf, cdiv.precision());
+        // compute the gradients on both directions x and y
+        Mat grad_x, grad_y;
+        Mat abs_grad_x, abs_grad_y;
+        int ddepth = CV_32F; // use 16 bits unsigned to avoid overflow
+        std::vector<Mat> mv;
+        std::vector<Mat> gradXs(3);
+        std::vector<Mat> gradYs(3);
+        split(input_bgr, mv);
+        gradAbs = Mat::zeros(input_bgr.rows,input_bgr.cols, CV_32F);
+        orientation = Mat::zeros(input_bgr.rows,input_bgr.cols, CV_32F);
+
+        for (auto cc = 0; cc < 3; cc++)
+        {
+            gradXs[cc] = Mat::zeros(input_bgr.rows,input_bgr.cols, CV_32F);
+            gradYs[cc] = Mat::zeros(input_bgr.rows,input_bgr.cols, CV_32F);
+            Sobel( mv[cc], gradXs[cc], ddepth, 1, 0); //kx, scale, delta, BORDER_DEFAULT );
+            Sobel( mv[cc], gradYs[cc], ddepth, 0, 1); // , ky, scale, delta, BORDER_DEFAULT );
+        }
+        Mat dfdx = Mat::zeros(1, 3, CV_32FC1);
+        Mat dfdy = Mat::zeros(1, 3, CV_32FC1);
+        float E,F,G,EpG,EmG,a;
         
-        cdiv.point_set.clear();
-        findContours(cdiv.acf, cdiv.point_set, RETR_LIST, CHAIN_APPROX_NONE);
-        cdiv.acf_contours = cdiv.point_set.size();
-        bool empty = cdiv.point_set.empty();
-        if (empty) return false;
+        for (auto y = 0; y < input_bgr.rows; y++)
+            for (auto x = 0; x < input_bgr.cols; x++)
+            {
+                dfdx.at<float>(0,0) = gradXs[0].at<float>(y,x);
+                dfdx.at<float>(0,1) = gradXs[1].at<float>(y,x);
+                dfdx.at<float>(0,2) = gradXs[2].at<float>(y,x);
+                
+                dfdy.at<float>(0,0) = gradYs[0].at<float>(y,x);
+                dfdy.at<float>(0,1) = gradYs[1].at<float>(y,x);
+                dfdy.at<float>(0,2) = gradYs[2].at<float>(y,x);
+
+                E = dfdx.dot(dfdx);
+                F = dfdx.dot(dfdy);
+                G = dfdy.dot(dfdy);
+                
+                // the vector of maximal contrast is given by the eigenvalues of
+                // the tensor matrix lambda = (E+G) +/- sqrt((E-G)^2+4F^2)/2;
+                EpG=E+G;
+                if (EpG<=std::numeric_limits<float>::epsilon()) {
+                    gradAbs.at<float>(y,x)=0.0f;
+                    orientation.at<float>(y,x)=0.0f;
+                } else {
+                    EmG=E-G;
+                    a = sqrt(EmG*EmG+4.0f*F*F);
+                    // maximum directional derivative -> lambda_max
+                    maxVal=max((gradAbs.at<float>(y,x)=sqrt((EpG + a)*0.5f)),maxVal);
+                    a = 0.5f*atan2(2.0f*F,EmG);
+                    orientation.at<float>(y,x)=a;
+                }
+            }
         
-        // Only process the first one
-        size_t count = cdiv.point_set[0].size();
-        if( count < 6 )
-            return false;
-        Mat(cdiv.point_set[0]).convertTo(cdiv.peak, CV_32F);
-        cdiv.affineRect = fitEllipse(cdiv.peak);
-        
-        cdiv.isValid = true;
-        return cdiv.isValid;
     }
+   
     
     bool matIsEqual(const cv::Mat mat1, const cv::Mat mat2){
         // treat two empty mat as identical as well
@@ -502,39 +536,7 @@ namespace svl
     }
     
     
-    /////////////////////////////////////////////////////////
-
-    cv::Mat redRain (const cv::Mat& hue, float red_spread)
-    {
-        red_spread = std::fmod (red_spread, 1.0f);
-        cv::Mat cvlut (1, 256, CV_8UC1);
-        cvlut = uint8_t(0);
-        
-        std::vector<uint32_t> lut (256, 0);
-        float range = std::floor (red_spread * 256);
-        std::vector<uint32_t>::iterator be = lut.begin();
-        std::vector<uint32_t>::iterator en = lut.begin();
-        std::advance (en, 180);
-        
-        for (float index = 1.0f; index <= range; index+=1.0f)
-        {
-            float fv = std::tanh(M_PI / index) * 255;
-            uint32_t iv = std::floor(fv);
-            *be++ = iv;
-            *en-- = iv;
-        }
-
-        for (auto ll = 0;ll < 256; ll++)
-        {
-            cvlut.at<uint8_t>(0,ll) = uint8_t(lut[ll]);
-  //          std::cout << "{" << ll << "," << setprecision(3) << lut[ll] << "},";
-        }
-        cv::Mat dst = hue.clone ();
-        cv::LUT(hue, cvlut, dst);
-        return dst;
-        
-    }
-    // Silly Implementation: calculates the median value of a single channel
+     // Silly Implementation: calculates the median value of a single channel
     // based on https://github.com/arnaudgelas/OpenCVExamples/blob/master/cvMat/Statistics/Median/Median.cpp
     double median( cv::Mat channel )
     {
@@ -602,29 +604,23 @@ namespace svl
     }
     
     
-    void sobel_opencv (const cv::Mat& input_gray, cv::Mat& mag, cv::Mat& ang, bool output8U)
+    void sobel_opencv (const cv::Mat& input_gray, cv::Mat& mag, cv::Mat& ang)
     {
         
         // compute the gradients on both directions x and y
         Mat grad_x, grad_y;
-        Mat abs_grad_x, abs_grad_y;
-        int ddepth = CV_32F; // use 16 bits unsigned to avoid overflow
-        
-        Sobel( input_gray, grad_x, ddepth, 1, 0); //kx, scale, delta, BORDER_DEFAULT );
-        Sobel( input_gray, grad_y, ddepth, 0, 1); // , ky, scale, delta, BORDER_DEFAULT );
         cv::Mat sobel_mag;
         cv::Mat sobel_ang;
+        
+        int ddepth = CV_32F; // use 16 bits unsigned to avoid overflow
+        
+        Sobel( input_gray, grad_x, ddepth, 1, 0, 7); //kx, scale, delta, BORDER_DEFAULT );
+        Sobel( input_gray, grad_y, ddepth, 0, 1, 7); // , ky, scale, delta, BORDER_DEFAULT );
+   
         cv::cartToPolar(grad_x, grad_y, sobel_mag, sobel_ang, true);
-        
-        
-        if (output8U)
-        {
-            double minval, maxval;
-            // cv::minMaxLoc(sobel_mag,&minval,&maxval);
-            sobel_mag.convertTo(mag,CV_8U);
-            sobel_ang.convertTo(ang,CV_8U,256.0/360.0);
-        }
-    }
+        mag = sobel_mag;
+        ang = sobel_ang;
+     }
     
     // Computes the 1D histogram.
     cv::Mat getHistogram(const cv::Mat1b &image, const cv::Mat1b &mask)
