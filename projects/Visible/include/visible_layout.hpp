@@ -157,37 +157,21 @@ public:
     inline ivec2 canvas_size () { return desired_window_size() - trim() - trim (); }
     
     
-    inline void plot_rects (std::vector<Rectf>& plots )
+    inline const std::vector<Rectf>& plot_rects () const
     {
-        update_plots ();
-        
-        vec2 cs (m_canvas_size.x, m_canvas_size.y);
-        
-        for (Rectf& plot : m_plot_rects)
-        {
-            plot.x1 *= cs.x;
-            plot.x2 *= cs.x;
-            plot.y1 *= cs.y;
-            plot.y2 *= cs.y;
-            
-        }
-        plots = m_plot_rects;
-        
+        return m_plot_rects;
     }
     
-    inline Rectf display_plots_rect ()
+    inline const Rectf& display_plots_rect () const
+    {
+        return m_plots_display;
+    }
+    
+    
+    inline  void update_display_plots_rects ()
     {
         update_plots ();
-        
-        vec2 cs (m_canvas_size.x, m_canvas_size.y);
-        Rectf ir = m_plots_display;
-        ir.x1 *= cs.x;
-        ir.x2 *= cs.x;
-        ir.y1 *= cs.y;
-        ir.y2 *= cs.y;
-        
-        return ir;
-    }
+     }
     
     
 private:
@@ -260,17 +244,30 @@ private:
         auto plot_tl = plots_frame_position_norm();
         auto plot_size = single_plot_size_norm ();
         vec2 plot_vertical (0.0, plot_size.y);
+        ivec2 cs = canvas_size ();
         
         m_plot_rects[0] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
+        unnorm_rect(m_plot_rects[0], cs);
         plot_tl += plot_vertical;
+        
         m_plot_rects[1] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
+        unnorm_rect(m_plot_rects[1], cs);
         plot_tl += plot_vertical;
         m_plot_rects[2] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
+        unnorm_rect(m_plot_rects[2], cs);
         
         m_plots_display = Rectf(m_plot_rects[0].getUpperLeft(), m_plot_rects[2].getLowerRight());
         
     }
     
+    inline void unnorm_rect (Rectf& drect, ivec2& factor)
+    {
+        ivec2 tl (factor.x * drect.getUpperLeft().x, factor.y * drect.getUpperLeft().y);
+        ivec2 lr (factor.x * drect.getLowerRight().x, factor.y * drect.getLowerRight().y);
+        drect = Rectf(tl, lr);
+    }
+    
+
     
     // Represent norm rectangles for the whole screen and image viewer
     // Real Rects are updated according to the layout and screen size

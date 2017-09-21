@@ -353,7 +353,6 @@ protected:
 	vector<Widget *>	mWidgets;
 	
 	std::vector<Graph1DRef> m_plots;
-	std::vector<ci::Rectf> m_track_rects;
 	
 	std::mutex m_track_mutex;
 	

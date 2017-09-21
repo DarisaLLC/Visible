@@ -153,7 +153,7 @@ public:
         ci::gl::draw( counter, vec2(x, y));
     }
     
-    void make_plot_mesh ()
+    void make_plot_mesh () const
     {
         const Rectf& content = getRect ();
         mPoly.resize(0);
@@ -177,6 +177,7 @@ public:
     void draw() const
     {
         
+        if (mIsSet) make_plot_mesh ();
         const Rectf& content = getRect ();
         
         {
@@ -221,8 +222,8 @@ private:
     mutable bool mIsSet;
     mutable float mVal;
     mutable int32_t mIndex;
-    std::vector<PolyLine2f>             mPoly;
-    TriMeshRef                          mMesh;
+    mutable std::vector<PolyLine2f>             mPoly;
+    mutable TriMeshRef                          mMesh;
     
     std::vector<float>                   mBuffer;
     

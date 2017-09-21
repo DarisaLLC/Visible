@@ -544,7 +544,7 @@ void lifContext::loadCurrentSerie ()
             ci_console() <<  m_series_book.size() << "  Series  " << std::endl;
             
             const tiny_media_info tm = mFrameSet->media_info ();
-            getWindow()->getApp()->setFrameRate(tm.getFramerate() / 5.0);
+            getWindow()->getApp()->setFrameRate(tm.getFramerate() * 2);
             
             mScreenSize = tm.getSize();
             m_frameCount = tm.getNumFrames ();
@@ -565,16 +565,15 @@ void lifContext::loadCurrentSerie ()
             
             {
                 std::lock_guard<std::mutex> lock(m_track_mutex);
-                vl.plot_rects(m_track_rects);
                 
-                assert (m_track_rects.size() >= channel_count);
+                assert (  vl.plot_rects().size() >= channel_count);
                 
                 m_plots.resize (0);
                 
                 for (int cc = 0; cc < channel_count; cc++)
                 {
                     m_plots.push_back( Graph1DRef (new graph1D (m_current_serie_ref->getChannels()[cc].getName(),
-                                                                 m_track_rects [cc])));
+                                                                 vl.plot_rects() [cc])));
                 }
                 
                 for (Graph1DRef gr : m_plots)
@@ -641,8 +640,8 @@ void lifContext::mouseMove( MouseEvent event )
     
     if (vl.display_plots_rect().contains(event.getPos()))
     {
-        std::vector<float> dds (m_track_rects.size());
-        for (auto pp = 0; pp < m_track_rects.size(); pp++) dds[pp] = m_track_rects[pp].distanceSquared(event.getPos());
+        std::vector<float> dds (vl.plot_rects().size());
+        for (auto pp = 0; pp < vl.plot_rects().size(); pp++) dds[pp] = vl.plot_rects()[pp].distanceSquared(event.getPos());
     
         auto min_iter = std::min_element(dds.begin(),dds.end());
         mMouseInGraphs = min_iter - dds.begin();
@@ -791,10 +790,11 @@ void lifContext::resize ()
     
     vl.update_window_size(getWindowSize ());
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-    vl.plot_rects(m_track_rects);
-    for (int cc = 0; cc < m_plots.size(); cc++)
+    vl.update_display_plots_rects();
+
+    for (int cc = 0; cc < vl.plot_rects().size(); cc++)
     {
-        m_plots[cc]->setRect (m_track_rects[cc]);
+        m_plots[cc]->setRect (vl.plot_rects()[cc]);
     }
     
     mTimeLineSlider.mBounds = vl.display_timeline_rect();
@@ -803,6 +803,8 @@ void lifContext::resize ()
 void lifContext::update ()
 {
   mContainer.update();
+  vl.update_display_plots_rects();
+    
     
   if ( is_ready (m_async_luminance_tracks))
     {
@@ -951,6 +953,7 @@ void lifContext::draw ()
         {
             for (int cc = 0; cc < m_plots.size(); cc++)
             {
+                m_plots[cc]->setRect (vl.plot_rects()[cc]);                
                 m_plots[cc]->draw();
             }
         }

@@ -16,6 +16,10 @@ using namespace ci;
 
 namespace tinyUi
 {
+    typedef float marker_t;
+    typedef std::pair<marker_t,marker_t> duration_t;
+    typedef std::pair<ColorA,ColorA> marker_colors_t;
+    typedef std::pair<duration_t,marker_colors_t> duration_marker_t;
     
     
     static gl::TextureFontRef getWidgetTexFont() {
@@ -250,6 +254,7 @@ namespace tinyUi
         
         float mValue, mValueScaled, mMin, mMax;
         ColorA mTextColor, mValueColor;
+        std::map<int, duration_marker_t> mMarker;
         std::string mTitle;
     };
     
