@@ -122,6 +122,7 @@ public:
     ci::app::WindowRef				mWindow;
 	std::string mName;
 	marker_info mTimeMarker;
+	marker_info mAuxTimeMarker;
 	
 };
 
@@ -324,6 +325,7 @@ public:
 	
 	typedef	 signals::Signal<void( marker_info_t & )>		MarkerSignalInfo_t;
 	MarkerSignalInfo_t&	getMarkerSignal () { return m_marker_signal; }
+	MarkerSignalInfo_t&	getAuxMarkerSignal () { return m_aux_marker_signal; }
 	
 	sequencedImageContext(ci::app::WindowRef& ww)
 	: guiContext (ww)
@@ -350,7 +352,10 @@ public:
 	
 protected:
 	TimeLineSlider					mTimeLineSlider;
+	TimeLineSlider					mAuxTimeLineSlider;
 	vector<Widget *>	mWidgets;
+
+	
 	
 	std::vector<Graph1DRef> m_plots;
 	
@@ -366,6 +371,7 @@ protected:
 	int  m_selected_perform_index;
 
 	mutable MarkerSignalInfo_t m_marker_signal;
+	mutable MarkerSignalInfo_t m_aux_marker_signal;
 	
 	ivec2 m_instant_mouse_image_pos;
 	uint32_t m_instant_channel;
@@ -379,8 +385,9 @@ protected:
 	vec2				mSize;
 	Font				mFont;
 	std::string			mLog;
-	std::vector<length_time_t> mCellEnds;
-	rph::DisplayObjectContainer mContainer;	
+	rph::DisplayObjectContainer mContainer;
+	
+
 	
 	
 };
@@ -768,7 +775,7 @@ private:
 
 	bool m_is_playing, m_is_looping;
 	uint32_t m_cutoff_pct;
-	
+	int mAuxTimeSliderIndex;
 	
 	
 	vec2 m_zoom;
@@ -785,6 +792,7 @@ private:
 	int mMouseInGraphs; // -1 if not, 0 1 2
 	bool mMouseInImage; // if in Image, mMouseInGraph is -1
 	bool mMouseInTimeLine;
+	bool mAuxMouseInTimeLine;
 	
 	ivec2 mMouseInImagePosition;
 	

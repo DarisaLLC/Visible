@@ -365,6 +365,8 @@ void lifContext::seekToFrame (int mark)
     m_seek_position = mark;
     mTimeMarker.from_count (m_seek_position);
     m_marker_signal.emit(mTimeMarker);
+    mAuxTimeMarker.from_count (m_seek_position);
+    m_aux_marker_signal.emit(mTimeMarker);
 }
 
 
@@ -549,6 +551,7 @@ void lifContext::loadCurrentSerie ()
             mScreenSize = tm.getSize();
             m_frameCount = tm.getNumFrames ();
             mTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
+            mAuxTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
             
             
             mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
@@ -586,6 +589,16 @@ void lifContext::loadCurrentSerie ()
                 m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mTimeLineSlider, std::placeholders::_1));
                 mWidgets.push_back( &mTimeLineSlider );
                 
+
+                mAuxTimeSliderIndex = vl.add_slider_rect ();
+                mAuxTimeLineSlider.mTitle = "Contraction Markers";
+                mAuxTimeLineSlider.mBounds  =  vl.slider_rects()[mAuxTimeSliderIndex];
+                m_aux_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mAuxTimeLineSlider, std::placeholders::_1));
+                mWidgets.push_back( &mAuxTimeLineSlider );
+           
+
+                
+                
                 getWindow()->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
                 
             }
@@ -608,6 +621,10 @@ void lifContext::processDrag( ivec2 pos )
         seekToFrame(mTimeMarker.current_frame());
     }
     
+    if( mAuxTimeLineSlider.hitTest( pos ) ) {
+        mAuxTimeMarker.from_norm(mAuxTimeLineSlider.mValueScaled);
+        seekToFrame(mAuxTimeMarker.current_frame());
+    }
 }
 
 void  lifContext::mouseWheel( MouseEvent event )
@@ -647,35 +664,8 @@ void lifContext::mouseMove( MouseEvent event )
         mMouseInGraphs = min_iter - dds.begin();
     }
     
-    mMouseInTimeLine = vl.display_timeline_rect().contains(event.getPos());
-    
-    if (mMouseInTimeLine && ! mCellEnds.empty())
-    {
-        auto cf = getCurrentFrame();
-        if (cf == mCellEnds[0].first.first)
-        {
-            Square *s = new Square();
-            s->setRegPoint(rph::DisplayObject2D::RegistrationPoint::CENTERCENTER);
-            s->setColor(Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat()));
-            s->setSize(Rand::randInt(50,100),Rand::randInt(50,100));
-            s->setPos( event.getPos() );
-            s->fadeOutAndDie();
-            mContainer.addChild(s);
-        }
-        else if (cf == mCellEnds[0].second.first)
-        {
-            Circle *c = new Circle();
-            c->setRegPoint(rph::DisplayObject2D::RegistrationPoint::CENTERCENTER);
-            c->setColor(Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat()));
-            c->setScale(Rand::randInt(50,100));
-            c->setPos( event.getPos() );
-            c->fadeOutAndDie();
-            mContainer.addChild(c);
-
-        }
-    }
-    
-    
+    mMouseInTimeLine =  mTimeLineSlider.mBounds.contains(event.getPos());
+    mAuxMouseInTimeLine =  mAuxTimeLineSlider.mBounds.contains(event.getPos());
 }
 
 
@@ -697,33 +687,10 @@ void lifContext::mouseDown( MouseEvent event )
     {
         graphRef->mouseDown( event );
         graphRef->get_marker_position(mTimeMarker);
+        graphRef->get_marker_position(mAuxTimeMarker);
     }
     
-    // If we are in the Visible Channel
-    if (getManualEditMode() && mMouseInTimeLine )
-    {
-        if( mTimeLineSlider.hitTest( event.getPos() ) ) {
-            mTimeMarker.from_norm(mTimeLineSlider.mValueScaled);
-            auto currentFrame = mTimeMarker.current_frame();
-            index_time_t tt (currentFrame, 0.0);
-            if (! mCellEnds.empty())
-            {
-                if (currentFrame > mCellEnds[0].first.first)
-                    mCellEnds[0].second = tt;
-                else if (currentFrame < mCellEnds[0].first.first)
-                {
-                    mCellEnds[0].second  = mCellEnds[0].first;
-                    mCellEnds[0].first = tt;
-                }
-            }
-            else // (mCellEnds.empty())
-            {
-                length_time_t lt (tt,tt);
-                mCellEnds.push_back(lt);
-            }
-        }
-    }
-}
+ }
 
 
 void lifContext::mouseUp( MouseEvent event )
@@ -790,7 +757,6 @@ void lifContext::resize ()
     
     vl.update_window_size(getWindowSize ());
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-    vl.update_display_plots_rects();
 
     for (int cc = 0; cc < vl.plot_rects().size(); cc++)
     {
@@ -798,12 +764,12 @@ void lifContext::resize ()
     }
     
     mTimeLineSlider.mBounds = vl.display_timeline_rect();
-    
+    mAuxTimeLineSlider.mBounds  =  vl.slider_rects()[mAuxTimeSliderIndex];
 }
 void lifContext::update ()
 {
   mContainer.update();
-  vl.update_display_plots_rects();
+  vl.update_window_size(getWindowSize ());
     
     
   if ( is_ready (m_async_luminance_tracks))

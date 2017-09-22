@@ -373,7 +373,6 @@ void movContext::loadMovieFile()
                 // Setup Plot area
                 {
                     std::lock_guard<std::mutex> lock(m_track_mutex);
-                    vl.update_display_plots_rects();
                     m_plots.resize (0);
                     
                     
@@ -544,7 +543,6 @@ void movContext::resize ()
     
     vl.update_window_size(getWindowSize ());
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-    vl.update_display_plots_rects();
     for (int cc = 0; cc < vl.plot_rects().size(); cc++)
     {
         m_plots[cc]->setRect (vl.plot_rects()[cc]);
@@ -558,8 +556,8 @@ void movContext::update ()
 {
     // Launch Average Luminance Computation
     //    m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance_and_aci,mFrameSet, names, false);
-    vl.update_display_plots_rects();
-    
+
+      vl.update_window_size(getWindowSize ());
 #if TODO
     if ( is_ready (m_async_luminance_tracks))
     {

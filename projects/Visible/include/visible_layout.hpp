@@ -30,6 +30,14 @@ using namespace ci::signals;
  *    Time Line         *    **********
  ************************    **********
  
+ ************************
+ *    Event Time Line   *
+ ************************
+ 
+ ************************
+ *    Event Time Line   *
+ ************************
+ 
  **************************************
  *  Log Output                        *
  **************************************
@@ -49,8 +57,8 @@ public:
         
         m_image_frame_size_norm = vec2(0.75, 0.75);
         m_single_plot_size_norm = vec2(0.20, 0.25);
-        m_timeline_size_norm = vec2(0.75, 0.10);
-        m_log_size_norm = vec2(0.95, 0.10);
+        m_timeline_size_norm = vec2(0.75, 0.08);
+        m_log_size_norm = vec2(0.95, 0.08);
         
         
     }
@@ -67,6 +75,10 @@ public:
         m_image_rect = Rectf (ai);
         m_aspect = layout::aspect(tmi.getSize());
         m_isSet = true;
+
+        //@todo remove this assumption
+        update_display_plots_rects ();
+        m_slider_rects.clear();
     }
     
     inline bool isSet () const { return m_isSet; }
@@ -89,27 +101,18 @@ public:
         Area wi (0, 0, m_canvas_size.x, m_canvas_size.y);
         m_window_rect = Rectf(wi);
         
+        update_display_frame_rect ();
+        update_display_timeline_rect ();
+        update_display_plots_rects();
+        
         m_windowSizeSignal.emit(m_canvas_size);
     }
-    
+
     inline Rectf display_frame_rect ()
     {
-        assert(isSet());
-        
-        // Get the image frame
-        Rectf imf = image_frame_rect ();
-        Rectf rawf = m_image_rect;
-        if (imf.intersects(rawf))
-        {
-            auto it = rawf.getCenteredFit(imf, true);
-            // Leave it centered and not align it to the top
-            //       it.offset(-it.getUpperLeft());
-            rawf = it;
-        }
-        m_display2image = RectMapping (rawf, m_image_rect, true);
-        
-        return rawf;
+        return m_current_display_frame_rect;
     }
+    
     
     inline const ivec2 display2image (const ivec2& pixel_loc)
     {
@@ -118,16 +121,9 @@ public:
     
     inline Rectf display_timeline_rect ()
     {
-        assert (m_image_frame_size_norm.x == m_timeline_size_norm.x);
-        auto timeline_size = timeline_frame_size ();
-        // Get the image frame rect
-        // Set width to the actual image display width
-        // Space it in y at half of its expected size
-        Rectf ir = display_frame_rect ();
-        vec2 TL (ir.getLowerLeft().x,ir.getLowerLeft().y + timeline_size.y / 2);
-        vec2 BR (TL.x + ir.getWidth() , TL.y + timeline_size.y);
-        return Rectf (TL, BR);
+        return m_current_display_timeline_rect;
     }
+    
     
     // Modify window size
     inline void scale (vec2& scale_by)
@@ -167,12 +163,19 @@ public:
         return m_plots_display;
     }
     
-    
-    inline  void update_display_plots_rects ()
+    inline const std::vector<Rectf>& slider_rects () const
     {
-        update_plots ();
-     }
+        return m_slider_rects;
+    }
     
+    
+    int add_slider_rect ()
+    {
+        Rectf slider = display_timeline_rect ();
+        slider.offset(vec2(0, (1 + m_slider_rects.size()) * slider.getHeight()));
+        m_slider_rects.push_back(slider);
+        return m_slider_rects.size() - 1;
+    }
     
 private:
     bool m_isSet;
@@ -238,7 +241,60 @@ private:
     
     
     
-    inline void update_plots ()
+    
+    inline void unnorm_rect (Rectf& drect, ivec2& factor)
+    {
+        ivec2 tl (factor.x * drect.getUpperLeft().x, factor.y * drect.getUpperLeft().y);
+        ivec2 lr (factor.x * drect.getLowerRight().x, factor.y * drect.getLowerRight().y);
+        drect = Rectf(tl, lr);
+    }
+    
+    inline void update_display_frame_rect ()
+    {
+        if (! m_isSet ) return;
+        
+        // Get the image frame
+        Rectf imf = image_frame_rect ();
+        Rectf rawf = m_image_rect;
+        if (imf.intersects(rawf))
+        {
+            auto it = rawf.getCenteredFit(imf, true);
+            // Leave it centered and not align it to the top
+            //       it.offset(-it.getUpperLeft());
+            rawf = it;
+        }
+        m_display2image = RectMapping (rawf, m_image_rect, true);
+        m_current_display_frame_rect = rawf;
+    }
+
+    // Updates sliders
+    inline void update_display_timeline_rect ()
+    {
+        assert (m_image_frame_size_norm.x == m_timeline_size_norm.x);
+        auto timeline_size = timeline_frame_size ();
+        // Get the image frame rect
+        // Set width to the actual image display width
+        // Space it in y at half of its expected size
+        Rectf ir = display_frame_rect ();
+        vec2 TL (ir.getLowerLeft().x,ir.getLowerLeft().y + timeline_size.y / 2);
+        vec2 BR (TL.x + ir.getWidth() , TL.y + timeline_size.y);
+        Rectf new_timeline_rect (TL, BR);
+        
+        // Update the other sliders.
+        std::vector<Rectf> new_sliders;
+        for (auto ss = 0; ss < m_slider_rects.size(); ss++)
+        {
+            Rectf slider = new_timeline_rect;
+            slider.offset(vec2(0, (ss + m_slider_rects.size()) * slider.getHeight()));
+            new_sliders.push_back(slider);
+        }
+        m_slider_rects = new_sliders;
+        m_current_display_timeline_rect = new_timeline_rect;
+        
+    }
+    
+    // Updates Plot Rects
+    inline  void update_display_plots_rects ()
     {
         m_plot_rects.resize(3);
         auto plot_tl = plots_frame_position_norm();
@@ -260,18 +316,13 @@ private:
         
     }
     
-    inline void unnorm_rect (Rectf& drect, ivec2& factor)
-    {
-        ivec2 tl (factor.x * drect.getUpperLeft().x, factor.y * drect.getUpperLeft().y);
-        ivec2 lr (factor.x * drect.getLowerRight().x, factor.y * drect.getLowerRight().y);
-        drect = Rectf(tl, lr);
-    }
-    
 
-    
     // Represent norm rectangles for the whole screen and image viewer
     // Real Rects are updated according to the layout and screen size
     mutable Rectf m_window_rect, m_image_rect;
+    mutable Rectf m_current_display_frame_rect;
+    mutable Rectf m_current_display_timeline_rect;
+    
     mutable ivec2 m_canvas_size;
     mutable ivec2 m_trim;
     mutable float m_aspect;
@@ -282,6 +333,7 @@ private:
     mutable vec2 m_log_size_norm;
     mutable Rectf m_plots_display;
     mutable std::vector<Rectf> m_plot_rects;
+    mutable std::vector<Rectf> m_slider_rects;
     
     LayoutSignalWindowSize_t m_windowSizeSignal;
     

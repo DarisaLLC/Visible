@@ -21,6 +21,8 @@ namespace tinyUi
     typedef std::pair<ColorA,ColorA> marker_colors_t;
     typedef std::pair<duration_t,marker_colors_t> duration_marker_t;
     
+
+    
     
     static gl::TextureFontRef getWidgetTexFont() {
         static gl::TextureFontRef sWidgetTexFont;
@@ -43,6 +45,8 @@ namespace tinyUi
         bool mHidden;
         float mPadding;
     };
+
+    typedef std::shared_ptr<Widget> WidgetRef;
     
     inline void drawWidgets( const std::vector<Widget *> &widgets )
     {
@@ -179,8 +183,26 @@ namespace tinyUi
         std::string mTitle;
     };
     
+    
+    /*
+     *  TimeLineSlider
+     *
+     */
+    
     struct TimeLineSlider : public Widget {
+
         TimeLineSlider() : Widget()
+        {
+            init ();
+        }
+        
+        TimeLineSlider(Rectf& bounds) : Widget()
+        {
+            init ();
+            mBounds = bounds;
+        }
+        
+        void init ()
         {
             mValue = mValueScaled = 0.0f;
             mMin = 0.0f;
@@ -259,7 +281,7 @@ namespace tinyUi
     };
     
     
-    
+  
     
     
     
