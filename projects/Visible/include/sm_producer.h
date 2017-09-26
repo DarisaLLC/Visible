@@ -123,8 +123,16 @@ private:
 class sm_filter
 {
 public:
+    typedef std::pair<uint32_t,double> index_val_t;
+    struct contraction
+    {
+        index_val_t contraction_start;
+        index_val_t peak;
+        index_val_t relaxation_end;
+    };
+    
     sm_filter(const deque<double>& entropies, const deque<deque<double>>& mmatrix) :
-    m_entropies (entropies), m_SMatrix (mmatrix), m_cached(false), mValid (false), m_median_levelset_frac (0.1)
+    m_entropies (entropies), m_SMatrix (mmatrix), m_cached(false), m_peak_cached (false), mValid (false), m_median_levelset_frac (0.1)
     {
         m_matsize = m_entropies.size();
         m_ranks.resize (m_matsize);
@@ -140,6 +148,10 @@ public:
     {
         if (verify_input())
         {
+            index_val_t lowest;
+            lowest.first = -1;
+            lowest.second = std::numeric_limits<double>::max ();
+            
             compute_median_levelsets ();
             
             size_t count = std::floor (m_entropies.size () * m_median_levelset_frac);
@@ -155,17 +167,58 @@ public:
                     val += m_SMatrix[jj][ii];
                 }
                 signal[ii] = val;
+                if (val < lowest.second)
+                {
+                    lowest.second = val;
+                    lowest.first = ii;
+                }
             }
+        //    auto extr =  svl::norm_min_max (signal.begin(), signal.end(), true);
+            m_peak.first = lowest.first;
+            m_peak.second = signal[lowest.first];
+            auto iter_to_peak = signal.begin();
+            std::advance (iter_to_peak, lowest.first);
+            find_flat(signal.begin(), iter_to_peak);
             
+            m_peak_cached = true;
             return true;
         }
         return false;
     }
     
-    void set_median_levelset_pct (float frac) const { m_median_levelset_frac = frac; }
+    void set_median_levelset_pct (float frac) const { m_median_levelset_frac = frac; m_cached = false;m_peak_cached = false; }
     float get_median_levelset_pct () const { return m_median_levelset_frac; }
     
+    const index_val_t& low_peak () const
+    {
+        if (!m_peak_cached)
+        {
+            deque<double> signal;
+            median_levelset_similarities(signal);
+        }
+        if (m_peak_cached)
+            return m_peak;
+        return index_val_t ();
+        
+    }
+    
+    
 private:
+    
+
+    
+    void norm_scale (const std::deque<double>& src, std::deque<double>& dst) const
+    {
+        deque<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
+        deque<double>::const_iterator top = std::max_element (src.begin (), src.end() );
+
+        if (svl::equal(*top, *bot)) return;
+        double scaleBy = *top - *bot;
+        dst.resize (src.size ());
+        for (int ii = 0; ii < src.size (); ii++)
+            dst[ii] = (src[ii] - *bot) / scaleBy;
+    }
+    
     void compute_median_levelsets () const
     {
         if (m_cached) return;
@@ -206,13 +259,22 @@ private:
         return ok;
     }
     
+    index_val_t find_flat (const std::deque<double>::iterator& from, const std::deque<double>::iterator& to) const
+    {
+        std::adjacent_difference (from, to, std::ostream_iterator<double>(std::cout, " "));
+    }
+    
     mutable float m_median_levelset_frac;    
     mutable deque<deque<double>>        m_SMatrix;   // Used in eExhaustive and
     deque<double>               m_entropies;
+    deque<double>               m_accum;
     mutable std::vector<int>            m_ranks;
     size_t m_matsize;
     mutable std::atomic<bool> m_cached;
+    mutable std::atomic<bool> m_peak_cached;
     mutable bool mValid;
+    
+    mutable index_val_t m_peak;
     
     
 };

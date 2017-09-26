@@ -55,9 +55,9 @@ public:
     layout (ivec2 trim, bool keep_aspect = true):m_keep_aspect ( keep_aspect), m_trim (trim), m_isSet (false)
     {
         
-        m_image_frame_size_norm = vec2(0.75, 0.75);
-        m_single_plot_size_norm = vec2(0.20, 0.25);
-        m_timeline_size_norm = vec2(0.75, 0.08);
+        m_image_frame_size_norm = vec2(0.67, 0.75);
+        m_single_plot_size_norm = vec2(0.33, 0.25);
+        m_timeline_size_norm = vec2(0.67, 0.08);
         m_log_size_norm = vec2(0.95, 0.08);
         
         
@@ -75,7 +75,7 @@ public:
         m_image_rect = Rectf (ai);
         m_aspect = layout::aspect(tmi.getSize());
         m_isSet = true;
-
+        
         //@todo remove this assumption
         update_display_plots_rects ();
         m_slider_rects.clear();
@@ -107,7 +107,7 @@ public:
         
         m_windowSizeSignal.emit(m_canvas_size);
     }
-
+    
     inline Rectf display_frame_rect ()
     {
         return m_current_display_frame_rect;
@@ -203,19 +203,19 @@ private:
         vec2& np = image_frame_size_norm ();
         return ivec2 (np.x * desired_window_size().x, np.y * desired_window_size().y);
     }
-             
-  inline vec2& timeline_size_norm (){ return m_timeline_size_norm;}
-                              
-  inline ivec2 timeline_frame_size ()
-  {
-      vec2& np = timeline_size_norm ();
-      return ivec2 (np.x * desired_window_size().x, np.y * desired_window_size().y);
-  }
+    
+    inline vec2& timeline_size_norm (){ return m_timeline_size_norm;}
+    
+    inline ivec2 timeline_frame_size ()
+    {
+        vec2& np = timeline_size_norm ();
+        return ivec2 (np.x * desired_window_size().x, np.y * desired_window_size().y);
+    }
     
     // Plot areas on the right
     inline vec2 plots_frame_position_norm ()
     {
-        vec2 np = vec2 (1.0 - trim_norm().x - plots_frame_size_norm().x , trim_norm().y);
+        vec2 np = vec2 (1.0 - trim_norm().x - plots_frame_size_norm().x , 1.5 * trim_norm().y);
         return np;
     }
     
@@ -266,7 +266,7 @@ private:
         m_display2image = RectMapping (rawf, m_image_rect, true);
         m_current_display_frame_rect = rawf;
     }
-
+    
     // Updates sliders
     inline void update_display_timeline_rect ()
     {
@@ -316,7 +316,7 @@ private:
         
     }
     
-
+    
     // Represent norm rectangles for the whole screen and image viewer
     // Real Rects are updated according to the layout and screen size
     mutable Rectf m_window_rect, m_image_rect;

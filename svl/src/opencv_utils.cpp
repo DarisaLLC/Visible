@@ -17,6 +17,8 @@ using namespace svl;
 
 namespace svl
 {
+    
+    
     roiVP8UC NewFromOCV (const cv::Mat& mat)
     {
         switch (mat.channels())
@@ -167,6 +169,36 @@ namespace svl
             }
         }
         dst = mask;
+    }
+
+    double correlation (cv::Mat &image_1, cv::Mat &image_2)
+    {
+        // convert data-type to "float"
+        cv::Mat im_float_1;
+        image_1.convertTo(im_float_1, CV_32F);
+        cv::Mat im_float_2;
+        image_2.convertTo(im_float_2, CV_32F);
+        
+        int n_pixels = im_float_1.rows * im_float_1.cols;
+        
+        // Compute mean and standard deviation of both images
+        cv::Scalar im1_Mean, im1_Std, im2_Mean, im2_Std;
+        meanStdDev(im_float_1, im1_Mean, im1_Std);
+        meanStdDev(im_float_2, im2_Mean, im2_Std);
+        
+        // Compute covariance and correlation coefficient
+        double covar = (im_float_1 - im1_Mean).dot(im_float_2 - im2_Mean) / n_pixels;
+        double correl = covar / (im1_Std[0] * im2_Std[0]);
+        
+        return correl;
+    }
+    
+    double correlation_ocv(const roiWindow<P8U>& i, const roiWindow<P8U>& m)
+    {
+        cv::Mat im (i.height(), i.width(), CV_8UC(1), i.pelPointer(0,0), size_t(i.rowUpdate()));
+        cv::Mat mm (m.height(), m.width(), CV_8UC(1), m.pelPointer(0,0), size_t(m.rowUpdate()));
+        double r = correlation (im, mm);
+        return r * r;
     }
     
     float crossMatch (const cv::Mat& img, const cv::Mat& model, cv::Mat& space, bool squareit)

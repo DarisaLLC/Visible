@@ -22,6 +22,8 @@ using namespace svl;
 namespace svl
 {
 
+    double correlation_ocv(const roiWindow<P8U>& i, const roiWindow<P8U>& m);
+    
     
     class momento : CvMoments
     {
@@ -166,9 +168,7 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     
     cv::Mat gaussianTemplate(const std::pair<uint32_t,uint32_t>& dims, const vec2& sigma = vec2(1.0, 1.0), const vec2& center = vec2(0.5,0.5));
     
-    cv::Mat redRain (const cv::Mat& hue, float red_spread);
     
-   
     float crossMatch (const cv::Mat& img, const cv::Mat& model, cv::Mat& space, bool squareit = true);
     cv::Mat selfMatch (const cv::Mat& img, int32_t dia = 5, bool squareit = true);
     cv::Mat1b acf (const cv::Mat& img, int32_t dia = 5, uint32_t precision = 3);

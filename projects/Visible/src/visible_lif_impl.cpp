@@ -131,6 +131,7 @@ namespace
         // Note tracks contained timed data. 
         void entropiesToTracks (trackD1_t& track)
         {
+            track.second.clear();
             m_medianLevel.resize(m_smfilterRef->size());
             m_smfilterRef->median_levelset_similarities(m_medianLevel);
             auto bee = m_smfilterRef->entropies().begin();
@@ -394,6 +395,8 @@ void lifContext::setMedianCutOff (uint32_t newco)
     if (tmp == current) return;
     sp->set_median_levelset_pct (tmp / 100.0f);
     algo_processor::get_mutable_instance().update();
+    auto tracksRef = algo_processor::get_mutable_instance().similarity_track();
+    m_plots[2]->setup(tracksRef);
 }
 
 uint32_t lifContext::getMedianCutOff () const
@@ -776,10 +779,9 @@ void lifContext::update ()
     {
         auto tracksRef = m_async_luminance_tracks.get();
         assert (tracksRef->size() == m_plots.size ());
-        for (int cc = 0; cc < tracksRef->size(); cc++)
-        {
-            m_plots[cc]->setup(tracksRef->at(cc));
-        }
+        m_plots[0]->setup(tracksRef->at(0));
+        m_plots[1]->setup(tracksRef->at(1));
+        m_plots[2]->setup(tracksRef->at(2), graph1D::mapping_option::type_limits);
     }
     
     if (! have_movie () ) return;
