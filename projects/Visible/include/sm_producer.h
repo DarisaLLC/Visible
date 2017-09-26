@@ -3,6 +3,7 @@
 #define _SIMILARITY_PRODUCER_H
 
 #include <stdio.h>
+#include <algorithm>
 #include <deque>
 #include <vector>
 #include <memory>
@@ -15,6 +16,7 @@
 #include <chrono>
 #include "core/singleton.hpp"
 #include "core/stats.hpp"
+#include "core/stl_utils.hpp"
 
 using namespace std;
 using namespace boost;
@@ -173,12 +175,14 @@ public:
                     lowest.first = ii;
                 }
             }
-        //    auto extr =  svl::norm_min_max (signal.begin(), signal.end(), true);
+
+            stl_utils::Out(signal);
+            
             m_peak.first = lowest.first;
             m_peak.second = signal[lowest.first];
             auto iter_to_peak = signal.begin();
             std::advance (iter_to_peak, lowest.first);
-            find_flat(signal.begin(), iter_to_peak);
+//            find_flat(signal.begin(), iter_to_peak);
             
             m_peak_cached = true;
             return true;
@@ -258,12 +262,19 @@ private:
         }
         return ok;
     }
-    
+#if 0
     index_val_t find_flat (const std::deque<double>::iterator& from, const std::deque<double>::iterator& to) const
     {
+
+        std::deque<double> adjdiff;
         std::adjacent_difference (from, to, std::ostream_iterator<double>(std::cout, " "));
+        std::adjacent_difference (from, to, adjdiff);
+        std::deque<double>::iterator mini = std::min_element(adjdiff.begin(), adjdiff.end());
+        auto dis = std::distance(from, mini);
+        std::cout << dis << " = " << *mini << std::endl;
+
     }
-    
+#endif
     mutable float m_median_levelset_frac;    
     mutable deque<deque<double>>        m_SMatrix;   // Used in eExhaustive and
     deque<double>               m_entropies;

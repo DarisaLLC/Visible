@@ -15,11 +15,8 @@
 #include "roiWindow.h"
 #include "vision/self_similarity.h"
 #include "qtime_frame_cache.hpp"
-#include "cinder/qtime/Quicktime.h"
-#include "cinder/app/Renderer.h"
 #include "cinder/ImageIO.h"
 #include "cinder_xchg.hpp"
-#include "cinder/ip/Grayscale.h"
 #include "ut_sm.hpp"
 #include "AVReader.hpp"
 #include "cm_time.hpp"
@@ -64,28 +61,31 @@ SurfaceRef get_surface(const std::string & path){
     return sp;
 }
 
+std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655, 39.0342,
+    38.8791, 38.8527, 39.0099, 38.8608, 38.9188, 38.8499, 38.6693,
+    38.2513, 37.9095, 37.3313, 36.765, 36.3621, 35.7261, 35.0656,
+    34.2602, 33.2523, 32.3183, 31.6464, 31.0073, 29.8166, 29.3423,
+    28.5223, 27.5152, 26.8191, 26.3114, 25.8164, 25.0818, 24.7631,
+    24.6277, 24.8184, 25.443, 26.2479, 27.8759, 29.2094, 30.7956,
+    32.3586, 33.6268, 35.1586, 35.9315, 36.808, 37.3002, 37.67, 37.9986,
+    38.2788, 38.465, 38.5513, 38.6818, 38.8076, 38.9388, 38.9592,
+    39.058, 39.1322, 39.0803, 39.1779, 39.1531, 39.1375, 39.1978,
+    39.0379, 39.1231, 39.202, 39.1581, 39.1777, 39.2971, 39.2366,
+    39.1555, 39.2822, 39.243, 39.1807, 39.1488, 39.2491, 39.265, 39.198,
+    39.2855, 39.2595, 39.4274, 39.3258, 39.3162, 39.4143, 39.3034,
+    39.2099, 39.2775, 39.5042, 39.1446, 39.188, 39.2006, 39.1799,
+    39.4077, 39.2694, 39.1967, 39.2828, 39.2438, 39.2093, 39.2167,
+    39.2749, 39.4703, 39.2846};
+
+TEST(UT_contraction, basic)
+{
+    
+}
 void done_callback (void)
 {
         std::cout << "Done"  << std::endl;
 }
 
-TEST (UT_kmeans, one_d)
-{
-    std::string name = "imagine.csv";
-    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    
-    auto vec_tuple = rankOutput (res.first.string() );
-    std::vector<double> data;
-    for (auto const tpl : *vec_tuple)
-    {
-        data.push_back(std::get<1>(tpl));
-    }
-    
-    auto km = kmeans(data, 10);
-    
-}
 
 
 TEST (UT_make_function, make_function)
@@ -234,30 +234,7 @@ TEST (UT_qtimeCache, AVReader)
 }
 
 
-TEST(colorHistogram, basic)
-{
-    {
-        std::string name = "red_bar.png";
-        std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(name);
-        EXPECT_TRUE(res.second);
-        {
-            std::pair<Surface8uRef, Channel8uRef> wp (svl::image_io_read_surface(res.first));
-            roiWindow<P8UC4> rootwin = svl::NewFromSurface(wp.first.get());
-            EXPECT_EQ(rootwin.width(), 420);
-            EXPECT_EQ(rootwin.height(), 234);
-        
-            Surface8uRef rr = wp.first;
-            cv::Mat rgb = cinder::toOcvRef(*wp.first.get());
-            ColorSpaceHistogram sh (rgb);
-            sh.run();
-            
-            sh.check_against(sh.spaceHistogram ());
-        }
-    }
-    
-}
-
-#if 1
+#if 0
 
 TEST (UT_SimilarityProducer, run)
 {
@@ -288,10 +265,8 @@ TEST (UT_SimilarityProducer, run)
         
         EXPECT_EQ(true, test.mlies.empty());
     }
-    
-    
 }
-
+#endif
 
 TEST (UT_cm_timer, run)
 {
@@ -356,77 +331,9 @@ TEST (UT_AVReaderBasic, run)
 
 
 
-TEST (UT_surface_roi_conversion, run)
-{
-    Surface8uRef s8 = ci::Surface8u::create(3, 7, true);
-    
-    EXPECT_TRUE(s8->hasAlpha());
-    int32_t sums[4] = {0,0,0};
-    for (int r = 0; r < s8->getHeight(); r++)
-        for (int c = 0; c < s8->getWidth(); c++)
-        {
-            vec2 pos (c, r);
-            ColorAT<uint8_t> col (r, c, r+c, 255);
-            sums[0] += col[0];
-            sums[1] += col[1];
-            sums[2] += col[2];
-            s8->setPixel(pos, col);
-        }
-    
-    roiWindow<P8UC4> uc4 = svl::NewFromSurface(s8.get());
-    EXPECT_EQ(3, uc4.width());
-    EXPECT_EQ(7, uc4.height());
-    
-    for (int r = 0; r < s8->getHeight(); r++)
-    {
-        uint32_t* pel = (uint32_t*) uc4.rowPointer(r);
-        for (int c = 0; c < s8->getWidth(); c++, pel++)
-        {
-            ColorAT<uint8_t> col (r, c, r+c, 255);
-            uint8_t* pels = (uint8_t*) pel;
-            EXPECT_TRUE(pels[0] == col[0]);
-            EXPECT_TRUE(pels[1] == col[1]);
-            EXPECT_TRUE(pels[2] == col[2]);
-            EXPECT_TRUE(pels[3] == col[3]);
-        }
-    }
-    
-    Channel8uRef gray = Channel8u::create(s8->getWidth(), s8->getHeight());
-    ip::grayscale(*s8, gray.get());
-    
-    roiWindow<P8U> u8 = svl::NewFromChannel(*gray, 0);
-    EXPECT_EQ(uc4.width(), u8.width());
-    EXPECT_EQ(uc4.height(), u8.height());
-    
-    
-}
 
-TEST (UT_fileutils, run)
-{
-    boost::filesystem::path test_filepath;
-    
-    std::string txtfile ("onecolumn.txt");
-    std::string matfile ("matrix.txt");
-    
-    auto res = dgenv_ptr->asset_path(txtfile);
-    if (res.second)
-        test_filepath = res.first;
-    
-    VisibleAudioSourceRef   vis ( new VisibleAudioSource (test_filepath));
-    EXPECT_TRUE (vis->getNumChannels() == 1);
-    EXPECT_TRUE (vis->getNumFrames () == 3296);
-    
-    auto res2 = dgenv_ptr->asset_path(matfile);
-    if (res2.second)
-        test_filepath = res2.first;
-    
-    vector<vector<float> > matrix;
-    csv::csv2vectors(test_filepath.string(), matrix, false, false, true);
-    EXPECT_TRUE(matrix.size() == 300);
-    for (int rr=0; rr < matrix.size(); rr++)
-        EXPECT_TRUE(matrix[rr].size() == 300);
-    
-}
+
+
 
 
 TEST (UT_QtimeCache, run)
@@ -462,7 +369,7 @@ TEST (UT_QtimeCache, run)
     
 }
 
-#endif
+
 
 
 

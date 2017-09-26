@@ -271,6 +271,16 @@ namespace stl_utils
             std::cout << v.back() << std::endl;
     }
     
+    template <class Val>
+    void Out(const std::deque<Val>& v)
+    {
+        if (v.size() > 1)
+            std::copy(v.begin(), v.end() - 1, std::ostream_iterator<Val>(std::cout, ", "));
+        if (v.size())
+            std::cout << v.back() << std::endl;
+    }
+    
+    
     
     // Functions on sets
     //============================================================================

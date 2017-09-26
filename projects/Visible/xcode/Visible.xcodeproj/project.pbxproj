@@ -66,10 +66,7 @@
 		C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
 		C24CD8891CEA916E0008C72B /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
 		C24CD88A1CEA916E0008C72B /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8851CEA916E0008C72B /* libboost_system.a */; };
-		C24CD88B1CEA916E0008C72B /* libboost_thread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8861CEA916E0008C72B /* libboost_thread.a */; };
 		C24CD88C1CEA916E0008C72B /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8871CEA916E0008C72B /* libz.a */; };
-		C24CD88F1CEA91910008C72B /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD88D1CEA91910008C72B /* libgtest_main.a */; };
-		C24CD8901CEA91910008C72B /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD88E1CEA91910008C72B /* libgtest.a */; };
 		C24CD8AA1CEB840C0008C72B /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784AF0FF439BC000DE1D7 /* Accelerate.framework */; };
 		C24CD8AB1CEB840C0008C72B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */; };
 		C24CD8AC1CEB840C0008C72B /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B10FF439BC000DE1D7 /* AudioUnit.framework */; };
@@ -216,6 +213,23 @@
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C2DA195B1E80E4E200062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
+		C2E0EE621F7B079300D32697 /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693D1CED3E2B0045FF57 /* libgtest.a */; };
+		C2E0EE631F7B079600D32697 /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693E1CED3E2B0045FF57 /* libgtest_main.a */; };
+		C2E0EE641F7B081D00D32697 /* OcvVideo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BE851F4FAF5C00977307 /* OcvVideo.cpp */; };
+		C2E0EE651F7B085B00D32697 /* libboost_signals.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26A05571E77741300BDC954 /* libboost_signals.a */; };
+		C2E0EE6A1F7B0B1800D32697 /* libippicv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BED91F4FB39E00977307 /* libippicv.a */; };
+		C2E0EE6B1F7B0B1C00D32697 /* libopencv_video.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BECC1F4FB07900977307 /* libopencv_video.a */; };
+		C2E0EE6C1F7B0B3100D32697 /* libopencv_videoio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BECD1F4FB07900977307 /* libopencv_videoio.a */; };
+		C2E0EE6D1F7B0B3300D32697 /* libopencv_videostab.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BECE1F4FB07900977307 /* libopencv_videostab.a */; };
+		C2E0EE6E1F7B0B5300D32697 /* libopencv_imgcodecs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AF87F71CFBCC5900CFC191 /* libopencv_imgcodecs.a */; };
+		C2E0EE6F1F7B0B5600D32697 /* libopencv_imgproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AF87F81CFBCC5900CFC191 /* libopencv_imgproc.a */; };
+		C2E0EE701F7B0B5900D32697 /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AF87F31CFBC7ED00CFC191 /* libopencv_core.a */; };
+		C2E0EE711F7B0B7000D32697 /* liblibjasper.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC81F6C66F700A0E908 /* liblibjasper.a */; };
+		C2E0EE721F7B0B7300D32697 /* liblibjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC91F6C66F700A0E908 /* liblibjpeg.a */; };
+		C2E0EE731F7B0B7500D32697 /* liblibpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCA1F6C66F700A0E908 /* liblibpng.a */; };
+		C2E0EE741F7B0B7700D32697 /* liblibtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCB1F6C66F700A0E908 /* liblibtiff.a */; };
+		C2E0EE751F7B0B7900D32697 /* liblibwebp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCC1F6C66F700A0E908 /* liblibwebp.a */; };
+		C2E0EE761F7B0B7C00D32697 /* libIlmImf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DD21F6C677100A0E908 /* libIlmImf.a */; };
 		C2FA97191E82EFB1006EC61E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2FA97181E82EFB1006EC61E /* Images.xcassets */; };
 		C2FC7DAF1CF4F46100D18193 /* qtime_frame_cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */; };
 /* End PBXBuildFile section */
@@ -641,6 +655,19 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2E0EE761F7B0B7C00D32697 /* libIlmImf.a in Frameworks */,
+				C2E0EE751F7B0B7900D32697 /* liblibwebp.a in Frameworks */,
+				C2E0EE741F7B0B7700D32697 /* liblibtiff.a in Frameworks */,
+				C2E0EE731F7B0B7500D32697 /* liblibpng.a in Frameworks */,
+				C2E0EE721F7B0B7300D32697 /* liblibjpeg.a in Frameworks */,
+				C2E0EE711F7B0B7000D32697 /* liblibjasper.a in Frameworks */,
+				C2E0EE6A1F7B0B1800D32697 /* libippicv.a in Frameworks */,
+				C2E0EE6B1F7B0B1C00D32697 /* libopencv_video.a in Frameworks */,
+				C2E0EE6C1F7B0B3100D32697 /* libopencv_videoio.a in Frameworks */,
+				C2E0EE6D1F7B0B3300D32697 /* libopencv_videostab.a in Frameworks */,
+				C2E0EE6E1F7B0B5300D32697 /* libopencv_imgcodecs.a in Frameworks */,
+				C2E0EE6F1F7B0B5600D32697 /* libopencv_imgproc.a in Frameworks */,
+				C2E0EE701F7B0B5900D32697 /* libopencv_core.a in Frameworks */,
 				C21FFE731CFE0E1D00C97013 /* OpenCL.framework in Frameworks */,
 				C24CD8AA1CEB840C0008C72B /* Accelerate.framework in Frameworks */,
 				C24CD8AB1CEB840C0008C72B /* AudioToolbox.framework in Frameworks */,
@@ -659,12 +686,12 @@
 				C24CD8B71CEB841E0008C72B /* IOSurface.framework in Frameworks */,
 				C24CD8B81CEB841E0008C72B /* AVFoundation.framework in Frameworks */,
 				C24CD8B91CEB841E0008C72B /* CoreMedia.framework in Frameworks */,
-				C24CD88F1CEA91910008C72B /* libgtest_main.a in Frameworks */,
-				C24CD8901CEA91910008C72B /* libgtest.a in Frameworks */,
+				C2E0EE631F7B079600D32697 /* libgtest_main.a in Frameworks */,
+				C2E0EE621F7B079300D32697 /* libgtest.a in Frameworks */,
 				C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */,
 				C24CD8891CEA916E0008C72B /* libboost_filesystem.a in Frameworks */,
+				C2E0EE651F7B085B00D32697 /* libboost_signals.a in Frameworks */,
 				C24CD88A1CEA916E0008C72B /* libboost_system.a in Frameworks */,
-				C24CD88B1CEA916E0008C72B /* libboost_thread.a in Frameworks */,
 				C24CD88C1CEA916E0008C72B /* libz.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1576,6 +1603,7 @@
 				C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */,
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,
+				C2E0EE641F7B081D00D32697 /* OcvVideo.cpp in Sources */,
 				C24CD87F1CEA5B1B0008C72B /* main.cpp in Sources */,
 				C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */,
 				C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */,
@@ -1667,9 +1695,9 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
+					"$(LOCAL_CINDER)/lib/macosx",
 					"$(PROJECT_DIR)",
 					"$(LOCAL_OCV)/lib/macosx",
-					"$(LOCAL_CINDER)/lib/macosx",
 					/usr/local/Cellar/openexr/2.2.0/lib,
 					/usr/local/Cellar/libtiff/4.0.8/lib,
 					/usr/local/Cellar/libpng/1.6.29/lib,
@@ -1735,9 +1763,9 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
+					"$(LOCAL_CINDER)/lib/macosx",
 					"$(PROJECT_DIR)",
 					"$(LOCAL_OCV)/lib/macosx",
-					"$(LOCAL_CINDER)/lib/macosx",
 					/usr/local/Cellar/openexr/2.2.0/lib,
 					/usr/local/Cellar/libtiff/4.0.8/lib,
 					/usr/local/Cellar/libpng/1.6.29/lib,
@@ -1863,6 +1891,7 @@
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1875,23 +1904,41 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include",
-					"$(LOCAL_CINDER)/include",
 					"$(LOCAL_gtest)/include",
-					"$(LOCAL_BOOST)/include",
+					"$(LOCAL_CINDER)/include",
+					"$(LOCAL_BOOST)",
+					"$(SRCROOT)/include",
 					"$(LOCAL_OCV)/include",
-					"$(LOCAL_EIGEN)/",
+					"$(LOCAL_EIGEN)",
 					"$(LOCAL_TINYXML)",
+					"$(SRCROOT)/include/plistcpp",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					"$(LOCAL_gtest)/lib/Release",
+					"$(LOCAL_gtest)/lib/Debug",
+					"$(PROJECT_DIR)",
 					"$(LOCAL_OCV)/lib/macosx",
-					"$(LOCAL_BOOST)/lib",
-					"$(LOCAL_CINDER)/lib",
+					"$(LOCAL_CINDER)/lib/macosx",
+					/usr/local/Cellar/openexr/2.2.0/lib,
+					/usr/local/Cellar/libtiff/4.0.8/lib,
+					/usr/local/Cellar/libpng/1.6.29/lib,
+					/usr/local/Cellar/webp/0.5.2/lib,
 				);
+				LOCAL_BOOST = "$(EXTERNALS)";
+				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"$(PROJECT_DIR)/libcinder.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
+					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_highgui.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_hal.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a",
+					"$(LOCAL_OCV)/lib/macosx/libzlib.a",
+					"$(LOCAL_CINDER)/lib/macosx/libboost_date_time.a",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1921,6 +1968,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_MODEL_TUNING = G5;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -1928,22 +1976,40 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include",
-					"$(LOCAL_CINDER)/include",
 					"$(LOCAL_gtest)/include",
-					"$(LOCAL_BOOST)/include",
+					"$(LOCAL_CINDER)/include",
+					"$(LOCAL_BOOST)",
+					"$(SRCROOT)/include",
 					"$(LOCAL_OCV)/include",
-					"$(LOCAL_EIGEN)/",
+					"$(LOCAL_EIGEN)",
 					"$(LOCAL_TINYXML)",
+					"$(SRCROOT)/include/plistcpp",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					"$(LOCAL_gtest)/lib/Release",
+					"$(LOCAL_gtest)/lib/Debug",
+					"$(PROJECT_DIR)",
 					"$(LOCAL_OCV)/lib/macosx",
-					"$(LOCAL_BOOST)/lib",
-					"$(LOCAL_CINDER)/lib",
+					"$(LOCAL_CINDER)/lib/macosx",
+					/usr/local/Cellar/openexr/2.2.0/lib,
+					/usr/local/Cellar/libtiff/4.0.8/lib,
+					/usr/local/Cellar/libpng/1.6.29/lib,
+					/usr/local/Cellar/webp/0.5.2/lib,
 				);
+				LOCAL_BOOST = "$(EXTERNALS)";
+				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = (
+					"$(PROJECT_DIR)/libcinder.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
+					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_highgui.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_hal.a",
+					"$(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a",
+					"$(LOCAL_OCV)/lib/macosx/libzlib.a",
+					"$(LOCAL_CINDER)/lib/macosx/libboost_date_time.a",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

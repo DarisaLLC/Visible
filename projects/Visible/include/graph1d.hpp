@@ -1,4 +1,3 @@
-
 #ifndef _iclip_H_
 #define _iclip_H_
 
@@ -54,9 +53,8 @@ public:
         data_limits = 3
     };
     
-    graph1D( std::string name, const ci::Rectf& display_box,
-            mapping_option mo = data_limits)
-    : InteractiveObject(display_box) , mIsSet(false), m_opt (mo)
+    graph1D( std::string name, const ci::Rectf& display_box)
+    : InteractiveObject(display_box) , mIsSet(false)
     {
         graph1D::setFonts (Font( "Menlo", 18 ), Font( "Menlo", 25 ));
         
@@ -95,7 +93,7 @@ public:
     }
     
     // load the data and bind a function to access it
-    void setup (const trackD1_t& track)
+    void setup (const trackD1_t& track, mapping_option mopt = data_limits)
     {
         if ( mIsSet ) return;
         
@@ -107,10 +105,10 @@ public:
             mBuffer.push_back (reader->second);
             reader++;
         }
-        if (m_opt == data_limits)
-        {
-            auto extr = svl::norm_min_max (mBuffer.begin(), mBuffer.end());
-        }
+        
+        mRawBuffer = mBuffer;
+        mMinMax = svl::norm_min_max (mBuffer.begin(), mBuffer.end(), false);
+        svl::norm_min_max (mBuffer.begin(), mBuffer.end(), true);
         
         m_CB = bind (&graph1D::get, this, std::placeholders::_1);
         make_plot_mesh ();
@@ -125,6 +123,15 @@ public:
         int32_t index = floor (tnormed * (buf.size()-1));
         return (index >= 0 && index < buf.size()) ? buf[index] : -1.0f;
     }
+
+    float getRaw (float tnormed) const
+    {
+        const std::vector<float>& buf = mRawBuffer;
+        if (empty()) return -1.0;
+        int32_t index = floor (tnormed * (buf.size()-1));
+        return (index >= 0 && index < buf.size()) ? buf[index] : -1.0f;
+    }
+    
     
     void get_marker_position (marker_info& t) const
     {
@@ -196,7 +203,7 @@ public:
             gl::ScopedColor C (ColorA(0.75f, 0.5f, 1, 1 ));
             glLineWidth(25.f);
             float px = norm_pos().x * content.getWidth();
-            float mVal = m_CB (norm_pos().x);
+            float mVal = getRaw (norm_pos().x);
             
             vec2 mid (px, content.getHeight()/2.0);
             mid += content.getUpperLeft();
@@ -224,14 +231,15 @@ private:
     mutable int32_t mIndex;
     mutable std::vector<PolyLine2f>             mPoly;
     mutable TriMeshRef                          mMesh;
+    std::pair<double,double> mMinMax;
     
     std::vector<float>                   mBuffer;
+    std::vector<float>                   mRawBuffer;
     
     bool empty () const { return mBuffer.empty (); }
     
     cinder::gl::TextureRef						mLabelTex;
     Graph1DSetCb m_CB;
-    mapping_option m_opt;
     ci::Anim<marker_info> m_marker;
     
 };

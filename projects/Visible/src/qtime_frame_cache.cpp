@@ -115,10 +115,8 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifse
         {
             return std::make_shared<qTimeFrameCache>();
         }
-        else
-            return std::make_shared<qTimeFrameCache>();
-        
     }
+    return std::make_shared<qTimeFrameCache>();
 }
 
 
