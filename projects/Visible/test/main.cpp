@@ -30,6 +30,7 @@
 #include "core/csv.hpp"
 #include "core/kmeans1d.hpp"
 
+
 using namespace boost;
 
 using namespace ci;
@@ -79,7 +80,29 @@ std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655,
 
 TEST(UT_contraction, basic)
 {
+    std::vector<double> fder;
+    auto bItr = acid.begin();
+    fder.resize (acid.size());
+
     
+    adjacent_difference(acid.begin(),acid.end(), fder.begin());
+    std::rotate(fder.begin(), fder.begin()+1, fder.end());
+    fder.pop_back();
+    
+    stl_utils::Out(fder);
+
+    std::transform(fder.begin(), fder.end(), fder.begin(), [](double f)->double { return f * f; });
+      stl_utils::Out(fder);
+
+    // find first element greater than 3
+    auto pos = find_if (fder.begin(), fder.end(),    // range
+                   bind2nd(greater<double>(),0.1));  // criterion
+
+    cout << "the "
+    << std::distance(fder.begin(),pos) + 1
+    << ". element is the first greater than 0.1" << endl;
+    
+  
 }
 void done_callback (void)
 {
