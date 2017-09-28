@@ -280,6 +280,90 @@ namespace stl_utils
             std::cout << v.back() << std::endl;
     }
     
+ 
+
+    
+    template <class T>
+    class FilterInterface
+    {
+        
+    public:
+        virtual std::vector<T> filter(const std::vector<T> & in) = 0;
+        
+    private:
+
+        
+    };
+    
+    template <class T>
+    class NthElement : public FilterInterface<T>
+    {
+        std::vector<T> _history;
+        std::vector<T> _pool;
+        unsigned       _median;
+        
+    public:
+        
+        NthElement(unsigned window_size)
+        :
+        _history(keep_odd(window_size), T()),
+        _pool(_history),
+        _median(window_size / 2 + 1)
+        {
+            assert(window_size >= 3);
+        }
+        
+        
+        std::vector<T> filter(const std::vector<T> & in)
+        {
+            assert(in.size() > 0);
+            
+            //---------------------------------------------------------------------
+            // init state
+            
+            unsigned hist_ptr = 0;
+            
+            std::fill(_history.begin(), _history.end(), in[0]);
+            
+            //---------------------------------------------------------------------
+            // filter input
+            
+            std::vector<T> out;
+            out.reserve(in.size());
+            
+            for(auto x : in)
+            {
+                // step 1, write to history pool
+                
+                _history[hist_ptr] = x;
+                
+                hist_ptr = (hist_ptr + 1) % _history.size();
+                
+                // step 2, copy history to pool
+                
+                std::copy(_history.begin(), _history.end(), _pool.begin());
+                
+                // step 3, compute median on pool
+                
+                auto first = _pool.begin();
+                auto last  = _pool.end();
+                auto middle = first + (last - first) / 2;
+                
+                std::nth_element(first, middle, last);
+                
+                out.push_back(*middle);
+            }
+            
+            return out;
+        }
+        
+        unsigned keep_odd(unsigned n)
+        {
+            if(n % 2 == 0) return n + 1;
+            
+            return n;
+        }
+    };
     
     
     // Functions on sets
@@ -688,7 +772,7 @@ namespace stl_utils
         // }
         // return ret;
     }
-
+    
     
     template< class T >
     std::ostream & operator << ( std::ostream & os, const std::vector< T > & v ) {
@@ -699,7 +783,7 @@ namespace stl_utils
     }
     
     
-
+    
     
     template<class A,class B>
     inline ostream& operator<<(ostream& out, const multimap<A,B>& m)
@@ -714,7 +798,7 @@ namespace stl_utils
         out << "}}";
         return out;
     }
-  
+    
 }
 
 

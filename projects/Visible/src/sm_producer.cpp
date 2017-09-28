@@ -11,10 +11,9 @@
 #include <memory>
 #include <functional>
 #include "app_utils.hpp"
-//#include "cinder/qtime/Quicktime.h"
 #include "cinder_xchg.hpp"
 #include "core/simple_timing.hpp"
-#include "core/stl_utils.hpp"
+//#include "core/stl_utils.hpp"
 #include "vision/opencv_utils.hpp"
 #include "vision/histo.h"
 

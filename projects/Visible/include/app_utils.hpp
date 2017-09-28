@@ -32,7 +32,7 @@
 #include <utility>
 
 #include "core/singleton.hpp"
-#include "stl_utils.hpp"
+
 
 using namespace std;
 using namespace boost;

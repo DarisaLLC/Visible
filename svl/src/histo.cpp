@@ -4,7 +4,7 @@
 #include <limits>
 #include <array>
 #include <vector>
-#include "core/stl_utils.hpp"
+//#include "core/stl_utils.hpp"
 
 histoStats::histoStats(vector<uint32_t> & histogram)
 : computedMoments_(0), computedIC_(0), computedMode_(0), n_(0), mode_(0), mean_(0), sDev_(0), var_(0), ic_(101)
