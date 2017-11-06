@@ -28,6 +28,27 @@ namespace defaultMatchers
 
 }
 
+namespace anonymous
+{
+    void rank_dist_to_median (const std::deque<double> signal, std::vector<int> ranks)
+    {
+        vector<double> entcpy;
+        for (const auto val : signal)
+        entcpy.push_back(1.0 - val);
+
+        auto median_value = svl::Median(entcpy);
+        // Subtract median from all
+        for (double& val : entcpy)
+        val = std::abs(val - median_value );
+
+        // Sort according to distance to the median. small to high
+        ranks.resize (entcpy.size());
+        std::iota(ranks.begin(), ranks.end(), 0);
+        auto comparator = [&entcpy](double a, double b){ return entcpy[a] < entcpy[b]; };
+        std::sort(ranks.begin(), ranks.end(), comparator);
+    }
+}
+
 using namespace svl;
 
 template<typename P>
@@ -56,7 +77,7 @@ static int32_t log2max(int32_t n);
 
 template<typename P>
 self_similarity_producer<P>::self_similarity_producer() : _matrixSz (0), _maskValid(false), _cacheSz (0),
-_depth (P::depth()),  _notify(NULL), _finished(true),_guiUpdate(NULL), _tiny(1e-10)
+_depth (P::depth()),  _notify(NULL), _finished(true), _tiny(1e-10)
 {
     _corr_fn = std::bind(&defaultMatchers::norm_correlate, std::placeholders::_1, std::placeholders::_2);
     
@@ -67,19 +88,17 @@ self_similarity_producer<P>::self_similarity_producer(uint32_t matrixSz,
 			     uint32_t cacheSz,
                  const similarity_fn_t& simFunc,
 			     bool notify,
-			     rcProgressIndicator* guiUpdate,
 			     double tiny)
   : _maskValid(false),  _matrixSz(matrixSz),
     _cacheSz(cacheSz),
     _notify(notify), _finished(true),
-    _guiUpdate(guiUpdate), _tiny(tiny)
+     _tiny(tiny)
 {
 
     _corr_fn = (simFunc) ? simFunc : std::bind(&defaultMatchers::norm_correlate, std::placeholders::_1, std::placeholders::_2);
     
     _depth = P::depth();
   _log2MSz = log2(_matrixSz);
-  _ltOn = false;
 }
 
 
@@ -87,8 +106,7 @@ template<typename P>
 self_similarity_producer<P>::self_similarity_producer(uint32_t matrixSz,
 			     bool notify,
 			     double tiny)
-  : _maskValid(false), _matrixSz(matrixSz), _notify(notify), _finished(true),_tiny(tiny), _cacheSz (matrixSz),
-    _guiUpdate (NULL)
+  : _maskValid(false), _matrixSz(matrixSz), _notify(notify), _finished(true),_tiny(tiny), _cacheSz (matrixSz)
 {
     _depth = P::depth();
   _log2MSz = log2(_matrixSz);
@@ -181,9 +199,9 @@ bool self_similarity_producer<P>::entropies(deque<double>& signal) const
 {
   assert(_matrixSz);
 
-    if (_finished && !_entropies.empty())
+    if (_finished && !m_entropies.empty())
     {
-        signal = _entropies;
+        signal = m_entropies;
         for (unsigned int i = 0; i < signal.size(); i++)
         {
             signal[i] = 1 - signal[i];
@@ -215,7 +233,7 @@ bool self_similarity_producer<P>::selfSimilarityMatrix(deque<deque<double> >& ma
 {
   assert(_matrixSz);
 
-  if (_finished && !_entropies.empty() && !_SMatrix.empty()) {
+  if (_finished && !m_entropies.empty() && !_SMatrix.empty()) {
     matrix = _SMatrix;
     return true;
   }
@@ -236,25 +254,7 @@ bool self_similarity_producer<P>::sequentialCorrelations (deque<double>& slist) 
   return false;
 }  
 
-template<typename P>
-bool self_similarity_producer<P>::longTermCache (bool onOrOff)
-{
-  assert(_matrixSz);
-  _ltEntropies.resize (_matrixSz);
-  _ltOn = onOrOff;
-  return _ltOn;
-}
-template<typename P>
-bool self_similarity_producer<P>::longTermCache () const
-{
-  return _ltOn;
-}
 
-template<typename P>
-const vector<float>& self_similarity_producer<P>::longTermEntropy () const
-{
-  return _ltEntropies;
-}
 
 template<typename P>
 template<typename Iterator>
@@ -295,11 +295,6 @@ bool self_similarity_producer<P>::internalFill(Iterator start, Iterator end,  de
    * if longtermCache is on, write the first matrix size entropies
    */ 
   bool rtn = (_finished = ssMatrixFill(tWin)) && genMatrixEntropy(tWin.size());
-  if (rtn && _ltOn && !_entropies.empty())
-    {
-      for (uint32_t i = 0; i < matrixSz(); i++)
-	_ltEntropies[i] = (float) _entropies[i];
-    }
 
   return rtn;
 }
@@ -308,28 +303,16 @@ bool self_similarity_producer<P>::internalFill(Iterator start, Iterator end,  de
 template<typename P>
 bool self_similarity_producer<P>::median_levelset_similarities (deque<double>& signal, float use_pct ) const
 {
-    if (_finished && !_entropies.empty() && use_pct <= 1.0)
+    if (_finished && !m_entropies.empty() && use_pct <= 1.0)
     {
-        vector<double> entcpy;
-        
-        for (const auto val : _entropies)
-            entcpy.push_back(1.0 - val);
-        
-        auto median_value = svl::Median(entcpy);
-        
-        // Subtract median from all
-        for (double& val : entcpy)
-            val = std::abs(val - median_value );
+        // If it is the first time, produce the distance to median ranks
+        if (m_median_ranked.size() != m_entropies.size())
+            anonymous::rank_dist_to_median(m_entropies,m_median_ranked);
 
-        // Sort according to distance to the median. small to high
-        std::vector<int> ranks(entcpy.size());
-        std::iota(ranks.begin(), ranks.end(), 0);
-        auto comparator = [&entcpy](double a, double b){ return entcpy[a] < entcpy[b]; };
-        std::sort(ranks.begin(), ranks.end(), comparator);
-        
-        size_t count = std::floor (entcpy.size () * use_pct);
-
-        signal.resize(entcpy.size(), 0.0);
+        bool ok = m_median_ranked.size() != m_entropies.size();
+        if (!ok) return ok;
+        size_t count = std::floor (m_entropies.size() * use_pct);
+        signal.resize(m_entropies.size(), 0.0);
         
         for (auto ii = 0; ii < signal.size(); ii++)
         {
@@ -337,7 +320,7 @@ bool self_similarity_producer<P>::median_levelset_similarities (deque<double>& s
             for (int index = 0; index < count; index++)
             {
                 // get the index
-                auto jj = ranks[index];
+                auto jj = m_median_ranked[index];
                 // fetch the cross match value for
                 val += _SMatrix[jj][ii];
             }
@@ -516,10 +499,7 @@ bool self_similarity_producer<P>::internalUpdate(image_t& nextImage, deque<image
    */ 
 
   bool rtn = (_finished=ssMatrixUpdate(tWin)) && genMatrixEntropy(tWin.size());
-  if (rtn && _ltOn && !_entropies.empty())
-    {
-      _ltEntropies.push_back ((float) _entropies.back ());
-    }
+ 
 
   return rtn;
 }
@@ -602,15 +582,15 @@ bool self_similarity_producer<P>::genMatrixEntropy(size_t tWinSz)
     else
         assert(_sums.size() == _matrixSz);
 
-  if (_entropies.empty())
-    _entropies.resize(_matrixSz);
+  if (m_entropies.empty())
+    m_entropies.resize(_matrixSz);
   else
-    assert(_entropies.size() == _matrixSz);
+    assert(m_entropies.size() == _matrixSz);
 
   for (uint32_t i = 0; i < _matrixSz; i++) {
     assert(_SMatrix[i].size() == _matrixSz);
     _sums[i] = _SMatrix[i][i];
-    _entropies[i] = 0.0;
+    m_entropies[i] = 0.0;
   }
 
   for (uint32_t i = 0; i < (_matrixSz-1); i++)
@@ -623,14 +603,14 @@ bool self_similarity_producer<P>::genMatrixEntropy(size_t tWinSz)
     for (uint32_t j = i; j < _matrixSz; j++) {
       double rr =
 	_SMatrix[i][j]/_sums[i]; // Normalize for total energy in samples
-      _entropies[i] += shannon(rr);
+      m_entropies[i] += shannon(rr);
       
       if (i != j) {
 	rr = _SMatrix[i][j]/_sums[j];//Normalize for total energy in samples
-	_entropies[j] += shannon(rr);
+	m_entropies[j] += shannon(rr);
       }
     }
-    _entropies[i] = _entropies[i]/_log2MSz;// Normalize for cnt of samples
+    m_entropies[i] = m_entropies[i]/_log2MSz;// Normalize for cnt of samples
   }
 
     for (int ii = 0; ii < _sums.size (); ii++)
