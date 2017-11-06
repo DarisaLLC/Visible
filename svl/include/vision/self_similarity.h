@@ -15,7 +15,7 @@
 #include "registration.h"
 #include "roiWindow.h"
 
-class rcProgressIndicator;
+using namespace std;
 
 /* self_similarity_producer - Entropy signal generating class. There are two
  * steps to this process.  First, a self-similarity matrix is
@@ -76,7 +76,6 @@ class self_similarity_producer
   self_similarity_producer(uint32_t matrixSz, uint32_t cacheSz,
         const similarity_fn_t& sf = self_similarity_producer<P>::similarity_fn_t (), 
 		bool notify = false,
-		rcProgressIndicator* guiUpdate = 0,
 		double tiny = 1e-10);
 
   self_similarity_producer(uint32_t matrixSz, 	bool notify,		double tiny );
@@ -135,10 +134,6 @@ class self_similarity_producer
 
   void setMask(const roiWindow<P8U>& mask);
   void clearMask();
-
-  bool longTermCache (bool);
-  bool longTermCache () const;
-  const vector<float>& longTermEntropy () const;
 
   /* Accessor Functions
    */
@@ -294,7 +289,6 @@ class self_similarity_producer
   const uint32_t                     _cacheSz;
   const bool                         _notify;
   bool                               _finished;
-  rcProgressIndicator*         const _guiUpdate;
   const double                       _tiny;
   double                             _log2MSz;
   
@@ -316,61 +310,12 @@ class self_similarity_producer
   deque<deque<double> >        _SMatrix;   // Used in eExhaustive and
                                            // eApproximate cases
   deque<double>                _SList;     // Used in approximate cases
-  deque<double>                _entropies; // Final entropy signal
+  deque<double>                m_entropies; // Final entropy signal
+  std::vector<int>               m_median_ranked;
   mutable deque<double>                _sums;     // Final mean signal
   vector<double>               _kernel;    // Filtering Operation Kernel
 
-  /* Long Term Output Caching
-   */
-  bool                         _ltOn;        // Do store entropy in call to update
-  vector<float>                _ltEntropies; // Store entropy in call to update
   svl::stats<float>              _corrTimes;
-
-#if 0
-  class progressNotification
-  {
-  public:
-    progressNotification(int32 totCorr,
-			 rcProgressIndicator* guiUpdate) :
-    _totCorr(totCorr), _curCorr(0), _guiUpdate(guiUpdate), _abort(false)
-    { 
-      // The following is a hack to simulate the existing effect.
-      if (guiUpdate) {
-          _abort = _guiUpdate->progress(uint32_t(0));
-	_pctUpdate = 1;
-      }
-      else {
-	fprintf(stderr, "  0 pct done\n");
-	_pctUpdate = 5;
-      }
-      _nextPct = _pctUpdate;
-    }
-
-    /* Return true if analysis should be aborted, false otherwise.
-     */
-    bool update()
-    {
-      if (_abort)
-	return true;
-      _curCorr++;
-      if (_nextPct <= ((_curCorr*100)/_totCorr)) {
-	if (_guiUpdate) {
-	  bool abort = _guiUpdate->progress((uint32_t)_nextPct);
-	  _nextPct += _pctUpdate;
-	  return abort;
-	}
-	fprintf(stderr, "% 3d pct done\n", _nextPct);
-	_nextPct += _pctUpdate;
-      }
-      return false;
-    }
-
-  private:
-    int32 _totCorr, _curCorr, _nextPct, _pctUpdate;
-    rcProgressIndicator* _guiUpdate;
-    bool _abort;
-  };
-#endif
     
 };
 
