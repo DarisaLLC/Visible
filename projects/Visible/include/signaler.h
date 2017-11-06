@@ -1,7 +1,7 @@
 #ifndef __IO_GRABBER__
 #define __IO_GRABBER__
 
-#include "svl_exception.hpp"
+#include "core/svl_exception.hpp"
 #include <map>
 #include <iostream>
 #include <string>
@@ -16,7 +16,7 @@
   /** \brief signaler interface for 
    
    // make callback function from member function
-    boost::function<void (..onearg..)> f = boost::bind (&Observer::cb_, this, _1);
+    std::function<void (..onearg..)> f = boost::bind (&Observer::cb_, this, _1);
    
    // connect callback function for desired signal. In this case its a point cloud with color values
    boost::signals2::connection c = interface->registerCallback (f);
@@ -37,7 +37,7 @@
         * \return Connection object, that can be used to disconnect the callback method from the signal again.
         */
       template<typename T> boost::signals2::connection 
-      registerCallback (const boost::function<T>& callback);
+      registerCallback (const std::function<T>& callback);
 
       /** \brief indicates whether a signal with given parameter-type exists or not
         * \return true if signal exists, false otherwise
@@ -178,7 +178,7 @@
   }
 
   template<typename T> boost::signals2::connection
-  base_signaler::registerCallback (const boost::function<T> & callback)
+  base_signaler::registerCallback (const std::function<T> & callback)
   {
     typedef boost::signals2::signal<T> Signal;
     if (signals_.find (typeid (T).name ()) == signals_.end ())
@@ -186,7 +186,7 @@
       std::stringstream sstream;
 
       sstream << "no callback for type:" << typeid (T).name ();
-        throw svl_exception::type_error (sstream.str () );
+        throw svl::type_error (sstream.str () );
     }
     Signal* signal = dynamic_cast<Signal*> (signals_[typeid (T).name ()]);
     boost::signals2::connection ret = signal->connect (callback);
