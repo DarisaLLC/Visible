@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
-#include "base_signaler.h"
+#include "signaler.h"
 #include "static.hpp"
 #include <atomic>
 #include <thread>
@@ -25,10 +25,16 @@
 
 #include "sm_producer.h"
 
+class sm_signaler : public base_signaler
+{
+    virtual std::string
+    getName () const { return "sm_signaler"; }
+};
+
 
 SINGLETON_FCN(gen_filename::random_name,get_name_generator);
 
-class sm_producer::spImpl : public base_signaler
+class sm_producer::spImpl : public sm_signaler
 {
 public:
     friend class sm_producer;
@@ -36,6 +42,8 @@ public:
     typedef std::mutex mutex_t;
 
     enum source_type : int { movie = 0, imageFileDirectory = 1, imageInMemory = 2, Unknown = -1 };
+
+ 
     
     spImpl () :  m_auto_run (false)
     {
@@ -63,7 +71,6 @@ public:
     bool done_grabbing () const;
     bool generate_ssm (int start_frame, int frames);
     int64_t frame_count () { return _frameCount; }
-    std::string  getName () const { return m_name; }
     bool image_file_entropy_result_ok () const;
     
     void asset_reader_done_cb ();

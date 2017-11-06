@@ -11,7 +11,7 @@
 #include <typeinfo>
 #include <string>
 #include <tuple>
-#include "base_signaler.h"
+#include "signaler.h"
 #include "roiWindow.h"
 #include <chrono>
 #include "core/singleton.hpp"
@@ -138,6 +138,7 @@ public:
     {
         m_matsize = m_entropies.size();
         m_ranks.resize (m_matsize);
+        m_signal.resize (m_matsize);
         mValid = verify_input ();
     }
     
@@ -145,8 +146,9 @@ public:
     size_t size () const { return m_matsize; }
     
     const deque<double>& entropies () { return m_entropies; }
+    const deque<double>& median_adjusted () { return m_signal; }
     
-    bool median_levelset_similarities (deque<double>& signal) const
+    bool median_levelset_similarities () const
     {
         if (verify_input())
         {
@@ -157,8 +159,8 @@ public:
             compute_median_levelsets ();
             
             size_t count = std::floor (m_entropies.size () * m_median_levelset_frac);
-            signal.resize(m_entropies.size (), 0.0);
-            for (auto ii = 0; ii < signal.size(); ii++)
+            m_signal.resize(m_entropies.size (), 0.0);
+            for (auto ii = 0; ii < m_signal.size(); ii++)
             {
                 double val = 0;
                 for (int index = 0; index < count; index++)
@@ -168,7 +170,7 @@ public:
                     // fetch the cross match value for
                     val += m_SMatrix[jj][ii];
                 }
-                signal[ii] = val;
+                m_signal[ii] = val;
                 if (val < lowest.second)
                 {
                     lowest.second = val;
@@ -176,11 +178,9 @@ public:
                 }
             }
 
-            stl_utils::Out(signal);
-            
             m_peak.first = lowest.first;
-            m_peak.second = signal[lowest.first];
-            auto iter_to_peak = signal.begin();
+            m_peak.second = m_signal[lowest.first];
+            auto iter_to_peak = m_signal.begin();
             std::advance (iter_to_peak, lowest.first);
 //            find_flat(signal.begin(), iter_to_peak);
             
@@ -190,27 +190,23 @@ public:
         return false;
     }
     
-    void set_median_levelset_pct (float frac) const { m_median_levelset_frac = frac; m_cached = false;m_peak_cached = false; }
+    bool set_median_levelset_pct (float frac) const { m_median_levelset_frac = frac; m_cached = false;m_peak_cached = false; return median_levelset_similarities(); }
     float get_median_levelset_pct () const { return m_median_levelset_frac; }
     
     const index_val_t& low_peak () const
     {
+        static index_val_t null_index_val;
+        
         if (!m_peak_cached)
-        {
-            deque<double> signal;
-            median_levelset_similarities(signal);
-        }
+            median_levelset_similarities();
+
         if (m_peak_cached)
             return m_peak;
-        return index_val_t ();
+        return null_index_val;
         
     }
     
-    
 private:
-    
-
-    
     void norm_scale (const std::deque<double>& src, std::deque<double>& dst) const
     {
         deque<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
@@ -279,6 +275,7 @@ private:
     mutable deque<deque<double>>        m_SMatrix;   // Used in eExhaustive and
     deque<double>               m_entropies;
     deque<double>               m_accum;
+    mutable deque<double>              m_signal;
     mutable std::vector<int>            m_ranks;
     size_t m_matsize;
     mutable std::atomic<bool> m_cached;
