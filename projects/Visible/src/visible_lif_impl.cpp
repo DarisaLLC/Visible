@@ -34,8 +34,8 @@
 #include "vision/histo.h"
 #include "core/stl_utils.hpp"
 #include "sm_producer.h"
-#include "algo_registry.hpp"
-#include "tracker.h"
+#include "algo_Lif.hpp"
+#include "signaler.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -47,6 +47,7 @@ using namespace svl;
 
 namespace
 {
+ 
     std::ostream& ci_console ()
     {
         return AppBase::get()->console();
@@ -59,18 +60,36 @@ namespace
     
     static layout vl ( ivec2 (10, 10));
     
+#if 0
+    class vSignaler : public base_signaler
+    {
+        virtual std::string
+        getName () const { return "vSignaler"; }
+    };
     
-    class algo_processor : public internal_singleton <algo_processor>
+    class algo_processor : public vSignaler, public internal_singleton <algo_processor>
     {
     public:
+        
+        typedef void (sig_cb_content_loaded) ();
+        typedef void (sig_cb_frame_loaded) (int, double);
+        typedef void (sig_cb_sm1d_available) ();
+        typedef void (sig_cb_sm1dmed_available) ();
+        
         algo_processor ()
         {
             m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
+            
         }
 
         const smProducerRef sm () const { return m_sm; }
         std::shared_ptr<sm_filter> smFilterRef () { return m_smfilterRef; }
         
+    protected:
+        boost::signals2::signal<algo_processor::sig_cb_content_loaded>* signal_content_loaded;
+        boost::signals2::signal<algo_processor::sig_cb_frame_loaded>* signal_frame_loaded;
+        boost::signals2::signal<algo_processor::sig_cb_sm1d_available>* signal_sm1d_available;
+        boost::signals2::signal<algo_processor::sig_cb_sm1dmed_available>* signal_sm1dmed_available;
         
     private:
 
@@ -117,6 +136,10 @@ namespace
                 }
             }
             
+            // Call the content loaded cb if any
+            if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+                signal_content_loaded->operator()();
+            
         }
         
         timed_double_t computeIntensityStatisticsResults (const roiWindow<P8U>& roi)
@@ -125,6 +148,7 @@ namespace
             timed_double_t res;
             res.first = ti;
             res.second = histoStats::mean(roi) / 256.0;
+            std::cout << res.first.first << "\t," << res.second;
             return res;
         }
 
@@ -132,10 +156,9 @@ namespace
         void entropiesToTracks (trackD1_t& track)
         {
             track.second.clear();
-            m_medianLevel.resize(m_smfilterRef->size());
-            m_smfilterRef->median_levelset_similarities(m_medianLevel);
+            m_smfilterRef->median_levelset_similarities();
             auto bee = m_smfilterRef->entropies().begin();
-            auto mee = m_medianLevel.begin();
+            auto mee = m_smfilterRef->median_adjusted().begin();
             for (auto ss = 0; bee != m_smfilterRef->entropies().end() && ss < frame_count(); ss++, bee++, mee++)
             {
                 index_time_t ti;
@@ -178,6 +201,7 @@ namespace
             {
                 m_tracksRef->at(0).second.emplace_back(computeIntensityStatisticsResults(c0[ii]));
                 m_tracksRef->at(1).second.emplace_back(computeIntensityStatisticsResults(c1[ii]));
+                std::cout << std::endl;
             }
             
             auto sp =  instance().sm();
@@ -185,11 +209,12 @@ namespace
             std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
             std::future<bool>  future_ss = task.get_future();  // get a future
             std::thread(std::move(task)).detach(); // launch on a thread
-            future_ss.wait();
-            auto entropies = sp->shannonProjection ();
-            auto smat = sp->similarityMatrix();
-            m_smfilterRef = std::make_shared<sm_filter> (entropies, smat);
-            update();
+            if (future_ss.get())
+            {
+                const deque<double>& entropies = sp->shannonProjection ();
+                const deque<deque<double>>& smat = sp->similarityMatrix();
+                m_smfilterRef = std::make_shared<sm_filter> (entropies, smat);
+            }
             return m_tracksRef;
         }
         
@@ -213,6 +238,9 @@ namespace
         std::deque<double> m_medianLevel;
         std::shared_ptr<vector_of_trackD1s_t>  m_tracksRef;
     };
+
+#endif
+    
     
     std::shared_ptr<vector_of_trackD1s_t>   get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
                                                bool test_data = false)
@@ -222,6 +250,10 @@ namespace
     
 }
 
+//template boost::signals2::connection algo_processor::registerCallback(const std::function<algo_processor::sig_cb_content_loaded>&);
+template boost::signals2::connection algo_processor::registerCallback(const std::function<algo_processor::sig_cb_frame_loaded>&);
+//template boost::signals2::connection algo_processor::registerCallback(const std::function<algo_processor::sig_cb_sm1d_available>&);
+template boost::signals2::connection algo_processor::registerCallback(const std::function<algo_processor::sig_cb_sm1dmed_available>&);
 
 /////////////  lifContext Implementation  ////////////////
 
@@ -391,6 +423,7 @@ void lifContext::setMedianCutOff (uint32_t newco)
 {
     uint32_t tmp = newco % 100; // pct
     auto sp =  algo_processor::get_mutable_instance().smFilterRef();
+    if (! sp ) return;
     uint32_t current (sp->get_median_levelset_pct () * 100);
     if (tmp == current) return;
     sp->set_median_levelset_pct (tmp / 100.0f);
@@ -781,7 +814,8 @@ void lifContext::update ()
         assert (tracksRef->size() == m_plots.size ());
         m_plots[0]->setup(tracksRef->at(0));
         m_plots[1]->setup(tracksRef->at(1));
-        m_plots[2]->setup(tracksRef->at(2), graph1D::mapping_option::type_limits);
+        if (!tracksRef->at(2).second.empty())
+            m_plots[2]->setup(tracksRef->at(2), graph1D::mapping_option::type_limits);
     }
     
     if (! have_movie () ) return;
