@@ -7,6 +7,7 @@
 #include "cinder/Log.h"
 #include "cinder/Display.h"
 #include "guiContext.h"
+#include "LifContext.h"
 #include "boost/filesystem.hpp"
 #include "boost/any.hpp"
 #include <functional>
