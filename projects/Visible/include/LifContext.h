@@ -127,10 +127,9 @@ private:
 	
 	Rectf get_image_display_rect ();
 	
-    lif_processor::sig_cb_frame_loaded m_cb_frame_loaded;
-    lif_processor::sig_cb_content_loaded m_cb_content_loaded;
-    
     void signal_content_loaded ();
+    void signal_sm1d_available (int&);
+    void signal_sm1dmed_available (int&,int&);
  
     void signal_frame_loaded (int& findex, double& timestamp);
  

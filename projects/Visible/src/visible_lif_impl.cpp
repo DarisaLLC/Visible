@@ -60,12 +60,7 @@ namespace
     }
     
     static layout vl ( ivec2 (10, 10));
-    
-//    std::shared_ptr<vector_of_trackD1s_t>   get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
-//                                               bool test_data = false)
-//    {
-//        return m_lifProcRef.run(frames, names, test_data);
-//    }
+
     
 }
 
@@ -94,6 +89,13 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
     }
     
     m_lifProcRef = std::make_shared<lif_processor> ();
+    
+    std::function<void ()> content_loaded_cb = std::bind (&lifContext::signal_content_loaded, this);
+    boost::signals2::connection ml_connection = m_lifProcRef->registerCallback(content_loaded_cb);
+    std::function<void (int&)> sm1d_available_cb = boost::bind (&lifContext::signal_sm1d_available, this, _1);
+    boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_available_cb);
+    std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&lifContext::signal_sm1dmed_available, this, _1, _2);
+    boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_available_cb);
     
     setup ();
 }
@@ -331,14 +333,6 @@ void lifContext::setup()
             // Attach a callback that is fired after a target is updated.
             mUIParams.addParam( "CutOff Pct", setter, getter );
         }
-        
-        //        {
-        //            const std::function<void (float)> setter = std::bind(&lifContext::setZoom, this, std::placeholders::_1);
-        //            const std::function<float (void)> getter = std::bind(&lifContext::getZoom, this);
-        //            mUIParams.addParam( "Zoom", setter, getter);
-        //        }
-        
-        
     }
 }
 
@@ -371,10 +365,22 @@ void lifContext::loadLifFile ()
     }
 }
 
+void lifContext::signal_sm1d_available (int& dummy)
+{
+    static int i = 0;
+    std::cout << "sm1d available: " << ++i << std::endl;
+}
+
+void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
+{
+    static int ii = 0;
+    std::cout << "sm1dmed available: " << ++ii << std::endl;
+}
+
 void lifContext::signal_content_loaded ()
 {
 //    movie_loaded = true;
-    std::cout << "Content Loaded " << std::endl;
+    std::cout << "SM Results Ready " << std::endl;
 }
 void lifContext::signal_frame_loaded (int& findex, double& timestamp)
 {
@@ -407,9 +413,6 @@ void lifContext::loadCurrentSerie ()
         
         if (m_valid)
         {
- 
-            
-            
             getWindow()->setTitle( mPath.filename().string() );
             
             ci_console() <<  m_series_book.size() << "  Series  " << std::endl;
@@ -465,9 +468,6 @@ void lifContext::loadCurrentSerie ()
                 m_aux_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mAuxTimeLineSlider, std::placeholders::_1));
                 mWidgets.push_back( &mAuxTimeLineSlider );
            
-
-                
-                
                 getWindow()->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
                 
             }

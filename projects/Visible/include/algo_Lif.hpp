@@ -47,16 +47,18 @@ class lif_processor : public vSignaler
 public:
     
     typedef void (sig_cb_content_loaded) ();
-    typedef void (sig_cb_frame_loaded) (int, double);
-    typedef void (sig_cb_sm1d_available) ();
-    typedef void (sig_cb_sm1dmed_available) ();
+    typedef void (sig_cb_frame_loaded) (int&, double&);
+    typedef void (sig_cb_sm1d_available) (int&);
+    typedef void (sig_cb_sm1dmed_available) (int&,int&);
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     
     lif_processor ()
     {
-        m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
         signal_content_loaded = createSignal<lif_processor::sig_cb_content_loaded>();
         signal_frame_loaded = createSignal<lif_processor::sig_cb_frame_loaded>();
+        signal_sm1d_available = createSignal<lif_processor::sig_cb_sm1d_available>();
+        signal_sm1dmed_available = createSignal<lif_processor::sig_cb_sm1dmed_available>();
+        m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
         
     }
     
@@ -106,7 +108,14 @@ private:
     void entropiesToTracks (trackD1_t& track)
     {
         track.second.clear();
-        m_smfilterRef->median_levelset_similarities();
+        if (m_smfilterRef->median_levelset_similarities())
+        {
+            // Signal we are done with median level set
+            static int dummy;
+            if (signal_sm1dmed_available && signal_sm1dmed_available->num_slots() > 0)
+                signal_sm1dmed_available->operator()(dummy, dummy);
+        }
+
         auto bee = m_smfilterRef->entropies().begin();
         auto mee = m_smfilterRef->median_adjusted().begin();
         for (auto ss = 0; bee != m_smfilterRef->entropies().end() && ss < frame_count(); ss++, bee++, mee++)
@@ -156,6 +165,7 @@ private:
         
     }
 public:
+    // Run to get Entropies and Median Level Set
     std::shared_ptr<vector_of_trackD1s_t>  run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
                                                 bool test_data = false)
     {
@@ -168,14 +178,26 @@ public:
         channel_images_t c2 = m_channel_images[2];
         auto sp =  sm();
         sp->load_images (c2);
+
+        // Call the content loaded cb if any
+        if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+            signal_content_loaded->operator()();
+        
         std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
         std::future<bool>  future_ss = task.get_future();  // get a future
         std::thread(std::move(task)).detach(); // launch on a thread
         if (future_ss.get())
         {
+            // Signal we are done with ACI
+            static int dummy;
+            if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
+                signal_sm1d_available->operator()(dummy);
+            
             const deque<double>& entropies = sp->shannonProjection ();
             const deque<deque<double>>& smat = sp->similarityMatrix();
             m_smfilterRef = std::make_shared<sm_filter> (entropies, smat);
+
+       
             update ();
         }
         return m_tracksRef;
@@ -184,13 +206,11 @@ public:
     const std::vector<Rectf>& rois () const { return m_rois; }
     const trackD1_t& similarity_track () const { return m_tracksRef->at(2); }
     
+    // Update. Called also when cutoff offset has changed
     void update ()
     {
         if(m_tracksRef && !m_tracksRef->empty() && m_smfilterRef && m_smfilterRef->isValid())
             entropiesToTracks(m_tracksRef->at(2));
-        // Call the content loaded cb if any
-        if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
-            signal_content_loaded->operator()();
     }
     
 private:
@@ -207,7 +227,7 @@ private:
 
 template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_content_loaded>&);
 template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_frame_loaded>&);
-//template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_sm1d_available>&);
-//template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_sm1dmed_available>&);
+template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_sm1d_available>&);
+template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_sm1dmed_available>&);
 
 #endif
