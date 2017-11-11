@@ -17,6 +17,9 @@
 #include "sm_producer.h"
 #include "cinder_xchg.hpp"
 #include "vision/histo.h"
+#include "vision/opencv_utils.hpp"
+#include "opencv2/video/tracking.hpp"
+
 
 class vSignaler : public base_signaler
 {
@@ -28,18 +31,29 @@ class vSignaler : public base_signaler
 struct OpticalFlowFarnebackRunner
 {
     typedef std::vector<roiWindow<P8U>> channel_images_t;
-    void operator()(channel_images_t& channel, timed_mat_vec_t& results)
+    std::shared_ptr<timed_mat_vec_t> operator()(channel_images_t& channel)
     {
-        results.clear();
-        for (auto ii = 0; ii < channel.size(); ii++)
+        std::shared_ptr<timed_mat_vec_t> results ( new timed_mat_vec_t () );
+        if (channel.size () < 1) return results;
+        cv::Mat cvm_0, cvm_1;
+        svl::NewFromSVL(channel[0], cvm_0);
+
+
+        results->clear();
+        for (auto ii = 1; ii < channel.size(); ii++)
         {
+            cv::UMat uflow;
             timed_mat_t res;
             index_time_t ti;
             ti.first = ii;
             res.first = ti;
-            res.second = histoStats::mean(channel[ii]) / 256.0;
-            results.emplace_back(res);
+            svl::NewFromSVL(channel[ii], cvm_1);
+            calcOpticalFlowFarneback(cvm_0, cvm_1, uflow, 0.5, 1, 15, 3, 5, 1.2, cv::OPTFLOW_FARNEBACK_GAUSSIAN);
+            uflow.copyTo(res.second);
+            std::swap(cvm_0, cvm_1);
+            results->emplace_back(res);
         }
+        return results;
     }
 };
 
@@ -78,7 +92,6 @@ public:
         signal_sm1d_available = createSignal<lif_processor::sig_cb_sm1d_available>();
         signal_sm1dmed_available = createSignal<lif_processor::sig_cb_sm1dmed_available>();
         m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
-        
     }
     
     const smProducerRef sm () const { return m_sm; }
@@ -179,10 +192,11 @@ private:
             m_tracksRef->at(tt).second = cts[tt];
     }
     
-    void compute_sm_threaded ()
+    std::shared_ptr<timed_mat_vec_t> compute_oflow_threaded ()
     {
-        
+        return OpticalFlowFarnebackRunner()(std::ref(m_channel_images[2]));
     }
+    
 public:
     // Run to get Entropies and Median Level Set
     std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
@@ -193,6 +207,7 @@ public:
         create_named_tracks(names);
 
         compute_channel_statistics_threaded();
+        auto oflow = compute_oflow_threaded ();
         
         channel_images_t c2 = m_channel_images[2];
         auto sp =  sm();
@@ -233,7 +248,6 @@ public:
     }
     
 private:
-
     smProducerRef m_sm;
     channel_images_t m_images;
     std::vector<channel_images_t> m_channel_images;
