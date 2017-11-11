@@ -717,27 +717,23 @@ gl::TextureRef lifContext::pixelInfoTexture ()
     if(m_instant_channel < names.size())
         channel_name = names[m_instant_channel];
     
+    // LIF has 3 Channels.
+    uint32_t channel_height = mMediaInfo.getChannelSize().y;
     std::string pos = channel_name + "[ " +
-    toString(((int)m_instant_pixel_Color.g)) + " ]" +
-    "[" + to_string(mMouseInImagePosition.x) +
-    "," + to_string(mMouseInImagePosition.y) +
-    "] i [" +
-    to_string(imagePos().x) + "," + to_string(imagePos().y) + "]";
-    
-    lout.clear( ColorA::gray( 0.2f, 0.5f ) );
-    lout.setFont( Font( "Menlo", 10 ) );
+    toString(((int)m_instant_pixel_Color.g)) + " @ " +
+    to_string(imagePos().x) + "," + to_string(imagePos().y % channel_height) + "]";
+    vec2                mSize(250, 100);
+    TextBox tbox = TextBox().alignment( TextBox::LEFT).font( mFont ).size( ivec2( mSize.x, TextBox::GROW ) ).text( pos );
+    tbox.setFont( Font( "Times New Roman", 24 ) );
     if (channel_name == "Red")
-        lout.setColor( ColorA(0.8,0.2,0.1,1.0) );
+        tbox.setColor( ColorA(0.8,0.2,0.1,1.0) );
     else if (channel_name == "Green")
-        lout.setColor( ColorA(0.2,0.8,0.1,1.0) );
+        tbox.setColor( ColorA(0.2,0.8,0.1,1.0) );
     else
-         lout.setColor( ColorA(0.8,0.8,0.8,1.0) );
-    
-    lout.setLeadingOffset( 3 );
-    lout.addRightLine( pos );
-    
-    
-    return gl::Texture::create( lout.render( true ));
+        tbox.setColor( ColorA(0.0,0.0,0.0,1.0) );
+    tbox.setBackgroundColor( ColorA( 0.3, 0.3, 0.3, 0.3 ) );
+    ivec2 sz = tbox.measure();
+    return  gl::Texture2d::create( tbox.render() );
   }
 
 
@@ -768,10 +764,7 @@ void lifContext::draw_info ()
     if (texR)
     {
         Rectf tbox = texR->getBounds();
-        tbox = tbox.getCenteredFit(getWindowBounds(), true);
-        tbox.scale(vec2(0.5, 0.67));
-        tbox.offset(vec2(getWindowWidth() - tbox.getWidth(),getWindowHeight() - tbox.getHeight() - tbox.getY1()));
-        
+        tbox.offset(mMouseInImagePosition);
         gl::draw( texR, tbox);
     }
     tinyUi::drawWidgets(mWidgets);
