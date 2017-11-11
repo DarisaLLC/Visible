@@ -24,6 +24,25 @@ class vSignaler : public base_signaler
     getName () const { return "vSignaler"; }
 };
 
+
+struct OpticalFlowFarnebackRunner
+{
+    typedef std::vector<roiWindow<P8U>> channel_images_t;
+    void operator()(channel_images_t& channel, timed_mat_vec_t& results)
+    {
+        results.clear();
+        for (auto ii = 0; ii < channel.size(); ii++)
+        {
+            timed_mat_t res;
+            index_time_t ti;
+            ti.first = ii;
+            res.first = ti;
+            res.second = histoStats::mean(channel[ii]) / 256.0;
+            results.emplace_back(res);
+        }
+    }
+};
+
 struct IntensityStatisticsRunner
 {
     typedef std::vector<roiWindow<P8U>> channel_images_t;
@@ -105,7 +124,7 @@ private:
  
     
     // Note tracks contained timed data.
-    void entropiesToTracks (trackD1_t& track)
+    void entropiesToTracks (namedTrackOfdouble_t& track)
     {
         track.second.clear();
         if (m_smfilterRef->median_levelset_similarities())
@@ -138,7 +157,7 @@ private:
     
     void create_named_tracks (const std::vector<std::string>& names)
     {
-        m_tracksRef = std::make_shared<vector_of_trackD1s_t> ();
+        m_tracksRef = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
         
         m_tracksRef->resize (names.size ());
         for (auto tt = 0; tt < names.size(); tt++)
@@ -166,7 +185,7 @@ private:
     }
 public:
     // Run to get Entropies and Median Level Set
-    std::shared_ptr<vector_of_trackD1s_t>  run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
                                                 bool test_data = false)
     {
         
@@ -204,7 +223,7 @@ public:
     }
     
     const std::vector<Rectf>& rois () const { return m_rois; }
-    const trackD1_t& similarity_track () const { return m_tracksRef->at(2); }
+    const namedTrackOfdouble_t& similarity_track () const { return m_tracksRef->at(2); }
     
     // Update. Called also when cutoff offset has changed
     void update ()
@@ -222,7 +241,7 @@ private:
     Rectf m_all;
     std::shared_ptr<sm_filter> m_smfilterRef;
     std::deque<double> m_medianLevel;
-    std::shared_ptr<vector_of_trackD1s_t>  m_tracksRef;
+    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  m_tracksRef;
 };
 
 template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_content_loaded>&);

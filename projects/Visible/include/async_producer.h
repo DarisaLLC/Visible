@@ -27,8 +27,47 @@
 
 typedef std::vector<index_time_t>  index_time_vec_t;
 
+// track of timed result type of double
 typedef std::pair<index_time_t, double> timed_double_t;
+typedef std::vector<timed_double_t>  timed_double_vec_t;
+typedef std::pair<std::string, timed_double_vec_t> namedTrackOfdouble_t;
+typedef std::vector<namedTrackOfdouble_t>  vectorOfnamedTrackOfdouble_t;
+typedef std::vector<vectorOfnamedTrackOfdouble_t>  vectorOfVectorOfnamedTrackOfdouble_t;
 
+// track of timed result type of cv::Mat
+typedef std::pair<index_time_t, cv::Mat> timed_mat_t;
+typedef std::vector<timed_mat_t>  timed_mat_vec_t;
+typedef std::pair<std::string, timed_mat_vec_t> namedTrackOfmat_t;
+typedef std::vector<namedTrackOfmat_t>  vectorOfnamedTrackOfmat_t;
+typedef std::vector<vectorOfnamedTrackOfmat_t>  vectorOfVectorOfnamedTrackOfmat_t;
+
+
+// *****************
+// *                *
+// *  Async         *
+// *                *
+// *****************
+
+
+// Steps:
+// 1. create a global function generating the non-future vector
+// 2. launch the async call: std::async(std::launch::async, generating function, args .... )
+// 3. Check if the async result is ready. If it is copy it to the non-future.
+// Using
+// template<typename R>
+// bool is_ready(std::future<R> const& f)
+
+typedef std::future<std::shared_ptr<std::vector<namedTrackOfdouble_t>>> async_vectorOfnamedTrackOfdouble_t;
+typedef std::future<std::shared_ptr<std::vector<namedTrackOfmat_t>>> async_vectorOfnamedTrackOfmat_t;
+
+template<typename R>
+bool is_ready(std::future<R> const& f)
+
+{ return f.valid() && f.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
+
+
+
+// A different Track design Unused
 template<typename T, uint32_t N = 1>
 class track : public std::array<T,N>
 {
@@ -50,46 +89,6 @@ typedef track<double, 3> track3D;
 
 
 
-
-
-
-
-template<typename R>
-bool is_ready(std::future<R> const& f)
-
-{ return f.valid() && f.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
-
-
-typedef std::vector<timed_double_t>  timed_double_vec_t;
-
-typedef std::future<timed_double_vec_t > async_timed_double_vec_t;
-typedef std::pair<std::string, timed_double_vec_t> trackD1_t;
-typedef std::future<trackD1_t> future_trackD1_t;
-typedef std::vector<trackD1_t>  tracksD1_t;
-typedef std::vector<trackD1_t>  vector_of_trackD1s_t;
-typedef std::vector<future_trackD1_t>  future_tracksD1_t;
-
-
-
-// *****************
-// *                *
-// *  Async         *
-// *                *
-// *****************
-
-
-// Steps:
-// 1. create a global function generating the non-future vector
-// 2. launch the async call: std::async(std::launch::async, generating function, args .... )
-// 3. Check if the async result is ready. If it is copy it to the non-future.
-// Using
-// template<typename R>
-// bool is_ready(std::future<R> const& f)
-
-typedef std::future<std::shared_ptr<std::vector<trackD1_t>>> async_tracksD1_t;
-
-typedef std::promise<std::vector<trackD1_t> > promised_tracks_t;
-typedef std::future<std::vector<trackD1_t> > future_tracks_t;
 
 // SynchronisedQueue.hpp
 //

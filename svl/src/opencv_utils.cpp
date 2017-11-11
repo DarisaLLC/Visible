@@ -106,14 +106,7 @@ namespace svl
         CopyFromSVL(roi, mat);
     }
     
-    
-    template void NewFromSVL (const roiWindow<P8UC3>&, cv::Mat&);
-    template void NewFromSVL (const roiWindow<P8UC4>&, cv::Mat&);
-    template void NewFromSVL (const roiWindow<P8U>&, cv::Mat&);
-    
-    template void CopyFromSVL (const roiWindow<P8UC3>&, cv::Mat&);
-    template void CopyFromSVL (const roiWindow<P8UC4>&, cv::Mat&);
-    template void CopyFromSVL (const roiWindow<P8U>&, cv::Mat&);
+  
     
     // P is roiWindow<>
     template<typename P>

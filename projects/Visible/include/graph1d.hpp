@@ -93,7 +93,7 @@ public:
     }
     
     // load the data and bind a function to access it
-    void setup (const trackD1_t& track, mapping_option mopt = data_limits)
+    void setup (const namedTrackOfdouble_t& track, mapping_option mopt = data_limits)
     {
         if ( mIsSet ) return;
         

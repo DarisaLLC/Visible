@@ -358,12 +358,14 @@ protected:
 	
 	
 	std::vector<Graph1DRef> m_plots;
-	
 	std::mutex m_track_mutex;
 	
-	vector_of_trackD1s_t m_luminance_tracks;
-	async_tracksD1_t m_async_luminance_tracks;
-	promised_tracks_t m_promised_tracks;
+	vectorOfVectorOfnamedTrackOfdouble_t m_luminance_tracks;
+	async_vectorOfnamedTrackOfdouble_t m_async_luminance_tracks;
+	vectorOfVectorOfnamedTrackOfmat_t m_oflow_tracks;
+	async_vectorOfnamedTrackOfmat_t m_async_oflow_tracks;
+	
+	
 	bool m_have_tracks;
 	
 	std::vector<size_t> m_spatial_dims;

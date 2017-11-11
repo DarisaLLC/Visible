@@ -72,6 +72,15 @@ namespace svl
     template<typename P>
     void CopyFromSVL (const P& roi, cv::Mat& mat);
 
+    
+    template<> void NewFromSVL (const roiWindow<P8UC3>&, cv::Mat&);
+    template<> void NewFromSVL (const roiWindow<P8UC4>&, cv::Mat&);
+    template<> void NewFromSVL (const roiWindow<P8U>&, cv::Mat&);
+    
+    template<> void CopyFromSVL (const roiWindow<P8UC3>&, cv::Mat&);
+    template<> void CopyFromSVL (const roiWindow<P8UC4>&, cv::Mat&);
+    template<> void CopyFromSVL (const roiWindow<P8U>&, cv::Mat&);
+    
     roiVP8UC NewFromOCV (const cv::Mat& mat);
     std::shared_ptr<roiWindow<P8U>> NewRefFromOCV (const cv::Mat& mat);
     
