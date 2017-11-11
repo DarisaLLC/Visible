@@ -126,7 +126,7 @@ WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
     WindowRef win = createWindow( format );
     win->getSignalClose().connect( std::bind( &VisibleApp::windowClose, this ) );
     win->getSignalMouseDown().connect( std::bind( &VisibleApp::windowMouseDown, this, std::placeholders::_1 ) );
-//    win->getSignalDisplayChange().connect( std::bind( &VisibleApp::update, this ) );
+    win->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
     return win;
     
 }

@@ -23,8 +23,6 @@ using namespace boost;
 using namespace svl;
 
 
-typedef std::shared_ptr<class sm_producer> smProducerRef;
-
 
 class sm_producer
 {
@@ -115,6 +113,8 @@ private:
     
 };
 
+typedef std::shared_ptr<sm_producer> smProducerRef;
+
 /*
  * in Tandem with sm_producer
  *
@@ -134,11 +134,12 @@ public:
     };
     
     sm_filter(const deque<double>& entropies, const deque<deque<double>>& mmatrix) :
-    m_entropies (entropies), m_SMatrix (mmatrix), m_cached(false), m_peak_cached (false), mValid (false), m_median_levelset_frac (0.1)
+    m_entropies (entropies), m_SMatrix (mmatrix), m_cached(false),  mValid (false), m_median_levelset_frac (0.1)
     {
         m_matsize = m_entropies.size();
         m_ranks.resize (m_matsize);
         m_signal.resize (m_matsize);
+        m_peaks.resize(0);
         mValid = verify_input ();
     }
     
@@ -178,32 +179,24 @@ public:
                 }
             }
 
-            m_peak.first = lowest.first;
-            m_peak.second = m_signal[lowest.first];
-            auto iter_to_peak = m_signal.begin();
-            std::advance (iter_to_peak, lowest.first);
+            m_peaks.resize(0);
+            m_peaks.emplace_back(lowest.first, m_signal[lowest.first]);
+            
+//            auto iter_to_peak = m_signal.begin();
+//            std::advance (iter_to_peak, lowest.first);
 //            find_flat(signal.begin(), iter_to_peak);
             
-            m_peak_cached = true;
             return true;
         }
         return false;
     }
     
-    bool set_median_levelset_pct (float frac) const { m_median_levelset_frac = frac; m_cached = false;m_peak_cached = false; return median_levelset_similarities(); }
+    bool set_median_levelset_pct (float frac) const { m_median_levelset_frac = frac; m_cached = false; return median_levelset_similarities(); }
     float get_median_levelset_pct () const { return m_median_levelset_frac; }
     
-    const index_val_t& low_peak () const
+    const std::vector<index_val_t>& low_peaks () const
     {
-        static index_val_t null_index_val;
-        
-        if (!m_peak_cached)
-            median_levelset_similarities();
-
-        if (m_peak_cached)
-            return m_peak;
-        return null_index_val;
-        
+        return m_peaks;
     }
     
 private:
@@ -279,11 +272,8 @@ private:
     mutable std::vector<int>            m_ranks;
     size_t m_matsize;
     mutable std::atomic<bool> m_cached;
-    mutable std::atomic<bool> m_peak_cached;
     mutable bool mValid;
-    
-    mutable index_val_t m_peak;
-    
+    mutable std::vector<index_val_t> m_peaks;
     
 };
 

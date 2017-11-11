@@ -255,7 +255,7 @@ void movContext::seekToFrame (int mark)
 void movContext::processDrag( ivec2 pos )
 {
     if( mTimeLineSlider.hitTest( pos ) ) {
-        mTimeMarker.from_norm(mTimeLineSlider.mValueScaled);
+        mTimeMarker.from_norm(mTimeLineSlider.valueScaled());
         seekToFrame(mTimeMarker.current_frame());
     }
     
@@ -387,8 +387,8 @@ void movContext::loadMovieFile()
                         m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
                     }
                     
-                    mTimeLineSlider.mBounds = vl.display_timeline_rect();
-                    mTimeLineSlider.mTitle = "Time Line";
+                    mTimeLineSlider.setBounds (vl.display_timeline_rect());
+                    mTimeLineSlider.setTitle ("Time Line");
                     m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mTimeLineSlider, std::placeholders::_1));
                     mWidgets.push_back( &mTimeLineSlider );
                     
@@ -548,7 +548,7 @@ void movContext::resize ()
         m_plots[cc]->setRect (vl.plot_rects()[cc]);
     }
     
-    mTimeLineSlider.mBounds = vl.display_timeline_rect();
+    mTimeLineSlider.setBounds (vl.display_timeline_rect());
     
     
 }

@@ -397,6 +397,8 @@ void lifContext::loadCurrentSerie ()
     
     try {
         
+        mWidgets.clear ();
+        
         // Create the frameset and assign the channel names
         // Fetch the media info
         mFrameSet = qTimeFrameCache::create (*m_current_serie_ref);
@@ -456,15 +458,17 @@ void lifContext::loadCurrentSerie ()
                     m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
                 }
                 
-                mTimeLineSlider.mBounds = vl.display_timeline_rect();
-                mTimeLineSlider.mTitle = "Time Line";
+                mTimeLineSlider.setBounds (vl.display_timeline_rect());
+                mTimeLineSlider.clear_timepoint_markers();
+                mTimeLineSlider.setTitle ("Time Line");
                 m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mTimeLineSlider, std::placeholders::_1));
                 mWidgets.push_back( &mTimeLineSlider );
                 
 
                 mAuxTimeSliderIndex = vl.add_slider_rect ();
-                mAuxTimeLineSlider.mTitle = "Contraction Markers";
-                mAuxTimeLineSlider.mBounds  =  vl.slider_rects()[mAuxTimeSliderIndex];
+                mAuxTimeLineSlider.clear_timepoint_markers();
+                mAuxTimeLineSlider.setTitle("Contraction Markers");
+                mAuxTimeLineSlider.setBounds(vl.slider_rects()[mAuxTimeSliderIndex]);
                 m_aux_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mAuxTimeLineSlider, std::placeholders::_1));
                 mWidgets.push_back( &mAuxTimeLineSlider );
            
@@ -486,12 +490,12 @@ void lifContext::loadCurrentSerie ()
 void lifContext::processDrag( ivec2 pos )
 {
     if( mTimeLineSlider.hitTest( pos ) ) {
-        mTimeMarker.from_norm(mTimeLineSlider.mValueScaled);
+        mTimeMarker.from_norm(mTimeLineSlider.valueScaled());
         seekToFrame(mTimeMarker.current_frame());
     }
     
     if( mAuxTimeLineSlider.hitTest( pos ) ) {
-        mAuxTimeMarker.from_norm(mAuxTimeLineSlider.mValueScaled);
+        mAuxTimeMarker.from_norm(mAuxTimeLineSlider.valueScaled());
         seekToFrame(mAuxTimeMarker.current_frame());
     }
 }
@@ -533,8 +537,8 @@ void lifContext::mouseMove( MouseEvent event )
         mMouseInGraphs = min_iter - dds.begin();
     }
     
-    mMouseInTimeLine =  mTimeLineSlider.mBounds.contains(event.getPos());
-    mAuxMouseInTimeLine =  mAuxTimeLineSlider.mBounds.contains(event.getPos());
+    mMouseInTimeLine =  mTimeLineSlider.contains(event.getPos());
+    mAuxMouseInTimeLine =  mAuxTimeLineSlider.contains(event.getPos());
 }
 
 
@@ -579,6 +583,13 @@ void lifContext::keyDown( KeyEvent event )
     else if( event.getChar() == 'o' ) {
         loadLifFile();
     }
+    else if( event.getChar() == 'b' ) {
+        getWindow()->setBorderless( ! getWindow()->isBorderless() );
+    }
+    else if( event.getChar() == 't' ) {
+        getWindow()->setAlwaysOnTop( ! getWindow()->isAlwaysOnTop() );
+    }
+ 
     
     // these keys only make sense if there is an active movie
     if( have_movie () ) {
@@ -586,15 +597,15 @@ void lifContext::keyDown( KeyEvent event )
             pause();
             seekToFrame (getCurrentFrame() - 1);
         }
-        if( event.getCode() == KeyEvent::KEY_RIGHT ) {
+        else if( event.getCode() == KeyEvent::KEY_RIGHT ) {
             pause ();
             seekToFrame (getCurrentFrame() + 1);
         }
-        if( event.getChar() == 'l' ) {
+        else if( event.getChar() == 'l' ) {
             loop_no_loop_button();
         }
         
-        if( event.getChar() == ' ' ) {
+        else if( event.getChar() == ' ' ) {
             play_pause_button();
         }
         
@@ -632,14 +643,14 @@ void lifContext::resize ()
         m_plots[cc]->setRect (vl.plot_rects()[cc]);
     }
     
-    mTimeLineSlider.mBounds = vl.display_timeline_rect();
-    mAuxTimeLineSlider.mBounds  =  vl.slider_rects()[mAuxTimeSliderIndex];
+    mTimeLineSlider.setBounds (vl.display_timeline_rect());
+    mAuxTimeLineSlider.setBounds(vl.slider_rects()[mAuxTimeSliderIndex]);
 }
 void lifContext::update ()
 {
+  if (! have_movie () ) return;
   mContainer.update();
   vl.update_window_size(getWindowSize ());
-    
     
   if ( is_ready (m_async_luminance_tracks))
     {
@@ -651,7 +662,7 @@ void lifContext::update ()
             m_plots[2]->setup(tracksRef->at(2), graph1D::mapping_option::type_limits);
     }
     
-    if (! have_movie () ) return;
+
     
     if (getCurrentFrame() >= getNumFrames())
     {
@@ -664,6 +675,20 @@ void lifContext::update ()
     
     if (m_is_playing ) seekToFrame (getCurrentFrame() + 1);
     
+    // TBD: this is inefficient as it continuously clears and updates contraction peak and time markers
+    // should be signal driven.
+    
+    mAuxTimeLineSlider.clear_timepoint_markers();
+    if (m_lifProcRef && m_lifProcRef->smFilterRef() && ! m_lifProcRef->smFilterRef()->low_peaks().empty())
+    {
+        for(auto lowp : m_lifProcRef->smFilterRef()->low_peaks())
+        {
+            tinyUi::timepoint_marker_t tm;
+            tm.first = float(lowp.first) / m_lifProcRef->smFilterRef()->size();
+            tm.second = ColorA (0.9, 0.3, 0.1, 0.75);
+            mAuxTimeLineSlider.add_timepoint_marker(tm);
+        }
+    }
 }
 
 void lifContext::update_instant_image_mouse ()
@@ -782,8 +807,7 @@ void lifContext::draw ()
             gl::drawLine(mLengthPoints.first, mLengthPoints.second);
         }
         
-        draw_info ();
-        
+      
         if (m_serie.channelCount)
         {
             for (int cc = 0; cc < m_plots.size(); cc++)
@@ -793,7 +817,8 @@ void lifContext::draw ()
             }
         }
         
-        mContainer.draw();        
+        mContainer.draw();
+        draw_info ();
     }
     
     mUIParams.draw();

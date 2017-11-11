@@ -20,8 +20,7 @@ namespace tinyUi
     typedef std::pair<marker_t,marker_t> duration_t;
     typedef std::pair<ColorA,ColorA> marker_colors_t;
     typedef std::pair<duration_t,marker_colors_t> duration_marker_t;
-    
-
+    typedef std::pair<marker_t,ColorA> timepoint_marker_t;
     
     
     static gl::TextureFontRef getWidgetTexFont() {
@@ -32,174 +31,25 @@ namespace tinyUi
     }
     
     static std::vector<struct TextInput *> sTextInputs;
-    
-    struct Widget {
-        Widget() : mHidden( false ), mPadding( 10.0f ) {}
-        
-        virtual void draw() {}
-        
-        Rectf mBounds;
-        ColorA mBackgroundColor;
-        
-        gl::TextureFontRef mTexFont;
-        bool mHidden;
-        float mPadding;
-    };
 
-    typedef std::shared_ptr<Widget> WidgetRef;
-    
-    inline void drawWidgets( const std::vector<Widget *> &widgets )
-    {
-        for( auto w : widgets )
-            w->draw();
-    }
-    
-    struct Button : public Widget {
-        Button( bool isToggle = false, const std::string& titleNormal = "", const std::string& titleEnabled = "" )
-        : Widget(), mIsToggle( isToggle ), mTitleNormal( titleNormal ), mTitleEnabled( titleEnabled )
-        {
-            mTextColor = Color::white();
-            mNormalColor = Color( "SlateGray" );
-            mEnabledColor = Color( "RoyalBlue" );
-            setEnabled( false );
-            mTimeout = 30;
-            mFadeFrames = 0;
-        }
-        
-        void setEnabled( bool b )
-        {
-            if( b ) {
-                mBackgroundColor = mEnabledColor;
-            } else {
-                mBackgroundColor = mNormalColor;
-            }
-            mEnabled = b;
-        }
-        
-        bool hitTest( const vec2 &pos )
-        {
-            if( mHidden )
-                return false;
-            
-            bool b = mBounds.contains( pos );
-            if( b ) {
-                if( mIsToggle )
-                    setEnabled( ! mEnabled );
-                else {
-                    setEnabled( true );
-                    mFadeFrames = mTimeout;
-                }
-            }
-            
-            return b;
-        }
-        
-        void draw()
-        {
-            if( mHidden )
-                return;
-            if( ! mTexFont )
-                mTexFont = tinyUi::getWidgetTexFont();
-            
-            if( mIsToggle || ! mFadeFrames )
-                gl::color( mBackgroundColor );
-            else {
-                mFadeFrames--;
-                setEnabled( false );
-                gl::color( lerp( mNormalColor, mEnabledColor, (float)mFadeFrames / (float)mTimeout ) );
-            }
-            
-            gl::drawSolidRoundedRect( mBounds, 4 );
-            
-            std::string& title = mEnabled ? mTitleEnabled : mTitleNormal;
-            
-            gl::color( mTextColor );
-            mTexFont->drawString( title, vec2( mBounds.x1 + mPadding, mBounds.getCenter().y + mTexFont->getFont().getDescent() ) );
-        }
-        
-        ColorA mTextColor;
-        std::string mTitleNormal, mTitleEnabled;
-        ColorA mNormalColor, mEnabledColor;
-        bool mEnabled, mIsToggle;
-        size_t mTimeout, mFadeFrames;
-    };
-    
-    struct HSlider : public Widget {
-        HSlider() : Widget()
-        {
-            mValue = mValueScaled = 0.0f;
-            mMin = 0.0f;
-            mMax = 1.0f;
-            mBackgroundColor = ColorA( "DarkGreen", 0.75f );
-            mValueColor = ColorA( "SpringGreen", 0.75f );
-            mTextColor = Color::white();
-        }
-        
-        void set( float val ) {
-            mValueScaled = val;
-            mValue = ( mValueScaled - mMin ) / ( mMax - mMin );
-        }
-        
-        bool hitTest( const vec2 &pos )
-        {
-            if( mHidden )
-                return false;
-            
-            bool b = mBounds.contains( pos );
-            if( b ) {
-                mValue = ( pos.x - mBounds.x1 ) / mBounds.getWidth();
-                mValueScaled = (mMax - mMin) * mValue + mMin;
-            }
-            return b;
-        }
-        
-        void draw()
-        {
-            if( mHidden )
-                return;
-            if( ! mTexFont )
-                mTexFont = tinyUi::getWidgetTexFont();
-            
-            gl::color( mBackgroundColor );
-            gl::drawSolidRect( mBounds );
-            
-            auto valFormatted = boost::format( "%0.3f" ) % mValueScaled;
-            
-            std::string str = mTitle + ": " + valFormatted.str();
-            gl::color( mTextColor );
-            mTexFont->drawString( str, vec2( mBounds.x1 + mPadding, mBounds.getCenter().y + mTexFont->getFont().getDescent() ) );
-            
-            gl::color( mValueColor );
-            gl::drawStrokedRect( mBounds );
-            
-            float offset = mBounds.x1 + mBounds.getWidth() * mValue;
-            float w = 2.0f;
-            Rectf valRect( offset - w, mBounds.y1, offset + w, mBounds.y2 );
-            gl::drawSolidRoundedRect( valRect, w );
-        }
-        
-        float mValue, mValueScaled, mMin, mMax;
-        ColorA mTextColor, mValueColor;
-        std::string mTitle;
-    };
-    
+
     
     /*
      *  TimeLineSlider
      *
      */
     
-    struct TimeLineSlider : public Widget {
-
-        TimeLineSlider() : Widget()
+    class TimeLineSlider : public Rectf
+    {
+    public:
+        TimeLineSlider()
         {
             init ();
         }
         
-        TimeLineSlider(Rectf& bounds) : Widget()
+        TimeLineSlider(Rectf& bounds) : Rectf(bounds)
         {
             init ();
-            mBounds = bounds;
         }
         
         void init ()
@@ -212,6 +62,25 @@ namespace tinyUi
             mTextColor = Color::white();
         }
         
+        void setBounds (const Rectf& bounds)
+        {
+            static_cast<Rectf*>(this)->set(bounds.getX1(), bounds.getY1(), bounds.getX2(), bounds.getY2());
+        }
+        Rectf getBounds ()
+        {
+            return Rectf(getX1(), getY1(), getX2(), getY2());
+        }
+        
+        void setTitle ( const std::string& title)
+        {
+            mTitle = title;
+        }
+
+        std::string& getTitle () const
+        {
+            return mTitle;
+        }
+        
         void set( float val ) {
             mValueScaled = val;
             mValue = ( mValueScaled - mMin ) / ( mMax - mMin );
@@ -222,9 +91,9 @@ namespace tinyUi
             if( mHidden )
                 return false;
             
-            bool b = mBounds.contains( pos );
+            bool b = contains( pos );
             if( b ) {
-                mValue = ( pos.x - mBounds.x1 ) / mBounds.getWidth();
+                mValue = ( pos.x - x1 ) / getWidth();
                 mValueScaled = (mMax - mMin) * mValue + mMin;
             }
             return b;
@@ -242,6 +111,38 @@ namespace tinyUi
             set (t.norm_index());
         }
         
+        void clear_timepoint_markers ()
+        {
+            mTimePoints.clear();
+            std::queue<uint32_t> empty;
+            std::swap(m_available_timepoint_indicies, empty);
+        }
+        void clear_timepoint_marker (const uint32_t& map_index)
+        {
+            map<uint32_t, timepoint_marker_t>::iterator iter = mTimePoints.find(map_index) ;
+            if( iter != mTimePoints.end() )
+            {
+                mTimePoints.erase( iter );
+                m_available_timepoint_indicies.push(map_index);
+            }
+        }
+        uint32_t add_timepoint_marker (const timepoint_marker_t& tm)
+        {
+            // Find the next available map point
+            uint32_t count = mTimePoints.size();
+            if (! m_available_timepoint_indicies.empty())
+            {
+                count = m_available_timepoint_indicies.front();
+                m_available_timepoint_indicies.pop();
+            }
+
+            mTimePoints[count] = tm;
+            return count;
+        }
+        
+        const float & value () const { return mValue; }
+        const float & valueScaled () const { return mValueScaled; }
+        
         void draw()
         {
             if( mHidden )
@@ -252,225 +153,63 @@ namespace tinyUi
             {
                 {
                     gl::ScopedColor A ( mBackgroundColor );
-                    gl::drawSolidRect( mBounds );
+                    gl::drawSolidRect( *this );
                 }
                 auto valFormatted = boost::format( "%0.3f" ) % mValueScaled;
                 
                 std::string str = mTitle + ": " + valFormatted.str();
                 {
                     gl::ScopedColor B ( mTextColor );
-                    mTexFont->drawString( str, vec2( mBounds.x1 + mPadding, mBounds.getCenter().y + mTexFont->getFont().getDescent() ) );
+                    mTexFont->drawString( str, vec2( x1 + mPadding, getCenter().y + mTexFont->getFont().getDescent() ) );
                 }
             }
             
             {
                 gl::ScopedColor A ( ColorA(0.25f, 0.5f, 1, 1 ) );
-                gl::drawStrokedRect( mBounds );
+                gl::drawStrokedRect( *this );
                 
-                float offset = mBounds.x1 + mBounds.getWidth() * mValue;
+                float offset = x1 + getWidth() * mValue;
                 float w = 3.0f;
-                Rectf valRect( offset - w, mBounds.y1, offset + w, mBounds.y2 );
+                Rectf valRect( offset - w, y1, offset + w, y2 );
+                gl::drawSolidRoundedRect( valRect, w );
+            }
+
+            for (const auto& kv : mTimePoints) {
+                gl::ScopedColor A (kv.second.second);
+                float offset = x1 + getWidth() * kv.second.first;
+                float w = 3.0f;
+                Rectf valRect( offset - w, y1, offset + w, y2 );
                 gl::drawSolidRoundedRect( valRect, w );
             }
         }
         
+    private:
+        ColorA mBackgroundColor;
+        gl::TextureFontRef mTexFont;
+        bool mHidden;
+        float mPadding;
+        
         float mValue, mValueScaled, mMin, mMax;
         ColorA mTextColor, mValueColor;
-        std::map<int, duration_marker_t> mMarker;
-        std::string mTitle;
+        std::map<uint32_t, duration_marker_t> mDurations;
+        std::map<uint32_t, timepoint_marker_t> mTimePoints;
+        std::queue<uint32_t> m_available_timepoint_indicies;
+        
+        
+        mutable std::string mTitle;
     };
+
+    typedef TimeLineSlider Widget;
+    typedef std::shared_ptr<Widget> WidgetRef;
+    
+    inline void drawWidgets( const std::vector<Widget *> &widgets )
+    {
+        for( auto w : widgets )
+            w->draw();
+    }
     
     
-  
-    
-    
-    
-    
-    struct VSelector : public Widget {
-        VSelector() : Widget()
-        {
-            mCurrentSectionIndex = 0;
-            mBackgroundColor = ColorA( "MidnightBlue", 0.75f );
-            mSelectedColor = ColorA( "SpringGreen", 0.95f );
-            mUnselectedColor = ColorA::gray( 0.5 );
-            mTitleColor = ColorA::gray( 0.75f, 0.5f );
-        }
-        
-        bool hitTest( const vec2 &pos )
-        {
-            if( mHidden )
-                return false;
-            
-            bool b = mBounds.contains( pos );
-            if( b ) {
-                int offset = pos.y - (int)mBounds.y1;
-                int sectionHeight = (int)mBounds.getHeight() / mSegments.size();
-                mCurrentSectionIndex = std::min<size_t>( offset / sectionHeight, mSegments.size() - 1 );
-            }
-            return b;
-        }
-        
-        std::string currentSection() const
-        {
-            if( mSegments.empty() )
-                return "";
-            
-            return mSegments[mCurrentSectionIndex];
-        }
-        
-        void draw()
-        {
-            if( mHidden )
-                return;
-            
-            if( ! mTexFont )
-                mTexFont = tinyUi::getWidgetTexFont();
-            
-            gl::color( mBackgroundColor );
-            gl::drawSolidRect( mBounds );
-            
-            float sectionHeight = mBounds.getHeight() / mSegments.size();
-            Rectf section( mBounds.x1, mBounds.y1, mBounds.x2, mBounds.y1 + sectionHeight );
-            gl::color( mUnselectedColor );
-            for( size_t i = 0; i < mSegments.size(); i++ ) {
-                if( i != mCurrentSectionIndex ) {
-                    gl::drawStrokedRect( section );
-                    gl::color( mUnselectedColor );
-                    mTexFont->drawString( mSegments[i], vec2( section.x1 + mPadding, section.getCenter().y + mTexFont->getFont().getDescent() ) );
-                }
-                section += vec2( 0.0f, sectionHeight );
-            }
-            
-            gl::color( mSelectedColor );
-            
-            section.y1 = mBounds.y1 + mCurrentSectionIndex * sectionHeight;
-            section.y2 = section.y1 + sectionHeight;
-            gl::drawStrokedRect( section );
-            
-            if( ! mSegments.empty() ) {
-                gl::color( mSelectedColor );
-                mTexFont->drawString( mSegments[mCurrentSectionIndex], vec2( section.x1 + mPadding, section.getCenter().y + mTexFont->getFont().getDescent() ) );
-            }
-            
-            if( ! mTitle.empty() ) {
-                gl::color( mTitleColor );
-                mTexFont->drawString( mTitle, vec2( mBounds.x1 + mPadding, mBounds.y1 - mTexFont->getFont().getDescent() ) );
-            }
-        }
-        
-        std::vector<std::string> mSegments;
-        ColorA mSelectedColor, mUnselectedColor, mTitleColor;
-        size_t mCurrentSectionIndex;
-        std::string mTitle;
-    };
-    
-    struct TextInput : public Widget {
-        enum Format { NUMERICAL, ALL };
-        
-        TextInput( Format format = Format::NUMERICAL, const std::string& title = "" )
-        : Widget(), mFormat( format ), mTitle( title )
-        {
-            mBackgroundColor = ColorA( "MidnightBlue", 0.65f );
-            mTitleColor = ColorA::gray( 0.75f, 0.5f );
-            mNormalColor = Color( "SlateGray" );
-            mEnabledColor = ColorA( "SpringGreen", 0.95f );
-            setSelected( false );
-            
-            tinyUi::sTextInputs.push_back( this );
-        }
-        
-        void setSelected( bool b )
-        {
-            disableAll();
-            mSelected = b;
-        }
-        
-        bool hitTest( const vec2 &pos )
-        {
-            if( mHidden )
-                return false;
-            
-            bool b = mBounds.contains( pos );
-            if( b ) {
-                setSelected( true );
-            }
-            
-            return b;
-        }
-        
-        void setValue( int value )
-        {
-            mInputString = std::to_string( value );
-        }
-        
-        int getValue()
-        {
-            if( mInputString.empty() )
-                return 0;
-            
-            return stoi( mInputString );
-        }
-        
-        void processChar( char c )
-        {
-            if( mFormat == Format::NUMERICAL && ! isdigit( c ) )
-                return;
-            
-            mInputString.push_back( c );
-        }
-        
-        void processBackspace()
-        {
-            if( ! mInputString.empty() )
-                mInputString.pop_back();
-        }
-        
-        static void disableAll()
-        {
-            for( TextInput *t : tinyUi::sTextInputs )
-                t->mSelected = false;
-        }
-        
-        static TextInput *getCurrentSelected()
-        {
-            for( TextInput *t : tinyUi::sTextInputs ) {
-                if( t->mSelected )
-                    return t;
-            }
-            
-            return nullptr;
-        }
-        
-        void draw()
-        {
-            if( mHidden )
-                return;
-            if( ! mTexFont )
-                mTexFont = tinyUi::getWidgetTexFont();
-            
-            gl::color( mBackgroundColor );
-            gl::drawSolidRect( mBounds );
-            
-            vec2 titleOffset = vec2( mBounds.x1 + mPadding, mBounds.y1 - mTexFont->getFont().getDescent() );
-            gl::color( mTitleColor );
-            mTexFont->drawString( mTitle, titleOffset );
-            
-            vec2 textOffset = vec2( mBounds.x1 + mPadding, mBounds.getCenter().y + mTexFont->getFont().getDescent() );
-            
-            gl::color( ( mSelected ? mEnabledColor : mNormalColor ) );
-            
-            gl::drawStrokedRect( mBounds );
-            mTexFont->drawString( mInputString, textOffset );
-        }
-        
-        Format	mFormat;
-        std::string mTitle, mInputString;
-        ColorA mNormalColor, mEnabledColor, mTitleColor;
-        bool mSelected;
-        
-        
-    };
-    
+ 
 }
 
 
