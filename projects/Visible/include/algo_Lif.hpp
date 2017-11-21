@@ -20,6 +20,7 @@
 #include "vision/opencv_utils.hpp"
 #include "opencv2/video/tracking.hpp"
 
+using namespace cv;
 
 class vSignaler : public base_signaler
 {
@@ -28,33 +29,56 @@ class vSignaler : public base_signaler
 };
 
 
+
 struct OpticalFlowFarnebackRunner
 {
     typedef std::vector<roiWindow<P8U>> channel_images_t;
-    std::shared_ptr<timed_mat_vec_t> operator()(channel_images_t& channel)
+    std::shared_ptr<timed_mat_vec_t> operator()(std::vector<cv::Mat>& frames)
     {
         std::shared_ptr<timed_mat_vec_t> results ( new timed_mat_vec_t () );
-        if (channel.size () < 1) return results;
-        cv::Mat cvm_0, cvm_1;
-        svl::NewFromSVL(channel[0], cvm_0);
-
-
+        if (frames.size () < 2) return results;
+        cv::Mat cflow;
+        int ii = 0;
+        std::string imgpath = "/Users/arman/tmp/oflow/fback" + toString(ii) + ".png";
+        cvtColor(frames[ii], cflow, COLOR_GRAY2BGR);
+        cv::imwrite(imgpath, frames[ii]);
+        
         results->clear();
-        for (auto ii = 1; ii < channel.size(); ii++)
+        for (++ii; ii < frames.size(); ii++)
         {
             cv::UMat uflow;
             timed_mat_t res;
             index_time_t ti;
             ti.first = ii;
             res.first = ti;
-            svl::NewFromSVL(channel[ii], cvm_1);
-            calcOpticalFlowFarneback(cvm_0, cvm_1, uflow, 0.5, 1, 15, 3, 5, 1.2, cv::OPTFLOW_FARNEBACK_GAUSSIAN);
+            calcOpticalFlowFarneback(frames[ii-1], frames[ii], uflow, 0.5, 1, 15, 3, 5, 1.2, cv::OPTFLOW_FARNEBACK_GAUSSIAN);
             uflow.copyTo(res.second);
-            std::swap(cvm_0, cvm_1);
+            cvtColor(frames[ii], cflow, COLOR_GRAY2BGR);
+            drawOptFlowMap(res.second, cflow, 16, 1.5, Scalar(0, 255, 0));
+            std::string imgpath = "/Users/arman/tmp/oflow/fback" + toString(ii) + ".png";
+            cv::imwrite(imgpath, frames[ii]);
+            std::cout << "wrote Out " << imgpath << std::endl;
             results->emplace_back(res);
+        
         }
         return results;
     }
+    
+ 
+    
+    static void drawOptFlowMap(const Mat& flow, Mat& cflowmap, int step,
+                               double, const Scalar& color)
+    {
+        for(int y = 0; y < cflowmap.rows; y += step)
+            for(int x = 0; x < cflowmap.cols; x += step)
+            {
+                const Point2f& fxy = flow.at<Point2f>(y, x);
+                line(cflowmap, cv::Point(x,y), cv::Point(cvRound(x+fxy.x), cvRound(y+fxy.y)),
+                     color);
+                circle(cflowmap, cv::Point(x,y), 2, color, -1);
+            }
+    }
+
 };
 
 struct IntensityStatisticsRunner
@@ -113,14 +137,15 @@ private:
         m_channel_images.resize (3);
         m_rois.resize (0);
         std::vector<std::string> names = {"Red", "Green","Blue"};
-        
+
+        cv::Mat mat;
         while (frames->checkFrame(fn))
         {
             auto su8 = frames->getFrame(fn++);
             auto m3 = svl::NewRefMultiFromSurface (su8, names, fn);
             for (auto cc = 0; cc < m3->planes(); cc++)
                 m_channel_images[cc].emplace_back(m3->plane(cc));
-            
+
             // Assumption: all have the same 3 channel concatenated structure
             // Fetch it only once
             if (m_rois.empty())
@@ -194,7 +219,19 @@ private:
     
     std::shared_ptr<timed_mat_vec_t> compute_oflow_threaded ()
     {
-        return OpticalFlowFarnebackRunner()(std::ref(m_channel_images[2]));
+        return OpticalFlowFarnebackRunner()(std::ref(m_channel2_mats));
+    }
+    
+    
+    void loadImagesToMats (const sm_producer::images_vector_t& images, std::vector<cv::Mat>& mts)
+    {
+        mts.resize(0);
+        vector<roiWindow<P8U> >::const_iterator vitr = images.begin();
+        do
+        {
+            mts.emplace_back(vitr->height(), vitr->width(), CV_8UC(1), vitr->pelPointer(0,0), size_t(vitr->rowUpdate()));
+        }
+        while (++vitr != images.end());
     }
     
 public:
@@ -205,11 +242,13 @@ public:
         
         load_channels_from_images(frames);
         create_named_tracks(names);
+        channel_images_t c2 = m_channel_images[2];
+        loadImagesToMats(c2, m_channel2_mats);
 
         compute_channel_statistics_threaded();
-        auto oflow = compute_oflow_threaded ();
+     //   auto oflow = compute_oflow_threaded ();
         
-        channel_images_t c2 = m_channel_images[2];
+
         auto sp =  sm();
         sp->load_images (c2);
 
@@ -251,6 +290,8 @@ private:
     smProducerRef m_sm;
     channel_images_t m_images;
     std::vector<channel_images_t> m_channel_images;
+    std::vector<cv::Mat> m_channel2_mats;
+    
     std::vector<Rectf> m_rois;
     Rectf m_all;
     std::shared_ptr<sm_filter> m_smfilterRef;

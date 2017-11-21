@@ -209,6 +209,8 @@
 		C2BECECE1DD6D4F80001E2BA /* visible_idir_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */; };
 		C2BECED11DD6D8BA0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
 		C2BECED21DD6D8DE0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
+		C2CF01E81FC4BE8E00A90651 /* HockeySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2CF01E71FC4BE8E00A90651 /* HockeySDK.framework */; };
+		C2CF01EA1FC4BEF400A90651 /* HockeySDK.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2CF01E91FC4BEF400A90651 /* HockeySDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
@@ -241,6 +243,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				C2CF01EA1FC4BEF400A90651 /* HockeySDK.framework in CopyFiles */,
 				C2309DAD1F69BDFE00A0E908 /* libboost_system.a in CopyFiles */,
 				C2309DA01F69B9E700A0E908 /* libopencv_video.a in CopyFiles */,
 				C2309DAA1F69BA8900A0E908 /* libopencv_imgproc.a in CopyFiles */,
@@ -600,6 +603,9 @@
 		C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccordionItem.h; path = ../include/AccordionItem.h; sourceTree = "<group>"; };
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
 		C2C68C3B1ED9F9440095FFC4 /* tracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tracker.h; path = ../include/tracker.h; sourceTree = "<group>"; };
+		C2CF01E31FC4BBDE00A90651 /* HockeySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HockeySDK.framework; path = "HockeySDK-Mac/HockeySDK.framework"; sourceTree = "<group>"; };
+		C2CF01E71FC4BE8E00A90651 /* HockeySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HockeySDK.framework; path = "../../../svl/HockeySDK-Mac/HockeySDK.framework"; sourceTree = "<group>"; };
+		C2CF01E91FC4BEF400A90651 /* HockeySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HockeySDK.framework; path = "../../../svl/HockeySDK-Mac/HockeySDK.framework"; sourceTree = "<group>"; };
 		C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cinder_support.cpp; sourceTree = "<group>"; };
 		C2DA19561E7F30D800062DBC /* csv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = csv.cpp; sourceTree = "<group>"; };
 		C2DA19581E7F30E800062DBC /* csv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = csv.hpp; sourceTree = "<group>"; };
@@ -618,6 +624,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2CF01E81FC4BE8E00A90651 /* HockeySDK.framework in Frameworks */,
 				C254BEF01F4FC44700977307 /* QTKit.framework in Frameworks */,
 				C2309DD61F6CA53100A0E908 /* libcinder.a in Frameworks */,
 				C2309DCD1F6C66F700A0E908 /* liblibjasper.a in Frameworks */,
@@ -806,6 +813,7 @@
 		29B97314FDCFA39411CA2CEA /* QuickTimeIteration */ = {
 			isa = PBXGroup;
 			children = (
+				C2CF01E91FC4BEF400A90651 /* HockeySDK.framework */,
 				C260099A1CED3E010045FF57 /* svl */,
 				C21946B11CE4EA6100976025 /* include */,
 				C21946891CE4DC9700976025 /* Configurations */,
@@ -842,6 +850,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C2CF01E31FC4BBDE00A90651 /* HockeySDK.framework */,
+				C2CF01E71FC4BE8E00A90651 /* HockeySDK.framework */,
 				C2309DD51F6CA53100A0E908 /* libcinder.a */,
 				C2309DC81F6C66F700A0E908 /* liblibjasper.a */,
 				C2309DC91F6C66F700A0E908 /* liblibjpeg.a */,
@@ -1374,6 +1384,7 @@
 				8D11072E0486CEB800E47090 /* Frameworks */,
 				C2309D981F69B99B00A0E908 /* CopyFiles */,
 				C25261131F66D7BF0069F665 /* Build Number */,
+				C2CF01E21FC4BA5100A90651 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -1533,6 +1544,19 @@
 			shellPath = /bin/sh;
 			shellScript = "#./Fabric.framework/run 6c107bbc4d9b676f55d670b4a1baacbff9754c65 1190b5b2eda58cb562659f650e2800609eae0587f4a139ce86370628e5ce54d0\n";
 		};
+		C2CF01E21FC4BA5100A90651 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd $TARGET_BUILD_DIR\nerr=$(install_name_tool -change @rpath/HockeySDK.framework/Versions/A/HockeySDK @executable_path/../Frameworks/HockeySDK.framework/Versions/A/HockeySDK Visible.app/Contents/MacOS/Visible)\necho $err\noutput=$(otool -L Visible.app/Contents/MacOS/Visible)\necho $output\n\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1680,6 +1704,10 @@
 				DEVELOPMENT_TEAM = W4F7HL2GN5;
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
 				ENABLE_ON_DEMAND_RESOURCES = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/HockeySDK-Mac",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
@@ -1748,6 +1776,10 @@
 				DEVELOPMENT_TEAM = W4F7HL2GN5;
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
 				ENABLE_ON_DEMAND_RESOURCES = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/HockeySDK-Mac",
+				);
 				GCC_FAST_MATH = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
