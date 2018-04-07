@@ -19,14 +19,9 @@
 #include "vision/histo.h"
 #include "vision/opencv_utils.hpp"
 #include "opencv2/video/tracking.hpp"
+#include "getLuminanceAlgo.hpp"
 
 using namespace cv;
-
-class vSignaler : public base_signaler
-{
-    virtual std::string
-    getName () const { return "vSignaler"; }
-};
 
 
 
@@ -81,25 +76,14 @@ struct OpticalFlowFarnebackRunner
 
 };
 
-struct IntensityStatisticsRunner
+// For base classing
+class LifSignaler : public base_signaler
 {
-    typedef std::vector<roiWindow<P8U>> channel_images_t;
-    void operator()(channel_images_t& channel, timed_double_vec_t& results)
-    {
-        results.clear();
-        for (auto ii = 0; ii < channel.size(); ii++)
-        {
-            timed_double_t res;
-            index_time_t ti;
-            ti.first = ii;
-            res.first = ti;
-            res.second = histoStats::mean(channel[ii]) / 256.0;
-            results.emplace_back(res);
-        }
-    }
+    virtual std::string
+    getName () const { return "Lif Signaler"; }
 };
 
-class lif_processor : public vSignaler
+class lif_processor : public LifSignaler
 {
 public:
     

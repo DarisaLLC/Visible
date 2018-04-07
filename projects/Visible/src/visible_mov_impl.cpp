@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include "VisibleApp.h"
 #include "guiContext.h"
+#include "MovContext.h"
 #include "cinder/ip/Flip.h"
 #include "opencv2/highgui.hpp"
 #include "opencv_utils.hpp"
@@ -27,6 +28,7 @@
 #include "core/stl_utils.hpp"
 #include "sm_producer.h"
 #include "qtimeAvfLink.h"
+#include "signaler.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -53,87 +55,14 @@ namespace
     static layout vl (ivec2 (10, 10));
     
     
-    vectorOfnamedTrackOfdouble_t get_mean_luminance_and_aci (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
-                                                     bool test_data = false)
-    {
-        
-        vectorOfnamedTrackOfdouble_t tracks;
-        tracks.resize (names.size ());
-        for (auto tt = 0; tt < names.size(); tt++)
-            tracks[tt].first = names[tt];
-        
-        std::vector<roiWindow<P8U>> images;
-        auto fcnt = frames->count();
-        
-        // If it is 3 channels. We will use multiple window
-        int64_t fn = 0;
-        while (frames->checkFrame(fn))
-        {
-            auto su8 = frames->getFrame(fn++);
-            
-            auto channels = names.size();
-            
-            std::vector<roiWindow<P8U> > rois;
-            auto m1 = svl::NewRedFromSurface(su8);
-            rois.emplace_back(m1);
-            auto m2 = svl::NewGreenFromSurface(su8);
-            rois.emplace_back(m2);
-            auto m3 = svl::NewBlueFromSurface(su8);
-            rois.emplace_back(m3);
-            
-            assert (rois.size () == tracks.size());
-            
-            // Now get average intensity for each channel
-            int index = 0;
-            for (roiWindow<P8U> roi : rois)
-            {
-                //                if (index == 2)
-                //                {
-                //                    images.push_back(roi);
-                //                    break;
-                //                }
-                index_time_t ti;
-                ti.first = fn;
-                timed_double_t res;
-                res.first = ti;
-                auto nmg = histoStats::mean(roi) / 256.0;
-                res.second = (! test_data) ? nmg :  (((float) fn) / fcnt );
-                tracks[index++].second.emplace_back(res);
-            }
-            // TBD: call progress reporter
-        }
-        
-#if 0
-        // Now Do Aci on the 3rd channel
-        assert(images.size() == fcnt && fcnt > 0);
-        
-        auto sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
-        sp->load_images (images);
-        
-        std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
-        std::future<bool>  future_ss = task.get_future();  // get a future
-        std::thread(std::move(task)).detach(); // launch on a thread
-        future_ss.wait();
-        auto entropies = sp->shannonProjection ();
-        sm_producer::sMatrixProjection_t::const_iterator bee = entropies.begin();
-        for (auto ss = 0; bee != entropies.end() && ss < fcnt; ss++, bee++)
-        {
-            index_time_t ti;
-            ti.first = ss;
-            timed_double_t res;
-            res.first = ti;
-            res.second = *bee;
-            tracks[2].second.emplace_back(res);
-        }
-#endif
-        
-        return tracks;
-    }
-    
-    
+ 
     
 }
 
+template boost::signals2::connection mov_processor::registerCallback(const std::function<mov_processor::mov_cb_content_loaded>&);
+template boost::signals2::connection mov_processor::registerCallback(const std::function<mov_processor::mov_cb_frame_loaded>&);
+template boost::signals2::connection mov_processor::registerCallback(const std::function<mov_processor::mov_cb_sm1d_available>&);
+template boost::signals2::connection mov_processor::registerCallback(const std::function<mov_processor::mov_cb_sm1dmed_available>&);
 
 
 
@@ -157,6 +86,16 @@ movContext::movContext(WindowRef& ww, const boost::filesystem::path& dp)
         mFont = Font( "Menlo", 12 );
         mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     }
+    
+    m_movProcRef = std::make_shared<mov_processor> ();
+    
+    std::function<void ()> content_loaded_cb = std::bind (&movContext::signal_content_loaded, this);
+    boost::signals2::connection ml_connection = m_movProcRef->registerCallback(content_loaded_cb);
+    std::function<void (int&)> sm1d_available_cb = boost::bind (&movContext::signal_sm1d_available, this, _1);
+    boost::signals2::connection nl_connection = m_movProcRef->registerCallback(sm1d_available_cb);
+    std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&movContext::signal_sm1dmed_available, this, _1, _2);
+    boost::signals2::connection ol_connection = m_movProcRef->registerCallback(sm1dmed_available_cb);
+    
     setup ();
 }
 
@@ -279,6 +218,29 @@ void movContext::setZoom (vec2 zoom)
     update ();
 }
 
+void movContext::signal_sm1d_available (int& dummy)
+{
+    static int i = 0;
+    std::cout << "sm1d available: " << ++i << std::endl;
+}
+
+void movContext::signal_sm1dmed_available (int& dummy, int& dummy2)
+{
+    static int ii = 0;
+    std::cout << "sm1dmed available: " << ++ii << std::endl;
+}
+
+void movContext::signal_content_loaded ()
+{
+    //    movie_loaded = true;
+    std::cout << "SM Results Ready " << std::endl;
+}
+void movContext::signal_frame_loaded (int& findex, double& timestamp)
+{
+    //    frame_indices.push_back (findex);
+    //    frame_times.push_back (timestamp);
+    //     std::cout << frame_indices.size() << std::endl;
+}
 
 void movContext::setup()
 {
@@ -330,6 +292,7 @@ void movContext::clear_movie_params ()
 
 void movContext::loadMovieFile()
 {
+    std::vector<std::string> names = {  "blue", "green", "red"};
     if ( ! mPath.empty () )
     {
         ci_console () << mPath.string ();
@@ -345,7 +308,7 @@ void movContext::loadMovieFile()
             CI_LOG_V( " > Size: "		<< m_movie->getSize() );
             
             m_valid = m_movie->isLoaded();
-            std::vector<std::string> names = {  "blue", "green", "red"};
+
             mFrameSet = qTimeFrameCache::create (m_movie);
             mFrameSet->channel_names(names);
             mMediaInfo = mFrameSet->media_info();
@@ -373,8 +336,13 @@ void movContext::loadMovieFile()
                 // Setup Plot area
                 {
                     std::lock_guard<std::mutex> lock(m_track_mutex);
+                    
                     m_plots.resize (0);
                     
+                    for (Graph1DRef gr : m_plots)
+                    {
+                        m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
+                    }
                     
                     for (int cc = 0; cc < names.size() ; cc++)
                     {
@@ -397,6 +365,10 @@ void movContext::loadMovieFile()
                     play ();
                 }
 
+                
+                // Launch Average Luminance Computation
+                m_async_luminance_tracks = std::async(std::launch::async, &mov_processor::run, m_movProcRef.get(),
+                                                      mFrameSet, names, false);
                 
                 ci_console() << "Dimensions:" <<m_movie->getSize() << std::endl;
                 ci_console() << "Duration:  " <<m_movie->getDuration() << " seconds" << std::endl;
@@ -499,39 +471,33 @@ void movContext::keyDown( KeyEvent event )
 void movContext::update_instant_image_mouse ()
 {
     auto image_pos = vl.display2image(mMouseInImagePosition);
-    // LIF 3 channel organization. Channel height is 1/3 of image height
-    // Channel Index is pos.y / channel_height,
-    // In channel x is pos.x, In channel y is pos.y % channel_height
-    uint32_t channel_height = mMediaInfo.getHeight();
-    image_pos.y = ((int) image_pos.y) % channel_height;
     m_instant_mouse_image_pos = image_pos;
     if (mSurface)
     {
         m_instant_pixel_Color = mSurface->getPixel(m_instant_mouse_image_pos);
     }
+    
+    
 }
 
 gl::TextureRef movContext::pixelInfoTexture ()
 {
     if (! mMouseInImage) return gl::TextureRef ();
     TextLayout lout;
+  
     
-    std::string pos =  toString(m_instant_pixel_Color) +
-    "[" + to_string(mMouseInImagePosition.x) +
-    "," + to_string(mMouseInImagePosition.y) +
-    "] i [" +
-    to_string(imagePos().x) + "," + to_string(imagePos().y) + "]";
-    
-    lout.clear( ColorA::gray( 0.2f, 0.5f ) );
-    lout.setFont( Font( "Menlo", 10 ) );
-    lout.setColor( ColorA(0.8,0.2,0.1,1.0) );
-    lout.setLeadingOffset( 3 );
-    lout.addRightLine( pos );
-    
-    
-    return gl::Texture::create( lout.render( true ));
-    
+    std::string pos =  "[ " +
+    toString(((int)m_instant_pixel_Color.r)) + " , " + toString(((int)m_instant_pixel_Color.g)) +
+        " , " + toString(((int)m_instant_pixel_Color.b)) + " @ " + to_string(imagePos().x) + "," + to_string(imagePos().y) + "]";
+    vec2                mSize(250, 100);
+    TextBox tbox = TextBox().alignment( TextBox::LEFT).font( mFont ).size( ivec2( mSize.x, TextBox::GROW ) ).text( pos );
+    tbox.setFont( Font( "Times New Roman", 24 ) );
+    tbox.setColor( ColorA(0.0,0.0,0.0,1.0) );
+    tbox.setBackgroundColor( ColorA( 0.3, 0.3, 0.3, 0.3 ) );
+    ivec2 sz = tbox.measure();
+    return  gl::Texture2d::create( tbox.render() );
 }
+
 
 
 
@@ -554,22 +520,20 @@ void movContext::resize ()
 }
 void movContext::update ()
 {
-    // Launch Average Luminance Computation
-    //    m_async_luminance_tracks = std::async(std::launch::async, get_mean_luminance_and_aci,mFrameSet, names, false);
-
-      vl.update_window_size(getWindowSize ());
-#if TODO
+    if (! have_movie () ) return;
+    mContainer.update();
+    vl.update_window_size(getWindowSize ());
+    
     if ( is_ready (m_async_luminance_tracks))
     {
-        m_luminance_tracks = m_async_luminance_tracks.get();
-        assert (m_luminance_tracks.size() == m_plots.size ());
-        for (int cc = 0; cc < m_luminance_tracks.size(); cc++)
-        {
-            m_plots[cc]->setup(m_luminance_tracks[cc]);
-            m_plots[cc]->setRect (vl.plot_rects()[cc]);            
-        }
+        auto tracksRef = m_async_luminance_tracks.get();
+        assert (tracksRef->size() == m_plots.size ());
+        m_plots[0]->setup(tracksRef->at(0));
+        m_plots[1]->setup(tracksRef->at(1));
+        m_plots[2]->setup(tracksRef->at(2));
+//        if (!tracksRef->at(2).second.empty())
+//            m_plots[2]->setup(tracksRef->at(2), graph1D::mapping_option::type_limits);
     }
-#endif
     
     if (! have_movie () ) return;
     
@@ -661,10 +625,7 @@ void movContext::draw_info ()
     if (texR)
     {
         Rectf tbox = texR->getBounds();
-        tbox = tbox.getCenteredFit(getWindowBounds(), true);
-        tbox.scale(vec2(0.5, 0.67));
-        tbox.offset(vec2(getWindowWidth() - tbox.getWidth(),getWindowHeight() - tbox.getHeight() - tbox.getY1()));
-
+        tbox.offset(mMouseInImagePosition);
         gl::draw( texR, tbox);
     }
     tinyUi::drawWidgets(mWidgets);

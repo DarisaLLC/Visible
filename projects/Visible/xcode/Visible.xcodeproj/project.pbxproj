@@ -353,6 +353,8 @@
 		C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../local/tinyxml/tinyxmlerror.cpp; sourceTree = "<group>"; };
 		C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
 		C241BBAA1FB11B51000DE36E /* algo_Lif.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = algo_Lif.hpp; path = ../include/algo_Lif.hpp; sourceTree = "<group>"; };
+		C24306651FC8CD4000B2B39C /* algo_mov.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = algo_mov.hpp; path = ../include/algo_mov.hpp; sourceTree = "<group>"; };
+		C24306661FC8D32C00B2B39C /* MovContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MovContext.h; path = ../include/MovContext.h; sourceTree = "<group>"; };
 		C24CD87C1CEA5B1B0008C72B /* VisibleGtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VisibleGtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C24CD87E1CEA5B1B0008C72B /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		C24CD8831CEA916E0008C72B /* libboost_date_time.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_date_time.a; path = ../../../svl/local/boost/lib/libboost_date_time.a; sourceTree = "<group>"; };
@@ -967,10 +969,12 @@
 				C24FC84C1E5E40130071AA1A /* async_producer.h */,
 				C2601BBC1E6B5A60004415A3 /* algo_registry.hpp */,
 				C241BBAA1FB11B51000DE36E /* algo_Lif.hpp */,
+				C24306651FC8CD4000B2B39C /* algo_mov.hpp */,
 				C219469E1CE4EA4900976025 /* simple_pair.h */,
 				C219469F1CE4EA4900976025 /* sshist.hpp */,
 				C21946A31CE4EA4900976025 /* guiContext.h */,
 				C2F1B6211FB13FE600DDD7DB /* LifContext.h */,
+				C24306661FC8D32C00B2B39C /* MovContext.h */,
 				C2B005861CFF8FE100AC2E64 /* qtimeAvfLink.h */,
 				C2E321FF1D0480E4006DFE5E /* mediaInfo.h */,
 				C2BF1A671E71D12200A30407 /* timeMarker.h */,
