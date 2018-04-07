@@ -379,8 +379,8 @@ void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
 
 void lifContext::signal_content_loaded ()
 {
-//    movie_loaded = true;
     std::cout << "SM Results Ready " << std::endl;
+    update();
 }
 void lifContext::signal_frame_loaded (int& findex, double& timestamp)
 {
