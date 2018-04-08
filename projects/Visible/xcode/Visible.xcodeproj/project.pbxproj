@@ -196,6 +196,7 @@
 		C2A5DBAB2079FE01001C6608 /* HockeySDK-Mac in Resources */ = {isa = PBXBuildFile; fileRef = C2A5DBAA2079FE01001C6608 /* HockeySDK-Mac */; };
 		C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611E1F66EA910069F665 /* PlistDate.cpp */; };
 		C2A5DBAD207A003F001C6608 /* Plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611B1F66E95B0069F665 /* Plist.cpp */; };
+		C2A5DBAE207A0507001C6608 /* HockeySDK.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2CF01E71FC4BE8E00A90651 /* HockeySDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C2AF87F11CFBC74200CFC191 /* libopencv_highgui.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606E811CEE08F00045FF57 /* libopencv_highgui.a */; };
 		C2AF87F41CFBC7ED00CFC191 /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AF87F31CFBC7ED00CFC191 /* libopencv_core.a */; };
 		C2AF87F91CFBCC5900CFC191 /* libopencv_imgcodecs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AF87F71CFBCC5900CFC191 /* libopencv_imgcodecs.a */; };
@@ -243,6 +244,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				C2A5DBAE207A0507001C6608 /* HockeySDK.framework in CopyFiles */,
 				C2309DAD1F69BDFE00A0E908 /* libboost_system.a in CopyFiles */,
 				C2309DA01F69B9E700A0E908 /* libopencv_video.a in CopyFiles */,
 				C2309DAA1F69BA8900A0E908 /* libopencv_imgproc.a in CopyFiles */,
@@ -606,7 +608,7 @@
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
 		C2C68C3B1ED9F9440095FFC4 /* tracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tracker.h; path = ../include/tracker.h; sourceTree = "<group>"; };
 		C2CF01E31FC4BBDE00A90651 /* HockeySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HockeySDK.framework; path = "HockeySDK-Mac/HockeySDK.framework"; sourceTree = "<group>"; };
-		C2CF01E71FC4BE8E00A90651 /* HockeySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HockeySDK.framework; path = "../../../svl/HockeySDK-Mac/HockeySDK.framework"; sourceTree = "<group>"; };
+		C2CF01E71FC4BE8E00A90651 /* HockeySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HockeySDK.framework; path = "HockeySDK-Mac/HockeySDK.framework"; sourceTree = "<group>"; };
 		C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cinder_support.cpp; sourceTree = "<group>"; };
 		C2DA19561E7F30D800062DBC /* csv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = csv.cpp; sourceTree = "<group>"; };
 		C2DA19581E7F30E800062DBC /* csv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = csv.hpp; sourceTree = "<group>"; };
