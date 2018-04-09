@@ -171,7 +171,8 @@ private:
 	std::vector<series_info> m_series_book;
     std::vector<std::string> m_series_names;
 	std::shared_ptr<lifIO::LifSerie> m_current_serie_ref;
-	int  m_selected_serie_index;
+	int m_selected_serie_index;
+    int m_currently_selected_index;
 	
 	void seek( size_t xPos );
 	void clear_movie_params ();

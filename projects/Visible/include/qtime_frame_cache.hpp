@@ -7,7 +7,7 @@
 #include <limits>
 #include "cinder/qtime/QuickTime.h"
 #include "cinder/qtime/QuickTimeUtils.h"
-#include "cinder/qtime/QuicktimeGl.h"
+#include "cinder/qtime/QuickTimeGl.h"
 #include "cinder/Thread.h"
 #include "sshist.hpp"
 #include "roiWindow.h"

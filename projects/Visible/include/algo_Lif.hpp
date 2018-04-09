@@ -95,15 +95,83 @@ public:
     
     lif_processor ()
     {
+        // Signals we provide
         signal_content_loaded = createSignal<lif_processor::sig_cb_content_loaded>();
         signal_frame_loaded = createSignal<lif_processor::sig_cb_frame_loaded>();
         signal_sm1d_available = createSignal<lif_processor::sig_cb_sm1d_available>();
         signal_sm1dmed_available = createSignal<lif_processor::sig_cb_sm1dmed_available>();
+        
+        // Signals we support
         m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
+        std::function<void ()> sm_content_loaded_cb = std::bind (&lif_processor::sm_content_loaded, this);
+        boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
+//        std::function<void (int&)> sm1d_available_cb = boost::bind (&lifContext::signal_sm1d_available, this, _1);
+//        boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_available_cb);
+//        std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&lifContext::signal_sm1dmed_available, this, _1, _2);
+//        boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_available_cb);
+//
+        
+        
+        
+
     }
     
     const smProducerRef sm () const { return m_sm; }
     std::shared_ptr<sm_filter> smFilterRef () { return m_smfilterRef; }
+    
+    
+    void load (const std::shared_ptr<qTimeFrameCache>& frames)
+    {
+        load_channels_from_images(frames);
+  
+        
+    }
+    // Run to get Entropies and Median Level Set
+    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run (const std::vector<std::string>& names, bool test_data = false)
+    {
+        
+
+        create_named_tracks(names);
+        channel_images_t c2 = m_channel_images[2];
+        loadImagesToMats(c2, m_channel2_mats);
+        
+        compute_channel_statistics_threaded();
+        //   auto oflow = compute_oflow_threaded ();
+        
+        
+        auto sp =  sm();
+        sp->load_images (c2);
+        
+     
+        std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
+        std::future<bool>  future_ss = task.get_future();  // get a future
+        std::thread(std::move(task)).detach(); // launch on a thread
+        if (future_ss.get())
+        {
+            // Signal we are done with ACI
+            static int dummy;
+            if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
+                signal_sm1d_available->operator()(dummy);
+            
+            const deque<double>& entropies = sp->shannonProjection ();
+            const deque<deque<double>>& smat = sp->similarityMatrix();
+            m_smfilterRef = std::make_shared<sm_filter> (entropies, smat);
+            
+            
+            update ();
+        }
+        return m_tracksRef;
+    }
+    
+    const std::vector<Rectf>& rois () const { return m_rois; }
+    const namedTrackOfdouble_t& similarity_track () const { return m_tracksRef->at(2); }
+    
+    // Update. Called also when cutoff offset has changed
+    void update ()
+    {
+        if(m_tracksRef && !m_tracksRef->empty() && m_smfilterRef && m_smfilterRef->isValid())
+            entropiesToTracks(m_tracksRef->at(2));
+    }
     
 protected:
     boost::signals2::signal<lif_processor::sig_cb_content_loaded>* signal_content_loaded;
@@ -113,6 +181,14 @@ protected:
     
 private:
     
+    void sm_content_loaded ()
+    {
+        // Call the content loaded cb if any
+        if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+            signal_content_loaded->operator()();
+        
+        std::cout << "----------> sm content_loaded\n";
+    }
     // Assumes LIF data -- use multiple window.
     void load_channels_from_images (const std::shared_ptr<qTimeFrameCache>& frames)
     {
@@ -217,58 +293,7 @@ private:
         }
         while (++vitr != images.end());
     }
-    
-public:
-    // Run to get Entropies and Median Level Set
-    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
-                                                bool test_data = false)
-    {
-        
-        load_channels_from_images(frames);
-        create_named_tracks(names);
-        channel_images_t c2 = m_channel_images[2];
-        loadImagesToMats(c2, m_channel2_mats);
 
-        compute_channel_statistics_threaded();
-     //   auto oflow = compute_oflow_threaded ();
-        
-
-        auto sp =  sm();
-        sp->load_images (c2);
-
-        // Call the content loaded cb if any
-        if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
-            signal_content_loaded->operator()();
-        
-        std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
-        std::future<bool>  future_ss = task.get_future();  // get a future
-        std::thread(std::move(task)).detach(); // launch on a thread
-        if (future_ss.get())
-        {
-            // Signal we are done with ACI
-            static int dummy;
-            if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
-                signal_sm1d_available->operator()(dummy);
-            
-            const deque<double>& entropies = sp->shannonProjection ();
-            const deque<deque<double>>& smat = sp->similarityMatrix();
-            m_smfilterRef = std::make_shared<sm_filter> (entropies, smat);
-
-       
-            update ();
-        }
-        return m_tracksRef;
-    }
-    
-    const std::vector<Rectf>& rois () const { return m_rois; }
-    const namedTrackOfdouble_t& similarity_track () const { return m_tracksRef->at(2); }
-    
-    // Update. Called also when cutoff offset has changed
-    void update ()
-    {
-        if(m_tracksRef && !m_tracksRef->empty() && m_smfilterRef && m_smfilterRef->isValid())
-            entropiesToTracks(m_tracksRef->at(2));
-    }
     
 private:
     smProducerRef m_sm;

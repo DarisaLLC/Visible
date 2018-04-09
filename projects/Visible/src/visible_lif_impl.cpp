@@ -269,7 +269,7 @@ void lifContext::setup()
     mUIParams = params::InterfaceGl( "Lif Player ", toPixels( ivec2( 200, 300 )));
     mUIParams.setPosition(getWindowSize() / 3);
     
-  
+    m_currently_selected_index = -1;
     // Load the validated movie file
     loadLifFile ();
     
@@ -287,21 +287,25 @@ void lifContext::setup()
         m_perform_names.clear ();
         m_perform_names.push_back("Manual Cell End Tracing");
         
-        // Add an enum (list) selector.
-        
-        m_selected_serie_index = 0;
-        m_current_serie_ref = std::shared_ptr<lifIO::LifSerie>();
+        // If it is first time
+        if (m_currently_selected_index < 0)
+        {
+            m_selected_serie_index = 0;
+            m_current_serie_ref = std::shared_ptr<lifIO::LifSerie>();
+        }
         
         mUIParams.addParam( "Series ", m_series_names, &m_selected_serie_index )
         //        .keyDecr( "[" )
         //        .keyIncr( "]" )
         .updateFn( [this]
                   {
-                      if (m_selected_serie_index >= 0 && m_selected_serie_index < m_series_names.size() )
+                      bool exists = m_currently_selected_index  >= 0 && m_currently_selected_index == m_selected_serie_index;
+                      if (! exists && m_selected_serie_index >= 0 && m_selected_serie_index < m_series_names.size() )
                       {
                           m_serie = m_series_book[m_selected_serie_index];
                           m_current_serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(m_selected_serie_index), stl_utils::null_deleter());
                           loadCurrentSerie ();
+                          m_currently_selected_index = m_selected_serie_index;
                           console() << "selected serie updated: " << m_series_names [m_selected_serie_index] << endl;
                       }
                   });
@@ -380,6 +384,7 @@ void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
 void lifContext::signal_content_loaded ()
 {
     std::cout << "SM Results Ready " << std::endl;
+    play();
     update();
 }
 void lifContext::signal_frame_loaded (int& findex, double& timestamp)
@@ -410,6 +415,7 @@ void lifContext::loadCurrentSerie ()
         
         mFrameSet->channel_names (m_series_book[m_selected_serie_index].channel_names);
         mMediaInfo = mFrameSet->media_info();
+        std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet);
         
         vl.init (app::getWindow(), mFrameSet->media_info());
         
@@ -478,7 +484,7 @@ void lifContext::loadCurrentSerie ()
             
             // Launch Average Luminance Computation
             m_async_luminance_tracks = std::async(std::launch::async, &lif_processor::run, m_lifProcRef.get(),
-                                                  mFrameSet, m_serie.channel_names, false);
+                                                  m_serie.channel_names, false);
         }
     }
     catch( const std::exception &ex ) {

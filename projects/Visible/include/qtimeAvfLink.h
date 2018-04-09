@@ -4,7 +4,7 @@
 #define __qtimeAvfLink___h
 
 #include "cinder/app/App.h"
-#include "cinder/qtime/QuicktimeGl.h"
+#include "cinder/qtime/QuickTimeGl.h"
 #include "core/cm_time.hpp"
 
 class qtimeAvfLink
