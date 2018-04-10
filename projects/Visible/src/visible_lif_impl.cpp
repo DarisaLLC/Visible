@@ -48,7 +48,7 @@ using namespace svl;
 
 namespace
 {
- 
+    
     std::ostream& ci_console ()
     {
         return AppBase::get()->console();
@@ -60,7 +60,7 @@ namespace
     }
     
     static layout vl ( ivec2 (10, 10));
-
+    
     
 }
 
@@ -92,6 +92,13 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
     
     std::function<void ()> content_loaded_cb = std::bind (&lifContext::signal_content_loaded, this);
     boost::signals2::connection ml_connection = m_lifProcRef->registerCallback(content_loaded_cb);
+    
+    std::function<void ()> flu_stats_available_cb = std::bind (&lifContext::signal_flu_stats_available, this);
+    boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(flu_stats_available_cb);
+    
+    
+    
+    
     std::function<void (int&)> sm1d_available_cb = boost::bind (&lifContext::signal_sm1d_available, this, _1);
     boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_available_cb);
     std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&lifContext::signal_sm1dmed_available, this, _1, _2);
@@ -266,6 +273,7 @@ uint32_t lifContext::getMedianCutOff () const
 
 void lifContext::setup()
 {
+    srand( 133 );
     mUIParams = params::InterfaceGl( "Lif Player ", toPixels( ivec2( 200, 300 )));
     mUIParams.setPosition(getWindowSize() / 3);
     
@@ -277,7 +285,7 @@ void lifContext::setup()
     
     if( m_valid )
     {
-       	m_type = Type::qtime_viewer;
+        m_type = Type::qtime_viewer;
         mUIParams.addSeparator();
         
         m_series_names.clear ();
@@ -359,6 +367,7 @@ void lifContext::loadLifFile ()
             
             m_lifRef =  std::shared_ptr<lifIO::LifReader> (new lifIO::LifReader (mPath.string()));
             get_series_info (m_lifRef);
+            ci_console() <<  std::endl << m_series_book.size() << "  Series  " << std::endl;
             
         }
         catch( ... ) {
@@ -383,15 +392,20 @@ void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
 
 void lifContext::signal_content_loaded ()
 {
-    std::cout << "SM Results Ready " << std::endl;
-    play();
-    update();
+    std::cout << std::endl << " Images Loaded  " << std::endl;
 }
+void lifContext::signal_flu_stats_available ()
+{
+    std::cout << "Flu Stats Available " << std::endl;
+}
+
+
+
 void lifContext::signal_frame_loaded (int& findex, double& timestamp)
 {
-//    frame_indices.push_back (findex);
-//    frame_times.push_back (timestamp);
-//     std::cout << frame_indices.size() << std::endl;
+    //    frame_indices.push_back (findex);
+    //    frame_times.push_back (timestamp);
+    //     std::cout << frame_indices.size() << std::endl;
 }
 
 void lifContext::loadCurrentSerie ()
@@ -415,26 +429,22 @@ void lifContext::loadCurrentSerie ()
         
         mFrameSet->channel_names (m_series_book[m_selected_serie_index].channel_names);
         mMediaInfo = mFrameSet->media_info();
-        std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet);
-        
         vl.init (app::getWindow(), mFrameSet->media_info());
+        
+        // std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names);
         
         if (m_valid)
         {
             getWindow()->setTitle( mPath.filename().string() );
-            
-            ci_console() <<  m_series_book.size() << "  Series  " << std::endl;
-            
             const tiny_media_info tm = mFrameSet->media_info ();
             getWindow()->getApp()->setFrameRate(tm.getFramerate() * 2);
             
             mScreenSize = tm.getSize();
             m_frameCount = tm.getNumFrames ();
+            mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
+            
             mTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
             mAuxTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
-            
-            
-            mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
             
             // Set window size according to layout
             //  Channel             Data
@@ -456,11 +466,15 @@ void lifContext::loadCurrentSerie ()
                 for (int cc = 0; cc < channel_count; cc++)
                 {
                     m_plots.push_back( Graph1DRef (new graph1D (m_current_serie_ref->getChannels()[cc].getName(),
-                                                                 vl.plot_rects() [cc])));
+                                                                vl.plot_rects() [cc])));
                 }
+                m_plots[0]->strokeColor = ColorA(0.2,0.8,0.1,1.0);
+                m_plots[1]->strokeColor = ColorA(0.8,0.2,0.1,1.0);
+                m_plots[2]->strokeColor = ColorA(0.0,0.0,0.0,1.0);
                 
                 for (Graph1DRef gr : m_plots)
                 {
+                    gr->backgroundColor = ColorA( 0.3, 0.3, 0.3, 0.3 );
                     m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
                 }
                 
@@ -470,21 +484,25 @@ void lifContext::loadCurrentSerie ()
                 m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mTimeLineSlider, std::placeholders::_1));
                 mWidgets.push_back( &mTimeLineSlider );
                 
-
                 mAuxTimeSliderIndex = vl.add_slider_rect ();
                 mAuxTimeLineSlider.clear_timepoint_markers();
                 mAuxTimeLineSlider.setTitle("Contraction Markers");
                 mAuxTimeLineSlider.setBounds(vl.slider_rects()[mAuxTimeSliderIndex]);
                 m_aux_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mAuxTimeLineSlider, std::placeholders::_1));
                 mWidgets.push_back( &mAuxTimeLineSlider );
-           
+                
                 getWindow()->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
                 
             }
-            
+            seekToStart();
+            play();
+#if 0
+            m_async_luminance_tracks = std::async(std::launch::async,
+                                                  &lif_processor::run_flu_statistics,
+                                                  m_lifProcRef.get());
+#endif
             // Launch Average Luminance Computation
-            m_async_luminance_tracks = std::async(std::launch::async, &lif_processor::run, m_lifProcRef.get(),
-                                                  m_serie.channel_names, false);
+            // m_async_luminance_tracks = std::async(std::launch::async, &lif_processor::run, m_lifProcRef.get(), false);
         }
     }
     catch( const std::exception &ex ) {
@@ -511,10 +529,10 @@ void  lifContext::mouseWheel( MouseEvent event )
 #if 0
     if( mMouseInTimeLine )
         mTimeMarker.from_norm(mTimeLineSlider.mValueScaled);
-        seekToFrame(mTimeMarker.current_frame());
-    }
-    
-    mPov.adjustDist( event.getWheelIncrement() * -5.0f );
+    seekToFrame(mTimeMarker.current_frame());
+}
+
+mPov.adjustDist( event.getWheelIncrement() * -5.0f );
 #endif
 
 }
@@ -538,7 +556,7 @@ void lifContext::mouseMove( MouseEvent event )
     {
         std::vector<float> dds (vl.plot_rects().size());
         for (auto pp = 0; pp < vl.plot_rects().size(); pp++) dds[pp] = vl.plot_rects()[pp].distanceSquared(event.getPos());
-    
+        
         auto min_iter = std::min_element(dds.begin(),dds.end());
         mMouseInGraphs = min_iter - dds.begin();
     }
@@ -569,7 +587,7 @@ void lifContext::mouseDown( MouseEvent event )
         graphRef->get_marker_position(mAuxTimeMarker);
     }
     
- }
+}
 
 
 void lifContext::mouseUp( MouseEvent event )
@@ -595,7 +613,7 @@ void lifContext::keyDown( KeyEvent event )
     else if( event.getChar() == 't' ) {
         getWindow()->setAlwaysOnTop( ! getWindow()->isAlwaysOnTop() );
     }
- 
+    
     
     // these keys only make sense if there is an active movie
     if( have_movie () ) {
@@ -632,6 +650,7 @@ void  lifContext::update_log (const std::string& msg)
 
 Rectf lifContext::get_image_display_rect ()
 {
+    vl.update_window_size(getWindowSize ());
     return vl.display_frame_rect();
 }
 
@@ -643,7 +662,7 @@ void lifContext::resize ()
     
     vl.update_window_size(getWindowSize ());
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-
+    
     for (int cc = 0; cc < vl.plot_rects().size(); cc++)
     {
         m_plots[cc]->setRect (vl.plot_rects()[cc]);
@@ -651,33 +670,41 @@ void lifContext::resize ()
     
     mTimeLineSlider.setBounds (vl.display_timeline_rect());
     mAuxTimeLineSlider.setBounds(vl.slider_rects()[mAuxTimeSliderIndex]);
+    
 }
+
+bool lifContext::haveTracks()
+{
+    return ! m_trackWeakRef.expired();
+}
+
 void lifContext::update ()
 {
-  if (! have_movie () ) return;
-  mContainer.update();
-  vl.update_window_size(getWindowSize ());
+    mContainer.update();
+    vl.update_window_size(getWindowSize ());
     
-  if ( is_ready (m_async_luminance_tracks))
+    // If Plots are ready, set them up
+    // It is ready only for new data
+    if ( is_ready (m_async_luminance_tracks))
     {
-        auto tracksRef = m_async_luminance_tracks.get();
+        m_trackWeakRef = m_async_luminance_tracks.get();
+        auto tracksRef = m_trackWeakRef.lock();
         assert (tracksRef->size() == m_plots.size ());
         m_plots[0]->setup(tracksRef->at(0));
         m_plots[1]->setup(tracksRef->at(1));
-        if (!tracksRef->at(2).second.empty())
-            m_plots[2]->setup(tracksRef->at(2), graph1D::mapping_option::type_limits);
+        //        if (!tracksRef->at(2).second.empty())
+        //        m_plots[2]->setup(tracksRef->at(2), graph1D::mapping_option::type_limits);
     }
-    
-
     
     if (getCurrentFrame() >= getNumFrames())
     {
-        if (! looping () ) pause ();
+        if (! looping () ) seekToEnd();
         else
             seekToStart();
     }
     
-    mSurface = mFrameSet->getFrame(getCurrentFrame());
+    if (have_movie ())
+        mSurface = mFrameSet->getFrame(getCurrentFrame());
     
     if (m_is_playing ) seekToFrame (getCurrentFrame() + 1);
     
@@ -695,6 +722,7 @@ void lifContext::update ()
             mAuxTimeLineSlider.add_timepoint_marker(tm);
         }
     }
+    
 }
 
 void lifContext::update_instant_image_mouse ()
@@ -711,7 +739,7 @@ void lifContext::update_instant_image_mouse ()
         m_instant_pixel_Color = mSurface->getPixel(m_instant_mouse_image_pos);
     }
     
-  
+    
 }
 
 gl::TextureRef lifContext::pixelInfoTexture ()
@@ -730,7 +758,7 @@ gl::TextureRef lifContext::pixelInfoTexture ()
     to_string(imagePos().x) + "," + to_string(imagePos().y % channel_height) + "]";
     vec2                mSize(250, 100);
     TextBox tbox = TextBox().alignment( TextBox::LEFT).font( mFont ).size( ivec2( mSize.x, TextBox::GROW ) ).text( pos );
-    tbox.setFont( Font( "Times New Roman", 24 ) );
+    tbox.setFont( Font( "Times New Roman", 34 ) );
     if (channel_name == "Red")
         tbox.setColor( ColorA(0.8,0.2,0.1,1.0) );
     else if (channel_name == "Green")
@@ -740,14 +768,13 @@ gl::TextureRef lifContext::pixelInfoTexture ()
     tbox.setBackgroundColor( ColorA( 0.3, 0.3, 0.3, 0.3 ) );
     ivec2 sz = tbox.measure();
     return  gl::Texture2d::create( tbox.render() );
-  }
+}
 
 
 void lifContext::draw_info ()
 {
     if (! m_lifRef) return;
     
-    std::string seri_str = m_serie.info();
     gl::setMatricesWindow( getWindowSize() );
     
     gl::ScopedBlendAlpha blend_;
@@ -773,17 +800,20 @@ void lifContext::draw_info ()
         tbox.offset(mMouseInImagePosition);
         gl::draw( texR, tbox);
     }
-    tinyUi::drawWidgets(mWidgets);
     
- }
+    if (haveTracks())
+        tinyUi::drawWidgets(mWidgets);
+    
+}
 
 
 void lifContext::draw ()
 {
-   
+    
     if( have_movie()  && mSurface )
     {
         Rectf dr = get_image_display_rect();
+        assert(dr.getWidth() > 0 && dr.getHeight() > 0);
         
         switch(m_serie.channelCount)
         {
@@ -806,18 +836,20 @@ void lifContext::draw ()
             gl::drawLine(mLengthPoints.first, mLengthPoints.second);
         }
         
-      
+        
         if (m_serie.channelCount)
         {
             for (int cc = 0; cc < m_plots.size(); cc++)
             {
-                m_plots[cc]->setRect (vl.plot_rects()[cc]);                
+                m_plots[cc]->setRect (vl.plot_rects()[cc]);
                 m_plots[cc]->draw();
             }
         }
         
         mContainer.draw();
         draw_info ();
+        
+        
     }
     
     mUIParams.draw();
