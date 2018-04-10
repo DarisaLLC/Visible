@@ -140,7 +140,7 @@ public:
     
     void set_marker_position (marker_info t) const
     {
-        std::cout << t.current_frame() << "/" << t.count() << std::endl;
+     //   std::cout << t.current_frame() << "/" << t.count() << std::endl;
         vec2 pp ((float)t.norm_index(), 0.0);
         norm_pos (pp);
 
@@ -195,7 +195,7 @@ public:
         
         // draw graph
         {
-            gl::ScopedColor B (ColorA ( 0.0f, 0.0f, 1.0f, 1.0f ));
+            gl::ScopedColor B (strokeColor);
             gl::draw(*mMesh);
         }
         
