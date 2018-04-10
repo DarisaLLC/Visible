@@ -107,7 +107,7 @@ namespace tinyUi
         
         void set_marker_position (marker_info t)
         {
-            std::cout << t.current_frame() << "/" << t.count() << std::endl;
+//            std::cout << t.current_frame() << "/" << t.count() << std::endl;
             set (t.norm_index());
         }
         
