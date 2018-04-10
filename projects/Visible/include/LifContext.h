@@ -83,6 +83,8 @@ public:
 	virtual time_spec_t getCurrentTime ();
 	virtual int getNumFrames ();
 	virtual void processDrag (ivec2 pos);
+    
+    bool haveTracks();
 	
 	const params::InterfaceGl& ui_params ()
 	{
@@ -128,6 +130,7 @@ private:
 	Rectf get_image_display_rect ();
 	
     void signal_content_loaded ();
+    void signal_flu_stats_available ();
     void signal_sm1d_available (int&);
     void signal_sm1dmed_available (int&,int&);
  
@@ -195,6 +198,7 @@ private:
 	int mAuxTimeSliderIndex;
 	
 	
+    std::weak_ptr<vectorOfnamedTrackOfdouble_t> m_trackWeakRef;
 	vec2 m_zoom;
 	boost::filesystem::path mPath;
 	vec2		mMousePos;
