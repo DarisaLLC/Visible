@@ -66,7 +66,7 @@ public:
     ci::Rectf getRect () const { return m_rect; }
     void setRect (const ci::Rectf& new_rect) { m_rect = new_rect; }
     
-    ci::Color pressedColor, idleColor, overColor, strokeColor;
+    ci::Color pressedColor, idleColor, overColor, strokeColor, backgroundColor;
     
 protected:
     ci::Rectf m_rect;
