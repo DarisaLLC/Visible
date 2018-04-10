@@ -83,12 +83,15 @@ class LifSignaler : public base_signaler
     getName () const { return "Lif Signaler"; }
 };
 
+
 class lif_processor : public LifSignaler
 {
 public:
     
     typedef void (sig_cb_content_loaded) ();
+    typedef void (sig_cb_flu_stats_available) ();
     typedef void (sig_cb_frame_loaded) (int&, double&);
+    
     typedef void (sig_cb_sm1d_available) (int&);
     typedef void (sig_cb_sm1dmed_available) (int&,int&);
     typedef std::vector<roiWindow<P8U>> channel_images_t;
@@ -97,6 +100,7 @@ public:
     {
         // Signals we provide
         signal_content_loaded = createSignal<lif_processor::sig_cb_content_loaded>();
+        signal_flu_available = createSignal<lif_processor::sig_cb_flu_stats_available>();
         signal_frame_loaded = createSignal<lif_processor::sig_cb_frame_loaded>();
         signal_sm1d_available = createSignal<lif_processor::sig_cb_sm1d_available>();
         signal_sm1dmed_available = createSignal<lif_processor::sig_cb_sm1dmed_available>();
@@ -105,6 +109,8 @@ public:
         m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
         std::function<void ()> sm_content_loaded_cb = std::bind (&lif_processor::sm_content_loaded, this);
         boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
+        
+        
 //        std::function<void (int&)> sm1d_available_cb = boost::bind (&lifContext::signal_sm1d_available, this, _1);
 //        boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_available_cb);
 //        std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&lifContext::signal_sm1dmed_available, this, _1, _2);
@@ -120,22 +126,40 @@ public:
     std::shared_ptr<sm_filter> smFilterRef () { return m_smfilterRef; }
     
     
-    void load (const std::shared_ptr<qTimeFrameCache>& frames)
+    void load (const std::shared_ptr<qTimeFrameCache>& frames,const std::vector<std::string>& names)
     {
+        create_named_tracks(names);
         load_channels_from_images(frames);
-  
-        
     }
+    
+
+    std::shared_ptr<vectorOfnamedTrackOfdouble_t> run_flu_statistics ()
+    {
+        std::vector<timed_double_vec_t> cts (2);
+        std::vector<std::thread> threads(2);
+        for (auto tt = 0; tt < 2; tt++)
+        {
+            threads[tt] = std::thread(IntensityStatisticsRunner(),
+                                      std::ref(m_channel_images[tt]), std::ref(cts[tt]));
+        }
+        std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+        
+        for (auto tt = 0; tt < 2; tt++)
+            m_tracksRef->at(tt).second = cts[tt];
+        
+        // Call the content loaded cb if any
+        if (signal_flu_available && signal_flu_available->num_slots() > 0)
+            signal_flu_available->operator()();
+        
+        return m_tracksRef;
+    }
+    
     // Run to get Entropies and Median Level Set
     std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run (const std::vector<std::string>& names, bool test_data = false)
     {
-        
-
-        create_named_tracks(names);
         channel_images_t c2 = m_channel_images[2];
         loadImagesToMats(c2, m_channel2_mats);
         
-        compute_channel_statistics_threaded();
         //   auto oflow = compute_oflow_threaded ();
         
         
@@ -165,6 +189,7 @@ public:
     
     const std::vector<Rectf>& rois () const { return m_rois; }
     const namedTrackOfdouble_t& similarity_track () const { return m_tracksRef->at(2); }
+    const std::shared_ptr<vectorOfnamedTrackOfdouble_t>& all_track () const { return m_tracksRef; }
     
     // Update. Called also when cutoff offset has changed
     void update ()
@@ -175,6 +200,7 @@ public:
     
 protected:
     boost::signals2::signal<lif_processor::sig_cb_content_loaded>* signal_content_loaded;
+    boost::signals2::signal<lif_processor::sig_cb_flu_stats_available>* signal_flu_available;
     boost::signals2::signal<lif_processor::sig_cb_frame_loaded>* signal_frame_loaded;
     boost::signals2::signal<lif_processor::sig_cb_sm1d_available>* signal_sm1d_available;
     boost::signals2::signal<lif_processor::sig_cb_sm1dmed_available>* signal_sm1dmed_available;
@@ -183,10 +209,6 @@ private:
     
     void sm_content_loaded ()
     {
-        // Call the content loaded cb if any
-        if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
-            signal_content_loaded->operator()();
-        
         std::cout << "----------> sm content_loaded\n";
     }
     // Assumes LIF data -- use multiple window.
@@ -198,7 +220,6 @@ private:
         m_rois.resize (0);
         std::vector<std::string> names = {"Red", "Green","Blue"};
 
-        cv::Mat mat;
         while (frames->checkFrame(fn))
         {
             auto su8 = frames->getFrame(fn++);
@@ -217,6 +238,11 @@ private:
                 }
             }
         }
+        
+        // Call the content loaded cb if any
+        if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+            signal_content_loaded->operator()();
+        
     }
     
  
@@ -262,21 +288,6 @@ private:
             m_tracksRef->at(tt).first = names[tt];
     }
 
-    void compute_channel_statistics_threaded ()
-    {
-        std::vector<timed_double_vec_t> cts (2);
-        std::vector<std::thread> threads(2);
-        for (auto tt = 0; tt < 2; tt++)
-        {
-            threads[tt] = std::thread(IntensityStatisticsRunner(),
-                                      std::ref(m_channel_images[tt]), std::ref(cts[tt]));
-        }
-        std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
-
-        for (auto tt = 0; tt < 2; tt++)
-            m_tracksRef->at(tt).second = cts[tt];
-    }
-    
     std::shared_ptr<timed_mat_vec_t> compute_oflow_threaded ()
     {
         return OpticalFlowFarnebackRunner()(std::ref(m_channel2_mats));
@@ -309,6 +320,7 @@ private:
 };
 
 template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_content_loaded>&);
+//template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_flu_stats_available>&);
 template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_frame_loaded>&);
 template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_sm1d_available>&);
 template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_sm1dmed_available>&);
