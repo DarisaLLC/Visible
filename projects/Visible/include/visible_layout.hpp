@@ -85,8 +85,6 @@ public:
     
     inline void update_window_size (const ivec2& new_size )
     {
-        if (m_canvas_size == new_size) return;
-        
         ivec2 ns = new_size;
         if (m_keep_aspect)
         {
