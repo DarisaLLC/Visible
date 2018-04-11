@@ -97,8 +97,8 @@ public:
 	void setManualEditMode (bool b)  { mManualEditMode = b; }
 	bool getManualEditMode ()  { return mManualEditMode; }
 	
-	void setShowMotionBubble (bool b)  { mShowMotionBubble = b; }
-	bool getShowMotionBubble ()  { return mShowMotionBubble; }
+	void setAnalyzeMode (bool b)  { mAnalyze = b; }
+	bool getAnalyzeMode ()  { return mAnalyze; }
 	
 	void setZoom (vec2);
 	vec2 getZoom ();
@@ -108,7 +108,8 @@ public:
 	
 	void play_pause_button ();
 	void loop_no_loop_button ();
-	void edit_no_edit_button ();
+    void edit_no_edit_button ();
+    void analyze_analyzing_button ();
 	
 	void receivedEvent ( InteractiveObjectEvent event );
 	
@@ -174,8 +175,8 @@ private:
 	std::vector<series_info> m_series_book;
     std::vector<std::string> m_series_names;
 	std::shared_ptr<lifIO::LifSerie> m_current_serie_ref;
-	int m_selected_serie_index;
-    int m_currently_selected_index;
+	int m_cur_selected_index;
+    int m_prev_selected_index;
 	
 	void seek( size_t xPos );
 	void clear_movie_params ();
@@ -194,6 +195,9 @@ private:
 	int64_t m_seek_position;
 
 	bool m_is_playing, m_is_looping;
+    
+    void add_plot_widgets (const int);
+    
 	uint32_t m_cutoff_pct;
 	int mAuxTimeSliderIndex;
 	
@@ -209,16 +213,16 @@ private:
 	bool mMouseIsMoving;
 	bool mMouseIsDragging;
 	bool mMetaDown;
-	
 	int mMouseInGraphs; // -1 if not, 0 1 2
 	bool mMouseInImage; // if in Image, mMouseInGraph is -1
-	bool mMouseInTimeLine;
-	bool mAuxMouseInTimeLine;
 	
 	ivec2 mMouseInImagePosition;
 	
-	bool mManualEditMode, mShowMotionBubble;
-	std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
+	bool mManualEditMode, mAnalyze;
+    
+    std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
+    std::vector<std::string>  mProcessOrProcessing = {"Process", "Processing"};
+    
 	int mButton_title_index;
 	std::string mButton_title;
 	
