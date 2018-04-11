@@ -354,6 +354,7 @@ protected:
 	TimeLineSlider					mTimeLineSlider;
 	TimeLineSlider					mAuxTimeLineSlider;
 	vector<Widget *>	mWidgets;
+	vector<bool> mMouseInWidgets;
 
 	
 	
