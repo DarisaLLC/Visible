@@ -19,7 +19,12 @@ namespace fs = boost::filesystem;
 class lifContext : public sequencedImageContext
 {
 public:
-	
+	struct clip
+    {
+        size_t begin;
+        size_t end;
+        size_t anchor;
+    };
 	class series_info
 	{
 	public:
@@ -164,8 +169,6 @@ private:
 			
 			si.length_in_seconds = lifer->getSerie(ss).total_duration ();
 			
-			std::cout << si << std::endl;
-			
 			m_series_book.emplace_back (si);
 		}
 	}
@@ -175,9 +178,10 @@ private:
 	std::vector<series_info> m_series_book;
     std::vector<std::string> m_series_names;
 	std::shared_ptr<lifIO::LifSerie> m_current_serie_ref;
-	int m_cur_selected_index;
+    int m_cur_selected_index;
     int m_prev_selected_index;
-	
+    int m_current_clip_index;
+    
 	void seek( size_t xPos );
 	void clear_movie_params ();
 	vec2 texture_to_display_zoom ();
@@ -199,10 +203,10 @@ private:
     void add_plot_widgets (const int);
     
 	uint32_t m_cutoff_pct;
-	int mAuxTimeSliderIndex;
-	
-	
+
     std::weak_ptr<vectorOfnamedTrackOfdouble_t> m_trackWeakRef;
+    std::weak_ptr<vectorOfnamedTrackOfdouble_t> m_pci_trackWeakRef;
+
 	vec2 m_zoom;
 	boost::filesystem::path mPath;
 	vec2		mMousePos;
@@ -225,6 +229,10 @@ private:
     
 	int mButton_title_index;
 	std::string mButton_title;
+    
+    std::vector<std::string> m_contraction_none = {"None"};
+    std::vector<std::string> m_contraction_names;
+    std::vector<clip> m_clips;
 	
 	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
 	{

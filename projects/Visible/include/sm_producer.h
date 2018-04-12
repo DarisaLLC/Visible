@@ -17,11 +17,12 @@
 #include "core/singleton.hpp"
 #include "core/stats.hpp"
 #include "core/stl_utils.hpp"
+#include "sg_filter.h"
 
 using namespace std;
 using namespace boost;
 using namespace svl;
-
+using namespace SGF;
 
 
 class sm_producer
@@ -51,7 +52,7 @@ public:
     
     bool operator () (int start_frame = 0, int frames = 0) const;
     
-  
+    
     
     bool set_auto_run_on () const;
     bool set_auto_run_off () const;
@@ -115,12 +116,6 @@ private:
 
 typedef std::shared_ptr<sm_producer> smProducerRef;
 
-/*
- * in Tandem with sm_producer
- *
- *
- *
- */
 
 class sm_filter
 {
@@ -134,7 +129,7 @@ public:
     };
     
     sm_filter(const deque<double>& entropies, const deque<deque<double>>& mmatrix) :
-    m_entropies (entropies), m_SMatrix (mmatrix), m_cached(false),  mValid (false), m_median_levelset_frac (0.1)
+    m_entropies (entropies), m_SMatrix (mmatrix), m_cached(false),  mValid (false), m_median_levelset_frac (0.0)
     {
         m_matsize = m_entropies.size();
         m_ranks.resize (m_matsize);
@@ -147,8 +142,18 @@ public:
     size_t size () const { return m_matsize; }
     
     const deque<double>& entropies () { return m_entropies; }
-    const deque<double>& median_adjusted () { return m_signal; }
+    const deque<double>& filtered () { return m_signal; }
     
+    bool savgol_filter () const
+    {
+        m_signal.resize(m_entropies.size (), 0.0);
+        int wlen = std::floor (100 * m_median_levelset_frac);
+        
+        savgol (m_entropies, m_signal, wlen);
+        return true;
+    }
+    
+    // @todo: add multi-contraction
     bool median_levelset_similarities () const
     {
         if (verify_input())
@@ -156,42 +161,58 @@ public:
             index_val_t lowest;
             lowest.first = -1;
             lowest.second = std::numeric_limits<double>::max ();
-            
             compute_median_levelsets ();
-            
             size_t count = std::floor (m_entropies.size () * m_median_levelset_frac);
-            m_signal.resize(m_entropies.size (), 0.0);
-            for (auto ii = 0; ii < m_signal.size(); ii++)
+            if (count == 0)
             {
-                double val = 0;
-                for (int index = 0; index < count; index++)
+                m_signal = m_entropies;
+                auto min_itr = min_element( m_signal.begin(), m_signal.end() );
+                lowest.first = std::distance(m_signal.begin(), min_itr);
+                lowest.second = *min_itr;
+            }
+                
+            else
+            {
+                m_signal.resize(m_entropies.size (), 0.0);
+                for (auto ii = 0; ii < m_signal.size(); ii++)
                 {
-                    // get the index
-                    auto jj = m_ranks[index];
-                    // fetch the cross match value for
-                    val += m_SMatrix[jj][ii];
-                }
-                m_signal[ii] = val;
-                if (val < lowest.second)
-                {
-                    lowest.second = val;
-                    lowest.first = ii;
+                    double val = 0;
+                    for (int index = 0; index < count; index++)
+                    {
+                        // get the index
+                        auto jj = m_ranks[index];
+                        // fetch the cross match value for
+                        val += m_SMatrix[jj][ii];
+                    }
+                    val = val / count;
+                    m_signal[ii] = val;
+                    if (val < lowest.second)
+                    {
+                        lowest.second = val;
+                        lowest.first = ii;
+                    }
                 }
             }
-
+            
             m_peaks.resize(0);
             m_peaks.emplace_back(lowest.first, m_signal[lowest.first]);
+            contraction one;
+            one.peak = m_peaks[0];
+            m_contractions.emplace_back(one);
             
-//            auto iter_to_peak = m_signal.begin();
-//            std::advance (iter_to_peak, lowest.first);
-//            find_flat(signal.begin(), iter_to_peak);
+            std::cout << "[" << lowest.first << "] = " << lowest.second << " mfrac = " << m_median_levelset_frac << std::endl;
+            
+            
+            //            auto iter_to_peak = m_signal.begin();
+            //            std::advance (iter_to_peak, lowest.first);
+            //            find_flat(signal.begin(), iter_to_peak);
             
             return true;
         }
         return false;
     }
     
-    bool set_median_levelset_pct (float frac) const { m_median_levelset_frac = frac; m_cached = false; return median_levelset_similarities(); }
+    void set_median_levelset_pct (float frac) const { m_median_levelset_frac = frac;  }
     float get_median_levelset_pct () const { return m_median_levelset_frac; }
     
     const std::vector<index_val_t>& low_peaks () const
@@ -199,12 +220,59 @@ public:
         return m_peaks;
     }
     
+    const std::vector<contraction>& contractions () const
+    {
+        return m_contractions;
+    }
+    
+    static double Median_levelsets (const deque<double>& entropies,  std::vector<int>& ranks )
+    {
+        vector<double> entcpy;
+        
+        for (const auto val : entropies)
+            entcpy.push_back(val);
+        auto median_value = svl::Median(entcpy);
+        // Subtract median from all
+        for (double& val : entcpy)
+            val = std::abs (val - median_value );
+        
+        // Sort according to distance to the median. small to high
+        ranks.resize(entropies.size());
+        std::iota(ranks.begin(), ranks.end(), 0);
+        auto comparator = [&entcpy](double a, double b){ return entcpy[a] < entcpy[b]; };
+        std::sort(ranks.begin(), ranks.end(), comparator);
+        return median_value;
+    }
+    
+    
+    
+    static void savgol (const deque<double>& signal, deque<double>& dst, int winlen)
+    {
+        // for scalar data:
+        int order = 4;
+        SGF::real sample_time = 0; // this is simply a float or double, you can change it in the header sg_filter.h if yo u want
+        SGF::ScalarSavitzkyGolayFilter filter(order, winlen, sample_time);
+        dst.resize(signal.size());
+        SGF::real output;
+        for (auto ii = 0; ii < signal.size(); ii++)
+        {
+            filter.AddData(signal[ii]);
+            if (! filter.IsInitialized()) continue;
+            dst[ii] = 0;
+            int ret_code;
+            ret_code = filter.GetOutput(0, output);
+            dst[ii] = output;
+        }
+        
+    }
+    
+    
 private:
     void norm_scale (const std::deque<double>& src, std::deque<double>& dst) const
     {
         deque<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
         deque<double>::const_iterator top = std::max_element (src.begin (), src.end() );
-
+        
         if (svl::equal(*top, *bot)) return;
         double scaleBy = *top - *bot;
         dst.resize (src.size ());
@@ -215,23 +283,7 @@ private:
     void compute_median_levelsets () const
     {
         if (m_cached) return;
-        
-        vector<double> entcpy;
-        
-        for (const auto val : m_entropies)
-            entcpy.push_back(1.0 - val);
-        
-        auto median_value = svl::Median(entcpy);
-        
-        // Subtract median from all
-        for (double& val : entcpy)
-            val = std::abs(val - median_value );
-        
-        // Sort according to distance to the median. small to high
-        m_ranks.resize(m_matsize);
-        std::iota(m_ranks.begin(), m_ranks.end(), 0);
-        auto comparator = [&entcpy](double a, double b){ return entcpy[a] < entcpy[b]; };
-        std::sort(m_ranks.begin(), m_ranks.end(), comparator);
+        sm_filter::Median_levelsets (m_entropies, m_ranks);
         m_cached = true;
     }
     
@@ -254,17 +306,17 @@ private:
 #if 0
     index_val_t find_flat (const std::deque<double>::iterator& from, const std::deque<double>::iterator& to) const
     {
-
+        
         std::deque<double> adjdiff;
         std::adjacent_difference (from, to, std::ostream_iterator<double>(std::cout, " "));
         std::adjacent_difference (from, to, adjdiff);
         std::deque<double>::iterator mini = std::min_element(adjdiff.begin(), adjdiff.end());
         auto dis = std::distance(from, mini);
         std::cout << dis << " = " << *mini << std::endl;
-
+        
     }
 #endif
-    mutable float m_median_levelset_frac;    
+    mutable float m_median_levelset_frac;
     mutable deque<deque<double>>        m_SMatrix;   // Used in eExhaustive and
     deque<double>               m_entropies;
     deque<double>               m_accum;
@@ -274,6 +326,7 @@ private:
     mutable std::atomic<bool> m_cached;
     mutable bool mValid;
     mutable std::vector<index_val_t> m_peaks;
+    mutable std::vector<contraction> m_contractions;
     
 };
 

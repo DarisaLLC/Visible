@@ -129,18 +129,6 @@ bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif
 
 
 
-void  lifContext::update_log (const std::string& msg)
-{
-    if (msg.length() > 2)
-        mLog = msg;
-    TextBox tbox = TextBox().alignment( TextBox::RIGHT).font( mFont ).size( mSize ).text( mLog );
-    tbox.setColor( Color( 1.0f, 0.65f, 0.35f ) );
-    tbox.setBackgroundColor( ColorA( 0.3f, 0.3f, 0.3f, 0.4f )  );
-    tbox.measure();
-    mTextTexture = gl::Texture2d::create( tbox.render() );
-}
-
-
             /************************
              *
              *  UI Bind Functions
@@ -242,13 +230,14 @@ void lifContext::analyze_analyzing_button()
 
 void lifContext::seekToEnd ()
 {
-    seekToFrame (getNumFrames() - 1);
+    seekToFrame (m_clips[m_current_clip_index].end);
+//    seekToFrame (getNumFrames() - 1);
     mUIParams.setOptions( "mode", "label=`@ End`" );
 }
 
 void lifContext::seekToStart ()
 {
-    seekToFrame(0);
+    seekToFrame(m_clips[m_current_clip_index].anchor);
     mUIParams.setOptions( "mode", "label=`@ Start`" );
 }
 
@@ -437,8 +426,6 @@ void lifContext::setMedianCutOff (uint32_t newco)
     if (tmp == current) return;
     sp->set_median_levelset_pct (tmp / 100.0f);
     m_lifProcRef->update();
-    auto tracksRef = m_lifProcRef->similarity_track();
-    m_plots[2]->setup(tracksRef);
 }
 
 uint32_t lifContext::getMedianCutOff () const
@@ -464,6 +451,7 @@ void lifContext::setup()
     srand( 133 );
     mUIParams = params::InterfaceGl( "Lif Player ", toPixels( ivec2( 300, 400 )));
     mUIParams.setPosition(getWindowSize() / 3);
+    m_contraction_names = m_contraction_none;
     
     m_prev_selected_index = -1;
     loadLifFile ();
@@ -512,6 +500,21 @@ void lifContext::setup()
             const std::function<int ()> getter = std::bind(&lifContext::getCurrentFrame, this);
             mUIParams.addParam ("Current Time Step", setter, getter);
         }
+        
+        clip entire;
+        entire.begin = 0;
+        entire.end = getNumFrames()-2;
+        entire.anchor = 0;
+        m_clips.push_back(entire);
+        
+        mUIParams.addParam( "Select ", m_contraction_names, &m_current_clip_index )
+        .updateFn( [this]
+                  {
+                      if (m_current_clip_index >= 0 && m_current_clip_index < m_contraction_names.size() )
+                      {
+                          std::cout << m_contraction_names[m_current_clip_index] << std::endl;
+                      }
+                  });
         
         mUIParams.addSeparator();
         mUIParams.addButton("Play / Pause ", bind( &lifContext::play_pause_button, this ) );
@@ -578,6 +581,14 @@ void lifContext::signal_sm1d_available (int& dummy)
 void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
 {
     static int ii = 0;
+    
+    if (haveTracks())
+    {
+        auto tracksRef = m_pci_trackWeakRef.lock();
+        if (!tracksRef->at(0).second.empty())
+            m_plots[2]->setup(tracksRef->at(0));
+    }
+    
     std::cout << "sm1dmed available: " << ++ii << std::endl;
 }
 
@@ -629,19 +640,12 @@ void lifContext::add_plot_widgets (const int channel_count)
         m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
     }
     
-    mTimeLineSlider.setBounds (vl.display_timeline_rect());
-    mTimeLineSlider.clear_timepoint_markers();
-    mTimeLineSlider.setTitle ("Time Line");
-    m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mTimeLineSlider, std::placeholders::_1));
-    mWidgets.push_back( &mTimeLineSlider );
-#if 0
-    mAuxTimeSliderIndex = vl.add_slider_rect ();
-    mAuxTimeLineSlider.clear_timepoint_markers();
-    mAuxTimeLineSlider.setTitle("Contraction Markers");
-    mAuxTimeLineSlider.setBounds(vl.slider_rects()[mAuxTimeSliderIndex]);
-    m_aux_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mAuxTimeLineSlider, std::placeholders::_1));
-    mWidgets.push_back( &mAuxTimeLineSlider );
-#endif
+    mMainTimeLineSlider.setBounds (vl.display_timeline_rect());
+    mMainTimeLineSlider.clear_timepoint_markers();
+    mMainTimeLineSlider.setTitle ("Time Line");
+    m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mMainTimeLineSlider, std::placeholders::_1));
+    mWidgets.push_back( &mMainTimeLineSlider );
+
     
     getWindow()->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
     
@@ -670,6 +674,7 @@ void lifContext::loadCurrentSerie ()
         mFrameSet->channel_names (m_series_book[m_cur_selected_index].channel_names);
         mMediaInfo = mFrameSet->media_info();
         vl.init (app::getWindow(), mFrameSet->media_info());
+        mMediaInfo.output(std::cout);
         
         std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names);
         
@@ -679,6 +684,7 @@ void lifContext::loadCurrentSerie ()
             getWindow()->setTitle( title );
             const tiny_media_info tm = mFrameSet->media_info ();
             getWindow()->getApp()->setFrameRate(tm.getFramerate() * 2);
+
             
             mScreenSize = tm.getSize();
             m_frameCount = tm.getNumFrames ();
@@ -700,12 +706,12 @@ void lifContext::loadCurrentSerie ()
             seekToStart();
             play();
             
-#if 1
+
             m_async_luminance_tracks = std::async(std::launch::async,
                                                   &lif_processor::run_flu_statistics,
                                                   m_lifProcRef.get());
-#endif
-            m_async_luminance_tracks = std::async(std::launch::async, &lif_processor::run, m_lifProcRef.get());
+
+            m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci, m_lifProcRef.get());
         }
     }
     catch( const std::exception &ex ) {
@@ -730,6 +736,18 @@ Rectf lifContext::get_image_display_rect ()
 
 
 
+void  lifContext::update_log (const std::string& msg)
+{
+    if (msg.length() > 2)
+        mLog = msg;
+    TextBox tbox = TextBox().alignment( TextBox::RIGHT).font( mFont ).size( mSize ).text( mLog );
+    tbox.setColor( Color( 1.0f, 0.65f, 0.35f ) );
+    tbox.setBackgroundColor( ColorA( 0.3f, 0.3f, 0.3f, 0.4f )  );
+    tbox.measure();
+    mTextTexture = gl::Texture2d::create( tbox.render() );
+}
+
+
 void lifContext::resize ()
 {
     if (! have_movie () ) return;
@@ -742,14 +760,12 @@ void lifContext::resize ()
         m_plots[cc]->setRect (vl.plot_rects()[cc]);
     }
     
-    mTimeLineSlider.setBounds (vl.display_timeline_rect());
- //   mAuxTimeLineSlider.setBounds(vl.slider_rects()[mAuxTimeSliderIndex]);
-    
+    mMainTimeLineSlider.setBounds (vl.display_timeline_rect());
 }
 
 bool lifContext::haveTracks()
 {
-    return ! m_trackWeakRef.expired();
+    return ! m_trackWeakRef.expired() && ! m_pci_trackWeakRef.expired();
 }
 
 void lifContext::update ()
@@ -759,18 +775,25 @@ void lifContext::update ()
     
     // If Plots are ready, set them up
     // It is ready only for new data
-    if ( is_ready (m_async_luminance_tracks))
-    {
+    if ( is_ready (m_async_luminance_tracks) )
         m_trackWeakRef = m_async_luminance_tracks.get();
+    if ( is_ready (m_async_pci_tracks))
+        m_pci_trackWeakRef = m_async_pci_tracks.get();
+    
+    if (! m_trackWeakRef.expired())
+    {
         auto tracksRef = m_trackWeakRef.lock();
-        assert (tracksRef->size() == m_plots.size ());
         m_plots[0]->setup(tracksRef->at(0));
         m_plots[1]->setup(tracksRef->at(1));
-        if (!tracksRef->at(2).second.empty())
-            m_plots[2]->setup(tracksRef->at(2), graph1D::mapping_option::type_limits);
+    }
+    if ( ! m_pci_trackWeakRef.expired())
+    {
+        auto tracksRef = m_pci_trackWeakRef.lock();
+        if (!tracksRef->at(0).second.empty())
+            m_plots[2]->setup(tracksRef->at(0));
     }
     
-    if (getCurrentFrame() >= getNumFrames())
+    if (getCurrentFrame() > getNumFrames())
     {
         if (! looping () ) seekToEnd();
         else
@@ -780,12 +803,15 @@ void lifContext::update ()
     if (have_movie ())
         mSurface = mFrameSet->getFrame(getCurrentFrame());
     
-    if (m_is_playing ) seekToFrame (getCurrentFrame() + 1);
-    
+    if (m_is_playing )
+    {
+        update_instant_image_mouse ();
+        seekToFrame (getCurrentFrame() + 1);
+    }
     // TBD: this is inefficient as it continuously clears and updates contraction peak and time markers
     // should be signal driven.
-#if 0
-    mAuxTimeLineSlider.clear_timepoint_markers();
+
+    mMainTimeLineSlider.clear_timepoint_markers();
     if (m_lifProcRef && m_lifProcRef->smFilterRef() && ! m_lifProcRef->smFilterRef()->low_peaks().empty())
     {
         for(auto lowp : m_lifProcRef->smFilterRef()->low_peaks())
@@ -793,11 +819,14 @@ void lifContext::update ()
             tinyUi::timepoint_marker_t tm;
             tm.first = float(lowp.first) / m_lifProcRef->smFilterRef()->size();
             tm.second = ColorA (0.9, 0.3, 0.1, 0.75);
-            mAuxTimeLineSlider.add_timepoint_marker(tm);
+            mMainTimeLineSlider.add_timepoint_marker(tm);
         }
     }
-#endif
-    
+
+    // Update text texture with most recent text
+    auto num_str = to_string( int( getCurrentFrame ()));
+    std::string frame_str = m_is_playing ? string( "Playing: " + num_str) : string ("Paused: " + num_str);
+    update_log (frame_str);
 }
 
 void lifContext::update_instant_image_mouse ()
@@ -822,15 +851,12 @@ gl::TextureRef lifContext::pixelInfoTexture ()
     if (! mMouseInImage) return gl::TextureRef ();
     TextLayout lout;
     const auto names = m_series_book[m_cur_selected_index].channel_names;
-    std::string channel_name = " ";
-    if(m_instant_channel < names.size())
-        channel_name = names[m_instant_channel];
+    auto channel_name = (m_instant_channel < names.size()) ? names[m_instant_channel] : " ";
     
     // LIF has 3 Channels.
     uint32_t channel_height = mMediaInfo.getChannelSize().y;
-    std::string pos = channel_name + "[ " +
-    toString(((int)m_instant_pixel_Color.g)) + " @ " +
-    to_string(imagePos().x) + "," + to_string(imagePos().y % channel_height) + "]";
+    std::string pos = " " + toString(((int)m_instant_pixel_Color.g)) + " @ [ " +
+        to_string(imagePos().x) + "," + to_string(imagePos().y % channel_height) + "]";
     vec2                mSize(250, 100);
     TextBox tbox = TextBox().alignment( TextBox::LEFT).font( mFont ).size( ivec2( mSize.x, TextBox::GROW ) ).text( pos );
     tbox.setFont( Font( "Times New Roman", 34 ) );
@@ -874,6 +900,13 @@ void lifContext::draw_info ()
         Rectf tbox = texR->getBounds();
         tbox.offset(mMouseInImagePosition);
         gl::draw( texR, tbox);
+    }
+    
+    
+    if (mTextTexture)
+    {
+        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
+        gl::draw(mTextTexture, textrect);
     }
     
 //    if (haveTracks())

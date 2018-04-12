@@ -351,8 +351,8 @@ public:
 
 	
 protected:
-	TimeLineSlider					mTimeLineSlider;
-	TimeLineSlider					mAuxTimeLineSlider;
+	int mMainTimeLineSliderIndex;
+	TimeLineSlider                    mMainTimeLineSlider;
 	vector<Widget *>	mWidgets;
 	vector<bool> mMouseInWidgets;
 
@@ -365,6 +365,8 @@ protected:
 	async_vectorOfnamedTrackOfdouble_t m_async_luminance_tracks;
 	vectorOfVectorOfnamedTrackOfmat_t m_oflow_tracks;
 	async_vectorOfnamedTrackOfmat_t m_async_oflow_tracks;
+	vectorOfVectorOfnamedTrackOfdouble_t m_pci_tracks;
+	async_vectorOfnamedTrackOfdouble_t m_async_pci_tracks;
 	
 	
 	bool m_have_tracks;

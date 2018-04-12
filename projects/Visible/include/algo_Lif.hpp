@@ -7,6 +7,7 @@
 #include <string>
 #include <typeinfo>
 #include <vector>
+#include <deque>
 #include <sstream>
 #include <typeindex>
 #include <map>
@@ -54,14 +55,14 @@ struct OpticalFlowFarnebackRunner
             cv::imwrite(imgpath, frames[ii]);
             std::cout << "wrote Out " << imgpath << std::endl;
             results->emplace_back(res);
-        
+            
         }
         return results;
     }
     
- 
     
-    static void drawOptFlowMap(const Mat& flow, Mat& cflowmap, int step,
+    
+    static void drawOptFlowMap(const cv::Mat& flow, cv::Mat& cflowmap, int step,
                                double, const Scalar& color)
     {
         for(int y = 0; y < cflowmap.rows; y += step)
@@ -73,7 +74,7 @@ struct OpticalFlowFarnebackRunner
                 circle(cflowmap, cv::Point(x,y), 2, color, -1);
             }
     }
-
+    
 };
 
 // For base classing
@@ -111,15 +112,15 @@ public:
         boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
         
         
-//        std::function<void (int&)> sm1d_available_cb = boost::bind (&lifContext::signal_sm1d_available, this, _1);
-//        boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_available_cb);
-//        std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&lifContext::signal_sm1dmed_available, this, _1, _2);
-//        boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_available_cb);
-//
+        //        std::function<void (int&)> sm1d_available_cb = boost::bind (&lifContext::signal_sm1d_available, this, _1);
+        //        boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_available_cb);
+        //        std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&lifContext::signal_sm1dmed_available, this, _1, _2);
+        //        boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_available_cb);
+        //
         
         
         
-
+        
     }
     
     const smProducerRef sm () const { return m_sm; }
@@ -132,7 +133,7 @@ public:
         load_channels_from_images(frames);
     }
     
-
+    
     std::shared_ptr<vectorOfnamedTrackOfdouble_t> run_flu_statistics ()
     {
         std::vector<timed_double_vec_t> cts (2);
@@ -155,21 +156,14 @@ public:
     }
     
     // Run to get Entropies and Median Level Set
-    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run (const std::vector<std::string>& names, bool test_data = false)
+    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run_pci ()
     {
         channel_images_t c2 = m_channel_images[2];
-        loadImagesToMats(c2, m_channel2_mats);
-        
-        //   auto oflow = compute_oflow_threaded ();
-        
-        
         auto sp =  sm();
         sp->load_images (c2);
-        
-     
         std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
         std::future<bool>  future_ss = task.get_future();  // get a future
-        std::thread(std::move(task)).detach(); // launch on a thread
+        std::thread(std::move(task)).join(); // Finish on a thread
         if (future_ss.get())
         {
             // Signal we are done with ACI
@@ -177,14 +171,13 @@ public:
             if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
                 signal_sm1d_available->operator()(dummy);
             
-            const deque<double>& entropies = sp->shannonProjection ();
-            const deque<deque<double>>& smat = sp->similarityMatrix();
-            m_smfilterRef = std::make_shared<sm_filter> (entropies, smat);
-            
+            m_entropies = sp->shannonProjection ();
+            m_smat = sp->similarityMatrix();
+            m_smfilterRef = std::make_shared<sm_filter> (m_entropies, m_smat);
             
             update ();
         }
-        return m_tracksRef;
+        return m_pci_tracksRef;
     }
     
     const std::vector<Rectf>& rois () const { return m_rois; }
@@ -194,8 +187,8 @@ public:
     // Update. Called also when cutoff offset has changed
     void update ()
     {
-        if(m_tracksRef && !m_tracksRef->empty() && m_smfilterRef && m_smfilterRef->isValid())
-            entropiesToTracks(m_tracksRef->at(2));
+        if(m_pci_tracksRef && !m_pci_tracksRef->empty() && m_smfilterRef && m_smfilterRef->isValid())
+            entropiesToTracks(m_pci_tracksRef->at(0));
     }
     
 protected:
@@ -219,14 +212,14 @@ private:
         m_channel_images.resize (3);
         m_rois.resize (0);
         std::vector<std::string> names = {"Red", "Green","Blue"};
-
+        
         while (frames->checkFrame(fn))
         {
             auto su8 = frames->getFrame(fn++);
             auto m3 = svl::NewRefMultiFromSurface (su8, names, fn);
             for (auto cc = 0; cc < m3->planes(); cc++)
                 m_channel_images[cc].emplace_back(m3->plane(cc));
-
+            
             // Assumption: all have the same 3 channel concatenated structure
             // Fetch it only once
             if (m_rois.empty())
@@ -245,22 +238,18 @@ private:
         
     }
     
- 
+    
     
     // Note tracks contained timed data.
     void entropiesToTracks (namedTrackOfdouble_t& track)
     {
+        if (! m_smfilterRef->median_levelset_similarities  ()) return;
+        
+        
         track.second.clear();
-        if (m_smfilterRef->median_levelset_similarities())
-        {
-            // Signal we are done with median level set
-            static int dummy;
-            if (signal_sm1dmed_available && signal_sm1dmed_available->num_slots() > 0)
-                signal_sm1dmed_available->operator()(dummy, dummy);
-        }
-
+        
         auto bee = m_smfilterRef->entropies().begin();
-        auto mee = m_smfilterRef->median_adjusted().begin();
+        auto mee = m_smfilterRef->filtered().begin();
         for (auto ss = 0; bee != m_smfilterRef->entropies().end() && ss < frame_count(); ss++, bee++, mee++)
         {
             index_time_t ti;
@@ -270,6 +259,11 @@ private:
             res.second = *mee;
             track.second.emplace_back(res);
         }
+        
+        // Signal we are done with median level set
+        static int dummy;
+        if (signal_sm1dmed_available && signal_sm1dmed_available->num_slots() > 0)
+            signal_sm1dmed_available->operator()(dummy, dummy);
     }
     
     size_t frame_count () const
@@ -279,15 +273,20 @@ private:
         else return 0;
     }
     
+    // @note Specific to ID Lab Lif Files
     void create_named_tracks (const std::vector<std::string>& names)
     {
         m_tracksRef = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
+        m_pci_tracksRef = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
         
-        m_tracksRef->resize (names.size ());
-        for (auto tt = 0; tt < names.size(); tt++)
+        m_tracksRef->resize (2);
+        m_pci_tracksRef->resize (1);
+        for (auto tt = 0; tt < names.size()-1; tt++)
             m_tracksRef->at(tt).first = names[tt];
+        m_pci_tracksRef->at(0).first = names[2];
+        
     }
-
+    
     std::shared_ptr<timed_mat_vec_t> compute_oflow_threaded ()
     {
         return OpticalFlowFarnebackRunner()(std::ref(m_channel2_mats));
@@ -304,9 +303,12 @@ private:
         }
         while (++vitr != images.end());
     }
-
+    
+    
     
 private:
+    deque<double> m_entropies;
+    deque<deque<double>> m_smat;
     smProducerRef m_sm;
     channel_images_t m_images;
     std::vector<channel_images_t> m_channel_images;
@@ -316,6 +318,7 @@ private:
     Rectf m_all;
     std::shared_ptr<sm_filter> m_smfilterRef;
     std::deque<double> m_medianLevel;
+    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  m_pci_tracksRef;
     std::shared_ptr<vectorOfnamedTrackOfdouble_t>  m_tracksRef;
 };
 

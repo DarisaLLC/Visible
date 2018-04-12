@@ -60,7 +60,7 @@ struct tiny_media_info
     uint32_t getNumChannels () const { return mChannels; }
     
     
-    const std::ostream& operator<< (std::ostream& std_stream)
+    std::ostream& output (std::ostream& std_stream)
     {
         if (! isImageFolder ())
             std::cout  << " -- General Movie Info -- " << std::endl;

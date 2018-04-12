@@ -53,7 +53,7 @@ void prepareSettings( App::Settings *settings )
     settings->setHighDensityDisplayEnabled();
     settings->setWindowSize( 848, 564 );
     settings->setFrameRate( 60 );
-    settings->setResizable( false );
+    settings->setResizable( true );
     //    settings->setWindowSize( 640, 480 );
     //    settings->setFullScreen( false );
     //    settings->setResizable( true );
@@ -307,12 +307,12 @@ void VisibleApp::update_log (const std::string& msg)
 
 void VisibleApp::windowMouseDown( MouseEvent &mouseEvt )
 {
-    update_log ( "Mouse down in window" );
+  //  update_log ( "Mouse down in window" );
 }
 
 void VisibleApp::windowMove()
 {
-    update_log("window pos: " + toString(getWindow()->getPos()));
+  //  update_log("window pos: " + toString(getWindow()->getPos()));
 }
 
 void VisibleApp::displayChange()

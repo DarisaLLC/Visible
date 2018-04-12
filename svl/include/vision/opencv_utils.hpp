@@ -87,7 +87,7 @@ namespace svl
     // P is roiWindow<>
     template<typename P>
     void cvResize (const P& roi, P& dst, float col_sample, float row_sample);
-    double getPSNR(const Mat& I1, const Mat& I2);
+    double getPSNR(const cv::Mat& I1, const cv::Mat& I2);
     
 #define cv_drawCross( img, center, color, d )\
 cv::line( img, cv::Point( center.x - d, center.y), cv::Point( center.x + d, center.y), color, 1, CV_AA, 0); \
@@ -127,7 +127,7 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     
     void getLuminanceCenterOfMass (const cv::Mat& gray, cv::Point2f& com);
     
-    void computeNormalizedColorHist(const Mat& image, Mat& hist, int N, double minProb);
+    void computeNormalizedColorHist(const cv::Mat& image, cv::Mat& hist, int N, double minProb);
     
     bool matIsEqual(const cv::Mat mat1, const cv::Mat mat2);
        
@@ -216,9 +216,9 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
         return out;
     }
     
-    void output(Mat mat, int prec, float base = 1.0f, char be = '{', char en = '}');
+    void output(cv::Mat mat, int prec, float base = 1.0f, char be = '{', char en = '}');
     
-    void outputU8 (const Mat& mat, char be = '{', char en = '}');
+    void outputU8 (const cv::Mat& mat, char be = '{', char en = '}');
 }
 
 

@@ -124,7 +124,7 @@ private:
 
 	bool m_is_playing, m_is_looping;
 	uint32_t m_cutoff_pct;
-	int mAuxTimeSliderIndex;
+
 	
 	
 	vec2 m_zoom;

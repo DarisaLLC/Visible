@@ -70,6 +70,8 @@ public:
     
     // Setup should get called only once.
     // TBD: implement reset
+    // Call back is set ony once
+    // Others, setup can be called to update
     void setup (size_t length, Graph1DSetCb callback)
     {
         if ( mIsSet ) return;
@@ -89,14 +91,11 @@ public:
         }
         m_CB = bind (&graph1D::get, this, std::placeholders::_1);
         make_plot_mesh ();
-        mIsSet = true;
     }
     
     // load the data and bind a function to access it
-    void setup (const namedTrackOfdouble_t& track, mapping_option mopt = data_limits)
+    void setup (const namedTrackOfdouble_t& track)
     {
-        if ( mIsSet ) return;
-        
         const timed_double_vec_t& ds = track.second;
         mBuffer.clear ();
         std::vector<timed_double_t>::const_iterator reader = ds.begin ();

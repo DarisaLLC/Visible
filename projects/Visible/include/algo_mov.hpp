@@ -51,6 +51,26 @@ public:
   //  const smProducerRef sm () const { return m_sm; }
 //    std::shared_ptr<sm_filter> smFilterRef () { return m_smfilterRef; }
     
+    
+    // Assumes RGB
+    static void load_channels_from_images (const std::shared_ptr<qTimeFrameCache>& frames,  std::vector<channel_images_t>& channels)
+    {
+        int64_t fn = 0;
+        channels.clear();
+        channels.resize (3);
+        while (frames->checkFrame(fn))
+        {
+            auto su8 = frames->getFrame(fn++);
+            auto m1 = svl::NewRedFromSurface(su8);
+            channels[0].emplace_back(m1);
+            auto m2 = svl::NewGreenFromSurface(su8);
+            channels[1].emplace_back(m2);
+            auto m3 = svl::NewBlueFromSurface(su8);
+            channels[2].emplace_back(m3);
+        }
+    }
+    
+    
 protected:
     boost::signals2::signal<mov_processor::mov_cb_content_loaded>* signal_content_loaded;
     boost::signals2::signal<mov_processor::mov_cb_frame_loaded>* signal_frame_loaded;
@@ -58,33 +78,14 @@ protected:
     boost::signals2::signal<mov_processor::mov_cb_sm1dmed_available>* signal_sm1dmed_available;
     
 private:
-    
-    // Assumes RGB
-    void load_channels_from_images (const std::shared_ptr<qTimeFrameCache>& frames)
-    {
-        int64_t fn = 0;
-        m_channel_images.clear();
-        m_channel_images.resize (3);
-        cv::Mat mat;
-        while (frames->checkFrame(fn))
-        {
-            auto su8 = frames->getFrame(fn++);
-            auto m1 = svl::NewRedFromSurface(su8);
-            m_channel_images[0].emplace_back(m1);
-            auto m2 = svl::NewGreenFromSurface(su8);
-            m_channel_images[1].emplace_back(m2);
-            auto m3 = svl::NewBlueFromSurface(su8);
-            m_channel_images[2].emplace_back(m3);
-        }
-    }
-    
+  
  
     
     // Note tracks contained timed data.
     void entropiesToTracks (namedTrackOfdouble_t& track)
     {
         track.second.clear();
-        if (m_smfilterRef->median_levelset_similarities())
+        if (m_smfilterRef->savgol_filter())
         {
             // Signal we are done with median level set
             static int dummy;
@@ -93,7 +94,7 @@ private:
         }
 
         auto bee = m_smfilterRef->entropies().begin();
-        auto mee = m_smfilterRef->median_adjusted().begin();
+        auto mee = m_smfilterRef->filtered().begin();
         for (auto ss = 0; bee != m_smfilterRef->entropies().end() && ss < frame_count(); ss++, bee++, mee++)
         {
             index_time_t ti;
@@ -155,7 +156,7 @@ public:
                                                 bool test_data = false)
     {
         
-        load_channels_from_images(frames);
+        mov_processor::load_channels_from_images(frames, m_channel_images);
         create_named_tracks(names);
         compute_channel_statistics_threaded();
 

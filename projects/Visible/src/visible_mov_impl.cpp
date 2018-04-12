@@ -193,8 +193,8 @@ void movContext::seekToFrame (int mark)
 
 void movContext::processDrag( ivec2 pos )
 {
-    if( mTimeLineSlider.hitTest( pos ) ) {
-        mTimeMarker.from_norm(mTimeLineSlider.valueScaled());
+    if( mMainTimeLineSlider.hitTest( pos ) ) {
+        mTimeMarker.from_norm(mMainTimeLineSlider.valueScaled());
         seekToFrame(mTimeMarker.current_frame());
     }
     
@@ -355,10 +355,10 @@ void movContext::loadMovieFile()
                         m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
                     }
                     
-                    mTimeLineSlider.setBounds (vl.display_timeline_rect());
-                    mTimeLineSlider.setTitle ("Time Line");
-                    m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mTimeLineSlider, std::placeholders::_1));
-                    mWidgets.push_back( &mTimeLineSlider );
+                    mMainTimeLineSlider.setBounds (vl.display_timeline_rect());
+                    mMainTimeLineSlider.setTitle ("Time Line");
+                    m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mMainTimeLineSlider, std::placeholders::_1));
+                    mWidgets.push_back( &mMainTimeLineSlider );
                     
                     getWindow()->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
                     
@@ -514,7 +514,7 @@ void movContext::resize ()
         m_plots[cc]->setRect (vl.plot_rects()[cc]);
     }
     
-    mTimeLineSlider.setBounds (vl.display_timeline_rect());
+    mMainTimeLineSlider.setBounds (vl.display_timeline_rect());
     
     
 }

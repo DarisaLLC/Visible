@@ -31,6 +31,8 @@
 #include "core/kmeans1d.hpp"
 #include "core/stl_utils.hpp"
 #include "contraction.hpp"
+#include "sm_producer.h"
+#include "algo_mov.hpp"
 
 using namespace boost;
 
@@ -78,6 +80,72 @@ std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655,
     39.2099, 39.2775, 39.5042, 39.1446, 39.188, 39.2006, 39.1799,
     39.4077, 39.2694, 39.1967, 39.2828, 39.2438, 39.2093, 39.2167,
     39.2749, 39.4703, 39.2846};
+
+
+void norm_scale (const std::vector<double>& src, std::deque<double>& dst)
+{
+    vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
+    vector<double>::const_iterator top = std::max_element (src.begin (), src.end() );
+    
+    if (svl::equal(*top, *bot)) return;
+    double scaleBy = *top - *bot;
+    dst.resize (src.size ());
+    for (int ii = 0; ii < src.size (); ii++)
+        dst[ii] = (src[ii] - *bot) / scaleBy;
+}
+
+
+
+
+void savgol (const deque<double>& signal, deque<double>& dst)
+{
+    // for scalar data:
+    int order = 4;
+    int winlen = 17 ;
+    SGF::real sample_time = 0; // this is simply a float or double, you can change it in the header sg_filter.h if yo u want
+    SGF::ScalarSavitzkyGolayFilter filter(order, winlen, sample_time);
+    dst.resize(signal.size());
+    SGF::real output;
+    for (auto ii = 0; ii < signal.size(); ii++)
+    {
+        filter.AddData(signal[ii]);
+        if (! filter.IsInitialized()) continue;
+        dst[ii] = 0;
+        int ret_code;
+        ret_code = filter.GetOutput(0, output);
+        dst[ii] = output;
+    }
+    
+}
+
+
+TEST(UT_smfilter, basic)
+{
+    vector<int> ranks;
+    deque<double> norms;
+    norm_scale(acid,norms);
+//    stl_utils::Out(norms);
+    
+    deque<double> output;
+    savgol(norms, output);
+    stl_utils::Out(norms);
+    stl_utils::Out(output);
+    
+    auto median_value = sm_filter::Median_levelsets(norms,ranks);
+    
+    std::cout << median_value << std::endl;
+    for (auto ii = 0; ii < norms.size(); ii++)
+    {
+//        std::cout << "[" << ii << "] : " << norms[ii] << "     "  << std::abs(norms[ii] - median_value) << "     "  << ranks[ii] << "     " << norms[ranks[ii]] << std::endl;
+        std::cout << "[" << ii << "] : " << norms[ii] << "     " << output[ii] << std::endl;
+    }
+    
+    
+}
+
+
+
+
 
 TEST(UT_contraction, basic)
 {
@@ -168,7 +236,8 @@ TEST (UT_algo, AVReader)
     
     EXPECT_TRUE(rref->isValid());
     EXPECT_TRUE(sm->count() == 57);
-    
+
+#if 0 // UpdatetothenewAPI
     meanLumAlgorithm::Ref_t al0 = meanLumAlgorithm::create("zero", sm);
     
     std::vector<std::string> names = {"zero", "one", "two"};
@@ -177,7 +246,7 @@ TEST (UT_algo, AVReader)
     al0->run();
     
     al3->run();
-    
+#endif
 //    std::unique_ptr<lum_func_t> f_ut(new lum_func_t (&algo_registry_ut));
 //    
 //    auto lum_func_ti = algo_library::instance().add(f_ut);
@@ -229,10 +298,7 @@ TEST(ut_similarity, run)
         images[i] = tmp;
     }
     
-    
-    EXPECT_EQ (sm.longTermCache() , false);
-    EXPECT_EQ (sm.longTermCache (true) , true);
-    EXPECT_EQ (sm.longTermCache() , true);
+  
     
     fRet = sm.fill(images);
     EXPECT_EQ(fRet, true);
@@ -261,7 +327,7 @@ TEST(ut_similarity, run)
 
 
 
-TEST (UT_qtimeCache, AVReader)
+TEST (UT_mov_processor, basic)
 {
     boost::filesystem::path test_filepath;
     
@@ -271,55 +337,44 @@ TEST (UT_qtimeCache, AVReader)
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
     
-    if (res.second)
-        test_filepath = res.first;
+    test_filepath = res.first;
     
-    avcc::avReaderRef rref = std::make_shared< avcc::avReader> (test_filepath.string(), false);
-    rref->setUserDoneCallBack(done_callback);
+    std::vector<std::string> names = {  "blue", "green", "red"};
+    auto movProcRef = std::make_shared<mov_processor> ();
+    auto m_movie = ocvPlayerRef ( new OcvVideoPlayer );
+    if (m_movie->load (test_filepath.string())) {
+        std::cout <<  m_movie->getFilePath() << " loaded successfully: " << std::endl;
+        
+        std::cout <<  " > Codec: "        << m_movie->getCodec() << std::endl;
+        std::cout <<  " > Duration: "    << m_movie->getDuration() << std::endl;
+        std::cout <<  " > FPS: "        << m_movie->getFrameRate() << std::endl;
+        std::cout <<  " > Num frames: "    << m_movie->getNumFrames() << std::endl;
+        std::cout <<  " > Size: "        << m_movie->getSize() << std::endl;
+    }
     
-    rref->run ();
-    std::shared_ptr<qTimeFrameCache> sm = qTimeFrameCache::create(rref);
+    EXPECT_TRUE(m_movie->isLoaded());
+        
+    auto mFrameSet = qTimeFrameCache::create (m_movie);
+    std::vector<mov_processor::channel_images_t> channels;
+    mov_processor::load_channels_from_images(mFrameSet, channels);
     
-    EXPECT_TRUE(rref->isValid());
-    EXPECT_TRUE(sm->count() == 57);
-    
-    
-}
-
-
-#if 0
-
-TEST (UT_SimilarityProducer, run)
-{
-    boost::filesystem::path test_filepath;
-    
-    // vf does not support QuickTime natively. The ut expectes and checks for failure
-    static std::string qmov_name ("ump4.mov");
-    
-    auto res = dgenv_ptr->asset_path(qmov_name);
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    
-    if (res.second)
-        test_filepath = res.first;
-    
-    {
-        cb_similarity_producer test (test_filepath.string());
-        EXPECT_EQ(0, test.run () );
-        //        EXPECT_EQ(true, test.is_movie_loaded () );
-        EXPECT_EQ(353, test.frameCount ());
-        EXPECT_EQ(353, test.sp->shannonProjection().size () );
-        EXPECT_EQ(false, svl::contains_nan(test.sp->shannonProjection().begin(), test.sp->shannonProjection().end()));
+#if 0 // Not Yet
+    auto sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
+    sp->load_images(channels[0]);
+    sp->operator()(0, 0);
+        
+        EXPECT_EQ(57, sp->frames_in_content());
+        EXPECT_EQ(57, sp->shannonProjection().size () );
+        EXPECT_EQ(false, svl::contains_nan(sp->shannonProjection().begin(),sp->shannonProjection().end()));
         
         std::ofstream f("/Users/arman/tmp/test.txt");
-        for(auto i = test.sp->shannonProjection().begin(); i != test.sp->shannonProjection().end(); ++i) {
+        for(auto i = sp->shannonProjection().begin(); i != sp->shannonProjection().end(); ++i) {
             f << *i << '\n';
         }
-        
-        EXPECT_EQ(true, test.mlies.empty());
-    }
-}
 #endif
+    
+}
+
 
 TEST (UT_cm_timer, run)
 {

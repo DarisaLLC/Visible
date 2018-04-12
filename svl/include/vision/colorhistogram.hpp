@@ -12,6 +12,7 @@
 using namespace std;
 using namespace cv;
 
+
 class ColorSpaceHistogram
 {
 public:
@@ -44,7 +45,7 @@ public:
     void run ()
     {
         /// check if we have all
-        //        calcHist( &hsv, 1, channels, Mat(), // do not use mask
+        //        calcHist( &hsv, 1, channels, cv::Mat(), // do not use mask
         //                 hist, 2, histSize, ranges,
         //                 true, // the histogram is uniform
         //                 false );
@@ -56,7 +57,7 @@ public:
         const float* ranges [] = { range_0,range_0,range_0 };
         
         calcHist(&deep_copy, 1,
-                 channels, Mat(),
+                 channels, cv::Mat(),
                  _currentHist, 3, hist_size, ranges,
                  true, false);
         
@@ -234,7 +235,7 @@ private:
     
     float entropy (int index)
     {
-        Mat logP;
+        cv::Mat logP;
         cv::log(channel_histogram(index),logP);
         cv::Mat norm = channel_histogram(index)/ ((float)mBounds.width*mBounds.height);
         float entropy = -1*sum(norm.mul(logP)).val[0];
@@ -246,12 +247,12 @@ private:
         float range[] = { 0, 256 } ;
         const float* histRange = { range };
         cv::Mat dirty;
-        calcHist( &channel, 1, 0, Mat(), dirty, 1, &histSize, &histRange, true, false);
+        cv::calcHist( &channel, 1, 0, cv::Mat(), dirty, 1, &histSize, &histRange, true, false);
         return dirty.clone();
         
     }
     
-    void run (const vector<Mat> bgr_planes)
+    void run (const vector<cv::Mat> bgr_planes)
     {
         
         /// Set the ranges ( for B,G,R) )
@@ -259,23 +260,23 @@ private:
         const float* histRange = { range };
         
         
-        Mat b_hist, g_hist, r_hist;
+        cv::Mat b_hist, g_hist, r_hist;
         
         /// Compute the histograms:
-        calcHist( &bgr_planes[0], 1, 0, Mat(), b_hist, 1, &histSize, &histRange, uniform, accumulate );
-        calcHist( &bgr_planes[1], 1, 0, Mat(), g_hist, 1, &histSize, &histRange, uniform, accumulate );
-        calcHist( &bgr_planes[2], 1, 0, Mat(), r_hist, 1, &histSize, &histRange, uniform, accumulate );
+        calcHist( &bgr_planes[0], 1, 0, cv::Mat(), b_hist, 1, &histSize, &histRange, uniform, accumulate );
+        calcHist( &bgr_planes[1], 1, 0, cv::Mat(), g_hist, 1, &histSize, &histRange, uniform, accumulate );
+        calcHist( &bgr_planes[2], 1, 0, cv::Mat(), r_hist, 1, &histSize, &histRange, uniform, accumulate );
         
         // Draw the histograms for B, G and R
         int hist_w = 512; int hist_h = 400;
         int bin_w = cvRound( (double) hist_w/histSize );
         
-        mHistImage = Mat ( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
+        mHistImage = cv::Mat ( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
         
         /// Normalize the result to [ 0, histImage.rows ]
-        normalize(b_hist, b_hist, 0, mHistImage.rows, NORM_MINMAX, -1, Mat() );
-        normalize(g_hist, g_hist, 0, mHistImage.rows, NORM_MINMAX, -1, Mat() );
-        normalize(r_hist, r_hist, 0, mHistImage.rows, NORM_MINMAX, -1, Mat() );
+    normalize(b_hist, b_hist, 0, mHistImage.rows, NORM_MINMAX, -1, cv::Mat() );
+        normalize(g_hist, g_hist, 0, mHistImage.rows, NORM_MINMAX, -1, cv::Mat() );
+        normalize(r_hist, r_hist, 0, mHistImage.rows, NORM_MINMAX, -1, cv::Mat() );
         
         for (unsigned ii = 0; ii < 256; ii++)
         {
