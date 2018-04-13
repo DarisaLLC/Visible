@@ -111,16 +111,6 @@ public:
         std::function<void ()> sm_content_loaded_cb = std::bind (&lif_processor::sm_content_loaded, this);
         boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
         
-        
-        //        std::function<void (int&)> sm1d_available_cb = boost::bind (&lifContext::signal_sm1d_available, this, _1);
-        //        boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_available_cb);
-        //        std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&lifContext::signal_sm1dmed_available, this, _1, _2);
-        //        boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_available_cb);
-        //
-        
-        
-        
-        
     }
     
     const smProducerRef sm () const { return m_sm; }
