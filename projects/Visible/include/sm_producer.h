@@ -120,6 +120,7 @@ typedef std::shared_ptr<sm_producer> smProducerRef;
 class sm_filter
 {
 public:
+    //@note: pair representing frame number and frame time 
     typedef std::pair<uint32_t,double> index_val_t;
     struct contraction
     {
@@ -170,8 +171,7 @@ public:
                 lowest.first = std::distance(m_signal.begin(), min_itr);
                 lowest.second = *min_itr;
             }
-                
-            else
+            else  // @note: re-compute and find the lowest ( corresponding to contraction )
             {
                 m_signal.resize(m_entropies.size (), 0.0);
                 for (auto ii = 0; ii < m_signal.size(); ii++)
@@ -194,14 +194,18 @@ public:
                 }
             }
             
-            m_peaks.resize(0);
-            m_peaks.emplace_back(lowest.first, m_signal[lowest.first]);
-            contraction one;
-            one.peak = m_peaks[0];
-            m_contractions.emplace_back(one);
-            
-            std::cout << "[" << lowest.first << "] = " << lowest.second << " mfrac = " << m_median_levelset_frac << std::endl;
-            
+            //@ note: clear and fetch the peak. Set cotraction envelope in frames 
+            clear_outputs ();
+            if (lowest.first >= 0)
+            {
+                m_peaks.emplace_back(lowest.first, m_signal[lowest.first]);
+                contraction one;
+                one.peak = m_peaks[0];
+                one.contraction_start.first = one.peak.first - 10;
+                one.relaxation_end.first = one.peak.first + 10;
+                m_contractions.emplace_back(one);
+//                std::cout << "[" << lowest.first << "] = " << lowest.second << " mfrac = " << m_median_levelset_frac << std::endl;
+            }
             
             //            auto iter_to_peak = m_signal.begin();
             //            std::advance (iter_to_peak, lowest.first);
@@ -220,7 +224,7 @@ public:
         return m_peaks;
     }
     
-    const std::vector<contraction>& contractions () const
+    std::vector<contraction>& contractions () 
     {
         return m_contractions;
     }
@@ -287,6 +291,11 @@ private:
         m_cached = true;
     }
     
+    void clear_outputs () const
+    {
+        m_peaks.resize(0);
+        m_contractions.resize(0);
+    }
     bool verify_input () const
     {
         if (m_entropies.empty() || m_SMatrix.empty ())

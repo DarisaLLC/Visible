@@ -216,6 +216,17 @@ void lifContext::analyze_analyzing_button()
             looping(false);
             seekToStart();
         }
+
+        mUIParams.removeParam("Select ");
+        mUIParams.addParam( "Select ", m_contraction_names, &m_current_clip_index )
+        .updateFn( [this]
+                  {
+                      if (m_current_clip_index >= 0 && m_current_clip_index < m_contraction_names.size() )
+                      {
+                          std::cout << m_contraction_names[m_current_clip_index] << std::endl;
+                      }
+                  });
+        
     }
     else
         mUIParams.setOptions( "state", "label=`Ready`" );
@@ -231,13 +242,12 @@ void lifContext::analyze_analyzing_button()
 void lifContext::seekToEnd ()
 {
     seekToFrame (m_clips[m_current_clip_index].end);
-//    seekToFrame (getNumFrames() - 1);
     mUIParams.setOptions( "mode", "label=`@ End`" );
 }
 
 void lifContext::seekToStart ()
 {
-    seekToFrame(m_clips[m_current_clip_index].anchor);
+    seekToFrame(m_clips[m_current_clip_index].begin);
     mUIParams.setOptions( "mode", "label=`@ Start`" );
 }
 
@@ -262,6 +272,9 @@ time_spec_t lifContext::getCurrentTime ()
 
 void lifContext::seekToFrame (int mark)
 {
+    if (mark < m_clips[m_current_clip_index].begin || mark > m_clips[m_current_clip_index].end)
+        mark = m_clips[m_current_clip_index].begin;
+    
     m_seek_position = mark;
     mTimeMarker.from_count (m_seek_position);
     m_marker_signal.emit(mTimeMarker);
@@ -449,6 +462,7 @@ uint32_t lifContext::getMedianCutOff () const
 void lifContext::setup()
 {
     srand( 133 );
+
     mUIParams = params::InterfaceGl( "Lif Player ", toPixels( ivec2( 300, 400 )));
     mUIParams.setPosition(getWindowSize() / 3);
     m_contraction_names = m_contraction_none;
@@ -501,21 +515,7 @@ void lifContext::setup()
             mUIParams.addParam ("Current Time Step", setter, getter);
         }
         
-        clip entire;
-        entire.begin = 0;
-        entire.end = getNumFrames()-2;
-        entire.anchor = 0;
-        m_clips.push_back(entire);
-        
-        mUIParams.addParam( "Select ", m_contraction_names, &m_current_clip_index )
-        .updateFn( [this]
-                  {
-                      if (m_current_clip_index >= 0 && m_current_clip_index < m_contraction_names.size() )
-                      {
-                          std::cout << m_contraction_names[m_current_clip_index] << std::endl;
-                      }
-                  });
-        
+
         mUIParams.addSeparator();
         mUIParams.addButton("Play / Pause ", bind( &lifContext::play_pause_button, this ) );
         mUIParams.addSeparator();
@@ -588,6 +588,8 @@ void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
         if (!tracksRef->at(0).second.empty())
             m_plots[2]->setup(tracksRef->at(0));
     }
+    
+    
     
     std::cout << "sm1dmed available: " << ++ii << std::endl;
 }
@@ -675,6 +677,10 @@ void lifContext::loadCurrentSerie ()
         mMediaInfo = mFrameSet->media_info();
         vl.init (app::getWindow(), mFrameSet->media_info());
         mMediaInfo.output(std::cout);
+        m_entire.begin = 0;
+        m_entire.end = getNumFrames()-2;
+        m_entire.anchor = 0;
+        m_clips.push_back(m_entire);
         
         std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names);
         
@@ -822,7 +828,27 @@ void lifContext::update ()
             mMainTimeLineSlider.add_timepoint_marker(tm);
         }
     }
+    if (m_lifProcRef && m_lifProcRef->smFilterRef() && ! m_lifProcRef->smFilterRef()->contractions().empty())
+    {
+        m_contraction_names.clear();
+        m_contraction_names.push_back("None");
 
+        uint32_t index = 0;
+        auto contractions = m_lifProcRef->smFilterRef()->contractions();
+        m_clips.resize(1 + contractions.size());
+        auto clipItr = m_clips.begin();
+        clipItr++;
+        for(auto ctr : m_lifProcRef->smFilterRef()->contractions())
+        {
+            string name = " C " + toString(index) + " ";
+            m_contraction_names.push_back(name);
+            clip tmp;
+            tmp.begin = ctr.contraction_start.first;
+            tmp.end = ctr.relaxation_end.first;
+            tmp.anchor = ctr.peak.first;
+            *clipItr++ = tmp;
+        }
+    }
     // Update text texture with most recent text
     auto num_str = to_string( int( getCurrentFrame ()));
     std::string frame_str = m_is_playing ? string( "Playing: " + num_str) : string ("Paused: " + num_str);

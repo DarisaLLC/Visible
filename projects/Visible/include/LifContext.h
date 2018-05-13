@@ -232,8 +232,9 @@ private:
     
     std::vector<std::string> m_contraction_none = {"None"};
     std::vector<std::string> m_contraction_names;
-    std::vector<clip> m_clips;
-	
+    std::deque<clip> m_clips;
+    clip m_entire;
+    
 	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
 	{
 		size_t xScaled = (pos * wave) / box.getWidth();
