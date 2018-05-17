@@ -25,6 +25,16 @@ public:
         size_t end;
         size_t anchor;
     };
+    
+    
+    enum Side_t : uint32_t
+    {
+        major = 0,
+        minor = 1,
+        notset = 2,
+        number_of_sides = notset
+    };
+
 	class series_info
 	{
 	public:
@@ -57,7 +67,8 @@ public:
 		
 	};
 	
-	
+    typedef std::pair<vec2,vec2> sides_length_t;
+    
 	// From just a name, use the open file dialog to get the file
 	// From a name and a path
 	lifContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
@@ -99,8 +110,9 @@ public:
 	const ivec2& imagePos () const { return m_instant_mouse_image_pos; }
 	const uint32_t& channelIndex () const { return m_instant_channel; }
 	
-	void setManualEditMode (bool b)  { mManualEditMode = b; }
-	bool getManualEditMode ()  { return mManualEditMode; }
+	void setManualEditMode (Side_t b)  { mManualEditMode = b; }
+	Side_t getManualEditMode ()  { return mManualEditMode; }
+    Side_t getManualNextEditMode ();
 	
 	void setAnalyzeMode (bool b)  { mAnalyze = b; }
 	bool getAnalyzeMode ()  { return mAnalyze; }
@@ -187,7 +199,8 @@ private:
 	vec2 texture_to_display_zoom ();
 	void update_instant_image_mouse ();
 	
-	std::pair<vec2,vec2> mLengthPoints;
+	sides_length_t mLengthPoints;
+    std::vector<sides_length_t> mCellEnds = {sides_length_t (), sides_length_t()};
 	vec2 mScreenSize;
 	gl::TextureRef mImage;
 	series_info m_serie;
@@ -222,7 +235,9 @@ private:
 	
 	ivec2 mMouseInImagePosition;
 	
-	bool mManualEditMode, mAnalyze;
+	bool mAnalyze;
+    Side_t mManualEditMode;
+    std::vector<std::string> mEditNames = {"label=`Cell Length`", "label=`Cell Width`", "label=`None`"};
     
     std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
     std::vector<std::string>  mProcessOrProcessing = {"Process", "Processing"};

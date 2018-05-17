@@ -172,29 +172,55 @@ void lifContext::play_pause_button ()
 }
 
 
+/************************
+ *
+ *  Manual Edit Support ( Width and Height setting )
+ *
+ ************************/
+
+lifContext::Side_t lifContext::getManualNextEditMode ()
+{
+    Side_t nm = getManualEditMode();
+    switch(nm)
+    {
+        case Side_t::major:
+            nm = Side_t::minor;
+            break;
+        case Side_t::minor:
+            nm = Side_t::notset;
+            break;
+        case Side_t::notset:
+            nm = Side_t::major;
+            break;
+    }
+    return nm;
+    
+}
+
 void lifContext::edit_no_edit_button ()
 {
     if (! have_movie () )
         return;
     
-    // Flip
-    setManualEditMode(!getManualEditMode());
+    // Increment
+    setManualEditMode(getManualNextEditMode());
     
+    const std::string& ename = mEditNames[getManualEditMode()];
     // If we are in Edit mode. Stop and Go to Start
-    if (getManualEditMode())
+    if (getManualEditMode() != notset)
     {
-        mUIParams.setOptions( "mode", "label=`Edit`" );
-        if (looping())
-        {
-            mUIParams.setOptions( "mode", "label=`Stopping`" );
-            looping(false);
-            seekToStart();
-        }
+        mUIParams.setOptions( "mode", ename);
+//        if (looping())
+//        {
+//            mUIParams.setOptions( "mode", "label=`Stopping`" );
+//            looping(false);
+//            seekToStart();
+//        }
         if (mContainer.getNumChildren())
             mContainer.removeChildren();
     }
     else
-        mUIParams.setOptions( "mode", "label=`Browse`" );
+        mUIParams.setOptions( "mode", ename);
     
 }
 
@@ -241,12 +267,16 @@ void lifContext::analyze_analyzing_button()
 
 void lifContext::seekToEnd ()
 {
+    if (m_clips.empty()) return;
+        
     seekToFrame (m_clips[m_current_clip_index].end);
     mUIParams.setOptions( "mode", "label=`@ End`" );
 }
 
 void lifContext::seekToStart ()
 {
+    if (m_clips.empty()) return;
+    
     seekToFrame(m_clips[m_current_clip_index].begin);
     mUIParams.setOptions( "mode", "label=`@ Start`" );
 }
@@ -272,6 +302,8 @@ time_spec_t lifContext::getCurrentTime ()
 
 void lifContext::seekToFrame (int mark)
 {
+    std::unique_lock<std::mutex> lock(m_track_mutex );
+
     if (mark < m_clips[m_current_clip_index].begin || mark > m_clips[m_current_clip_index].end)
         mark = m_clips[m_current_clip_index].begin;
     
@@ -368,9 +400,10 @@ void lifContext::mouseDrag( MouseEvent event )
     for (Graph1DRef graphRef : m_plots)
         graphRef->mouseDrag( event );
     
-    if (getManualEditMode() && mMouseInImage && channelIndex() == 2)
+    if (getManualEditMode() != notset && mMouseInImage && channelIndex() == 2)
     {
-        mLengthPoints.second = event.getPos();
+        sides_length_t& which = mCellEnds[getManualEditMode()];
+        which.second = event.getPos();
     }
 }
 
@@ -383,7 +416,12 @@ void lifContext::mouseDown( MouseEvent event )
         graphRef->get_marker_position(mTimeMarker);
         graphRef->get_marker_position(mAuxTimeMarker);
     }
-    
+
+    if (getManualEditMode() != notset && mMouseInImage && channelIndex() == 2)
+    {
+        sides_length_t& which = mCellEnds[getManualEditMode()];
+        which.first = event.getPos();
+    }
 }
 
 
@@ -964,10 +1002,13 @@ void lifContext::draw ()
         }
         
         
-        if (getManualEditMode())
+        if (getManualEditMode() != notset)
         {
-            gl::ScopedColor (ColorA( 0.25f, 0.5f, 1, 1 ));
-            gl::drawLine(mLengthPoints.first, mLengthPoints.second);
+            for (sides_length_t which : mCellEnds)
+            {
+                gl::ScopedColor (ColorA( 0.25f, 0.5f, 1, 1 ));
+                gl::drawLine(which.first, which.second);
+            }
         }
         
         
