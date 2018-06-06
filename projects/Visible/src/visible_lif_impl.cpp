@@ -893,12 +893,13 @@ void lifContext::update ()
     update_log (frame_str);
 }
 
+//@note:
+// LIF 3 channel organization. Channel height is 1/3 of image height
+// Channel Index is pos.y / channel_height,
+// In channel x is pos.x, In channel y is pos.y % channel_height
 void lifContext::update_instant_image_mouse ()
 {
     auto image_pos = vl.display2image(mMouseInImagePosition);
-    // LIF 3 channel organization. Channel height is 1/3 of image height
-    // Channel Index is pos.y / channel_height,
-    // In channel x is pos.x, In channel y is pos.y % channel_height
     uint32_t channel_height = mMediaInfo.getChannelSize().y;
     m_instant_channel = ((int) image_pos.y) / channel_height;
     m_instant_mouse_image_pos = image_pos;
@@ -906,7 +907,7 @@ void lifContext::update_instant_image_mouse ()
     {
         m_instant_pixel_Color = mSurface->getPixel(m_instant_mouse_image_pos);
     }
-    
+
     
 }
 
@@ -957,15 +958,16 @@ void lifContext::draw_info ()
         gl::drawStrokedRect(vl.display_plots_rect(), 3.0f);
     }
     
-    
-    auto texR = pixelInfoTexture ();
-    if (texR)
-    {
-        Rectf tbox = texR->getBounds();
-        tbox.offset(mMouseInImagePosition);
-        gl::draw( texR, tbox);
-    }
-    
+     if (getManualEditMode() == notset)
+     {
+        auto texR = pixelInfoTexture ();
+        if (texR)
+        {
+            Rectf tbox = texR->getBounds();
+            tbox.offset(mMouseInImagePosition);
+            gl::draw( texR, tbox);
+        }
+     }
     
     if (mTextTexture)
     {
@@ -1002,12 +1004,18 @@ void lifContext::draw ()
         }
         
         
-        if (getManualEditMode() != notset)
+        if (getManualEditMode() != notset && mCellEnds.size() == 2)
         {
-            for (sides_length_t which : mCellEnds)
+            const sides_length_t& length = mCellEnds[0];
+            const sides_length_t& width = mCellEnds[1];
+            cinder::gl::ScopedLineWidth( 10.0f );
             {
-                gl::ScopedColor (ColorA( 0.25f, 0.5f, 1, 1 ));
-                gl::drawLine(which.first, which.second);
+                cinder::gl::ScopedColor col (ColorA( 1, 0.1, 0.1, 0.8f ) );
+                gl::drawLine(length.first, length.second);
+            }
+            {
+                cinder::gl::ScopedColor col (ColorA( 0.1, 1.0, 0.1, 0.8f ) );
+                gl::drawLine(width.first, width.second);
             }
         }
         
