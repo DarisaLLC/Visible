@@ -145,6 +145,8 @@ private:
 	bool looping ();
 	void looping (bool what);
 	
+    void clear_conractions_clips () const;
+    
 	Rectf get_image_display_rect ();
 	
     void signal_content_loaded ();
@@ -245,10 +247,10 @@ private:
 	int mButton_title_index;
 	std::string mButton_title;
     
-    std::vector<std::string> m_contraction_none = {"None"};
-    std::vector<std::string> m_contraction_names;
-    std::deque<clip> m_clips;
-    clip m_entire;
+    std::vector<std::string> m_contraction_none = {" Entire "};
+    mutable std::vector<std::string> m_contraction_names;
+    mutable std::deque<clip> m_clips;
+    mutable clip m_entire;
     
 	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
 	{

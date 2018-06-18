@@ -127,6 +127,11 @@ bool lifContext::have_movie ()
 
 bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif_file_viewer); }
 
+void lifContext::clear_conractions_clips () const
+{
+    m_clips.clear();
+    m_contraction_names.clear ();
+}
 
 
             /************************
@@ -267,7 +272,7 @@ void lifContext::analyze_analyzing_button()
 
 void lifContext::seekToEnd ()
 {
-    if (m_clips.empty()) return;
+    assert(! m_clips.empty());
         
     seekToFrame (m_clips[m_current_clip_index].end);
     mUIParams.setOptions( "mode", "label=`@ End`" );
@@ -275,7 +280,7 @@ void lifContext::seekToEnd ()
 
 void lifContext::seekToStart ()
 {
-    if (m_clips.empty()) return;
+    assert(! m_clips.empty());
     
     seekToFrame(m_clips[m_current_clip_index].begin);
     mUIParams.setOptions( "mode", "label=`@ Start`" );
@@ -510,9 +515,8 @@ void lifContext::setup()
     
     clear_movie_params();
     
-    if( m_valid )
+    if( is_valid() )
     {
-        m_type = Type::qtime_viewer;
         mUIParams.addSeparator();
         
         m_series_names.clear ();
@@ -692,14 +696,21 @@ void lifContext::add_plot_widgets (const int channel_count)
 }
 
 
+// Set window size according to layout
+//  Channel             Data
+//  1
+//  2
+//  3
+
 void lifContext::loadCurrentSerie ()
 {
     
-    if ( ! (m_lifRef || ! m_current_serie_ref) )
+    if ( ! is_valid() || ! (m_lifRef || ! m_current_serie_ref) )
         return;
     
     try {
         
+        clear_conractions_clips();
         mWidgets.clear ();
         
         // Create the frameset and assign the channel names
@@ -719,44 +730,37 @@ void lifContext::loadCurrentSerie ()
         m_entire.end = getNumFrames()-2;
         m_entire.anchor = 0;
         m_clips.push_back(m_entire);
+        m_current_clip_index = 0;
         
         std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names);
         
-        if (m_valid)
-        {
-            auto title = m_series_names[m_cur_selected_index] + " @ " + mPath.filename().string();
-            getWindow()->setTitle( title );
-            const tiny_media_info tm = mFrameSet->media_info ();
-            getWindow()->getApp()->setFrameRate(tm.getFramerate() * 2);
+        auto title = m_series_names[m_cur_selected_index] + " @ " + mPath.filename().string();
+        getWindow()->setTitle( title );
+        const tiny_media_info tm = mFrameSet->media_info ();
+        getWindow()->getApp()->setFrameRate(tm.getFramerate() * 2);
 
-            
-            mScreenSize = tm.getSize();
-            m_frameCount = tm.getNumFrames ();
-            mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
-            
-            mTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
-            mAuxTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
-            
-            // Set window size according to layout
-            //  Channel             Data
-            //  1
-            //  2
-            //  3
-            
-            ivec2 window_size (vl.desired_window_size());
-            setWindowSize(window_size);
-            int channel_count = (int) tm.getNumChannels();
-            add_plot_widgets(channel_count);
-            seekToStart();
-            play();
-            
+        
+        mScreenSize = tm.getSize();
+        m_frameCount = tm.getNumFrames ();
+        mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
+        
+        mTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
+        mAuxTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
+ 
+        ivec2 window_size (vl.desired_window_size());
+        setWindowSize(window_size);
+        int channel_count = (int) tm.getNumChannels();
+        add_plot_widgets(channel_count);
+        seekToStart();
+        play();
+        
 
-            m_async_luminance_tracks = std::async(std::launch::async,
-                                                  &lif_processor::run_flu_statistics,
-                                                  m_lifProcRef.get());
+        m_async_luminance_tracks = std::async(std::launch::async,
+                                              &lif_processor::run_flu_statistics,
+                                              m_lifProcRef.get());
 
-            m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci, m_lifProcRef.get());
-        }
+        m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci, m_lifProcRef.get());
+
     }
     catch( const std::exception &ex ) {
         console() << ex.what() << endl;
