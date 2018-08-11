@@ -173,14 +173,24 @@ private:
 		}
 	}
 	
-	
+	int get_current_clip_index () const
+    {
+        std::lock_guard<std::mutex> guard(m_clip_mutex);
+        return m_current_clip_index;
+    }
+    
+    void set_current_clip_index (int cindex) const
+    {
+        std::lock_guard<std::mutex> guard(m_clip_mutex);
+        m_current_clip_index = cindex;
+    }
 	std::shared_ptr<lifIO::LifReader> m_lifRef;
 	std::vector<series_info> m_series_book;
     std::vector<std::string> m_series_names;
 	std::shared_ptr<lifIO::LifSerie> m_current_serie_ref;
     int m_cur_selected_index;
     int m_prev_selected_index;
-    int m_current_clip_index;
+    mutable int m_current_clip_index;
     
 	void seek( size_t xPos );
 	void clear_movie_params ();
@@ -234,6 +244,7 @@ private:
     std::vector<std::string> m_contraction_names;
     std::deque<clip> m_clips;
     clip m_entire;
+    mutable std::mutex m_clip_mutex;
     
 	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
 	{

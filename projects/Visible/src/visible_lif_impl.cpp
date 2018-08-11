@@ -201,6 +201,7 @@ void lifContext::edit_no_edit_button ()
 
 void lifContext::analyze_analyzing_button()
 {
+    std::lock_guard<std::mutex> guard(m_clip_mutex);
     if (! have_movie () )
         return;
     
@@ -241,13 +242,13 @@ void lifContext::analyze_analyzing_button()
 
 void lifContext::seekToEnd ()
 {
-    seekToFrame (m_clips[m_current_clip_index].end);
+    seekToFrame (m_clips[get_current_clip_index()].end);
     mUIParams.setOptions( "mode", "label=`@ End`" );
 }
 
 void lifContext::seekToStart ()
 {
-    seekToFrame(m_clips[m_current_clip_index].begin);
+    seekToFrame(m_clips[get_current_clip_index()].begin);
     mUIParams.setOptions( "mode", "label=`@ Start`" );
 }
 
@@ -272,6 +273,7 @@ time_spec_t lifContext::getCurrentTime ()
 
 void lifContext::seekToFrame (int mark)
 {
+    std::lock_guard<std::mutex> guard(m_clip_mutex);
     if (mark < m_clips[m_current_clip_index].begin || mark > m_clips[m_current_clip_index].end)
         mark = m_clips[m_current_clip_index].begin;
     
