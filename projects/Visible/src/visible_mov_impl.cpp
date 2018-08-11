@@ -313,7 +313,7 @@ void movContext::loadMovieFile()
             mFrameSet->channel_names(names);
             mMediaInfo = mFrameSet->media_info();
             
-            getWindow()->getApp()->setFrameRate(30.0);
+          //  getWindow()->getApp()->setFrameRate(30.0);
             
             vl.init (app::getWindow(), mFrameSet->media_info());
             
@@ -528,9 +528,9 @@ void movContext::update ()
     {
         auto tracksRef = m_async_luminance_tracks.get();
         assert (tracksRef->size() == m_plots.size ());
-        m_plots[0]->setup(tracksRef->at(0));
-        m_plots[1]->setup(tracksRef->at(1));
-        m_plots[2]->setup(tracksRef->at(2));
+ //       m_plots[0]->setup(tracksRef->at(0));
+//        m_plots[1]->setup(tracksRef->at(1));
+//        m_plots[2]->setup(tracksRef->at(2));
 //        if (!tracksRef->at(2).second.empty())
 //            m_plots[2]->setup(tracksRef->at(2), graph1D::mapping_option::type_limits);
     }
