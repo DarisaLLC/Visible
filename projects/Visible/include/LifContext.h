@@ -257,18 +257,13 @@ private:
 	int mButton_title_index;
 	std::string mButton_title;
     
-<<<<<<< HEAD
-    std::vector<std::string> m_contraction_none = {"None"};
-    std::vector<std::string> m_contraction_names;
-    std::deque<clip> m_clips;
-    clip m_entire;
-    mutable std::mutex m_clip_mutex;
-=======
     std::vector<std::string> m_contraction_none = {" Entire "};
     mutable std::vector<std::string> m_contraction_names;
     mutable std::deque<clip> m_clips;
     mutable clip m_entire;
->>>>>>> 7d7339e58f653e281111488f97ae4d4dd237fda9
+    mutable std::mutex m_clip_mutex;
+
+    
     
 	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
 	{

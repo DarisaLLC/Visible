@@ -273,25 +273,18 @@ void lifContext::analyze_analyzing_button()
 
 void lifContext::seekToEnd ()
 {
-<<<<<<< HEAD
     seekToFrame (m_clips[get_current_clip_index()].end);
-=======
     assert(! m_clips.empty());
         
-    seekToFrame (m_clips[m_current_clip_index].end);
->>>>>>> 7d7339e58f653e281111488f97ae4d4dd237fda9
     mUIParams.setOptions( "mode", "label=`@ End`" );
 }
 
 void lifContext::seekToStart ()
 {
-<<<<<<< HEAD
+
     seekToFrame(m_clips[get_current_clip_index()].begin);
-=======
     assert(! m_clips.empty());
     
-    seekToFrame(m_clips[m_current_clip_index].begin);
->>>>>>> 7d7339e58f653e281111488f97ae4d4dd237fda9
     mUIParams.setOptions( "mode", "label=`@ Start`" );
 }
 
@@ -316,12 +309,8 @@ time_spec_t lifContext::getCurrentTime ()
 
 void lifContext::seekToFrame (int mark)
 {
-<<<<<<< HEAD
     std::lock_guard<std::mutex> guard(m_clip_mutex);
-=======
-    std::unique_lock<std::mutex> lock(m_track_mutex );
 
->>>>>>> 7d7339e58f653e281111488f97ae4d4dd237fda9
     if (mark < m_clips[m_current_clip_index].begin || mark > m_clips[m_current_clip_index].end)
         mark = m_clips[m_current_clip_index].begin;
     
