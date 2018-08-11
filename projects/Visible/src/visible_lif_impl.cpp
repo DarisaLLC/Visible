@@ -127,6 +127,11 @@ bool lifContext::have_movie ()
 
 bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif_file_viewer); }
 
+void lifContext::clear_conractions_clips () const
+{
+    m_clips.clear();
+    m_contraction_names.clear ();
+}
 
 
             /************************
@@ -172,29 +177,55 @@ void lifContext::play_pause_button ()
 }
 
 
+/************************
+ *
+ *  Manual Edit Support ( Width and Height setting )
+ *
+ ************************/
+
+lifContext::Side_t lifContext::getManualNextEditMode ()
+{
+    Side_t nm = getManualEditMode();
+    switch(nm)
+    {
+        case Side_t::major:
+            nm = Side_t::minor;
+            break;
+        case Side_t::minor:
+            nm = Side_t::notset;
+            break;
+        case Side_t::notset:
+            nm = Side_t::major;
+            break;
+    }
+    return nm;
+    
+}
+
 void lifContext::edit_no_edit_button ()
 {
     if (! have_movie () )
         return;
     
-    // Flip
-    setManualEditMode(!getManualEditMode());
+    // Increment
+    setManualEditMode(getManualNextEditMode());
     
+    const std::string& ename = mEditNames[getManualEditMode()];
     // If we are in Edit mode. Stop and Go to Start
-    if (getManualEditMode())
+    if (getManualEditMode() != notset)
     {
-        mUIParams.setOptions( "mode", "label=`Edit`" );
-        if (looping())
-        {
-            mUIParams.setOptions( "mode", "label=`Stopping`" );
-            looping(false);
-            seekToStart();
-        }
+        mUIParams.setOptions( "mode", ename);
+//        if (looping())
+//        {
+//            mUIParams.setOptions( "mode", "label=`Stopping`" );
+//            looping(false);
+//            seekToStart();
+//        }
         if (mContainer.getNumChildren())
             mContainer.removeChildren();
     }
     else
-        mUIParams.setOptions( "mode", "label=`Browse`" );
+        mUIParams.setOptions( "mode", ename);
     
 }
 
@@ -242,13 +273,25 @@ void lifContext::analyze_analyzing_button()
 
 void lifContext::seekToEnd ()
 {
+<<<<<<< HEAD
     seekToFrame (m_clips[get_current_clip_index()].end);
+=======
+    assert(! m_clips.empty());
+        
+    seekToFrame (m_clips[m_current_clip_index].end);
+>>>>>>> 7d7339e58f653e281111488f97ae4d4dd237fda9
     mUIParams.setOptions( "mode", "label=`@ End`" );
 }
 
 void lifContext::seekToStart ()
 {
+<<<<<<< HEAD
     seekToFrame(m_clips[get_current_clip_index()].begin);
+=======
+    assert(! m_clips.empty());
+    
+    seekToFrame(m_clips[m_current_clip_index].begin);
+>>>>>>> 7d7339e58f653e281111488f97ae4d4dd237fda9
     mUIParams.setOptions( "mode", "label=`@ Start`" );
 }
 
@@ -273,7 +316,12 @@ time_spec_t lifContext::getCurrentTime ()
 
 void lifContext::seekToFrame (int mark)
 {
+<<<<<<< HEAD
     std::lock_guard<std::mutex> guard(m_clip_mutex);
+=======
+    std::unique_lock<std::mutex> lock(m_track_mutex );
+
+>>>>>>> 7d7339e58f653e281111488f97ae4d4dd237fda9
     if (mark < m_clips[m_current_clip_index].begin || mark > m_clips[m_current_clip_index].end)
         mark = m_clips[m_current_clip_index].begin;
     
@@ -370,9 +418,10 @@ void lifContext::mouseDrag( MouseEvent event )
     for (Graph1DRef graphRef : m_plots)
         graphRef->mouseDrag( event );
     
-    if (getManualEditMode() && mMouseInImage && channelIndex() == 2)
+    if (getManualEditMode() != notset && mMouseInImage && channelIndex() == 2)
     {
-        mLengthPoints.second = event.getPos();
+        sides_length_t& which = mCellEnds[getManualEditMode()];
+        which.second = event.getPos();
     }
 }
 
@@ -385,7 +434,12 @@ void lifContext::mouseDown( MouseEvent event )
         graphRef->get_marker_position(mTimeMarker);
         graphRef->get_marker_position(mAuxTimeMarker);
     }
-    
+
+    if (getManualEditMode() != notset && mMouseInImage && channelIndex() == 2)
+    {
+        sides_length_t& which = mCellEnds[getManualEditMode()];
+        which.first = event.getPos();
+    }
 }
 
 
@@ -474,9 +528,8 @@ void lifContext::setup()
     
     clear_movie_params();
     
-    if( m_valid )
+    if( is_valid() )
     {
-        m_type = Type::qtime_viewer;
         mUIParams.addSeparator();
         
         m_series_names.clear ();
@@ -656,14 +709,21 @@ void lifContext::add_plot_widgets (const int channel_count)
 }
 
 
+// Set window size according to layout
+//  Channel             Data
+//  1
+//  2
+//  3
+
 void lifContext::loadCurrentSerie ()
 {
     
-    if ( ! (m_lifRef || ! m_current_serie_ref) )
+    if ( ! is_valid() || ! (m_lifRef || ! m_current_serie_ref) )
         return;
     
     try {
         
+        clear_conractions_clips();
         mWidgets.clear ();
         
         // Create the frameset and assign the channel names
@@ -683,44 +743,37 @@ void lifContext::loadCurrentSerie ()
         m_entire.end = getNumFrames()-2;
         m_entire.anchor = 0;
         m_clips.push_back(m_entire);
+        m_current_clip_index = 0;
         
         std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names);
         
-        if (m_valid)
-        {
-            auto title = m_series_names[m_cur_selected_index] + " @ " + mPath.filename().string();
-            getWindow()->setTitle( title );
-            const tiny_media_info tm = mFrameSet->media_info ();
-            getWindow()->getApp()->setFrameRate(tm.getFramerate() * 2);
+        auto title = m_series_names[m_cur_selected_index] + " @ " + mPath.filename().string();
+        getWindow()->setTitle( title );
+        const tiny_media_info tm = mFrameSet->media_info ();
+        getWindow()->getApp()->setFrameRate(tm.getFramerate() * 2);
 
-            
-            mScreenSize = tm.getSize();
-            m_frameCount = tm.getNumFrames ();
-            mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
-            
-            mTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
-            mAuxTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
-            
-            // Set window size according to layout
-            //  Channel             Data
-            //  1
-            //  2
-            //  3
-            
-            ivec2 window_size (vl.desired_window_size());
-            setWindowSize(window_size);
-            int channel_count = (int) tm.getNumChannels();
-            add_plot_widgets(channel_count);
-            seekToStart();
-            play();
-            
+        
+        mScreenSize = tm.getSize();
+        m_frameCount = tm.getNumFrames ();
+        mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
+        
+        mTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
+        mAuxTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
+ 
+        ivec2 window_size (vl.desired_window_size());
+        setWindowSize(window_size);
+        int channel_count = (int) tm.getNumChannels();
+        add_plot_widgets(channel_count);
+        seekToStart();
+        play();
+        
 
-            m_async_luminance_tracks = std::async(std::launch::async,
-                                                  &lif_processor::run_flu_statistics,
-                                                  m_lifProcRef.get());
+        m_async_luminance_tracks = std::async(std::launch::async,
+                                              &lif_processor::run_flu_statistics,
+                                              m_lifProcRef.get());
 
-            m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci, m_lifProcRef.get());
-        }
+        m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci, m_lifProcRef.get());
+
     }
     catch( const std::exception &ex ) {
         console() << ex.what() << endl;
@@ -857,12 +910,13 @@ void lifContext::update ()
     update_log (frame_str);
 }
 
+//@note:
+// LIF 3 channel organization. Channel height is 1/3 of image height
+// Channel Index is pos.y / channel_height,
+// In channel x is pos.x, In channel y is pos.y % channel_height
 void lifContext::update_instant_image_mouse ()
 {
     auto image_pos = vl.display2image(mMouseInImagePosition);
-    // LIF 3 channel organization. Channel height is 1/3 of image height
-    // Channel Index is pos.y / channel_height,
-    // In channel x is pos.x, In channel y is pos.y % channel_height
     uint32_t channel_height = mMediaInfo.getChannelSize().y;
     m_instant_channel = ((int) image_pos.y) / channel_height;
     m_instant_mouse_image_pos = image_pos;
@@ -870,7 +924,7 @@ void lifContext::update_instant_image_mouse ()
     {
         m_instant_pixel_Color = mSurface->getPixel(m_instant_mouse_image_pos);
     }
-    
+
     
 }
 
@@ -921,15 +975,16 @@ void lifContext::draw_info ()
         gl::drawStrokedRect(vl.display_plots_rect(), 3.0f);
     }
     
-    
-    auto texR = pixelInfoTexture ();
-    if (texR)
-    {
-        Rectf tbox = texR->getBounds();
-        tbox.offset(mMouseInImagePosition);
-        gl::draw( texR, tbox);
-    }
-    
+     if (getManualEditMode() == notset)
+     {
+        auto texR = pixelInfoTexture ();
+        if (texR)
+        {
+            Rectf tbox = texR->getBounds();
+            tbox.offset(mMouseInImagePosition);
+            gl::draw( texR, tbox);
+        }
+     }
     
     if (mTextTexture)
     {
@@ -966,10 +1021,19 @@ void lifContext::draw ()
         }
         
         
-        if (getManualEditMode())
+        if (getManualEditMode() != notset && mCellEnds.size() == 2)
         {
-            gl::ScopedColor (ColorA( 0.25f, 0.5f, 1, 1 ));
-            gl::drawLine(mLengthPoints.first, mLengthPoints.second);
+            const sides_length_t& length = mCellEnds[0];
+            const sides_length_t& width = mCellEnds[1];
+            cinder::gl::ScopedLineWidth( 10.0f );
+            {
+                cinder::gl::ScopedColor col (ColorA( 1, 0.1, 0.1, 0.8f ) );
+                gl::drawLine(length.first, length.second);
+            }
+            {
+                cinder::gl::ScopedColor col (ColorA( 0.1, 1.0, 0.1, 0.8f ) );
+                gl::drawLine(width.first, width.second);
+            }
         }
         
         
