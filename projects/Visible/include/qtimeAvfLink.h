@@ -19,6 +19,11 @@ public:
     static bool MovieBaseFrameReadyConnect(cinder::qtime::MovieSurfaceRef& movie, void (*frame_ready)());
 };
 
+class hockeyAppSetup
+{
+public:
+    hockeyAppSetup ();
+};
 
 
 

@@ -19,7 +19,7 @@
 #include "Plist.hpp"
 #include <memory>
 #include <functional>
-#include "qtimeAvfLink.h"
+
 
 using namespace ci;
 using namespace ci::app;
@@ -224,8 +224,6 @@ void VisibleApp::fileDrop( FileDropEvent event )
 
 void VisibleApp::setup()
 {
-    hockeyAppSetup hockey;
-    
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "Visible.app/Contents/Info.plist";
     std::ifstream stream(plist.c_str(), std::ios::binary);
@@ -452,6 +450,7 @@ void VisibleApp::resize ()
     if (data && data->is_valid()) data->resize ();
     
 }
+
 
 
 // This line tells Cinder to actually create the application

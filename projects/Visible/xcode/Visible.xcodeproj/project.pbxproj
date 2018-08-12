@@ -39,13 +39,9 @@
 		C2309DA01F69B9E700A0E908 /* libopencv_video.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C254BECC1F4FB07900977307 /* libopencv_video.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DA11F69B9E900A0E908 /* libopencv_videoio.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C254BECD1F4FB07900977307 /* libopencv_videoio.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DA21F69B9EA00A0E908 /* libopencv_videostab.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C254BECE1F4FB07900977307 /* libopencv_videostab.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		C2309DA41F69BA0D00A0E908 /* libboost_date_time.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C26A05611E77763000BDC954 /* libboost_date_time.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		C2309DA51F69BA0F00A0E908 /* libboost_signals.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C26A05571E77741300BDC954 /* libboost_signals.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DA81F69BA7600A0E908 /* libopencv_imgcodecs.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2AF87F71CFBCC5900CFC191 /* libopencv_imgcodecs.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DA91F69BA7900A0E908 /* libopencv_core.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2AF87F31CFBC7ED00CFC191 /* libopencv_core.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DAA1F69BA8900A0E908 /* libopencv_imgproc.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2AF87F81CFBCC5900CFC191 /* libopencv_imgproc.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		C2309DAC1F69BDDF00A0E908 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DAB1F69BDDF00A0E908 /* libboost_system.a */; };
-		C2309DAD1F69BDFE00A0E908 /* libboost_system.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2309DAB1F69BDDF00A0E908 /* libboost_system.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2309DCD1F6C66F700A0E908 /* liblibjasper.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC81F6C66F700A0E908 /* liblibjasper.a */; };
 		C2309DCE1F6C66F700A0E908 /* liblibjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC91F6C66F700A0E908 /* liblibjpeg.a */; };
 		C2309DCF1F6C66F700A0E908 /* liblibpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCA1F6C66F700A0E908 /* liblibpng.a */; };
@@ -153,7 +149,6 @@
 		C26A05521E77628800BDC954 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995581B128DF400A5C623 /* IOKit.framework */; };
 		C26A05541E77629500BDC954 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C26A05531E77629500BDC954 /* CoreVideo.framework */; };
 		C26A05551E7762B500BDC954 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B20FF439BC000DE1D7 /* CoreAudio.framework */; };
-		C26A05581E77741300BDC954 /* libboost_signals.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26A05571E77741300BDC954 /* libboost_signals.a */; };
 		C26A05591E77744300BDC954 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
 		C26A055A1E7774B600BDC954 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
 		C26A055B1E7774D800BDC954 /* qtime_frame_cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */; };
@@ -162,8 +157,6 @@
 		C26A055E1E7775A700BDC954 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C26A055F1E7775A700BDC954 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C26A05601E7775A700BDC954 /* ExtraQuickTimeImplAvf.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm */; };
-		C26A05631E77763000BDC954 /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26A05611E77763000BDC954 /* libboost_date_time.a */; };
-		C26A05641E77763000BDC954 /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26A05611E77763000BDC954 /* libboost_date_time.a */; };
 		C26A05651E777DF300BDC954 /* registration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696F1CED3E2C0045FF57 /* registration.cpp */; };
 		C26A05661E777E1000BDC954 /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C26A05671E777E2100BDC954 /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
@@ -180,7 +173,6 @@
 		C26A057C1E7785C300BDC954 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C26A057D1E77A90600BDC954 /* histo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069681CED3E2C0045FF57 /* histo.cpp */; };
 		C26A057E1E77AB4700BDC954 /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
-		C26A057F1E77AE6C00BDC954 /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
 		C27221161D1C912E008EF8B2 /* histo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069681CED3E2C0045FF57 /* histo.cpp */; };
 		C276EC961C72B26300242CDB /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784AF0FF439BC000DE1D7 /* Accelerate.framework */; };
 		C276EC971C72B26300242CDB /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */; };
@@ -221,7 +213,6 @@
 		C2E0EE621F7B079300D32697 /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693D1CED3E2B0045FF57 /* libgtest.a */; };
 		C2E0EE631F7B079600D32697 /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693E1CED3E2B0045FF57 /* libgtest_main.a */; };
 		C2E0EE641F7B081D00D32697 /* OcvVideo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BE851F4FAF5C00977307 /* OcvVideo.cpp */; };
-		C2E0EE651F7B085B00D32697 /* libboost_signals.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26A05571E77741300BDC954 /* libboost_signals.a */; };
 		C2E0EE6A1F7B0B1800D32697 /* libippicv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BED91F4FB39E00977307 /* libippicv.a */; };
 		C2E0EE6B1F7B0B1C00D32697 /* libopencv_video.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BECC1F4FB07900977307 /* libopencv_video.a */; };
 		C2E0EE6C1F7B0B3100D32697 /* libopencv_videoio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BECD1F4FB07900977307 /* libopencv_videoio.a */; };
@@ -235,6 +226,10 @@
 		C2E0EE741F7B0B7700D32697 /* liblibtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCB1F6C66F700A0E908 /* liblibtiff.a */; };
 		C2E0EE751F7B0B7900D32697 /* liblibwebp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCC1F6C66F700A0E908 /* liblibwebp.a */; };
 		C2E0EE761F7B0B7C00D32697 /* libIlmImf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DD21F6C677100A0E908 /* libIlmImf.a */; };
+		C2E60A0921200A7F00059FA6 /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
+		C2E60A0A21200A7F00059FA6 /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
+		C2E60A0B21200A7F00059FA6 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8851CEA916E0008C72B /* libboost_system.a */; };
+		C2E60A0C21200A7F00059FA6 /* libboost_thread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8861CEA916E0008C72B /* libboost_thread.a */; };
 		C2FA97191E82EFB1006EC61E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2FA97181E82EFB1006EC61E /* Images.xcassets */; };
 		C2FC7DAF1CF4F46100D18193 /* qtime_frame_cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */; };
 /* End PBXBuildFile section */
@@ -247,7 +242,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				C2960C13211E671900C5D449 /* HockeySDK.framework in CopyFiles */,
-				C2309DAD1F69BDFE00A0E908 /* libboost_system.a in CopyFiles */,
 				C2309DA01F69B9E700A0E908 /* libopencv_video.a in CopyFiles */,
 				C2309DAA1F69BA8900A0E908 /* libopencv_imgproc.a in CopyFiles */,
 				C2309DA81F69BA7600A0E908 /* libopencv_imgcodecs.a in CopyFiles */,
@@ -255,8 +249,6 @@
 				C2309D9A1F69B9DB00A0E908 /* libippicv.a in CopyFiles */,
 				C2309DA11F69B9E900A0E908 /* libopencv_videoio.a in CopyFiles */,
 				C2309DA21F69B9EA00A0E908 /* libopencv_videostab.a in CopyFiles */,
-				C2309DA51F69BA0F00A0E908 /* libboost_signals.a in CopyFiles */,
-				C2309DA41F69BA0D00A0E908 /* libboost_date_time.a in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,7 +331,6 @@
 		C21FFE741CFE104600C97013 /* ut_sm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_sm.hpp; sourceTree = "<group>"; };
 		C221D9181E4B130400AF74CE /* visible_mov_dir_impl.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = visible_mov_dir_impl.cpp; path = ../src/visible_mov_dir_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C221D91A1E4B176800AF74CE /* directoryPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = directoryPlayer.h; path = ../include/directoryPlayer.h; sourceTree = "<group>"; };
-		C2309DAB1F69BDDF00A0E908 /* libboost_system.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libboost_system.a; sourceTree = "<group>"; };
 		C2309DC61F6B4D6500A0E908 /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcinder.a; sourceTree = "<group>"; };
 		C2309DC81F6C66F700A0E908 /* liblibjasper.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = liblibjasper.a; sourceTree = "<group>"; };
 		C2309DC91F6C66F700A0E908 /* liblibjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = liblibjpeg.a; sourceTree = "<group>"; };
@@ -591,8 +582,6 @@
 		C26A05491E77618900BDC954 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		C26A054E1E77620C00BDC954 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		C26A05531E77629500BDC954 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
-		C26A05571E77741300BDC954 /* libboost_signals.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_signals.a; path = ../../../svl/local/cinder/cinder_0.9/lib/macosx/libboost_signals.a; sourceTree = "<group>"; };
-		C26A05611E77763000BDC954 /* libboost_date_time.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_date_time.a; path = ../../../svl/local/cinder/cinder_0.9/lib/macosx/libboost_date_time.a; sourceTree = "<group>"; };
 		C276EC821C72971400242CDB /* cvcapture.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cvcapture.icns; sourceTree = "<group>"; };
 		C276EC841C72988200242CDB /* cp-visible_release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "cp-visible_release.xcconfig"; sourceTree = "<group>"; };
 		C276ECA81C72B5D900242CDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -630,6 +619,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2E60A0921200A7F00059FA6 /* libboost_date_time.a in Frameworks */,
+				C2E60A0A21200A7F00059FA6 /* libboost_filesystem.a in Frameworks */,
+				C2E60A0B21200A7F00059FA6 /* libboost_system.a in Frameworks */,
+				C2E60A0C21200A7F00059FA6 /* libboost_thread.a in Frameworks */,
 				C254BEF01F4FC44700977307 /* QTKit.framework in Frameworks */,
 				C2309DD61F6CA53100A0E908 /* libcinder.a in Frameworks */,
 				C2309DCD1F6C66F700A0E908 /* liblibjasper.a in Frameworks */,
@@ -637,7 +630,6 @@
 				C2AF87F91CFBCC5900CFC191 /* libopencv_imgcodecs.a in Frameworks */,
 				C2AF87FA1CFBCC5900CFC191 /* libopencv_imgproc.a in Frameworks */,
 				C2AF87F41CFBC7ED00CFC191 /* libopencv_core.a in Frameworks */,
-				C26A057F1E77AE6C00BDC954 /* libboost_date_time.a in Frameworks */,
 				C2309DCE1F6C66F700A0E908 /* liblibjpeg.a in Frameworks */,
 				C254BEE71F4FC3F200977307 /* libopencv_video.a in Frameworks */,
 				C254BEE81F4FC3F600977307 /* libopencv_videoio.a in Frameworks */,
@@ -654,7 +646,6 @@
 				C276ECA31C72B26F00242CDB /* CoreMedia.framework in Frameworks */,
 				C276EC961C72B26300242CDB /* Accelerate.framework in Frameworks */,
 				C276EC971C72B26300242CDB /* AudioToolbox.framework in Frameworks */,
-				C2309DAC1F69BDDF00A0E908 /* libboost_system.a in Frameworks */,
 				C276EC981C72B26300242CDB /* AudioUnit.framework in Frameworks */,
 				C276EC991C72B26300242CDB /* CoreAudio.framework in Frameworks */,
 				C276EC9C1C72B26300242CDB /* CoreVideo.framework in Frameworks */,
@@ -697,7 +688,6 @@
 				C24CD8B41CEB841E0008C72B /* ImageIO.framework in Frameworks */,
 				C24CD8B51CEB841E0008C72B /* CoreGraphics.framework in Frameworks */,
 				C24CD8B61CEB841E0008C72B /* IOKit.framework in Frameworks */,
-				C26A05631E77763000BDC954 /* libboost_date_time.a in Frameworks */,
 				C24CD8B71CEB841E0008C72B /* IOSurface.framework in Frameworks */,
 				C24CD8B81CEB841E0008C72B /* AVFoundation.framework in Frameworks */,
 				C24CD8B91CEB841E0008C72B /* CoreMedia.framework in Frameworks */,
@@ -705,7 +695,6 @@
 				C2E0EE621F7B079300D32697 /* libgtest.a in Frameworks */,
 				C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */,
 				C24CD8891CEA916E0008C72B /* libboost_filesystem.a in Frameworks */,
-				C2E0EE651F7B085B00D32697 /* libboost_signals.a in Frameworks */,
 				C24CD88A1CEA916E0008C72B /* libboost_system.a in Frameworks */,
 				C24CD88C1CEA916E0008C72B /* libz.a in Frameworks */,
 			);
@@ -747,13 +736,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				C26A055A1E7774B600BDC954 /* OpenCL.framework in Frameworks */,
-				C26A05581E77741300BDC954 /* libboost_signals.a in Frameworks */,
 				C26A05551E7762B500BDC954 /* CoreAudio.framework in Frameworks */,
 				C26A05541E77629500BDC954 /* CoreVideo.framework in Frameworks */,
 				C26A05521E77628800BDC954 /* IOKit.framework in Frameworks */,
 				C26A05501E77625000BDC954 /* CoreMedia.framework in Frameworks */,
 				C26A054F1E77620C00BDC954 /* Cocoa.framework in Frameworks */,
-				C26A05641E77763000BDC954 /* libboost_date_time.a in Frameworks */,
 				C26A054C1E7761D700BDC954 /* IOSurface.framework in Frameworks */,
 				C26A054B1E7761AF00BDC954 /* Accelerate.framework in Frameworks */,
 				C26A054A1E77618900BDC954 /* OpenGL.framework in Frameworks */,
@@ -871,9 +858,6 @@
 				C254BECC1F4FB07900977307 /* libopencv_video.a */,
 				C254BECD1F4FB07900977307 /* libopencv_videoio.a */,
 				C254BECE1F4FB07900977307 /* libopencv_videostab.a */,
-				C2309DAB1F69BDDF00A0E908 /* libboost_system.a */,
-				C26A05611E77763000BDC954 /* libboost_date_time.a */,
-				C26A05571E77741300BDC954 /* libboost_signals.a */,
 				C26A05531E77629500BDC954 /* CoreVideo.framework */,
 				C26A054E1E77620C00BDC954 /* Cocoa.framework */,
 				C26A05491E77618900BDC954 /* OpenGL.framework */,
@@ -1754,6 +1738,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
+					"$(SRCROOT)/local/boost/lib",
 					"$(LOCAL_CINDER)/lib/macosx",
 					"$(PROJECT_DIR)",
 					"$(LOCAL_OCV)/lib/macosx",
@@ -1774,7 +1759,6 @@
 					"$(LOCAL_OCV)/lib/macosx/libopencv_hal.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a",
 					"$(LOCAL_OCV)/lib/macosx/libzlib.a",
-					"$(LOCAL_CINDER)/lib/macosx/libboost_date_time.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
@@ -1827,6 +1811,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
+					"$(SRCROOT)/local/boost/lib",
 					"$(LOCAL_CINDER)/lib/macosx",
 					"$(PROJECT_DIR)",
 					"$(LOCAL_OCV)/lib/macosx",
@@ -1847,7 +1832,6 @@
 					"$(LOCAL_OCV)/lib/macosx/libopencv_hal.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a",
 					"$(LOCAL_OCV)/lib/macosx/libzlib.a",
-					"$(LOCAL_CINDER)/lib/macosx/libboost_date_time.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
