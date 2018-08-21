@@ -6,8 +6,17 @@
 #include <vector>
 //#include "core/stl_utils.hpp"
 
+
+histoStats::histoStats()
+: computedMoments_(0), computedIC_(0), computedMode_(0),computedSumSq_(false), n_(0), mode_(0),
+mean_(0), sDev_(0), var_(0), ic_(101), sum_(0), sumsq_(0)
+{
+    valid_bins_.resize(0);
+}
+
 histoStats::histoStats(vector<uint32_t> & histogram)
-: computedMoments_(0), computedIC_(0), computedMode_(0), n_(0), mode_(0), mean_(0), sDev_(0), var_(0), ic_(101)
+: computedMoments_(0), computedIC_(0), computedMode_(0),computedSumSq_(false), n_(0), mode_(0),
+    mean_(0), sDev_(0), var_(0), ic_(101), sum_(0), sumsq_(0)
 {
     valid_bins_.resize(0);
     histogram_ = histogram;
@@ -16,7 +25,8 @@ histoStats::histoStats(vector<uint32_t> & histogram)
 
 
 histoStats::histoStats(const cv::Mat & histogram)
-: computedMoments_(0), computedIC_(0), computedMode_(0), n_(0), mode_(0), mean_(0), sDev_(0), var_(0), ic_(101)
+: computedMoments_(0), computedIC_(0), computedMode_(0),computedSumSq_(false), n_(0), mode_(0),
+mean_(0), sDev_(0), var_(0), ic_(101), sum_(0), sumsq_(0)
 {
     valid_bins_.resize(0);
     histogram_.resize(256);
@@ -45,6 +55,22 @@ double histoStats::mean() const
     if (computedMoments_) return mean_;
     ((histoStats * const) this)->computeMoments();
     return mean_;
+}
+
+int64_t histoStats::sum() const
+{
+    if (! computedMoments_)
+        ((histoStats * const) this)->computeMoments();
+    return sum_;
+}
+
+int64_t histoStats::sumSquared () const
+{
+    std::unique_lock <std::mutex> lock(m_mutex, std::try_to_lock);
+    
+    if (! computedSumSq_ )
+        ((histoStats * const) this)->computeSS();
+    return sumsq_;
 }
 
 int32_t histoStats::mode() const
@@ -214,15 +240,17 @@ void histoStats::computeMoments()
     {
         long endI = (long)histogram_.size();
         long i;
-        uint32_t sum = 0;
+        sum_ = 0;
+        sumsq_ = 0;
         double temp;
         
         // Accumulate the sum = SUM( i*hist[i] )
         for (i = 0; i < endI; i++)
-            sum += histogram_[i] * i;
+            sum_ += histogram_[i] * i;
         
         // Calculate mean
-        mean_ = (double)sum / n_;
+        mean_ = (double)sum_ / n_;
+
         
         // Calculate variance
         if (n_ > 1)
@@ -246,7 +274,19 @@ void histoStats::computeMoments()
     computedMoments_ = 1;
 }
 
-
+void histoStats::computeSS()
+{
+    std::unique_lock <std::mutex> lock(m_mutex, std::try_to_lock);
+    
+    long endI = (long)histogram_.size();
+    long i;
+    sumsq_ = 0;
+    
+    for (i = 0; i < endI; i++)
+        sumsq_ += histogram_[i] * i * i;
+    
+    computedSumSq_ = true;
+}
 void histoStats::computeNsamp()
 {
     std::unique_lock <std::mutex> lock(m_mutex, std::try_to_lock);
@@ -290,10 +330,6 @@ int32_t histoStats::inverseCum(int percent) const
         return ((histoStats * const) this)->computeInverseCum(percent);
 }
 
-histoStats::histoStats()
-: computedMoments_(0), computedIC_(0), computedMode_(0), n_(0), mode_(0), mean_(0), sDev_(0), var_(0), ic_(101), bins_()
-{
-}
 
 void histoStats::clear()
 {
