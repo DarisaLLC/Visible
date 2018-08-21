@@ -202,7 +202,6 @@
 		C2AF87FA1CFBCC5900CFC191 /* libopencv_imgproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AF87F81CFBCC5900CFC191 /* libopencv_imgproc.a */; };
 		C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
 		C2B005821CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm */; };
-		C2B005831CFF878B00AC2E64 /* ExtraQuickTimeImplAvf.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm */; };
 		C2B38A571D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
@@ -1664,7 +1663,6 @@
 				C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */,
 				C20BBC031E4E33CE002C7D68 /* tinystr.cpp in Sources */,
 				C2606E721CED44370045FF57 /* qtime_frame_cache.cpp in Sources */,
-				C2B005831CFF878B00AC2E64 /* ExtraQuickTimeImplAvf.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1974,6 +1972,7 @@
 					"$(SRCROOT)/include/plistcpp",
 				);
 				LIBRARY_SEARCH_PATHS = (
+					"$(SRCROOT)/local/boost/lib",
 					"$(LOCAL_gtest)/lib/Debug",
 					"$(PROJECT_DIR)",
 					"$(LOCAL_OCV)/lib/macosx",
@@ -1997,7 +1996,6 @@
 					"$(LOCAL_OCV)/lib/macosx/libopencv_hal.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a",
 					"$(LOCAL_OCV)/lib/macosx/libzlib.a",
-					"$(LOCAL_CINDER)/lib/macosx/libboost_date_time.a",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -2046,6 +2044,7 @@
 					"$(SRCROOT)/include/plistcpp",
 				);
 				LIBRARY_SEARCH_PATHS = (
+					"$(SRCROOT)/local/boost/lib",
 					"$(LOCAL_gtest)/lib/Debug",
 					"$(PROJECT_DIR)",
 					"$(LOCAL_OCV)/lib/macosx",
@@ -2068,7 +2067,6 @@
 					"$(LOCAL_OCV)/lib/macosx/libopencv_hal.a",
 					"$(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a",
 					"$(LOCAL_OCV)/lib/macosx/libzlib.a",
-					"$(LOCAL_CINDER)/lib/macosx/libboost_date_time.a",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

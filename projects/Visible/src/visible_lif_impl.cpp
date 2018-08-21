@@ -1083,10 +1083,14 @@ void lifContext::draw ()
             {
                 cinder::gl::ScopedColor col (ColorA( 1, 0.1, 0.1, 0.8f ) );
                 gl::drawLine(length.first, length.second);
+                gl::drawSolidCircle(length.first, 3.0);
+                gl::drawSolidCircle(length.second, 3.0);
             }
             {
                 cinder::gl::ScopedColor col (ColorA( 0.1, 1.0, 0.1, 0.8f ) );
                 gl::drawLine(width.first, width.second);
+                gl::drawSolidCircle(width.first, 3.0);
+                gl::drawSolidCircle(width.second, 3.0);
             }
         }
         

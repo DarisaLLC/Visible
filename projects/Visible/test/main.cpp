@@ -33,6 +33,7 @@
 #include "contraction.hpp"
 #include "sm_producer.h"
 #include "algo_mov.hpp"
+#include "sg_filter.h"
 
 using namespace boost;
 
@@ -161,7 +162,7 @@ TEST(UT_contraction, basic)
 
     // Get contraction peak ( valley ) first
     auto min_iter = std::min_element(acid.begin(),acid.end());
-    ctr.contraction_peak = std::distance(acid.begin(),min_iter);
+    ctr.contraction_peak.first = std::distance(acid.begin(),min_iter);
     
     // Computer First Difference, 
     adjacent_difference(acid.begin(),acid.end(), fder.begin());
@@ -174,30 +175,30 @@ TEST(UT_contraction, basic)
     auto pos = find_if (fder2.begin(), fder2.end(),    // range
                    bind2nd(greater<double>(),0.1));  // criterion
 
-    ctr.contraction_start = std::distance(fder2.begin(),pos);
-    auto max_accel = std::min_element(fder.begin()+ ctr.contraction_start ,fder.begin()+ctr.contraction_peak);
-    ctr.contraction_max_acceleration = std::distance(fder.begin()+ ctr.contraction_start, max_accel);
-    ctr.contraction_max_acceleration += ctr.contraction_start;
-    auto max_relax = std::max_element(fder.begin()+ ctr.contraction_peak ,fder.end());
-    ctr.relaxation_max_acceleration = std::distance(fder.begin()+ ctr.contraction_peak, max_relax);
-     ctr.relaxation_max_acceleration += ctr.contraction_peak;
+    ctr.contraction_start.first = std::distance(fder2.begin(),pos);
+    auto max_accel = std::min_element(fder.begin()+ ctr.contraction_start.first ,fder.begin()+ctr.contraction_peak.first);
+    ctr.contraction_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_start.first, max_accel);
+    ctr.contraction_max_acceleration.first += ctr.contraction_start.first;
+    auto max_relax = std::max_element(fder.begin()+ ctr.contraction_peak.first ,fder.end());
+    ctr.relaxation_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_peak.first, max_relax);
+     ctr.relaxation_max_acceleration.first += ctr.contraction_peak.first;
     
     // Initialize rpos to point to the element following the last occurance of a value greater than 0.1
     // If there is no such value, initialize rpos = to begin
     // If the last occurance is the last element, initialize this it to end
     dItr_t rpos = find_if (fder2.rbegin(), fder2.rend(),    // range
                         bind2nd(greater<double>(),0.1)).base();  // criterion
-    ctr.relaxation_end = std::distance (fder2.begin(), rpos);
+    ctr.relaxation_end.first = std::distance (fder2.begin(), rpos);
     
-    EXPECT_EQ(ctr.contraction_start,16);
-    EXPECT_EQ(ctr.contraction_peak,35);
-    EXPECT_EQ(ctr.contraction_max_acceleration,27);
-    EXPECT_EQ(ctr.relaxation_max_acceleration,43);
-    EXPECT_EQ(ctr.relaxation_end,52);
+    EXPECT_EQ(ctr.contraction_start.first,16);
+    EXPECT_EQ(ctr.contraction_peak.first,35);
+    EXPECT_EQ(ctr.contraction_max_acceleration.first,27);
+    EXPECT_EQ(ctr.relaxation_max_acceleration.first,43);
+    EXPECT_EQ(ctr.relaxation_end.first,52);
     
-    contraction_analyzer ca;
+    contraction_profile_analyzer ca;
     ca.run(acid);
-    bool test = contraction_analyzer::contraction::compare(ca.pols(), ctr);
+    bool test = contraction_analyzer::contraction::equal(ca.pols(), ctr);
     EXPECT_TRUE(test);
     
     
