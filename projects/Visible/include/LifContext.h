@@ -19,6 +19,9 @@ namespace fs = boost::filesystem;
 class lifContext : public sequencedImageContext
 {
 public:
+    
+    using contractionContainer_t = lif_processor::contractionContainer_t;
+    
 	struct clip
     {
         size_t begin;
@@ -48,6 +51,7 @@ public:
 		std::vector<time_spec_t> timeSpecs;
 		float                    length_in_seconds;
 		
+        
 		friend std::ostream& operator<< (std::ostream& out, const series_info& se)
 		{
 			out << "Serie:    " << se.name << std::endl;
@@ -67,6 +71,8 @@ public:
 		
 	};
 	
+ 
+    
     typedef std::pair<vec2,vec2> sides_length_t;
     
 	// From just a name, use the open file dialog to get the file
@@ -131,14 +137,15 @@ public:
 	void receivedEvent ( InteractiveObjectEvent event );
 	
 	const tiny_media_info& media () const { return mMediaInfo; }
-	
+
+    
 private:
     std::shared_ptr<lif_processor> m_lifProcRef;
     
 	gl::TextureRef pixelInfoTexture ();
 	void loadLifFile();
 	void loadCurrentSerie ();
-	bool have_movie ();
+	bool have_lif_serie ();
 	void play ();
 	void pause ();
 	void update_log (const std::string& meg = "");
@@ -149,55 +156,21 @@ private:
     
 	Rectf get_image_display_rect ();
 	
-    void signal_content_loaded ();
+    void signal_content_loaded (int64_t&);
     void signal_flu_stats_available ();
     void signal_sm1d_available (int&);
     void signal_sm1dmed_available (int&,int&);
+    void signal_contraction_available (contractionContainer_t&);
  
     void signal_frame_loaded (int& findex, double& timestamp);
  
-	void get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer)
-	{
-		m_series_book.clear ();
-		for (unsigned ss = 0; ss < lifer->getNbSeries(); ss++)
-		{
-			series_info si;
-			si.name = lifer->getSerie(ss).getName();
-			si.timesteps = lifer->getSerie(ss).getNbTimeSteps();
-			si.pixelsInOneTimestep = lifer->getSerie(ss).getNbPixelsInOneTimeStep();
-			si.dimensions = lifer->getSerie(ss).getSpatialDimensions();
-			si.channelCount = lifer->getSerie(ss).getChannels().size();
-			si.channels.clear ();
-			for (lifIO::ChannelData cda : lifer->getSerie(ss).getChannels())
-			{
-				si.channel_names.push_back(cda.getName());
-				si.channels.emplace_back(cda);
-			}
-			
-			// Get timestamps in to time_spec_t and store it in info
-			si.timeSpecs.resize (lifer->getSerie(ss).getTimestamps().size());
-			
-			// Adjust sizes based on the number of bytes
-			std::transform(lifer->getSerie(ss).getTimestamps().begin(), lifer->getSerie(ss).getTimestamps().end(),
-						   si.timeSpecs.begin(), [](lifIO::LifSerie::timestamp_t ts) { return time_spec_t ( ts / 10000.0); });
-			
-			si.length_in_seconds = lifer->getSerie(ss).total_duration ();
-			
-			m_series_book.emplace_back (si);
-		}
-	}
-	
-	int get_current_clip_index () const
-    {
-        std::lock_guard<std::mutex> guard(m_clip_mutex);
-        return m_current_clip_index;
-    }
+    void get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer);
+
+    int get_current_clip_index () const;
+ 
     
-    void set_current_clip_index (int cindex) const
-    {
-        std::lock_guard<std::mutex> guard(m_clip_mutex);
-        m_current_clip_index = cindex;
-    }
+    void set_current_clip_index (int cindex) const;
+  
 	std::shared_ptr<lifIO::LifReader> m_lifRef;
 	std::vector<series_info> m_series_book;
     std::vector<std::string> m_series_names;
@@ -207,7 +180,7 @@ private:
     mutable int m_current_clip_index;
     
 	void seek( size_t xPos );
-	void clear_movie_params ();
+	void clear_playback_params ();
 	vec2 texture_to_display_zoom ();
 	void update_instant_image_mouse ();
 	
@@ -225,7 +198,7 @@ private:
 
 	bool m_is_playing, m_is_looping;
     
-    void add_plot_widgets (const int);
+    void add_widgets (const int);
     
 	uint32_t m_cutoff_pct;
 
@@ -257,6 +230,7 @@ private:
 	int mButton_title_index;
 	std::string mButton_title;
     
+    lif_processor::contractionContainer_t m_contractions;
     std::vector<std::string> m_contraction_none = {" Entire "};
     mutable std::vector<std::string> m_contraction_names;
     mutable std::deque<clip> m_clips;

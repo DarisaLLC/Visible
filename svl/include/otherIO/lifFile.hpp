@@ -1,3 +1,10 @@
+/** @file lifFile.hpp
+ * @brief Namespace @ref LifReader
+ */
+
+
+
+
 /**
 
 

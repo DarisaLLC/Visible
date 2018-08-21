@@ -28,7 +28,7 @@
 class sm_signaler : public base_signaler
 {
     virtual std::string
-    getName () const { return "sm_signaler"; }
+    getName () const { return "smSignaler"; }
 };
 
 

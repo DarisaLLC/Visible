@@ -1,3 +1,12 @@
+/** @dir src
+ * @brief Namespace @ref svl
+ */
+/** @namespace svl
+ * @brief The Simple Vision Library
+ */
+
+
+
 #include "core/csv.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>

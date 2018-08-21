@@ -1,3 +1,12 @@
+/** @dir include
+ * @brief Namespace @ref svl
+ */
+/** @namespace svl
+ * @brief The Simple Vision Library
+ */
+
+
+
 //
 //   PlistCpp Property List (plist) serialization and parsing library.
 //

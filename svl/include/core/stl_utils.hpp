@@ -27,13 +27,12 @@ using namespace std;
 
 namespace stl_utils
 {
+    /*
+        Watch dog with RAII design
+     */
     
     class watchdog {
     public:
-        static void start(int secs);
-        static void stop();
-        
-    private:
         watchdog(int secs) {
             thread_ = std::thread{[=] {
                 auto tp =
@@ -58,7 +57,8 @@ namespace stl_utils
             }
             thread_.join();
         }
-        
+
+    private:
         volatile bool canceled_ = false;
         std::mutex mtx_;
         std::condition_variable cv_;
@@ -282,6 +282,10 @@ namespace stl_utils
     
  
 
+    /*
+        Simple 1D filter interface and median filtering derivation
+     
+     */
     
     template <class T>
     class FilterInterface
@@ -296,7 +300,7 @@ namespace stl_utils
     };
     
     template <class T>
-    class NthElement : public FilterInterface<T>
+    class median1D : public FilterInterface<T>
     {
         std::vector<T> _history;
         std::vector<T> _pool;
@@ -304,7 +308,7 @@ namespace stl_utils
         
     public:
         
-        NthElement(unsigned window_size)
+        median1D(const unsigned long window_size)
         :
         _history(keep_odd(window_size), T()),
         _pool(_history),

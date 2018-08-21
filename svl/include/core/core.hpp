@@ -1,3 +1,11 @@
+/** @dir core
+ * @brief Namespace @ref svl
+ */
+/** @namespace svl
+ * @brief The Simple Vision Library
+ */
+
+
 #ifndef _CORE_HPP
 #define _CORE_HPP
 

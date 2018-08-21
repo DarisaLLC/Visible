@@ -1,3 +1,12 @@
+/** @dir cinder
+ * @brief Namespace @ref svl
+ */
+/** @namespace svl
+ * @brief Cinder Additions
+ */
+
+
+
 #ifndef __AFFINE_RECTANGLE__
 #define __AFFINE_RECTANGLE__
 

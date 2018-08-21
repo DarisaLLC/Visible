@@ -5,6 +5,10 @@
 
 #include <stdint.h>
 #include <limits>
+#include <iostream>
+#include <cmath>
+
+using namespace std;
 
 namespace svl
 {
@@ -59,12 +63,12 @@ class stats
     static void PrintTo(const stats<T>& stinst, std::ostream* stream_ptr)
     {
         if(! stream_ptr) return;
-        *stream_ptr << "Count: " << stinst.count () << std::endl;
-        *stream_ptr << "Min  : " << stinst.minimum () << std::endl;
-        *stream_ptr << "Max  : " << stinst.maximum () << std::endl;
-        *stream_ptr << "Mean : " << stinst.mean () << std::endl;
+        *stream_ptr  << "Count: " << stinst.count ()              << std::endl;
+        *stream_ptr << "Min  : " << stinst.minimum ()             << std::endl;
+        *stream_ptr << "Max  : " << stinst.maximum ()             << std::endl;
+        *stream_ptr << "Mean : " << stinst.mean ()                << std::endl;
         *stream_ptr << "Std  : " << std::sqrt(stinst.variance ()) << std::endl;
-        *stream_ptr << "RMS  : " << stinst.rms () << std::endl;
+        *stream_ptr << "RMS  : " << stinst.rms ()                 << std::endl;
     }
     
     private:

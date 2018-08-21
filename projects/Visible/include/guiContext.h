@@ -349,6 +349,8 @@ public:
 	
 	virtual bool have_tracks () const { return m_have_tracks; }
 
+	// App default startup params
+	static ivec2 startup_display_size () { return ivec2( 848, 564 ); }
 	
 protected:
 	int mMainTimeLineSliderIndex;

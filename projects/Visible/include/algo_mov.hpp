@@ -85,25 +85,7 @@ private:
     void entropiesToTracks (namedTrackOfdouble_t& track)
     {
         track.second.clear();
-        if (m_smfilterRef->savgol_filter())
-        {
-            // Signal we are done with median level set
-            static int dummy;
-            if (signal_sm1dmed_available && signal_sm1dmed_available->num_slots() > 0)
-                signal_sm1dmed_available->operator()(dummy, dummy);
-        }
-
-        auto bee = m_smfilterRef->entropies().begin();
-        auto mee = m_smfilterRef->filtered().begin();
-        for (auto ss = 0; bee != m_smfilterRef->entropies().end() && ss < frame_count(); ss++, bee++, mee++)
-        {
-            index_time_t ti;
-            ti.first = ss;
-            timed_double_t res;
-            res.first = ti;
-            res.second = *mee;
-            track.second.emplace_back(res);
-        }
+  
     }
     
     size_t frame_count () const
@@ -160,37 +142,7 @@ public:
         create_named_tracks(names);
         compute_channel_statistics_threaded();
 
-//        channel_images_t c2 = m_channel_images[2];
- //       loadImagesToMats(c2, m_channel2_mats);
 
-
-     //   auto oflow = compute_oflow_threaded ();
-        
-
-//        auto sp =  sm();
-//        sp->load_images (c2);
-//
-//        // Call the content loaded cb if any
-//        if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
-//            signal_content_loaded->operator()();
-//
-//        std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
-//        std::future<bool>  future_ss = task.get_future();  // get a future
-//        std::thread(std::move(task)).detach(); // launch on a thread
-//        if (future_ss.get())
-//        {
-//            // Signal we are done with ACI
-//            static int dummy;
-//            if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
-//                signal_sm1d_available->operator()(dummy);
-//
-//            const deque<double>& entropies = sp->shannonProjection ();
-//            const deque<deque<double>>& smat = sp->similarityMatrix();
-//            m_smfilterRef = std::make_shared<sm_filter> (entropies, smat);
-//
-//
-//            update ();
-//        }
         return m_tracksRef;
     }
     
@@ -199,8 +151,7 @@ public:
     // Update. Called also when cutoff offset has changed
     void update ()
     {
-//        if(m_tracksRef && !m_tracksRef->empty() && m_smfilterRef && m_smfilterRef->isValid())
-//            entropiesToTracks(m_tracksRef->at(2));
+
     }
     
 private:
@@ -210,7 +161,6 @@ private:
     std::vector<cv::Mat> m_channel2_mats;
     
     Rectf m_all;
-    std::shared_ptr<sm_filter> m_smfilterRef;
     std::deque<double> m_medianLevel;
     std::shared_ptr<vectorOfnamedTrackOfdouble_t>  m_tracksRef;
 };

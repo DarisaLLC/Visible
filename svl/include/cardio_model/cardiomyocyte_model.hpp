@@ -1,3 +1,13 @@
+/** @dir cardio
+ * @brief Namespace @ref cm
+ */
+/** @namespace cm
+ * @brief Cardio Model
+ */
+
+
+
+
 #ifndef _CARDIO_MODEL_HPP
 #define _CARDIO_MODEL_HPP
 

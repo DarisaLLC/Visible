@@ -1,3 +1,12 @@
+/** @dir core
+ * @brief Namespace @ref svl
+ */
+/** @namespace svl
+ * @brief The Simple Vision Library
+ */
+
+
+
 #include "sg_filter.h"
 #include "math.h"
 

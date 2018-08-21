@@ -1,3 +1,10 @@
+/** @dir core
+ * @brief Namespace @ref svl
+ */
+/** @namespace svl
+ * @brief The Simple Vision Library
+ */
+
 
 #ifndef _MULTIWINDOW_H_
 #define _MULTIWINDOW_H_

@@ -54,6 +54,7 @@ namespace tinyUi
         
         void init ()
         {
+            mHidden = false;
             mValue = mValueScaled = 0.0f;
             mMin = 0.0f;
             mMax = 1.0f;

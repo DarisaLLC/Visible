@@ -52,7 +52,7 @@ namespace
     }
     
     
-    static layout vl (ivec2 (10, 10));
+    static layoutManager vl (ivec2 (10, 10));
     
     
  
@@ -315,7 +315,7 @@ void movContext::loadMovieFile()
             
           //  getWindow()->getApp()->setFrameRate(30.0);
             
-            vl.init (app::getWindow(), mFrameSet->media_info());
+            vl.init (movContext::startup_display_size(), mFrameSet->media_info());
             
             if (m_valid)
             {

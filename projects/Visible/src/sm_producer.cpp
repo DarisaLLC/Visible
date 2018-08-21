@@ -13,7 +13,6 @@
 #include "app_utils.hpp"
 #include "cinder_xchg.hpp"
 #include "core/simple_timing.hpp"
-//#include "core/stl_utils.hpp"
 #include "vision/opencv_utils.hpp"
 #include "vision/histo.h"
 
@@ -28,8 +27,6 @@ namespace fs=boost::filesystem;
 using namespace ci;
 
 using namespace svl;
-
-using namespace stl_utils;
 
 namespace anonymous
 {
@@ -264,8 +261,6 @@ int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_pr
         std::cout << tmp_loaded_ref.size() << " Out of " << tmp_framePaths.size () << " Files "  << std::endl;
         
     }
-    
-    std::cout << size_map;
     
     // All same size, or our pairwise compare function does not care
     if (size_map.size() == 1 || (size_map.size() > 1 &&  szmap == dontCare))

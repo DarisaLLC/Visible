@@ -52,7 +52,7 @@ namespace
 void prepareSettings( App::Settings *settings )
 {
     settings->setHighDensityDisplayEnabled();
-    settings->setWindowSize( 848, 564 );
+    settings->setWindowSize(lifContext::startup_display_size().x, lifContext::startup_display_size().y);
     settings->setFrameRate( 60 );
     settings->setResizable( true );
     //    settings->setWindowSize( 640, 480 );
@@ -65,7 +65,13 @@ class VisibleApp : public App, public SingletonLight<VisibleApp>
 {
 public:
     
-    
+    virtual ~VisibleApp(){
+        guiContext  *data = getWindow()->getUserData<guiContext>();
+        
+        
+        std::cout << " Visible App Dtor " << std::endl;
+        
+    }
     void prepareSettings( Settings *settings );
     void setup()override;
     void create_qmovie_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
@@ -108,20 +114,12 @@ public:
     Rectf						mGlobalBounds;
     map<string, boost::any> mPlist;
     
-    mutable std::list <std::shared_ptr<guiContext> > mContexts;
+    mutable std::list <std::unique_ptr<guiContext> > mContexts;
     
   
 };
 
-WindowRef  VisibleCentral::getConnectedWindow (Window::Format& format )
-{
-    return VisibleApp::instance().createConnectedWindow(format);
-}
 
-std::list <std::shared_ptr<guiContext> >& VisibleCentral::contexts ()
-{
-    return VisibleApp::instance().mContexts;
-}
 
 WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
 {
@@ -148,7 +146,7 @@ void VisibleApp::create_qmovie_viewer (const boost::filesystem::path& pp)
 {
     Window::Format format( RendererGl::create() );
     WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::shared_ptr<movContext>( new movContext(ww, pp) ) );
+    mContexts.push_back(std::unique_ptr<movContext>( new movContext(ww, pp) ) );
 }
 
 //
@@ -159,7 +157,7 @@ void VisibleApp::create_result_viewer (const boost::filesystem::path& pp)
 {
     Window::Format format( RendererGl::create() );
     WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::shared_ptr<imageDirContext>( new imageDirContext(ww, pp) ) );
+    mContexts.push_back(std::unique_ptr<imageDirContext>( new imageDirContext(ww, pp) ) );
 }
 
 
@@ -171,7 +169,7 @@ void VisibleApp::create_lif_viewer (const boost::filesystem::path& pp)
 {
     Window::Format format( RendererGl::create() );
     WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::shared_ptr<lifContext>(new lifContext(ww, pp)));
+    mContexts.push_back(std::unique_ptr<lifContext>(new lifContext(ww, pp)));
 }
 
 
@@ -183,7 +181,7 @@ void VisibleApp::create_movie_dir_viewer (const boost::filesystem::path& pp)
 {
     Window::Format format( RendererGl::create() );
     WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::shared_ptr<movDirContext>(new movDirContext(ww, pp)));
+    mContexts.push_back(std::unique_ptr<movDirContext>(new movDirContext(ww, pp)));
 }
 
 //
@@ -194,7 +192,7 @@ void VisibleApp::create_clip_viewer (const boost::filesystem::path& pp)
 {
     Window::Format format( RendererGl::create() );
     WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::shared_ptr<clipContext>(new clipContext(ww, pp)));
+    mContexts.push_back(std::unique_ptr<clipContext>(new clipContext(ww, pp)));
 }
 
 void VisibleApp::fileDrop( FileDropEvent event )

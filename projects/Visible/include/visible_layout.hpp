@@ -6,7 +6,7 @@
 #include "cinder/Rect.h"
 #include "cinder/Signals.h"
 #include "cinder/app/Event.h"
-
+#include "signaler.h"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -45,68 +45,71 @@ using namespace ci::signals;
  
  */
 
-class layout : tiny_media_info
+class layouter : public base_signaler
+{
+    virtual std::string
+    getName () const { return "LayoutManager"; }
+};
+
+class layoutManager : tiny_media_info, layouter
 {
 public:
     
-    typedef	 signals::Signal<void( ivec2 & )>		LayoutSignalWindowSize_t;
-    LayoutSignalWindowSize_t&	getSignalWindowSize() { return m_windowSizeSignal; }
+    typedef void (sig_plot_size_changed_cb) ();
+    typedef void (sig_window_size_changed_cb) ();
     
-    layout (ivec2 trim, bool keep_aspect = true):m_keep_aspect ( keep_aspect), m_trim (trim), m_isSet (false)
+    layoutManager (ivec2 trim, bool keep_aspect = true):m_keep_aspect ( keep_aspect), m_trim (trim), m_isSet (false)
     {
-        
+        // Load defaults
+        // from config file ?
         m_image_frame_size_norm = vec2(0.67, 0.75);
         m_single_plot_size_norm = vec2(0.33, 0.25);
         m_timeline_size_norm = vec2(0.67, 0.08);
         m_log_size_norm = vec2(0.95, 0.08);
         
+        // Two signals we provide
+        m_signal_window_size_changed = createSignal<sig_window_size_changed_cb>();
+        m_signal_plot_size_changed = createSignal<sig_plot_size_changed_cb>();
+
+        // And subscribe to as well
+        std::function<void ()> window_size_changed_cb = std::bind (&layoutManager::update, this);
+        boost::signals2::connection ml_window_connection = registerCallback(window_size_changed_cb);
+        
+        std::function<void ()> plot_size_changed_cb = std::bind (&layoutManager::update, this);
+        boost::signals2::connection ml_plot_connection = registerCallback(plot_size_changed_cb);
         
     }
     
     // Constructor
-    void init (const WindowRef& uiWin, const tiny_media_info& tmi)
+    void init (const vec2& uiWinSize, const tiny_media_info& tmi)
     
     {
+        // Load defaults
+        // from config file ?
+        m_image_frame_size_norm = vec2(0.67, 0.75);
+        m_single_plot_size_norm = vec2(0.33, 0.25);
+        m_timeline_size_norm = vec2(0.67, 0.08);
+        m_log_size_norm = vec2(0.95, 0.08);
+        
         *((tiny_media_info*)this) = tmi;
-        m_canvas_size = uiWin->getSize ();
+        m_canvas_size = uiWinSize;
         Area wi (0, 0, m_canvas_size.x, m_canvas_size.y);
         m_window_rect = Rectf(wi);
         Area ai (0, 0, tmi.getWidth(), tmi.getHeight());
         m_image_rect = Rectf (ai);
-        m_aspect = layout::aspect(tmi.getSize());
+        m_aspect = layoutManager::aspect(tmi.getSize());
         m_isSet = true;
         
         //@todo remove this assumption
         update_display_plots_rects ();
+        update_display_timeline_rect ();
         m_slider_rects.clear();
     }
     
+    // Accessors
     inline bool isSet () const { return m_isSet; }
     
-    inline void update_window_size (const ivec2& new_size )
-    {
-        ivec2 ns = new_size;
-        if (m_keep_aspect)
-        {
-            float newAr = new_size.x / (float) new_size.y ;
-            if (aspectRatio() > newAr)
-                ns.y= std::floor(ns.x/ aspectRatio ());
-            else
-                ns.x = std::floor(ns.y * aspectRatio () );
-        }
-        
-        m_canvas_size = new_size;
-        Area wi (0, 0, m_canvas_size.x, m_canvas_size.y);
-        m_window_rect = Rectf(wi);
-        
-        update_display_frame_rect ();
-        update_display_timeline_rect ();
-        update_display_plots_rects();
-        
-        m_windowSizeSignal.emit(m_canvas_size);
-    }
-    
-    inline Rectf display_frame_rect ()
+    inline const Rectf& display_frame_rect ()
     {
         return m_current_display_frame_rect;
     }
@@ -117,18 +120,9 @@ public:
         return m_display2image.map(pixel_loc);
     }
     
-    inline Rectf display_timeline_rect ()
+    inline const Rectf& display_timeline_rect ()
     {
         return m_current_display_timeline_rect;
-    }
-    
-    
-    // Modify window size
-    inline void scale (vec2& scale_by)
-    {
-        m_canvas_size.x  = std::floor(m_canvas_size.x * scale_by.x);
-        m_canvas_size.y  = std::floor(m_canvas_size.y * scale_by.y);
-        m_windowSizeSignal.emit(m_canvas_size);
     }
     
     
@@ -138,6 +132,7 @@ public:
     const vec2& normSinglePlotSize () const { return m_single_plot_size_norm; }
     void normSinglePlotSize (vec2 ns) const { m_single_plot_size_norm = ns; }
     
+
     
     const float& aspectRatio () const { return m_aspect; }
     
@@ -165,7 +160,54 @@ public:
     {
         return m_slider_rects;
     }
+
+    inline const vec2& single_plot_size_norm (){ return m_single_plot_size_norm;}
     
+    // Mutators
+    inline void update ()
+    {
+        update_display_frame_rect ();
+        update_display_timeline_rect ();
+        update_display_plots_rects();
+    }
+    
+    inline void update_window_size (const ivec2& new_size )
+    {
+        ivec2 ns = new_size;
+        if (m_keep_aspect)
+        {
+            float newAr = new_size.x / (float) new_size.y ;
+            if (aspectRatio() > newAr)
+                ns.y= std::floor(ns.x/ aspectRatio ());
+            else
+                ns.x = std::floor(ns.y * aspectRatio () );
+        }
+        
+        m_canvas_size = new_size;
+        Area wi (0, 0, m_canvas_size.x, m_canvas_size.y);
+        m_window_rect = Rectf(wi);
+        
+        // Call the layout change cb if any
+        if (m_signal_window_size_changed && m_signal_window_size_changed->num_slots() > 0)
+            m_signal_window_size_changed->operator()();
+    }
+    
+    // Modify window size
+    inline void scale (vec2& scale_by)
+    {
+        m_canvas_size.x  = std::floor(m_canvas_size.x * scale_by.x);
+        m_canvas_size.y  = std::floor(m_canvas_size.y * scale_by.y);
+        update_window_size (m_canvas_size);
+    }
+    
+    // Modify Normalized Single Plot Size
+    void single_plot_size_norm (const vec2& new_norm)
+    {
+        m_single_plot_size_norm = new_norm;
+        // Call the layout change cb if any
+        if (m_signal_plot_size_changed && m_signal_plot_size_changed->num_slots() > 0)
+            m_signal_plot_size_changed->operator()();
+    }
     
     int add_slider_rect ()
     {
@@ -223,7 +265,7 @@ private:
         return np;
     }
     
-    inline vec2 single_plot_size_norm (){ return m_single_plot_size_norm;}
+
     inline vec2 plots_frame_size_norm (){ vec2 np = vec2 (single_plot_size_norm().x, 3 * single_plot_size_norm().y); return np;}
     
     
@@ -333,12 +375,12 @@ private:
     mutable std::vector<Rectf> m_plot_rects;
     mutable std::vector<Rectf> m_slider_rects;
     
-    LayoutSignalWindowSize_t m_windowSizeSignal;
-    
     static float aspect (const ivec2& s) { return s.x / (float) s.y; }
     
     mutable RectMapping m_display2image;
-    
+protected:
+    boost::signals2::signal<sig_plot_size_changed_cb>* m_signal_plot_size_changed;
+    boost::signals2::signal<sig_window_size_changed_cb>* m_signal_window_size_changed;
     
 };
 

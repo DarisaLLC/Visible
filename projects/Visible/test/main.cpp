@@ -131,7 +131,7 @@ TEST(UT_smfilter, basic)
     stl_utils::Out(norms);
     stl_utils::Out(output);
     
-    auto median_value = sm_filter::Median_levelsets(norms,ranks);
+    auto median_value = contraction_analyzer::Median_levelsets(norms,ranks);
     
     std::cout << median_value << std::endl;
     for (auto ii = 0; ii < norms.size(); ii++)
@@ -167,7 +167,7 @@ TEST(UT_contraction, basic)
     adjacent_difference(acid.begin(),acid.end(), fder.begin());
     std::rotate(fder.begin(), fder.begin()+1, fder.end());
     fder.pop_back();
-    auto medianD = stl_utils::NthElement<double>(7);
+    auto medianD = stl_utils::median1D<double>(7);
     fder = medianD.filter(fder);
     std::transform(fder.begin(), fder.end(), fder2.begin(), [](double f)->double { return f * f; });
     // find first element greater than 0.1
