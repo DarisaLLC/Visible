@@ -860,6 +860,8 @@ void lifContext::loadCurrentSerie ()
         
         m_async_luminance_tracks = std::async(std::launch::async,&lif_processor::run_flu_statistics,m_lifProcRef.get());
         m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci, m_lifProcRef.get());
+        auto res = m_lifProcRef->run_volume_sum_sumsq_count ();
+        stl_utils::printTuple(res);
         
     }
     catch( const std::exception &ex ) {

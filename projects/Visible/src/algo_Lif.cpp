@@ -76,7 +76,8 @@ std::tuple<int64_t,int64_t,uint32_t> lif_processor::run_volume_sum_sumsq_count (
     std::vector<std::thread> threads(1);
     threads[0] = std::thread(IntensityStatisticsPartialRunner(),std::ref(m_all_by_channel[2]), std::ref(cts));
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
-    return make_tuple(1,1,1);
+    auto res = std::accumulate(cts.begin(), cts.end(), std::make_tuple(int64_t(0),int64_t(0), uint32_t(0)), stl_utils::tuple_sum<int64_t,uint32_t>());
+    return res;
 }
 
 /*
