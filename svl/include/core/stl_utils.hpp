@@ -18,6 +18,12 @@
 #include <stdio.h>
 #include <thread>
 #include <condition_variable>
+#include <cstddef>
+#include <tuple>
+#include <utility>
+#include <type_traits>
+#include <iostream>
+
 
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
@@ -65,7 +71,131 @@ namespace stl_utils
         std::thread thread_;
     };
     
+            /**************
+             *  Tuple     *
+             * Accumulate *
+             * Print      *
+             *            *
+             **************/
     
+    // helper function to print a tuple of any size
+    template<class Tuple, std::size_t N>
+    struct TuplePrinter {
+        static void print(const Tuple& t)
+        {
+            TuplePrinter<Tuple, N-1>::print(t);
+            std::cout << ", " << std::get<N-1>(t);
+        }
+    };
+    
+    template<class Tuple>
+    struct TuplePrinter<Tuple, 1> {
+        static void print(const Tuple& t)
+        {
+            std::cout << std::get<0>(t);
+        }
+    };
+    
+    template<class... Args>
+    void printTuple(const std::tuple<Args...>& t)
+    {
+        std::cout << "(";
+        TuplePrinter<decltype(t), sizeof...(Args)>::print(t);
+        std::cout << ")\n";
+    }
+    
+    template <typename T1, typename T2> struct tuple_sum : public std::binary_function< std::tuple<T1,T1,T2>, std::tuple<T1,T1,T2>, std::tuple<T1,T1,T2> >
+    {
+        static_assert(std::is_arithmetic<T1>::value, "NumericType must be numeric");
+        static_assert(std::is_arithmetic<T2>::value, "NumericType must be numeric");
+        std::tuple<T1,T1,T2> operator()(const std::tuple<T1,T1,T2>& lhs, const std::tuple<T1,T1,T2>& rhs)
+        {
+            return std::tuple<T1,T1,T2>(std::get<0>(lhs) + std::get<0>(rhs), std::get<1>(lhs) + std::get<1>(rhs), std::get<2>(lhs) + std::get<2>(rhs));
+        }
+    };
+
+    // Accumulate over std::tuple  https://stackoverflow.com/a/18562596
+    //    int main(int /*argc*/, const char* /*argv*/[])
+    //    {
+    //        auto val = tuple_accumulate(std::make_tuple(5, 3.2, 7U, 6.4f), 0L, functor());
+    //        std::cout << val << std::endl; //should output 21.6
+    //        return 0;
+    //    }
+    //deduces the type resulted from the folding of a sequence from left to right
+    //avoids the decltype nonsense
+    template <typename T, typename OpT>
+    class result_of_acumulate;
+    
+    template <typename... ArgsT, typename OpT>
+    class result_of_acumulate<std::tuple<ArgsT...>, OpT>
+    {
+    private:
+        template <typename... ArgsHeadT>
+        struct result_of_acumulate_helper;
+        
+        template <typename ArgsHeadT>
+        struct result_of_acumulate_helper<ArgsHeadT>
+        {
+            typedef ArgsHeadT type;
+        };
+        
+        template <typename ArgsHead1T, typename ArgsHead2T>
+        struct result_of_acumulate_helper<ArgsHead1T, ArgsHead2T>
+        {
+            typedef typename std::result_of<OpT(ArgsHead1T, ArgsHead2T)>::type type;
+        };
+        
+        template <typename ArgsHead1T, typename ArgsHead2T, typename... ArgsTailT>
+        struct result_of_acumulate_helper<ArgsHead1T, ArgsHead2T, ArgsTailT...>
+        {
+            typedef typename result_of_acumulate_helper<typename std::result_of<OpT(ArgsHead1T, ArgsHead2T)>::type, ArgsTailT...>::type type;
+        };
+        
+    public:
+        typedef typename result_of_acumulate_helper<ArgsT...>::type type;
+    };
+    
+    template <std::size_t IndexI, typename T, typename OutT, typename OpT>
+    constexpr typename std::enable_if<(IndexI == std::tuple_size<T>::value), OutT>::type
+    tuple_accumulate_helper(T const& /*tuple*/, OutT const& init, OpT /*op*/)
+    {
+        return init;
+    }
+    
+    template <std::size_t IndexI, typename T, typename OutT, typename OpT>
+    constexpr typename std::enable_if
+    <
+    (IndexI < std::tuple_size<T>::value),
+    typename result_of_acumulate<T, OpT>::type
+    >::type
+    tuple_accumulate_helper(T const& tuple, OutT const init, OpT op)
+    {
+        return tuple_accumulate_helper<IndexI + 1>(tuple, op(init, std::get<IndexI>(tuple)), op);
+    }
+    
+    template <typename T, typename OutT, typename OpT>
+    auto tuple_accumulate(T const& tuple, OutT const& init, OpT op)
+    -> decltype(tuple_accumulate_helper<0>(tuple, init, op))
+    {
+        return tuple_accumulate_helper<0>(tuple, init, op);
+    }
+    
+    struct functor
+    {
+        template <typename T1, typename T2>
+        auto operator()(T1 t1, T2 t2)
+        -> decltype(t1 + t2)
+        {
+            return t1 + t2;
+        }
+    };
+    
+ 
+    /**************
+     *  Map       *
+     *            *
+     **************/
+
     template <typename Key, typename Value, typename Comparator = less<Key>, typename Alloc = std::allocator<std::pair<const Key, Value> > >
     bool contains_key (const std::map<Key, Value, Comparator, Alloc>& dmap, const Key& key, Value& out)
     {

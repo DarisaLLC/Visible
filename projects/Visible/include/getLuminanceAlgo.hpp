@@ -28,6 +28,25 @@ struct IntensityStatisticsRunner
     }
 };
 
+struct IntensityStatisticsPartialRunner
+{
+    typedef std::vector<roiWindow<P8U>> channel_images_t;
+    void operator()( channel_images_t& channel, std::vector< std::tuple<int64_t, int64_t, uint32_t> >& results)
+    {
+        results.clear();
+        for (auto ii = 0; ii < channel.size(); ii++)
+        {
+            roiWindow<P8U>& image = channel[ii];
+            histoStats hh;
+            hh.from_image(image);
+            int64_t s = hh.sum();
+            int64_t ss = hh.sumSquared();
+            uint32_t nn = hh.n();
+            results.emplace_back(s,ss,nn);
+        }
+    }
+};
+
 
 #endif
 

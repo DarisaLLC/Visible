@@ -90,8 +90,8 @@ private:
     
     size_t frame_count () const
     {
-        if (m_channel_images[0].size() == m_channel_images[1].size() && m_channel_images[1].size() == m_channel_images[2].size())
-            return m_channel_images[0].size();
+        if (m_all_by_channel[0].size() == m_all_by_channel[1].size() && m_all_by_channel[1].size() == m_all_by_channel[2].size())
+            return m_all_by_channel[0].size();
         else return 0;
     }
     
@@ -111,7 +111,7 @@ private:
         for (auto tt = 0; tt < 3; tt++)
         {
             threads[tt] = std::thread(IntensityStatisticsRunner(),
-                                      std::ref(m_channel_images[tt]), std::ref(cts[tt]));
+                                      std::ref(m_all_by_channel[tt]), std::ref(cts[tt]));
         }
         std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 
@@ -138,7 +138,7 @@ public:
                                                 bool test_data = false)
     {
         
-        mov_processor::load_channels_from_images(frames, m_channel_images);
+        mov_processor::load_channels_from_images(frames, m_all_by_channel);
         create_named_tracks(names);
         compute_channel_statistics_threaded();
 
@@ -157,7 +157,7 @@ public:
 private:
     smProducerRef m_sm;
     channel_images_t m_images;
-    std::vector<channel_images_t> m_channel_images;
+    std::vector<channel_images_t> m_all_by_channel;
     std::vector<cv::Mat> m_channel2_mats;
     
     Rectf m_all;

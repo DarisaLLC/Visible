@@ -66,6 +66,22 @@ int64_t lif_processor::load (const std::shared_ptr<qTimeFrameCache>& frames,cons
     return m_frameCount;
 }
 
+/*
+ * 1 monchrome channel. Compute volume stats of each on a thread
+ */
+
+std::tuple<int64_t,int64_t,uint32_t> lif_processor::run_volume_sum_sumsq_count (){
+  
+    std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
+    std::vector<std::thread> threads(1);
+    threads[0] = std::thread(IntensityStatisticsPartialRunner(),std::ref(m_all_by_channel[2]), std::ref(cts));
+    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+    return make_tuple(1,1,1);
+}
+
+/*
+ * 2 flu channels. Compute stats of each using its own threaD
+ */
 
 std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_processor::run_flu_statistics ()
 {
@@ -74,7 +90,7 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_processor::run_flu_statistics 
     for (auto tt = 0; tt < 2; tt++)
     {
         threads[tt] = std::thread(IntensityStatisticsRunner(),
-                                  std::ref(m_channel_images[tt]), std::ref(cts[tt]));
+                                  std::ref(m_all_by_channel[tt]), std::ref(cts[tt]));
     }
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     
@@ -91,7 +107,7 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_processor::run_flu_statistics 
 // Run to get Entropies and Median Level Set
 std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_processor::run_pci ()
 {
-    channel_images_t c2 = m_channel_images[2];
+    channel_images_t c2 = m_all_by_channel[2];
     auto sp =  sm();
     sp->load_images (c2);
     std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
@@ -143,8 +159,8 @@ void lif_processor::sm_content_loaded ()
 void lif_processor::load_channels_from_images (const std::shared_ptr<qTimeFrameCache>& frames)
 {
     m_frameCount = 0;
-    m_channel_images.clear();
-    m_channel_images.resize (3);
+    m_all_by_channel.clear();
+    m_all_by_channel.resize (3);
     m_rois.resize (0);
     std::vector<std::string> names = {"Red", "Green","Blue"};
     
@@ -153,7 +169,7 @@ void lif_processor::load_channels_from_images (const std::shared_ptr<qTimeFrameC
         auto su8 = frames->getFrame(m_frameCount++);
         auto m3 = svl::NewRefMultiFromSurface (su8, names, m_frameCount);
         for (auto cc = 0; cc < m3->planes(); cc++)
-            m_channel_images[cc].emplace_back(m3->plane(cc));
+            m_all_by_channel[cc].emplace_back(m3->plane(cc));
         
         // Assumption: all have the same 3 channel concatenated structure
         // Fetch it only once
@@ -200,8 +216,8 @@ void lif_processor::entropiesToTracks (namedTrackOfdouble_t& track)
 
 const int64_t lif_processor::frame_count () const
 {
-    if (m_channel_images[0].size() == m_channel_images[1].size() && m_channel_images[1].size() == m_channel_images[2].size() &&
-        m_frameCount == m_channel_images[0].size())
+    if (m_all_by_channel[0].size() == m_all_by_channel[1].size() && m_all_by_channel[1].size() == m_all_by_channel[2].size() &&
+        m_frameCount == m_all_by_channel[0].size())
         return m_frameCount;
     else return 0;
 }

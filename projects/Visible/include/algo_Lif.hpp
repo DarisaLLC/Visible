@@ -43,6 +43,7 @@ public:
     typedef void (sig_cb_sm1d_available) (int&);
     typedef void (sig_cb_sm1dmed_available) (int&,int&);
     typedef std::vector<roiWindow<P8U>> channel_images_t;
+    typedef std::vector<channel_images_t> channel_vec_t;
     
     lif_processor ();
  
@@ -54,6 +55,7 @@ public:
     int64_t load (const std::shared_ptr<qTimeFrameCache>& frames,const std::vector<std::string>& names);
     
     std::shared_ptr<vectorOfnamedTrackOfdouble_t> run_flu_statistics ();
+    std::tuple<int64_t,int64_t,uint32_t> run_volume_sum_sumsq_count ();
     
     // Run to get Entropies and Median Level Set
     std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run_pci ();
@@ -102,7 +104,7 @@ private:
     deque<deque<double>> m_smat;
     smProducerRef m_sm;
     channel_images_t m_images;
-    std::vector<channel_images_t> m_channel_images;
+    channel_vec_t m_all_by_channel;
     std::vector<cv::Mat> m_channel2_mats;
     int64_t m_frameCount;
     std::vector<Rectf> m_rois;

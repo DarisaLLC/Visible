@@ -34,6 +34,9 @@
 #include "sm_producer.h"
 #include "algo_mov.hpp"
 #include "sg_filter.h"
+#include "vision/drawUtils.hpp"
+#include "core/stl_utils.hpp"
+
 
 using namespace boost;
 
@@ -41,6 +44,7 @@ using namespace ci;
 using namespace ci::ip;
 using namespace spiritcsv;
 using namespace kmeans1D;
+using namespace stl_utils;
 
 namespace fs = boost::filesystem;
 
@@ -119,6 +123,23 @@ void savgol (const deque<double>& signal, deque<double>& dst)
     
 }
 
+TEST(ut_stl_utils, accOverTuple)
+{
+    float val = tuple_accumulate(std::make_tuple(5, 3.2, 7U, 6.4f), 0L, functor());
+    auto diff = std::fabs(val - 21.6);
+    EXPECT_TRUE(diff < 0.000001);
+
+    typedef std::tuple<int64_t,int64_t, uint32_t> partial_t;
+    partial_t t0 = make_tuple(12345679, -12345679, 1);
+    std::vector<partial_t> boo;
+    for (int ii = 0; ii < 9; ii++)
+        boo.emplace_back(12345679, -12345679, 1);
+    
+    
+    auto res = std::accumulate(boo.begin(), boo.end(), std::make_tuple(int64_t(0),int64_t(0), uint32_t(0)), tuple_sum<int64_t,uint32_t>());
+    bool check = res == make_tuple(111111111, -111111111, 9); //(int64_t(111111111),int64_t(-111111111), uint32_t(9));
+    EXPECT_TRUE(check);
+}
 
 TEST(UT_smfilter, basic)
 {
@@ -129,8 +150,8 @@ TEST(UT_smfilter, basic)
     
     deque<double> output;
     savgol(norms, output);
-    stl_utils::Out(norms);
-    stl_utils::Out(output);
+  //  stl_utils::Out(norms);
+  //  stl_utils::Out(output);
     
     auto median_value = contraction_analyzer::Median_levelsets(norms,ranks);
     
@@ -138,12 +159,34 @@ TEST(UT_smfilter, basic)
     for (auto ii = 0; ii < norms.size(); ii++)
     {
 //        std::cout << "[" << ii << "] : " << norms[ii] << "     "  << std::abs(norms[ii] - median_value) << "     "  << ranks[ii] << "     " << norms[ranks[ii]] << std::endl;
-        std::cout << "[" << ii << "] : " << norms[ii] << "     " << output[ii] << std::endl;
+//        std::cout << "[" << ii << "] : " << norms[ii] << "     " << output[ii] << std::endl;
     }
     
     
 }
 
+TEST(basicU8, histo)
+{
+    
+    const char * frame[] =
+    {
+        "00000000000000000000",
+        "00001020300000000000",
+        "00000000000000000000",
+        "00000000012300000000",
+        "00000000000000000000",
+        0};
+    
+    roiWindow<P8U> pels(20, 5);
+    DrawShape(pels, frame);
+
+    histoStats hh;
+    hh.from_image<P8U>(pels);
+    EXPECT_EQ(hh.max(0), 3);
+    EXPECT_EQ(hh.min(0), 0);
+    EXPECT_EQ(hh.sum(), 12);
+    EXPECT_EQ(hh.sumSquared(), 28); // 2 * 9 + 2 * 4 + 2 * 1
+}
 
 
 
