@@ -55,7 +55,7 @@ public:
     int64_t load (const std::shared_ptr<qTimeFrameCache>& frames,const std::vector<std::string>& names);
     
     std::shared_ptr<vectorOfnamedTrackOfdouble_t> run_flu_statistics ();
-    std::tuple<int64_t,int64_t,uint32_t> run_volume_sum_sumsq_count ();
+    svl::stats<int64_t> run_volume_sum_sumsq_count ();
     
     // Run to get Entropies and Median Level Set
     std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run_pci ();

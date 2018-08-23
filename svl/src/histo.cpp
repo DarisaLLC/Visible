@@ -283,7 +283,10 @@ void histoStats::computeSS()
     sumsq_ = 0;
     
     for (i = 0; i < endI; i++)
-        sumsq_ += histogram_[i] * i * i;
+        if (histogram_[i])
+        {
+            sumsq_ += histogram_[i] * i * i;
+        }
     
     computedSumSq_ = true;
 }
@@ -337,6 +340,7 @@ void histoStats::clear()
     computedMoments_ = 0;
     computedIC_ = 0;
     computedMode_ = 0;
+    computedSumSq_ = false;
     n_ = 0;
     mode_ = 0;
     mean_ = 0;
@@ -344,6 +348,8 @@ void histoStats::clear()
     var_ = 0;
     ic_.resize(101);
     bins_ = 0;
+    sum_ = 0;
+    sumsq_ = 0;
 }
 
 template <typename P>

@@ -23,6 +23,16 @@ class stats
         m_squared_total(0),
         m_count(0)
     {}
+    
+    stats(const T& total, const T& total_squared, uint32_t count, const T& minv, const T& maxv):
+    m_min(minv),
+    m_max(maxv),
+    m_total(total),
+    m_squared_total(total_squared),
+    m_count(count)
+    
+    {}
+    
     void add(const T& val)
     {
         if (val < m_min)

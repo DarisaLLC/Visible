@@ -70,14 +70,17 @@ int64_t lif_processor::load (const std::shared_ptr<qTimeFrameCache>& frames,cons
  * 1 monchrome channel. Compute volume stats of each on a thread
  */
 
-std::tuple<int64_t,int64_t,uint32_t> lif_processor::run_volume_sum_sumsq_count (){
+svl::stats<int64_t> lif_processor::run_volume_sum_sumsq_count (){
   
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
+    std::vector<std::tuple<uint8_t,uint8_t>> rts;
     std::vector<std::thread> threads(1);
-    threads[0] = std::thread(IntensityStatisticsPartialRunner(),std::ref(m_all_by_channel[2]), std::ref(cts));
+    threads[0] = std::thread(IntensityStatisticsPartialRunner(),std::ref(m_all_by_channel[2]), std::ref(cts), std::ref(rts));
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     auto res = std::accumulate(cts.begin(), cts.end(), std::make_tuple(int64_t(0),int64_t(0), uint32_t(0)), stl_utils::tuple_sum<int64_t,uint32_t>());
-    return res;
+    auto mes = std::accumulate(rts.begin(), rts.end(), std::make_tuple(uint8_t(255),uint8_t(0)), stl_utils::tuple_minmax<uint8_t, uint8_t>());
+    
+    return svl::stats<int64_t> (std::get<0>(res), std::get<1>(res), std::get<2>(res), int64_t(std::get<0>(mes)), int64_t(std::get<1>(mes)));
 }
 
 /*

@@ -113,6 +113,16 @@ namespace stl_utils
             return std::tuple<T1,T1,T2>(std::get<0>(lhs) + std::get<0>(rhs), std::get<1>(lhs) + std::get<1>(rhs), std::get<2>(lhs) + std::get<2>(rhs));
         }
     };
+    
+    template <typename T1, typename T2> struct tuple_minmax : public std::binary_function< std::tuple<T1,T2>, std::tuple<T1,T2>, std::tuple<T1,T2> >
+    {
+        static_assert(std::is_arithmetic<T1>::value, "NumericType must be numeric");
+        static_assert(std::is_arithmetic<T2>::value, "NumericType must be numeric");
+        std::tuple<T1,T2> operator()(const std::tuple<T1,T2>& lhs, const std::tuple<T1,T2>& rhs)
+        {
+            return std::tuple<T1,T2>(std::min(std::get<0>(lhs), std::get<0>(rhs)), std::max(std::get<1>(lhs), std::get<1>(rhs)));
+        }
+    };
 
     // Accumulate over std::tuple  https://stackoverflow.com/a/18562596
     //    int main(int /*argc*/, const char* /*argv*/[])

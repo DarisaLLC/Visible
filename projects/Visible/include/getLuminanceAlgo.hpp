@@ -31,7 +31,8 @@ struct IntensityStatisticsRunner
 struct IntensityStatisticsPartialRunner
 {
     typedef std::vector<roiWindow<P8U>> channel_images_t;
-    void operator()( channel_images_t& channel, std::vector< std::tuple<int64_t, int64_t, uint32_t> >& results)
+    void operator()( channel_images_t& channel, std::vector< std::tuple<int64_t, int64_t, uint32_t> >& results,
+                    std::vector< std::tuple<uint8_t, uint8_t> >& ranges )
     {
         results.clear();
         for (auto ii = 0; ii < channel.size(); ii++)
@@ -41,8 +42,11 @@ struct IntensityStatisticsPartialRunner
             hh.from_image(image);
             int64_t s = hh.sum();
             int64_t ss = hh.sumSquared();
+            uint8_t mi = hh.min();
+            uint8_t ma = hh.max();
             uint32_t nn = hh.n();
             results.emplace_back(s,ss,nn);
+            ranges.emplace_back(mi,ma);
         }
     }
 };
