@@ -47,24 +47,6 @@ namespace svl
         
     };
 
-    class colorDiv
-    {
-    public:
-        colorDiv () : m_precision (3) {}
-        
-        bool isValid;
-        cv::Mat raw_acf;
-        cv::Mat acf;
-        cv::Mat peak;
-        vector<vector<cv::Point>> point_set;
-        cv::RotatedRect affineRect;
-        size_t acf_contours;
-
-        inline const uint32_t precision () { return m_precision; }
-    private:
-        uint32_t m_precision;
-    };
-    
     void cumani_opencv (const cv::Mat& input_bgr, cv::Mat& gradAbs, cv::Mat& orientation, float& maxVal);
     
     template<typename P>
@@ -182,8 +164,6 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     cv::Mat selfMatch (const cv::Mat& img, int32_t dia = 5, bool squareit = true);
     cv::Mat1b acf (const cv::Mat& img, int32_t dia = 5, uint32_t precision = 3);
     size_t writeSpaceToStl (const cv::Mat& space,  std::vector<std::vector<float>> out);
-    
-    bool colorDivergence (const cv::Mat& img, int32_t dia, colorDiv&);
     
     // Computes the 1D histogram.
     cv::Mat getHistogram(const cv::Mat1b &image, const cv::Mat1b& mask = cv::Mat1b () );

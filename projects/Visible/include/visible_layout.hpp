@@ -62,9 +62,9 @@ public:
     {
         // Load defaults
         // from config file ?
-        m_image_frame_size_norm = vec2(0.67, 0.75);
-        m_single_plot_size_norm = vec2(0.33, 0.25);
-        m_timeline_size_norm = vec2(0.67, 0.08);
+        m_image_frame_size_norm = vec2(0.60, 0.75);
+        m_single_plot_size_norm = vec2(0.25, 0.15);
+        m_timeline_size_norm = vec2(0.60, 0.08);
         m_log_size_norm = vec2(0.95, 0.08);
         
         // Two signals we provide
@@ -81,13 +81,14 @@ public:
     }
     
     // Constructor
-    void init (const vec2& uiWinSize, const tiny_media_info& tmi)
+    void init (const vec2& uiWinSize, const tiny_media_info& tmi, const int num_channels_plots = 3)
     
     {
+        m_cc = num_channels_plots;
         // Load defaults
         // from config file ?
         m_image_frame_size_norm = vec2(0.67, 0.75);
-        m_single_plot_size_norm = vec2(0.33, 0.25);
+        m_single_plot_size_norm = vec2(0.25, 0.15);
         m_timeline_size_norm = vec2(0.67, 0.08);
         m_log_size_norm = vec2(0.95, 0.08);
         
@@ -100,14 +101,13 @@ public:
         m_aspect = layoutManager::aspect(tmi.getSize());
         m_isSet = true;
         
-        //@todo remove this assumption
-        update_display_plots_rects ();
-        update_display_timeline_rect ();
+        update ();
         m_slider_rects.clear();
     }
     
     // Accessors
     inline bool isSet () const { return m_isSet; }
+    inline int channelCount () const { return m_cc; }
     
     inline const Rectf& display_frame_rect ()
     {
@@ -186,6 +186,8 @@ public:
         m_canvas_size = new_size;
         Area wi (0, 0, m_canvas_size.x, m_canvas_size.y);
         m_window_rect = Rectf(wi);
+        
+        update ();
         
         // Call the layout change cb if any
         if (m_signal_window_size_changed && m_signal_window_size_changed->num_slots() > 0)
@@ -266,7 +268,7 @@ private:
     }
     
 
-    inline vec2 plots_frame_size_norm (){ vec2 np = vec2 (single_plot_size_norm().x, 3 * single_plot_size_norm().y); return np;}
+    inline vec2 plots_frame_size_norm (){ vec2 np = vec2 (single_plot_size_norm().x, m_cc * single_plot_size_norm().y); return np;}
     
     
     inline ivec2 plots_frame_size () { return ivec2 ((canvas_size().x * plots_frame_size_norm().x),
@@ -334,25 +336,28 @@ private:
     }
     
     // Updates Plot Rects
+    //@todo adjust
     inline  void update_display_plots_rects ()
     {
-        m_plot_rects.resize(3);
+        m_plot_rects.resize(m_cc);
         auto plot_tl = plots_frame_position_norm();
         auto plot_size = single_plot_size_norm ();
         vec2 plot_vertical (0.0, plot_size.y);
         ivec2 cs = canvas_size ();
         
-        m_plot_rects[0] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
-        unnorm_rect(m_plot_rects[0], cs);
-        plot_tl += plot_vertical;
+        for (int i = 0; i < m_cc; i++)
+        {
+            m_plot_rects[i] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
+            unnorm_rect(m_plot_rects[i], cs);
+            plot_tl += plot_vertical;
+        }
         
-        m_plot_rects[1] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
-        unnorm_rect(m_plot_rects[1], cs);
-        plot_tl += plot_vertical;
-        m_plot_rects[2] = Rectf (plot_tl, vec2 (plot_tl.x + plot_size.x, plot_tl.y + plot_size.y));
-        unnorm_rect(m_plot_rects[2], cs);
+//        m_plots_display = Rectf(m_plot_rects[0].getUpperLeft(), m_plot_rects[m_cc-1].getLowerRight());
+//        auto plt_ul = m_plots_display.getUpperLeft();
+//        auto dis_ur = m_current_display_frame_rect.getUpperRight();
+//        auto dis = dis_ur - plt_ul;
+//        if (dis.x < 0) m_plots_display.offset(vec2(-dis.x, 0));
         
-        m_plots_display = Rectf(m_plot_rects[0].getUpperLeft(), m_plot_rects[2].getLowerRight());
         
     }
     
@@ -376,7 +381,7 @@ private:
     mutable std::vector<Rectf> m_slider_rects;
     
     static float aspect (const ivec2& s) { return s.x / (float) s.y; }
-    
+    mutable int m_cc;
     mutable RectMapping m_display2image;
 protected:
     boost::signals2::signal<sig_plot_size_changed_cb>* m_signal_plot_size_changed;

@@ -601,6 +601,7 @@
 		C2B38A4F1D022D2A00C70872 /* AVReader.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = AVReader.mm; path = ../src/AVReader.mm; sourceTree = "<group>"; };
 		C2B38A541D022E9D00C70872 /* AVReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AVReader.h; path = ../include/AVReader.h; sourceTree = "<group>"; };
 		C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AVReaderWrapper.mm; path = ../src/AVReaderWrapper.mm; sourceTree = "<group>"; };
+		C2B62D3B2130878500828630 /* ut_cardio.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_cardio.hpp; sourceTree = "<group>"; };
 		C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AccordionItem.cpp; path = ../src/AccordionItem.cpp; sourceTree = "<group>"; };
 		C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccordionItem.h; path = ../include/AccordionItem.h; sourceTree = "<group>"; };
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
@@ -1356,6 +1357,7 @@
 		C26069711CED3E2C0045FF57 /* ut */ = {
 			isa = PBXGroup;
 			children = (
+				C2B62D3B2130878500828630 /* ut_cardio.hpp */,
 				C26069931CED3E2C0045FF57 /* ut.cpp */,
 				C26069941CED3E2C0045FF57 /* ut_localvar.hpp */,
 			);

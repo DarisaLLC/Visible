@@ -201,6 +201,18 @@ namespace svl
         return NewRefMultiFromChannel (src->getChannel(0), names_l2r, timestamp);
     }
     
+    static std::shared_ptr<roiWindow<P8U>> NewRefSingleFromSurface (const Surface8uRef& src,
+                                                                          const std::vector<std::string>& names_l2r = {" C ", " C "," C "},
+                                                                          int64_t timestamp = 0)
+    {
+        auto channel = src->getChannel(0);
+        uint8_t* pixels = channel.getData();
+        std::shared_ptr<roiWindow<P8U>> mwRef (new roiWindow<P8U>(src->getWidth(), src->getHeight()));
+        assert (channel.getWidth() == mwRef->width() && channel.getHeight() == mwRef->height());
+        mwRef->copy_pixels_from(pixels, channel.getWidth (),channel.getHeight (), (int32_t) channel.getRowBytes ());
+        return mwRef;
+    }
+    
     
 }
 

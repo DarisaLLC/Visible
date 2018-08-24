@@ -109,7 +109,7 @@ bool contraction_analyzer::find_best () const
         {
             m_peaks.emplace_back(lowest.first, m_signal[lowest.first]);
             contraction one;
-            contraction::fill(m_peaks.back(), std::pair<size_t,size_t>(10,10), one);
+            contraction::fill(m_peaks.back(), std::pair<size_t,size_t>(-10,10), one);
             m_contractions.emplace_back(one);
             if (signal_contraction_analyzed && signal_contraction_analyzed->num_slots() > 0)
                 signal_contraction_analyzed->operator()(m_contractions);

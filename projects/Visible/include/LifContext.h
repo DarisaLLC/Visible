@@ -27,6 +27,14 @@ public:
         size_t begin;
         size_t end;
         size_t anchor;
+        
+        friend std::ostream& operator<< (std::ostream& out, const lifContext::clip& se)
+        {
+            out << "Begin:    " << se.begin << std::endl;
+            out << "End: " << se.end << std::endl;
+            out << "Anchor  " << se.anchor << std::endl;
+            return out;
+        }
     };
     
     
@@ -152,7 +160,9 @@ private:
 	bool looping ();
 	void looping (bool what);
 	
-    void clear_conractions_clips () const;
+    void reset_entire_clip (const size_t& frame_count) const;
+    void reset_clips () const;
+    
     
 	Rectf get_image_display_rect ();
 	

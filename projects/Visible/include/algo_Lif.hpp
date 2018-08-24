@@ -56,6 +56,7 @@ public:
     
     std::shared_ptr<vectorOfnamedTrackOfdouble_t> run_flu_statistics ();
     svl::stats<int64_t> run_volume_sum_sumsq_count ();
+    void compute_oflow_threaded (timed_mat_vec_t& res);
     
     // Run to get Entropies and Median Level Set
     std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run_pci ();
@@ -100,6 +101,7 @@ private:
     
     
 private:
+    uint32_t m_channel_count;
     deque<double> m_entropies;
     deque<deque<double>> m_smat;
     smProducerRef m_sm;

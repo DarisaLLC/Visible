@@ -66,16 +66,26 @@ int64_t lif_processor::load (const std::shared_ptr<qTimeFrameCache>& frames,cons
     return m_frameCount;
 }
 
+
+
+void lif_processor::compute_oflow_threaded (timed_mat_vec_t& res)
+{
+    std::vector<std::thread> threads(1);
+    threads[0] = std::thread(fbFlowRunner(),std::ref(m_all_by_channel[2]), std::ref(res));
+    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+}
+
+
 /*
  * 1 monchrome channel. Compute volume stats of each on a thread
  */
 
 svl::stats<int64_t> lif_processor::run_volume_sum_sumsq_count (){
-  
+    int channel_to_use = m_channel_count - 1;
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
     std::vector<std::tuple<uint8_t,uint8_t>> rts;
     std::vector<std::thread> threads(1);
-    threads[0] = std::thread(IntensityStatisticsPartialRunner(),std::ref(m_all_by_channel[2]), std::ref(cts), std::ref(rts));
+    threads[0] = std::thread(IntensityStatisticsPartialRunner(),std::ref(m_all_by_channel[channel_to_use]), std::ref(cts), std::ref(rts));
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     auto res = std::accumulate(cts.begin(), cts.end(), std::make_tuple(int64_t(0),int64_t(0), uint32_t(0)), stl_utils::tuple_sum<int64_t,uint32_t>());
     auto mes = std::accumulate(rts.begin(), rts.end(), std::make_tuple(uint8_t(255),uint8_t(0)), stl_utils::tuple_minmax<uint8_t, uint8_t>());
@@ -89,16 +99,19 @@ svl::stats<int64_t> lif_processor::run_volume_sum_sumsq_count (){
 
 std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_processor::run_flu_statistics ()
 {
-    std::vector<timed_double_vec_t> cts (2);
-    std::vector<std::thread> threads(2);
-    for (auto tt = 0; tt < 2; tt++)
+    auto channels = std::vector<int> {0};
+    if (m_channel_count == 3) channels.push_back(1);
+    
+    std::vector<timed_double_vec_t> cts (channels.size());
+    std::vector<std::thread> threads(channels.size());
+    for (auto tt = 0; tt < channels.size(); tt++)
     {
         threads[tt] = std::thread(IntensityStatisticsRunner(),
                                   std::ref(m_all_by_channel[tt]), std::ref(cts[tt]));
     }
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     
-    for (auto tt = 0; tt < 2; tt++)
+    for (auto tt = 0; tt < channels.size(); tt++)
         m_tracksRef->at(tt).second = cts[tt];
     
     // Call the content loaded cb if any
@@ -111,7 +124,8 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_processor::run_flu_statistics 
 // Run to get Entropies and Median Level Set
 std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_processor::run_pci ()
 {
-    channel_images_t c2 = m_all_by_channel[2];
+    int channel_to_use = m_channel_count - 1;
+    channel_images_t c2 = m_all_by_channel[channel_to_use];
     auto sp =  sm();
     sp->load_images (c2);
     std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
@@ -131,6 +145,8 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_processor::run_pci ()
     }
     return m_pci_tracksRef;
 }
+
+
 
 const std::vector<Rectf>& lif_processor::rois () const { return m_rois; }
 const namedTrackOfdouble_t& lif_processor::similarity_track () const { return m_tracksRef->at(2); }
@@ -164,27 +180,44 @@ void lif_processor::load_channels_from_images (const std::shared_ptr<qTimeFrameC
 {
     m_frameCount = 0;
     m_all_by_channel.clear();
-    m_all_by_channel.resize (3);
+    m_channel_count = frames->media_info().getNumChannels();
+    m_all_by_channel.resize (m_channel_count);
     m_rois.resize (0);
     std::vector<std::string> names = {"Red", "Green","Blue"};
     
     while (frames->checkFrame(m_frameCount))
     {
         auto su8 = frames->getFrame(m_frameCount++);
-        auto m3 = svl::NewRefMultiFromSurface (su8, names, m_frameCount);
-        for (auto cc = 0; cc < m3->planes(); cc++)
-            m_all_by_channel[cc].emplace_back(m3->plane(cc));
-        
-        // Assumption: all have the same 3 channel concatenated structure
-        // Fetch it only once
-        if (m_rois.empty())
+        switch (m_channel_count)
         {
-            for (auto cc = 0; cc < m3->planes(); cc++)
+            case 3  :
             {
-                const iRect& ir = m3->roi(cc);
+                auto m3 = svl::NewRefMultiFromSurface (su8, names, m_frameCount);
+                for (auto cc = 0; cc < m3->planes(); cc++)
+                    m_all_by_channel[cc].emplace_back(m3->plane(cc));
+                
+                // Assumption: all have the same 3 channel concatenated structure
+                // Fetch it only once
+                if (m_rois.empty())
+                {
+                    for (auto cc = 0; cc < m3->planes(); cc++)
+                    {
+                        const iRect& ir = m3->roi(cc);
+                        m_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
+                    }
+                }
+                break;
+            }
+            case 1  :
+            {
+                auto m1 = svl::NewRefSingleFromSurface (su8, names, m_frameCount);
+                m_all_by_channel[0].emplace_back(*m1);
+                const iRect& ir = m1->frame();
                 m_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
+                break;
             }
         }
+        
     }
     
     // Call the content loaded cb if any
@@ -241,79 +274,4 @@ void lif_processor::create_named_tracks (const std::vector<std::string>& names)
 }
 
 
-#if 0
-std::shared_ptr<timed_mat_vec_t> lif_processor::compute_oflow_threaded ()
-{
-    return fbOpticalFlowRunner()(std::ref(m_channel2_mats));
-}
-
-
-template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_content_loaded>&);
-template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_frame_loaded>&);
-template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_sm1d_available>&);
-template boost::signals2::connection lif_processor::registerCallback(const std::function<lif_processor::sig_cb_sm1dmed_available>&);
-
-
-std::shared_ptr<timed_mat_vec_t> fbOpticalFlowRunner::operator()(std::vector<cv::Mat>& frames)
-{
-    std::shared_ptr<timed_mat_vec_t> results ( new timed_mat_vec_t () );
-    if (frames.size () < 2) return results;
-    cv::Mat cflow;
-    int ii = 0;
-    std::string imgpath = "/Users/arman/tmp/oflow/fback" + toString(ii) + ".png";
-    cvtColor(frames[ii], cflow, COLOR_GRAY2BGR);
-    cv::imwrite(imgpath, frames[ii]);
-    
-    results->clear();
-    for (++ii; ii < frames.size(); ii++)
-    {
-        cv::UMat uflow;
-        timed_mat_t res;
-        index_time_t ti;
-        ti.first = ii;
-        res.first = ti;
-        calcOpticalFlowFarneback(frames[ii-1], frames[ii], uflow, 0.5, 1, 15, 3, 5, 1.2, cv::OPTFLOW_FARNEBACK_GAUSSIAN);
-        uflow.copyTo(res.second);
-        cvtColor(frames[ii], cflow, COLOR_GRAY2BGR);
-        drawOptFlowMap(res.second, cflow, 16, 1.5, Scalar(0, 255, 0));
-        std::string imgpath = "/Users/arman/tmp/oflow/fback" + toString(ii) + ".png";
-        cv::imwrite(imgpath, frames[ii]);
-        std::cout << "wrote Out " << imgpath << std::endl;
-        results->emplace_back(res);
-        
-    }
-    return results;
-}
-
-
-
-static void drawOptFlowMap(const cv::Mat& flow, cv::Mat& cflowmap, int step,
-                           double, const Scalar& color)
-{
-    for(int y = 0; y < cflowmap.rows; y += step)
-        for(int x = 0; x < cflowmap.cols; x += step)
-        {
-            const Point2f& fxy = flow.at<Point2f>(y, x);
-            line(cflowmap, cv::Point(x,y), cv::Point(cvRound(x+fxy.x), cvRound(y+fxy.y)),
-                 color);
-            circle(cflowmap, cv::Point(x,y), 2, color, -1);
-        }
-}
-
-
-
-
-
-void loadImagesToMats (const sm_producer::images_vector_t& images, std::vector<cv::Mat>& mts)
-{
-    mts.resize(0);
-    vector<roiWindow<P8U> >::const_iterator vitr = images.begin();
-    do
-    {
-        mts.emplace_back(vitr->height(), vitr->width(), CV_8UC(1), vitr->pelPointer(0,0), size_t(vitr->rowUpdate()));
-    }
-    while (++vitr != images.end());
-}
-
-#endif
 

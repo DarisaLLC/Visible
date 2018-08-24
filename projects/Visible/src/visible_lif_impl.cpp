@@ -75,6 +75,8 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
     
     m_valid = ! mPath.string().empty() && exists(mPath);
     
+    m_lifProcRef = std::make_shared<lif_processor> ();
+    
     if (is_valid())
     {
         mWindow->setTitle( mPath.filename().string() );
@@ -82,8 +84,6 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
         mFont = Font( "Menlo", 18 );
         mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     }
-    
-    m_lifProcRef = std::make_shared<lif_processor> ();
     
     
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&lifContext::signal_content_loaded, this, _1);
@@ -100,8 +100,6 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
     std::function<void (lif_processor::contractionContainer_t&)> contraction_available_cb = boost::bind (&lifContext::signal_contraction_available, this, _1);
     boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_available_cb);
     
-    
-    sLayoutMgr.single_plot_size_norm(vec2(0.33,0.15));
     
     setup ();
 }
@@ -149,34 +147,32 @@ void lifContext::signal_contraction_available (lif_processor::contractionContain
     // TimeLine Markers
     mMainTimeLineSlider.clear_timepoint_markers();
     m_contractions = contras;
+    std::cout << m_contractions.size() << std::endl;
+    
     m_contraction_names.clear();
-    m_contraction_names.push_back("None");
-
+    m_contraction_names.push_back("Entire");
+    
     if (contras.empty()) return;
     
+    // @note: We are handling one contraction for now.
     uint32_t index = 0;
     m_clips.resize(1 + m_contractions.size());
     auto clipItr = m_clips.begin();
     clipItr++;
-    for(auto ctr : m_contractions)
-    {
-        string name = " C " + toString(index) + " ";
-        m_contraction_names.push_back(name);
-        clip tmp;
-        tmp.begin = ctr.contraction_start.first;
-        tmp.end = ctr.relaxation_end.first;
-        tmp.anchor = ctr.contraction_peak.first;
-        *clipItr++ = tmp;
-        
-        tinyUi::timepoint_marker_t tm;
-        tm.first = tmp.anchor / ((float)m_frameCount);
-        tm.second = ColorA (0.9, 0.3, 0.1, 0.75);
-        mMainTimeLineSlider.add_timepoint_marker(tm);
-        std::cout << "Contration Time Point Added  " << tm.first << std::endl;
-        
-    }
-
+    string name = " C " + toString(index) + " ";
+    m_contraction_names.push_back(name);
+    
+    clipItr->begin = m_contractions[0].contraction_start.first;
+    clipItr->end = m_contractions[0].relaxation_end.first;
+    clipItr->anchor = m_contractions[0].contraction_peak.first;
+    tinyUi::timepoint_marker_t tm;
+    tm.first =clipItr->anchor / ((float)m_frameCount);
+    tm.second = ColorA (0.9, 0.3, 0.1, 0.75);
+    mMainTimeLineSlider.add_timepoint_marker(tm);
+    std::cout << "Contration Time Point Added  " << tm.first << std::endl;
+    
 }
+
 
 
 void lifContext::signal_frame_loaded (int& findex, double& timestamp)
@@ -186,11 +182,12 @@ void lifContext::signal_frame_loaded (int& findex, double& timestamp)
     //     std::cout << frame_indices.size() << std::endl;
 }
 
-        /************************
-         *
-         *  CLIP Processing
-         *
-         ************************/
+                    /************************
+                     *
+                     *  CLIP Processing
+                     *
+                     ************************/
+
 int lifContext::get_current_clip_index () const
 {
     std::lock_guard<std::mutex> guard(m_clip_mutex);
@@ -203,11 +200,32 @@ void lifContext::set_current_clip_index (int cindex) const
     m_current_clip_index = cindex;
 }
 
-        /************************
-         *
-         *  Validation, Clear & Log
-         *
-         ************************/
+void lifContext::reset_entire_clip (const size_t& frame_count) const
+{
+    std::lock_guard<std::mutex> guard(m_clip_mutex);
+    m_clips.resize(1);
+    m_clips[0].end = frame_count - 2;
+    m_contraction_names.resize(1);
+    m_contraction_names[0] = " Entire ";
+    m_current_clip_index = 0;
+}
+
+void lifContext::reset_clips () const
+{
+    std::lock_guard<std::mutex> guard(m_clip_mutex);
+    m_clips.resize(1);
+    m_clips[0].end = 0;
+    m_contraction_names.resize(1);
+    m_contraction_names[0] = " Entire ";
+    m_current_clip_index = 0;
+}
+
+
+                /************************
+                 *
+                 *  Validation, Clear & Log
+                 *
+                 ************************/
 
 void lifContext::clear_playback_params ()
 {
@@ -228,18 +246,14 @@ bool lifContext::have_lif_serie ()
 
 bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif_file_viewer); }
 
-void lifContext::clear_conractions_clips () const
-{
-    m_clips.clear();
-    m_contraction_names.clear ();
-}
 
 
-/************************
- *
- *  UI Bind Functions
- *
- ************************/
+
+                /************************
+                 *
+                 *  UI Bind Functions
+                 *
+                 ************************/
 
 void lifContext::looping (bool what)
 {
@@ -278,11 +292,11 @@ void lifContext::play_pause_button ()
 }
 
 
-/************************
- *
- *  Manual Edit Support ( Width and Height setting )
- *
- ************************/
+            /************************
+             *
+             *  Manual Edit Support ( Width and Height setting )
+             *
+             ************************/
 
 lifContext::Side_t lifContext::getManualNextEditMode ()
 {
@@ -339,7 +353,6 @@ void lifContext::analyze_analyzing_button()
     
     // Flip
     setAnalyzeMode(!getAnalyzeMode());
-#if 1
     // If we are in Edit mode. Stop and Go to Start
     if (getAnalyzeMode())
     {
@@ -351,26 +364,30 @@ void lifContext::analyze_analyzing_button()
         }
         
         mUIParams.removeParam("Select ");
-        mUIParams.addParam( "Select ", m_contraction_names, &m_current_clip_index )
+        static int selected_index = 0;
+        mUIParams.addParam( "Select ", m_contraction_names, &selected_index )
         .updateFn( [this]
                   {
-                      if (m_current_clip_index >= 0 && m_current_clip_index < m_contraction_names.size() )
+                      if ( selected_index >= 0 && selected_index < m_contraction_names.size() )
                       {
-                          std::cout << m_contraction_names[m_current_clip_index] << std::endl;
+                          set_current_clip_index(selected_index);
+                          std::cout << m_contraction_names[get_current_clip_index()] << std::endl;
+                          const lifContext::clip& clip = m_clips[get_current_clip_index()];
+                          std::cout << clip << std::endl;
                       }
                   });
         
     }
     else
         mUIParams.setOptions( "state", "label=`Ready`" );
-#endif
 }
 
-/************************
- *
- *  Seek Processing
- *
- ************************/
+                /************************
+                 *
+                 *  Seek Processing
+                 *
+                 ************************/
+
 // @ todo: indicate mode differently
 void lifContext::seekToEnd ()
 {
@@ -440,11 +457,11 @@ void lifContext::setZoom (vec2 zoom)
 }
 
 
-/************************
- *
- *  Navigation UI
- *
- ************************/
+                /************************
+                 *
+                 *  Navigation UI
+                 *
+                 ************************/
 
 void lifContext::processDrag( ivec2 pos )
 {
@@ -563,10 +580,14 @@ void lifContext::keyDown( KeyEvent event )
         if( event.getCode() == KeyEvent::KEY_LEFT ) {
             pause();
             seekToFrame (getCurrentFrame() - 1);
+            if (mMouseInImage)
+                update_instant_image_mouse ();
         }
         else if( event.getCode() == KeyEvent::KEY_RIGHT ) {
             pause ();
             seekToFrame (getCurrentFrame() + 1);
+            if (mMouseInImage)
+                update_instant_image_mouse ();
         }
         else if( event.getChar() == ' ' ) {
             play_pause_button();
@@ -575,11 +596,11 @@ void lifContext::keyDown( KeyEvent event )
     }
 }
 
-/************************
- *
- *  MedianCutOff Set/Get
- *
- ************************/
+                /************************
+                 *
+                 *  MedianCutOff Set/Get
+                 *
+                 ************************/
 
 void lifContext::setMedianCutOff (uint32_t newco)
 {
@@ -606,11 +627,12 @@ uint32_t lifContext::getMedianCutOff () const
 }
 
 
-/************************
- *
- *  Setup & Load File
- *
- ************************/
+                /************************
+                 *
+                 *  Setup & Load File
+                 *
+                 ************************/
+
 void  lifContext::get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer)
 {
     m_series_book.clear ();
@@ -749,11 +771,11 @@ void lifContext::loadLifFile ()
 
 
 
-/************************
- *
- *  Load Serie & Setup Widgets
- *
- ************************/
+                /************************
+                 *
+                 *  Load Serie & Setup Widgets
+                 *
+                 ************************/
 
 void lifContext::add_widgets (const int channel_count)
 {
@@ -768,14 +790,17 @@ void lifContext::add_widgets (const int channel_count)
         m_plots.push_back( Graph1DRef (new graph1D (m_current_serie_ref->getChannels()[cc].getName(),
                                                     sLayoutMgr.plot_rects() [cc])));
     }
-    m_plots[0]->strokeColor = ColorA(0.2,0.8,0.1,1.0);
-    m_plots[1]->strokeColor = ColorA(0.8,0.2,0.1,1.0);
-    m_plots[2]->strokeColor = ColorA(0.0,0.0,0.0,1.0);
     
     for (Graph1DRef gr : m_plots)
     {
         gr->backgroundColor = ColorA( 0.3, 0.3, 0.3, 0.3 );
+        gr->strokeColor = ColorA(0.2,0.8,0.1,1.0);
         m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
+    }
+    if (m_plots.size() == 3)
+    {
+        m_plots[1]->strokeColor = ColorA(0.8,0.2,0.1,1.0);
+        m_plots[2]->strokeColor = ColorA(0.0,0.0,0.0,1.0);
     }
     
     std::cout << sLayoutMgr.display_timeline_rect() << std::endl;
@@ -802,13 +827,13 @@ void lifContext::loadCurrentSerie ()
 {
     if ( ! is_valid() || ! (m_lifRef || ! m_current_serie_ref) )
         return;
-    
+
     try {
         
-        clear_conractions_clips();
+        reset_clips();
         mWidgets.clear ();
-        m_contractions.clear();
         setMedianCutOff(0);
+        pause();
         
         // Create the frameset and assign the channel names
         // Fetch the media info
@@ -818,20 +843,16 @@ void lifContext::loadCurrentSerie ()
             ci_console() << "Serie had 1 or no frames " << std::endl;
             return;
         }
-        sLayoutMgr.init (lifContext::startup_display_size() , mFrameSet->media_info());
+        mMediaInfo = mFrameSet->media_info();
+        mMediaInfo.output(std::cout);
+        sLayoutMgr.init (lifContext::startup_display_size() , mFrameSet->media_info(), mMediaInfo.getNumChannels());
         
         // Start Loading Images on a different thread
         auto future_res = std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names);
         
         mFrameSet->channel_names (m_series_book[m_cur_selected_index].channel_names);
-        mMediaInfo = mFrameSet->media_info();
-
-        mMediaInfo.output(std::cout);
-        m_entire.begin = 0;
-        m_entire.end = getNumFrames()-2;
-        m_entire.anchor = 0;
-        m_clips.push_back(m_entire);
-        set_current_clip_index(0);
+    
+        reset_entire_clip(getNumFrames());
 
     
         auto title = m_series_names[m_cur_selected_index] + " @ " + mPath.filename().string();
@@ -857,7 +878,6 @@ void lifContext::loadCurrentSerie ()
         seekToStart();
         play();
         
-        
         m_async_luminance_tracks = std::async(std::launch::async,&lif_processor::run_flu_statistics,m_lifProcRef.get());
         m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci, m_lifProcRef.get());
         auto res = m_lifProcRef->run_volume_sum_sumsq_count ();
@@ -872,11 +892,11 @@ void lifContext::loadCurrentSerie ()
 
 
 
-/************************
- *
- *  Update & Draw
- *
- ************************/
+                /************************
+                 *
+                 *  Update & Draw
+                 *
+                 ************************/
 
 Rectf lifContext::get_image_display_rect ()
 {
@@ -901,17 +921,19 @@ void  lifContext::update_log (const std::string& msg)
 void lifContext::resize ()
 {
     if (! have_lif_serie () || ! mSurface ) return;
-    if (! sLayoutMgr.isSet() || m_plots.size () != 3) return;
+    if (! sLayoutMgr.isSet()) return;
     
     sLayoutMgr.update_window_size(getWindowSize ());
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+    mMainTimeLineSlider.setBounds (sLayoutMgr.display_timeline_rect());
+    if (m_plots.empty()) return;
     
     for (int cc = 0; cc < sLayoutMgr.plot_rects().size(); cc++)
     {
         m_plots[cc]->setRect (sLayoutMgr.plot_rects()[cc]);
     }
     
-    mMainTimeLineSlider.setBounds (sLayoutMgr.display_timeline_rect());
+
 }
 
 bool lifContext::haveTracks()
@@ -921,8 +943,11 @@ bool lifContext::haveTracks()
 
 void lifContext::update ()
 {
+    if (! have_lif_serie() ) return;
+    
     mContainer.update();
     sLayoutMgr.update_window_size(getWindowSize ());
+    int cc = m_current_serie_ref->getChannels().size();
     
     // If Plots are ready, set them up
     // It is ready only for new data
@@ -935,13 +960,14 @@ void lifContext::update ()
     {
         auto tracksRef = m_trackWeakRef.lock();
         m_plots[0]->setup(tracksRef->at(0));
-        m_plots[1]->setup(tracksRef->at(1));
+        if (cc > 1)
+            m_plots[1]->setup(tracksRef->at(1));
     }
     if ( ! m_pci_trackWeakRef.expired())
     {
         auto tracksRef = m_pci_trackWeakRef.lock();
         if (!tracksRef->at(0).second.empty())
-            m_plots[2]->setup(tracksRef->at(0));
+            m_plots[cc-1]->setup(tracksRef->at(0));
     }
     
     if (getCurrentFrame() > getNumFrames())
