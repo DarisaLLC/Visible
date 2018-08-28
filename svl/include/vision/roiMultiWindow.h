@@ -54,6 +54,9 @@ namespace svl
         
         // Constructors
         roiMultiWindow();
+        roiMultiWindow(const window_t&,const std::vector<std::string>& names_l2r = {"Top","Middle","Bottom"}, int64_t timestamp = 0,
+                       image_memory_alignment_policy im = image_memory_alignment_policy::align_first_row);
+        
         roiMultiWindow(const std::vector<std::string>& names_l2r, int64_t timestamp = 0,
                        image_memory_alignment_policy im = image_memory_alignment_policy::align_first_row);
         
@@ -119,7 +122,9 @@ namespace svl
         iRect m_bounds [T::planes_c];
         std::string m_names [T::planes_c];
         uint32_t m_indexes [T::planes_c];
-        
+    
+    private:
+        void init (const std::vector<std::string>&, int64_t,image_memory_alignment_policy);
         
     };
     

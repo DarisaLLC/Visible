@@ -42,6 +42,8 @@ public:
     typedef void (sig_cb_frame_loaded) (int&, double&);
     typedef void (sig_cb_sm1d_available) (int&);
     typedef void (sig_cb_sm1dmed_available) (int&,int&);
+    typedef void (sig_cb_cvmat_available) (cv::Mat &);
+    
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     typedef std::vector<channel_images_t> channel_vec_t;
     
@@ -58,7 +60,7 @@ public:
     
     std::shared_ptr<vectorOfnamedTrackOfdouble_t> run_flu_statistics ();
     svl::stats<int64_t> run_volume_sum_sumsq_count ();
-    void compute_oflow_threaded (timed_mat_vec_t& res);
+    const timed_mat_vec_t& compute_oflow_threaded ();
     
     // Run to get Entropies and Median Level Set
     std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run_pci ();
@@ -77,6 +79,7 @@ protected:
     boost::signals2::signal<lif_processor::sig_cb_sm1d_available>* signal_sm1d_available;
     boost::signals2::signal<lif_processor::sig_cb_sm1dmed_available>* signal_sm1dmed_available;
     boost::signals2::signal<lif_processor::sig_cb_contraction_available>* signal_contraction_available;
+    boost::signals2::signal<lif_processor::sig_cb_cvmat_available>* signal_cvmat_available;
     
 private:
  
@@ -94,8 +97,7 @@ private:
     // @note Specific to ID Lab Lif Files
     void create_named_tracks (const std::vector<std::string>& names);
     
-    std::shared_ptr<timed_mat_vec_t> compute_oflow_threaded ();
-    
+   
     void loadImagesToMats (const sm_producer::images_vector_t& images, std::vector<cv::Mat>& mts);
 
     
@@ -116,6 +118,7 @@ private:
     std::deque<double> m_medianLevel;
     std::shared_ptr<vectorOfnamedTrackOfdouble_t>  m_pci_tracksRef;
     std::shared_ptr<vectorOfnamedTrackOfdouble_t>  m_tracksRef;
+    timed_mat_vec_t  m_mat_tracks;
 };
 
 

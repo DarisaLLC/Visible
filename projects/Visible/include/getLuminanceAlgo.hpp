@@ -129,20 +129,16 @@ struct fbFlowRunner
             const roiWindow<P8U> prev = channel[ii-1].clone();
             const roiWindow<P8U> curr = channel[ii].clone();
 
-            std::string imgpath = "/Users/arman/oflow/fback_prev" + toString(ii) + ".png";
+            std::string imgpath = "/Users/arman/oflow/out" + toString(ii) + ".png";
             cv::Mat prevMat (prev.height(), prev.width(), CV_8UC(1), prev.pelPointer(0,0), size_t(prev.rowUpdate()));
             cv::Mat currMat (curr.height(), curr.width(), CV_8UC(1), curr.pelPointer(0,0), size_t(curr.rowUpdate()));
-            cv::imwrite(imgpath, prevMat);
-
-            
-//            calcOpticalFlowFarneback(prevMat, currMat, uflow, 0.5, 1, 15, 3, 5, 1.0, cv::OPTFLOW_FARNEBACK_GAUSSIAN);
-//            uflow.copyTo(res.second);
-//            cvtColor(currMat, cflow, COLOR_GRAY2BGR);
-//            drawOptFlowMap(res.second, cflow, 16, 1.5, Scalar(0, 255, 0));
-//
-//
-//            std::cout << "wrote Out " << imgpath << std::endl;
-//            results.emplace_back(res);
+            calcOpticalFlowFarneback(prevMat, currMat, uflow, 0.5, 1, 21, 10, 5, 1.0, cv::OPTFLOW_FARNEBACK_GAUSSIAN);
+            uflow.copyTo(res.second);
+            cvtColor(currMat, cflow, COLOR_GRAY2BGR);
+            drawOptFlowMap(res.second, cflow, 16, 1.5, Scalar(0, 255, 0));
+            cv::imwrite(imgpath, cflow);
+            std::cout << "wrote Out " << imgpath << std::endl;
+            results.emplace_back(res);
             
         }
     }

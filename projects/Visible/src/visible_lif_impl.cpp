@@ -880,8 +880,7 @@ void lifContext::loadCurrentSerie ()
         m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci, m_lifProcRef.get());
         auto res = m_lifProcRef->run_volume_sum_sumsq_count ();
         res.PrintTo(res,&std::cout);
-        timed_mat_vec_t tres;
-        m_lifProcRef->compute_oflow_threaded(tres);
+        timed_mat_vec_t tres = m_lifProcRef->compute_oflow_threaded();
         
     }
     catch( const std::exception &ex ) {

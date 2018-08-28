@@ -68,15 +68,13 @@ int64_t lif_processor::load (const std::shared_ptr<qTimeFrameCache>& frames,cons
 
 
 
-void lif_processor::compute_oflow_threaded (timed_mat_vec_t& res)
-{
+const timed_mat_vec_t& lif_processor::compute_oflow_threaded (){
+    m_mat_tracks.resize(0);
     int channel_to_use = m_channel_count - 1;
     std::vector<std::thread> threads(1);
-    OCVImageWriter writer ("/Users/arman/oflow/");
-    writer.operator()(m_all_by_channel[channel_to_use]);
-    
-//    threads[0] = std::thread(fbFlowRunner(),std::ref(m_all_by_channel[channel_to_use]), std::ref(res));
-//    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+    threads[0] = std::thread(fbFlowRunner(),std::ref(m_all_by_channel[channel_to_use]), std::ref(m_mat_tracks));
+    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+    return m_mat_tracks;
 }
 
 
@@ -196,17 +194,20 @@ void lif_processor::load_channels_from_images (const std::shared_ptr<qTimeFrameC
         
         switch (m_channel_count)
         {
+            // @todo support general case
+            // ID Lab 3 vertical roi 512 x (128x3)
             case 3  :
             {
-                // Assumption: all have the same 3 channel concatenated structure
-                // Fetch it only once
+                auto m3 = roiMultiWindow<P8UP3>(*m1, names, m_frameCount);
+                for (auto cc = 0; cc < m3.planes(); cc++)
+                    m_all_by_channel[cc].emplace_back(m3.plane(cc));
+                
                 if (m_rois.empty())
                 {
-                    for (auto cc = 0; cc < 3; cc++)
+                    for (auto cc = 0; cc < m3.planes(); cc++)
                     {
-                        const iRect ir (0,cc*128,512,128);
+                        const iRect& ir = m3.roi(cc);
                         m_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
-                        m_all_by_channel[cc].emplace_back(m1->frameBuf(),0, cc*128,512,128);
                     }
                 }
                 break;
