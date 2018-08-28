@@ -8,7 +8,6 @@
 
 
 #include <stdio.h>
-#include "VisibleApp.h"
 #include "guiContext.h"
 #include "LifContext.h"
 #include "cinder/app/App.h"
@@ -19,7 +18,6 @@
 #include "cinder/qtime/QuickTime.h"
 #include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"
-#include "CinderOpenCV.h"
 #include "cinder/ip/Blend.h"
 #include "opencv2/highgui.hpp"
 #include "cinder/ip/Flip.h"
@@ -882,6 +880,8 @@ void lifContext::loadCurrentSerie ()
         m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci, m_lifProcRef.get());
         auto res = m_lifProcRef->run_volume_sum_sumsq_count ();
         res.PrintTo(res,&std::cout);
+        timed_mat_vec_t tres;
+        m_lifProcRef->compute_oflow_threaded(tres);
         
     }
     catch( const std::exception &ex ) {

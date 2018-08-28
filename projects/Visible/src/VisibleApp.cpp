@@ -14,7 +14,6 @@
 #include <functional>
 #include <list>
 #include "core/stl_utils.hpp"
-#include "app_utils.hpp"
 #include "core/core.hpp"
 #include "Plist.hpp"
 #include <memory>
@@ -25,9 +24,6 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-#include "VisibleApp.h"
-
-using namespace csv;
 
 namespace
 {
@@ -149,16 +145,6 @@ void VisibleApp::create_qmovie_viewer (const boost::filesystem::path& pp)
     mContexts.push_back(std::unique_ptr<movContext>( new movContext(ww, pp) ) );
 }
 
-//
-// We allow one movie and multiple clips or matrix view.
-// And movie of a directory
-//
-void VisibleApp::create_result_viewer (const boost::filesystem::path& pp)
-{
-    Window::Format format( RendererGl::create() );
-    WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::unique_ptr<imageDirContext>( new imageDirContext(ww, pp) ) );
-}
 
 
 //
@@ -184,16 +170,6 @@ void VisibleApp::create_movie_dir_viewer (const boost::filesystem::path& pp)
     mContexts.push_back(std::unique_ptr<movDirContext>(new movDirContext(ww, pp)));
 }
 
-//
-// We allow one movie and multiple clips or matrix view.
-//
-//
-void VisibleApp::create_clip_viewer (const boost::filesystem::path& pp)
-{
-    Window::Format format( RendererGl::create() );
-    WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::unique_ptr<clipContext>(new clipContext(ww, pp)));
-}
 
 void VisibleApp::fileDrop( FileDropEvent event )
 {

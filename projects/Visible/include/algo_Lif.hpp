@@ -48,6 +48,8 @@ public:
     lif_processor ();
  
     const smProducerRef sm () const;
+    const int64_t frame_count () const;
+    const int64_t channel_count () const;
     
     // Check if the returned has expired
     std::weak_ptr<contraction_analyzer> contractionWeakRef ();
@@ -89,8 +91,6 @@ private:
     // Note tracks contained timed data.
     void entropiesToTracks (namedTrackOfdouble_t& track);
     
-    const int64_t frame_count () const;
-
     // @note Specific to ID Lab Lif Files
     void create_named_tracks (const std::vector<std::string>& names);
     
@@ -101,13 +101,14 @@ private:
     
     
 private:
+    mutable std::mutex m_mutex;
     uint32_t m_channel_count;
     deque<double> m_entropies;
     deque<deque<double>> m_smat;
     smProducerRef m_sm;
     channel_images_t m_images;
     channel_vec_t m_all_by_channel;
-    std::vector<cv::Mat> m_channel2_mats;
+    std::vector<cv::Mat> m_channel_mats;
     int64_t m_frameCount;
     std::vector<Rectf> m_rois;
     Rectf m_all;
@@ -117,16 +118,6 @@ private:
     std::shared_ptr<vectorOfnamedTrackOfdouble_t>  m_tracksRef;
 };
 
-#if 0
-struct fbOpticalFlowRunner
-{
-    typedef std::vector<roiWindow<P8U>> channel_images_t;
-    std::shared_ptr<timed_mat_vec_t> operator()(std::vector<cv::Mat>& frames);
-    static void drawOptFlowMap(const cv::Mat& flow, cv::Mat& cflowmap, int step,
-                               double, const Scalar& color);
-};
-
-#endif
 
 
 #endif

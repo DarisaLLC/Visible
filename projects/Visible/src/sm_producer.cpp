@@ -10,7 +10,6 @@
 #include <mutex>
 #include <memory>
 #include <functional>
-#include "app_utils.hpp"
 #include "cinder_xchg.hpp"
 #include "core/simple_timing.hpp"
 #include "vision/opencv_utils.hpp"
@@ -415,10 +414,7 @@ bool sm_producer::spImpl::setup_image_directory_result_repo () const
 // @todo add sampling and offset
 bool sm_producer::spImpl::generate_ssm (int start_frames, int frames)
 {
-    static    double tiny = 1e-10;
-    std::cout << "_sm_producer" << std::this_thread::get_id() << std::endl;
     std::unique_lock<std::mutex> lock( m_mutex, std::try_to_lock );
-    std::cout << "sm_producer_" << std::this_thread::get_id() << std::endl;
     
     // Get a new similarity engine
     // Note: get execution times with   svl::stats<float>::PrintTo(simi->timeStats(), & std::cout);

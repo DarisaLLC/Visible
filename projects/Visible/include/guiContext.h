@@ -24,7 +24,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/cstdint.hpp>
 
-#include "app_utils.hpp"
 #include "timestamp.h"
 #include "qtime_frame_cache.hpp"
 
@@ -139,48 +138,6 @@ public:
 };
 
 
-class imageDirContext : public guiContext
-{
-public:
-	// From just a name, use the browse to folder dialog to get the file
-	// From a name and a path
-	imageDirContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
-	
-	static const std::string& caption () { static std::string cp ("Image Dir Viewer "); return cp; }
-	void loadImageDirectory ( const filesystem::path& directory);
-	
-	virtual void draw ();
-	virtual void resize ();
-	virtual void setup ();
-	virtual bool is_valid ();
-	virtual void update ();
-	virtual void mouseMove( MouseEvent event );
-	
-private:
-	int				mTotalItems;
-	std::pair<int,int> mLarge;
-	
-	float			mItemExpandedWidth;
-	float			mItemRelaxedWidth;
-	float			mItemHeight;
-	
-	csv::matf_t mdat;
-	bool m_normalize;
-	size_t m_frames, m_file_frames, m_read_pos;
-	size_t m_rows, m_columns;
-	
-	list<AccordionItem>				mItems;
-	std::vector<gl::TextureRef>			mTextures;
-	std::vector<SurfaceRef>			mSurfaces;
-	list<AccordionItem>::iterator	mCurrentSelection;
-
-	boost::filesystem::path mFolderPath;
-	std::vector<boost::filesystem::path> mImageFiles;
-	std::vector<std::string> mSupportedExtensions;
-
-	
-	
-};
 
 
 
@@ -206,7 +163,6 @@ public:
 private:
 
     void internal_setupmat_from_file (const boost::filesystem::path &);
-    void internal_setupmat_from_mat (const csv::matf_t &);
     params::InterfaceGl         mMatParams;
     
     gl::VboMeshRef mPointCloud;
@@ -220,102 +176,6 @@ private:
 };
 
 
-class timelineContext : public guiContext
-{
-public:
-	
-	typedef	 signals::Signal<void( marker_info_t & )>		MarkerSignalInfo_t;
-	MarkerSignalInfo_t&	getMarkerSignal () { return m_marker_signal; }
-	
-	// Create one
-	timelineContext(const Rectf&); //ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
-
-	
-	static const std::string& caption () { static std::string cp ("Timeline Browser "); return cp; }
-	
-	virtual void draw ();
-	virtual void setup ();
-	virtual bool is_valid ();
-	virtual void update ();
-	virtual void resize ();
-	virtual void mouseDrag( MouseEvent event );
-	virtual void mouseMove( MouseEvent event );
-	virtual void mouseDown( MouseEvent event );
-	virtual void mouseUp( MouseEvent event );
-	void normalize (const bool do_normalize = false){m_normalize = do_normalize; }
-	bool normalize_option () const { return m_normalize; }
-	
-	void draw_window ();
-	void receivedEvent ( InteractiveObjectEvent event );
-	void loadAll (const csv::matf_t& src);
-	
-	virtual void onMarked (marker_info_t&);
-	
-private:
-	
-	//	static DataSourcePathRef create (const std::string& fqfn)
-	//	{
-	//		return  DataSourcePath::create (boost::filesystem::path  (fqfn));
-	//	}
-	
-	params::InterfaceGl         mClipParams;
-	Graph1DRef mGraph1D;
-	boost::filesystem::path mPath;
-	csv::matf_t mdat;
-	int m_column_select;
-	bool m_normalize;
-	size_t m_frames, m_file_frames, m_read_pos;
-	size_t m_rows, m_columns;
-	MarkerSignalInfo_t m_marker_signal;
-};
-
-
-class clipContext : public guiContext
-{
-public:
-	
-	// From just a name, use the open file dialog to get the file
-	// From a name and a path
-	clipContext( ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
-	
-	static const std::string& caption () { static std::string cp ("Result Clip Viewer # "); return cp; }
-	virtual void draw ();
-	virtual void setup ();
-	virtual bool is_valid ();
-	virtual void update ();
-	virtual void resize ();
-	virtual void mouseDrag( MouseEvent event );
-	virtual void mouseMove( MouseEvent event );
-	virtual void mouseDown( MouseEvent event );
-	virtual void mouseUp( MouseEvent event );
-	void normalize (const bool do_normalize = false){m_normalize = do_normalize; }
-	bool normalize_option () const { return m_normalize; }
-	
-	void draw_window ();
-	void receivedEvent ( InteractiveObjectEvent event );
-	void loadAll (const csv::matf_t& src);
-	
-	virtual void onMarked (marker_info_t&);
-	
-private:
-	
-//	static DataSourcePathRef create (const std::string& fqfn)
-//	{
-//		return  DataSourcePath::create (boost::filesystem::path  (fqfn));
-//	}
-	
-	void select_column (size_t col) { m_column_select = col; }
-	
-	params::InterfaceGl         mClipParams;
-	Graph1DRef mGraph1D;
-	boost::filesystem::path mPath;
-	csv::matf_t mdat;
-	int m_column_select;
-	bool m_normalize;
-	size_t m_frames, m_file_frames, m_read_pos;
-	size_t m_rows, m_columns;
-	
-};
 
 ///////////////////   Visual Browsing Contexts
 

@@ -7,7 +7,6 @@
 //
 
 #include <stdio.h>
-#include "VisibleApp.h"
 #include "guiContext.h"
 #include "MovContext.h"
 #include "cinder/ip/Flip.h"
@@ -299,13 +298,13 @@ void movContext::loadMovieFile()
         
         m_movie = ocvPlayerRef ( new OcvVideoPlayer );
         if (m_movie->load (mPath.string())) {
-            CI_LOG_V( m_movie->getFilePath() << " loaded successfully: " );
-            
-            CI_LOG_V( " > Codec: "		<< m_movie->getCodec() );
-            CI_LOG_V( " > Duration: "	<< m_movie->getDuration() );
-            CI_LOG_V( " > FPS: "		<< m_movie->getFrameRate() );
-            CI_LOG_V( " > Num frames: "	<< m_movie->getNumFrames() );
-            CI_LOG_V( " > Size: "		<< m_movie->getSize() );
+//            CI_LOG_V( m_movie->getFilePath() << " loaded successfully: " );
+//            
+//            CI_LOG_V( " > Codec: "        << m_movie->getCodec() );
+//            CI_LOG_V( " > Duration: "    << m_movie->getDuration() );
+//            CI_LOG_V( " > FPS: "        << m_movie->getFrameRate() );
+//            CI_LOG_V( " > Num frames: "    << m_movie->getNumFrames() );
+//            CI_LOG_V( " > Size: "        << m_movie->getSize() );
             
             m_valid = m_movie->isLoaded();
 

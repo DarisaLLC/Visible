@@ -212,6 +212,24 @@ bool roiWindow<P>::copy_pixels_from(pixel_ptr_t pixels, int columns, int rows, i
 
 
 template <typename P>
+roiWindow<P> roiWindow<P>::clone() const
+{
+    if (! isBound())
+        return roiWindow<P> ();
+    
+    roiWindow<P> clo (width(),height(), image_memory_alignment_policy::align_first_row);
+    int stride = width() * bytes ();
+    for (int j = 0; j < height(); j++)
+    {
+        pixel_ptr_t our_row = rowPointer(j);
+        pixel_ptr_t other_row = clo.rowPointer(j);
+        std::memcpy(other_row, our_row, stride);
+    }
+    return clo;
+}
+
+
+template <typename P>
 bool roiWindow<P>::copy_pixels_to(roiWindow<P> & other)
 {
     bool sg = isBound() && other.isBound() && width() == other.width() && height() == other.height();

@@ -303,7 +303,7 @@ namespace stl_utils
     }
     
     /**
-     * RAIII (Resource Allocataion is Initialization) Exception safe handling of openning and closing of files.
+     * RAIII (Resource Allocation is Initialization) Exception safe handling of openning and closing of files.
      * a functor object to delete an ifstream
      * utility functions to create
      */
@@ -945,6 +945,49 @@ namespace stl_utils
     
 }
 
+namespace gen_filename
+{
+    
+    static bool insensitive_case_compare (const std::string& str1, const std::string& str2)
+    {
+        for(unsigned int i=0; i<str1.length(); i++){
+            if(toupper(str1[i]) != toupper(str2[i]))
+                return false;
+        }
+        return true;
+    }
+    
+    class random_name
+    {
+        
+        std::string _chars;
+        std::mt19937 mBase;
+    public:
+        
+        random_name ()
+        {
+            _chars = std::string (
+                                  "abcdefghijklmnopqrstuvwxyz"
+                                  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                  "1234567890");
+        }
+        
+        int32_t nextInt( int32_t v )
+        {
+            if( v <= 0 ) return 0;
+            return mBase() % v;
+        }
+        
+        std::string get_anew ()
+        {
+            std::string ns;
+            for(int i = 0; i < 8; ++i) ns.push_back (_chars[nextInt(_chars.size()-1)]);
+            assert (ns.length() == 8);
+            return ns;
+        }
+    };
+    
+}
 
 
 #if 0

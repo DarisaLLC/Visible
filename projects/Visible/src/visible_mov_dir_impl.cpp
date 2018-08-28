@@ -1,6 +1,5 @@
 
 #include <stdio.h>
-#include "VisibleApp.h"
 #include "guiContext.h"
 #include "core/stl_utils.hpp"
 #include "cinder/app/App.h"
@@ -12,7 +11,6 @@
 #include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"
 #include "qtime_frame_cache.hpp"
-#include "CinderOpenCV.h"
 #include "Cinder/ip/Blend.h"
 #include "opencv2/highgui.hpp"
 #include "vision/opencv_utils.hpp"

@@ -70,9 +70,13 @@ int64_t lif_processor::load (const std::shared_ptr<qTimeFrameCache>& frames,cons
 
 void lif_processor::compute_oflow_threaded (timed_mat_vec_t& res)
 {
+    int channel_to_use = m_channel_count - 1;
     std::vector<std::thread> threads(1);
-    threads[0] = std::thread(fbFlowRunner(),std::ref(m_all_by_channel[2]), std::ref(res));
-    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+    OCVImageWriter writer ("/Users/arman/oflow/");
+    writer.operator()(m_all_by_channel[channel_to_use]);
+    
+//    threads[0] = std::thread(fbFlowRunner(),std::ref(m_all_by_channel[channel_to_use]), std::ref(res));
+//    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 }
 
 
@@ -188,29 +192,28 @@ void lif_processor::load_channels_from_images (const std::shared_ptr<qTimeFrameC
     while (frames->checkFrame(m_frameCount))
     {
         auto su8 = frames->getFrame(m_frameCount++);
+        auto m1 = svl::NewRefSingleFromSurface (su8, names, m_frameCount);
+        
         switch (m_channel_count)
         {
             case 3  :
             {
-                auto m3 = svl::NewRefMultiFromSurface (su8, names, m_frameCount);
-                for (auto cc = 0; cc < m3->planes(); cc++)
-                    m_all_by_channel[cc].emplace_back(m3->plane(cc));
-                
                 // Assumption: all have the same 3 channel concatenated structure
                 // Fetch it only once
                 if (m_rois.empty())
                 {
-                    for (auto cc = 0; cc < m3->planes(); cc++)
+                    for (auto cc = 0; cc < 3; cc++)
                     {
-                        const iRect& ir = m3->roi(cc);
+                        const iRect ir (0,cc*128,512,128);
                         m_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
+                        m_all_by_channel[cc].emplace_back(m1->frameBuf(),0, cc*128,512,128);
                     }
                 }
                 break;
             }
             case 1  :
             {
-                auto m1 = svl::NewRefSingleFromSurface (su8, names, m_frameCount);
+
                 m_all_by_channel[0].emplace_back(*m1);
                 const iRect& ir = m1->frame();
                 m_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
@@ -257,6 +260,11 @@ const int64_t lif_processor::frame_count () const
         m_frameCount == m_all_by_channel[0].size())
         return m_frameCount;
     else return 0;
+}
+
+const int64_t lif_processor::channel_count () const
+{
+    return m_all_by_channel.size();
 }
 
 // @note Specific to ID Lab Lif Files

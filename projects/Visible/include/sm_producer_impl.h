@@ -18,7 +18,6 @@
 #include <tuple>
 #include <condition_variable>
 
-#include "app_utils.hpp"
 #include "roiWindow.h"
 #include "qtime_frame_cache.hpp"
 #include "avReader.hpp"

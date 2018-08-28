@@ -229,8 +229,10 @@ public:
     void entire();
     roiWindow<T> window(int32_t tl_x, int32_t tl_y, int32_t width, int32_t height);
     bool step(const iPair & tp);
-  
 
+    // Clone in a just right allocated memory
+    roiWindow<T> clone () const;
+    
     // Set pixel value for (x,y). Return new value
     pixel_t setPixel(int32_t px, int32_t py, pixel_t val = pixel_t(0));
 
