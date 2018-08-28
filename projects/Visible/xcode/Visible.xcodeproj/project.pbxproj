@@ -13,7 +13,6 @@
 		C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
 		C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
 		C20BBC071E4E34C3002C7D68 /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
-		C20BBC081E4E34D5002C7D68 /* visible_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946761CE4DC7100976025 /* visible_impl.cpp */; };
 		C20BBC091E4E34F0002C7D68 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
 		C20BBC0B1E4E39E6002C7D68 /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
 		C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
@@ -27,7 +26,6 @@
 		C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C20EDBC81CF277740074C47A /* exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBE1CF277130074C47A /* exception.cpp */; };
 		C219467E1CE4DC7100976025 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
-		C21946871CE4DC7100976025 /* visible_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946761CE4DC7100976025 /* visible_impl.cpp */; };
 		C21946881CE4DC7100976025 /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946771CE4DC7100976025 /* VisibleApp.cpp */; };
 		C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
 		C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
@@ -206,7 +204,6 @@
 		C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2B6E6701D0618E400235FB7 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
-		C2BECECE1DD6D4F80001E2BA /* visible_idir_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */; };
 		C2BECED11DD6D8BA0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
 		C2BECED21DD6D8DE0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
@@ -234,6 +231,7 @@
 		C2E60A0B21200A7F00059FA6 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8851CEA916E0008C72B /* libboost_system.a */; };
 		C2E60A0C21200A7F00059FA6 /* libboost_thread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8861CEA916E0008C72B /* libboost_thread.a */; };
 		C2FA97191E82EFB1006EC61E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2FA97181E82EFB1006EC61E /* Images.xcassets */; };
+		C2FB69D92134C3E800DDEFCA /* visible_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946761CE4DC7100976025 /* visible_impl.cpp */; };
 		C2FC7DAF1CF4F46100D18193 /* qtime_frame_cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */; };
 /* End PBXBuildFile section */
 
@@ -326,7 +324,6 @@
 		C219469F1CE4EA4900976025 /* sshist.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sshist.hpp; path = ../include/sshist.hpp; sourceTree = "<group>"; };
 		C21946A31CE4EA4900976025 /* guiContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = guiContext.h; path = ../include/guiContext.h; sourceTree = "<group>"; usesTabs = 1; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		C21946AC1CE4EA4900976025 /* qtime_frame_cache.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = qtime_frame_cache.hpp; path = ../include/qtime_frame_cache.hpp; sourceTree = "<group>"; };
-		C21FFE6B1CFD1D9B00C97013 /* app_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = app_utils.hpp; path = ../include/app_utils.hpp; sourceTree = "<group>"; };
 		C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer_impl.h; path = ../include/sm_producer_impl.h; sourceTree = "<group>"; };
 		C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer.h; path = ../include/sm_producer.h; sourceTree = "<group>"; };
 		C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sm_producer.cpp; path = ../src/sm_producer.cpp; sourceTree = "<group>"; };
@@ -615,7 +612,6 @@
 		C2E322001D05B90C006DFE5E /* time_index.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time_index.h; path = ../include/time_index.h; sourceTree = "<group>"; };
 		C2E469CE1D07718B0066B811 /* cm_time.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cm_time.hpp; sourceTree = "<group>"; };
 		C2F1B6211FB13FE600DDD7DB /* LifContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LifContext.h; path = ../include/LifContext.h; sourceTree = "<group>"; };
-		C2F27E891DD8516900890E4C /* VisibleApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VisibleApp.h; path = ../include/VisibleApp.h; sourceTree = "<group>"; };
 		C2FA97181E82EFB1006EC61E /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Visible/Images.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -787,7 +783,6 @@
 				C2677584212A325F00B5E080 /* contraction.cpp */,
 				C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */,
 				C21946691CE4DC7100976025 /* directoryPlayer.cpp */,
-				C2F27E891DD8516900890E4C /* VisibleApp.h */,
 				C219466D1CE4DC7100976025 /* InteractiveObject.cpp */,
 				C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */,
 				C21946761CE4DC7100976025 /* visible_impl.cpp */,
@@ -949,7 +944,6 @@
 				C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */,
 				C2B38A541D022E9D00C70872 /* AVReader.h */,
 				C2E321FE1D038B16006DFE5E /* AVReader.hpp */,
-				C21FFE6B1CFD1D9B00C97013 /* app_utils.hpp */,
 				C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */,
 				C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */,
 				C219076A1F7D4FB500CC4780 /* contraction.hpp */,
@@ -1023,7 +1017,6 @@
 				C2600A181CED3E010045FF57 /* local */,
 				C26069641CED3E2C0045FF57 /* README.md */,
 				C26069651CED3E2C0045FF57 /* src */,
-				C26069711CED3E2C0045FF57 /* ut */,
 			);
 			name = svl;
 			path = ../../../svl;
@@ -1350,6 +1343,7 @@
 				C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */,
 				C260696F1CED3E2C0045FF57 /* registration.cpp */,
 				C26069701CED3E2C0045FF57 /* rowfunc.cpp */,
+				C26069711CED3E2C0045FF57 /* ut */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -1584,13 +1578,11 @@
 				C2B005821CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm in Sources */,
 				C2677585212A325F00B5E080 /* contraction.cpp in Sources */,
 				C2606DB01CED3E2E0045FF57 /* opencv_utils.cpp in Sources */,
-				C2BECECE1DD6D4F80001E2BA /* visible_idir_impl.cpp in Sources */,
 				C2BECED11DD6D8BA0001E2BA /* AccordionItem.cpp in Sources */,
 				C219467E1CE4DC7100976025 /* InteractiveObject.cpp in Sources */,
 				C254BECB1F4FB02500977307 /* OcvVideo.cpp in Sources */,
 				C20EDBC31CF277130074C47A /* time_spec.cpp in Sources */,
 				C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */,
-				C21946871CE4DC7100976025 /* visible_impl.cpp in Sources */,
 				C2FC7DAF1CF4F46100D18193 /* qtime_frame_cache.cpp in Sources */,
 				C2B38A571D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
 				C2A5DBAD207A003F001C6608 /* Plist.cpp in Sources */,
@@ -1604,6 +1596,7 @@
 				C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */,
 				C25261091F6611A10069F665 /* Square.cpp in Sources */,
 				C21946881CE4DC7100976025 /* VisibleApp.cpp in Sources */,
+				C2FB69D92134C3E800DDEFCA /* visible_impl.cpp in Sources */,
 				C2606DAA1CED3E2E0045FF57 /* histo.cpp in Sources */,
 				C25261061F6611A10069F665 /* Circle.cpp in Sources */,
 				C20BBC0B1E4E39E6002C7D68 /* rand_support.cpp in Sources */,
@@ -1645,7 +1638,6 @@
 				C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */,
 				C21FFE721CFE0AA300C97013 /* sm_producer.cpp in Sources */,
 				C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */,
-				C20BBC081E4E34D5002C7D68 /* visible_impl.cpp in Sources */,
 				C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
 				C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */,
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
