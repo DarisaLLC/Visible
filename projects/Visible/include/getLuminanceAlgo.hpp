@@ -9,6 +9,7 @@
 #include "vision/pixel_traits.h"
 #include "vision/opencv_utils.hpp"
 #include "core/stl_utils.hpp"
+#include "core/stats.hpp"
 
 using namespace std;
 using namespace stl_utils;
@@ -111,35 +112,26 @@ private:
 struct fbFlowRunner
 {
     typedef std::vector<roiWindow<P8U>> channel_images_t;
-    void operator()(channel_images_t& channel, timed_mat_vec_t& results)
+    void operator()(channel_images_t& channel, svl::stats<int64_t>& volstats, timed_mat_vec_t& results)
     {
         if (channel.size () < 2) return;
         std::mutex m_mutex;
         std::lock_guard<std::mutex> guard (m_mutex);
         
-        cv::Mat cflow;
         results.clear();
-        for (int ii = 1; ii < channel.size(); ii++)
+        std::vector<cv::Mat> frames;
+        for (int ii = 0; ii < channel.size(); ii++)
         {
-            cv::UMat uflow;
-            timed_mat_t res;
-            index_time_t ti;
-            ti.first = ii;
-            res.first = ti;
-            const roiWindow<P8U> prev = channel[ii-1].clone();
-            const roiWindow<P8U> curr = channel[ii].clone();
-
+            const roiWindow<P8U>& image = channel[ii];
             std::string imgpath = "/Users/arman/oflow/out" + toString(ii) + ".png";
-            cv::Mat prevMat (prev.height(), prev.width(), CV_8UC(1), prev.pelPointer(0,0), size_t(prev.rowUpdate()));
-            cv::Mat currMat (curr.height(), curr.width(), CV_8UC(1), curr.pelPointer(0,0), size_t(curr.rowUpdate()));
-            calcOpticalFlowFarneback(prevMat, currMat, uflow, 0.5, 1, 21, 10, 5, 1.0, cv::OPTFLOW_FARNEBACK_GAUSSIAN);
-            uflow.copyTo(res.second);
-            cvtColor(currMat, cflow, COLOR_GRAY2BGR);
-            drawOptFlowMap(res.second, cflow, 16, 1.5, Scalar(0, 255, 0));
-            cv::imwrite(imgpath, cflow);
+            cv::Mat mat (image.height(), image.width(), CV_8UC(1), image.pelPointer(0,0), size_t(image.rowUpdate()));
+            cv::Mat diff (image.height(), image.width(), CV_32F);
+            diff = mat - volstats.mean();
+         //   cv::multiply(diff,diff,diff);
+            diff /= std::sqrt(volstats.variance());
+            cv::normalize(diff,mat,0,UCHAR_MAX,cv::NORM_MINMAX);
+            cv::imwrite(imgpath, mat);
             std::cout << "wrote Out " << imgpath << std::endl;
-            results.emplace_back(res);
-            
         }
     }
 
@@ -160,6 +152,8 @@ struct fbFlowRunner
     
 
 };
+
+
 
 #endif
 

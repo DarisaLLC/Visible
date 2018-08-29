@@ -37,6 +37,7 @@ lif_processor::lif_processor ()
     signal_sm1d_available = createSignal<lif_processor::sig_cb_sm1d_available>();
     signal_sm1dmed_available = createSignal<lif_processor::sig_cb_sm1dmed_available>();
     signal_contraction_available = createSignal<lif_processor::sig_cb_contraction_available>();
+    signal_3dstats_available = createSignal<lif_processor::sig_cb_3dstats_available>();
     
     // Signals we support
     m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
@@ -47,6 +48,11 @@ lif_processor::lif_processor ()
     m_caRef = contraction_analyzer::create ();
     std::function<void (contractionContainer_t&)>ca_analyzed_cb = boost::bind (&lif_processor::contraction_analyzed, this, _1);
     boost::signals2::connection ca_connection = m_caRef->registerCallback(ca_analyzed_cb);
+    
+    // Signal us when 3d stats are ready
+    std::function<void ()>_3dstats_done_cb = boost::bind (&lif_processor::stats_3d_computed, this);
+    boost::signals2::connection _3d_stats_connection = registerCallback(_3dstats_done_cb);
+    
 }
 
 const smProducerRef lif_processor::sm () const { return m_sm; }
@@ -72,7 +78,9 @@ const timed_mat_vec_t& lif_processor::compute_oflow_threaded (){
     m_mat_tracks.resize(0);
     int channel_to_use = m_channel_count - 1;
     std::vector<std::thread> threads(1);
-    threads[0] = std::thread(fbFlowRunner(),std::ref(m_all_by_channel[channel_to_use]), std::ref(m_mat_tracks));
+    threads[0] = std::thread(fbFlowRunner(),std::ref(m_all_by_channel[channel_to_use]),
+                             std::ref(m_3d_stats),
+                             std::ref(m_mat_tracks));
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     return m_mat_tracks;
 }
@@ -83,6 +91,7 @@ const timed_mat_vec_t& lif_processor::compute_oflow_threaded (){
  */
 
 svl::stats<int64_t> lif_processor::run_volume_sum_sumsq_count (){
+    m_3d_stats_done = false;
     int channel_to_use = m_channel_count - 1;
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
     std::vector<std::tuple<uint8_t,uint8_t>> rts;
@@ -91,10 +100,15 @@ svl::stats<int64_t> lif_processor::run_volume_sum_sumsq_count (){
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     auto res = std::accumulate(cts.begin(), cts.end(), std::make_tuple(int64_t(0),int64_t(0), uint32_t(0)), stl_utils::tuple_sum<int64_t,uint32_t>());
     auto mes = std::accumulate(rts.begin(), rts.end(), std::make_tuple(uint8_t(255),uint8_t(0)), stl_utils::tuple_minmax<uint8_t, uint8_t>());
+    m_3d_stats = svl::stats<int64_t> (std::get<0>(res), std::get<1>(res), std::get<2>(res), int64_t(std::get<0>(mes)), int64_t(std::get<1>(mes)));
+    if (signal_3dstats_available && signal_3dstats_available->num_slots() > 0)
+        signal_3dstats_available->operator()();
     
-    return svl::stats<int64_t> (std::get<0>(res), std::get<1>(res), std::get<2>(res), int64_t(std::get<0>(mes)), int64_t(std::get<1>(mes)));
 }
 
+void lif_processor::stats_3d_computed(){
+    compute_oflow_threaded();
+}
 /*
  * 2 flu channels. Compute stats of each using its own threaD
  */
@@ -164,11 +178,9 @@ void lif_processor::update ()
 
 void lif_processor::contraction_analyzed (contractionContainer_t& contractions)
 {
-//    std::cout << " Lif Processor " << contractions.size() << std::endl;
     // Call the contraction available cb if any
     if (signal_contraction_available && signal_contraction_available->num_slots() > 0)
     {
-//        std::cout << "Slots : " << signal_contraction_available->num_slots() << std::endl;
         contractionContainer_t copied = m_caRef->contractions();
         signal_contraction_available->operator()(copied);
     }
