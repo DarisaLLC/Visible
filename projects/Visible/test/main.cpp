@@ -168,9 +168,9 @@ TEST(ut_lif_tracker, basic)
     auto num_regions = detectRegionBlobs(threshold_input, threshold_output, regions, graphics);
     EXPECT_EQ(num_regions, 59);
     /// Show in a window
- //   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
- //   imshow( "Contours", graphics);
- //   cv::waitKey();
+    namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+    imshow( "Contours", graphics);
+    cv::waitKey();
 }
 
 

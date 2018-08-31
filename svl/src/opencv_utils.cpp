@@ -462,9 +462,36 @@ namespace svl
         eigen_done = true;
     }
     
+/***************
+                             #define CV_8U   0
+                             #define CV_8S   1
+                             #define CV_16U  2
+                             #define CV_16S  3
+                             #define CV_32S  4       stats
+                             #define CV_32F  5
+                             #define CV_64F  6       centroids
 
+ ****************/
+    
+    
     size_t detectRegionBlobs(const cv::Mat& grayImage, const cv::Mat&threshold_output, blob_region_records_t& result , cv::Mat& graphics){
-        cv::connectedComponentsWithStats(threshold_output, result.labels, result.stats, result.centroids);
+        size_t count = cv::connectedComponentsWithStats(threshold_output, result.labels, result.stats, result.centroids);
+        assert(count == result.stats.rows);
+        
+        result.moments.resize(0);
+        result.rois.resize(0);
+        
+        for(int i=0; i<result.stats.rows; i++)
+        {
+            int x = result.stats.at<int>(Point(0, i));
+            int y = result.stats.at<int>(Point(1, i));
+            int w = result.stats.at<int>(Point(2, i));
+            int h = result.stats.at<int>(Point(3, i));
+            result.rois.emplace_back(x,y,w,h);
+            cv::Mat window = grayImage(result.rois.back());
+            result.moments.emplace_back(window);
+        }
+        
         if (graphics.size() == grayImage.size())
         {
             std::vector<cv::Mat> channels = { threshold_output,threshold_output,threshold_output};
@@ -483,6 +510,16 @@ namespace svl
                 Rect rect(x,y,w,h);
                 cv::rectangle(graphics, rect, color);
             }
+            std::vector<cv::KeyPoint> kps;
+            
+            for (int i=0; i<result.centroids.rows; i++){
+                
+                double theta = result.moments[i].getOrientation();
+                if(! std::isnan(theta))
+                    kps.emplace_back(cv::Point2f(result.centroids.at<double>(i,0), result.centroids.at<double>(i,1)), 20, theta * 57.3);
+
+            }
+            cv::drawKeypoints(graphics, kps,graphics, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
         }
         return result.stats.rows;
     }

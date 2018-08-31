@@ -51,38 +51,18 @@ namespace svl
         
     };
     
-    class blob_record_t {
-    public:
-        size_t id;
-        Point2d location;
-        double radius;
-        double inertia;
-        double area;
-        double perimeter;
-        double circularity;
-        cv::Rect bounding;
-        std::vector<cv::Point> hull;
-        std::vector<cv::Point> poly;
-        double contourArea;
-        double hullArea;
-        double convexity;
-        double equalRadius;
-        cv::Moments moms;
-    };
-    typedef std::shared_ptr<blob_record_t> blobRecordRef;
-    
+  
     
     
     typedef struct {
         cv::Mat labels;
         cv::Mat stats;
         cv::Mat centroids;
+        std::vector<svl::momento> moments;
+        std::vector<cv::Rect2f> rois;
     } blob_region_records_t;
 
-#if 0
-    static void drawBlob (const blobRecordRef&, InputOutputArray image, const Scalar& color, int thickness = 1, int lineType = LINE_8);
-    size_t detectContourBlobs(const cv::Mat& grayImage, const cv::Mat&binary, std::vector<blobRecordRef>& blobs, cv::Mat& graphics);
-#endif
+
     
     size_t detectRegionBlobs(const cv::Mat& grayImage, const cv::Mat&threshold_output, blob_region_records_t& result , cv::Mat& graphics);
     
@@ -240,6 +220,30 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     void outputU8 (const cv::Mat& mat, char be = '{', char en = '}');
 }
 
+#if NotYet
+static void drawBlob (const blobRecordRef&, InputOutputArray image, const Scalar& color, int thickness = 1, int lineType = LINE_8);
+size_t detectContourBlobs(const cv::Mat& grayImage, const cv::Mat&binary, std::vector<blobRecordRef>& blobs, cv::Mat& graphics);
+
+class blob_record_t {
+public:
+    size_t id;
+    Point2d location;
+    double radius;
+    double inertia;
+    double area;
+    double perimeter;
+    double circularity;
+    cv::Rect bounding;
+    std::vector<cv::Point> hull;
+    std::vector<cv::Point> poly;
+    double contourArea;
+    double hullArea;
+    double convexity;
+    double equalRadius;
+    cv::Moments moms;
+};
+typedef std::shared_ptr<blob_record_t> blobRecordRef;
+#endif
 
 #endif
 

@@ -227,6 +227,7 @@
 		C2E0EE741F7B0B7700D32697 /* liblibtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCB1F6C66F700A0E908 /* liblibtiff.a */; };
 		C2E0EE751F7B0B7900D32697 /* liblibwebp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCC1F6C66F700A0E908 /* liblibwebp.a */; };
 		C2E0EE761F7B0B7C00D32697 /* libIlmImf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DD21F6C677100A0E908 /* libIlmImf.a */; };
+		C2E3F55B213A0430007B1088 /* libopencv_features2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606E7E1CEE08F00045FF57 /* libopencv_features2d.a */; };
 		C2E60A0921200A7F00059FA6 /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
 		C2E60A0A21200A7F00059FA6 /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
 		C2E60A0B21200A7F00059FA6 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8851CEA916E0008C72B /* libboost_system.a */; };
@@ -665,6 +666,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2E3F55B213A0430007B1088 /* libopencv_features2d.a in Frameworks */,
 				C2E0EE761F7B0B7C00D32697 /* libIlmImf.a in Frameworks */,
 				C2E0EE751F7B0B7900D32697 /* liblibwebp.a in Frameworks */,
 				C2E0EE741F7B0B7700D32697 /* liblibtiff.a in Frameworks */,
