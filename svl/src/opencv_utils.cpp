@@ -397,7 +397,7 @@ namespace svl
         com = cv::Point2f ((moms.m10 * inv_m00), moms.m01 * inv_m00);
     }
     
-    momento::momento(const cv::Mat& image)
+    void momento::run(const cv::Mat& image) const
     {
         CvMoments mu =  cv::moments(image, false);
         *((Moments*)this) = mu;
@@ -405,16 +405,26 @@ namespace svl
         inv_m00 = mu.inv_sqrt_m00 * mu.inv_sqrt_m00;
         
         mc = Point2f ((m10 * inv_m00), m01 * inv_m00);
+        m_is_loaded = true;
+    }
+    
+    momento::momento(const cv::Mat& image)
+    {
+        run (image);
     }
     
     vec2 momento::getEllipseAspect () const
     {
+        if (! isLoaded()) return vec2();
+        
         getDirectionals ();
         return vec2(a,b);
     }
     
     double momento::getOrientation () const
     {
+        if (! isLoaded()) return std::numeric_limits<double>::max();
+        
         getDirectionals ();
         return theta;
     }
@@ -452,6 +462,107 @@ namespace svl
         eigen_done = true;
     }
     
+
+    size_t detectRegionBlobs(const cv::Mat& grayImage, const cv::Mat&threshold_output, blob_region_records_t& result , cv::Mat& graphics){
+        cv::connectedComponentsWithStats(threshold_output, result.labels, result.stats, result.centroids);
+        if (graphics.size() == grayImage.size())
+        {
+            std::vector<cv::Mat> channels = { threshold_output,threshold_output,threshold_output};
+            cv::merge(&channels[0],3,graphics);
+            
+            
+            RNG rng(12345);
+            
+            for(int i=0; i<result.stats.rows; i++)
+            {
+                int x = result.stats.at<int>(Point(0, i));
+                int y = result.stats.at<int>(Point(1, i));
+                int w = result.stats.at<int>(Point(2, i));
+                int h = result.stats.at<int>(Point(3, i));
+                Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+                Rect rect(x,y,w,h);
+                cv::rectangle(graphics, rect, color);
+            }
+        }
+        return result.stats.rows;
+    }
+
+#if 0
+    void drawBlob (const blobRecordRef& blob, InputOutputArray image, const Scalar& color, int thickness, int lineType)
+    {
+        cv::drawContours( image, blob->poly, blob->id, color, 1, 8, vector<Vec4i>(), 0, cv::Point() );
+    }
+    
+    size_t detectContourBlobs (const cv::Mat& grayImage, const cv::Mat&threshold_output,  std::vector<blobRecordRef>& blobs, cv::Mat& graphics)
+    {
+        RNG rng(12345);
+        
+        vector<vector<cv::Point> > contours;
+        vector<Vec4i> hierarchy;
+        
+        /// Find contours
+        findContours( threshold_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+        
+        blobs.clear();
+        
+        for (size_t contourIdx = 0; contourIdx < contours.size(); contourIdx++)
+        {
+            blobRecordRef blob = std::make_shared<blob_record_t>();
+            blob->id = contourIdx;
+            blob->moms = moments(Mat(contours[contourIdx]));
+            blob->area = blob->moms.m00;
+            blob->perimeter = arcLength(Mat(contours[contourIdx]), true);
+            blob->circularity = 4 * CV_PI * blob->area / (blob->perimeter * blob->perimeter);
+            double denominator = std::sqrt(std::pow(2 * blob->moms.mu11, 2) + std::pow(blob->moms.mu20 - blob->moms.mu02, 2));
+            const double eps = 1e-2;
+            if (denominator > eps)
+            {
+                double cosmin = (blob->moms.mu20 - blob->moms.mu02) / denominator;
+                double sinmin = 2 * blob->moms.mu11 / denominator;
+                double cosmax = -cosmin;
+                double sinmax = -sinmin;
+                
+                double imin = 0.5 * (blob->moms.mu20 + blob->moms.mu02) - 0.5 * (blob->moms.mu20 - blob->moms.mu02) * cosmin - blob->moms.mu11 * sinmin;
+                double imax = 0.5 * (blob->moms.mu20 + blob->moms.mu02) - 0.5 * (blob->moms.mu20 - blob->moms.mu02) * cosmax - blob->moms.mu11 * sinmax;
+                blob->inertia = imin / imax;
+            }
+            else
+            {
+                blob->inertia = 1;
+            }
+            std::vector < Point > hull;
+            convexHull(Mat(contours[contourIdx]), hull);
+            blob->contourArea = contourArea(Mat(contours[contourIdx]));
+            blob->hullArea = contourArea(Mat(hull));
+            
+            approxPolyDP( Mat(contours[contourIdx]), blob->poly, 3, true );
+            blob->bounding = boundingRect( Mat(blob->poly) );
+            
+            if(blob->moms.m00 > 0.0)
+                blob->location = Point2d(blob->moms.m10 / blob->moms.m00, blob->moms.m01 / blob->moms.m00);
+            
+            //compute blob radius
+            std::vector<double> dists;
+            for (size_t pointIdx = 0; pointIdx < contours[contourIdx].size(); pointIdx++)
+            {
+                Point2d pt = contours[contourIdx][pointIdx];
+                dists.push_back(norm(blob->location - pt));
+            }
+            std::sort(dists.begin(), dists.end());
+            blob->radius = (dists[(dists.size() - 1) / 2] + dists[dists.size() / 2]) / 2.;
+            blobs.emplace_back(blob);
+        }
+
+        for( int i = 0; i< blobs.size(); i++ )
+        {
+            Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+            drawBlob(blobs[i],graphics, color);
+
+        }
+        return blobs.size();
+        
+    }
+#endif
     
     void generate_mask (const cv::Mat& rg, cv::Mat& mask, float left_tail_post, bool debug_output)
     {
@@ -689,6 +800,7 @@ namespace svl
     
     
     // Return -1 or 0-255 for left_tail
+    // @note: add accumulative hist
     int leftTailPost (const cv::Mat1b& image, float left_tail_fraction)
     {
         auto hist = getHistogram (image);

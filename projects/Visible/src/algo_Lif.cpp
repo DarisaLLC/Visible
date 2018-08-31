@@ -26,7 +26,7 @@
 #include "vision/opencv_utils.hpp"
 #include "getLuminanceAlgo.hpp"
 #include "contraction.hpp"
-
+#include "vision/localvariance.h"
 #include "algo_Lif.hpp"
 lif_processor::lif_processor ()
 {
@@ -103,6 +103,7 @@ svl::stats<int64_t> lif_processor::run_volume_sum_sumsq_count (){
     m_3d_stats = svl::stats<int64_t> (std::get<0>(res), std::get<1>(res), std::get<2>(res), int64_t(std::get<0>(mes)), int64_t(std::get<1>(mes)));
     if (signal_3dstats_available && signal_3dstats_available->num_slots() > 0)
         signal_3dstats_available->operator()();
+    return m_3d_stats;
     
 }
 

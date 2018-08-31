@@ -204,6 +204,7 @@
 		C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2B6E6701D0618E400235FB7 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
+		C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
 		C2BECED11DD6D8BA0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
 		C2BECED21DD6D8DE0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
@@ -599,6 +600,8 @@
 		C2B38A541D022E9D00C70872 /* AVReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AVReader.h; path = ../include/AVReader.h; sourceTree = "<group>"; };
 		C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AVReaderWrapper.mm; path = ../src/AVReaderWrapper.mm; sourceTree = "<group>"; };
 		C2B62D3B2130878500828630 /* ut_cardio.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_cardio.hpp; sourceTree = "<group>"; };
+		C2BB4DED21384F970002AECE /* ut_localvar.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_localvar.hpp; sourceTree = "<group>"; };
+		C2BB4DEF213851DC0002AECE /* CinderOpenCV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CinderOpenCV.h; path = ../../local/cinder/cinder_0.9/blocks/OpenCV3/include/CinderOpenCV.h; sourceTree = "<group>"; };
 		C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AccordionItem.cpp; path = ../src/AccordionItem.cpp; sourceTree = "<group>"; };
 		C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccordionItem.h; path = ../include/AccordionItem.h; sourceTree = "<group>"; };
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
@@ -989,6 +992,7 @@
 		C24CD87D1CEA5B1B0008C72B /* VisibleGtest */ = {
 			isa = PBXGroup;
 			children = (
+				C2BB4DED21384F970002AECE /* ut_localvar.hpp */,
 				C21FFE741CFE104600C97013 /* ut_sm.hpp */,
 				C2601BBA1E6B41F4004415A3 /* ut_util.hpp */,
 				C2601BB51E68F1CC004415A3 /* ut_algo.hpp */,
@@ -1146,6 +1150,7 @@
 		C26009E01CED3E010045FF57 /* cinder */ = {
 			isa = PBXGroup;
 			children = (
+				C2BB4DEF213851DC0002AECE /* CinderOpenCV.h */,
 				C26009E11CED3E010045FF57 /* affine_rectangle.h */,
 				C26009E21CED3E010045FF57 /* cinder_xchg.hpp */,
 				C26009E31CED3E010045FF57 /* editableRectangle.hpp */,
@@ -1648,6 +1653,7 @@
 				C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */,
 				C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */,
 				C20EDBB61CEFC2D20074C47A /* registration.cpp in Sources */,
+				C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */,
 				C2677586212A325F00B5E080 /* contraction.cpp in Sources */,
 				C2601BB81E690409004415A3 /* bitvector.cpp in Sources */,
 				C20EDBC81CF277740074C47A /* exception.cpp in Sources */,

@@ -7,13 +7,6 @@
     //
 
 
-    // Define to write Local Variance images
-#define VISUALIZE_IMAGES 1
-
-    // Show timing information
-#define SHOW_TIMING 1
-
-
 #include "vision/localvariance.h"
 #include <opencv2/imgproc/imgproc.hpp>  // cvtColor
 #include "opencv2/core/core_c.h"
@@ -24,7 +17,6 @@ namespace svl
 {
     localVAR::localVAR (Size filter_size)
     {
-        CV_Assert (filter_size.area () >= 1);
         m_fsize = filter_size;
         m_maxVar = std::numeric_limits<float>::min ();
         m_minVar = std::numeric_limits<float>::max ();
@@ -84,8 +76,10 @@ namespace svl
 
     }
 
-    void localVAR::operator()(const cv::Mat& _image, const cv::Mat& _mask, cv::Mat& result) const
+    bool localVAR::process(const cv::Mat& _image, cv::Mat& result) const
     {
+        if (m_fsize.width < 2 || m_fsize.height < 2) return false;
+        
             // Allocate intergral image: 1 bigger in each dimension
         allocate_images (_image);
         convert_or_not (_image);
@@ -138,7 +132,8 @@ namespace svl
                 
             }
         }
-        result = m_var(cv::Rect(0,0,m_isize.width,m_isize.height));
+        result = m_var(cv::Rect(half_k_w,half_k_h,processed_w,processed_h));
+        return true;
     }
     
 }

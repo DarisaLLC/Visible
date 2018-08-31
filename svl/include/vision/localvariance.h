@@ -22,8 +22,10 @@ namespace svl
     public:
         CV_WRAP explicit localVAR( cv::Size filter_size );
 
-        void operator()(const cv::Mat& image, const cv::Mat& mask, cv::Mat& results ) const;
+        bool process (const cv::Mat& image, cv::Mat& results ) const;
             //! Produces local variance image for this image using kernel size
+            // if filter size is less than 2 in either side, returns false
+        
 
         const cv::Mat& VarianceImageRef () const { return m_var; }
         float min_variance () const { return m_minVar; }

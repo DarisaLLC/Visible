@@ -10,6 +10,7 @@
 #include "vision/opencv_utils.hpp"
 #include "core/stl_utils.hpp"
 #include "core/stats.hpp"
+#include "vision/localvariance.h"
 
 using namespace std;
 using namespace stl_utils;
@@ -120,17 +121,23 @@ struct fbFlowRunner
         
         results.clear();
         std::vector<cv::Mat> frames;
+        svl::localVAR tv (cv::Size(7,7));
+        
         for (int ii = 0; ii < channel.size(); ii++)
         {
             const roiWindow<P8U>& image = channel[ii];
             std::string imgpath = "/Users/arman/oflow/out" + toString(ii) + ".png";
             cv::Mat mat (image.height(), image.width(), CV_8UC(1), image.pelPointer(0,0), size_t(image.rowUpdate()));
-            cv::Mat diff (image.height(), image.width(), CV_32F);
-            diff = mat - volstats.mean();
-         //   cv::multiply(diff,diff,diff);
-            diff /= std::sqrt(volstats.variance());
-            cv::normalize(diff,mat,0,UCHAR_MAX,cv::NORM_MINMAX);
-            cv::imwrite(imgpath, mat);
+            cv::Mat lv;
+            tv.process (mat,lv);
+//            cv::Mat diff (image.height(), image.width(), CV_32F);
+//            diff = mat - volstats.mean();
+//            cv::Mat slices[3];
+//            cv::Mat mzp;
+        //   cv::multiply(diff,diff,diff);
+        //   diff /= std::sqrt(volstats.variance());
+            cv::normalize(lv,mat,0,UCHAR_MAX,cv::NORM_MINMAX);
+            cv::imwrite(imgpath, lv);
             std::cout << "wrote Out " << imgpath << std::endl;
         }
     }

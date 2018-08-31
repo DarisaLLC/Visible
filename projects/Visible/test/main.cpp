@@ -36,6 +36,7 @@
 #include "sg_filter.h"
 #include "vision/drawUtils.hpp"
 #include "core/stl_utils.hpp"
+#include "ut_localvar.hpp"
 
 
 using namespace boost;
@@ -123,6 +124,62 @@ void savgol (const deque<double>& signal, deque<double>& dst)
     
 }
 
+struct blob_record
+{
+    Point2d location;
+    double radius;
+    double confidence;
+};
+
+TEST(ut_lif_tracker, basic)
+{
+    auto res = dgenv_ptr->asset_path("out0.png");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    cv::Mat out0 = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    std::cout << out0.channels() << std::endl;
+    
+    EXPECT_EQ(out0.cols , 512);
+    EXPECT_EQ(out0.rows , 128);
+
+    // create local variance filter size runner
+    svl::localVAR tv (cv::Size(7,7));
+    cv::Mat var0;
+    cv::Mat std0U8;
+    tv.process(out0, var0);
+    EXPECT_EQ(tv.min_variance() , 0);
+    EXPECT_EQ(tv.max_variance() , 11712);
+//    cv::sqrt(var0,var0);
+//    cv::normalize(var0,std0U8,0,UCHAR_MAX,cv::NORM_MINMAX);
+    
+    // Histogram -> threshold at 5 percent from the right ( 95 from the left :) )
+    int threshold = leftTailPost (out0, 95.0 / 100.0);
+    EXPECT_EQ(threshold, 40);
+    
+    cv::Mat threshold_input, threshold_output;
+    
+    /// Detect edges using Threshold
+    out0.convertTo(threshold_input, CV_8U);
+    cv::threshold(threshold_input
+                  , threshold_output, threshold, 255, THRESH_BINARY );
+    blob_region_records_t  regions;
+    cv::Mat graphics(out0.size(), CV_8UC3);
+    graphics.setTo(cv::Scalar(0,0,0,0));
+    auto num_regions = detectRegionBlobs(threshold_input, threshold_output, regions, graphics);
+    EXPECT_EQ(num_regions, 59);
+    /// Show in a window
+ //   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+ //   imshow( "Contours", graphics);
+ //   cv::waitKey();
+}
+
+
+TEST(ut_localvar, basic)
+{
+    ut_localvar utvar;
+    utvar.test_method();
+    
+}
 TEST(ut_stl_utils, accOverTuple)
 {
     float val = tuple_accumulate(std::make_tuple(5, 3.2, 7U, 6.4f), 0L, functor());
