@@ -405,6 +405,7 @@ namespace svl
         inv_m00 = mu.inv_sqrt_m00 * mu.inv_sqrt_m00;
         
         mc = Point2f ((m10 * inv_m00), m01 * inv_m00);
+        
         m_is_loaded = true;
     }
     
@@ -506,9 +507,9 @@ namespace svl
                 int y = result.stats.at<int>(Point(1, i));
                 int w = result.stats.at<int>(Point(2, i));
                 int h = result.stats.at<int>(Point(3, i));
-                Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+                Scalar color = Scalar( rng.uniform(100, 255), rng.uniform(100,255), rng.uniform(100,255) );
                 Rect rect(x,y,w,h);
-                cv::rectangle(graphics, rect, color);
+                cv::rectangle(graphics, rect, color,3);
             }
             std::vector<cv::KeyPoint> kps;
             
@@ -516,8 +517,11 @@ namespace svl
                 
                 double theta = result.moments[i].getOrientation();
                 if(! std::isnan(theta))
-                    kps.emplace_back(cv::Point2f(result.centroids.at<double>(i,0), result.centroids.at<double>(i,1)), 20, theta * 57.3);
-
+                {
+                    auto tl = result.rois[i].tl();
+                    auto com = result.moments[i].com() + tl;
+                    kps.emplace_back(com, 20, theta * 57.3);
+                }
             }
             cv::drawKeypoints(graphics, kps,graphics, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
         }
