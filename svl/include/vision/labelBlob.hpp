@@ -42,7 +42,7 @@ namespace svl
         bool isLoaded () const { return m_is_loaded; }
         
     private:
-        mutable Point m_offset;
+        mutable cv::Point m_offset;
         mutable cv::Size m_size;
         mutable double a;
         mutable double b;
@@ -75,11 +75,11 @@ class lblMgr : public base_signaler
 class labelBlob : public lblMgr
 {
 public:
-    typedef void (sig_blob_results_ready_cb) ();
-    typedef void (sig_blob_graphics_ready_cb) ();
-    typedef std::shared_ptr<labelBlob> labelBlobRef;
+    typedef void (results_ready_cb) ();
+    typedef void (graphics_ready_cb) ();
+    typedef std::shared_ptr<labelBlob> ref;
     
-    static labelBlobRef create(const cv::Mat& gray, const cv::Mat& threshold_out);
+    static ref create(const cv::Mat& gray, const cv::Mat& threshold_out);
     
     class blob {
     public:
@@ -130,11 +130,11 @@ public:
     
 protected:
     
-    boost::signals2::signal<sig_blob_results_ready_cb>* signal_results_ready;
-    boost::signals2::signal<sig_blob_graphics_ready_cb>* signal_graphics_ready;
+    boost::signals2::signal<results_ready_cb>* signal_results_ready;
+    boost::signals2::signal<graphics_ready_cb>* signal_graphics_ready;
     
 private:
-    labelBlob () : m_results_ready(false) {}
+    labelBlob ();
     mutable chrono::time_point<std::chrono::high_resolution_clock> m_start;
     mutable cv::Mat m_grey;
     mutable cv::Mat m_threshold_out;

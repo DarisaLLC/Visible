@@ -29,16 +29,15 @@ void momento::run(const cv::Mat& image) const
 {
     image.locateROI(m_size,m_offset);
     
+    // Get the basic moments from Cv::Moments. It does respect ROI
+    // Fill up the base and only the base.
     CvMoments mu =  cv::moments(image, false);
-    *((Moments*)this) = mu;
+    *((CvMoments*)this) = mu;
     
     inv_m00 = mu.inv_sqrt_m00 * mu.inv_sqrt_m00;
-    
     mc = Point2f ((m10 * inv_m00), m01 * inv_m00);
-    
     mc.x += m_offset.x;
     mc.y += m_offset.y;
-    
     m_is_loaded = true;
 }
 
@@ -99,7 +98,13 @@ void momento::getDirectionals () const
     eigen_done = true;
 }
 
-svl::labelBlob::labelBlobRef labelBlob::create(const cv::Mat& gray, const cv::Mat& threshold_out){
+svl::labelBlob::labelBlob() : m_results_ready(false){
+    // Signals we provide
+    signal_results_ready = createSignal<results_ready_cb> ();
+    signal_graphics_ready = createSignal<graphics_ready_cb> ();
+    
+}
+svl::labelBlob::ref labelBlob::create(const cv::Mat& gray, const cv::Mat& threshold_out){
     auto reff = std::shared_ptr<labelBlob>(new labelBlob());
     reff->reload(gray, threshold_out);
     reff->m_results_ready = false;
@@ -109,7 +114,7 @@ svl::labelBlob::labelBlobRef labelBlob::create(const cv::Mat& gray, const cv::Ma
 void svl::labelBlob::blob::update_moments(const cv::Mat& image) const {
     m_moments_ready = false;
     cv::Mat window = image(m_roi);
-    m_moments.run(image);
+    m_moments.run(window);
     m_moments_ready = true;
     
 }
@@ -165,7 +170,7 @@ void labelBlob::drawOutput() const {
     for (auto const & blob : m_blobs)
     {
         Scalar color = Scalar( rng.uniform(100, 255), rng.uniform(100,255), rng.uniform(100,255) );
-        cv::rectangle(m_graphics, blob.roi(), color,3);
+        cv::rectangle(m_graphics, blob.roi(), color, 1);
         uRadian theta = blob.moments().getOrientation();
         if(! isnan(theta))
         {
@@ -174,7 +179,8 @@ void labelBlob::drawOutput() const {
         }
     }
   
-        cv::drawKeypoints(m_graphics, kps,m_graphics, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    cv::drawKeypoints(m_graphics, kps,m_graphics, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    
     if (signal_graphics_ready && signal_graphics_ready->num_slots() > 0)
         signal_graphics_ready->operator()();
 }

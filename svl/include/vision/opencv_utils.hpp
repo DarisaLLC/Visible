@@ -24,47 +24,7 @@ namespace svl
 
     double correlation_ocv(const roiWindow<P8U>& i, const roiWindow<P8U>& m);
     
-    
-    class momento : CvMoments
-    {
-    public:
-        momento(): m_is_loaded (false) {}
-        momento(const cv::Mat&);
-        
-        void run (const cv::Mat&) const;
-        const Point2f& com () const { return mc; }
-        vec2 getEllipseAspect () const;
-        double getOrientation () const;
-        bool isLoaded () const { return m_is_loaded; }
-        
-    private:
-        mutable double a;
-        mutable double b;
-        mutable double theta;
-        mutable double eigen_angle;
-        mutable double inv_m00;
-        mutable Point2f mc;
-        mutable bool eigen_ok;
-        mutable bool m_is_loaded;
-        mutable bool eigen_done;
-        void getDirectionals () const;
-        
-    };
-    
-  
-    
-    
-    typedef struct {
-        cv::Mat labels;
-        cv::Mat stats;
-        cv::Mat centroids;
-        std::vector<svl::momento> moments;
-        std::vector<cv::Rect2f> rois;
-    } blob_region_records_t;
 
-
-    
-    size_t detectRegionBlobs(const cv::Mat& grayImage, const cv::Mat&threshold_output, blob_region_records_t& result , cv::Mat& graphics);
     
     void cumani_opencv (const cv::Mat& input_bgr, cv::Mat& gradAbs, cv::Mat& orientation, float& maxVal);
     
@@ -117,7 +77,7 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     
     void compute2DRectCorners(const cv::RotatedRect rect, std::vector<cv::Point2f> & corners);
     
-    bool direction_moments (cv::Mat image, momento& res);
+   // bool direction_moments (cv::Mat image, momento& res);
     
     float Median1dF (const cv::Mat& fmat, size_t& loc);
     

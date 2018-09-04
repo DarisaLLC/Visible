@@ -400,61 +400,7 @@ namespace svl
                              #define CV_64F  6       centroids
 
  ****************/
-    
-    
-    size_t detectRegionBlobs(const cv::Mat& grayImage, const cv::Mat&threshold_output, blob_region_records_t& result , cv::Mat& graphics){
-        size_t count = cv::connectedComponentsWithStats(threshold_output, result.labels, result.stats, result.centroids);
-        assert(count == result.stats.rows);
-        
-        result.moments.resize(0);
-        result.rois.resize(0);
-        
-        for(int i=0; i<result.stats.rows; i++)
-        {
-            int x = result.stats.at<int>(Point(0, i));
-            int y = result.stats.at<int>(Point(1, i));
-            int w = result.stats.at<int>(Point(2, i));
-            int h = result.stats.at<int>(Point(3, i));
-            result.rois.emplace_back(x,y,w,h);
-            cv::Mat window = grayImage(result.rois.back());
-            result.moments.emplace_back(window);
-        }
-        
-        if (graphics.size() == grayImage.size())
-        {
-            std::vector<cv::Mat> channels = { threshold_output,threshold_output,threshold_output};
-            cv::merge(&channels[0],3,graphics);
-            
-            
-            RNG rng(12345);
-            
-            for(int i=0; i<result.stats.rows; i++)
-            {
-                int x = result.stats.at<int>(Point(0, i));
-                int y = result.stats.at<int>(Point(1, i));
-                int w = result.stats.at<int>(Point(2, i));
-                int h = result.stats.at<int>(Point(3, i));
-                Scalar color = Scalar( rng.uniform(100, 255), rng.uniform(100,255), rng.uniform(100,255) );
-                Rect rect(x,y,w,h);
-                cv::rectangle(graphics, rect, color,3);
-            }
-            std::vector<cv::KeyPoint> kps;
-            
-            for (int i=0; i<result.centroids.rows; i++){
-                
-                double theta = result.moments[i].getOrientation();
-                if(! std::isnan(theta))
-                {
-                    auto tl = result.rois[i].tl();
-                    auto com = result.moments[i].com() + tl;
-                    kps.emplace_back(com, 20, theta * 57.3);
-                }
-            }
-            cv::drawKeypoints(graphics, kps,graphics, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-        }
-        return result.stats.rows;
-    }
-
+ 
 #if 0
     void drawBlob (const blobRecordRef& blob, InputOutputArray image, const Scalar& color, int thickness, int lineType)
     {

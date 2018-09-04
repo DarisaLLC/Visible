@@ -37,7 +37,7 @@
 #include "vision/drawUtils.hpp"
 #include "core/stl_utils.hpp"
 #include "ut_localvar.hpp"
-
+#include "vision/labelBlob.hpp"
 
 using namespace boost;
 
@@ -124,24 +124,18 @@ void savgol (const deque<double>& signal, deque<double>& dst)
     
 }
 
-struct blob_record
-{
-    Point2d location;
-    double radius;
-    double confidence;
-};
 
-TEST(ut_lif_tracker, basic)
+TEST(ut_localvar, basic)
 {
     auto res = dgenv_ptr->asset_path("out0.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
     cv::Mat out0 = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
     std::cout << out0.channels() << std::endl;
-    
+    EXPECT_EQ(out0.channels() , 1);
     EXPECT_EQ(out0.cols , 512);
     EXPECT_EQ(out0.rows , 128);
-
+    
     // create local variance filter size runner
     svl::localVAR tv (cv::Size(7,7));
     cv::Mat var0;
@@ -149,37 +143,58 @@ TEST(ut_lif_tracker, basic)
     tv.process(out0, var0);
     EXPECT_EQ(tv.min_variance() , 0);
     EXPECT_EQ(tv.max_variance() , 11712);
-//    cv::sqrt(var0,var0);
-//    cv::normalize(var0,std0U8,0,UCHAR_MAX,cv::NORM_MINMAX);
+}
+
+TEST(ut_labelBlob, basic)
+{
+    using blob = svl::labelBlob::blob;
     
+    static bool s_results_ready = false;
+    static bool s_graphics_ready = false;
+    
+
+    auto res = dgenv_ptr->asset_path("out0.png");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    cv::Mat out0 = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    EXPECT_EQ(out0.channels() , 1);
+    EXPECT_EQ(out0.cols , 512);
+    EXPECT_EQ(out0.rows , 128);
+
     // Histogram -> threshold at 5 percent from the right ( 95 from the left :) )
     int threshold = leftTailPost (out0, 95.0 / 100.0);
     EXPECT_EQ(threshold, 40);
     
     cv::Mat threshold_input, threshold_output;
     
-    /// Detect edges using Threshold
+    /// Detect regions using Threshold
     out0.convertTo(threshold_input, CV_8U);
     cv::threshold(threshold_input
                   , threshold_output, threshold, 255, THRESH_BINARY );
-    blob_region_records_t  regions;
-    cv::Mat graphics(out0.size(), CV_8UC3);
-    graphics.setTo(cv::Scalar(0,0,0,0));
-    auto num_regions = detectRegionBlobs(threshold_input, threshold_output, regions, graphics);
-    EXPECT_EQ(num_regions, 59);
+    
+    labelBlob::ref lbr = labelBlob::create(out0, threshold_output);
+    EXPECT_EQ(lbr == nullptr , false);
+    std::function<void()> res_ready_lambda = [](){ s_results_ready = ! s_results_ready;};
+    std::function<labelBlob::results_ready_cb> graphics_ready_lambda = [](){ s_graphics_ready = ! s_graphics_ready;};
+    boost::signals2::connection results_ready_ = lbr->registerCallback(res_ready_lambda);
+    boost::signals2::connection graphics_ready_ = lbr->registerCallback<labelBlob::graphics_ready_cb> (graphics_ready_lambda);
+    EXPECT_EQ(false, s_results_ready);
+    lbr->run();
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    EXPECT_EQ(true, s_results_ready);
+    EXPECT_EQ(true, lbr->hasResults());
+    const std::vector<blob> blobs = lbr->results();
+    EXPECT_EQ(59, blobs.size());
+    
+    lbr->drawOutput();
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    EXPECT_EQ(true, s_graphics_ready);
     /// Show in a window
-    namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-    imshow( "Contours", graphics);
+    namedWindow( "LabelBlob ", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+    imshow( "LabelBlob", lbr->graphicOutput());
     cv::waitKey();
 }
 
-
-TEST(ut_localvar, basic)
-{
-    ut_localvar utvar;
-    utvar.test_method();
-    
-}
 TEST(ut_stl_utils, accOverTuple)
 {
     float val = tuple_accumulate(std::make_tuple(5, 3.2, 7U, 6.4f), 0L, functor());
@@ -187,7 +202,6 @@ TEST(ut_stl_utils, accOverTuple)
     EXPECT_TRUE(diff < 0.000001);
 
     typedef std::tuple<int64_t,int64_t, uint32_t> partial_t;
-    partial_t t0 = make_tuple(12345679, -12345679, 1);
     std::vector<partial_t> boo;
     for (int ii = 0; ii < 9; ii++)
         boo.emplace_back(12345679, -12345679, 1);
@@ -196,6 +210,8 @@ TEST(ut_stl_utils, accOverTuple)
     auto res = std::accumulate(boo.begin(), boo.end(), std::make_tuple(int64_t(0),int64_t(0), uint32_t(0)), tuple_sum<int64_t,uint32_t>());
     bool check = res == make_tuple(111111111, -111111111, 9); //(int64_t(111111111),int64_t(-111111111), uint32_t(9));
     EXPECT_TRUE(check);
+    
+    
 }
 
 TEST(UT_smfilter, basic)
