@@ -6,7 +6,7 @@
 #include "cinder/Rect.h"
 #include "cinder/Signals.h"
 #include "cinder/app/Event.h"
-#include "signaler.h"
+#include "core/signaler.h"
 #include <iostream>
 #include <iomanip>
 #include <sstream>

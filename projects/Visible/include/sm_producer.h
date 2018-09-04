@@ -11,7 +11,7 @@
 #include <typeinfo>
 #include <string>
 #include <tuple>
-#include "signaler.h"
+#include "core/signaler.h"
 #include "roiWindow.h"
 #include <chrono>
 #include "core/singleton.hpp"

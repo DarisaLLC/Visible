@@ -195,6 +195,8 @@ inline double tan (uRadian x) { return tan (x.Double());}
 inline uRadian abs (uRadian x) { return uRadian (std::fabs (x.Double()));}
 inline uDegree abs (uDegree x) { return uDegree (std::fabs (x.Double()));}
 
+inline bool isnan (uRadian x) { return std::isnan<double> (x.Double()); }
+
 
 
 

@@ -228,6 +228,8 @@
 		C2E0EE751F7B0B7900D32697 /* liblibwebp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCC1F6C66F700A0E908 /* liblibwebp.a */; };
 		C2E0EE761F7B0B7C00D32697 /* libIlmImf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DD21F6C677100A0E908 /* libIlmImf.a */; };
 		C2E3F55B213A0430007B1088 /* libopencv_features2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606E7E1CEE08F00045FF57 /* libopencv_features2d.a */; };
+		C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
+		C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
 		C2E60A0921200A7F00059FA6 /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
 		C2E60A0A21200A7F00059FA6 /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
 		C2E60A0B21200A7F00059FA6 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8851CEA916E0008C72B /* libboost_system.a */; };
@@ -321,7 +323,6 @@
 		C21946941CE4EA4900976025 /* graph1d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = graph1d.hpp; path = ../include/graph1d.hpp; sourceTree = "<group>"; };
 		C21946961CE4EA4900976025 /* InteractiveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InteractiveObject.h; path = ../include/InteractiveObject.h; sourceTree = "<group>"; };
 		C21946971CE4EA4900976025 /* intrusive_ptr_base.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = intrusive_ptr_base.hpp; path = ../include/intrusive_ptr_base.hpp; sourceTree = "<group>"; };
-		C219469D1CE4EA4900976025 /* signaler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = signaler.h; path = ../include/signaler.h; sourceTree = "<group>"; };
 		C219469E1CE4EA4900976025 /* simple_pair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = simple_pair.h; path = ../include/simple_pair.h; sourceTree = "<group>"; };
 		C219469F1CE4EA4900976025 /* sshist.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sshist.hpp; path = ../include/sshist.hpp; sourceTree = "<group>"; };
 		C21946A31CE4EA4900976025 /* guiContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = guiContext.h; path = ../include/guiContext.h; sourceTree = "<group>"; usesTabs = 1; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -614,6 +615,8 @@
 		C2E321FE1D038B16006DFE5E /* AVReader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AVReader.hpp; path = ../include/AVReader.hpp; sourceTree = "<group>"; };
 		C2E321FF1D0480E4006DFE5E /* mediaInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mediaInfo.h; path = ../include/mediaInfo.h; sourceTree = "<group>"; };
 		C2E322001D05B90C006DFE5E /* time_index.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time_index.h; path = ../include/time_index.h; sourceTree = "<group>"; };
+		C2E3F55C213D9408007B1088 /* labelBlob.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = labelBlob.cpp; sourceTree = "<group>"; };
+		C2E3F560213D9483007B1088 /* labelBlob.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = labelBlob.hpp; sourceTree = "<group>"; };
 		C2E469CE1D07718B0066B811 /* cm_time.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cm_time.hpp; sourceTree = "<group>"; };
 		C2F1B6211FB13FE600DDD7DB /* LifContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LifContext.h; path = ../include/LifContext.h; sourceTree = "<group>"; };
 		C2FA97181E82EFB1006EC61E /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Visible/Images.xcassets; sourceTree = "<group>"; };
@@ -959,7 +962,6 @@
 				C21946941CE4EA4900976025 /* graph1d.hpp */,
 				C21946961CE4EA4900976025 /* InteractiveObject.h */,
 				C21946971CE4EA4900976025 /* intrusive_ptr_base.hpp */,
-				C219469D1CE4EA4900976025 /* signaler.h */,
 				C24FC84C1E5E40130071AA1A /* async_producer.h */,
 				C2601BBC1E6B5A60004415A3 /* algo_registry.hpp */,
 				C241BBAA1FB11B51000DE36E /* algo_Lif.hpp */,
@@ -1201,6 +1203,7 @@
 		C26009FF1CED3E010045FF57 /* vision */ = {
 			isa = PBXGroup;
 			children = (
+				C2E3F560213D9483007B1088 /* labelBlob.hpp */,
 				C24FC84D1E5E56960071AA1A /* roiMultiWindow.h */,
 				C20BBC181E5271C5002C7D68 /* opencv_utils.hpp */,
 				C21FFE711CFDF82600C97013 /* self_similarity.h */,
@@ -1348,6 +1351,7 @@
 				C260696C1CED3E2C0045FF57 /* localvariance.cpp */,
 				C260696D1CED3E2C0045FF57 /* matpixel.cpp */,
 				C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */,
+				C2E3F55C213D9408007B1088 /* labelBlob.cpp */,
 				C260696F1CED3E2C0045FF57 /* registration.cpp */,
 				C26069701CED3E2C0045FF57 /* rowfunc.cpp */,
 				C26069711CED3E2C0045FF57 /* ut */,
@@ -1609,6 +1613,7 @@
 				C20BBC0B1E4E39E6002C7D68 /* rand_support.cpp in Sources */,
 				C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */,
 				C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */,
+				C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */,
 				C2606DAB1CED3E2E0045FF57 /* ip_utils.cpp in Sources */,
 				C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */,
 				C254BE841F4F912E00977307 /* csv.cpp in Sources */,
@@ -1663,6 +1668,7 @@
 				C29DB077212B351200930CBD /* algo_Lif.cpp in Sources */,
 				C20EDBC61CF2776D0074C47A /* self_similarity.cpp in Sources */,
 				C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */,
+				C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */,
 				C20BBC031E4E33CE002C7D68 /* tinystr.cpp in Sources */,
 				C2606E721CED44370045FF57 /* qtime_frame_cache.cpp in Sources */,
 			);

@@ -126,8 +126,6 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     std::pair<size_t, size_t> medianPoint (const cv::Mat& mat);
     
     
-    void getLuminanceCenterOfMass (const cv::Mat& gray, cv::Point2f& com);
-    
     void computeNormalizedColorHist(const cv::Mat& image, cv::Mat& hist, int N, double minProb);
     
     bool matIsEqual(const cv::Mat mat1, const cv::Mat mat2);

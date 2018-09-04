@@ -27,7 +27,7 @@
 #include "core/stl_utils.hpp"
 #include "sm_producer.h"
 #include "qtimeAvfLink.h"
-#include "signaler.h"
+#include "core/signaler.h"
 
 using namespace ci;
 using namespace ci::app;

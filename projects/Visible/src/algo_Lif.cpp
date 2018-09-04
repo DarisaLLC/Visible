@@ -19,7 +19,7 @@
 #include <future>
 #include "core/singleton.hpp"
 #include "async_producer.h"
-#include "signaler.h"
+#include "core/signaler.h"
 #include "sm_producer.h"
 #include "cinder_xchg.hpp"
 #include "vision/histo.h"

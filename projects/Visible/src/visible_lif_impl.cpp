@@ -34,7 +34,7 @@
 #include "core/stl_utils.hpp"
 #include "sm_producer.h"
 #include "algo_Lif.hpp"
-#include "signaler.h"
+#include "core/signaler.h"
 #include "contraction.hpp"
 using namespace ci;
 using namespace ci::app;

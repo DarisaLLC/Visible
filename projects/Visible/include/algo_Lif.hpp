@@ -11,7 +11,7 @@
 #include <typeindex>
 #include <map>
 #include "async_producer.h"
-#include "signaler.h"
+#include "core/signaler.h"
 #include "vision/opencv_utils.hpp"
 #include "getLuminanceAlgo.hpp"
 #include "sm_producer.h"

@@ -13,7 +13,7 @@
 #include <chrono>
 #include "core/stats.hpp"
 #include "core/stl_utils.hpp"
-#include "signaler.h"
+#include "core/signaler.h"
 
 using namespace std;
 using namespace boost;

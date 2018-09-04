@@ -23,7 +23,7 @@
 #include <utility>
 #include <type_traits>
 #include <iostream>
-
+#include <future>
 
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
@@ -33,6 +33,65 @@ using namespace std;
 
 namespace stl_utils
 {
+    
+    class ThreadRAII {
+    public:
+        enum class DtorAction { join, detach };         
+        
+        ThreadRAII(std::thread&& t, DtorAction a)       // in dtor, take
+        : action(a), t(std::move(t)) {}                 // action a on t
+        
+        ~ThreadRAII()
+        {                                               // see below for
+            if (t.joinable()) {                           // joinability test
+                
+                if (action == DtorAction::join) {
+                    t.join();
+                } else {
+                    t.detach();
+                }
+                
+            }
+        }
+        
+        ThreadRAII(ThreadRAII&&) = default;             // support
+        ThreadRAII& operator=(ThreadRAII&&) = default;  // moving
+        
+        std::thread& get() { return t; }                // see below
+        
+    private:
+        DtorAction action;
+        std::thread t;
+    };
+    
+    /**
+     * Key idea:
+     *
+     *   This is a C++14 version of a function that acts like std::async, but that
+     *   automatically uses std::launch::async as the launch policy.
+     * c++ 14
+     */
+    template<typename F, typename... Ts>
+    inline
+    auto                                     // C++14
+    reallyAsync(F&& f, Ts&&... params)
+    {
+        return std::async(std::launch::async,
+                          std::forward<F>(f),
+                          std::forward<Ts>(params)...);
+    }
+
+    
+    template<typename F, typename... Ts>
+    inline
+    std::future<typename std::result_of<F(Ts...)>::type>
+    reallyAsync11(F&& f, Ts&&... params)       // return future
+    {                                        // for asynchronous
+        return std::async(std::launch::async,  // call to f(params...)
+                          std::forward<F>(f),
+                          std::forward<Ts>(params)...);
+    }
+
     /*
         Watch dog with RAII design
      */
