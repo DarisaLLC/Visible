@@ -126,7 +126,7 @@ public:
     
     const std::vector<labelBlob::blob>& results() const { return m_blobs; }
     const cv::Mat& graphicOutput () const { return m_graphics; }
-    
+    const std::vector<cv::KeyPoint>& keyPoints (bool regen = false) const;
     
     
     // Support moving
@@ -151,7 +151,7 @@ private:
     mutable std::vector<svl::momento> m_moments;
     mutable std::vector<cv::Rect2f> m_rois;
     mutable int64_t m_client_id;
-    
+    mutable std::vector<cv::KeyPoint> m_kps;
   
 };
 

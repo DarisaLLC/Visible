@@ -171,11 +171,11 @@ void labelBlob::run_async() const {
     auto fdone = stl_utils::reallyAsync(&labelBlob::run, this);
 }
 
-void labelBlob::drawOutput() const {
-        RNG rng(12345);
-    
-    std::vector<cv::KeyPoint> kps;
-    
+const std::vector<cv::KeyPoint>& labelBlob::keyPoints (bool regen) const {
+    if(! regen && ! (m_kps.empty() || m_blobs.empty() || m_kps.size() != m_blobs.size()))
+        return m_kps;
+    static RNG rng(12345);
+    m_kps.clear();
     for (auto const & blob : m_blobs)
     {
         Scalar color = Scalar( rng.uniform(100, 255), rng.uniform(100,255), rng.uniform(100,255) );
@@ -184,10 +184,14 @@ void labelBlob::drawOutput() const {
         if(! isnan(theta))
         {
             uDegree degs (theta);
-            kps.emplace_back(blob.moments().com(), 20, degs.Double());
+            m_kps.emplace_back(blob.moments().com(), 20, degs.Double());
         }
     }
-  
+    return m_kps;
+}
+void labelBlob::drawOutput() const {
+
+    const std::vector<cv::KeyPoint>& kps = keyPoints();
     cv::drawKeypoints(m_graphics, kps,m_graphics, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
     
     if (signal_graphics_ready && signal_graphics_ready->num_slots() > 0)
