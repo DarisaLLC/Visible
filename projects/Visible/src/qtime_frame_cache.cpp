@@ -21,6 +21,7 @@
 
 using namespace ci;
 using namespace ci::ip;
+using namespace stl_utils;
 
 namespace anonymous
 {
@@ -75,48 +76,57 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifse
     tm.channel_size.height = static_cast<int>(dims[1]);
     tm.size = tm.channel_size;
     tm.size.height *= tm.mChannels;
-    auto frame_count = 0;
     cm_time frame_time;
     
     
-    auto thisref = std::make_shared<qTimeFrameCache>(tm);
+    qTimeFrameCache::ref thisref (new qTimeFrameCache(tm));
+    
     thisref->channel_names (names);
     
     if (lifserie.getDurations().size ())
     {
         if (tm.count > 1)
         {
-            std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator tItr = lifserie.getDurations().begin();
-            
+            std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator tItr = lifserie.getTimestamps().begin();
+
             std::vector<Surface8uRef> out;
-            while (tItr < lifserie.getDurations().end())
+            int inc = 0;
+            for (auto frame_count = 0; frame_count < tm.count; frame_count+=inc)
             {
                 anonymous::internal_fill_one(lifserie, tm, frame_count, out, tItr);
                 
                 // For 3 Channel get the one by 3 image containing all.
                 //
-                if (! out.empty() && out.size() == 1)
-                    thisref->loadFrame(out[0], frame_time);
+                if (! out.empty() && out.size() == 1){
+                    bool check = thisref->loadFrame(out[0], frame_time);
+                    if (! check){
+                        std::cout << std::endl << "-----------------" << frame_count << "--------------" << std::endl;
+                    }
                 
-                // Increment durations by number of channels
-                cm_time ts((*tItr)/(10000.0));
-                frame_time = frame_time + ts;
-                frame_count ++;
-                
-                // Step the durations number of channel times.
-                for (auto ii = 0; ii < tm.mChannels; ii++, tItr++);
+                    // Increment durations by number of channels
+                    cm_time ts((*tItr)/(10000.0));
+                    frame_time = frame_time + ts;
+                    inc = 1;
+                    
+                    // Step the durations number of channel times.
+                    tItr += tm.mChannels;
+                }
+                else{
+                    inc = 0;
+                    std::cout << " Error after  frame count " << frame_count << std::endl;
+                }
             }
             
-            thisref->mValid = tm.count == frame_count;
+            thisref->mValid = tm.count == thisref->count();
             
             return thisref;
         }
         else if (tm.count == 1) // @todo
         {
-            return std::make_shared<qTimeFrameCache>();
+            return thisref;
         }
     }
-    return std::make_shared<qTimeFrameCache>();
+    return thisref;
 }
 
 
@@ -128,7 +138,8 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ocvPlayerRef& mM
     minfo.mFps = mMovie->getFrameRate();
     minfo.count = mMovie->getNumFrames ();
     minfo.duration = mMovie->getDuration();
-    return std::make_shared<qTimeFrameCache>( minfo);
+    qTimeFrameCache::ref thisref (new qTimeFrameCache(minfo));
+    return thisref;
     
 }
 
@@ -140,7 +151,8 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ci::qtime::Movie
     minfo.mFps = mMovie->getFramerate();
     minfo.count = mMovie->getNumFrames ();
     minfo.duration = mMovie->getDuration();
-    return std::make_shared<qTimeFrameCache>( minfo);
+    qTimeFrameCache::ref thisref (new qTimeFrameCache(minfo));
+    return thisref;
     
 }
 
@@ -152,13 +164,14 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ci::qtime::Movie
     minfo.mFps = mMovie->getFramerate();
     minfo.count = mMovie->getNumFrames ();
     minfo.duration = mMovie->getDuration();
-    return std::make_shared<qTimeFrameCache>( minfo);
+    qTimeFrameCache::ref thisref (new qTimeFrameCache(minfo));
+    return thisref;
     
 }
 
 std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const std::shared_ptr<avcc::avReader>& asset_reader)
 {
-    auto thisref = std::make_shared<qTimeFrameCache>( asset_reader->info());
+    qTimeFrameCache::ref thisref (new qTimeFrameCache(asset_reader->info()));
     while (! asset_reader->isEmpty())
     {
         cm_time ts;
@@ -176,8 +189,7 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const std::vector<ci::
     minfo.mFps = 1.0;
     minfo.count = static_cast<uint32_t>(folderImages.size());
     minfo.duration = 1.0;
-    
-    auto thisref = std::make_shared<qTimeFrameCache>(minfo);
+    qTimeFrameCache::ref thisref (new qTimeFrameCache(minfo));
     cm_time ts;
     cm_time duration (minfo.duration);
     for (auto iitr = folderImages.begin(); iitr < folderImages.end(); iitr++)
@@ -273,7 +285,10 @@ const std::ostream& qTimeFrameCache::print_to_ (std::ostream& std_stream)
     return std_stream;
 }
 
-
+const std::ostream&  qTimeFrameCache::index_info (std::ostream& std_stream){
+    std_stream << m_itIter;
+    return std_stream;
+}
 
 /*
  * Increment the time histogram if the new time stamp is increasing.
@@ -310,6 +325,7 @@ bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const index_time_t& t
 
 bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const time_spec_t& tic )
 {
+    std::unique_lock <std::mutex> lock( mMutex , std::try_to_lock );
     assert(frame );
     if (!mFrames.empty())
     {
@@ -320,7 +336,8 @@ bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const time_spec_t& ti
     // It is not in the cache.
     // Get a time_index for it and load it
     index_time_t ti;
-    return make_unique_increasing_time_indices (tic, ti) && loadFrame(frame, ti);
+    shared_from_this()->make_unique_increasing_time_indices (tic, ti);
+    return loadFrame(frame, ti);
 }
 
 /*

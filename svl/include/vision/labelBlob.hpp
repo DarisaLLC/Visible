@@ -20,6 +20,7 @@
 #include "core/pair.hpp"
 #include <atomic>
 #include "angle_units.h"
+#include <memory>
 
 using namespace cv;
 
@@ -75,11 +76,14 @@ class lblMgr : public base_signaler
 class labelBlob : public lblMgr
 {
 public:
-    typedef void (results_ready_cb) ();
+    typedef void (results_ready_cb) (int64_t&);
     typedef void (graphics_ready_cb) ();
     typedef std::shared_ptr<labelBlob> ref;
+    typedef std::weak_ptr<labelBlob> weak_ref;
     
-    static ref create(const cv::Mat& gray, const cv::Mat& threshold_out);
+    static ref create(const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id = 0);
+    labelBlob ();
+    labelBlob (const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id = 0);
     
     class blob {
     public:
@@ -109,7 +113,7 @@ public:
         mutable std::atomic<bool> m_moments_ready;
     };
     
-    void reload (const cv::Mat& gray, const cv::Mat& threshold_out) const;
+    void reload (const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id = 0) const;
     
     // Result available can be checked via subscription to results_ready signal or
     // checking hasResults.
@@ -118,6 +122,7 @@ public:
     void run () const;
     void drawOutput () const;
     bool hasResults () const;
+    const int64_t& client_id () const { return m_client_id; }
     
     const std::vector<labelBlob::blob>& results() const { return m_blobs; }
     const cv::Mat& graphicOutput () const { return m_graphics; }
@@ -134,7 +139,6 @@ protected:
     boost::signals2::signal<graphics_ready_cb>* signal_graphics_ready;
     
 private:
-    labelBlob ();
     mutable chrono::time_point<std::chrono::high_resolution_clock> m_start;
     mutable cv::Mat m_grey;
     mutable cv::Mat m_threshold_out;
@@ -146,6 +150,7 @@ private:
     mutable cv::Mat m_centroids;
     mutable std::vector<svl::momento> m_moments;
     mutable std::vector<cv::Rect2f> m_rois;
+    mutable int64_t m_client_id;
     
   
 };

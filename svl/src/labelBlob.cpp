@@ -104,10 +104,18 @@ svl::labelBlob::labelBlob() : m_results_ready(false){
     signal_graphics_ready = createSignal<graphics_ready_cb> ();
     
 }
-svl::labelBlob::ref labelBlob::create(const cv::Mat& gray, const cv::Mat& threshold_out){
-    auto reff = std::shared_ptr<labelBlob>(new labelBlob());
-    reff->reload(gray, threshold_out);
-    reff->m_results_ready = false;
+
+
+svl::labelBlob::labelBlob(const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id) : m_results_ready(false){
+    // Signals we provide
+    signal_results_ready = createSignal<results_ready_cb> ();
+    signal_graphics_ready = createSignal<graphics_ready_cb> ();
+    reload(gray, threshold_out, client_id);
+}
+
+svl::labelBlob::ref labelBlob::create(const cv::Mat& gray, const cv::Mat& threshold_out,
+                                      const int64_t client_id) {
+    auto reff = std::make_shared<labelBlob> (gray, threshold_out, client_id);
     return reff;
 }
 
@@ -120,10 +128,11 @@ void svl::labelBlob::blob::update_moments(const cv::Mat& image) const {
 }
 bool labelBlob::hasResults() const { return m_results_ready; }
 
-void  labelBlob::reload (const cv::Mat& grayImage, const cv::Mat&threshold_output) const {
+void  labelBlob::reload (const cv::Mat& grayImage, const cv::Mat&threshold_output,const int64_t client_id) const {
     m_grey = grayImage;
     m_threshold_out = threshold_output;
     m_results_ready = false;
+    m_client_id = 666;
     
 }
 
@@ -154,7 +163,7 @@ void  labelBlob::run() const {
   
     
     if (signal_results_ready && signal_results_ready->num_slots() > 0)
-        signal_results_ready->operator()();
+        signal_results_ready->operator()(m_client_id);
     m_results_ready = true;
 }
 

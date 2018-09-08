@@ -30,7 +30,7 @@
 #include "vision/roiMultiWindow.h"
 #include "vision/sample.hpp"
 #include "vision/opencv_utils.hpp"
-#include "CImg/CImg.h"
+
 
 using namespace svl;
 
@@ -137,17 +137,224 @@ const char * pi341234[] =
 
 
 
-//TEST(basicTheta, angle_units)
-//{
-//	for (int aa = 0; aa <= 255; aa++)
-//	{
-//		uAngle8 a8(aa);
-//		uRadian r(a8);
-//		std::cout << (int)a8.basic() << " ~~~ " << r.Double() << std::endl;
-//	}
-//}
-//
+TEST (ut_lifFile, single_channel)
+{
+    std::string filename ("Sample1.lif");
+    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
+    EXPECT_TRUE(res.second);
+    lifIO::LifReader lif(res.first.string());
+    cout << "LIF version "<<lif.getVersion() << endl;
+    EXPECT_EQ(14, lif.getNbSeries() );
+    size_t serie = 0;
+    size_t frame = 0;
+    lifIO::LifSerie& se0 = lif.getSerie(serie);
+    const std::vector<size_t>& dims = se0.getSpatialDimensions();
+    EXPECT_EQ(512, dims[0]);
+    EXPECT_EQ(128, dims[1]);
+    std::vector<std::string> series;
+    for (auto ss = 0; ss < lif.getNbSeries(); ss++)
+        series.push_back (lif.getSerie(ss).getName());
+    
+    EXPECT_EQ(sizeof(expectedNames)/sizeof(std::string), series.size ());
+    
+    for (auto sn = 0; sn < series.size(); sn++)
+    {
+        EXPECT_EQ(0, expectedNames[sn].compare(series[sn]));
+        EXPECT_EQ(250, lif.getSerie(sn).getNbTimeSteps());
+        EXPECT_EQ(65536, lif.getSerie(sn).getNbPixelsInOneTimeStep ());
+        EXPECT_EQ(1, lif.getSerie(sn).getChannels().size());
+    }
+    
+    
+    roiWindow<P8U> slice (dims[0], dims[1]);
+    lif.getSerie(0).fill2DBuffer(slice.rowPointer(0));
+    histoStats h;
+    h.from_image(slice);
+    EXPECT_NEAR(h.mean(), 114.271, 0.001);
+    EXPECT_NEAR(h.median(), 114.0, 0.001);
+    EXPECT_NEAR(h.min(), 44.0, 0.001);
+    EXPECT_NEAR(h.max(), 255.0, 0.001);
+    
+    
+    
+}
 
+TEST (ut_lifFile, triple_channel)
+{
+    std::string filename ("3channels.lif");
+    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
+    EXPECT_TRUE(res.second);
+    lifIO::LifReader lif(res.first.string());
+    cout << "LIF version "<<lif.getVersion() << endl;
+    EXPECT_EQ(13, lif.getNbSeries() );
+    size_t serie = 0;
+    size_t frame = 0;
+    lifIO::LifSerie& se0 = lif.getSerie(serie);
+    const std::vector<size_t>& dims = se0.getSpatialDimensions();
+    EXPECT_EQ(512, dims[0]);
+    EXPECT_EQ(128, dims[1]);
+    std::vector<std::string> series;
+    for (auto ss = 0; ss < lif.getNbSeries(); ss++)
+        series.push_back (lif.getSerie(ss).getName());
+    
+    EXPECT_EQ(sizeof(expected3Names)/sizeof(std::string), series.size ());
+    
+    {
+        EXPECT_EQ(0, expected3Names[0].compare(series[0]));
+        EXPECT_EQ(31, lif.getSerie(0).getNbTimeSteps());
+        EXPECT_EQ(65536, lif.getSerie(0).getNbPixelsInOneTimeStep ());
+        EXPECT_EQ(3, lif.getSerie(0).getChannels().size());
+    }
+    for (auto sn = 1; sn < (series.size()-1); sn++)
+    {
+        EXPECT_EQ(0, expected3Names[sn].compare(series[sn]));
+        EXPECT_EQ(500, lif.getSerie(sn).getNbTimeSteps());
+        EXPECT_EQ(65536, lif.getSerie(sn).getNbPixelsInOneTimeStep ());
+        EXPECT_EQ(3, lif.getSerie(sn).getChannels().size());
+    }
+    {
+        EXPECT_EQ(0, expected3Names[series.size()-1].compare(series[series.size()-1]));
+        EXPECT_EQ(1, lif.getSerie(series.size()-1).getNbTimeSteps());
+        EXPECT_EQ(262144, lif.getSerie(series.size()-1).getNbPixelsInOneTimeStep ());
+        EXPECT_EQ(3, lif.getSerie(series.size()-1).getChannels().size());
+    }
+    
+    roiWindow<P8U> slice (dims[0], dims[1]);
+    lif.getSerie(0).fill2DBuffer(slice.rowPointer(0));
+    histoStats h;
+    h.from_image(slice);
+    EXPECT_NEAR(h.mean(), 5.82, 0.001);
+    EXPECT_NEAR(h.median(), 0.0, 0.001);
+    EXPECT_NEAR(h.min(), 0.0, 0.001);
+    EXPECT_NEAR(h.max(), 205.0, 0.001);
+    
+    std::vector<std::string> names { "green", "red", "gray" };
+    
+    {
+        lifIO::LifSerie& lls = lif.getSerie(0);
+        roiMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[0]);
+        lls.fill2DBuffer(oneBy3.rowPointer(0), 0);
+        
+        EXPECT_EQ(oneBy3.timestamp(),lls.getTimestamps()[0] );
+        histoStats h;
+        h.from_image(oneBy3.plane(0));
+        EXPECT_NEAR(h.mean(), 5.82, 0.001);
+        EXPECT_NEAR(h.median(), 0.0, 0.001);
+        EXPECT_NEAR(h.min(), 0.0, 0.001);
+        EXPECT_NEAR(h.max(), 205.0, 0.001);
+    }
+    
+    {
+        lifIO::LifSerie& lls = lif.getSerie(0);
+        roiMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[30]);
+        lif.getSerie(0).fill2DBuffer(oneBy3.rowPointer(0), 30);
+        EXPECT_EQ(oneBy3.timestamp(),lls.getTimestamps()[30] );
+        
+        histoStats h;
+        h.from_image(oneBy3.plane(2));
+        EXPECT_NEAR(h.mean(), 125.4625, 0.001);
+        EXPECT_NEAR(h.median(), 126.0, 0.001);
+        EXPECT_NEAR(h.min(), 88.0, 0.001);
+        EXPECT_NEAR(h.max(), 165.0, 0.001);
+        EXPECT_NEAR(h.mode(), 125.0, 0.001);
+    }
+    
+#if 0
+    // Test Smear Signal
+    {
+#ifdef _INTERACTIVE
+        cv::namedWindow( "Voxel View",   cv::WINDOW_NORMAL  | cv::WINDOW_KEEPRATIO);
+        //set the callback function for any mouse event
+        Point p;
+        setMouseCallback("Voxel View", on_mouse, &p );
+#endif
+        vector<int> compression_params;
+        compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+        compression_params.push_back(9);
+        
+        
+        
+        for (auto ss = 0; ss < lif.getNbSeries(); ss++)
+        {
+            lifIO::LifSerie& lls = lif.getSerie(ss);
+            
+            // Last series does not have time data. check
+            if (!lls.hasTimeChannel())
+            {
+                EXPECT_EQ(ss, 12);
+                continue;
+            }
+            
+            const std::vector<size_t>& extends = lls.getSpatialDimensions();
+            std::shared_ptr<cv::Mat> tops =  std::shared_ptr<cv::Mat>(new cv::Mat (static_cast<int>(extends[1]),
+                                                                                   static_cast<int>(extends[0]), CV_8U));
+            std::shared_ptr<cv::Mat> bots = std::shared_ptr<cv::Mat>(new cv::Mat(tops->clone ()));
+            std::shared_ptr<cv::Mat> mv = std::shared_ptr<cv::Mat>(new cv::Mat (tops->clone ()));
+            
+            *bots = 255;
+            *tops = 0;
+            
+            std::vector<roiMultiWindow<P8UP3> > voxel;
+            motionSmear smear;
+            
+            
+            for (auto tt = 0; tt < lls.getNbTimeSteps(); tt++)
+            {
+                roiMultiWindow<P8UP3> oneBy3 (names,lls.getTimestamps()[tt]);
+                lls.fill2DBuffer(oneBy3.rowPointer(0), tt);
+                voxel.emplace_back(oneBy3);
+                CopyFromSVL (oneBy3.plane(2), *mv);
+                smear.add_to_smear(*mv);
+                cv::min(*mv, *bots, *bots);
+                cv::max(*mv, *tops, *tops);
+                
+#ifdef _INTERACTIVE
+                imshow( "Voxel View", mv );
+                // Wait for a key press
+                int key = cvWaitKey( 33 );
+#endif
+            }
+            auto count = lls.getNbTimeSteps();
+            showImage = *tops - *bots;
+            ellipse_parms ep;
+            EXPECT_EQ(count, smear.count());
+            EXPECT_EQ(showImage.empty(), false);
+            EXPECT_EQ(smear.signature(ep).empty(), false);
+            EXPECT_EQ(matIsEqual(showImage, smear.signature(ep)), true);
+            
+            roiWindow<P8U> sig;
+            
+            NewFromOCV(showImage, sig);
+            std::string path = "/Users/arman/Pictures/";
+            std::string fname = path + lls.getName() + ".png";
+            
+            cv::imwrite (fname, showImage, compression_params);
+            
+#ifdef _INTERACTIVE
+            cv::namedWindow(displayImage,    cv::WINDOW_NORMAL |  cv::WINDOW_FREERATIO );
+            //  createTrackbar("Angle",displayImage, &iAngle, 360, CallbackForTrackBar);
+            createTrackbar("Scale",displayImage, &iScale, 100, CallbackForTrackBar);
+            
+            
+            int iDummy = 0;
+            
+            CallbackForTrackBar(iDummy, &iDummy);
+            
+            waitKey(0);
+#endif
+            
+            //set the callback function for any mouse event
+            //  Point pp;
+            //  setMouseCallback(displayImage, on_mouse, &pp );
+            //   imshow(displayImage, tops );
+            // Wait for a key press
+            //  int key = cvWaitKey( 0 );
+            
+        }
+        
+    }
+#endif
+}
 
 TEST(basicU8, gradient)
 {
@@ -344,246 +551,6 @@ TEST (ut_units, basic)
     units_ut::run();
     cardio_ut::run();
     
-}
-
-TEST (ut_lifFile, single_channel)
-{
-    std::string filename ("Sample1.lif");
-    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
-    EXPECT_TRUE(res.second);
-    lifIO::LifReader lif(res.first.string());
-    cout << "LIF version "<<lif.getVersion() << endl;
-    EXPECT_EQ(14, lif.getNbSeries() );
-    size_t serie = 0;
-    size_t frame = 0;
-    lifIO::LifSerie& se0 = lif.getSerie(serie);
-    const std::vector<size_t>& dims = se0.getSpatialDimensions();
-    EXPECT_EQ(512, dims[0]);
-    EXPECT_EQ(128, dims[1]);
-    std::vector<std::string> series;
-    for (auto ss = 0; ss < lif.getNbSeries(); ss++)
-        series.push_back (lif.getSerie(ss).getName());
-    
-    EXPECT_EQ(sizeof(expectedNames)/sizeof(std::string), series.size ());
-    
-    for (auto sn = 0; sn < series.size(); sn++)
-    {
-        EXPECT_EQ(0, expectedNames[sn].compare(series[sn]));
-        EXPECT_EQ(250, lif.getSerie(sn).getNbTimeSteps());
-        EXPECT_EQ(65536, lif.getSerie(sn).getNbPixelsInOneTimeStep ());
-        EXPECT_EQ(1, lif.getSerie(sn).getChannels().size());
-    }
-    
-    
-    roiWindow<P8U> slice (dims[0], dims[1]);
-    lif.getSerie(0).fill2DBuffer(slice.rowPointer(0));
-    histoStats h;
-    h.from_image(slice);
-    EXPECT_NEAR(h.mean(), 114.271, 0.001);
-    EXPECT_NEAR(h.median(), 114.0, 0.001);
-    EXPECT_NEAR(h.min(), 44.0, 0.001);
-    EXPECT_NEAR(h.max(), 255.0, 0.001);
-    
-    cimg_library::CImg<uint8_t> vol (dims[0], dims[1], lif.getSerie(0).getNbTimeSteps());
-    
-    lif.getSerie(0).fill3DBuffer(vol.data());
-    
-    EXPECT_EQ(vol.depth(), lif.getSerie(0).getNbTimeSteps());
-    EXPECT_EQ(vol.width(), dims[0]);
-    EXPECT_EQ(vol.height(), dims[1]);
-    
-    
-    cimg_library::CImg<uint8_t> z0 = vol.get_slice(0);
-    const auto stats = z0.get_stats();
-    EXPECT_NEAR(stats.at(0), 44.0, 0.001);
-    EXPECT_NEAR(stats.at(1), 255.0, 0.001);
-    EXPECT_NEAR(stats.at(2), 114.271, 0.001);
-
-#ifdef _INTERACTIVE
-    cimg_library::CImgDisplay dsp (512, 128);
-    cimg_library::CImg<uint8_t> project = vol.get_projections2d(0,0,0);
-    
-
-    //  project.display(dsp, True);
-#endif
-    
-}
-
-TEST (ut_lifFile, triple_channel)
-{
-    std::string filename ("3channels.lif");
-    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
-    EXPECT_TRUE(res.second);
-    lifIO::LifReader lif(res.first.string());
-    cout << "LIF version "<<lif.getVersion() << endl;
-    EXPECT_EQ(13, lif.getNbSeries() );
-    size_t serie = 0;
-    size_t frame = 0;
-    lifIO::LifSerie& se0 = lif.getSerie(serie);
-    const std::vector<size_t>& dims = se0.getSpatialDimensions();
-    EXPECT_EQ(512, dims[0]);
-    EXPECT_EQ(128, dims[1]);
-    std::vector<std::string> series;
-    for (auto ss = 0; ss < lif.getNbSeries(); ss++)
-        series.push_back (lif.getSerie(ss).getName());
-    
-    EXPECT_EQ(sizeof(expected3Names)/sizeof(std::string), series.size ());
-    
-    {
-        EXPECT_EQ(0, expected3Names[0].compare(series[0]));
-        EXPECT_EQ(31, lif.getSerie(0).getNbTimeSteps());
-        EXPECT_EQ(65536, lif.getSerie(0).getNbPixelsInOneTimeStep ());
-        EXPECT_EQ(3, lif.getSerie(0).getChannels().size());
-    }
-    for (auto sn = 1; sn < (series.size()-1); sn++)
-    {
-        EXPECT_EQ(0, expected3Names[sn].compare(series[sn]));
-        EXPECT_EQ(500, lif.getSerie(sn).getNbTimeSteps());
-        EXPECT_EQ(65536, lif.getSerie(sn).getNbPixelsInOneTimeStep ());
-        EXPECT_EQ(3, lif.getSerie(sn).getChannels().size());
-    }
-    {
-        EXPECT_EQ(0, expected3Names[series.size()-1].compare(series[series.size()-1]));
-        EXPECT_EQ(1, lif.getSerie(series.size()-1).getNbTimeSteps());
-        EXPECT_EQ(262144, lif.getSerie(series.size()-1).getNbPixelsInOneTimeStep ());
-        EXPECT_EQ(3, lif.getSerie(series.size()-1).getChannels().size());
-    }
-    
-    roiWindow<P8U> slice (dims[0], dims[1]);
-    lif.getSerie(0).fill2DBuffer(slice.rowPointer(0));
-    histoStats h;
-    h.from_image(slice);
-    EXPECT_NEAR(h.mean(), 5.82, 0.001);
-    EXPECT_NEAR(h.median(), 0.0, 0.001);
-    EXPECT_NEAR(h.min(), 0.0, 0.001);
-    EXPECT_NEAR(h.max(), 205.0, 0.001);
-    
-    std::vector<std::string> names { "green", "red", "gray" };
-    
-    {
-        lifIO::LifSerie& lls = lif.getSerie(0);
-        roiMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[0]);
-        lls.fill2DBuffer(oneBy3.rowPointer(0), 0);
-        
-        EXPECT_EQ(oneBy3.timestamp(),lls.getTimestamps()[0] );
-        histoStats h;
-        h.from_image(oneBy3.plane(0));
-        EXPECT_NEAR(h.mean(), 5.82, 0.001);
-        EXPECT_NEAR(h.median(), 0.0, 0.001);
-        EXPECT_NEAR(h.min(), 0.0, 0.001);
-        EXPECT_NEAR(h.max(), 205.0, 0.001);
-    }
-    
-    {
-        lifIO::LifSerie& lls = lif.getSerie(0);
-        roiMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[30]);
-        lif.getSerie(0).fill2DBuffer(oneBy3.rowPointer(0), 30);
-        EXPECT_EQ(oneBy3.timestamp(),lls.getTimestamps()[30] );
-        
-        histoStats h;
-        h.from_image(oneBy3.plane(2));
-        EXPECT_NEAR(h.mean(), 125.4625, 0.001);
-        EXPECT_NEAR(h.median(), 126.0, 0.001);
-        EXPECT_NEAR(h.min(), 88.0, 0.001);
-        EXPECT_NEAR(h.max(), 165.0, 0.001);
-        EXPECT_NEAR(h.mode(), 125.0, 0.001);
-    }
-    
-#if 0
-    // Test Smear Signal
-    {
-#ifdef _INTERACTIVE
-        cv::namedWindow( "Voxel View",   cv::WINDOW_NORMAL  | cv::WINDOW_KEEPRATIO);
-        //set the callback function for any mouse event
-        Point p;
-        setMouseCallback("Voxel View", on_mouse, &p );
-#endif
-        vector<int> compression_params;
-        compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-        compression_params.push_back(9);
-        
-        
-        
-        for (auto ss = 0; ss < lif.getNbSeries(); ss++)
-        {
-            lifIO::LifSerie& lls = lif.getSerie(ss);
-
-            // Last series does not have time data. check
-            if (!lls.hasTimeChannel())
-            {
-                EXPECT_EQ(ss, 12);
-                continue;
-            }
-            
-            const std::vector<size_t>& extends = lls.getSpatialDimensions();
-            std::shared_ptr<cv::Mat> tops =  std::shared_ptr<cv::Mat>(new cv::Mat (static_cast<int>(extends[1]),
-                                                                                   static_cast<int>(extends[0]), CV_8U));
-            std::shared_ptr<cv::Mat> bots = std::shared_ptr<cv::Mat>(new cv::Mat(tops->clone ()));
-            std::shared_ptr<cv::Mat> mv = std::shared_ptr<cv::Mat>(new cv::Mat (tops->clone ()));
-            
-            *bots = 255;
-            *tops = 0;
-
-            std::vector<roiMultiWindow<P8UP3> > voxel;
-            motionSmear smear;
-
-            
-            for (auto tt = 0; tt < lls.getNbTimeSteps(); tt++)
-            {
-                roiMultiWindow<P8UP3> oneBy3 (names,lls.getTimestamps()[tt]);
-                lls.fill2DBuffer(oneBy3.rowPointer(0), tt);
-                voxel.emplace_back(oneBy3);
-                CopyFromSVL (oneBy3.plane(2), *mv);
-                smear.add_to_smear(*mv);
-                cv::min(*mv, *bots, *bots);
-                cv::max(*mv, *tops, *tops);
-                
-#ifdef _INTERACTIVE
-                imshow( "Voxel View", mv );
-                // Wait for a key press
-                int key = cvWaitKey( 33 );
-#endif
-            }
-            auto count = lls.getNbTimeSteps();
-            showImage = *tops - *bots;
-            ellipse_parms ep;
-            EXPECT_EQ(count, smear.count());
-            EXPECT_EQ(showImage.empty(), false);
-            EXPECT_EQ(smear.signature(ep).empty(), false);
-            EXPECT_EQ(matIsEqual(showImage, smear.signature(ep)), true);
-            
-            roiWindow<P8U> sig;
-            
-            NewFromOCV(showImage, sig);
-            std::string path = "/Users/arman/Pictures/";
-            std::string fname = path + lls.getName() + ".png";
-
-            cv::imwrite (fname, showImage, compression_params);
-            
-#ifdef _INTERACTIVE
-            cv::namedWindow(displayImage,    cv::WINDOW_NORMAL |  cv::WINDOW_FREERATIO );
-            //  createTrackbar("Angle",displayImage, &iAngle, 360, CallbackForTrackBar);
-            createTrackbar("Scale",displayImage, &iScale, 100, CallbackForTrackBar);
-            
-            
-            int iDummy = 0;
-            
-            CallbackForTrackBar(iDummy, &iDummy);
-            
-            waitKey(0);
-#endif
-            
-            //set the callback function for any mouse event
-            //  Point pp;
-            //  setMouseCallback(displayImage, on_mouse, &pp );
-            //   imshow(displayImage, tops );
-            // Wait for a key press
-            //  int key = cvWaitKey( 0 );
-
-        }
-
-    }
-#endif
 }
 
 
@@ -858,7 +825,6 @@ TEST(basicU8, histo)
     
     roiWindow<P8U> pels(20, 5);
     DrawShape(pels, frame);
-    pels.output();
     
     histoStats hh;
     hh.from_image<P8U>(pels);

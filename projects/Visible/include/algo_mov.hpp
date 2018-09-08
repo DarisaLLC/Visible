@@ -77,15 +77,33 @@ protected:
     boost::signals2::signal<mov_processor::mov_cb_sm1d_available>* signal_sm1d_available;
     boost::signals2::signal<mov_processor::mov_cb_sm1dmed_available>* signal_sm1dmed_available;
     
+public:
+    // Run to get Entropies and Median Level Set
+    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+                                                bool test_data = false)
+    {
+        mov_processor::load_channels_from_images(frames, m_all_by_channel);
+        create_named_tracks(names);
+        compute_channel_statistics_threaded();
+        return m_tracksRef;
+    }
+    
+    // Update. Called also when cutoff offset has changed
+    void update ()
+    {
+
+    }
+    
 private:
-  
- 
+    
+    
+    
     
     // Note tracks contained timed data.
     void entropiesToTracks (namedTrackOfdouble_t& track)
     {
         track.second.clear();
-  
+        
     }
     
     size_t frame_count () const
@@ -103,7 +121,7 @@ private:
         for (auto tt = 0; tt < names.size(); tt++)
             m_tracksRef->at(tt).first = names[tt];
     }
-
+    
     void compute_channel_statistics_threaded ()
     {
         std::vector<timed_double_vec_t> cts (3);
@@ -114,12 +132,12 @@ private:
                                       std::ref(m_all_by_channel[tt]), std::ref(cts[tt]));
         }
         std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
-
+        
         for (auto tt = 0; tt < 3; tt++)
             m_tracksRef->at(tt).second = cts[tt];
     }
     
-
+    
     
     void loadImagesToMats (const sm_producer::images_vector_t& images, std::vector<cv::Mat>& mts)
     {
@@ -132,29 +150,6 @@ private:
         while (++vitr != images.end());
     }
     
-public:
-    // Run to get Entropies and Median Level Set
-    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
-                                                bool test_data = false)
-    {
-        
-        mov_processor::load_channels_from_images(frames, m_all_by_channel);
-        create_named_tracks(names);
-        compute_channel_statistics_threaded();
-
-
-        return m_tracksRef;
-    }
-    
-    const namedTrackOfdouble_t& similarity_track () const { return m_tracksRef->at(2); }
-    
-    // Update. Called also when cutoff offset has changed
-    void update ()
-    {
-
-    }
-    
-private:
     smProducerRef m_sm;
     channel_images_t m_images;
     std::vector<channel_images_t> m_all_by_channel;

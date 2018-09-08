@@ -48,7 +48,17 @@ namespace anonymous
             return std::get<index>(left) > std::get<index>(right); }
 };
     
-    
+    bool smatrix_ok(const sm_producer::sMatrix_t& sm, size_t d1)
+    {
+        bool ok = sm.size() == d1;
+        if (!ok) return ok;
+        for (int row = 0; row < d1; row++)
+        {
+            ok &= sm[row].size () == d1;
+            if (!ok) return ok;
+        }
+        return ok;
+    }
 }
 
 sm_producer::sm_producer (bool auto_on_off)
@@ -92,6 +102,7 @@ bool sm_producer::operator() (int start_frame, int frames ) const
 
 void sm_producer::load_images(const images_vector_t &images)
 {
+    std::cout << __LINE__ << images.size() << std::endl;
     if (_impl) _impl->loadImages (images);
 }
 
@@ -369,7 +380,8 @@ void sm_producer::spImpl::loadImages (const images_vector_t& images)
     }
     while (vitr != images.end());
     _frameCount = m_loaded_ref.size ();
-
+    std::cout << __FILE__ << "  " << __LINE__<< _frameCount << std::endl;
+    
     // Call the content loaded cb if any
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
         signal_content_loaded->operator()();
@@ -427,12 +439,26 @@ bool sm_producer::spImpl::generate_ssm (int start_frames, int frames)
     m_entropies.resize (0);
     m_SMatrix.resize (0);
     bool ok = simi->entropies (m_entropies);
-    if (!ok)
-        std::cout << " ERR OR " << std::endl;
     
-    // Fetch the SS matrix
-    simi->selfSimilarityMatrix(m_SMatrix);
+    if (!ok){
+        std::cout << " ERR OR " << std::endl;
+        return false;
+    }
+    
+    // Call the sm 1d ready cb if any
+    if (ok && signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
+        signal_sm1d_available->operator()();
 
+   
+    
+    // Fetch the SS matrix and verify
+    simi->selfSimilarityMatrix(m_SMatrix);
+    bool smOk = anonymous::smatrix_ok(m_SMatrix, m_entropies.size());
+    
+    // Call the sm 2d ready cb if any
+    if (smOk && signal_sm2d_available && signal_sm2d_available->num_slots() > 0)
+        signal_sm2d_available->operator()();
+    
     if (type() == imageFileDirectory)
         ok = setup_image_directory_result_repo();
     

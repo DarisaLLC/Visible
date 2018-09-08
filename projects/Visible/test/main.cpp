@@ -151,7 +151,7 @@ TEST(ut_labelBlob, basic)
     
     static bool s_results_ready = false;
     static bool s_graphics_ready = false;
-    
+    static int64_t cid = 0;
 
     auto res = dgenv_ptr->asset_path("out0.png");
     EXPECT_TRUE(res.second);
@@ -172,16 +172,20 @@ TEST(ut_labelBlob, basic)
     cv::threshold(threshold_input
                   , threshold_output, threshold, 255, THRESH_BINARY );
     
-    labelBlob::ref lbr = labelBlob::create(out0, threshold_output);
+    labelBlob::ref lbr = labelBlob::create(out0, threshold_output, 666);
     EXPECT_EQ(lbr == nullptr , false);
-    std::function<void()> res_ready_lambda = [](){ s_results_ready = ! s_results_ready;};
-    std::function<labelBlob::results_ready_cb> graphics_ready_lambda = [](){ s_graphics_ready = ! s_graphics_ready;};
+    std::function<labelBlob::results_ready_cb> res_ready_lambda = [](int64_t& cbi){ s_results_ready = ! s_results_ready; cid = cbi;};
+    std::function<labelBlob::graphics_ready_cb> graphics_ready_lambda = [](){ s_graphics_ready = ! s_graphics_ready;};
     boost::signals2::connection results_ready_ = lbr->registerCallback(res_ready_lambda);
-    boost::signals2::connection graphics_ready_ = lbr->registerCallback<labelBlob::graphics_ready_cb> (graphics_ready_lambda);
+    boost::signals2::connection graphics_ready_ = lbr->registerCallback(graphics_ready_lambda);
     EXPECT_EQ(false, s_results_ready);
-    lbr->run();
+    EXPECT_EQ(true, cid == 0);
+    EXPECT_EQ(true, lbr->client_id() == 666);
+    lbr->run_async();
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     EXPECT_EQ(true, s_results_ready);
+    EXPECT_EQ(true, lbr->client_id() == 666);
+    EXPECT_EQ(true, cid == 666);
     EXPECT_EQ(true, lbr->hasResults());
     const std::vector<blob> blobs = lbr->results();
     EXPECT_EQ(59, blobs.size());

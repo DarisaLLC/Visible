@@ -145,109 +145,111 @@ public:
 	void receivedEvent ( InteractiveObjectEvent event );
 	
 	const tiny_media_info& media () const { return mMediaInfo; }
-
+    const uint32_t& channel_count () const { return mChannelCount; }
+    
     
 private:
+    // LIF Support
     std::shared_ptr<lif_processor> m_lifProcRef;
-    
-	gl::TextureRef pixelInfoTexture ();
+    std::shared_ptr<lifIO::LifReader> m_lifRef;
+    std::vector<series_info> m_series_book;
+    std::vector<std::string> m_series_names;
 	void loadLifFile();
 	void loadCurrentSerie ();
 	bool have_lif_serie ();
-	void play ();
-	void pause ();
-	void update_log (const std::string& meg = "");
-	bool looping ();
-	void looping (bool what);
-	
-    void reset_entire_clip (const size_t& frame_count) const;
-    void reset_clips () const;
+    void get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer);
+    std::shared_ptr<lifIO::LifSerie> m_current_serie_ref;
+    series_info m_serie;
+    boost::filesystem::path mPath;
     
-    
-	Rectf get_image_display_rect ();
-	
+    // Callbacks
     void signal_content_loaded (int64_t&);
     void signal_flu_stats_available ();
     void signal_sm1d_available (int&);
     void signal_sm1dmed_available (int&,int&);
     void signal_contraction_available (contractionContainer_t&);
- 
     void signal_frame_loaded (int& findex, double& timestamp);
- 
-    void get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer);
-
-    int get_current_clip_index () const;
- 
     
+
+    // Clip Processing
+    int get_current_clip_index () const;
     void set_current_clip_index (int cindex) const;
-  
-	std::shared_ptr<lifIO::LifReader> m_lifRef;
-	std::vector<series_info> m_series_book;
-    std::vector<std::string> m_series_names;
-	std::shared_ptr<lifIO::LifSerie> m_current_serie_ref;
+    void reset_entire_clip (const size_t& frame_count) const;
+    void reset_clips () const;
     int m_cur_selected_index;
     int m_prev_selected_index;
-    mutable int m_current_clip_index;
-    
-	void seek( size_t xPos );
-	void clear_playback_params ();
-	vec2 texture_to_display_zoom ();
-	void update_instant_image_mouse ();
-	
-	sides_length_t mLengthPoints;
-    std::vector<sides_length_t> mCellEnds = {sides_length_t (), sides_length_t()};
-	vec2 mScreenSize;
-	gl::TextureRef mImage;
-	series_info m_serie;
-	
-	size_t m_frameCount;
-	params::InterfaceGl         mUIParams;
-	tiny_media_info      mMediaInfo;
-	
-	int64_t m_seek_position;
-
-	bool m_is_playing, m_is_looping;
-    
-    void add_widgets (const int);
-    
-	uint32_t m_cutoff_pct;
-
-    std::weak_ptr<vectorOfnamedTrackOfdouble_t> m_trackWeakRef;
-    std::weak_ptr<vectorOfnamedTrackOfdouble_t> m_pci_trackWeakRef;
-
-	vec2 m_zoom;
-	boost::filesystem::path mPath;
-	vec2		mMousePos;
-	std::shared_ptr<qTimeFrameCache> mFrameSet;
-	SurfaceRef  mSurface;
-	
-	bool mMouseIsDown;
-	bool mMouseIsMoving;
-	bool mMouseIsDragging;
-	bool mMetaDown;
-	int mMouseInGraphs; // -1 if not, 0 1 2
-	bool mMouseInImage; // if in Image, mMouseInGraph is -1
-	
-	ivec2 mMouseInImagePosition;
-	
-	bool mAnalyze;
-    Side_t mManualEditMode;
-    std::vector<std::string> mEditNames = {"label=`Cell Length`", "label=`Cell Width`", "label=`None`"};
-    
-    std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
-    std::vector<std::string>  mProcessOrProcessing = {"Process", "Processing"};
-    
-	int mButton_title_index;
-	std::string mButton_title;
-    
-    lif_processor::contractionContainer_t m_contractions;
-    std::vector<std::string> m_contraction_none = {" Entire "};
-    mutable std::vector<std::string> m_contraction_names;
+    mutable volatile int m_current_clip_index;
     mutable std::deque<clip> m_clips;
     mutable clip m_entire;
     mutable std::mutex m_clip_mutex;
-
     
+    // Frame Cache and frame store
+    std::shared_ptr<qTimeFrameCache> mFrameSet;
+    SurfaceRef  mSurface;
+  
+    // Tracks of frame associated results
+    std::weak_ptr<vectorOfnamedTrackOfdouble_t> m_trackWeakRef;
+    std::weak_ptr<vectorOfnamedTrackOfdouble_t> m_pci_trackWeakRef;
+
+    // Contraction
+    lif_processor::contractionContainer_t m_contractions;
+    std::vector<std::string> m_contraction_none = {" Entire "};
+    mutable std::vector<std::string> m_contraction_names;
+    
+    // Content Info
+    tiny_media_info      mMediaInfo;
+    mutable uint32_t  mChannelCount;
+    
+    // Instant information
+    int64_t m_seek_position;
+    bool m_is_playing, m_is_looping;
+    vec2 m_zoom;
+    vec2        mMousePos;
+    bool mMouseIsDown;
+    bool mMouseIsMoving;
+    bool mMouseIsDragging;
+    bool mMetaDown;
+    int mMouseInGraphs; // -1 if not, 0 1 2
+    bool mMouseInImage; // if in Image, mMouseInGraph is -1
+    ivec2 mMouseInImagePosition;
+    sides_length_t mLengthPoints;
+    std::vector<sides_length_t> mCellEnds = {sides_length_t (), sides_length_t()};
+    gl::TextureRef mImage;
+    uint32_t m_cutoff_pct;
+    bool mAnalyze;
+    Side_t mManualEditMode;
+    
+    // Screen Info
+    vec2 mScreenSize;
+    gl::TextureRef pixelInfoTexture ();
+ 
+    
+    // Update GUI
+    void clear_playback_params ();
+    void update_instant_image_mouse ();
+    Rectf get_image_display_rect ();
+    vec2 texture_to_display_zoom ();
+    void add_plots ();
+    
+    // Navigation
+    void play ();
+    void pause ();
+    void update_log (const std::string& meg = "");
+    bool looping ();
+    void looping (bool what);
+	void seek( size_t xPos );
+
+	
+    // UI Params Menu
+    params::InterfaceGl         mUIParams;
+    std::vector<std::string> mEditNames = {"label=`Cell Length`", "label=`Cell Width`", "label=`None`"};
+    std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
+    std::vector<std::string>  mProcessOrProcessing = {"Process", "Processing"};
+	int mButton_title_index;
+	std::string mButton_title;
+    
+
+  
     
 	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
 	{

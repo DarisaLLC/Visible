@@ -83,18 +83,23 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
         mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     }
     
-    
+    // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&lifContext::signal_content_loaded, this, _1);
     boost::signals2::connection ml_connection = m_lifProcRef->registerCallback(content_loaded_cb);
     
+    // Support lifProcessor::flu results available
     std::function<void ()> flu_stats_available_cb = std::bind (&lifContext::signal_flu_stats_available, this);
     boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(flu_stats_available_cb);
     
+    // Support lifProcessor::initial ss results available
     std::function<void (int&)> sm1d_available_cb = boost::bind (&lifContext::signal_sm1d_available, this, _1);
     boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_available_cb);
+    
+    // Support lifProcessor::median level set ss results available
     std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&lifContext::signal_sm1dmed_available, this, _1, _2);
     boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_available_cb);
     
+    // Support lifProcessor::contraction results available
     std::function<void (lif_processor::contractionContainer_t&)> contraction_available_cb = boost::bind (&lifContext::signal_contraction_available, this, _1);
     boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_available_cb);
     
@@ -123,15 +128,15 @@ void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
     {
         auto tracksRef = m_pci_trackWeakRef.lock();
         if (!tracksRef->at(0).second.empty())
-            m_plots[2]->setup(tracksRef->at(0));
+            m_plots[channel_count()-1]->setup(tracksRef->at(0));
     }
     std::cout << "sm1dmed available: " << ++ii << std::endl;
 }
 
-void lifContext::signal_content_loaded (int64_t& processed_frame_count )
+void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
 {
-    std::cout << m_frameCount << " Samples in Media  " << std::endl;
-    std::cout << processed_frame_count << " Images Processed  " << std::endl;
+    std::cout << std::endl << mMediaInfo.count << " Samples in Media  " << std::endl;
+    std::cout << loaded_frame_count << " Images Loaded  " << std::endl;
 }
 void lifContext::signal_flu_stats_available ()
 {
@@ -164,7 +169,7 @@ void lifContext::signal_contraction_available (lif_processor::contractionContain
     clipItr->end = m_contractions[0].relaxation_end.first;
     clipItr->anchor = m_contractions[0].contraction_peak.first;
     tinyUi::timepoint_marker_t tm;
-    tm.first =clipItr->anchor / ((float)m_frameCount);
+    tm.first =clipItr->anchor / ((float)mMediaInfo.count);
     tm.second = ColorA (0.9, 0.3, 0.1, 0.75);
     mMainTimeLineSlider.add_timepoint_marker(tm);
     std::cout << "Contration Time Point Added  " << tm.first << std::endl;
@@ -180,7 +185,7 @@ void lifContext::signal_frame_loaded (int& findex, double& timestamp)
     //     std::cout << frame_indices.size() << std::endl;
 }
 
-                    /************************
+             /************************
                      *
                      *  CLIP Processing
                      *
@@ -290,7 +295,7 @@ void lifContext::play_pause_button ()
 }
 
 
-            /************************
+        /************************
              *
              *  Manual Edit Support ( Width and Height setting )
              *
@@ -391,8 +396,6 @@ void lifContext::seekToEnd ()
 {
     seekToFrame (m_clips[get_current_clip_index()].end);
     assert(! m_clips.empty());
-    
-    //mUIParams.setOptions( "mode", "label=`@ End`" );
 }
 
 void lifContext::seekToStart ()
@@ -400,13 +403,11 @@ void lifContext::seekToStart ()
     
     seekToFrame(m_clips[get_current_clip_index()].begin);
     assert(! m_clips.empty());
-    
-    //mUIParams.setOptions( "mode", "label=`@ Start`" );
 }
 
 int lifContext::getNumFrames ()
 {
-    return m_frameCount;
+    return mMediaInfo.count;
 }
 
 int lifContext::getCurrentFrame ()
@@ -594,7 +595,7 @@ void lifContext::keyDown( KeyEvent event )
     }
 }
 
-                /************************
+            /************************
                  *
                  *  MedianCutOff Set/Get
                  *
@@ -625,7 +626,7 @@ uint32_t lifContext::getMedianCutOff () const
 }
 
 
-                /************************
+            /************************
                  *
                  *  Setup & Load File
                  *
@@ -769,21 +770,21 @@ void lifContext::loadLifFile ()
 
 
 
-                /************************
+            /************************
                  *
                  *  Load Serie & Setup Widgets
                  *
                  ************************/
 
-void lifContext::add_widgets (const int channel_count)
+void lifContext::add_plots ()
 {
     std::lock_guard<std::mutex> lock(m_track_mutex);
     
-    assert (  sLayoutMgr.plot_rects().size() >= channel_count);
+    assert (  sLayoutMgr.plot_rects().size() >= channel_count());
     
     m_plots.resize (0);
     
-    for (int cc = 0; cc < channel_count; cc++)
+    for (int cc = 0; cc < channel_count(); cc++)
     {
         m_plots.push_back( Graph1DRef (new graph1D (m_current_serie_ref->getChannels()[cc].getName(),
                                                     sLayoutMgr.plot_rects() [cc])));
@@ -836,50 +837,64 @@ void lifContext::loadCurrentSerie ()
         // Create the frameset and assign the channel names
         // Fetch the media info
         mFrameSet = qTimeFrameCache::create (*m_current_serie_ref);
+        
         if (! mFrameSet || ! mFrameSet->isValid())
         {
             ci_console() << "Serie had 1 or no frames " << std::endl;
             return;
         }
         mMediaInfo = mFrameSet->media_info();
+        mChannelCount = (uint32_t) mMediaInfo.getNumChannels();
+        assert(mChannelCount > 0 && mChannelCount < 4);
         mMediaInfo.output(std::cout);
-        sLayoutMgr.init (lifContext::startup_display_size() , mFrameSet->media_info(), mMediaInfo.getNumChannels());
+        sLayoutMgr.init (lifContext::startup_display_size() , mFrameSet->media_info(), channel_count());
         
         // Start Loading Images on a different thread
         auto future_res = std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names);
         
         mFrameSet->channel_names (m_series_book[m_cur_selected_index].channel_names);
-    
-        reset_entire_clip(getNumFrames());
+        reset_entire_clip(mFrameSet->count());
 
     
         auto title = m_series_names[m_cur_selected_index] + " @ " + mPath.filename().string();
         getWindow()->setTitle( title );
-        const tiny_media_info tm = mFrameSet->media_info ();
-        getWindow()->getApp()->setFrameRate(tm.getFramerate() * 2);
+        getWindow()->getApp()->setFrameRate(mMediaInfo.getFramerate() * 2);
         
         
-        mScreenSize = tm.getSize();
-        m_frameCount = tm.getNumFrames ();
+        mScreenSize = mMediaInfo.getSize();
+
         mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
         
-        mTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
-        mAuxTimeMarker = marker_info (tm.getNumFrames (), tm.getDuration());
+        mTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
+        mAuxTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
         
         ivec2 window_size (sLayoutMgr.desired_window_size());
         setWindowSize(window_size);
-        int channel_count = (int) tm.getNumChannels();
         
         std::cout << "Lif frames " << future_res.get() << std::endl;
         
-        add_widgets(channel_count);
+        add_plots();
         seekToStart();
         play();
-        
-        m_async_luminance_tracks = std::async(std::launch::async,&lif_processor::run_flu_statistics,m_lifProcRef.get());
-        m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci, m_lifProcRef.get());
-        auto res = m_lifProcRef->run_volume_sum_sumsq_count ();
-        res.PrintTo(res,&std::cout);
+        switch(channel_count()){
+            case 3:
+            {
+                m_async_luminance_tracks = std::async(std::launch::async,&lif_processor::run_flu_statistics,
+                                                      m_lifProcRef.get(), std::vector<int> ({0,1}) );
+                m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci,
+                                                m_lifProcRef.get(), 2);
+                auto res = m_lifProcRef->run_volume_sum_sumsq_count (2);
+                res.PrintTo(res,&std::cout);
+                break;
+            }
+            case 1:
+                m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci,
+                                                m_lifProcRef.get(), 0);
+                auto res = m_lifProcRef->run_volume_sum_sumsq_count (0);
+                res.PrintTo(res,&std::cout);
+                
+        }
+     
         
     }
     catch( const std::exception &ex ) {
@@ -945,7 +960,6 @@ void lifContext::update ()
     
     mContainer.update();
     sLayoutMgr.update_window_size(getWindowSize ());
-    int cc = m_current_serie_ref->getChannels().size();
     
     // If Plots are ready, set them up
     // It is ready only for new data
@@ -956,27 +970,31 @@ void lifContext::update ()
     
     if (! m_trackWeakRef.expired())
     {
+        assert(channel_count() >= 3);
         auto tracksRef = m_trackWeakRef.lock();
         m_plots[0]->setup(tracksRef->at(0));
-        if (cc > 1)
-            m_plots[1]->setup(tracksRef->at(1));
+        m_plots[1]->setup(tracksRef->at(1));
     }
     if ( ! m_pci_trackWeakRef.expired())
     {
         auto tracksRef = m_pci_trackWeakRef.lock();
-        if (!tracksRef->at(0).second.empty())
-            m_plots[cc-1]->setup(tracksRef->at(0));
+        m_plots[channel_count()-1]->setup(tracksRef->at(0));
     }
     
-    if (getCurrentFrame() > getNumFrames())
+    if (getCurrentFrame() == getNumFrames())
     {
         if (! looping () ) seekToEnd();
         else
             seekToStart();
     }
     
-    if (have_lif_serie ())
+    if (have_lif_serie ()){
         mSurface = mFrameSet->getFrame(getCurrentFrame());
+        mCurrentIndexTime = mFrameSet->currentIndexTime();
+        if (mCurrentIndexTime.first != m_seek_position){
+            std::cout << mCurrentIndexTime.first - m_seek_position << std::endl;
+        }
+    }
     
     if (m_is_playing )
     {
@@ -1086,7 +1104,7 @@ void lifContext::draw ()
         Rectf dr = get_image_display_rect();
         assert(dr.getWidth() > 0 && dr.getHeight() > 0);
         
-        switch(m_serie.channelCount)
+        switch(channel_count())
         {
             case 1:
                 mImage = gl::Texture::create(*mSurface);
@@ -1121,7 +1139,7 @@ void lifContext::draw ()
         }
         
         
-        if (m_serie.channelCount)
+        if (channel_count() && channel_count() == m_plots.size())
         {
             for (int cc = 0; cc < m_plots.size(); cc++)
             {

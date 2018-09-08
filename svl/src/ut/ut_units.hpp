@@ -17,6 +17,7 @@
 #include <cassert>
 #include "core/pair.hpp"
 
+using namespace Eigen;
 using namespace svl;
 using Eigen::MatrixXd;
 using namespace boost::units;
@@ -39,10 +40,10 @@ namespace units_ut
         quantity<bi::si::length>    dx(2.0 * bi::si::meter); // and a distance,
         quantity<bi::si::energy>    E(work(F,dx));  // and calculate the work done.
         
-        std::cout << "F  = " << F << std::endl
-        << "dx = " << dx << std::endl
-        << "E  = " << E << std::endl
-        << std::endl;
+//        std::cout << "F  = " << F << std::endl
+//        << "dx = " << dx << std::endl
+//        << "E  = " << E << std::endl
+//        << std::endl;
         
         /// Test and check complex quantities.
         typedef std::complex<double> complex_type; // double real and imaginary parts.
@@ -52,20 +53,20 @@ namespace units_ut
         quantity<current, complex_type>            i = complex_type(3.0, 4.0) * amperes;
         quantity<resistance, complex_type>         z = complex_type(1.5, -2.0) * ohms;
         
-        std::cout << "V   = " << v << std::endl
-        << "I   = " << i << std::endl
-        << "Z   = " << z << std::endl
+        EXPECT_EQ(true, (i * z == v));
+        //std::cout << "V   = " << v << std::endl
+        //<< "I   = " << i << std::endl
+        //<< "Z   = " << z << std::endl
         // Calculate from Ohm's law voltage = current * resistance.
-        << "I * Z = " << i * z << std::endl
+        //<< "I * Z = " << i * z << std::endl
         // Check defined V is equal to calculated.
-        << "I * Z == V? " << std::boolalpha << (i * z == v) << std::endl
-        << std::endl;
+        //<< "I * Z == V? " << std::boolalpha << (i * z == v) << std::endl
     }
 };
 
 namespace eigen_ut
 {
-    static void clone_column (Eigen::ArrayXXd& F)
+    static void clone_column (Eigen::MatrixXf& F)
     {
         for (auto i = 0; i < F.rows(); i++)
             for (auto j = 0; j < F.cols() - i; j++)
@@ -81,20 +82,27 @@ namespace eigen_ut
     
     static void run ()
     {
-        Eigen::ArrayXXd F_(8,8);
+        Eigen::MatrixXf F_(8,8);
         
         F_.setZero ();
         
         for (auto i = 0; i < F_.rows(); i++)
             F_(i,0) = i+1;
         
-        
-        std::cout << F_ << std::endl;
-        
         clone_column (F_);
+
+        Eigen::SelfAdjointEigenSolver<MatrixXf> eigensolver(F_);
+        EXPECT_EQ(true,eigensolver.info() == Eigen::Success);
+        auto num = eigensolver.eigenvalues().size();
+        auto lambda = eigensolver.eigenvalues()[0];
+        auto lambda2 = eigensolver.eigenvalues()[num-1];
+        EXPECT_NEAR(lambda, -13.1371, 0.0001);
+        EXPECT_NEAR(lambda2, 29.638, 0.0001);
         
-        std::cout << F_ << std::endl;
+     //   const auto & ev = eigensolver.eigenvalues().as;
+//        auto maxe = std::max_element(ev.begin(), ev.end());
         
+
     }
 }
 #endif

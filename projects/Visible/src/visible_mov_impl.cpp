@@ -366,8 +366,8 @@ void movContext::loadMovieFile()
 
                 
                 // Launch Average Luminance Computation
-                m_async_luminance_tracks = std::async(std::launch::async, &mov_processor::run, m_movProcRef.get(),
-                                                      mFrameSet, names, false);
+               // m_async_luminance_tracks = std::async(std::launch::async, &mov_processor::run, m_movProcRef.get(),
+                  //                                    mFrameSet, names, false);
                 
                 ci_console() << "Dimensions:" <<m_movie->getSize() << std::endl;
                 ci_console() << "Duration:  " <<m_movie->getDuration() << " seconds" << std::endl;
@@ -522,7 +522,8 @@ void movContext::update ()
     if (! have_movie () ) return;
     mContainer.update();
     vl.update_window_size(getWindowSize ());
-    
+ 
+#if 0
     if ( is_ready (m_async_luminance_tracks))
     {
         auto tracksRef = m_async_luminance_tracks.get();
@@ -533,7 +534,7 @@ void movContext::update ()
 //        if (!tracksRef->at(2).second.empty())
 //            m_plots[2]->setup(tracksRef->at(2), graph1D::mapping_option::type_limits);
     }
-    
+#endif
     if (! have_movie () ) return;
     
     if ( m_movie->update() ) {

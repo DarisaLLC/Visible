@@ -253,8 +253,8 @@ protected:
 	Font				mFont;
 	std::string			mLog;
 	rph::DisplayObjectContainer mContainer;
+	index_time_t    mCurrentIndexTime;
 	
-
 	
 	
 };

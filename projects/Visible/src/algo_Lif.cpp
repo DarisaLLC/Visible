@@ -39,15 +39,24 @@ lif_processor::lif_processor ()
     signal_contraction_available = createSignal<lif_processor::sig_cb_contraction_available>();
     signal_3dstats_available = createSignal<lif_processor::sig_cb_3dstats_available>();
     
-    // Signals we support
+    // semilarity producer
     m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
+    
+    // Signals we support
+    // support Similarity::Content Loaded
     std::function<void ()> sm_content_loaded_cb = boost::bind (&lif_processor::sm_content_loaded, this);
     boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
     
-    // Create a contraction object and register our call back for contraction available
+    // Create a contraction object
     m_caRef = contraction_analyzer::create ();
+    
+    // Suport lif_processor::Contraction Analyzed
     std::function<void (contractionContainer_t&)>ca_analyzed_cb = boost::bind (&lif_processor::contraction_analyzed, this, _1);
     boost::signals2::connection ca_connection = m_caRef->registerCallback(ca_analyzed_cb);
+    
+    // Signal us when we have pci results to run contraction analysis
+    //std::function<void (int&)> sm1dmed_available_cb = boost::bind (&lif_processor::pci_done, this);
+    //boost::signals2::connection nl_connection = registerCallback(sm1dmed_available_cb);
     
     // Signal us when 3d stats are ready
     std::function<void ()>_3dstats_done_cb = boost::bind (&lif_processor::stats_3d_computed, this);
@@ -55,7 +64,38 @@ lif_processor::lif_processor ()
     
 }
 
-const smProducerRef lif_processor::sm () const { return m_sm; }
+// @note Specific to ID Lab Lif Files
+// @note Specific to ID Lab Lif Files
+// 3 channels: 2 flu one visible
+// 1 channel: visible
+void lif_processor::create_named_tracks (const std::vector<std::string>& names)
+{
+    m_tracksRef = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
+    m_pci_tracksRef = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
+    
+    switch(names.size()){
+        case 3:
+            m_tracksRef->resize (2);
+            m_pci_tracksRef->resize (1);
+            for (auto tt = 0; tt < names.size()-1; tt++)
+                m_tracksRef->at(tt).first = names[tt];
+            m_pci_tracksRef->at(0).first = names[2];
+            break;
+        case 1:
+            m_pci_tracksRef->resize (1);
+            m_pci_tracksRef->at(0).first = names[0];
+            break;
+        default:
+            assert(false);
+            
+    }
+}
+
+
+const smProducerRef lif_processor::sm () const {
+    return m_sm;
+    
+}
 
 // Check if the returned has expired
 std::weak_ptr<contraction_analyzer> lif_processor::contractionWeakRef ()
@@ -69,34 +109,23 @@ int64_t lif_processor::load (const std::shared_ptr<qTimeFrameCache>& frames,cons
 {
     create_named_tracks(names);
     load_channels_from_images(frames);
+    int channel_to_use = m_channel_count - 1;
+    run_volume_sum_sumsq_count(channel_to_use);
     return m_frameCount;
 }
 
-
-
-const timed_mat_vec_t& lif_processor::compute_oflow_threaded (){
-    m_mat_tracks.resize(0);
-    int channel_to_use = m_channel_count - 1;
-    std::vector<std::thread> threads(1);
-    threads[0] = std::thread(fbFlowRunner(),std::ref(m_all_by_channel[channel_to_use]),
-                             std::ref(m_3d_stats),
-                             std::ref(m_mat_tracks));
-    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
-    return m_mat_tracks;
-}
 
 
 /*
  * 1 monchrome channel. Compute volume stats of each on a thread
  */
 
-svl::stats<int64_t> lif_processor::run_volume_sum_sumsq_count (){
+svl::stats<int64_t> lif_processor::run_volume_sum_sumsq_count (const int channel_index){
     m_3d_stats_done = false;
-    int channel_to_use = m_channel_count - 1;
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
     std::vector<std::tuple<uint8_t,uint8_t>> rts;
     std::vector<std::thread> threads(1);
-    threads[0] = std::thread(IntensityStatisticsPartialRunner(),std::ref(m_all_by_channel[channel_to_use]), std::ref(cts), std::ref(rts));
+    threads[0] = std::thread(IntensityStatisticsPartialRunner(),std::ref(m_all_by_channel[channel_index]), std::ref(cts), std::ref(rts));
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     auto res = std::accumulate(cts.begin(), cts.end(), std::make_tuple(int64_t(0),int64_t(0), uint32_t(0)), stl_utils::tuple_sum<int64_t,uint32_t>());
     auto mes = std::accumulate(rts.begin(), rts.end(), std::make_tuple(uint8_t(255),uint8_t(0)), stl_utils::tuple_minmax<uint8_t, uint8_t>());
@@ -108,17 +137,14 @@ svl::stats<int64_t> lif_processor::run_volume_sum_sumsq_count (){
 }
 
 void lif_processor::stats_3d_computed(){
-    compute_oflow_threaded();
+    
 }
 /*
  * 2 flu channels. Compute stats of each using its own threaD
  */
 
-std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_processor::run_flu_statistics ()
+std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_processor::run_flu_statistics (const std::vector<int>& channels)
 {
-    auto channels = std::vector<int> {0};
-    if (m_channel_count == 3) channels.push_back(1);
-    
     std::vector<timed_double_vec_t> cts (channels.size());
     std::vector<std::thread> threads(channels.size());
     for (auto tt = 0; tt < channels.size(); tt++)
@@ -139,9 +165,10 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_processor::run_flu_statistics 
 }
 
 // Run to get Entropies and Median Level Set
-std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_processor::run_pci ()
+// PCI track is being used for initial emtropy and median leveled 
+std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_processor::run_pci (const int channel_index)
 {
-    int channel_to_use = m_channel_count - 1;
+    int channel_to_use = channel_index % m_channel_count;
     channel_images_t c2 = m_all_by_channel[channel_to_use];
     auto sp =  sm();
     sp->load_images (c2);
@@ -154,7 +181,7 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_processor::run_pci ()
         m_smat = sp->similarityMatrix();
         m_caRef->load(m_entropies,m_smat);
         update ();
-
+        
         // Signal we are done with ACI
         static int dummy;
         if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
@@ -166,8 +193,6 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_processor::run_pci ()
 
 
 const std::vector<Rectf>& lif_processor::rois () const { return m_rois; }
-const namedTrackOfdouble_t& lif_processor::similarity_track () const { return m_tracksRef->at(2); }
-const std::shared_ptr<vectorOfnamedTrackOfdouble_t>& lif_processor::all_track () const { return m_tracksRef; }
 
 // Update. Called also when cutoff offset has changed
 void lif_processor::update ()
@@ -190,9 +215,48 @@ void lif_processor::sm_content_loaded ()
 {
     std::cout << "----------> sm content_loaded\n";
 }
+
+
+
+bool lif_processor::loadImagesToMats (int channel_index)
+{
+    if (channel_index < 0){
+        std::cout << " All channels is not implemented yet ";
+        return false;
+    }
+    if (m_all_by_channel.empty() || channel_index > (m_all_by_channel.size() - 1) ){
+        std::cout << " Empty or channel does not exist ";
+        return false;
+    }
+    channel_images_t c2 = m_all_by_channel[channel_index];
+    
+    m_channel_mats.resize(0);
+    vector<roiWindow<P8U> >::const_iterator vitr = c2.begin();
+    do
+    {
+        m_channel_mats.emplace_back(vitr->height(), vitr->width(), CV_8UC(1), vitr->pelPointer(0,0), size_t(vitr->rowUpdate()));
+    }
+    while (++vitr != c2.end());
+    return (c2.size() == m_channel_mats.size());
+}
+
+//  labelBlob::ref get_blobCachedObject (const index_time_t& ti)
+//{
+//    static std::mutex m;
+//    
+//    std::lock_guard<std::mutex> hold(m);
+//    auto sp = m_blob_cache [ti].lock();
+//    if(!sp)
+//    {
+//        m_blob_cache[ti] = sp = labelBlob::create(gray, tout, index);
+//    }
+//    return sp;
+//}
 // Assumes LIF data -- use multiple window.
+// @todo condider creating cv::Mats and convert to roiWindow when needed.
 void lif_processor::load_channels_from_images (const std::shared_ptr<qTimeFrameCache>& frames)
 {
+    
     m_frameCount = 0;
     m_all_by_channel.clear();
     m_channel_count = frames->media_info().getNumChannels();
@@ -202,16 +266,17 @@ void lif_processor::load_channels_from_images (const std::shared_ptr<qTimeFrameC
     
     while (frames->checkFrame(m_frameCount))
     {
-        auto su8 = frames->getFrame(m_frameCount++);
-        auto m1 = svl::NewRefSingleFromSurface (su8, names, m_frameCount);
+        auto su8 = frames->getFrame(m_frameCount);
+        auto ts = m_frameCount;
+        auto m1 = svl::NewRefSingleFromSurface (su8, names, ts);
         
         switch (m_channel_count)
         {
-            // @todo support general case
-            // ID Lab 3 vertical roi 512 x (128x3)
+                // @todo support general case
+                // ID Lab 3 vertical roi 512 x (128x3)
             case 3  :
             {
-                auto m3 = roiMultiWindow<P8UP3>(*m1, names, m_frameCount);
+                auto m3 = roiMultiWindow<P8UP3>(*m1, names, ts);
                 for (auto cc = 0; cc < m3.planes(); cc++)
                     m_all_by_channel[cc].emplace_back(m3.plane(cc));
                 
@@ -227,14 +292,13 @@ void lif_processor::load_channels_from_images (const std::shared_ptr<qTimeFrameC
             }
             case 1  :
             {
-
                 m_all_by_channel[0].emplace_back(*m1);
                 const iRect& ir = m1->frame();
                 m_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
                 break;
             }
         }
-        
+        m_frameCount++;
     }
     
     // Call the content loaded cb if any
@@ -247,52 +311,53 @@ void lif_processor::load_channels_from_images (const std::shared_ptr<qTimeFrameC
 // Each call to find_best can be with different median cut-off
 void lif_processor::entropiesToTracks (namedTrackOfdouble_t& track)
 {
-    std::weak_ptr<contraction_analyzer> weakCaPtr (m_caRef);
-    if (weakCaPtr.expired())
-        return;
-    
-    if (! m_caRef->find_best  ()) return;
-    track.second.clear();
-    auto mee = m_caRef->filtered().begin();
-    for (auto ss = 0; mee != m_caRef->filtered().end() && ss < frame_count(); ss++, mee++)
-    {
-        index_time_t ti;
-        ti.first = ss;
-        timed_double_t res;
-        track.second.emplace_back(ti,*mee);
+    try{
+        std::weak_ptr<contraction_analyzer> weakCaPtr (m_caRef);
+        if (weakCaPtr.expired())
+            return;
+        
+        if (! m_caRef->find_best  ()) return;
+        m_medianLevel = m_caRef->filtered();
+        track.second.clear();
+        auto mee = m_caRef->filtered().begin();
+        for (auto ss = 0; mee != m_caRef->filtered().end() && ss < frame_count(); ss++, mee++)
+        {
+            index_time_t ti;
+            ti.first = ss;
+            timed_double_t res;
+            track.second.emplace_back(ti,*mee);
+        }
     }
-    
+    catch(const std::exception & ex)
+    {
+        std::cout <<  ex.what() << std::endl;
+    }
     // Signal we are done with median level set
     static int dummy;
     if (signal_sm1dmed_available && signal_sm1dmed_available->num_slots() > 0)
         signal_sm1dmed_available->operator()(dummy, dummy);
 }
 
-const int64_t lif_processor::frame_count () const
+
+const int64_t& lif_processor::frame_count () const
 {
-    if (m_all_by_channel[0].size() == m_all_by_channel[1].size() && m_all_by_channel[1].size() == m_all_by_channel[2].size() &&
-        m_frameCount == m_all_by_channel[0].size())
-        return m_frameCount;
-    else return 0;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    static int64_t inconsistent (0);
+    
+    if (m_all_by_channel.empty()) return inconsistent;
+    
+    const auto cs = m_all_by_channel[0].size();
+    if (cs != m_frameCount) return inconsistent;
+    for (const auto cc : m_all_by_channel){
+        if (cc.size() != cs) return inconsistent;
+    }
+    return m_frameCount;
 }
 
 const int64_t lif_processor::channel_count () const
 {
-    return m_all_by_channel.size();
-}
-
-// @note Specific to ID Lab Lif Files
-void lif_processor::create_named_tracks (const std::vector<std::string>& names)
-{
-    m_tracksRef = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
-    m_pci_tracksRef = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
-    
-    m_tracksRef->resize (2);
-    m_pci_tracksRef->resize (1);
-    for (auto tt = 0; tt < names.size()-1; tt++)
-        m_tracksRef->at(tt).first = names[tt];
-    m_pci_tracksRef->at(0).first = names[2];
-    
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_channel_count;
 }
 
 

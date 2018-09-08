@@ -68,10 +68,7 @@ public:
         vector<roiWindow<P8U>> images(4);
         double tiny = 1e-10;
         
-        self_similarity_producer<P8U> sm((uint32_t) images.size(),0, self_similarity_producer<P8U>::similarity_fn_t (),
-                         false,
-                         0,
-                         tiny);
+        self_similarity_producer<P8U> sm((uint32_t) images.size(), uint32_t(0));
         
         EXPECT_EQ(sm.depth() , D_8U);
         EXPECT_EQ(sm.matrixSz() , images.size());
@@ -106,10 +103,7 @@ public:
         }
         
         
-        EXPECT_EQ (sm.longTermCache() , false);
-        EXPECT_EQ (sm.longTermCache (true) , true);
-        EXPECT_EQ (sm.longTermCache() , true);
-        
+
         fRet = sm.fill(images);
         EXPECT_EQ(fRet, true);
         
@@ -155,10 +149,7 @@ public:
         
         self_similarity_producer<P8U> simu( winSz, 0, self_similarity_producer<P8U>::similarity_fn_t ());
         
-        EXPECT_EQ (simu.longTermCache() , false);
-        EXPECT_EQ (simu.longTermCache (true) , true);
-        EXPECT_EQ (simu.longTermCache() , true);
-        
+
         deque<double> entu;
         bool iFill = simu.fill(imagevector); // Initialize with null vector
         bool iEnt = simu.entropies(entu);
@@ -171,10 +162,6 @@ public:
         {
             self_similarity_producer<P8U> simf( winSz, 0, self_similarity_producer<P8U>::similarity_fn_t ());
             
-            EXPECT_EQ (simf.longTermCache() , false);
-            EXPECT_EQ (simf.longTermCache (true) , true);
-            EXPECT_EQ (simf.longTermCache() , true);
-            
             
             vector<roiWindow<P8U>> imagevectorf;
             imagevectorf.insert(imagevectorf.begin(), srcvector.begin(),
@@ -185,14 +172,10 @@ public:
             if (i < (winSz-1))
             {
                 EXPECT_EQ(!fFill, true);
-                if (!matGen)
-                    EXPECT_EQ (simf.longTermEntropy().size() , simf.matrixSz ());
             }
             else
             {
                 EXPECT_EQ(fFill, true);
-                if (!matGen)
-                    EXPECT_EQ (simf.longTermEntropy().size() , winSz);
             }
             
             bool fEnt = simf.entropies(entf);
@@ -206,12 +189,6 @@ public:
             
             bool uEnt = simu.entropies(entu);
             EXPECT_EQ(update , uEnt);
-            
-            if (!matGen && i > (winSz-1) && update)
-            {
-                EXPECT_EQ (simu.longTermEntropy().size() , (entu.size()+i));
-                //    EXPECT_EQ (real_equal((double) simu.longTermEntropy().back(), entu.back (), 1.e-5));
-            }
             
             if (entu.size() != entf.size())
                 EXPECT_EQ(entu.size() , entf.size());

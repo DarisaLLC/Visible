@@ -31,14 +31,14 @@ typedef std::pair<SurfaceRef, index_time_t> SurTiIndexRef_t;
 
 typedef std::function<SurfaceRef ()> getSurfaceCb_t;
 
-class qTimeFrameCache : tiny_media_info 
+class qTimeFrameCache : public tiny_media_info, public std::enable_shared_from_this<qTimeFrameCache>
 {
 public:
+    typedef std::shared_ptr<qTimeFrameCache> ref;
     typedef std::map<time_spec_t, int64_t> timeToIndex;
     typedef std::map<int64_t, time_spec_t> indexToTime;
     typedef std::vector<SurTiIndexRef_t> container_t;
     typedef typename container_t::size_type container_index_t;
-    
     typedef std::map<int64_t, container_index_t > indexToContainer;
     
     // Cinder Movie requires rendering though the App
@@ -64,12 +64,12 @@ public:
     // Initializes for the movie. Frame indices are generated for unique increasing time stamps.
     // time-stamped Frames are copied and cached at the first load. Further references to the frame
     // by time stamp or index is from cache.
-    qTimeFrameCache ( const tiny_media_info& );
-    qTimeFrameCache ();
+   // qTimeFrameCache ( const tiny_media_info& );
+  //  qTimeFrameCache ();
     bool isValid () const;
     
     tiny_media_info& media_info ();
-
+    const std::ostream&  index_info (std::ostream& std_stream);
     const std::ostream& print_to_ (std::ostream& std_stream);
 
     const std::vector<std::string>& channel_names () const;
@@ -100,6 +100,12 @@ public:
 
     
 private:
+    // Initializes for the movie. Frame indices are generated for unique increasing time stamps.
+    // time-stamped Frames are copied and cached at the first load. Further references to the frame
+    // by time stamp or index is from cache.
+    qTimeFrameCache ( const tiny_media_info& );
+    qTimeFrameCache ();
+    
     bool loadFrame (const Surface8uRef, const index_time_t&);
     indexToContainer::const_iterator _checkFrame (const int64_t) const;
     indexToContainer::const_iterator _checkFrame (const time_spec_t&) const;
@@ -117,7 +123,7 @@ private:
     mutable std::mutex			mMutex;
 };
 
-typedef std::shared_ptr<qTimeFrameCache> qFrameCacheRef;
+
 
 
 

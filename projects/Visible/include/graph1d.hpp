@@ -96,6 +96,8 @@ public:
     // load the data and bind a function to access it
     void setup (const namedTrackOfdouble_t& track)
     {
+        try
+        {
         const timed_double_vec_t& ds = track.second;
         mBuffer.clear ();
         std::vector<timed_double_t>::const_iterator reader = ds.begin ();
@@ -112,6 +114,11 @@ public:
         m_CB = bind (&graph1D::get, this, std::placeholders::_1);
         make_plot_mesh ();
         mIsSet = mBuffer.size() == ds.size();
+        }
+        catch(const std::exception & ex)
+        {
+            std::cout <<  ex.what() << std::endl;
+        }
     }
     
     // a NN fetch function using the bound function
