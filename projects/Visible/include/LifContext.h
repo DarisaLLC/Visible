@@ -169,6 +169,7 @@ private:
     void signal_sm1dmed_available (int&,int&);
     void signal_contraction_available (contractionContainer_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
+    void signal_channelmats_available (int&);
     
 
     // Clip Processing

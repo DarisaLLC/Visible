@@ -38,6 +38,7 @@ lif_processor::lif_processor ()
     signal_sm1dmed_available = createSignal<lif_processor::sig_cb_sm1dmed_available>();
     signal_contraction_available = createSignal<lif_processor::sig_cb_contraction_available>();
     signal_3dstats_available = createSignal<lif_processor::sig_cb_3dstats_available>();
+    signal_channelmats_available = createSignal<lif_processor::sig_cb_channelmats_available>();
     
     // semilarity producer
     m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
@@ -54,9 +55,13 @@ lif_processor::lif_processor ()
     std::function<void (contractionContainer_t&)>ca_analyzed_cb = boost::bind (&lif_processor::contraction_analyzed, this, _1);
     boost::signals2::connection ca_connection = m_caRef->registerCallback(ca_analyzed_cb);
     
-    // Signal us when we have pci results to run contraction analysis
-    //std::function<void (int&)> sm1dmed_available_cb = boost::bind (&lif_processor::pci_done, this);
-    //boost::signals2::connection nl_connection = registerCallback(sm1dmed_available_cb);
+    // Support channel mats available
+    std::function<void (int&)>mats_available_cb = boost::bind(&lif_processor::channelmats_available, this, _1);
+    boost::signals2::connection mat_connection = registerCallback(mats_available_cb);
+    
+    // Signal us when we have pci mat channels are ready to run contraction analysis
+    std::function<void (int&)> sm1dmed_available_cb = boost::bind (&lif_processor::pci_done, this);
+    boost::signals2::connection nl_connection = registerCallback(sm1dmed_available_cb);
     
     // Signal us when 3d stats are ready
     std::function<void ()>_3dstats_done_cb = boost::bind (&lif_processor::stats_3d_computed, this);
@@ -211,33 +216,48 @@ void lif_processor::contraction_analyzed (contractionContainer_t& contractions)
         signal_contraction_available->operator()(copied);
     }
 }
+
+void lif_processor:: channelmats_available (int& channel_index){
+    
+    if (m_all_by_channel[channel_index].size() == m_channel_mats[channel_index].size() &&
+        signal_channelmats_available && signal_channelmats_available->num_slots() > 0){
+        int ci = channel_index;
+        signal_channelmats_available->operator()(ci);
+    }
+    
+}
 void lif_processor::sm_content_loaded ()
 {
     std::cout << "----------> sm content_loaded\n";
+    int channel_to_use = m_channel_count - 1;
+    loadImagesToMats(channel_to_use);
 }
 
 
 
-bool lif_processor::loadImagesToMats (int channel_index)
+void lif_processor::loadImagesToMats (const int channel_index)
 {
-    if (channel_index < 0){
+    int ci = channel_index;
+    if (ci < 0){
         std::cout << " All channels is not implemented yet ";
-        return false;
+        return;
     }
-    if (m_all_by_channel.empty() || channel_index > (m_all_by_channel.size() - 1) ){
+    if (m_all_by_channel.empty() || ci > (m_all_by_channel.size() - 1) ){
         std::cout << " Empty or channel does not exist ";
-        return false;
+        return;
     }
     channel_images_t c2 = m_all_by_channel[channel_index];
     
-    m_channel_mats.resize(0);
+    m_channel_mats[channel_index].resize(0);
     vector<roiWindow<P8U> >::const_iterator vitr = c2.begin();
     do
     {
-        m_channel_mats.emplace_back(vitr->height(), vitr->width(), CV_8UC(1), vitr->pelPointer(0,0), size_t(vitr->rowUpdate()));
+        m_channel_mats[channel_index].emplace_back(vitr->height(), vitr->width(), CV_8UC(1), vitr->pelPointer(0,0), size_t(vitr->rowUpdate()));
     }
     while (++vitr != c2.end());
-    return (c2.size() == m_channel_mats.size());
+
+    channelmats_available(ci);
+
 }
 
 //  labelBlob::ref get_blobCachedObject (const index_time_t& ti)

@@ -103,6 +103,9 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
     std::function<void (lif_processor::contractionContainer_t&)> contraction_available_cb = boost::bind (&lifContext::signal_contraction_available, this, _1);
     boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_available_cb);
     
+    // Support lifProcessor::channel mats available
+    std::function<void (int&)> channelmats_available_cb = boost::bind (&lifContext::signal_channelmats_available, this, _1);
+    boost::signals2::connection channelmats_connection = m_lifProcRef->registerCallback(channelmats_available_cb);
     
     setup ();
 }
@@ -176,6 +179,13 @@ void lifContext::signal_contraction_available (lif_processor::contractionContain
     
 }
 
+
+void lifContext::signal_channelmats_available(int& channel_index)
+{
+    //    frame_indices.push_back (findex);
+    //    frame_times.push_back (timestamp);
+    //     std::cout << frame_indices.size() << std::endl;
+}
 
 
 void lifContext::signal_frame_loaded (int& findex, double& timestamp)

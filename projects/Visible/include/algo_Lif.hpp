@@ -44,8 +44,10 @@ public:
     typedef void (sig_cb_sm1d_available) (int&);
     typedef void (sig_cb_sm1dmed_available) (int&,int&);
     typedef void (sig_cb_3dstats_available) ();
+    typedef void (sig_cb_channelmats_available) (int& );
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     typedef std::vector<channel_images_t> channel_vec_t;
+    typedef std::array<std::vector<cv::Mat>,4> channelMats_t;
     
     lif_processor ();
  
@@ -53,9 +55,7 @@ public:
     const int64_t& frame_count () const;
     const int64_t channel_count () const;
     const svl::stats<int64_t> stats3D () const;
-    const std::shared_ptr<vectorOfnamedTrackOfdouble_t> fluTracks () const;
-    const std::shared_ptr<vectorOfnamedTrackOfdouble_t> PCITrack () const;
-    
+    const channelMats_t & channelMats () const { return m_channel_mats; }
     // Check if the returned has expired
     std::weak_ptr<contraction_analyzer> contractionWeakRef ();
     
@@ -78,7 +78,7 @@ public:
     
     // Loads from all channels. -1 implies create a multichannel cv::Mat. 0,1,2 imply specific channel.
     // Returns false if channel(s) requested do not exist. Or in case of any error
-    bool loadImagesToMats (const int channel_index);
+    void loadImagesToMats (const int channel_index);
     
     // Update. Called also when cutoff offset has changed
     void update ();
@@ -91,12 +91,13 @@ protected:
     boost::signals2::signal<lif_processor::sig_cb_sm1dmed_available>* signal_sm1dmed_available;
     boost::signals2::signal<lif_processor::sig_cb_contraction_available>* signal_contraction_available;
     boost::signals2::signal<lif_processor::sig_cb_3dstats_available>* signal_3dstats_available;
+    boost::signals2::signal<lif_processor::sig_cb_channelmats_available>* signal_channelmats_available;
     
 private:
  
     void contraction_analyzed (contractionContainer_t&);
     void stats_3d_computed ();
-    
+    void channelmats_available (int&);
     void pci_done ();
     void sm_content_loaded ();
  
@@ -120,8 +121,8 @@ private:
     deque<double> m_entropies;
     deque<deque<double>> m_smat;
 
-    // Results map by channel
-    std::vector<cv::Mat> m_channel_mats;
+    // Channels by channel as cv::Mats
+    mutable std::array<std::vector<cv::Mat>,4> m_channel_mats;
     std::deque<double> m_medianLevel;
     
     channel_images_t m_images;
