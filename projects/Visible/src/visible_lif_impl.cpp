@@ -37,7 +37,7 @@
 #include "core/signaler.h"
 #include "contraction.hpp"
 #include "logger.hpp"
-
+#include "cinder/Log.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -140,6 +140,7 @@ void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
 {
     std::string msg = to_string(mMediaInfo.count) + " Samples in Media  " + to_string(loaded_frame_count) + " Loaded";
     vlogger::instance().console()->info(msg);
+    process_async();
 }
 void lifContext::signal_flu_stats_available ()
 {
@@ -148,6 +149,7 @@ void lifContext::signal_flu_stats_available ()
 
 void lifContext::signal_contraction_available (lif_processor::contractionContainer_t& contras)
 {
+    // Pauses playback if playing and restore it at scope's end
     scopedPause sp(std::shared_ptr<lifContext>(shared_from_above(), stl_utils::null_deleter () ));
     
     if (contras.empty()) return;
@@ -157,7 +159,6 @@ void lifContext::signal_contraction_available (lif_processor::contractionContain
     
     // @note: We are handling one contraction for now.
     m_contractions = contras;
-    std::cout << m_contractions.size() << std::endl;
     reset_entire_clip(mMediaInfo.count);
     uint32_t index = 0;
     string name = " C " + toString(index) + " ";
@@ -165,12 +166,14 @@ void lifContext::signal_contraction_available (lif_processor::contractionContain
     m_clips.emplace_back(m_contractions[0].contraction_start.first,
                          m_contractions[0].relaxation_end.first,
                          m_contractions[0].contraction_peak.first);
-  
+    
     tinyUi::timepoint_marker_t tm;
     tm.first = m_contractions[0].contraction_peak.first/ ((float)mMediaInfo.count);
     tm.second = ColorA (0.9, 0.3, 0.1, 0.75);
     mMainTimeLineSlider.add_timepoint_marker(tm);
-       
+    
+    update_contraction_selection();
+    
 }
 
 
@@ -190,11 +193,11 @@ void lifContext::signal_frame_loaded (int& findex, double& timestamp)
     //     std::cout << frame_indices.size() << std::endl;
 }
 
-             /************************
-                     *
-                     *  CLIP Processing
-                     *
-                     ************************/
+/************************
+ *
+ *  CLIP Processing
+ *
+ ************************/
 
 int lifContext::get_current_clip_index () const
 {
@@ -223,11 +226,11 @@ void lifContext::reset_entire_clip (const size_t& frame_count) const
 }
 
 
-                /************************
-                 *
-                 *  Validation, Clear & Log
-                 *
-                 ************************/
+/************************
+ *
+ *  Validation, Clear & Log
+ *
+ ************************/
 
 void lifContext::clear_playback_params ()
 {
@@ -251,17 +254,26 @@ bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif
 
 
 
-                /************************
-                 *
-                 *  UI Bind Functions
-                 *
-                 ************************/
+/************************
+ *
+ *  UI Conrol Functions
+ *
+ ************************/
+
+void lifContext::loop_no_loop_button ()
+{
+    if (! have_lif_serie()) return;
+    if (looping())
+        looping(false);
+    else
+        looping(true);
+}
 
 void lifContext::looping (bool what)
 {
     m_is_looping = what;
-    if (m_is_looping)
-        mUIParams.setOptions( "mode", "label=`Looping`" );
+    static std::vector<std::string> loopstrings {"label=` Looping`", "label=` Not Looping`"};
+    mUIParams.setOptions( "mode", m_is_looping ? loopstrings[0] : loopstrings[1]);
 }
 
 
@@ -274,14 +286,14 @@ void lifContext::play ()
 {
     if (! have_lif_serie() || m_is_playing ) return;
     m_is_playing = true;
-    mUIParams.setOptions( "mode", "label=`At Playing`" );
+    mUIParams.setOptions( "mode", "label=` Playing`" );
 }
 
 void lifContext::pause ()
 {
     if (! have_lif_serie() || ! m_is_playing ) return;
     m_is_playing = false;
-    mUIParams.setOptions( "mode", "label=`At Pause`" );
+    mUIParams.setOptions( "mode", "label=` Pause`" );
 }
 
 void lifContext::play_pause_button ()
@@ -294,11 +306,11 @@ void lifContext::play_pause_button ()
 }
 
 
-        /************************
-             *
-             *  Manual Edit Support ( Width and Height setting )
-             *
-             ************************/
+/************************
+ *
+ *  Manual Edit Support ( Width and Height setting )
+ *
+ ************************/
 
 lifContext::Side_t lifContext::getManualNextEditMode ()
 {
@@ -309,7 +321,7 @@ lifContext::Side_t lifContext::getManualNextEditMode ()
             nm = Side_t::minor;
             break;
         case Side_t::minor:
-            nm = Side_t::notset;
+            nm = Side_t::major;
             break;
         case Side_t::notset:
             nm = Side_t::major;
@@ -321,74 +333,54 @@ lifContext::Side_t lifContext::getManualNextEditMode ()
 
 void lifContext::edit_no_edit_button ()
 {
-    if (! have_lif_serie () )
-        return;
-    
-    // Increment
-    setManualEditMode(getManualNextEditMode());
-    
-    const std::string& ename = mEditNames[getManualEditMode()];
-    // If we are in Edit mode. Stop and Go to Start
-    if (getManualEditMode() != notset)
+    if (! have_lif_serie () ) return;
+    looping(false);
+    setManualEditMode(minor);
+    // If we are in Edit mode. Stop and Go to the end as detected
+    if (getManualNextEditMode() != notset)
     {
+        setManualEditMode(getManualNextEditMode());
+        const std::string& ename = mEditNames[getManualEditMode()];
+        const clip& clip = m_clips[get_current_clip_index()];
+        switch(getManualEditMode()){
+            case Side_t::minor:
+                seekToFrame(clip.first());
+                break;
+            case Side_t::major:
+                seekToFrame(clip.last());
+                break;
+            default:
+                break;
+        }
         mUIParams.setOptions( "mode", ename);
-        //        if (looping())
-        //        {
-        //            mUIParams.setOptions( "mode", "label=`Stopping`" );
-        //            looping(false);
-        //            seekToStart();
-        //        }
         if (mContainer.getNumChildren())
             mContainer.removeChildren();
     }
-    else
-        mUIParams.setOptions( "mode", ename);
-    
 }
 
 
-void lifContext::analyze_analyzing_button()
+void lifContext::update_contraction_selection()
 {
-    std::lock_guard<std::mutex> guard(m_clip_mutex);
-    if (! have_lif_serie () )
-        return;
-    
-    // Flip
-    setAnalyzeMode(!getAnalyzeMode());
-    // If we are in Edit mode. Stop and Go to Start
-    if (getAnalyzeMode())
-    {
-        mUIParams.setOptions( "state", "label=`Processing`" );
-        if (looping())
-        {
-            looping(false);
-            seekToStart();
-        }
-        
-        mUIParams.removeParam("Select ");
-        static int selected_index = 0;
-        mUIParams.addParam( "Select ", m_contraction_names, &selected_index )
-        .updateFn( [this]
+    mUIParams.removeParam("Select ");
+    static int selected_index = 0;
+    mUIParams.addParam( "Select ", m_contraction_names, &selected_index )
+    .updateFn( [this]
+              {
+                  if ( selected_index >= 0 && selected_index < m_contraction_names.size() )
                   {
-                      if ( selected_index >= 0 && selected_index < m_contraction_names.size() )
-                      {
-                          set_current_clip_index(selected_index);
-                          std::cout << m_contraction_names[get_current_clip_index()] << std::endl;
-                          const clip& clip = m_clips[get_current_clip_index()];
-                          std::cout << clip << std::endl;
-                      }
-                  });
-        
-    }
-    else
-        mUIParams.setOptions( "state", "label=`Ready`" );
+                      set_current_clip_index(selected_index);
+                      const clip& clip = m_clips[get_current_clip_index()];
+                      std::string msg = " Current Clip " + m_contraction_names[get_current_clip_index()] + " " + clip.to_string();
+                      vlogger::instance().console()->info(msg);
+                  }
+              });
 }
 
-                /************************
-                 *
-                 *  Seek Processing
-                 *
-                 ************************/
+/************************
+ *
+ *  Seek Processing
+ *
+ ************************/
 
 // @ todo: indicate mode differently
 void lifContext::seekToEnd ()
@@ -426,9 +418,10 @@ time_spec_t lifContext::getCurrentTime ()
 void lifContext::seekToFrame (int mark)
 {
     const clip& curr = get_current_clip();
-    
-    if (mark < curr.first() || mark > curr.last())
-        mark = curr.first();
+
+    if (mark < curr.first()) mark = curr.first();
+    if (mark > curr.last())
+        mark = looping() ? curr.first() : curr.last();
     
     m_seek_position = mark;
     mTimeMarker.from_count (m_seek_position);
@@ -455,11 +448,11 @@ void lifContext::setZoom (vec2 zoom)
 }
 
 
-                /************************
-                 *
-                 *  Navigation UI
-                 *
-                 ************************/
+/************************
+ *
+ *  Navigation UI
+ *
+ ************************/
 
 void lifContext::processDrag( ivec2 pos )
 {
@@ -594,11 +587,11 @@ void lifContext::keyDown( KeyEvent event )
     }
 }
 
-            /************************
-                 *
-                 *  MedianCutOff Set/Get
-                 *
-                 ************************/
+/************************
+ *
+ *  MedianCutOff Set/Get
+ *
+ ************************/
 
 void lifContext::setMedianCutOff (uint32_t newco)
 {
@@ -625,11 +618,11 @@ uint32_t lifContext::getMedianCutOff () const
 }
 
 
-            /************************
-                 *
-                 *  Setup & Load File
-                 *
-                 ************************/
+/************************
+ *
+ *  Setup & Load File
+ *
+ ************************/
 
 void  lifContext::get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer)
 {
@@ -721,18 +714,12 @@ void lifContext::setup()
         mUIParams.addSeparator();
         mUIParams.addButton("Play / Pause ", bind( &lifContext::play_pause_button, this ) );
         mUIParams.addSeparator();
-        mUIParams.addParam( " Loop ", &m_is_looping ).keyIncr( "l" );
+        mUIParams.addButton( " Loop ", bind ( &lifContext::loop_no_loop_button, this) );
         mUIParams.addSeparator();
         mUIParams.addButton(" Edit ", bind( &lifContext::edit_no_edit_button, this ) );
         mUIParams.addSeparator();
         mUIParams.addText( "mode", "label=`Browse`" );
-        
         mUIParams.addSeparator();
-        mUIParams.addButton(" Analyze ", bind( &lifContext::analyze_analyzing_button, this ) );
-        mUIParams.addSeparator();
-        mUIParams.addText( "state", "label=`Ready`" );
-        mUIParams.addSeparator();
-        
         {
             // Add a param with no target, but instead provide setter and getter functions.
             const std::function<void(uint32_t)> setter	= std::bind(&lifContext::setMedianCutOff, this, std::placeholders::_1 );
@@ -755,11 +742,11 @@ void lifContext::loadLifFile ()
             
             m_lifRef =  std::shared_ptr<lifIO::LifReader> (new lifIO::LifReader (mPath.string()));
             get_series_info (m_lifRef);
-            ci_console() <<  std::endl << m_series_book.size() << "  Series  " << std::endl;
-            
+            auto msg = tostr(m_series_book.size()) + "  Series  ";
+            vlogger::instance().console()->info(msg);
         }
         catch( ... ) {
-            ci_console() << "Unable to load the movie." << std::endl;
+            vlogger::instance().console()->debug("Unable to load LIF file");
             return;
         }
         
@@ -769,11 +756,11 @@ void lifContext::loadLifFile ()
 
 
 
-            /************************
-                 *
-                 *  Load Serie & Setup Widgets
-                 *
-                 ************************/
+/************************
+ *
+ *  Load Serie & Setup Widgets
+ *
+ ************************/
 
 void lifContext::add_plots ()
 {
@@ -801,7 +788,7 @@ void lifContext::add_plots ()
         m_plots[2]->strokeColor = ColorA(0.0,0.0,0.0,1.0);
     }
     
-    std::cout << sLayoutMgr.display_timeline_rect() << std::endl;
+    vlogger::instance().console()->info(tostr(sLayoutMgr.display_timeline_rect()));
     auto rect = sLayoutMgr.display_timeline_rect();
     mMainTimeLineSlider = tinyUi::TimeLineSlider(rect);
     mMainTimeLineSlider.clear_timepoint_markers();
@@ -825,11 +812,10 @@ void lifContext::loadCurrentSerie ()
 {
     if ( ! is_valid() || ! (m_lifRef || ! m_current_serie_ref) )
         return;
-
+    
     try {
         
         m_clips.clear();
-        
         mWidgets.clear ();
         setMedianCutOff(0);
         pause();
@@ -840,7 +826,7 @@ void lifContext::loadCurrentSerie ()
         
         if (! mFrameSet || ! mFrameSet->isValid())
         {
-            ci_console() << "Serie had 1 or no frames " << std::endl;
+            vlogger::instance().console()->debug("Serie had 1 or no frames ");
             return;
         }
         mMediaInfo = mFrameSet->media_info();
@@ -854,15 +840,15 @@ void lifContext::loadCurrentSerie ()
         
         mFrameSet->channel_names (m_series_book[m_cur_selected_index].channel_names);
         reset_entire_clip(mFrameSet->count());
-
-    
+        
+        
         auto title = m_series_names[m_cur_selected_index] + " @ " + mPath.filename().string();
         getWindow()->setTitle( title );
-        getWindow()->getApp()->setFrameRate(mMediaInfo.getFramerate() * 2);
+        getWindow()->getApp()->setFrameRate(mMediaInfo.getFramerate());
         
         
         mScreenSize = mMediaInfo.getSize();
-
+        
         mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
         
         mTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
@@ -870,31 +856,10 @@ void lifContext::loadCurrentSerie ()
         
         ivec2 window_size (sLayoutMgr.desired_window_size());
         setWindowSize(window_size);
-        
-        std::cout << "Lif frames " << future_res.get() << std::endl;
-        
         add_plots();
+        looping(false);
         seekToStart();
         play();
-        switch(channel_count()){
-            case 3:
-            {
-                m_async_luminance_tracks = std::async(std::launch::async,&lif_processor::run_flu_statistics,
-                                                      m_lifProcRef.get(), std::vector<int> ({0,1}) );
-                m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci,
-                                                m_lifProcRef.get(), 2);
-                auto res = m_lifProcRef->run_volume_sum_sumsq_count (2);
-                res.PrintTo(res,&std::cout);
-                break;
-            }
-            case 1:
-                m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci,
-                                                m_lifProcRef.get(), 0);
-                auto res = m_lifProcRef->run_volume_sum_sumsq_count (0);
-                res.PrintTo(res,&std::cout);
-                
-        }
-     
         
     }
     catch( const std::exception &ex ) {
@@ -903,13 +868,36 @@ void lifContext::loadCurrentSerie ()
     }
 }
 
+void lifContext::process_async (){
+    
+    switch(channel_count()){
+        case 3:
+        {
+            m_async_luminance_tracks = std::async(std::launch::async,&lif_processor::run_flu_statistics,
+                                                  m_lifProcRef.get(), std::vector<int> ({0,1}) );
+            m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci,
+                                            m_lifProcRef.get(), 2);
+            auto res = m_lifProcRef->run_volume_sum_sumsq_count (2);
+            res.PrintTo(res,&std::cout);
+            break;
+        }
+        case 1:
+        {
+            m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci,
+                                            m_lifProcRef.get(), 0);
+            auto res = m_lifProcRef->run_volume_sum_sumsq_count (0);
+            res.PrintTo(res,&std::cout);
+            break;
+        }
+    }
+}
 
 
-                /************************
-                 *
-                 *  Update & Draw
-                 *
-                 ************************/
+/************************
+ *
+ *  Update & Draw
+ *
+ ************************/
 
 Rectf lifContext::get_image_display_rect ()
 {
@@ -946,7 +934,7 @@ void lifContext::resize ()
         m_plots[cc]->setRect (sLayoutMgr.plot_rects()[cc]);
     }
     
-
+    
 }
 
 bool lifContext::haveTracks()
@@ -957,9 +945,6 @@ bool lifContext::haveTracks()
 void lifContext::update ()
 {
     if (! have_lif_serie() ) return;
-    
-
-    
     mContainer.update();
     sLayoutMgr.update_window_size(getWindowSize ());
     
@@ -985,16 +970,14 @@ void lifContext::update ()
     
     if (getCurrentFrame() == getNumFrames())
     {
-        if (! looping () ) seekToEnd();
-        else
-            seekToStart();
+        if (looping () ) seekToStart();
     }
     
     if (have_lif_serie ()){
         mSurface = mFrameSet->getFrame(getCurrentFrame());
         mCurrentIndexTime = mFrameSet->currentIndexTime();
         if (mCurrentIndexTime.first != m_seek_position){
-            std::cout << mCurrentIndexTime.first - m_seek_position << std::endl;
+            vlogger::instance().console()->info(tostr(mCurrentIndexTime.first - m_seek_position));
         }
     }
     
@@ -1003,7 +986,7 @@ void lifContext::update ()
         update_instant_image_mouse ();
         seekToFrame (getCurrentFrame() + 1);
     }
-
+    
     // Update text texture with most recent text
     auto num_str = to_string( int( getCurrentFrame ()));
     std::string frame_str = m_is_playing ? string( "Playing: " + num_str) : string ("Paused: " + num_str);

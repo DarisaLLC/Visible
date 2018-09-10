@@ -24,6 +24,7 @@
 using namespace std;
 using namespace boost;
 using namespace svl;
+using namespace stl_utils;
 
 class clip : public std::array<uint32_t,3>
 {
@@ -53,8 +54,13 @@ public:
     
     friend std::ostream& operator<< (std::ostream& out, const clip& se)
     {
-        out << "[ " << se.begin() << " : " << se.end() << " ] ( " << se.anchor() << std::endl;
+        out << se.to_string() << std::endl;
         return out;
+    }
+    
+    std::string to_string () const {
+        auto msg =  "[ " + tostr(begin()) + " : " + tostr(end()) + " ] ( " + tostr(anchor());
+        return msg;
     }
     
 private:

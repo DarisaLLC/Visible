@@ -207,6 +207,7 @@
 		C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
 		C2BECED11DD6D8BA0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
 		C2BECED21DD6D8DE0001E2BA /* AccordionItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */; };
+		C2C96FBD2146D217005F0ABF /* libopencv_features2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606E7E1CEE08F00045FF57 /* libopencv_features2d.a */; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
@@ -394,6 +395,8 @@
 		C254BEE01F4FB3D300977307 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
 		C254BEE41F4FB56600977307 /* VideoPlayerApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VideoPlayerApp.cpp; path = ../src/VideoPlayerApp.cpp; sourceTree = "<group>"; };
 		C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_mov_impl.cpp; path = ../src/visible_mov_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		C259145E214492A400F80D5F /* logger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = logger.hpp; path = ../include/logger.hpp; sourceTree = "<group>"; };
+		C259145F2145BA7500F80D5F /* clipManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = clipManager.hpp; path = ../include/clipManager.hpp; sourceTree = "<group>"; };
 		C259982B1ECF668F0015EE7B /* cardiomyocyte_model.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cardiomyocyte_model.hpp; path = ../../../svl/include/cardio_model/cardiomyocyte_model.hpp; sourceTree = "<group>"; };
 		C259982C1ECF668F0015EE7B /* cerruti_rectangle_integral.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cerruti_rectangle_integral.hpp; path = ../../../svl/include/cardio_model/cerruti_rectangle_integral.hpp; sourceTree = "<group>"; };
 		C259982D1ECF668F0015EE7B /* metric.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metric.hpp; path = ../../../svl/include/cardio_model/metric.hpp; sourceTree = "<group>"; };
@@ -463,7 +466,7 @@
 		C26009E21CED3E010045FF57 /* cinder_xchg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cinder_xchg.hpp; sourceTree = "<group>"; };
 		C26009E31CED3E010045FF57 /* editableRectangle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = editableRectangle.hpp; sourceTree = "<group>"; };
 		C26009EB1CED3E010045FF57 /* angle_units.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = angle_units.h; sourceTree = "<group>"; };
-		C26009EC1CED3E010045FF57 /* ConcurrentDeque.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConcurrentDeque.h; sourceTree = "<group>"; };
+		C26009EC1CED3E010045FF57 /* ConcurrentDeque.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = ConcurrentDeque.h; sourceTree = "<group>"; };
 		C26009ED1CED3E010045FF57 /* ConcurrentMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConcurrentMap.h; sourceTree = "<group>"; };
 		C26009EE1CED3E010045FF57 /* ConcurrentQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConcurrentQueue.h; sourceTree = "<group>"; };
 		C26009EF1CED3E010045FF57 /* core.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = core.hpp; sourceTree = "<group>"; };
@@ -627,6 +630,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2C96FBD2146D217005F0ABF /* libopencv_features2d.a in Frameworks */,
 				C2E60A0921200A7F00059FA6 /* libboost_date_time.a in Frameworks */,
 				C2E60A0A21200A7F00059FA6 /* libboost_filesystem.a in Frameworks */,
 				C2E60A0B21200A7F00059FA6 /* libboost_system.a in Frameworks */,
@@ -935,6 +939,7 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C259145E214492A400F80D5F /* logger.hpp */,
 				C24EA2D1207F07D100555D16 /* sg_filter.h */,
 				C252611D1F66EA0B0069F665 /* base64.hpp */,
 				C25261191F66E8F40069F665 /* Plist.hpp */,
@@ -955,6 +960,7 @@
 				C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */,
 				C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */,
 				C219076A1F7D4FB500CC4780 /* contraction.hpp */,
+				C259145F2145BA7500F80D5F /* clipManager.hpp */,
 				C219468A1CE4EA4900976025 /* AudioDrawUtils.h */,
 				C219468B1CE4EA4900976025 /* TinyUi.h */,
 				C221D91A1E4B176800AF74CE /* directoryPlayer.h */,
@@ -1751,6 +1757,7 @@
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
 					"$(LOCAL_TINYXML)",
+					"$(LOCAL_SPDLOG)/include",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -1825,6 +1832,7 @@
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
 					"$(LOCAL_TINYXML)",
+					"$(LOCAL_SPDLOG)/include",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";

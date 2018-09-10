@@ -131,7 +131,7 @@ public:
 	void play_pause_button ();
 	void loop_no_loop_button ();
     void edit_no_edit_button ();
-    void analyze_analyzing_button ();
+    void update_contraction_selection ();
 	
 	void receivedEvent ( InteractiveObjectEvent event );
 	
@@ -177,6 +177,9 @@ private:
     mutable volatile int m_current_clip_index;
     mutable std::vector<clip> m_clips;
     mutable std::mutex m_clip_mutex;
+    
+    // Async Processing
+    void process_async ();
     
     // Frame Cache and frame store
     std::shared_ptr<qTimeFrameCache> mFrameSet;

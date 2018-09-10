@@ -102,7 +102,6 @@ bool sm_producer::operator() (int start_frame, int frames ) const
 
 void sm_producer::load_images(const images_vector_t &images)
 {
-    std::cout << __LINE__ << images.size() << std::endl;
     if (_impl) _impl->loadImages (images);
 }
 
@@ -380,7 +379,6 @@ void sm_producer::spImpl::loadImages (const images_vector_t& images)
     }
     while (vitr != images.end());
     _frameCount = m_loaded_ref.size ();
-    std::cout << __FILE__ << "  " << __LINE__<< _frameCount << std::endl;
     
     // Call the content loaded cb if any
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
