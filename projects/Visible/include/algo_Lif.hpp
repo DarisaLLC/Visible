@@ -22,7 +22,24 @@
 using namespace cv;
 using namespace std;
 
+#if 0
+// Default logger factory-  creates synchronous loggers
+struct synchronous_factory
+{
+    template<typename Sink, typename... SinkArgs>
+    
+    static std::shared_ptr<spdlog::logger> create(std::string logger_name, SinkArgs &&... args)
+    {
+        auto sink = std::make_shared<Sink>(std::forward<SinkArgs>(args)...);
+        auto new_logger = std::make_shared<logger>(std::move(logger_name), std::move(sink));
+        details::registry::instance().register_and_init(new_logger);
+        return new_logger;
+    }
+};
 
+using default_factory = synchronous_factory;
+
+#endif
 
 // For base classing
 class LifSignaler : public base_signaler

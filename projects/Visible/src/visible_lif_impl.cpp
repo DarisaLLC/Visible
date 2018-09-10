@@ -36,6 +36,9 @@
 #include "algo_Lif.hpp"
 #include "core/signaler.h"
 #include "contraction.hpp"
+#include "logger.hpp"
+
+
 using namespace ci;
 using namespace ci::app;
 using namespace std;
@@ -119,69 +122,61 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
 
 void lifContext::signal_sm1d_available (int& dummy)
 {
-    static int i = 0;
-    std::cout << "sm1d available: " << ++i << std::endl;
+    vlogger::instance().console()->info("self-similarity available: ");
 }
 
 void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
 {
-    static int ii = 0;
-    
     if (haveTracks())
     {
         auto tracksRef = m_pci_trackWeakRef.lock();
         if (!tracksRef->at(0).second.empty())
             m_plots[channel_count()-1]->setup(tracksRef->at(0));
     }
-    std::cout << "sm1dmed available: " << ++ii << std::endl;
+    vlogger::instance().console()->info("self-similarity available: ");
 }
 
 void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
 {
-    std::cout << std::endl << mMediaInfo.count << " Samples in Media  " << std::endl;
-    std::cout << loaded_frame_count << " Images Loaded  " << std::endl;
+    std::string msg = to_string(mMediaInfo.count) + " Samples in Media  " + to_string(loaded_frame_count) + " Loaded";
+    vlogger::instance().console()->info(msg);
 }
 void lifContext::signal_flu_stats_available ()
 {
-    std::cout << "Flu Stats Available " << std::endl;
+    vlogger::instance().console()->info(" Flu Stats Available ");
 }
 
 void lifContext::signal_contraction_available (lif_processor::contractionContainer_t& contras)
 {
-    std::lock_guard<std::mutex> guard(m_clip_mutex);
-    
-    // TimeLine Markers
-    mMainTimeLineSlider.clear_timepoint_markers();
-    m_contractions = contras;
-    std::cout << m_contractions.size() << std::endl;
-    
-    m_contraction_names.clear();
-    m_contraction_names.push_back("Entire");
+    scopedPause sp(std::shared_ptr<lifContext>(shared_from_above(), stl_utils::null_deleter () ));
     
     if (contras.empty()) return;
     
+    // TimeLine Markers
+    mMainTimeLineSlider.clear_timepoint_markers();
+    
     // @note: We are handling one contraction for now.
+    m_contractions = contras;
+    std::cout << m_contractions.size() << std::endl;
+    reset_entire_clip(mMediaInfo.count);
     uint32_t index = 0;
-    m_clips.resize(1 + m_contractions.size());
-    auto clipItr = m_clips.begin();
-    clipItr++;
     string name = " C " + toString(index) + " ";
     m_contraction_names.push_back(name);
-    
-    clipItr->begin = m_contractions[0].contraction_start.first;
-    clipItr->end = m_contractions[0].relaxation_end.first;
-    clipItr->anchor = m_contractions[0].contraction_peak.first;
+    m_clips.emplace_back(m_contractions[0].contraction_start.first,
+                         m_contractions[0].relaxation_end.first,
+                         m_contractions[0].contraction_peak.first);
+  
     tinyUi::timepoint_marker_t tm;
-    tm.first =clipItr->anchor / ((float)mMediaInfo.count);
+    tm.first = m_contractions[0].contraction_peak.first/ ((float)mMediaInfo.count);
     tm.second = ColorA (0.9, 0.3, 0.1, 0.75);
     mMainTimeLineSlider.add_timepoint_marker(tm);
-    std::cout << "Contration Time Point Added  " << tm.first << std::endl;
-    
+       
 }
 
 
 void lifContext::signal_channelmats_available(int& channel_index)
 {
+    vlogger::instance().console()->info(" cv::Mats are available ");
     //    frame_indices.push_back (findex);
     //    frame_times.push_back (timestamp);
     //     std::cout << frame_indices.size() << std::endl;
@@ -213,24 +208,18 @@ void lifContext::set_current_clip_index (int cindex) const
     m_current_clip_index = cindex;
 }
 
-void lifContext::reset_entire_clip (const size_t& frame_count) const
-{
-    std::lock_guard<std::mutex> guard(m_clip_mutex);
-    m_clips.resize(1);
-    m_clips[0].end = frame_count - 2;
-    m_contraction_names.resize(1);
-    m_contraction_names[0] = " Entire ";
-    m_current_clip_index = 0;
+const clip& lifContext::get_current_clip () const {
+    return m_clips.at(m_current_clip_index);
 }
 
-void lifContext::reset_clips () const
+void lifContext::reset_entire_clip (const size_t& frame_count) const
 {
-    std::lock_guard<std::mutex> guard(m_clip_mutex);
-    m_clips.resize(1);
-    m_clips[0].end = 0;
+    // Stop Playback ?
+    m_clips.clear();
+    m_clips.emplace_back(frame_count);
     m_contraction_names.resize(1);
     m_contraction_names[0] = " Entire ";
-    m_current_clip_index = 0;
+    set_current_clip_index(0);
 }
 
 
@@ -385,7 +374,7 @@ void lifContext::analyze_analyzing_button()
                       {
                           set_current_clip_index(selected_index);
                           std::cout << m_contraction_names[get_current_clip_index()] << std::endl;
-                          const lifContext::clip& clip = m_clips[get_current_clip_index()];
+                          const clip& clip = m_clips[get_current_clip_index()];
                           std::cout << clip << std::endl;
                       }
                   });
@@ -404,14 +393,14 @@ void lifContext::analyze_analyzing_button()
 // @ todo: indicate mode differently
 void lifContext::seekToEnd ()
 {
-    seekToFrame (m_clips[get_current_clip_index()].end);
+    seekToFrame (get_current_clip().last());
     assert(! m_clips.empty());
 }
 
 void lifContext::seekToStart ()
 {
     
-    seekToFrame(m_clips[get_current_clip_index()].begin);
+    seekToFrame(get_current_clip().first());
     assert(! m_clips.empty());
 }
 
@@ -436,10 +425,10 @@ time_spec_t lifContext::getCurrentTime ()
 
 void lifContext::seekToFrame (int mark)
 {
-    std::lock_guard<std::mutex> guard(m_clip_mutex);
+    const clip& curr = get_current_clip();
     
-    if (mark < m_clips[m_current_clip_index].begin || mark > m_clips[m_current_clip_index].end)
-        mark = m_clips[m_current_clip_index].begin;
+    if (mark < curr.first() || mark > curr.last())
+        mark = curr.first();
     
     m_seek_position = mark;
     mTimeMarker.from_count (m_seek_position);
@@ -839,7 +828,8 @@ void lifContext::loadCurrentSerie ()
 
     try {
         
-        reset_clips();
+        m_clips.clear();
+        
         mWidgets.clear ();
         setMedianCutOff(0);
         pause();
@@ -967,6 +957,8 @@ bool lifContext::haveTracks()
 void lifContext::update ()
 {
     if (! have_lif_serie() ) return;
+    
+
     
     mContainer.update();
     sLayoutMgr.update_window_size(getWindowSize ());

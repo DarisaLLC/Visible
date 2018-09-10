@@ -10,6 +10,7 @@
 #include "sg_filter.h"
 #include "core/core.hpp"
 #include "core/stl_utils.hpp"
+#include "logger.hpp"
 
 namespace anonymous
 {
@@ -87,10 +88,8 @@ bool contraction_analyzer::find_best () const
                 double val = 0;
                 for (int index = 0; index < count; index++)
                 {
-                    // get the actual index from rank
-                    auto jj = m_ranks[index];
-                    // fetch the cross match value for
-                    val += m_SMatrix[jj][ii];
+                    auto jj = m_ranks[index]; // get the actual index from rank
+                    val += m_SMatrix[jj][ii]; // fetch the cross match value for
                 }
                 val = val / count;
                 m_signal[ii] = val;
@@ -113,8 +112,11 @@ bool contraction_analyzer::find_best () const
             m_contractions.emplace_back(one);
             if (signal_contraction_analyzed && signal_contraction_analyzed->num_slots() > 0)
                 signal_contraction_analyzed->operator()(m_contractions);
+            std::string c0("Contraction Detected @ ");
+            c0 = c0 + to_string(one.contraction_peak.first);
+            vlogger::instance().console()->info(c0);
+            return true;
         }
-        return true;
     }
     return false;
 }

@@ -20,7 +20,7 @@ using namespace boost;
 using namespace svl;
 
 
-struct contractionLattice
+struct contractionMesh
 {
     //@note: pair representing frame number and frame time
     typedef std::pair<size_t,double> index_val_t;
@@ -32,7 +32,7 @@ struct contractionLattice
     index_val_t relaxation_end;
     
     
-    static bool equal (const contractionLattice& left, const contractionLattice& right)
+    static bool equal (const contractionMesh& left, const contractionMesh& right)
     {
         bool ok = left.contraction_start == right.contraction_start;
         if (! ok) return ok;
@@ -46,12 +46,12 @@ struct contractionLattice
         return ok;
     }
     
-    static void clear (contractionLattice& ct)
+    static void clear (contractionMesh& ct)
     {
-        std::memset(&ct, 0, sizeof(contractionLattice));
+        std::memset(&ct, 0, sizeof(contractionMesh));
     }
     
-    static void fill (const index_val_t& peak, const std::pair<size_t,size_t>& start_end, contractionLattice& fillthis)
+    static void fill (const index_val_t& peak, const std::pair<size_t,size_t>& start_end, contractionMesh& fillthis)
     {
         fillthis.contraction_peak = peak;
         fillthis.contraction_start.first = peak.first + start_end.first;
@@ -71,8 +71,8 @@ class contraction_analyzer : public ca_signaler, std::enable_shared_from_this<co
 {
 public:
     
-    using contraction = contractionLattice;
-    using index_val_t = contractionLattice::index_val_t;
+    using contraction = contractionMesh;
+    using index_val_t = contractionMesh::index_val_t;
     
     // Signals we provide
     // signal_contraction_available
@@ -179,10 +179,10 @@ public:
     
     void check_contraction_point (size_t p_index) {}
     
-    bool measure_contraction_at_point (const size_t p_index, contractionLattice& mctr)
+    bool measure_contraction_at_point (const size_t p_index, contractionMesh& mctr)
     {
         if (! m_valid) return false;
-        contractionLattice::clear(mctr);
+        contractionMesh::clear(mctr);
         mctr.contraction_peak.first = p_index;
         
         // find first element greater than 0.1
@@ -220,7 +220,7 @@ public:
         measure_contraction_at_point(m_ctr.contraction_peak.first, m_ctr);
     }
     
-    const contractionLattice& pols () const { return m_ctr; }
+    const contractionMesh& pols () const { return m_ctr; }
     
 private:
     typedef vector<double>::iterator dItr_t;
@@ -229,7 +229,7 @@ private:
     unsigned long m_median_window;
     size_t m_minimum_contraction_width;
     
-    mutable contractionLattice m_ctr;
+    mutable contractionMesh m_ctr;
     mutable std::vector<double> m_fder;
     mutable std::vector<double> m_fder_filtered;
     mutable bool m_valid;

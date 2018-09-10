@@ -2,6 +2,7 @@
 #define __LIFContext___h
 
 #include "algo_Lif.hpp"
+#include "clipManager.hpp"
 
 using namespace tinyUi;
 
@@ -16,28 +17,15 @@ using namespace params;
 using namespace std;
 namespace fs = boost::filesystem;
 
+typedef std::shared_ptr<class lifContext> lifContextRef;
+
 class lifContext : public sequencedImageContext
 {
 public:
     
     using contractionContainer_t = lif_processor::contractionContainer_t;
     
-	struct clip
-    {
-        size_t begin;
-        size_t end;
-        size_t anchor;
-        
-        friend std::ostream& operator<< (std::ostream& out, const lifContext::clip& se)
-        {
-            out << "Begin:    " << se.begin << std::endl;
-            out << "End: " << se.end << std::endl;
-            out << "Anchor  " << se.anchor << std::endl;
-            return out;
-        }
-    };
-    
-    
+  
     enum Side_t : uint32_t
     {
         major = 0,
@@ -86,7 +74,10 @@ public:
 	// From just a name, use the open file dialog to get the file
 	// From a name and a path
 	lifContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
-	
+    lifContext* shared_from_above () {
+        return static_cast<lifContext*>(((guiContext*)this)->shared_from_this().get());
+    }
+    
 	Signal <void(bool)> signalManualEditMode;
 	
 	static const std::string& caption () { static std::string cp ("Lif Viewer # "); return cp; }
@@ -147,6 +138,10 @@ public:
 	const tiny_media_info& media () const { return mMediaInfo; }
     const uint32_t& channel_count () const { return mChannelCount; }
     
+    // Navigation
+    void play ();
+    void pause ();
+    bool isPlaying () const { return m_is_playing; }
     
 private:
     // LIF Support
@@ -161,6 +156,8 @@ private:
     std::shared_ptr<lifIO::LifSerie> m_current_serie_ref;
     series_info m_serie;
     boost::filesystem::path mPath;
+    int m_cur_selected_index;
+    int m_prev_selected_index;
     
     // Callbacks
     void signal_content_loaded (int64_t&);
@@ -176,12 +173,9 @@ private:
     int get_current_clip_index () const;
     void set_current_clip_index (int cindex) const;
     void reset_entire_clip (const size_t& frame_count) const;
-    void reset_clips () const;
-    int m_cur_selected_index;
-    int m_prev_selected_index;
+    const clip& get_current_clip () const;
     mutable volatile int m_current_clip_index;
-    mutable std::deque<clip> m_clips;
-    mutable clip m_entire;
+    mutable std::vector<clip> m_clips;
     mutable std::mutex m_clip_mutex;
     
     // Frame Cache and frame store
@@ -233,8 +227,6 @@ private:
     void add_plots ();
     
     // Navigation
-    void play ();
-    void pause ();
     void update_log (const std::string& meg = "");
     bool looping ();
     void looping (bool what);
@@ -262,5 +254,23 @@ private:
 
 };
 
+class scopedPause : private Noncopyable {
+public:
+    scopedPause (const lifContextRef& ref) : weakLif(ref) {
+        if (! weakLif){
+            if (weakLif->isPlaying())
+                weakLif->play_pause_button();
+        }
+    }
+    ~scopedPause (){
+        if (! weakLif ){
+            if (! weakLif->isPlaying()){
+                weakLif->play_pause_button();
+            }
+        }
+    }
+private:
+    std::shared_ptr<lifContext> weakLif;
+};
 
 #endif

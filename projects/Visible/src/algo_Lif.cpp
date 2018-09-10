@@ -28,6 +28,8 @@
 #include "contraction.hpp"
 #include "vision/localvariance.h"
 #include "algo_Lif.hpp"
+#include "logger.hpp"
+
 lif_processor::lif_processor ()
 {
     // Signals we provide
@@ -60,8 +62,8 @@ lif_processor::lif_processor ()
     boost::signals2::connection mat_connection = registerCallback(mats_available_cb);
     
     // Signal us when we have pci mat channels are ready to run contraction analysis
-    std::function<void (int&)> sm1dmed_available_cb = boost::bind (&lif_processor::pci_done, this);
-    boost::signals2::connection nl_connection = registerCallback(sm1dmed_available_cb);
+    //std::function<void (int&)> sm1dmed_available_cb = boost::bind (&lif_processor::pci_done, this);
+    //boost::signals2::connection nl_connection = registerCallback(sm1dmed_available_cb);
     
     // Signal us when 3d stats are ready
     std::function<void ()>_3dstats_done_cb = boost::bind (&lif_processor::stats_3d_computed, this);
@@ -215,6 +217,7 @@ void lif_processor::contraction_analyzed (contractionContainer_t& contractions)
         contractionContainer_t copied = m_caRef->contractions();
         signal_contraction_available->operator()(copied);
     }
+     vlogger::instance().console()->info(" Contractions Analyzed: ");
 }
 
 void lif_processor:: channelmats_available (int& channel_index){
@@ -224,13 +227,14 @@ void lif_processor:: channelmats_available (int& channel_index){
         int ci = channel_index;
         signal_channelmats_available->operator()(ci);
     }
-    
+     vlogger::instance().console()->info(" Channels Available: ");
 }
 void lif_processor::sm_content_loaded ()
 {
-    std::cout << "----------> sm content_loaded\n";
+    vlogger::instance().console()->info(" Similarity Image Data Loaded ");
     int channel_to_use = m_channel_count - 1;
     loadImagesToMats(channel_to_use);
+    vlogger::instance().console()->info(" cv::Mat generation dispatched ");
 }
 
 
