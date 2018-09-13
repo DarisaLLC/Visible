@@ -56,6 +56,7 @@
 		C248DD2C1F64601A00FF72B1 /* AudioDrawUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */; };
 		C248DD2D1F646A1200FF72B1 /* AudioDrawUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */; };
 		C24C0956214A1F71004C8002 /* palette.png in Copy Image Files */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
+		C24C0957214AC0DF004C8002 /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946771CE4DC7100976025 /* VisibleApp.cpp */; };
 		C24CD87F1CEA5B1B0008C72B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
 		C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
 		C24CD8891CEA916E0008C72B /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
@@ -130,7 +131,7 @@
 		C2606DB01CED3E2E0045FF57 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
 		C2606DB11CED3E2E0045FF57 /* registration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696F1CED3E2C0045FF57 /* registration.cpp */; };
 		C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069701CED3E2C0045FF57 /* rowfunc.cpp */; };
-		C2606E721CED44370045FF57 /* qtime_frame_cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */; };
+		C2606E721CED44370045FF57 /* seq_frame_container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* seq_frame_container.cpp */; };
 		C2606EA51CEE0E660045FF57 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
 		C2677585212A325F00B5E080 /* contraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction.cpp */; };
 		C2677586212A325F00B5E080 /* contraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction.cpp */; };
@@ -151,7 +152,7 @@
 		C26A05551E7762B500BDC954 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B20FF439BC000DE1D7 /* CoreAudio.framework */; };
 		C26A05591E77744300BDC954 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
 		C26A055A1E7774B600BDC954 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
-		C26A055B1E7774D800BDC954 /* qtime_frame_cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */; };
+		C26A055B1E7774D800BDC954 /* seq_frame_container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* seq_frame_container.cpp */; };
 		C26A055C1E77750C00BDC954 /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBF1CF277130074C47A /* self_similarity.cpp */; };
 		C26A055D1E77759D00BDC954 /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
 		C26A055E1E7775A700BDC954 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
@@ -236,12 +237,11 @@
 		C2E60A0B21200A7F00059FA6 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8851CEA916E0008C72B /* libboost_system.a */; };
 		C2E60A0C21200A7F00059FA6 /* libboost_thread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8861CEA916E0008C72B /* libboost_thread.a */; };
 		C2EF8D132148709300A5D3D6 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0E2148709300A5D3D6 /* logger.cpp */; };
-		C2EF8D1D2148760300A5D3D6 /* LifBrowserApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* LifBrowserApp.cpp */; };
 		C2EF8D1E2148768800A5D3D6 /* Item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0D2148709300A5D3D6 /* Item.cpp */; };
 		C2EF8D1F2148768D00A5D3D6 /* Swatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */; };
 		C2FA97191E82EFB1006EC61E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2FA97181E82EFB1006EC61E /* Images.xcassets */; };
 		C2FB69D92134C3E800DDEFCA /* visible_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946761CE4DC7100976025 /* visible_impl.cpp */; };
-		C2FC7DAF1CF4F46100D18193 /* qtime_frame_cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */; };
+		C2FC7DAF1CF4F46100D18193 /* seq_frame_container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* seq_frame_container.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -330,7 +330,7 @@
 		C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AudioDrawUtils.cpp; path = ../src/AudioDrawUtils.cpp; sourceTree = "<group>"; };
 		C21946691CE4DC7100976025 /* directoryPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = directoryPlayer.cpp; path = ../src/directoryPlayer.cpp; sourceTree = "<group>"; };
 		C219466D1CE4DC7100976025 /* InteractiveObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InteractiveObject.cpp; path = ../src/InteractiveObject.cpp; sourceTree = "<group>"; };
-		C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = qtime_frame_cache.cpp; path = ../src/qtime_frame_cache.cpp; sourceTree = "<group>"; };
+		C21946741CE4DC7100976025 /* seq_frame_container.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = seq_frame_container.cpp; path = ../src/seq_frame_container.cpp; sourceTree = "<group>"; };
 		C21946761CE4DC7100976025 /* visible_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_impl.cpp; path = ../src/visible_impl.cpp; sourceTree = "<group>"; };
 		C21946771CE4DC7100976025 /* VisibleApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VisibleApp.cpp; path = ../src/VisibleApp.cpp; sourceTree = "<group>"; };
 		C219468A1CE4EA4900976025 /* AudioDrawUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioDrawUtils.h; path = ../include/AudioDrawUtils.h; sourceTree = "<group>"; };
@@ -341,7 +341,7 @@
 		C219469E1CE4EA4900976025 /* simple_pair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = simple_pair.h; path = ../include/simple_pair.h; sourceTree = "<group>"; };
 		C219469F1CE4EA4900976025 /* sshist.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sshist.hpp; path = ../include/sshist.hpp; sourceTree = "<group>"; };
 		C21946A31CE4EA4900976025 /* guiContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = guiContext.h; path = ../include/guiContext.h; sourceTree = "<group>"; usesTabs = 1; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
-		C21946AC1CE4EA4900976025 /* qtime_frame_cache.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = qtime_frame_cache.hpp; path = ../include/qtime_frame_cache.hpp; sourceTree = "<group>"; };
+		C21946AC1CE4EA4900976025 /* seq_frame_container.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = seq_frame_container.hpp; path = ../include/seq_frame_container.hpp; sourceTree = "<group>"; };
 		C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer_impl.h; path = ../include/sm_producer_impl.h; sourceTree = "<group>"; };
 		C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer.h; path = ../include/sm_producer.h; sourceTree = "<group>"; };
 		C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sm_producer.cpp; path = ../src/sm_producer.cpp; sourceTree = "<group>"; };
@@ -481,9 +481,8 @@
 		C26009E21CED3E010045FF57 /* cinder_xchg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cinder_xchg.hpp; sourceTree = "<group>"; };
 		C26009E31CED3E010045FF57 /* editableRectangle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = editableRectangle.hpp; sourceTree = "<group>"; };
 		C26009EB1CED3E010045FF57 /* angle_units.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = angle_units.h; sourceTree = "<group>"; };
-		C26009EC1CED3E010045FF57 /* ConcurrentDeque.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = ConcurrentDeque.h; sourceTree = "<group>"; };
-		C26009ED1CED3E010045FF57 /* ConcurrentMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConcurrentMap.h; sourceTree = "<group>"; };
-		C26009EE1CED3E010045FF57 /* ConcurrentQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConcurrentQueue.h; sourceTree = "<group>"; };
+		C26009EC1CED3E010045FF57 /* file_system.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = file_system.hpp; sourceTree = "<group>"; };
+		C26009EE1CED3E010045FF57 /* concurrent_containers.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = concurrent_containers.hpp; sourceTree = "<group>"; };
 		C26009EF1CED3E010045FF57 /* core.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = core.hpp; sourceTree = "<group>"; };
 		C26009F01CED3E010045FF57 /* cv_gabor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cv_gabor.hpp; sourceTree = "<group>"; };
 		C26009F11CED3E010045FF57 /* fit.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = fit.hpp; sourceTree = "<group>"; };
@@ -827,7 +826,7 @@
 				C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */,
 				C21946691CE4DC7100976025 /* directoryPlayer.cpp */,
 				C219466D1CE4DC7100976025 /* InteractiveObject.cpp */,
-				C21946741CE4DC7100976025 /* qtime_frame_cache.cpp */,
+				C21946741CE4DC7100976025 /* seq_frame_container.cpp */,
 				C21946761CE4DC7100976025 /* visible_impl.cpp */,
 				C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */,
 				C221D9181E4B130400AF74CE /* visible_mov_dir_impl.cpp */,
@@ -1018,7 +1017,7 @@
 				C2BF1A671E71D12200A30407 /* timeMarker.h */,
 				C2C68C3B1ED9F9440095FFC4 /* tracker.h */,
 				C2601BB41E674F88004415A3 /* visible_layout.hpp */,
-				C21946AC1CE4EA4900976025 /* qtime_frame_cache.hpp */,
+				C21946AC1CE4EA4900976025 /* seq_frame_container.hpp */,
 				C29F43581CFA8D9B008EE460 /* time_index_cache.h */,
 				C2E322001D05B90C006DFE5E /* time_index.h */,
 				C2601BBE1E6B5C78004415A3 /* getLuminanceAlgo.hpp */,
@@ -1219,9 +1218,8 @@
 				C20EDBC51CF277480074C47A /* timestamp.h */,
 				C2606E731CEE05320045FF57 /* svl_exception.hpp */,
 				C26009EB1CED3E010045FF57 /* angle_units.h */,
-				C26009EC1CED3E010045FF57 /* ConcurrentDeque.h */,
-				C26009ED1CED3E010045FF57 /* ConcurrentMap.h */,
-				C26009EE1CED3E010045FF57 /* ConcurrentQueue.h */,
+				C26009EC1CED3E010045FF57 /* file_system.hpp */,
+				C26009EE1CED3E010045FF57 /* concurrent_containers.hpp */,
 				C26009EF1CED3E010045FF57 /* core.hpp */,
 				C26009F01CED3E010045FF57 /* cv_gabor.hpp */,
 				C26009F11CED3E010045FF57 /* fit.hpp */,
@@ -1639,7 +1637,7 @@
 				C254BECB1F4FB02500977307 /* OcvVideo.cpp in Sources */,
 				C20EDBC31CF277130074C47A /* time_spec.cpp in Sources */,
 				C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */,
-				C2FC7DAF1CF4F46100D18193 /* qtime_frame_cache.cpp in Sources */,
+				C2FC7DAF1CF4F46100D18193 /* seq_frame_container.cpp in Sources */,
 				C2B38A571D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
 				C2A5DBAD207A003F001C6608 /* Plist.cpp in Sources */,
 				C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */,
@@ -1662,10 +1660,10 @@
 				C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */,
 				C2606DAB1CED3E2E0045FF57 /* ip_utils.cpp in Sources */,
 				C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */,
+				C24C0957214AC0DF004C8002 /* VisibleApp.cpp in Sources */,
 				C254BE841F4F912E00977307 /* csv.cpp in Sources */,
 				C24EA2D3207F07EF00555D16 /* sg_filter.cpp in Sources */,
 				C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */,
-				C2EF8D1D2148760300A5D3D6 /* LifBrowserApp.cpp in Sources */,
 				C2606DAC1CED3E2E0045FF57 /* labelconnect.cpp in Sources */,
 				C2606DB11CED3E2E0045FF57 /* registration.cpp in Sources */,
 				C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */,
@@ -1717,7 +1715,7 @@
 				C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */,
 				C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */,
 				C20BBC031E4E33CE002C7D68 /* tinystr.cpp in Sources */,
-				C2606E721CED44370045FF57 /* qtime_frame_cache.cpp in Sources */,
+				C2606E721CED44370045FF57 /* seq_frame_container.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1744,7 +1742,7 @@
 				C26A056A1E777E3600BDC954 /* matpixel.cpp in Sources */,
 				C26A055F1E7775A700BDC954 /* AVReaderWrapper.mm in Sources */,
 				C26A05661E777E1000BDC954 /* time_spec.cpp in Sources */,
-				C26A055B1E7774D800BDC954 /* qtime_frame_cache.cpp in Sources */,
+				C26A055B1E7774D800BDC954 /* seq_frame_container.cpp in Sources */,
 				C26A056D1E777E6B00BDC954 /* exception.cpp in Sources */,
 				C26A05671E777E2100BDC954 /* tinyxml.cpp in Sources */,
 				C26A055E1E7775A700BDC954 /* AVReader.mm in Sources */,

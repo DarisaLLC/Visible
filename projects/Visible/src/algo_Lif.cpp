@@ -186,7 +186,7 @@ std::weak_ptr<contraction_analyzer> lif_processor::contractionWeakRef ()
 }
 
 
-int64_t lif_processor::load (const std::shared_ptr<qTimeFrameCache>& frames,const std::vector<std::string>& names)
+int64_t lif_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names)
 {
     create_named_tracks(names);
     load_channels_from_images(frames);
@@ -352,7 +352,7 @@ void lif_processor::loadImagesToMats (const int channel_index)
 //}
 // Assumes LIF data -- use multiple window.
 // @todo condider creating cv::Mats and convert to roiWindow when needed.
-void lif_processor::load_channels_from_images (const std::shared_ptr<qTimeFrameCache>& frames)
+void lif_processor::load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames)
 {
     
     m_frameCount = 0;

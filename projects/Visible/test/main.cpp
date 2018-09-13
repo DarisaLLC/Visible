@@ -14,7 +14,7 @@
 #include "opencv2/highgui.hpp"
 #include "roiWindow.h"
 #include "vision/self_similarity.h"
-#include "qtime_frame_cache.hpp"
+#include "seq_frame_container.hpp"
 #include "cinder/ImageIO.h"
 #include "cinder_xchg.hpp"
 #include "ut_sm.hpp"
@@ -355,7 +355,7 @@ TEST (UT_algo, AVReader)
     rref->setUserDoneCallBack(done_callback);
     
     rref->run ();
-    std::shared_ptr<qTimeFrameCache> sm = qTimeFrameCache::create(rref);
+    std::shared_ptr<seqFrameContainer> sm = seqFrameContainer::create(rref);
     
     EXPECT_TRUE(rref->isValid());
     EXPECT_TRUE(sm->count() == 57);
@@ -477,7 +477,7 @@ TEST (UT_mov_processor, basic)
     
     EXPECT_TRUE(m_movie->isLoaded());
         
-    auto mFrameSet = qTimeFrameCache::create (m_movie);
+    auto mFrameSet = seqFrameContainer::create (m_movie);
     std::vector<mov_processor::channel_images_t> channels;
     mov_processor::load_channels_from_images(mFrameSet, channels);
     
@@ -585,7 +585,7 @@ TEST (UT_QtimeCache, run)
     m_movie = qtime::MovieSurface::create( test_filepath.string() );
     EXPECT_TRUE(m_movie->isPlayable ());
     
-    std::shared_ptr<qTimeFrameCache> sm = qTimeFrameCache::create(m_movie);
+    std::shared_ptr<seqFrameContainer> sm = seqFrameContainer::create(m_movie);
     
     Surface8uRef s8 = ci::Surface8u::create(123, 321, false);
     time_spec_t t0 = 0.0f;

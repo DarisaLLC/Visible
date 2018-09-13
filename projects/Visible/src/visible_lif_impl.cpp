@@ -822,7 +822,7 @@ void lifContext::loadCurrentSerie ()
         
         // Create the frameset and assign the channel names
         // Fetch the media info
-        mFrameSet = qTimeFrameCache::create (*m_current_serie_ref);
+        mFrameSet = seqFrameContainer::create (*m_current_serie_ref);
         
         if (! mFrameSet || ! mFrameSet->isValid())
         {

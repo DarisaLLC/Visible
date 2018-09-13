@@ -25,7 +25,7 @@
 #include <boost/cstdint.hpp>
 
 #include "timestamp.h"
-#include "qtime_frame_cache.hpp"
+#include "seq_frame_container.hpp"
 
 #include "graph1d.hpp"
 #include "roiWindow.h"

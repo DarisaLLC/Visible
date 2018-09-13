@@ -346,7 +346,7 @@ int sm_producer::spImpl::loadMovie( const std::string& movieFile )
     {
         m_assetReader->info().printout();
         m_assetReader->run();
-        m_qtime_cache_ref = qTimeFrameCache::create (m_assetReader);
+        m_qtime_cache_ref = seqFrameContainer::create (m_assetReader);
         
         // Now load every frame, convert and update vector
         m_loaded_ref.resize(0);

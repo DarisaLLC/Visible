@@ -1,5 +1,5 @@
 
-#include "qtime_frame_cache.hpp"
+#include "seq_frame_container.hpp"
 #include <iterator>
 #include "core/stl_utils.hpp"
 #include "cinder_xchg.hpp"
@@ -57,9 +57,9 @@ namespace anonymous
         }
     }
 }
-std::string qTimeFrameCache::getName () const { return "qTimeFrameCache"; }
+std::string seqFrameContainer::getName () const { return "qTimeFrameCache"; }
 
-std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifserie)
+std::shared_ptr<seqFrameContainer> seqFrameContainer::create (lifIO::LifSerie& lifserie)
 {
     std::vector<std::string> names { "green", "red", "gray" };
     
@@ -79,7 +79,7 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifse
     cm_time frame_time;
     
     
-    qTimeFrameCache::ref thisref (new qTimeFrameCache(tm));
+    seqFrameContainer::ref thisref (new seqFrameContainer(tm));
     
     thisref->channel_names (names);
     
@@ -130,7 +130,7 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (lifIO::LifSerie& lifse
 }
 
 
-std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ocvPlayerRef& mMovie)
+std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const ocvPlayerRef& mMovie)
 {
     tiny_media_info minfo;
     minfo.size.width = mMovie->getSize().x;
@@ -138,12 +138,12 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ocvPlayerRef& mM
     minfo.mFps = mMovie->getFrameRate();
     minfo.count = mMovie->getNumFrames ();
     minfo.duration = mMovie->getDuration();
-    qTimeFrameCache::ref thisref (new qTimeFrameCache(minfo));
+    seqFrameContainer::ref thisref (new seqFrameContainer(minfo));
     return thisref;
     
 }
 
-std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ci::qtime::MovieSurfaceRef& mMovie)
+std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const ci::qtime::MovieSurfaceRef& mMovie)
 {
     tiny_media_info minfo;
     minfo.size.width = mMovie->getWidth();
@@ -151,12 +151,12 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ci::qtime::Movie
     minfo.mFps = mMovie->getFramerate();
     minfo.count = mMovie->getNumFrames ();
     minfo.duration = mMovie->getDuration();
-    qTimeFrameCache::ref thisref (new qTimeFrameCache(minfo));
+    seqFrameContainer::ref thisref (new seqFrameContainer(minfo));
     return thisref;
     
 }
 
-std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ci::qtime::MovieGlRef& mMovie)
+std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const ci::qtime::MovieGlRef& mMovie)
 {
     tiny_media_info minfo;
     minfo.size.width = mMovie->getWidth();
@@ -164,14 +164,14 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const ci::qtime::Movie
     minfo.mFps = mMovie->getFramerate();
     minfo.count = mMovie->getNumFrames ();
     minfo.duration = mMovie->getDuration();
-    qTimeFrameCache::ref thisref (new qTimeFrameCache(minfo));
+    seqFrameContainer::ref thisref (new seqFrameContainer(minfo));
     return thisref;
     
 }
 
-std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const std::shared_ptr<avcc::avReader>& asset_reader)
+std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const std::shared_ptr<avcc::avReader>& asset_reader)
 {
-    qTimeFrameCache::ref thisref (new qTimeFrameCache(asset_reader->info()));
+    seqFrameContainer::ref thisref (new seqFrameContainer(asset_reader->info()));
     while (! asset_reader->isEmpty())
     {
         cm_time ts;
@@ -183,13 +183,13 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const std::shared_ptr<
 }
 
 
-std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const std::vector<ci::Surface8uRef>& folderImages)
+std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const std::vector<ci::Surface8uRef>& folderImages)
 {
     tiny_media_info minfo;
     minfo.mFps = 1.0;
     minfo.count = static_cast<uint32_t>(folderImages.size());
     minfo.duration = 1.0;
-    qTimeFrameCache::ref thisref (new qTimeFrameCache(minfo));
+    seqFrameContainer::ref thisref (new seqFrameContainer(minfo));
     cm_time ts;
     cm_time duration (minfo.duration);
     for (auto iitr = folderImages.begin(); iitr < folderImages.end(); iitr++)
@@ -200,13 +200,13 @@ std::shared_ptr<qTimeFrameCache> qTimeFrameCache::create (const std::vector<ci::
     return thisref;
 }
 
-qTimeFrameCache::qTimeFrameCache () : mValid(false)
+seqFrameContainer::seqFrameContainer () : mValid(false)
 {
     m_time_hist.resize (0);
     m_stats.first = m_stats.second = 0;
 }
 
-qTimeFrameCache::qTimeFrameCache ( const tiny_media_info& info ) : tiny_media_info(info)
+seqFrameContainer::seqFrameContainer ( const tiny_media_info& info ) : tiny_media_info(info)
 {
     m_time_hist.resize (0);
     m_stats.first = m_stats.second = 0;
@@ -218,7 +218,7 @@ qTimeFrameCache::qTimeFrameCache ( const tiny_media_info& info ) : tiny_media_in
  * Returns a shared_ptr to frame. Valid until that frame is still alive.
  */
 
-const Surface8uRef  qTimeFrameCache::getFrame (int64_t offset) const
+const Surface8uRef  seqFrameContainer::getFrame (int64_t offset) const
 {
     std::unique_lock<std::mutex> lock( mMutex , std::try_to_lock);
     Surface8uRef s8;
@@ -237,7 +237,7 @@ const Surface8uRef  qTimeFrameCache::getFrame (int64_t offset) const
  * Returns a shared_ptr to frame. Valid until that frame is still alive.
  */
 
-const Surface8uRef qTimeFrameCache::getFrame(const time_spec_t& dtime) const
+const Surface8uRef seqFrameContainer::getFrame(const time_spec_t& dtime) const
 {
     std::unique_lock<std::mutex> lock( mMutex, std::try_to_lock );
     Surface8uRef s8;
@@ -252,32 +252,32 @@ const Surface8uRef qTimeFrameCache::getFrame(const time_spec_t& dtime) const
     
 }
 
-size_t qTimeFrameCache::count () const { return mFrames.size(); }
+size_t seqFrameContainer::count () const { return mFrames.size(); }
 
-bool qTimeFrameCache::checkFrame (const time_spec_t& dtime) const
+bool seqFrameContainer::checkFrame (const time_spec_t& dtime) const
 {
     return _checkFrame(dtime) != m_itIter.end();
 }
 
 
-bool qTimeFrameCache::checkFrame (int64_t offset) const
+bool seqFrameContainer::checkFrame (int64_t offset) const
 {
     return _checkFrame(offset) != m_itIter.end();
 }
 
-bool qTimeFrameCache::isValid () const
+bool seqFrameContainer::isValid () const
 {
     if (mValid) return !mFrames.empty();
     return mValid;
 }
 
-tiny_media_info& qTimeFrameCache::media_info ()
+tiny_media_info& seqFrameContainer::media_info ()
 {
     return *((tiny_media_info*) this);
 }
 
 
-const std::ostream& qTimeFrameCache::print_to_ (std::ostream& std_stream)
+const std::ostream& seqFrameContainer::print_to_ (std::ostream& std_stream)
 {
     std_stream << (tiny_media_info*)this << std::endl;
     std_stream << "Hits:    " << m_stats.first << std::endl;
@@ -285,7 +285,7 @@ const std::ostream& qTimeFrameCache::print_to_ (std::ostream& std_stream)
     return std_stream;
 }
 
-const std::ostream&  qTimeFrameCache::index_info (std::ostream& std_stream){
+const std::ostream&  seqFrameContainer::index_info (std::ostream& std_stream){
     std_stream << m_itIter;
     return std_stream;
 }
@@ -293,7 +293,7 @@ const std::ostream&  qTimeFrameCache::index_info (std::ostream& std_stream){
 /*
  * Increment the time histogram if the new time stamp is increasing.
  */
-bool qTimeFrameCache::make_unique_increasing_time_indices (const time_spec_t& tic, index_time_t& outi)
+bool seqFrameContainer::make_unique_increasing_time_indices (const time_spec_t& tic, index_time_t& outi)
 {
     bool check = m_time_hist.empty() || tic > m_time_hist.back();
     if (!check) return check;
@@ -304,7 +304,7 @@ bool qTimeFrameCache::make_unique_increasing_time_indices (const time_spec_t& ti
 }
 
 
-bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const index_time_t& tid )
+bool seqFrameContainer::loadFrame (const Surface8uRef frame, const index_time_t& tid )
 {
     std::unique_lock <std::mutex> lock( mMutex , std::try_to_lock );
     
@@ -323,7 +323,7 @@ bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const index_time_t& t
  * Return true of frame was loaded, false if it was already in cache
  */
 
-bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const time_spec_t& tic )
+bool seqFrameContainer::loadFrame (const Surface8uRef frame, const time_spec_t& tic )
 {
     std::unique_lock <std::mutex> lock( mMutex , std::try_to_lock );
     assert(frame );
@@ -345,7 +345,7 @@ bool qTimeFrameCache::loadFrame (const Surface8uRef frame, const time_spec_t& ti
  * The end iterator is returned if entry is not found.
  */
 
-int64_t qTimeFrameCache::indexFromTime (const time_spec_t& time) const
+int64_t seqFrameContainer::indexFromTime (const time_spec_t& time) const
 {
     std::unique_lock<std::mutex> lock( mMutex, std::try_to_lock );
     
@@ -355,12 +355,12 @@ int64_t qTimeFrameCache::indexFromTime (const time_spec_t& time) const
     return std::distance(m_itIter.begin(), ci);
 }
 
-const index_time_t& qTimeFrameCache::currentIndexTime () const
+const index_time_t& seqFrameContainer::currentIndexTime () const
 {
     return mCurrentIndexTime;
 }
 
-qTimeFrameCache::indexToContainer::const_iterator qTimeFrameCache::_checkFrame (const time_spec_t& query_time) const
+seqFrameContainer::indexToContainer::const_iterator seqFrameContainer::_checkFrame (const time_spec_t& query_time) const
 {
     std::unique_lock<std::mutex> lock( mMutex, std::try_to_lock );
     
@@ -385,12 +385,12 @@ qTimeFrameCache::indexToContainer::const_iterator qTimeFrameCache::_checkFrame (
     
 }
 
-qTimeFrameCache::indexToContainer::const_iterator qTimeFrameCache::_checkFrame (const int64_t query_index) const
+seqFrameContainer::indexToContainer::const_iterator seqFrameContainer::_checkFrame (const int64_t query_index) const
 {
     return m_itIter.find(query_index);
 }
 
-size_t qTimeFrameCache::convertTo(std::vector<roiWindow<P8U> >& dst)
+size_t seqFrameContainer::convertTo(std::vector<roiWindow<P8U> >& dst)
 {
     dst.clear ();
     
@@ -403,8 +403,8 @@ size_t qTimeFrameCache::convertTo(std::vector<roiWindow<P8U> >& dst)
     return dst.size();
 }
 
-const std::vector<std::string>& qTimeFrameCache::channel_names () const { return m_names; }
-void qTimeFrameCache::channel_names (const std::vector<std::string>& cnames) const { m_names = cnames; }
+const std::vector<std::string>& seqFrameContainer::channel_names () const { return m_names; }
+void seqFrameContainer::channel_names (const std::vector<std::string>& cnames) const { m_names = cnames; }
 
 
 

@@ -31,10 +31,10 @@ typedef std::pair<SurfaceRef, index_time_t> SurTiIndexRef_t;
 
 typedef std::function<SurfaceRef ()> getSurfaceCb_t;
 
-class qTimeFrameCache : public tiny_media_info, public std::enable_shared_from_this<qTimeFrameCache>
+class seqFrameContainer : public tiny_media_info, public std::enable_shared_from_this<seqFrameContainer>
 {
 public:
-    typedef std::shared_ptr<qTimeFrameCache> ref;
+    typedef std::shared_ptr<seqFrameContainer> ref;
     typedef std::map<time_spec_t, int64_t> timeToIndex;
     typedef std::map<int64_t, time_spec_t> indexToTime;
     typedef std::vector<SurTiIndexRef_t> container_t;
@@ -42,20 +42,20 @@ public:
     typedef std::map<int64_t, container_index_t > indexToContainer;
     
     // Cinder Movie requires rendering though the App
-    static std::shared_ptr<qTimeFrameCache> create (const ci::qtime::MovieSurfaceRef& movie);
-    static std::shared_ptr<qTimeFrameCache> create (const ci::qtime::MovieGlRef& movie);
+    static std::shared_ptr<seqFrameContainer> create (const ci::qtime::MovieSurfaceRef& movie);
+    static std::shared_ptr<seqFrameContainer> create (const ci::qtime::MovieGlRef& movie);
     
     // OpenCv based movie reader
-    static std::shared_ptr<qTimeFrameCache> create (const ocvPlayerRef&);
+    static std::shared_ptr<seqFrameContainer> create (const ocvPlayerRef&);
     
     // Offline movie loader
-    static std::shared_ptr<qTimeFrameCache> create (const std::shared_ptr<avcc::avReader>& assetReader);
+    static std::shared_ptr<seqFrameContainer> create (const std::shared_ptr<avcc::avReader>& assetReader);
     
     // From directory of images
-    static std::shared_ptr<qTimeFrameCache> create (const std::vector<ci::Surface8uRef>& folderImages);
+    static std::shared_ptr<seqFrameContainer> create (const std::vector<ci::Surface8uRef>& folderImages);
     
     // From LIF files
-    static std::shared_ptr<qTimeFrameCache> create (lifIO::LifSerie&);
+    static std::shared_ptr<seqFrameContainer> create (lifIO::LifSerie&);
     
 
     // todo: also return index to time mapping 
@@ -103,8 +103,8 @@ private:
     // Initializes for the movie. Frame indices are generated for unique increasing time stamps.
     // time-stamped Frames are copied and cached at the first load. Further references to the frame
     // by time stamp or index is from cache.
-    qTimeFrameCache ( const tiny_media_info& );
-    qTimeFrameCache ();
+    seqFrameContainer ( const tiny_media_info& );
+    seqFrameContainer ();
     
     bool loadFrame (const Surface8uRef, const index_time_t&);
     indexToContainer::const_iterator _checkFrame (const int64_t) const;

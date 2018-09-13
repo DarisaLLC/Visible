@@ -53,7 +53,7 @@ public:
     
     
     // Assumes RGB
-    static void load_channels_from_images (const std::shared_ptr<qTimeFrameCache>& frames,  std::vector<channel_images_t>& channels)
+    static void load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames,  std::vector<channel_images_t>& channels)
     {
         int64_t fn = 0;
         channels.clear();
@@ -79,7 +79,7 @@ protected:
     
 public:
     // Run to get Entropies and Median Level Set
-    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run (const std::shared_ptr<qTimeFrameCache>& frames, const std::vector<std::string>& names,
+    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  run (const std::shared_ptr<seqFrameContainer>& frames, const std::vector<std::string>& names,
                                                 bool test_data = false)
     {
         mov_processor::load_channels_from_images(frames, m_all_by_channel);

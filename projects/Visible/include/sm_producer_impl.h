@@ -19,7 +19,7 @@
 #include <condition_variable>
 
 #include "roiWindow.h"
-#include "qtime_frame_cache.hpp"
+#include "seq_frame_container.hpp"
 #include "avReader.hpp"
 
 #include "sm_producer.h"
@@ -114,7 +114,7 @@ private:
     mutable long m_index, m_must_stop, m_frame;
     
     std::shared_ptr<avcc::avReader>    m_assetReader;
-    std::shared_ptr<qTimeFrameCache>   m_qtime_cache_ref;
+    std::shared_ptr<seqFrameContainer>   m_qtime_cache_ref;
 
     std::queue<float> m_queue;
     paths_vector_t m_framePaths;

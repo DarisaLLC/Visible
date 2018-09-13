@@ -13,7 +13,7 @@
 #include "core/bitvector.h"
 #include "timestamp.h"
 #include "time_index.h"
-#include "qtime_frame_cache.hpp"
+#include "seq_frame_container.hpp"
 #include "async_producer.h"
 
 using namespace svl;
@@ -58,7 +58,7 @@ public:
 protected:
     progress_fn_t mProgressReporter;
     std::vector<std::string> mNames;
-    std::shared_ptr<qTimeFrameCache> mFrameSet;
+    std::shared_ptr<seqFrameContainer> mFrameSet;
     mutable std::vector<track_t> mOutput_tracks;
     
     bool mIs_test_data;

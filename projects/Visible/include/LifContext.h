@@ -182,7 +182,7 @@ private:
     void process_async ();
     
     // Frame Cache and frame store
-    std::shared_ptr<qTimeFrameCache> mFrameSet;
+    std::shared_ptr<seqFrameContainer> mFrameSet;
     SurfaceRef  mSurface;
   
     // Tracks of frame associated results

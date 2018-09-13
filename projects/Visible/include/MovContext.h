@@ -130,7 +130,7 @@ private:
 	vec2 m_zoom;
 	boost::filesystem::path mPath;
 	vec2		mMousePos;
-	std::shared_ptr<qTimeFrameCache> mFrameSet;
+	std::shared_ptr<seqFrameContainer> mFrameSet;
 	SurfaceRef  mSurface;
 	
 	bool mMouseIsDown;

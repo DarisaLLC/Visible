@@ -308,7 +308,7 @@ void movContext::loadMovieFile()
             
             m_valid = m_movie->isLoaded();
 
-            mFrameSet = qTimeFrameCache::create (m_movie);
+            mFrameSet = seqFrameContainer::create (m_movie);
             mFrameSet->channel_names(names);
             mMediaInfo = mFrameSet->media_info();
             
