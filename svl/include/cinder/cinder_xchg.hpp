@@ -5,14 +5,12 @@
 #include <cinder/Channel.h>
 #include <cinder/Area.h>
 #include <limits>
-//#include "cinder/ImageIo.h"
 #include "cinder/Utilities.h"
 #include "vision/roiWindow.h"
 #include "vision/roiVariant.hpp"
 #include "vision/roiMultiWindow.h"
 #include "core/vector2d.hpp"
 #include <fstream>
-//#include "core/singleton.hpp"
 #include "cinder/ImageSourcePng.h"
 #include "cinder/ip/Grayscale.h"
 

@@ -1,7 +1,6 @@
-#include "Logger.h"
+#include "logger.hpp"
 
-using namespace Reymenta;
-	
+#if 0
 Logger::Logger( string aLogFile ) 
 {
 
@@ -53,3 +52,6 @@ void Logger::logTimedString(std::string msg)
 	std::cout << msg << std::endl;
 #endif  // _DEBUG
 }
+
+#endif
+

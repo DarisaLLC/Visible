@@ -321,7 +321,7 @@ lifContext::Side_t lifContext::getManualNextEditMode ()
             nm = Side_t::minor;
             break;
         case Side_t::minor:
-            nm = Side_t::major;
+            nm = Side_t::notset;
             break;
         case Side_t::notset:
             nm = Side_t::major;

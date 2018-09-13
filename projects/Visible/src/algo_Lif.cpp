@@ -30,6 +30,80 @@
 #include "algo_Lif.hpp"
 #include "logger.hpp"
 
+lif_browser::lif_browser(const boost::filesystem::path&  fqfn_path) : mPath(fqfn_path){
+    
+    if ( ! mPath.empty () )
+    {
+        std::string msg = mPath.string() + " Loaded ";
+        vlogger::instance().console()->info(msg);
+        
+        try {
+            
+            m_lifRef =  std::shared_ptr<lifIO::LifReader> (new lifIO::LifReader (mPath.string()));
+            get_series_info (m_lifRef);
+            m_series_posters.clear ();
+            BOOST_FOREACH(serie_info& si, m_series_book){
+                cv::Mat mat;
+                get_first_frame(si,0, mat);
+                si.poster = mat.clone();
+            }
+            auto msg = tostr(m_series_book.size()) + "  Series  ";
+            vlogger::instance().console()->info(msg);
+        }
+        catch( ... ) {
+            vlogger::instance().console()->debug("Unable to load LIF file");
+            return;
+        }
+        
+    }
+}
+
+/*
+ * LIF files are plane organized. 3 Channel LIF file is 3 * rows by cols by ONE byte. 
+ */
+
+void lif_browser::get_first_frame (serie_info& si,  const int frameCount, cv::Mat& out)
+{
+    auto serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(si.index), stl_utils::null_deleter());
+    // opencv rows, cols
+    cv::Mat dst (si.dimensions[1] * si.channelCount , si.dimensions[0], CV_8U);
+    serie_ref->fill2DBuffer(dst.ptr(0), 0);
+    out = dst;
+}
+
+void  lif_browser::get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer)
+{
+    m_series_book.clear ();
+    for (unsigned ss = 0; ss < lifer->getNbSeries(); ss++)
+    {
+        serie_info si;
+        
+        si.index = ss;
+        si.name = lifer->getSerie(ss).getName();
+        si.timesteps = lifer->getSerie(ss).getNbTimeSteps();
+        si.pixelsInOneTimestep = lifer->getSerie(ss).getNbPixelsInOneTimeStep();
+        si.dimensions = lifer->getSerie(ss).getSpatialDimensions();
+        si.channelCount = lifer->getSerie(ss).getChannels().size();
+        si.channels.clear ();
+        for (lifIO::ChannelData cda : lifer->getSerie(ss).getChannels())
+        {
+            si.channel_names.push_back(cda.getName());
+            si.channels.emplace_back(cda);
+        }
+        
+        // Get timestamps in to time_spec_t and store it in info
+        si.timeSpecs.resize (lifer->getSerie(ss).getTimestamps().size());
+        
+        // Adjust sizes based on the number of bytes
+        std::transform(lifer->getSerie(ss).getTimestamps().begin(), lifer->getSerie(ss).getTimestamps().end(),
+                       si.timeSpecs.begin(), [](lifIO::LifSerie::timestamp_t ts) { return time_spec_t ( ts / 10000.0); });
+        
+        si.length_in_seconds = lifer->getSerie(ss).total_duration ();
+        
+        m_series_book.emplace_back (si);
+    }
+}
+
 lif_processor::lif_processor ()
 {
     // Signals we provide

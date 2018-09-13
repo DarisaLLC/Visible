@@ -39,6 +39,7 @@
 #include "ut_localvar.hpp"
 #include "vision/labelBlob.hpp"
 
+
 using namespace boost;
 
 using namespace ci;
@@ -145,6 +146,7 @@ TEST(ut_localvar, basic)
     EXPECT_EQ(tv.max_variance() , 11712);
 }
 
+
 TEST(ut_labelBlob, basic)
 {
     using blob = svl::labelBlob::blob;
@@ -196,7 +198,7 @@ TEST(ut_labelBlob, basic)
     /// Show in a window
     namedWindow( "LabelBlob ", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
     imshow( "LabelBlob", lbr->graphicOutput());
-    cv::waitKey();
+    cv::waitKey(60.0);
 }
 
 TEST(ut_stl_utils, accOverTuple)
@@ -602,6 +604,7 @@ TEST (UT_QtimeCache, run)
 
 
 
+
 /***
  **  Use --gtest-filter=*NULL*.*shared" to select https://code.google.com/p/googletest/wiki/V1_6_AdvancedGuide#Running_Test_Programs%3a_Advanced_Options
  */
@@ -618,4 +621,6 @@ int main(int argc, char ** argv)
     RUN_ALL_TESTS();
     
 }
+
+#include "ut_lif.hpp"
 
