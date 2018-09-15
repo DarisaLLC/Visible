@@ -19,7 +19,7 @@
 
 #include "cinder/qtime/QuickTimeImplAvf.h"
 #include "cinder/qtime/AvfUtils.h"
-#include "qtimeAvfLink.h"
+#include "hockey_etc_cocoa_wrappers.h"
 
 using namespace cinder;
 using namespace cinder::qtime;

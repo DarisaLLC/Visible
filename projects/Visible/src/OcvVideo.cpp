@@ -36,7 +36,7 @@
 */
 
 #include "OcvVideo.h"
-#include "CinderOpenCV.h"
+#include "cinder_opencv.h"
 using namespace ci;
 using namespace std;
 

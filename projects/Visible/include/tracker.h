@@ -2,7 +2,7 @@
 #ifndef __Tracker__
 #define __Tracker__
 
-#include "CinderOpenCV.h"
+#include "cinder_opencv.h"
 #include "time_index.h"
 #include "cinder/TriMesh.h"
 #include "cinder/Timeline.h"

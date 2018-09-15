@@ -15,7 +15,7 @@
 #include "spdlog/async.h"
 #include "spdlog/sinks/basic_file_sink.h"
 
-class vlogger : public SingletonLight<vlogger>
+class vlogger : public svl::SingletonLight<vlogger>
 {
 public:
     vlogger () : m_std_out (spdlog::stdout_color_mt("console")),

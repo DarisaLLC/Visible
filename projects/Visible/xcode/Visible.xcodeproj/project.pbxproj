@@ -56,7 +56,7 @@
 		C248DD2C1F64601A00FF72B1 /* AudioDrawUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */; };
 		C248DD2D1F646A1200FF72B1 /* AudioDrawUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */; };
 		C24C0956214A1F71004C8002 /* palette.png in Copy Image Files */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
-		C24C0957214AC0DF004C8002 /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946771CE4DC7100976025 /* VisibleApp.cpp */; };
+		C24C0958214B2F4D004C8002 /* LifBrowserApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* LifBrowserApp.cpp */; };
 		C24CD87F1CEA5B1B0008C72B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
 		C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
 		C24CD8891CEA916E0008C72B /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
@@ -113,7 +113,6 @@
 		C254BED11F4FB07900977307 /* libopencv_videostab.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BECE1F4FB07900977307 /* libopencv_videostab.a */; };
 		C254BEDD1F4FB39E00977307 /* libippicv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BED91F4FB39E00977307 /* libippicv.a */; };
 		C254BEE11F4FB3D300977307 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BEE01F4FB3D300977307 /* QTKit.framework */; };
-		C254BEE61F4FB56A00977307 /* VideoPlayerApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BEE41F4FB56600977307 /* VideoPlayerApp.cpp */; };
 		C254BEE71F4FC3F200977307 /* libopencv_video.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BECC1F4FB07900977307 /* libopencv_video.a */; };
 		C254BEE81F4FC3F600977307 /* libopencv_videoio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BECD1F4FB07900977307 /* libopencv_videoio.a */; };
 		C254BEEA1F4FC41300977307 /* libippicv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BED91F4FB39E00977307 /* libippicv.a */; };
@@ -157,7 +156,7 @@
 		C26A055D1E77759D00BDC954 /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
 		C26A055E1E7775A700BDC954 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C26A055F1E7775A700BDC954 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
-		C26A05601E7775A700BDC954 /* ExtraQuickTimeImplAvf.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm */; };
+		C26A05601E7775A700BDC954 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
 		C26A05651E777DF300BDC954 /* registration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696F1CED3E2C0045FF57 /* registration.cpp */; };
 		C26A05661E777E1000BDC954 /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C26A05671E777E2100BDC954 /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
@@ -200,7 +199,7 @@
 		C2AF87F91CFBCC5900CFC191 /* libopencv_imgcodecs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AF87F71CFBCC5900CFC191 /* libopencv_imgcodecs.a */; };
 		C2AF87FA1CFBCC5900CFC191 /* libopencv_imgproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AF87F81CFBCC5900CFC191 /* libopencv_imgproc.a */; };
 		C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
-		C2B005821CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm */; };
+		C2B005821CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
 		C2B38A571D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
@@ -368,6 +367,7 @@
 		C24306651FC8CD4000B2B39C /* algo_mov.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = algo_mov.hpp; path = ../include/algo_mov.hpp; sourceTree = "<group>"; };
 		C24306661FC8D32C00B2B39C /* MovContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MovContext.h; path = ../include/MovContext.h; sourceTree = "<group>"; };
 		C24C0953214A1ED5004C8002 /* palette.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = palette.png; path = ../assets/palette.png; sourceTree = "<group>"; };
+		C24C095A214B3291004C8002 /* cinder_opencv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cinder_opencv.h; sourceTree = "<group>"; };
 		C24CD87C1CEA5B1B0008C72B /* VisibleGtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VisibleGtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C24CD87E1CEA5B1B0008C72B /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		C24CD8831CEA916E0008C72B /* libboost_date_time.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_date_time.a; path = ../../../svl/local/boost/lib/libboost_date_time.a; sourceTree = "<group>"; };
@@ -382,7 +382,6 @@
 		C24EA2D2207F07EF00555D16 /* sg_filter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sg_filter.cpp; path = ../src/sg_filter.cpp; sourceTree = "<group>"; };
 		C24FC84C1E5E40130071AA1A /* async_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = async_producer.h; path = ../include/async_producer.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		C24FC84D1E5E56960071AA1A /* roiMultiWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = roiMultiWindow.h; sourceTree = "<group>"; };
-		C25261001F6611A10069F665 /* BasicSampleApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BasicSampleApp.cpp; path = ../src/rph/BasicSampleApp.cpp; sourceTree = "<group>"; };
 		C25261011F6611A10069F665 /* Circle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Circle.cpp; path = ../src/rph/Circle.cpp; sourceTree = "<group>"; };
 		C25261021F6611A10069F665 /* DisplayObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DisplayObject.cpp; path = ../src/rph/DisplayObject.cpp; sourceTree = "<group>"; };
 		C25261031F6611A10069F665 /* ObjectContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ObjectContainer.cpp; path = ../src/rph/ObjectContainer.cpp; sourceTree = "<group>"; };
@@ -408,7 +407,6 @@
 		C254BECE1F4FB07900977307 /* libopencv_videostab.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_videostab.a; path = "../../../externals/Cinder-OpenCV3/lib/macosx/libopencv_videostab.a"; sourceTree = "<group>"; };
 		C254BED91F4FB39E00977307 /* libippicv.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libippicv.a; path = "../../../externals/Cinder-OpenCV3/lib/macosx/libippicv.a"; sourceTree = "<group>"; };
 		C254BEE01F4FB3D300977307 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
-		C254BEE41F4FB56600977307 /* VideoPlayerApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VideoPlayerApp.cpp; path = ../src/VideoPlayerApp.cpp; sourceTree = "<group>"; };
 		C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_mov_impl.cpp; path = ../src/visible_mov_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C259145E214492A400F80D5F /* logger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = logger.hpp; path = ../include/logger.hpp; sourceTree = "<group>"; };
 		C259145F2145BA7500F80D5F /* clipManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = clipManager.hpp; path = ../include/clipManager.hpp; sourceTree = "<group>"; };
@@ -613,14 +611,13 @@
 		C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "cp-visible-debug.xcconfig"; sourceTree = "<group>"; };
 		C2AF87F71CFBCC5900CFC191 /* libopencv_imgcodecs.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_imgcodecs.a; path = ../../../svl/local/cinder/cinder_0.9/blocks/OpenCV3/lib/macosx/libopencv_imgcodecs.a; sourceTree = "<group>"; };
 		C2AF87F81CFBCC5900CFC191 /* libopencv_imgproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_imgproc.a; path = ../../../svl/local/cinder/cinder_0.9/blocks/OpenCV3/lib/macosx/libopencv_imgproc.a; sourceTree = "<group>"; };
-		C2B005811CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ExtraQuickTimeImplAvf.mm; path = ../src/ExtraQuickTimeImplAvf.mm; sourceTree = "<group>"; };
-		C2B005861CFF8FE100AC2E64 /* qtimeAvfLink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = qtimeAvfLink.h; path = ../include/qtimeAvfLink.h; sourceTree = "<group>"; };
+		C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = hockey_etc_cocoa_wrappers.mm; path = ../src/hockey_etc_cocoa_wrappers.mm; sourceTree = "<group>"; };
+		C2B005861CFF8FE100AC2E64 /* hockey_etc_cocoa_wrappers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hockey_etc_cocoa_wrappers.h; path = ../include/hockey_etc_cocoa_wrappers.h; sourceTree = "<group>"; };
 		C2B38A4F1D022D2A00C70872 /* AVReader.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = AVReader.mm; path = ../src/AVReader.mm; sourceTree = "<group>"; };
 		C2B38A541D022E9D00C70872 /* AVReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AVReader.h; path = ../include/AVReader.h; sourceTree = "<group>"; };
 		C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AVReaderWrapper.mm; path = ../src/AVReaderWrapper.mm; sourceTree = "<group>"; };
 		C2B62D3B2130878500828630 /* ut_cardio.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_cardio.hpp; sourceTree = "<group>"; };
 		C2BB4DED21384F970002AECE /* ut_localvar.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_localvar.hpp; sourceTree = "<group>"; };
-		C2BB4DEF213851DC0002AECE /* CinderOpenCV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CinderOpenCV.h; path = ../../local/cinder/cinder_0.9/blocks/OpenCV3/include/CinderOpenCV.h; sourceTree = "<group>"; };
 		C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AccordionItem.cpp; path = ../src/AccordionItem.cpp; sourceTree = "<group>"; };
 		C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccordionItem.h; path = ../include/AccordionItem.h; sourceTree = "<group>"; };
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
@@ -810,17 +807,15 @@
 				C252611E1F66EA910069F665 /* PlistDate.cpp */,
 				C252611F1F66EA910069F665 /* pugixml.cpp */,
 				C252611B1F66E95B0069F665 /* Plist.cpp */,
-				C25261001F6611A10069F665 /* BasicSampleApp.cpp */,
 				C25261011F6611A10069F665 /* Circle.cpp */,
 				C25261021F6611A10069F665 /* DisplayObject.cpp */,
 				C25261031F6611A10069F665 /* ObjectContainer.cpp */,
 				C25261041F6611A10069F665 /* Square.cpp */,
-				C254BEE41F4FB56600977307 /* VideoPlayerApp.cpp */,
 				C254BE851F4FAF5C00977307 /* OcvVideo.cpp */,
 				C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */,
 				C2B38A4F1D022D2A00C70872 /* AVReader.mm */,
 				C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */,
-				C2B005811CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm */,
+				C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */,
 				C2677584212A325F00B5E080 /* contraction.cpp */,
 				C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */,
 				C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */,
@@ -1012,7 +1007,7 @@
 				C21946A31CE4EA4900976025 /* guiContext.h */,
 				C2F1B6211FB13FE600DDD7DB /* LifContext.h */,
 				C24306661FC8D32C00B2B39C /* MovContext.h */,
-				C2B005861CFF8FE100AC2E64 /* qtimeAvfLink.h */,
+				C2B005861CFF8FE100AC2E64 /* hockey_etc_cocoa_wrappers.h */,
 				C2E321FF1D0480E4006DFE5E /* mediaInfo.h */,
 				C2BF1A671E71D12200A30407 /* timeMarker.h */,
 				C2C68C3B1ED9F9440095FFC4 /* tracker.h */,
@@ -1186,22 +1181,22 @@
 			children = (
 				C259982E1ECF66950015EE7B /* cardio */,
 				C23D0F491E29826F0049ADDB /* otherIO */,
-				C26009E01CED3E010045FF57 /* cinder */,
+				C26009E01CED3E010045FF57 /* cinder_cv */,
 				C26009EA1CED3E010045FF57 /* core */,
 				C26009FF1CED3E010045FF57 /* vision */,
 			);
 			path = include;
 			sourceTree = "<group>";
 		};
-		C26009E01CED3E010045FF57 /* cinder */ = {
+		C26009E01CED3E010045FF57 /* cinder_cv */ = {
 			isa = PBXGroup;
 			children = (
-				C2BB4DEF213851DC0002AECE /* CinderOpenCV.h */,
+				C24C095A214B3291004C8002 /* cinder_opencv.h */,
 				C26009E11CED3E010045FF57 /* affine_rectangle.h */,
 				C26009E21CED3E010045FF57 /* cinder_xchg.hpp */,
 				C26009E31CED3E010045FF57 /* editableRectangle.hpp */,
 			);
-			path = cinder;
+			path = cinder_cv;
 			sourceTree = "<group>";
 		};
 		C26009EA1CED3E010045FF57 /* core */ = {
@@ -1628,7 +1623,7 @@
 			files = (
 				C2606DA91CED3E2E0045FF57 /* gradient.cpp in Sources */,
 				C2B6E6701D0618E400235FB7 /* AVReader.mm in Sources */,
-				C2B005821CFF7F7000AC2E64 /* ExtraQuickTimeImplAvf.mm in Sources */,
+				C2B005821CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C2677585212A325F00B5E080 /* contraction.cpp in Sources */,
 				C2606DB01CED3E2E0045FF57 /* opencv_utils.cpp in Sources */,
 				C2BECED11DD6D8BA0001E2BA /* AccordionItem.cpp in Sources */,
@@ -1636,6 +1631,7 @@
 				C2EF8D1F2148768D00A5D3D6 /* Swatch.cpp in Sources */,
 				C254BECB1F4FB02500977307 /* OcvVideo.cpp in Sources */,
 				C20EDBC31CF277130074C47A /* time_spec.cpp in Sources */,
+				C24C0958214B2F4D004C8002 /* LifBrowserApp.cpp in Sources */,
 				C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */,
 				C2FC7DAF1CF4F46100D18193 /* seq_frame_container.cpp in Sources */,
 				C2B38A571D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
@@ -1660,7 +1656,6 @@
 				C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */,
 				C2606DAB1CED3E2E0045FF57 /* ip_utils.cpp in Sources */,
 				C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */,
-				C24C0957214AC0DF004C8002 /* VisibleApp.cpp in Sources */,
 				C254BE841F4F912E00977307 /* csv.cpp in Sources */,
 				C24EA2D3207F07EF00555D16 /* sg_filter.cpp in Sources */,
 				C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */,
@@ -1724,7 +1719,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C248DD2D1F646A1200FF72B1 /* AudioDrawUtils.cpp in Sources */,
-				C254BEE61F4FB56A00977307 /* VideoPlayerApp.cpp in Sources */,
 				C254BE931F4FAFCC00977307 /* OcvVideo.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1750,7 +1744,7 @@
 				C26A05591E77744300BDC954 /* sm_producer.cpp in Sources */,
 				C26A05711E777ECC00BDC954 /* gradient.cpp in Sources */,
 				C26A055D1E77759D00BDC954 /* lifFile.cpp in Sources */,
-				C26A05601E7775A700BDC954 /* ExtraQuickTimeImplAvf.mm in Sources */,
+				C26A05601E7775A700BDC954 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C2DA195B1E80E4E200062DBC /* csv.cpp in Sources */,
 				C26A05651E777DF300BDC954 /* registration.cpp in Sources */,
 				C26A057D1E77A90600BDC954 /* histo.cpp in Sources */,

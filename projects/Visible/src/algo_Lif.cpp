@@ -41,11 +41,12 @@ lif_browser::lif_browser(const boost::filesystem::path&  fqfn_path) : mPath(fqfn
             
             m_lifRef =  std::shared_ptr<lifIO::LifReader> (new lifIO::LifReader (mPath.string()));
             get_series_info (m_lifRef);
-            m_series_posters.clear ();
+            m_series_names.clear();
             BOOST_FOREACH(serie_info& si, m_series_book){
                 cv::Mat mat;
                 get_first_frame(si,0, mat);
                 si.poster = mat.clone();
+                m_series_names.push_back (si.name);
             }
             auto msg = tostr(m_series_book.size()) + "  Series  ";
             vlogger::instance().console()->info(msg);

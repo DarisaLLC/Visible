@@ -6,8 +6,8 @@
 
 
 /**
-
-
+ 
+ 
  * \file lifFile.cpp
  * \brief Define classes to read directly from Leica .lif file
  * \author Mathieu Leocmach
@@ -39,19 +39,19 @@
 
 namespace lifIO
 {
-struct ChannelData;
-struct DimensionData;
-struct ScannerSettingRecord;
-struct FilterSettingRecord;
-
-class LifSerieHeader
-{
-  
+    struct ChannelData;
+    struct DimensionData;
+    struct ScannerSettingRecord;
+    struct FilterSettingRecord;
+    
+    class LifSerieHeader
+    {
+        
     public:
         explicit LifSerieHeader(TiXmlElement *root);
-    
+        
         typedef unsigned long long timestamp_t;
-
+        
         std::string getName() const {return this->name;};
         double getVoxelSize(const size_t d) const;
         int getResolution(const size_t channel) const;
@@ -72,10 +72,10 @@ class LifSerieHeader
             if (std::signbit(timeL)) return -1.0f;
             return timeL;
         }
-    
+        
         float frame_duration_ms () const;
-    float frame_rate () const { if (frame_duration_ms() > 0.0) return 1000.0/frame_duration_ms ();return -1.0; }
-    
+        float frame_rate () const { if (frame_duration_ms() > 0.0) return 1000.0/frame_duration_ms ();return -1.0; }
+        
     protected:
         std::string name;
         std::map<std::string, DimensionData> dimensions;
@@ -83,52 +83,49 @@ class LifSerieHeader
         std::vector<timestamp_t> timeStamps;
         std::map<std::string, ScannerSettingRecord> scannerSettings;
         TiXmlElement *rootElement;
-    
+        
         mutable std::vector<timestamp_t> m_frame_durations;
         mutable std::pair<bool, float> m_cached_frame_duration;
-    
+        
     private:
         void parseImage(TiXmlNode *elementImage);
         void parseImageDescription(TiXmlNode *elementImageDescription);
         void parseTimeStampList(TiXmlNode *elementTimeStampList);
         void parseHardwareSettingList(TiXmlNode *elementHardwareSettingList);
         void parseScannerSetting(TiXmlNode *elementScannerSetting);
-    
+        
     };
-
-class LifSerie : public LifSerieHeader, boost::noncopyable
-{
-    unsigned long long offset;
-    unsigned long long memorySize;
-    std::ifstream file;
-    std::streampos fileSize;
-
+    
+    class LifSerie : public LifSerieHeader, boost::noncopyable
+    {
+        
     public:
         explicit LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize);
-
+        
         void fill3DBuffer(void* buffer, size_t t=0);
         void fill2DBuffer(void* buffer, size_t t=0, size_t z=0);
-    
-    
+        
+        
         std::istreambuf_iterator<char> begin(size_t t=0);
         std::streampos tellg(){return file.tellg();}
         unsigned long long getOffset(size_t t=0) const;
+        
+    private:
+        unsigned long long offset;
+        unsigned long long memorySize;
+        std::ifstream file;
+        std::streampos fileSize;
+        
+        
+    };
     
-};
-
-class LifHeader : boost::noncopyable
-{
-    int lifVersion;
-    std::string name;
-
-    protected:
-        TiXmlDocument header;
-        boost::ptr_vector<LifSerieHeader> series;
-
+    class LifHeader : boost::noncopyable
+    {
+        
     public:
         explicit LifHeader(TiXmlDocument &header);
         explicit LifHeader(std::string &header);
-
+        
         const TiXmlDocument& getXMLHeader() const{return this->header;};
         std::string getName() const {return this->name;};
         const int& getVersion() const {return this->lifVersion;};
@@ -136,145 +133,155 @@ class LifHeader : boost::noncopyable
         bool contains(size_t s) const {return s<this->series.size();}
         LifSerieHeader& getSerieHeader(size_t s){return this->series[s];};
         const LifSerieHeader& getSerieHeader(size_t s) const {return this->series[s];};
-
+        
+        
+    protected:
+        TiXmlDocument header;
+        boost::ptr_vector<LifSerieHeader> series;
+        
     private:
         void parseHeader();
-};
-
-class LifReader : boost::noncopyable
-{
-    std::auto_ptr<LifHeader> header;
-    std::ifstream file;
-    std::streampos fileSize;
-    boost::ptr_vector<LifSerie> series;
+        int lifVersion;
+        std::string name;
+        
+    };
     
-
-
+    class LifReader : boost::noncopyable
+    {
+        
     public:
+        typedef std::shared_ptr<LifReader> ref;
         explicit LifReader(const std::string &filename);
-
+        
         const LifHeader& getLifHeader() const {return *this->header;};
         const TiXmlDocument& getXMLHeader() const{return getLifHeader().getXMLHeader();};
         std::string getName() const {return getLifHeader().getName();};
         const int& getVersion() const {return getLifHeader().getVersion();};
         size_t getNbSeries() const {return this->series.size();}
         bool contains(size_t s) const {return getLifHeader().contains(s);}
-
+        
         LifSerie& getSerie(size_t s){return series[s];};
         const LifSerie& getSerie(size_t s) const {return series[s];};
-
+        
     private:
         int readInt();
         unsigned int readUnsignedInt();
         unsigned long long readUnsignedLongLong();
-
-
-};
-
-/** Struct of channel data*/
-struct ChannelData
-{
-    int dataType; // 0 Integer, 1 Float
-    int channelTag; // 0 Gray value, 1 Red, 2 Green, 3 Blue
-    int resolution; // Bits per pixel
-    std::string nameOfMeasuredQuantity;
-    double minimum;
-    double maximum;
-    std::string unit;
-    std::string LUTName;
-    bool isLUTInverted; // 0 Normal LUT, 1 Inverted Order
-    unsigned long long bytesInc; // Distance from the first channel in Bytes
-    int bitInc;
-
-    explicit ChannelData(TiXmlElement *element);
-    inline const std::string getName() const
-    {
-        return LUTName;
-#if LIF3_ChannelIndex_IsAlways_0_is_fixed
-        switch(channelTag)
-        {
-            case 0 : return "Gray";
-            case 1 : return "Red";
-            case 2 : return "Green";
-            case 3 : return "Blue";
-            default : return "Unknown color";
-        }
-#endif
+        std::auto_ptr<LifHeader> header;
+        std::ifstream file;
+        std::streampos fileSize;
+        boost::ptr_vector<LifSerie> series;
         
-    }
-    
-    
-    
-};
-
-/** Struct of dimension data*/
-struct DimensionData
-{
-    int dimID; // 0 Not valid, 1 X, 2 Y, 3 Z, 4 T, 5 Lambda, 6 Rotation, 7 XT Slices, 8 T Slices
-    int numberOfElements; // Number of elements in this dimension
-    double origin; // Physical position of the first element (left pixel side)
-    double length; // Physical length from the first left pixel side to the last left pixel side
-    std::string unit; // Physical unit
-    unsigned long long bytesInc; // Distance from the one element to the next in this dimension
-    int bitInc;
-
-    explicit DimensionData(TiXmlElement *element);
-    inline const std::string getName() const
-    {
-        switch(dimID)
-        {
-            case 1 : return "X";
-            case 2 : return "Y";
-            case 3 : return "Z";
-            case 4 : return "T";
-            case 5 : return "Lambda";
-            case 6 : return "Rotation";
-            case 7 : return "XT Slices";
-            case 8 : return "TSlices";
-            default : return "Invalid";
-        }
+        
+        
+        
     };
-};
-
-/**
-    \brief Struct of scanner setting
-    Maybe because the original Leica program was written in MS Visual Basic,
-    the type of the field "Variant" has to be defined from a test on the VariantType field :
-    3:long
-    5:double
-    8:char*
-    11:bool
-    17:char (or int)
-    See http://en.wikipedia.org/wiki/Variant_type
-*/
-struct ScannerSettingRecord
-{
-    std::string identifier;
-    std::string unit;
-    std::string description;
-    int data;
-    std::string variant;
-    int variantType;
-
-    explicit ScannerSettingRecord(TiXmlElement *element);
-};
-
-/** Struct of Filter Setting */
-struct FilterSettingRecord
-{
-    std::string objectName;
-    std::string className;
-    std::string attribute;
-    std::string description;
-    int data;
-    std::string variant;
-    int variantType;
-
-    explicit FilterSettingRecord(TiXmlElement *element);
-};
-
-std::ostream& operator<< (std::ostream& out, const LifSerieHeader &s );
-std::ostream& operator<< (std::ostream& out, const LifHeader &r );
-std::ostream& operator<< (std::ostream& out, const DimensionData &r );
+    
+    
+    /** Struct of channel data*/
+    struct ChannelData
+    {
+        int dataType; // 0 Integer, 1 Float
+        int channelTag; // 0 Gray value, 1 Red, 2 Green, 3 Blue
+        int resolution; // Bits per pixel
+        std::string nameOfMeasuredQuantity;
+        double minimum;
+        double maximum;
+        std::string unit;
+        std::string LUTName;
+        bool isLUTInverted; // 0 Normal LUT, 1 Inverted Order
+        unsigned long long bytesInc; // Distance from the first channel in Bytes
+        int bitInc;
+        
+        explicit ChannelData(TiXmlElement *element);
+        inline const std::string getName() const
+        {
+            return LUTName;
+#if LIF3_ChannelIndex_IsAlways_0_is_fixed
+            switch(channelTag)
+            {
+                case 0 : return "Gray";
+                case 1 : return "Red";
+                case 2 : return "Green";
+                case 3 : return "Blue";
+                default : return "Unknown color";
+            }
+#endif
+            
+        }
+        
+        
+        
+    };
+    
+    /** Struct of dimension data*/
+    struct DimensionData
+    {
+        int dimID; // 0 Not valid, 1 X, 2 Y, 3 Z, 4 T, 5 Lambda, 6 Rotation, 7 XT Slices, 8 T Slices
+        int numberOfElements; // Number of elements in this dimension
+        double origin; // Physical position of the first element (left pixel side)
+        double length; // Physical length from the first left pixel side to the last left pixel side
+        std::string unit; // Physical unit
+        unsigned long long bytesInc; // Distance from the one element to the next in this dimension
+        int bitInc;
+        
+        explicit DimensionData(TiXmlElement *element);
+        inline const std::string getName() const
+        {
+            switch(dimID)
+            {
+                case 1 : return "X";
+                case 2 : return "Y";
+                case 3 : return "Z";
+                case 4 : return "T";
+                case 5 : return "Lambda";
+                case 6 : return "Rotation";
+                case 7 : return "XT Slices";
+                case 8 : return "TSlices";
+                default : return "Invalid";
+            }
+        };
+    };
+    
+    /**
+     \brief Struct of scanner setting
+     Maybe because the original Leica program was written in MS Visual Basic,
+     the type of the field "Variant" has to be defined from a test on the VariantType field :
+     3:long
+     5:double
+     8:char*
+     11:bool
+     17:char (or int)
+     See http://en.wikipedia.org/wiki/Variant_type
+     */
+    struct ScannerSettingRecord
+    {
+        std::string identifier;
+        std::string unit;
+        std::string description;
+        int data;
+        std::string variant;
+        int variantType;
+        
+        explicit ScannerSettingRecord(TiXmlElement *element);
+    };
+    
+    /** Struct of Filter Setting */
+    struct FilterSettingRecord
+    {
+        std::string objectName;
+        std::string className;
+        std::string attribute;
+        std::string description;
+        int data;
+        std::string variant;
+        int variantType;
+        
+        explicit FilterSettingRecord(TiXmlElement *element);
+    };
+    
+    std::ostream& operator<< (std::ostream& out, const LifSerieHeader &s );
+    std::ostream& operator<< (std::ostream& out, const LifHeader &r );
+    std::ostream& operator<< (std::ostream& out, const DimensionData &r );
 }
 #endif

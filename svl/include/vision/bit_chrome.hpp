@@ -12,7 +12,7 @@
 #include "core/stl_utils.hpp"
 
 
-#include "CinderOpenCV.h"
+#include "cinder_opencv.h"
 
 
 

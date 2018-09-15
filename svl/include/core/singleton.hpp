@@ -6,7 +6,8 @@
 #include "core.hpp"
 
 
-
+namespace svl
+{
 #define SINGLETONPTR(Typename)                     \
   static Typename* instance() {                 \
     static Typename e;                          \
@@ -109,5 +110,6 @@ class internal_singleton : public singleton_module
 template<class T>
  T & internal_singleton< T >::m_instance = internal_singleton< T >::get_instance();
 
+}
 
 #endif

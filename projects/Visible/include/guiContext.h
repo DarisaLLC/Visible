@@ -15,7 +15,7 @@
 #include "cinder/Cinder.h"
 #include "cinder/Surface.h"
 #include "cinder/Text.h"
-#include "CinderOpenCV.h"
+#include "cinder_cv/cinder_opencv.h"
 
 #include <memory>
 #include <utility>
@@ -34,7 +34,7 @@
 #include "core/stl_utils.hpp"
 #include "async_producer.h"
 #include "directoryPlayer.h"
-#include "qtimeAvfLink.h"
+#include "hockey_etc_cocoa_wrappers.h"
 #include "timeMarker.h"
 #include "TinyUi.h"
 #include "OcvVideo.h"
@@ -220,7 +220,7 @@ protected:
 
 	
 	
-	std::vector<Graph1DRef> m_plots;
+	std::vector<graph1d::ref> m_plots;
 	std::mutex m_track_mutex;
 	
 	vectorOfVectorOfnamedTrackOfdouble_t m_luminance_tracks;

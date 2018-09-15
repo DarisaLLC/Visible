@@ -1,6 +1,7 @@
 #ifndef __LIFContext___h
 #define __LIFContext___h
 
+#include "guiContext.h"
 #include "algo_Lif.hpp"
 #include "clipManager.hpp"
 
@@ -34,49 +35,18 @@ public:
         number_of_sides = notset
     };
 
-	class series_info
-	{
-	public:
-		std::string name;
-		uint32_t    timesteps;
-		uint32_t    pixelsInOneTimestep;
-		uint32_t	channelCount;
-		std::vector<size_t> dimensions;
-		std::vector<lifIO::ChannelData> channels;
-		std::vector<std::string> channel_names;
-		std::vector<time_spec_t> timeSpecs;
-		float                    length_in_seconds;
-		
-        
-		friend std::ostream& operator<< (std::ostream& out, const series_info& se)
-		{
-			out << "Serie:    " << se.name << std::endl;
-			out << "Channels: " << se.channelCount << std::endl;
-			out << "TimeSteps  " << se.timesteps << std::endl;
-			out << "Dimensions:" << se.dimensions[0]  << " x " << se.dimensions[1] << std::endl;
-			out << "Time Length:" << se.length_in_seconds	<< std::endl;
-			return out;
-		}
-		
-		std::string info ()
-		{
-			std::ostringstream osr;
-			osr << *this << std::endl;
-			return osr.str();
-		}
-		
-	};
-	
- 
-    
     typedef std::pair<vec2,vec2> sides_length_t;
     
-	// From just a name, use the open file dialog to get the file
 	// From a name and a path
 	lifContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
+ 
+    // From a lif_browser
+    lifContext(ci::app::WindowRef& ww, const lif_browser::ref&, const uint32_t serie_index );
+    
     lifContext* shared_from_above () {
         return static_cast<lifContext*>(((guiContext*)this)->shared_from_this().get());
     }
+
     
 	Signal <void(bool)> signalManualEditMode;
 	
@@ -143,18 +113,23 @@ public:
     void pause ();
     bool isPlaying () const { return m_is_playing; }
     
+    bool isFixedSerieContext () const { return m_fixed_serie; }
+    
 private:
+    bool m_fixed_serie;
+    
+    bool init_with_browser (const lif_browser::ref& );
+    void setup_signals ();
     // LIF Support
+    lif_browser::ref m_lifBrowser;
     std::shared_ptr<lif_processor> m_lifProcRef;
     std::shared_ptr<lifIO::LifReader> m_lifRef;
-    std::vector<series_info> m_series_book;
+    std::vector<serie_info> m_series_book;
     std::vector<std::string> m_series_names;
-	void loadLifFile();
 	void loadCurrentSerie ();
 	bool have_lif_serie ();
-    void get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer);
-    std::shared_ptr<lifIO::LifSerie> m_current_serie_ref;
-    series_info m_serie;
+    std::shared_ptr<lifIO::LifSerie> m_cur_lif_serie_ref;
+    serie_info m_serie;
     boost::filesystem::path mPath;
     int m_cur_selected_index;
     int m_prev_selected_index;

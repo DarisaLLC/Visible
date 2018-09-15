@@ -24,19 +24,19 @@
 using namespace std;
 using namespace ci;
 using namespace ci::app;
-class graph1D;
 
-typedef std::shared_ptr<graph1D> Graph1DRef;
-typedef std::function<float (float)> Graph1DSetCb;
+
 
 
 using    std::numeric_limits;
 
 
-class graph1D:  public InteractiveObject
+class graph1d:  public InteractiveObject
 {
 public:
     
+    typedef std::shared_ptr<graph1d> ref;
+    typedef std::function<float (float)> get_callback;
     ci::Font sSmallFont, sBigFont;	// small and large fonts for Text textures
     
     void setFonts ( const Font &smallFont, const Font &bigFont )
@@ -53,30 +53,21 @@ public:
         data_limits = 3
     };
     
-    graph1D( std::string name, const ci::Rectf& display_box)
+    graph1d( std::string name, const ci::Rectf& display_box)
     : InteractiveObject(display_box) , mIsSet(false)
     {
-        graph1D::setFonts (Font( "Menlo", 18 ), Font( "Menlo", 25 ));
-        
-        // create label
-        //        mTextLayout.clear( cinder::Color::white() ); mTextLayout.setColor( Color(0.5f, 0.5f, 0.5f) );
-        //        try { mTextLayout.setFont( Font( "Menlo", 18 ) ); } catch( ... ) { mTextLayout.setFont( Font( "Menlo", 18 ) ); }
-        //        TextLayout tmp (mTextLayout);
-        //        tmp.addLine( name );
-        //        mLabelTex = cinder::gl::Texture::create(tmp.render( true ) );
-        
-        
+        graph1d::setFonts (Font( "Menlo", 18 ), Font( "Menlo", 25 ));
     }
     
     // Setup should get called only once.
     // TBD: implement reset
     // Call back is set ony once
     // Others, setup can be called to update
-    void setup (size_t length, Graph1DSetCb callback)
+    void setup (size_t length, graph1d::get_callback callback)
     {
         if ( mIsSet ) return;
         mBuffer.resize (length);
-        m_CB = bind (callback, std::placeholders::_1);
+        m_CB = std::bind (callback, std::placeholders::_1);
         mIsSet = true;
     }
     // load the data and bind a function to access it
@@ -89,7 +80,7 @@ public:
         {
             mBuffer.push_back (*reader++);
         }
-        m_CB = bind (&graph1D::get, this, std::placeholders::_1);
+        m_CB = std::bind (&graph1d::get, this, std::placeholders::_1);
         make_plot_mesh ();
     }
     
@@ -111,7 +102,7 @@ public:
         mMinMax = svl::norm_min_max (mBuffer.begin(), mBuffer.end(), false);
         svl::norm_min_max (mBuffer.begin(), mBuffer.end(), true);
         
-        m_CB = bind (&graph1D::get, this, std::placeholders::_1);
+        m_CB = std::bind (&graph1d::get, this, std::placeholders::_1);
         make_plot_mesh ();
         mIsSet = mBuffer.size() == ds.size();
         }
@@ -245,7 +236,7 @@ private:
     bool empty () const { return mBuffer.empty (); }
     
     cinder::gl::TextureRef						mLabelTex;
-    Graph1DSetCb m_CB;
+    graph1d::get_callback m_CB;
     ci::Anim<marker_info> m_marker;
     
 };

@@ -26,7 +26,7 @@
 #include "vision/histo.h"
 #include "core/stl_utils.hpp"
 #include "sm_producer.h"
-#include "qtimeAvfLink.h"
+#include "hockey_etc_cocoa_wrappers.h"
 #include "core/signaler.h"
 
 using namespace ci;
@@ -338,20 +338,20 @@ void movContext::loadMovieFile()
                     
                     m_plots.resize (0);
                     
-                    for (Graph1DRef gr : m_plots)
+                    for (graph1d::ref gr : m_plots)
                     {
-                        m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
+                        m_marker_signal.connect(std::bind(&graph1d::set_marker_position, gr, std::placeholders::_1));
                     }
                     
                     for (int cc = 0; cc < names.size() ; cc++)
                     {
-                        m_plots.push_back( Graph1DRef (new graph1D (names[cc], vl.plot_rects() [cc])));
+                        m_plots.push_back( graph1d::ref (new graph1d (names[cc], vl.plot_rects() [cc])));
                     }
                 
                     
-                    for (Graph1DRef gr : m_plots)
+                    for (graph1d::ref gr : m_plots)
                     {
-                        m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
+                        m_marker_signal.connect(std::bind(&graph1d::set_marker_position, gr, std::placeholders::_1));
                     }
                     
                     mMainTimeLineSlider.setBounds (vl.display_timeline_rect());
@@ -412,7 +412,7 @@ void movContext::mouseMove( MouseEvent event )
 void movContext::mouseDrag( MouseEvent event )
 {
     mMouseIsDragging = true;
-    for (Graph1DRef graphRef : m_plots)
+    for (graph1d::ref graphRef : m_plots)
         graphRef->mouseDrag( event );
 }
 
@@ -420,7 +420,7 @@ void movContext::mouseDrag( MouseEvent event )
 void movContext::mouseDown( MouseEvent event )
 {
     mMouseIsDown = true;
-    for (Graph1DRef graphRef : m_plots )
+    for (graph1d::ref graphRef : m_plots )
     {
         graphRef->mouseDown( event );
         graphRef->get_marker_position(mTimeMarker);
@@ -433,7 +433,7 @@ void movContext::mouseUp( MouseEvent event )
 {
     mMouseIsDown = false;
     mMouseIsDragging = false;
-    for (Graph1DRef graphRef : m_plots)
+    for (graph1d::ref graphRef : m_plots)
         graphRef->mouseUp( event );
 }
 
@@ -563,7 +563,7 @@ void movContext::draw ()
     mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
     gl::draw (mImage, dr);
     draw_info ();
-    for(Graph1DRef gg : m_plots)
+    for(graph1d::ref gg : m_plots)
         gg->draw ();
     }
     mUIParams.draw();

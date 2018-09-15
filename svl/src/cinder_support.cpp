@@ -10,7 +10,7 @@
 #include "core/vector2d.hpp"
 #include <fstream>
 #include "core/singleton.hpp"
-#include "cinder/cinder_xchg.hpp"
+#include "cinder_cv/cinder_xchg.hpp"
 #include "cinder/ImageSourceFileQuartz.h"
 
 

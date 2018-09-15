@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __CINDER_OCV_UTILS__
+#define __CINDER_OCV_UTILS__
 
 #include "opencv2/opencv.hpp"
 
@@ -192,3 +193,6 @@ inline ci::Area fromOcv( const cv::Rect &r )
 }
 
 } // namespace cinder
+
+#endif
+

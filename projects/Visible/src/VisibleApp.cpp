@@ -18,7 +18,7 @@
 #include "Plist.hpp"
 #include <memory>
 #include <functional>
-#include "qtimeAvfLink.h"
+#include "hockey_etc_cocoa_wrappers.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -82,7 +82,6 @@ public:
     void mouseDrag( MouseEvent event )override;
     void keyDown( KeyEvent event )override;
     
-    //void fileDrop( FileDropEvent event );
     void update()override;
     void draw()override;
     void close_main();
@@ -101,9 +100,7 @@ public:
     params::InterfaceGlRef         mTopParams;
     
     
-    gl::TextureRef		mTextTexture;
     vec2				mSize;
-    vec2                mDisplayTL;
     Font				mFont;
     std::string			mLog;
     
@@ -212,8 +209,6 @@ void VisibleApp::setup()
         CI_LOG_V( "display name: '" << display->getName() << "', bounds: " << display->getBounds() );
     }
     
-    ci::Area windowArea = getDisplay()->getBounds();
-    mDisplayTL = windowArea.getUL();
     setWindowPos(getWindowSize()/3);
     
     WindowRef ww = getWindow ();
@@ -236,24 +231,7 @@ void VisibleApp::setup()
    	mTopParams->addButton( "Import LIF  ", std::bind( &VisibleApp::create_lif_viewer, this, boost::filesystem::path () ) );
     mTopParams->addSeparator();
     mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this, boost::filesystem::path () ) );
-    
-#if 0
-    mTopParams->addSeparator();
-   	mTopParams->addButton( "Import Image Directory ", std::bind( &VisibleApp::create_movie_dir_viewer, this, boost::filesystem::path () ) );
-    
-    mTopParams->addSeparator();
-    
-    mTopParams->addSeparator();
-   	mTopParams->addButton( "View Sorted Result ", std::bind( &VisibleApp::create_result_viewer, this, boost::filesystem::path () ) );
-    
-    mTopParams->addSeparator();
-    
-    
-    mTopParams->addSeparator();
-    mTopParams->addButton( "Import A CSV File", std::bind( &VisibleApp::create_clip_viewer, this, boost::filesystem::path () ) );
-    mTopParams->addSeparator();
 
-#endif
     getSignalShouldQuit().connect( std::bind( &VisibleApp::shouldQuit, this ) );
     
     getWindow()->getSignalMove().connect( std::bind( &VisibleApp::windowMove, this ) );
@@ -392,28 +370,6 @@ void VisibleApp::draw ()
     if (valid_data) data->draw();
     else
         mTopParams->draw ();
-
-   
- 
-#if 0
-    gl::enableAlphaBlending();
-    
-    Rectf scaledBounds = mGlobalBounds;
-    if( mGlobalBounds.getAspectRatio() > getWindowAspectRatio() )
-        scaledBounds.scaleCentered( vec2( 1, mGlobalBounds.getAspectRatio() / getWindowAspectRatio() ) );
-    else
-        scaledBounds.scaleCentered( vec2(getWindowAspectRatio() / mGlobalBounds.getAspectRatio(), 1 ) );
-//    scaledBounds.scaleCentered( 1.1f );
-//    gl::clear( Color( 0, 0, 0 ) );
-    gl::setMatrices( CameraOrtho( scaledBounds.getLowerLeft().x, scaledBounds.getLowerRight().x, scaledBounds.getLowerLeft().y, scaledBounds.getUpperLeft().y, -1, 1 ) );
-    
-    gl::translate(mDisplayTL);
-#endif
-    
-    
-
-    
-    
 }
 
 

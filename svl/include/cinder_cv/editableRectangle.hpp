@@ -1,5 +1,5 @@
 #include "cinder/cinder.h"
-#include "CinderOpenCV.h"
+#include "cinder_opencv.h"
 #include "cinder/Quaternion.h"
 
 #undef near

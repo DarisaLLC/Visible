@@ -43,13 +43,6 @@ using default_factory = synchronous_factory;
 
 #endif
 
-
-// For base classing
-class LifBrowser : public base_signaler
-{
-    virtual std::string getName () const { return "LifBrowser"; }
-};
-
 class serie_info
 {
 public:
@@ -86,38 +79,37 @@ public:
     
 };
 
-typedef std::shared_ptr<class lif_browser> lifBrowserRef;
+
+
+// For base classing
+class LifBrowser : public base_signaler
+{
+    virtual std::string getName () const { return "LifBrowser"; }
+};
 
 class lif_browser : public LifBrowser
 {
 public:
-
- 
     
+    typedef std::shared_ptr<class lif_browser> ref;
     lif_browser(const boost::filesystem::path&  fqfn_path);
     
-    static lifBrowserRef create (const boost::filesystem::path&  fqfn_path){
+    static lif_browser::ref create (const boost::filesystem::path&  fqfn_path){
         return std::shared_ptr<lif_browser> ( new lif_browser (fqfn_path));
     }
     
+    const lifIO::LifReader::ref& reader () const { return m_lifRef; }
     const std::vector<serie_info>& serie_infos () const { return m_series_book; }
-        
-    
+    const boost::filesystem::path& path () const { return mPath; }
+    const std::vector<std::string>& names () const { return m_series_names; }
     
 private:
-
     std::shared_ptr<lifIO::LifReader> m_lifRef;
     std::vector<serie_info> m_series_book;
     std::vector<cv::Mat> m_series_posters;
-    void loadLifFile();
-    void loadCurrentSerie ();
-    bool have_lif_serie ();
-    serie_info m_serie;
+    std::vector<std::string> m_series_names;
     boost::filesystem::path mPath;
-    
     void get_first_frame (serie_info& si,  const int frameCount, cv::Mat& out);
-   
-    
     void  get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer);
     
 };

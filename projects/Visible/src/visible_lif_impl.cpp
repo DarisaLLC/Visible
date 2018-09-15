@@ -61,30 +61,69 @@ namespace
 }
 
 
+              /************************
+                     *
+                     *  Setup & Load File
+                     *
+                     ************************/
 
 /////////////  lifContext Implementation  ////////////////
 
+lifContext::lifContext(WindowRef& ww, const lif_browser::ref& lb, const uint32_t serie_index):
+sequencedImageContext(ww), m_lifBrowser(lb), m_fixed_serie(true) {
+    m_valid = init_with_browser(m_lifBrowser);
+    if (! m_valid) return;
+    m_valid &= (serie_index < m_lifBrowser->serie_infos().size());
+    if (! m_valid) return;
+    m_cur_selected_index = serie_index;
+    m_serie = m_series_book[m_cur_selected_index];
+    m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(m_cur_selected_index), stl_utils::null_deleter());
+    m_prev_selected_index = m_cur_selected_index;
+    setup();
+    std::cout << std::this_thread::get_id() << std::endl;
+ 
+
+    loadCurrentSerie();
+}
 
 lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
-: sequencedImageContext(ww), mPath (dp)
-{
+: sequencedImageContext(ww), mPath (dp), m_fixed_serie(false){
     m_valid = false;
     m_type = Type::lif_file_viewer;
-    
     if (mPath.string().empty())
         mPath = getOpenFilePath();
-    
     m_valid = ! mPath.string().empty() && exists(mPath);
+ 
+    m_lifBrowser = lif_browser::create(mPath);
+    m_valid &= init_with_browser(m_lifBrowser);
+    if (! m_valid) return;
+    m_prev_selected_index = -1;
+    setup ();
+}
+
+
+bool lifContext::init_with_browser (const lif_browser::ref& lb){
+    m_valid =lb.get() != nullptr;
+    if (! m_valid) return false;
+    m_type = Type::lif_file_viewer;
+    mPath =lb->path();
+    m_valid &= (! mPath.string().empty() && exists(mPath));
+    if (! m_valid) return false;
     
+    m_valid &= lb->names().size() == lb->serie_infos().size();
+    if (! m_valid) return false;
+    m_series_names =lb->names();
+    m_series_book =lb->serie_infos();
+    m_lifRef =lb->reader();
+    auto msg = tostr(m_series_book.size()) + "  Series  ";
+    vlogger::instance().console()->info(msg);
+    return true;
+}
+
+void lifContext::setup_signals(){
+
+    // Create a Processing Object to attach signals to
     m_lifProcRef = std::make_shared<lif_processor> ();
-    
-    if (is_valid())
-    {
-        mWindow->setTitle( mPath.filename().string() );
-        mWindow->setSize(960, 540);
-        mFont = Font( "Menlo", 18 );
-        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-    }
     
     // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&lifContext::signal_content_loaded, this, _1);
@@ -110,8 +149,88 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
     std::function<void (int&)> channelmats_available_cb = boost::bind (&lifContext::signal_channelmats_available, this, _1);
     boost::signals2::connection channelmats_connection = m_lifProcRef->registerCallback(channelmats_available_cb);
     
-    setup ();
 }
+
+
+void lifContext::setup()
+{
+    srand( 133 );
+    setup_signals();
+    assert(is_valid());
+    if (! isFixedSerieContext()){
+        mWindow->setTitle( mPath.filename().string() );
+        mWindow->setSize(960, 540);
+    }else{
+        mWindow->setTitle( m_serie.name);
+        mWindow->setSize(1280, 768);
+    }
+    mFont = Font( "Menlo", 18 );
+    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+
+
+    mUIParams = params::InterfaceGl( " Control ", toPixels( ivec2( 300, 400 )));
+    mUIParams.setPosition(getWindowSize() / 3);
+    m_contraction_names = m_contraction_none;
+    clear_playback_params();
+    
+    mUIParams.addSeparator();
+    m_perform_names.clear ();
+    m_perform_names.push_back("Manual Cell End Tracing");
+    
+    if (! isFixedSerieContext()){
+        // If it is first time
+        if (m_prev_selected_index < 0)
+        {
+            m_cur_selected_index = 0;
+            m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>();
+        }
+        
+        mUIParams.addParam( "Series ", m_series_names, &m_cur_selected_index )
+        //        .keyDecr( "[" )
+        //        .keyIncr( "]" )
+        .updateFn( [this]
+                  {
+                      bool exists = m_prev_selected_index  >= 0 && m_prev_selected_index == m_cur_selected_index;
+                      if (! exists && m_cur_selected_index >= 0 && m_cur_selected_index < m_series_names.size() )
+                      {
+                          m_serie = m_series_book[m_cur_selected_index];
+                          m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(m_cur_selected_index), stl_utils::null_deleter());
+                          loadCurrentSerie ();
+                          m_prev_selected_index = m_cur_selected_index;
+                      }
+                  });
+        
+        mUIParams.addSeparator();
+        mUIParams.addSeparator();
+    }
+    
+    {
+        const std::function<void (int)> setter = std::bind(&lifContext::seekToFrame, this, std::placeholders::_1);
+        const std::function<int ()> getter = std::bind(&lifContext::getCurrentFrame, this);
+        mUIParams.addParam ("Current Time Step", setter, getter);
+    }
+    
+    
+    mUIParams.addSeparator();
+    mUIParams.addButton("Play / Pause ", bind( &lifContext::play_pause_button, this ) );
+    mUIParams.addSeparator();
+    mUIParams.addButton( " Loop ", bind ( &lifContext::loop_no_loop_button, this) );
+    mUIParams.addSeparator();
+    mUIParams.addButton(" Edit ", bind( &lifContext::edit_no_edit_button, this ) );
+    mUIParams.addSeparator();
+    mUIParams.addText( "mode", "label=`Browse`" );
+    mUIParams.addSeparator();
+    {
+        // Add a param with no target, but instead provide setter and getter functions.
+        const std::function<void(uint32_t)> setter    = std::bind(&lifContext::setMedianCutOff, this, std::placeholders::_1 );
+        const std::function<uint32_t()> getter    = std::bind( &lifContext::getMedianCutOff, this);
+        
+        // Attach a callback that is fired after a target is updated.
+        mUIParams.addParam( "CutOff Pct", setter, getter );
+    }
+}
+
+
 
 /************************
  *
@@ -127,6 +246,7 @@ void lifContext::signal_sm1d_available (int& dummy)
 
 void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
 {
+    
     if (haveTracks())
     {
         auto tracksRef = m_pci_trackWeakRef.lock();
@@ -242,7 +362,7 @@ void lifContext::clear_playback_params ()
 
 bool lifContext::have_lif_serie ()
 {
-    bool have = m_lifRef && m_current_serie_ref >= 0 && mFrameSet && sLayoutMgr.isSet();
+    bool have = m_lifRef && m_cur_lif_serie_ref >= 0 && mFrameSet && sLayoutMgr.isSet();
     //  if (! have )
     //     mUIParams.setOptions( "mode", "label=`Nothing Loaded`" );
     return have;
@@ -513,7 +633,7 @@ void lifContext::mouseMove( MouseEvent event )
 
 void lifContext::mouseDrag( MouseEvent event )
 {
-    for (Graph1DRef graphRef : m_plots)
+    for (graph1d::ref graphRef : m_plots)
         graphRef->mouseDrag( event );
     
     if (getManualEditMode() != notset && mMouseInImage && channelIndex() == 2)
@@ -526,7 +646,7 @@ void lifContext::mouseDrag( MouseEvent event )
 
 void lifContext::mouseDown( MouseEvent event )
 {
-    for (Graph1DRef graphRef : m_plots )
+    for (graph1d::ref graphRef : m_plots )
     {
         graphRef->mouseDown( event );
         graphRef->get_marker_position(mTimeMarker);
@@ -543,7 +663,7 @@ void lifContext::mouseDown( MouseEvent event )
 
 void lifContext::mouseUp( MouseEvent event )
 {
-    for (Graph1DRef graphRef : m_plots)
+    for (graph1d::ref graphRef : m_plots)
         graphRef->mouseUp( event );
 }
 
@@ -554,9 +674,6 @@ void lifContext::keyDown( KeyEvent event )
 {
     if( event.getChar() == 'f' ) {
         setFullScreen( ! isFullScreen() );
-    }
-    else if( event.getChar() == 'o' ) {
-        loadLifFile();
     }
     else if( event.getChar() == 'b' ) {
         getWindow()->setBorderless( ! getWindow()->isBorderless() );
@@ -595,6 +712,7 @@ void lifContext::keyDown( KeyEvent event )
 
 void lifContext::setMedianCutOff (uint32_t newco)
 {
+    if (! m_lifProcRef) return;
     // Get a shared_ptr from weak and check if it had not expired
     auto spt = m_lifProcRef->contractionWeakRef().lock();
     if (! spt ) return;
@@ -607,6 +725,8 @@ void lifContext::setMedianCutOff (uint32_t newco)
 
 uint32_t lifContext::getMedianCutOff () const
 {
+    if (! m_cur_lif_serie_ref) return 0;
+    
     // Get a shared_ptr from weak and check if it had not expired
     auto spt = m_lifProcRef->contractionWeakRef().lock();
     if (spt)
@@ -615,142 +735,6 @@ uint32_t lifContext::getMedianCutOff () const
         return current;
     }
     return 0;
-}
-
-
-/************************
- *
- *  Setup & Load File
- *
- ************************/
-
-void  lifContext::get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer)
-{
-    m_series_book.clear ();
-    for (unsigned ss = 0; ss < lifer->getNbSeries(); ss++)
-    {
-        series_info si;
-        si.name = lifer->getSerie(ss).getName();
-        si.timesteps = lifer->getSerie(ss).getNbTimeSteps();
-        si.pixelsInOneTimestep = lifer->getSerie(ss).getNbPixelsInOneTimeStep();
-        si.dimensions = lifer->getSerie(ss).getSpatialDimensions();
-        si.channelCount = lifer->getSerie(ss).getChannels().size();
-        si.channels.clear ();
-        for (lifIO::ChannelData cda : lifer->getSerie(ss).getChannels())
-        {
-            si.channel_names.push_back(cda.getName());
-            si.channels.emplace_back(cda);
-        }
-        
-        // Get timestamps in to time_spec_t and store it in info
-        si.timeSpecs.resize (lifer->getSerie(ss).getTimestamps().size());
-        
-        // Adjust sizes based on the number of bytes
-        std::transform(lifer->getSerie(ss).getTimestamps().begin(), lifer->getSerie(ss).getTimestamps().end(),
-                       si.timeSpecs.begin(), [](lifIO::LifSerie::timestamp_t ts) { return time_spec_t ( ts / 10000.0); });
-        
-        si.length_in_seconds = lifer->getSerie(ss).total_duration ();
-        
-        m_series_book.emplace_back (si);
-    }
-}
-
-void lifContext::setup()
-{
-    srand( 133 );
-    
-    mUIParams = params::InterfaceGl( "Lif Player ", toPixels( ivec2( 300, 400 )));
-    mUIParams.setPosition(getWindowSize() / 3);
-    m_contraction_names = m_contraction_none;
-    
-    m_prev_selected_index = -1;
-    loadLifFile ();
-    
-    clear_playback_params();
-    
-    if( is_valid() )
-    {
-        mUIParams.addSeparator();
-        
-        m_series_names.clear ();
-        for (auto ss = 0; ss < m_series_book.size(); ss++)
-            m_series_names.push_back (m_series_book[ss].name);
-        
-        m_perform_names.clear ();
-        m_perform_names.push_back("Manual Cell End Tracing");
-        
-        // If it is first time
-        if (m_prev_selected_index < 0)
-        {
-            m_cur_selected_index = 0;
-            m_current_serie_ref = std::shared_ptr<lifIO::LifSerie>();
-        }
-        
-        mUIParams.addParam( "Series ", m_series_names, &m_cur_selected_index )
-        //        .keyDecr( "[" )
-        //        .keyIncr( "]" )
-        .updateFn( [this]
-                  {
-                      bool exists = m_prev_selected_index  >= 0 && m_prev_selected_index == m_cur_selected_index;
-                      if (! exists && m_cur_selected_index >= 0 && m_cur_selected_index < m_series_names.size() )
-                      {
-                          m_serie = m_series_book[m_cur_selected_index];
-                          m_current_serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(m_cur_selected_index), stl_utils::null_deleter());
-                          loadCurrentSerie ();
-                          m_prev_selected_index = m_cur_selected_index;
-                      }
-                  });
-        
-        mUIParams.addSeparator();
-        mUIParams.addSeparator();
-        
-        {
-            const std::function<void (int)> setter = std::bind(&lifContext::seekToFrame, this, std::placeholders::_1);
-            const std::function<int ()> getter = std::bind(&lifContext::getCurrentFrame, this);
-            mUIParams.addParam ("Current Time Step", setter, getter);
-        }
-        
-        
-        mUIParams.addSeparator();
-        mUIParams.addButton("Play / Pause ", bind( &lifContext::play_pause_button, this ) );
-        mUIParams.addSeparator();
-        mUIParams.addButton( " Loop ", bind ( &lifContext::loop_no_loop_button, this) );
-        mUIParams.addSeparator();
-        mUIParams.addButton(" Edit ", bind( &lifContext::edit_no_edit_button, this ) );
-        mUIParams.addSeparator();
-        mUIParams.addText( "mode", "label=`Browse`" );
-        mUIParams.addSeparator();
-        {
-            // Add a param with no target, but instead provide setter and getter functions.
-            const std::function<void(uint32_t)> setter	= std::bind(&lifContext::setMedianCutOff, this, std::placeholders::_1 );
-            const std::function<uint32_t()> getter	= std::bind( &lifContext::getMedianCutOff, this);
-            
-            // Attach a callback that is fired after a target is updated.
-            mUIParams.addParam( "CutOff Pct", setter, getter );
-        }
-    }
-}
-
-
-void lifContext::loadLifFile ()
-{
-    if ( ! mPath.empty () )
-    {
-        ci_console () << mPath.string ();
-        
-        try {
-            
-            m_lifRef =  std::shared_ptr<lifIO::LifReader> (new lifIO::LifReader (mPath.string()));
-            get_series_info (m_lifRef);
-            auto msg = tostr(m_series_book.size()) + "  Series  ";
-            vlogger::instance().console()->info(msg);
-        }
-        catch( ... ) {
-            vlogger::instance().console()->debug("Unable to load LIF file");
-            return;
-        }
-        
-    }
 }
 
 
@@ -764,6 +748,7 @@ void lifContext::loadLifFile ()
 
 void lifContext::add_plots ()
 {
+
     std::lock_guard<std::mutex> lock(m_track_mutex);
     
     assert (  sLayoutMgr.plot_rects().size() >= channel_count());
@@ -772,15 +757,15 @@ void lifContext::add_plots ()
     
     for (int cc = 0; cc < channel_count(); cc++)
     {
-        m_plots.push_back( Graph1DRef (new graph1D (m_current_serie_ref->getChannels()[cc].getName(),
+        m_plots.push_back( graph1d::ref (new graph1d (m_cur_lif_serie_ref->getChannels()[cc].getName(),
                                                     sLayoutMgr.plot_rects() [cc])));
     }
     
-    for (Graph1DRef gr : m_plots)
+    for (graph1d::ref gr : m_plots)
     {
         gr->backgroundColor = ColorA( 0.3, 0.3, 0.3, 0.3 );
         gr->strokeColor = ColorA(0.2,0.8,0.1,1.0);
-        m_marker_signal.connect(std::bind(&graph1D::set_marker_position, gr, std::placeholders::_1));
+        m_marker_signal.connect(std::bind(&graph1d::set_marker_position, gr, std::placeholders::_1));
     }
     if (m_plots.size() == 3)
     {
@@ -798,6 +783,7 @@ void lifContext::add_plots ()
     
     
     getWindow()->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
+
     
 }
 
@@ -810,7 +796,7 @@ void lifContext::add_plots ()
 
 void lifContext::loadCurrentSerie ()
 {
-    if ( ! is_valid() || ! (m_lifRef || ! m_current_serie_ref) )
+    if ( ! is_valid() || ! (m_lifRef || ! m_cur_lif_serie_ref) )
         return;
     
     try {
@@ -822,7 +808,7 @@ void lifContext::loadCurrentSerie ()
         
         // Create the frameset and assign the channel names
         // Fetch the media info
-        mFrameSet = seqFrameContainer::create (*m_current_serie_ref);
+        mFrameSet = seqFrameContainer::create (*m_cur_lif_serie_ref);
         
         if (! mFrameSet || ! mFrameSet->isValid())
         {
@@ -968,11 +954,11 @@ void lifContext::update ()
         m_plots[channel_count()-1]->setup(tracksRef->at(0));
     }
     
-    if (getCurrentFrame() == getNumFrames())
-    {
-        if (looping () ) seekToStart();
-    }
-    
+//    if (getCurrentFrame() == getNumFrames())
+//    {
+//        if (looping () ) seekToStart();
+//    }
+//
     if (have_lif_serie ()){
         mSurface = mFrameSet->getFrame(getCurrentFrame());
         mCurrentIndexTime = mFrameSet->currentIndexTime();
@@ -1135,11 +1121,8 @@ void lifContext::draw ()
         
         mContainer.draw();
         draw_info ();
-        
-        
+        mUIParams.draw();
     }
-    
-    mUIParams.draw();
     
     
 }
