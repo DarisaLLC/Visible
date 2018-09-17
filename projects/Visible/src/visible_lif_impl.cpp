@@ -73,7 +73,7 @@ lifContext::lifContext(WindowRef& ww, const lif_browser::ref& lb, const uint32_t
 sequencedImageContext(ww), m_lifBrowser(lb), m_fixed_serie(true) {
     m_valid = init_with_browser(m_lifBrowser);
     if (! m_valid) return;
-    m_valid &= (serie_index < m_lifBrowser->serie_infos().size());
+    m_valid &= (serie_index < m_lifBrowser->internal_serie_infos().size());
     if (! m_valid) return;
     m_cur_selected_index = serie_index;
     m_serie = m_series_book[m_cur_selected_index];
@@ -81,9 +81,9 @@ sequencedImageContext(ww), m_lifBrowser(lb), m_fixed_serie(true) {
     m_prev_selected_index = m_cur_selected_index;
     setup();
     std::cout << std::this_thread::get_id() << std::endl;
- 
-
     loadCurrentSerie();
+    resize();
+
 }
 
 lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
@@ -110,10 +110,10 @@ bool lifContext::init_with_browser (const lif_browser::ref& lb){
     m_valid &= (! mPath.string().empty() && exists(mPath));
     if (! m_valid) return false;
     
-    m_valid &= lb->names().size() == lb->serie_infos().size();
+    m_valid &= lb->names().size() == lb->internal_serie_infos().size();
     if (! m_valid) return false;
     m_series_names =lb->names();
-    m_series_book =lb->serie_infos();
+    m_series_book =lb->internal_serie_infos();
     m_lifRef =lb->reader();
     auto msg = tostr(m_series_book.size()) + "  Series  ";
     vlogger::instance().console()->info(msg);
@@ -210,13 +210,13 @@ void lifContext::setup()
         mUIParams.addParam ("Current Time Step", setter, getter);
     }
     
-    
+    mUIParams.addParam( "Looping", &m_is_looping ).keyIncr( "l" );
     mUIParams.addSeparator();
-    mUIParams.addButton("Play / Pause ", bind( &lifContext::play_pause_button, this ) );
+    mUIParams.addParam("Play / Pause ", &m_is_playing).keyIncr(" ");
     mUIParams.addSeparator();
-    mUIParams.addButton( " Loop ", bind ( &lifContext::loop_no_loop_button, this) );
+    mUIParams.addParam("Show Pixel Probe ", &m_show_probe).keyIncr("s");
     mUIParams.addSeparator();
-    mUIParams.addButton(" Edit ", bind( &lifContext::edit_no_edit_button, this ) );
+    mUIParams.addButton("Edit ", bind( &lifContext::edit_no_edit_button, this ) );
     mUIParams.addSeparator();
     mUIParams.addText( "mode", "label=`Browse`" );
     mUIParams.addSeparator();
@@ -228,6 +228,8 @@ void lifContext::setup()
         // Attach a callback that is fired after a target is updated.
         mUIParams.addParam( "CutOff Pct", setter, getter );
     }
+    
+    if (isFixedSerieContext()) shared_from_above()->update();
 }
 
 
@@ -357,6 +359,8 @@ void lifContext::clear_playback_params ()
     m_seek_position = 0;
     m_is_playing = false;
     m_is_looping = false;
+    m_show_probe = false;
+    m_is_editing = false;
     m_zoom.x = m_zoom.y = 1.0f;
 }
 
@@ -392,8 +396,8 @@ void lifContext::loop_no_loop_button ()
 void lifContext::looping (bool what)
 {
     m_is_looping = what;
-    static std::vector<std::string> loopstrings {"label=` Looping`", "label=` Not Looping`"};
-    mUIParams.setOptions( "mode", m_is_looping ? loopstrings[0] : loopstrings[1]);
+//    static std::vector<std::string> loopstrings {"label=` Looping`", "label=` Not Looping`"};
+//    mUIParams.setOptions( "mode", m_is_looping ? loopstrings[0] : loopstrings[1]);
 }
 
 
@@ -416,6 +420,7 @@ void lifContext::pause ()
     mUIParams.setOptions( "mode", "label=` Pause`" );
 }
 
+// For use with RAII scoped pause pattern
 void lifContext::play_pause_button ()
 {
     if (! have_lif_serie () ) return;
@@ -441,9 +446,6 @@ lifContext::Side_t lifContext::getManualNextEditMode ()
             nm = Side_t::minor;
             break;
         case Side_t::minor:
-            nm = Side_t::notset;
-            break;
-        case Side_t::notset:
             nm = Side_t::major;
             break;
     }
@@ -454,28 +456,28 @@ lifContext::Side_t lifContext::getManualNextEditMode ()
 void lifContext::edit_no_edit_button ()
 {
     if (! have_lif_serie () ) return;
+    m_is_editing = ! m_is_editing;
+    if (! m_is_editing) return;
+    
     looping(false);
-    setManualEditMode(minor);
+
     // If we are in Edit mode. Stop and Go to the end as detected
-    if (getManualNextEditMode() != notset)
-    {
-        setManualEditMode(getManualNextEditMode());
-        const std::string& ename = mEditNames[getManualEditMode()];
-        const clip& clip = m_clips[get_current_clip_index()];
-        switch(getManualEditMode()){
-            case Side_t::minor:
-                seekToFrame(clip.first());
-                break;
-            case Side_t::major:
-                seekToFrame(clip.last());
-                break;
-            default:
-                break;
-        }
-        mUIParams.setOptions( "mode", ename);
-        if (mContainer.getNumChildren())
-            mContainer.removeChildren();
+    setManualEditMode(getManualNextEditMode());
+    const std::string& ename = mEditNames[getManualEditMode()];
+    const clip& clip = m_clips[get_current_clip_index()];
+    switch(getManualEditMode()){
+        case Side_t::minor:
+            seekToFrame(clip.first());
+            break;
+        case Side_t::major:
+            seekToFrame(clip.last());
+            break;
+        default:
+            break;
     }
+    mUIParams.setOptions( "mode", ename);
+    if (mContainer.getNumChildren())
+        mContainer.removeChildren();
 }
 
 
@@ -698,7 +700,7 @@ void lifContext::keyDown( KeyEvent event )
                 update_instant_image_mouse ();
         }
         else if( event.getChar() == ' ' ) {
-            play_pause_button();
+            m_is_playing = true;
         }
         
     }
@@ -819,7 +821,7 @@ void lifContext::loadCurrentSerie ()
         mChannelCount = (uint32_t) mMediaInfo.getNumChannels();
         assert(mChannelCount > 0 && mChannelCount < 4);
         mMediaInfo.output(std::cout);
-        sLayoutMgr.init (lifContext::startup_display_size() , mFrameSet->media_info(), channel_count());
+        sLayoutMgr.init (getWindowSize() , mFrameSet->media_info(), channel_count());
         
         // Start Loading Images on a different thread
         auto future_res = std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names);
@@ -840,10 +842,11 @@ void lifContext::loadCurrentSerie ()
         mTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
         mAuxTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
         
-        ivec2 window_size (sLayoutMgr.desired_window_size());
-        setWindowSize(window_size);
+      //  ivec2 window_size (sLayoutMgr.desired_window_size());
+      //  setWindowSize(window_size);
         add_plots();
         looping(false);
+        resize();
         seekToStart();
         play();
         
@@ -954,11 +957,6 @@ void lifContext::update ()
         m_plots[channel_count()-1]->setup(tracksRef->at(0));
     }
     
-//    if (getCurrentFrame() == getNumFrames())
-//    {
-//        if (looping () ) seekToStart();
-//    }
-//
     if (have_lif_serie ()){
         mSurface = mFrameSet->getFrame(getCurrentFrame());
         mCurrentIndexTime = mFrameSet->currentIndexTime();
@@ -1008,8 +1006,8 @@ gl::TextureRef lifContext::pixelInfoTexture ()
     uint32_t channel_height = mMediaInfo.getChannelSize().y;
     std::string pos = " " + toString(((int)m_instant_pixel_Color.g)) + " @ [ " +
     to_string(imagePos().x) + "," + to_string(imagePos().y % channel_height) + "]";
-    vec2                mSize(250, 100);
-    TextBox tbox = TextBox().alignment( TextBox::LEFT).font( mFont ).size( ivec2( mSize.x, TextBox::GROW ) ).text( pos );
+    vec2                textSize(250, 100);
+    TextBox tbox = TextBox().alignment( TextBox::LEFT).font( mFont ).size( ivec2( textSize.x, TextBox::GROW ) ).text( pos );
     tbox.setFont( Font( "Times New Roman", 34 ) );
     if (channel_name == "Red")
         tbox.setColor( ColorA(0.8,0.2,0.1,1.0) );
@@ -1044,7 +1042,7 @@ void lifContext::draw_info ()
         gl::drawStrokedRect(sLayoutMgr.display_plots_rect(), 3.0f);
     }
     
-    if (getManualEditMode() == notset)
+    if (m_show_probe)
     {
         auto texR = pixelInfoTexture ();
         if (texR)

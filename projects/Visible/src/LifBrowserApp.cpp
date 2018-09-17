@@ -84,7 +84,7 @@ class LifBrowserApp : public App, public SingletonLight<LifBrowserApp> {
     void resize() override;
     
 	void initData( const fs::path &path );
-	void createItem( const serie_info &line, int lineNumber );
+	void createItem( const internal_serie_info &serie, int serieNumber );
 
     void fileDrop( FileDropEvent event ) override;
     
@@ -98,7 +98,7 @@ class LifBrowserApp : public App, public SingletonLight<LifBrowserApp> {
 	vector<Item>::iterator	mNewMouseOverItem;
 	vector<Item>::iterator	mSelectedItem;
 	
-	vector<gl::Texture2dRef>	mImages;
+    vector<gl::Texture2dRef>    mImages;
 	
 	float mLeftBorder;
 	float mTopBorder;
@@ -131,7 +131,7 @@ void LifBrowserApp::create_lif_viewer (const int serie_index)
 
 WindowRef LifBrowserApp::createConnectedWindow(Window::Format& format)
 {
-    WindowRef win = createWindow( format );
+    WindowRef win = createWindow( Window::Format().size( APP_WIDTH, APP_HEIGHT ) );
     win->getSignalClose().connect( std::bind( &LifBrowserApp::windowClose, this ) );
     win->getSignalMouseDown().connect( std::bind( &LifBrowserApp::windowMouseDown, this, std::placeholders::_1 ) );
     win->getSignalDisplayChange().connect( std::bind( &LifBrowserApp::displayChange, this ) );
@@ -186,11 +186,11 @@ void LifBrowserApp::setup()
     {
     }
     
-    setWindowPos(getWindowSize()/3);
-    
+    setWindowPos(getWindowSize()/4);
+    getWindow()->setAlwaysOnTop();
     WindowRef ww = getWindow ();
     std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
-    ww->setTitle ("Visible build: " + buildN);
+    ww->setTitle ("Visible ( build: " + buildN + " ) ");
     mFont = Font( "Menlo", 18 );
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     
@@ -260,29 +260,30 @@ void LifBrowserApp::initData( const fs::path &path )
 {
     mLifRef = lif_browser::create(path);
     
-    auto lines = mLifRef->serie_infos();
+    auto series = mLifRef->internal_serie_infos();
 
-	for( vector<serie_info>::const_iterator lineIt = lines.begin(); lineIt != lines.end(); ++lineIt )
-		createItem( *lineIt, lineIt - lines.begin() );
+	for( vector<internal_serie_info>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt )
+		createItem( *serieIt, serieIt - series.begin() );
 }
 
-void LifBrowserApp::createItem( const serie_info &line, int index )
+void LifBrowserApp::createItem( const internal_serie_info &serie, int index )
 {
-    string title				= line.name;
-    string desc					= " Channels: " + to_string(line.channelCount) +
-                                  "   width: " + to_string(line.dimensions[0]) +
-                                  "   height: " + to_string(line.dimensions[1]);
+    string title				= serie.name;
+    string desc					= " Channels: " + to_string(serie.channelCount) +
+                                  "   width: " + to_string(serie.dimensions[0]) +
+                                  "   height: " + to_string(serie.dimensions[1]);
     
     auto platform = ci::app::Platform::get();
     auto palette_path = platform->getResourceDirectory();
     string paletteFilename        = "palette.png";
     palette_path = palette_path / paletteFilename;
     Surface palette = Surface( loadImage(  palette_path ) ) ;
-    gl::Texture2dRef image = gl::Texture::create(Surface( ImageSourceRef( new ImageSourceCvMat( line.poster ))));
+    gl::Texture2dRef image = gl::Texture::create(Surface( ImageSourceRef( new ImageSourceCvMat( serie.poster ))));
 	vec2 pos( mLeftBorder, mTopBorder + index * mItemSpacing );
 	Item item = Item(index, pos, title, desc, palette );
 	mItems.push_back( item );
 	mImages.push_back( image );
+   
 }
 
 void LifBrowserApp::mouseMove( MouseEvent event )
@@ -319,8 +320,8 @@ void LifBrowserApp::mouseMove( MouseEvent event )
         
         if( mMouseOverItem != mItems.end() && mMouseOverItem != mSelectedItem ){
             mFgImage = mImages[mMouseOverItem->mIndex];
-            mFgAlpha = 0.0f;
-            timeline().apply( &mFgAlpha, 1.0f, 0.4f, EaseInQuad() );
+      //      mFgAlpha = 0.0f;
+       //     timeline().apply( &mFgAlpha, 1.0f, 0.4f, EaseInQuad() );
         }
     }
 }
@@ -396,8 +397,10 @@ void LifBrowserApp::draw()
         
         // draw foreground image
         if( mFgImage ){
+            Rectf bounds (mFgImage->getBounds());
+            bounds = bounds.getCenteredFit(getWindowBounds(), false);
             gl::color( ColorA( 1.0f, 1.0f, 1.0f, mFgAlpha ) );
-            gl::draw( mFgImage, getWindowBounds() );
+            gl::draw( mFgImage, bounds );
         }
         
         // draw swatches

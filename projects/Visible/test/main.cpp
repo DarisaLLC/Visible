@@ -22,7 +22,7 @@
 #include "cm_time.hpp"
 #include "core/gtest_image_utils.hpp"
 #include "vision/colorhistogram.hpp"
-#include "CinderOpenCV.h"
+#include "cinder_opencv.h"
 #include "algoFunctions.hpp"
 #include "ut_util.hpp"
 #include "ut_algo.hpp"

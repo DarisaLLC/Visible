@@ -69,9 +69,9 @@ TEST (ut_liffile, browser_single_channel_basic)
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
       EXPECT_TRUE(res.second);
     auto lb_ref = lif_browser::create(res.first);
-    EXPECT_EQ(sizeof(expectedNames)/sizeof(std::string), lb_ref->serie_infos().size ());
+    EXPECT_EQ(sizeof(expectedNames)/sizeof(std::string), lb_ref->internal_serie_infos().size ());
     
-    BOOST_FOREACH(const serie_info& si, lb_ref->serie_infos()){
+    BOOST_FOREACH(const internal_serie_info& si, lb_ref->internal_serie_infos()){
         /// Show in a window
         namedWindow(si.name, CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
         imshow(si.name, si.poster);
