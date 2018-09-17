@@ -101,7 +101,7 @@ public:
         m_aspect = layoutManager::aspect(tmi.getSize());
         m_isSet = true;
         
-        update ();
+        update_window_size(m_canvas_size);
         m_slider_rects.clear();
     }
     

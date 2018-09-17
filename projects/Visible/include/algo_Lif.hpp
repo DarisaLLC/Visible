@@ -43,7 +43,7 @@ using default_factory = synchronous_factory;
 
 #endif
 
-class serie_info
+class internal_serie_info
 {
 public:
     uint32_t index;
@@ -56,11 +56,12 @@ public:
     std::vector<std::string> channel_names;
     std::vector<time_spec_t> timeSpecs;
     cv::Mat poster;
+
     
-    float                    length_in_seconds;
+    float  length_in_seconds;
     
     
-    friend std::ostream& operator<< (std::ostream& out, const serie_info& se)
+    friend std::ostream& operator<< (std::ostream& out, const internal_serie_info& se)
     {
         out << "Serie:    " << se.name << std::endl;
         out << "Channels: " << se.channelCount << std::endl;
@@ -99,17 +100,17 @@ public:
     }
     
     const lifIO::LifReader::ref& reader () const { return m_lifRef; }
-    const std::vector<serie_info>& serie_infos () const { return m_series_book; }
+    const std::vector<internal_serie_info>& internal_serie_infos () const { return m_series_book; }
     const boost::filesystem::path& path () const { return mPath; }
     const std::vector<std::string>& names () const { return m_series_names; }
     
 private:
     std::shared_ptr<lifIO::LifReader> m_lifRef;
-    std::vector<serie_info> m_series_book;
+    std::vector<internal_serie_info> m_series_book;
     std::vector<cv::Mat> m_series_posters;
     std::vector<std::string> m_series_names;
     boost::filesystem::path mPath;
-    void get_first_frame (serie_info& si,  const int frameCount, cv::Mat& out);
+    void get_first_frame (internal_serie_info& si,  const int frameCount, cv::Mat& out);
     void  get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer);
     
 };

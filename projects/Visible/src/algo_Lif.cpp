@@ -42,7 +42,7 @@ lif_browser::lif_browser(const boost::filesystem::path&  fqfn_path) : mPath(fqfn
             m_lifRef =  std::shared_ptr<lifIO::LifReader> (new lifIO::LifReader (mPath.string()));
             get_series_info (m_lifRef);
             m_series_names.clear();
-            BOOST_FOREACH(serie_info& si, m_series_book){
+            BOOST_FOREACH(internal_serie_info& si, m_series_book){
                 cv::Mat mat;
                 get_first_frame(si,0, mat);
                 si.poster = mat.clone();
@@ -63,7 +63,7 @@ lif_browser::lif_browser(const boost::filesystem::path&  fqfn_path) : mPath(fqfn
  * LIF files are plane organized. 3 Channel LIF file is 3 * rows by cols by ONE byte. 
  */
 
-void lif_browser::get_first_frame (serie_info& si,  const int frameCount, cv::Mat& out)
+void lif_browser::get_first_frame (internal_serie_info& si,  const int frameCount, cv::Mat& out)
 {
     auto serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(si.index), stl_utils::null_deleter());
     // opencv rows, cols
@@ -77,7 +77,7 @@ void  lif_browser::get_series_info (const std::shared_ptr<lifIO::LifReader>& lif
     m_series_book.clear ();
     for (unsigned ss = 0; ss < lifer->getNbSeries(); ss++)
     {
-        serie_info si;
+        internal_serie_info si;
         
         si.index = ss;
         si.name = lifer->getSerie(ss).getName();
