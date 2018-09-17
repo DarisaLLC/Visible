@@ -1,8 +1,8 @@
 /*
- * Code Copyright 2011 Robert Hodgin ( http://roberthodgin.com )
- * Used with permission for the Cinder Project ( http://libcinder.org )
+ * Code Copyright 2011 Darisa LLC
  */
 
+#include "cinder_opencv.h"
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/Context.h"
@@ -18,7 +18,7 @@
 #include "otherIO/lifFile.hpp"
 #include "algo_Lif.hpp"
 #include "Item.h"
-#include "cinder_opencv.h"
+
 #include "core/singleton.hpp"
 #include "hockey_etc_cocoa_wrappers.h"
 #include "LifContext.h"

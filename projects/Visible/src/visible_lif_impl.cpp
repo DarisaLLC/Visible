@@ -6,7 +6,7 @@
 //
 //
 
-
+#include "opencv2/stitching.hpp"
 #include <stdio.h>
 #include "guiContext.h"
 #include "LifContext.h"
