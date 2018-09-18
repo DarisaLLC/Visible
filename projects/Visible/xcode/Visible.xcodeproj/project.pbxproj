@@ -178,6 +178,7 @@
 		C276ECA21C72B26F00242CDB /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731819953389008149E2 /* AVFoundation.framework */; };
 		C276ECA31C72B26F00242CDB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731919953389008149E2 /* CoreMedia.framework */; };
 		C276ECA91C72B5D900242CDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C276ECA81C72B5D900242CDB /* CoreGraphics.framework */; };
+		C294B11B2151C08400C916B1 /* classic.icns in Resources */ = {isa = PBXBuildFile; fileRef = C294B11A2151C08400C916B1 /* classic.icns */; };
 		C2960C12211E66DD00C5D449 /* HockeySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2960C11211E66DD00C5D449 /* HockeySDK.framework */; };
 		C2960C13211E671900C5D449 /* HockeySDK.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2960C11211E66DD00C5D449 /* HockeySDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
@@ -554,6 +555,7 @@
 		C26A05531E77629500BDC954 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		C276EC841C72988200242CDB /* cp-visible_release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "cp-visible_release.xcconfig"; sourceTree = "<group>"; };
 		C276ECA81C72B5D900242CDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		C294B11A2151C08400C916B1 /* classic.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = classic.icns; path = ../resources/classic.icns; sourceTree = "<group>"; };
 		C2960C11211E66DD00C5D449 /* HockeySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HockeySDK.framework; path = "HockeySDK-Mac/HockeySDK.framework"; sourceTree = "<group>"; };
 		C29DB075212B351200930CBD /* algo_Lif.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = algo_Lif.cpp; path = ../src/algo_Lif.cpp; sourceTree = "<group>"; };
 		C29F43581CFA8D9B008EE460 /* time_index_cache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time_index_cache.h; path = ../include/time_index_cache.h; sourceTree = "<group>"; };
@@ -801,6 +803,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C294B11A2151C08400C916B1 /* classic.icns */,
 				C2175DD8215154A9004315C0 /* swatchLarge.png */,
 				C2175DD9215154A9004315C0 /* swatchSmall.png */,
 				C2175DD521514C01004315C0 /* Images.xcassets */,
@@ -1467,6 +1470,7 @@
 			files = (
 				C2175DDC215154EA004315C0 /* palette.png in Resources */,
 				C2175DD621514C01004315C0 /* Images.xcassets in Resources */,
+				C294B11B2151C08400C916B1 /* classic.icns in Resources */,
 				C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */,
 				C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */,
 			);
