@@ -38,6 +38,10 @@
 		C2175DCF2150AB36004315C0 /* libippiw.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DCE2150AB36004315C0 /* libippiw.a */; };
 		C2175DD12150AE20004315C0 /* libtbb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DD02150AE20004315C0 /* libtbb.a */; };
 		C2175DD621514C01004315C0 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD521514C01004315C0 /* Images.xcassets */; };
+		C2175DD72151517E004315C0 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BEE01F4FB3D300977307 /* QTKit.framework */; };
+		C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
+		C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
+		C2175DDC215154EA004315C0 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
 		C219467E1CE4DC7100976025 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
 		C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
 		C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
@@ -108,7 +112,6 @@
 		C254BEC31F4FAFCC00977307 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		C254BECB1F4FB02500977307 /* OcvVideo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BE851F4FAF5C00977307 /* OcvVideo.cpp */; };
 		C254BEE11F4FB3D300977307 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BEE01F4FB3D300977307 /* QTKit.framework */; };
-		C254BEF01F4FC44700977307 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BEE01F4FB3D300977307 /* QTKit.framework */; };
 		C2601BB81E690409004415A3 /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
 		C2601BB91E69042B004415A3 /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
 		C2606DA91CED3E2E0045FF57 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
@@ -180,7 +183,6 @@
 		C2960C13211E671900C5D449 /* HockeySDK.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2960C11211E66DD00C5D449 /* HockeySDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
 		C29DB077212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
-		C2A5DBAB2079FE01001C6608 /* HockeySDK.framework in Resources */ = {isa = PBXBuildFile; fileRef = C2A5DBAA2079FE01001C6608 /* HockeySDK.framework */; };
 		C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611E1F66EA910069F665 /* PlistDate.cpp */; };
 		C2A5DBAD207A003F001C6608 /* Plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611B1F66E95B0069F665 /* Plist.cpp */; };
 		C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
@@ -306,6 +308,8 @@
 		C2175DD02150AE20004315C0 /* libtbb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtbb.a; path = ../../../../../../../../../usr/local/lib/libtbb.a; sourceTree = "<group>"; };
 		C2175DD22150B779004315C0 /* Visible.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Visible.entitlements; path = Visible/Visible.entitlements; sourceTree = "<group>"; };
 		C2175DD521514C01004315C0 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Visible/Images.xcassets; sourceTree = "<group>"; };
+		C2175DD8215154A9004315C0 /* swatchLarge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = swatchLarge.png; path = ../assets/swatchLarge.png; sourceTree = "<group>"; };
+		C2175DD9215154A9004315C0 /* swatchSmall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = swatchSmall.png; path = ../assets/swatchSmall.png; sourceTree = "<group>"; };
 		C219076A1F7D4FB500CC4780 /* contraction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = contraction.hpp; path = ../include/contraction.hpp; sourceTree = "<group>"; };
 		C21946611CE4D95E00976025 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AudioDrawUtils.cpp; path = ../src/AudioDrawUtils.cpp; sourceTree = "<group>"; };
@@ -588,7 +592,6 @@
 		C2E3F55C213D9408007B1088 /* labelBlob.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = labelBlob.cpp; sourceTree = "<group>"; };
 		C2E3F560213D9483007B1088 /* labelBlob.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = labelBlob.hpp; sourceTree = "<group>"; };
 		C2E469CE1D07718B0066B811 /* cm_time.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cm_time.hpp; sourceTree = "<group>"; };
-		C2EF8D0B21486F5000A5D3D6 /* Visible copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Visible copy2-Info.plist"; path = "/Users/arman/code/darisallc/dev/projects/Visible/xcode/Visible copy2-Info.plist"; sourceTree = "<absolute>"; };
 		C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Swatch.cpp; path = ../src/Swatch.cpp; sourceTree = "<group>"; };
 		C2EF8D0D2148709300A5D3D6 /* Item.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Item.cpp; path = ../src/Item.cpp; sourceTree = "<group>"; };
 		C2EF8D0E2148709300A5D3D6 /* logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = logger.cpp; path = ../src/logger.cpp; sourceTree = "<group>"; };
@@ -607,6 +610,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2175DD72151517E004315C0 /* QTKit.framework in Frameworks */,
 				C2175DD12150AE20004315C0 /* libtbb.a in Frameworks */,
 				C2175DCF2150AB36004315C0 /* libippiw.a in Frameworks */,
 				C2175DCB2150A9EE004315C0 /* libopencv_imgcodecs.a in Frameworks */,
@@ -625,7 +629,6 @@
 				C2E60A0A21200A7F00059FA6 /* libboost_filesystem.a in Frameworks */,
 				C2E60A0B21200A7F00059FA6 /* libboost_system.a in Frameworks */,
 				C2E60A0C21200A7F00059FA6 /* libboost_thread.a in Frameworks */,
-				C254BEF01F4FC44700977307 /* QTKit.framework in Frameworks */,
 				C2606EA51CEE0E660045FF57 /* OpenCL.framework in Frameworks */,
 				C276ECA91C72B5D900242CDB /* CoreGraphics.framework in Frameworks */,
 				C2309DCF1F6C66F700A0E908 /* libpng16.a in Frameworks */,
@@ -795,7 +798,6 @@
 				C26A053B1E771CCF00BDC954 /* sscli */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
-				C2EF8D0B21486F5000A5D3D6 /* Visible copy2-Info.plist */,
 			);
 			name = QuickTimeIteration;
 			sourceTree = "<group>";
@@ -811,6 +813,8 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C2175DD8215154A9004315C0 /* swatchLarge.png */,
+				C2175DD9215154A9004315C0 /* swatchSmall.png */,
 				C2175DD521514C01004315C0 /* Images.xcassets */,
 				C24C0953214A1ED5004C8002 /* palette.png */,
 				8D1107310486CEB800E47090 /* Info.plist */,
@@ -1474,8 +1478,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2175DDC215154EA004315C0 /* palette.png in Resources */,
 				C2175DD621514C01004315C0 /* Images.xcassets in Resources */,
-				C2A5DBAB2079FE01001C6608 /* HockeySDK.framework in Resources */,
+				C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */,
+				C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1815,6 +1821,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ASSET_PACK_MANIFEST_URL_PREFIX = assets;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -1849,6 +1856,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ASSET_PACK_MANIFEST_URL_PREFIX = assets;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
