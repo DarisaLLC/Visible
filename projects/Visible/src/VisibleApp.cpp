@@ -1,24 +1,33 @@
+/*
+ * Code Copyright 2011 Darisa LLC
+ */
+
+#include "cinder_opencv.h"
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
-#include "cinder/Camera.h"
-#include "cinder/params/Params.h"
-#include "cinder/Rand.h"
+#include "cinder/gl/Context.h"
+#include "cinder/gl/gl.h"
+#include "cinder/ImageIo.h"
 #include "cinder/Utilities.h"
-#include "cinder/Log.h"
-#include "cinder/Display.h"
-#include "guiContext.h"
+#include "cinder/app/Platform.h"
+#include "cinder/Url.h"
+#include "cinder/System.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include "otherIO/lifFile.hpp"
+#include "algo_Lif.hpp"
+#include "Item.h"
+#include "logger.hpp"
+#include "core/singleton.hpp"
+#include "hockey_etc_cocoa_wrappers.h"
 #include "LifContext.h"
-#include "MovContext.h"
-#include "boost/filesystem.hpp"
-#include "boost/any.hpp"
-#include <functional>
-#include <list>
-#include "core/stl_utils.hpp"
 #include "core/core.hpp"
 #include "Plist.hpp"
-#include <memory>
-#include <functional>
-#include "hockey_etc_cocoa_wrappers.h"
+#include <map>
+
+#define APP_WIDTH 1024
+#define APP_HEIGHT 768
 
 using namespace ci;
 using namespace ci::app;
@@ -33,7 +42,7 @@ namespace
         return App::get()->console();
     }
     
-    double				ci_getElapsedSeconds()
+    double                ci_getElapsedSeconds()
     {
         return App::get()->getElapsedSeconds();
     }
@@ -44,79 +53,86 @@ namespace
     }
 }
 
-
+#if 0
 void prepareSettings( App::Settings *settings )
 {
     settings->setHighDensityDisplayEnabled();
-    settings->setWindowSize(lifContext::startup_display_size().x, lifContext::startup_display_size().y);
+    settings->setWindowSize(APP_WIDTH,APP_HEIGHT);
     settings->setFrameRate( 60 );
     settings->setResizable( true );
-    //    settings->setWindowSize( 640, 480 );
-    //    settings->setFullScreen( false );
-    //    settings->setResizable( true );
 }
 
+#endif
 
-class VisibleApp : public App, public SingletonLight<VisibleApp>
-{
-public:
+
+class VisibleApp : public App, public SingletonLight<VisibleApp> {
+  public:
     
-    virtual ~VisibleApp(){
-        guiContext  *data = getWindow()->getUserData<guiContext>();
-        
-        
-        std::cout << " Visible App Dtor " << std::endl;
-        
-    }
-    void prepareSettings( Settings *settings );
-    void setup()override;
-    void create_qmovie_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
-    void create_movie_dir_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
-    void create_result_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
-    void create_clip_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
-    void create_lif_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
-    
-    void mouseDown( MouseEvent event )override;
-    void mouseMove( MouseEvent event )override;
+ //   void prepareSettings( Settings *settings );
+	void setup() override;
+    void mouseMove( MouseEvent event ) override;
+    void mouseDrag( MouseEvent event ) override;
+	void mouseDown( MouseEvent event ) override;
     void mouseUp( MouseEvent event )override;
-    void mouseDrag( MouseEvent event )override;
     void keyDown( KeyEvent event )override;
-    
-    void update()override;
-    void draw()override;
-    void close_main();
-    void resize()override;
-    void windowMove();
+	void update() override;
+	void draw() override;
     void windowClose();
+    void windowMove();
     void windowMouseDown( MouseEvent &mouseEvt );
     void displayChange();
-    void update_log (const std::string& msg);
+    void resize() override;
     
+	void initData( const fs::path &path );
+	void createItem( const internal_serie_info &serie, int serieNumber );
+
     void fileDrop( FileDropEvent event ) override;
     
     bool shouldQuit();
+    void update_log (const std::string& msg);
     WindowRef createConnectedWindow (Window::Format& format);
+    void create_lif_viewer (const int serie_index);
     
-    params::InterfaceGlRef         mTopParams;
+	vector<Item>			mItems;
+	vector<Item>::iterator	mMouseOverItem;
+	vector<Item>::iterator	mNewMouseOverItem;
+	vector<Item>::iterator	mSelectedItem;
+	
+    vector<gl::Texture2dRef>    mImages;
+	
+	float mLeftBorder;
+	float mTopBorder;
+	float mItemSpacing;
+	
+	gl::Texture2dRef mTitleTex;
+	gl::Texture2dRef mBgImage;
+	gl::Texture2dRef mFgImage;
+	gl::Texture2dRef mSwatchSmallTex, mSwatchLargeTex;
+	
+	Anim<float> mFgAlpha;
+	Anim<Color> mBgColor;
     
-    
-    vec2				mSize;
-    Font				mFont;
-    std::string			mLog;
-    
-    Rectf						mGlobalBounds;
-    map<string, boost::any> mPlist;
-    
+    lif_browser::ref mLifRef;
     mutable std::list <std::unique_ptr<guiContext> > mContexts;
-    
-  
+    map<string, boost::any> mPlist;
+    Font                mFont;
+    std::string            mLog;
+    vec2                mSize;
+    fs::path            mCurrentLifFilePath;
 };
 
 
+void VisibleApp::create_lif_viewer (const int serie_index)
+{
+    Window::Format format( RendererGl::create() );
+    WindowRef ww = createConnectedWindow(format);
+    mContexts.push_back(std::unique_ptr<lifContext>(new lifContext(ww, mLifRef, serie_index)));
+    
+}
 
 WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
 {
-    WindowRef win = createWindow( format );
+    WindowRef win = createWindow( Window::Format().size( APP_WIDTH, APP_HEIGHT ) );
     win->getSignalClose().connect( std::bind( &VisibleApp::windowClose, this ) );
     win->getSignalMouseDown().connect( std::bind( &VisibleApp::windowMouseDown, this, std::placeholders::_1 ) );
     win->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
@@ -125,46 +141,9 @@ WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
 }
 
 
-
-bool VisibleApp::shouldQuit()
+void VisibleApp::windowMouseDown( MouseEvent &mouseEvt )
 {
-    return true;
-}
-
-//
-// We allow one movie and multiple clips or matrix view.
-// And movie of a directory
-//
-void VisibleApp::create_qmovie_viewer (const boost::filesystem::path& pp)
-{
-    Window::Format format( RendererGl::create() );
-    WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::unique_ptr<movContext>( new movContext(ww, pp) ) );
-}
-
-
-
-//
-// We allow one movie and multiple clips or matrix view.
-//
-//
-void VisibleApp::create_lif_viewer (const boost::filesystem::path& pp)
-{
-    Window::Format format( RendererGl::create() );
-    WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::unique_ptr<lifContext>(new lifContext(ww, pp)));
-}
-
-
-//
-// We allow one movie and multiple clips or matrix view.
-//
-//
-void VisibleApp::create_movie_dir_viewer (const boost::filesystem::path& pp)
-{
-    Window::Format format( RendererGl::create() );
-    WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::unique_ptr<movDirContext>(new movDirContext(ww, pp)));
+    //  update_log ( "Mouse down in window" );
 }
 
 
@@ -176,27 +155,27 @@ void VisibleApp::fileDrop( FileDropEvent event )
     
     if (! exists(file) ) return;
     
-    if (is_directory(file))
-    {
-        create_movie_dir_viewer(file);
-        return;
-    }
-    
+ 
     if (file.has_extension())
     {
         std::string ext = file.extension().string ();
         if (ext.compare(".lif") == 0)
-            create_lif_viewer(file);
-        else if (ext.compare(".mov"))
-            create_qmovie_viewer(file);
+            initData(file);
         return;
     }
 }
 
+
+bool VisibleApp::shouldQuit()
+{
+    return true;
+}
+
+//
 void VisibleApp::setup()
 {
-    hockeyAppSetup hockey;
-    
+
+ //   hockeyAppSetup hockey;
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "Visible.app/Contents/Info.plist";
     std::ifstream stream(plist.c_str(), std::ios::binary);
@@ -205,33 +184,69 @@ void VisibleApp::setup()
     
     for( auto display : Display::getDisplays() )
     {
-        mGlobalBounds.include(display->getBounds());
-        CI_LOG_V( "display name: '" << display->getName() << "', bounds: " << display->getBounds() );
     }
     
-    setWindowPos(getWindowSize()/3);
-    
+    setWindowPos(getWindowSize()/4);
+    getWindow()->setAlwaysOnTop();
     WindowRef ww = getWindow ();
     std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
-    ww->setTitle ("Visible build: " + buildN);
+    ww->setTitle ("Visible ( build: " + buildN + " ) ");
     mFont = Font( "Menlo", 18 );
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     
-    ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
+	// fonts
+	Font smallFont = Font( "TrebuchetMS-Bold", 16 );
+	Font bigFont   = Font( "TrebuchetMS-Bold", 100 );
+	Item::setFonts( smallFont, bigFont );
+	
+	// title text
+	TextLayout layout;
+	layout.clear( ColorA( 1, 1, 1, 0 ) );
+	layout.setFont( bigFont );
+	layout.setColor( Color::white() );
+	layout.addLine( "Icelandic Colors" );
+	mTitleTex		= gl::Texture2d::create( layout.render( true ) );
+	
+	// positioning
+	mLeftBorder		= 50.0f;
+	mTopBorder		= 375.0f;
+	mItemSpacing	= 22.0f;
+	
+	// create items
+    std::vector<std::string> extensions = {"lif"};
+    auto platform = ci::app::Platform::get();
     
-    // Setup the parameters
-    mTopParams = params::InterfaceGl::create( "Visible", ivec2( getWindowWidth()/2, getWindowHeight()/2 ) );
+    auto home_path = platform->getHomeDirectory();
+    vlogger::instance().console()->info(home_path.string());
+    auto some_path = getOpenFilePath(); //"", extensions);
+    if (! some_path.empty() || exists(some_path))
+        initData(some_path);
+    else{
+            std::string msg = some_path.string() + " is not a valid path to a file ";
+            vlogger::instance().console()->info(msg);
+    }
+	
+	// textures and colors
+	mFgImage		= gl::Texture2d::create( APP_WIDTH, APP_HEIGHT );
+	mBgImage		= gl::Texture2d::create( APP_WIDTH, APP_HEIGHT );
+	mFgAlpha		= 1.0f;
+	mBgColor		= Color::white();
+	
+	// swatch graphics (square and blurry square)
+    auto palette_path = platform->getResourceDirectory();
+    std::string small =  "swatchSmall.png";
+    std::string large =  "swatchLarge.png";
+    auto small_path = palette_path / small ;
+	mSwatchSmallTex	= gl::Texture2d::create( loadImage( small_path ) );
+    auto large_path = palette_path / large ;
+	mSwatchLargeTex	= gl::Texture2d::create( loadImage( large_path ) );
+	
+	// state
+	mMouseOverItem		= mItems.end();
+	mNewMouseOverItem	= mItems.end();
+	mSelectedItem		= mItems.begin();
+	mSelectedItem->select( timeline(), mLeftBorder );
     
-    mTopParams->addSeparator();
-    mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this, boost::filesystem::path () ) );
-    //  mTopParams->addSeparator();
-    // 	mTopParams->addButton( "Import SS Matrix", std::bind( &VisibleApp::create_matrix_viewer, this ) );
-    
-    mTopParams->addSeparator();
-   	mTopParams->addButton( "Import LIF  ", std::bind( &VisibleApp::create_lif_viewer, this, boost::filesystem::path () ) );
-    mTopParams->addSeparator();
-    mTopParams->addButton( "Import Movie", std::bind( &VisibleApp::create_qmovie_viewer, this, boost::filesystem::path () ) );
-
     getSignalShouldQuit().connect( std::bind( &VisibleApp::shouldQuit, this ) );
     
     getWindow()->getSignalMove().connect( std::bind( &VisibleApp::windowMove, this ) );
@@ -245,12 +260,190 @@ void VisibleApp::setup()
     
     getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
     
-    gl::enableVerticalSync();
+}
+
+
+void VisibleApp::windowMove()
+{
+    //  update_log("window pos: " + toString(getWindow()->getPos()));
+}
+
+void VisibleApp::initData( const fs::path &path )
+{
+    if(! exists(path))
+    {
+        std::string msg = path.string() + " is not a valid path to a file ";
+        vlogger::instance().console()->info(msg);
+    }
+    mCurrentLifFilePath = path;
+    mLifRef = lif_browser::create(path);
     
-    auto cistrs = getCommandLineArgs();
-    for (auto li : cistrs)
-        std::cout << li << std::endl;
+    auto series = mLifRef->internal_serie_infos();
+
+	for( vector<internal_serie_info>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt )
+		createItem( *serieIt, serieIt - series.begin() );
+}
+
+void VisibleApp::createItem( const internal_serie_info &serie, int index )
+{
+    string title				= serie.name;
+    string desc					= " Channels: " + to_string(serie.channelCount) +
+                                  "   width: " + to_string(serie.dimensions[0]) +
+                                  "   height: " + to_string(serie.dimensions[1]);
     
+    auto platform = ci::app::Platform::get();
+    auto palette_path = platform->getResourceDirectory();
+    string paletteFilename        = "palette.png";
+    palette_path = palette_path / paletteFilename;
+    Surface palette = Surface( loadImage(  palette_path ) ) ;
+    gl::Texture2dRef image = gl::Texture::create(Surface( ImageSourceRef( new ImageSourceCvMat( serie.poster ))));
+	vec2 pos( mLeftBorder, mTopBorder + index * mItemSpacing );
+	Item item = Item(index, pos, title, desc, palette );
+	mItems.push_back( item );
+	mImages.push_back( image );
+   
+}
+
+void VisibleApp::mouseMove( MouseEvent event )
+{
+    guiContext  *data = getWindow()->getUserData<guiContext>();
+    if(data)
+        data->mouseMove(event);
+    else
+    {
+        mNewMouseOverItem = mItems.end();
+
+        for( vector<Item>::iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+            if( itemIt->isPointIn( event.getPos() ) && !itemIt->getSelected() ) {
+                mNewMouseOverItem = itemIt;
+
+                break;
+            }
+        }
+        
+        if( mNewMouseOverItem == mItems.end() ){
+            if( mMouseOverItem != mItems.end() && mMouseOverItem != mSelectedItem ){
+                mMouseOverItem->mouseOff( timeline() );
+                mMouseOverItem = mItems.end();
+            }
+        } else {
+        
+            if( mNewMouseOverItem != mMouseOverItem && !mNewMouseOverItem->getSelected() ){
+                if( mMouseOverItem != mItems.end() && mMouseOverItem != mSelectedItem )
+                    mMouseOverItem->mouseOff( timeline() );
+                mMouseOverItem = mNewMouseOverItem;
+                mMouseOverItem->mouseOver( timeline() );
+            }
+        }
+        
+        if( mMouseOverItem != mItems.end() && mMouseOverItem != mSelectedItem ){
+            mFgImage = mImages[mMouseOverItem->mIndex];
+      //      mFgAlpha = 0.0f;
+       //     timeline().apply( &mFgAlpha, 1.0f, 0.4f, EaseInQuad() );
+        }
+    }
+}
+
+void VisibleApp::mouseDown( MouseEvent event )
+{
+    guiContext  *data = getWindow()->getUserData<guiContext>();
+    if(data)
+        data->mouseDown(event);
+    else
+    {
+        if( mMouseOverItem != mItems.end() ){
+            vector<Item>::iterator prevSelected = mSelectedItem;
+            mSelectedItem = mMouseOverItem;
+            
+            // deselect previous selected item
+            if( prevSelected != mItems.end() && prevSelected != mMouseOverItem ){
+                prevSelected->deselect( timeline() );
+                mBgImage = mFgImage;
+                mBgColor = Color::white();
+                timeline().apply( &mBgColor, Color::black(), 0.4f, EaseInQuad() );
+            }
+            
+            // select current mouseover item
+            mSelectedItem->select( timeline(), mLeftBorder );
+            mFgImage = mImages[mSelectedItem->mIndex];
+            mFgAlpha = 0.0f;
+            timeline().apply( &mFgAlpha, 1.0f, 0.4f, EaseInQuad() );
+            mMouseOverItem = mItems.end();
+            mNewMouseOverItem = mItems.end();
+            
+            // Open a LIF Context for this serie
+           create_lif_viewer(mSelectedItem->mIndex);
+        }
+    }
+}
+
+void VisibleApp::update()
+{
+    guiContext  *data = getWindow()->getUserData<guiContext>();
+    
+    if (data && data->is_valid()) data->update ();
+    else {
+        for( vector<Item>::iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+            itemIt->update();
+        }
+    }
+}
+
+void VisibleApp::draw()
+{
+    guiContext  *data = getWindow()->getUserData<guiContext>();
+    
+    bool valid_data = data != nullptr && data->is_valid ();
+    
+    if (valid_data){
+          gl::clear( Color::gray( 0.5f ) );
+         data->draw();
+    }
+    else {
+        
+        // clear out the window with black
+        gl::clear( Color( 0, 0, 0 ) );
+        gl::enableAlphaBlending();
+        
+        gl::setMatricesWindowPersp( getWindowSize() );
+        
+        // draw background image
+        if( mBgImage ){
+            gl::color( mBgColor );
+            gl::draw( mBgImage, getWindowBounds() );
+        }
+        
+        // draw foreground image
+        if( mFgImage ){
+            Rectf bounds (mFgImage->getBounds());
+            bounds = bounds.getCenteredFit(getWindowBounds(), false);
+            gl::color( ColorA( 1.0f, 1.0f, 1.0f, mFgAlpha ) );
+            gl::draw( mFgImage, bounds );
+        }
+        
+        // draw swatches
+        gl::context()->pushTextureBinding( mSwatchLargeTex->getTarget(), mSwatchLargeTex->getId(), 0 );
+        if( mSelectedItem != mItems.end() )
+            mSelectedItem->drawSwatches();
+        
+        gl::context()->bindTexture( mSwatchLargeTex->getTarget(), mSwatchLargeTex->getId(), 0 );
+        for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+            if( ! itemIt->getSelected() )
+                itemIt->drawSwatches();
+        }
+        gl::context()->popTextureBinding( mSwatchLargeTex->getTarget(), 0 );
+        
+        // turn off textures and draw bgBar
+        for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+            itemIt->drawBgBar();
+        }
+        
+        // turn on textures and draw text
+        gl::color( Color( 1.0f, 1.0f, 1.0f ) );
+        for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+            itemIt->drawText();
+        }
+    }
 }
 
 
@@ -260,42 +453,19 @@ void VisibleApp::update_log (const std::string& msg)
         std::cout << msg.c_str ();
 }
 
-void VisibleApp::windowMouseDown( MouseEvent &mouseEvt )
-{
-  //  update_log ( "Mouse down in window" );
-}
-
-void VisibleApp::windowMove()
-{
-  //  update_log("window pos: " + toString(getWindow()->getPos()));
-}
-
 void VisibleApp::displayChange()
 {
-    ci::Area windowArea = getDisplay()->getBounds();
-    mDisplayTL = windowArea.getUL();
-    
-    update_log ( "window display changed: " + toString(getWindow()->getDisplay()->getBounds()));
-    console() << "ContentScale = " << getWindowContentScale() << endl;
-    console() << "getWindowCenter() = " << getWindowCenter() << endl;
+ //   update_log ( "window display changed: " + toString(getWindow()->getDisplay()->getBounds()));
+ //   console() << "ContentScale = " << getWindowContentScale() << endl;
+ //   console() << "getWindowCenter() = " << getWindowCenter() << endl;
 }
 
 
 void VisibleApp::windowClose()
 {
     WindowRef win = getWindow();
-    CI_LOG_V( "Closing " << getWindow() );
 }
 
-void VisibleApp::mouseMove( MouseEvent event )
-{
-    guiContext  *data = getWindow()->getUserData<guiContext>();
-    if(data)
-        data->mouseMove(event);
-    else
-        cinder::app::App::mouseMove(event);
-    
-}
 
 
 void VisibleApp::mouseDrag( MouseEvent event )
@@ -308,14 +478,6 @@ void VisibleApp::mouseDrag( MouseEvent event )
 }
 
 
-void VisibleApp::mouseDown( MouseEvent event )
-{
-    guiContext  *data = getWindow()->getUserData<guiContext>();
-    if(data)
-        data->mouseDown(event);
-    else
-        cinder::app::App::mouseDown(event);
-}
 
 
 void VisibleApp::mouseUp( MouseEvent event )
@@ -351,28 +513,6 @@ void VisibleApp::keyDown( KeyEvent event )
 }
 
 
-void VisibleApp::update()
-{
-    guiContext  *data = getWindow()->getUserData<guiContext>();
-    
-    if (data && data->is_valid()) data->update ();
-    
-}
-
-void VisibleApp::draw ()
-{
-    gl::clear( Color::gray( 0.5f ) );
-    
-    guiContext  *data = getWindow()->getUserData<guiContext>();
-    
-    bool valid_data = data != nullptr && data->is_valid ();
-    
-    if (valid_data) data->draw();
-    else
-        mTopParams->draw ();
-}
-
-
 
 void VisibleApp::resize ()
 {
@@ -383,6 +523,6 @@ void VisibleApp::resize ()
     
 }
 
-
-// This line tells Cinder to actually create the application
-CINDER_APP( VisibleApp, RendererGl, prepareSettings )
+CINDER_APP( VisibleApp, RendererGl( RendererGl::Options().msaa( 4 ) ), []( App::Settings *settings ) {
+	settings->setWindowSize( APP_WIDTH, APP_HEIGHT );
+} )

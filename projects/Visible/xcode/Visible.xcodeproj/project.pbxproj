@@ -60,7 +60,7 @@
 		C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
 		C248DD2C1F64601A00FF72B1 /* AudioDrawUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */; };
 		C248DD2D1F646A1200FF72B1 /* AudioDrawUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */; };
-		C24C0958214B2F4D004C8002 /* LifBrowserApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* LifBrowserApp.cpp */; };
+		C24C0958214B2F4D004C8002 /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */; };
 		C24CD87F1CEA5B1B0008C72B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
 		C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
 		C24CD8891CEA916E0008C72B /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
@@ -306,7 +306,7 @@
 		C219466D1CE4DC7100976025 /* InteractiveObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InteractiveObject.cpp; path = ../src/InteractiveObject.cpp; sourceTree = "<group>"; };
 		C21946741CE4DC7100976025 /* seq_frame_container.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = seq_frame_container.cpp; path = ../src/seq_frame_container.cpp; sourceTree = "<group>"; };
 		C21946761CE4DC7100976025 /* visible_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_impl.cpp; path = ../src/visible_impl.cpp; sourceTree = "<group>"; };
-		C21946771CE4DC7100976025 /* VisibleApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VisibleApp.cpp; path = ../src/VisibleApp.cpp; sourceTree = "<group>"; };
+		C21946771CE4DC7100976025 /* VisibleAllApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VisibleAllApp.cpp; path = ../src/VisibleAllApp.cpp; sourceTree = "<group>"; };
 		C219468A1CE4EA4900976025 /* AudioDrawUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioDrawUtils.h; path = ../include/AudioDrawUtils.h; sourceTree = "<group>"; };
 		C219468B1CE4EA4900976025 /* TinyUi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TinyUi.h; path = ../include/TinyUi.h; sourceTree = "<group>"; };
 		C21946931CE4EA4900976025 /* grabber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = grabber.h; path = ../include/grabber.h; sourceTree = "<group>"; };
@@ -586,7 +586,7 @@
 		C2EF8D0D2148709300A5D3D6 /* Item.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Item.cpp; path = ../src/Item.cpp; sourceTree = "<group>"; };
 		C2EF8D0E2148709300A5D3D6 /* logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = logger.cpp; path = ../src/logger.cpp; sourceTree = "<group>"; };
 		C2EF8D0F2148709300A5D3D6 /* ocv_frame_cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ocv_frame_cache.cpp; path = ../src/ocv_frame_cache.cpp; sourceTree = "<group>"; };
-		C2EF8D102148709300A5D3D6 /* LifBrowserApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LifBrowserApp.cpp; path = ../src/LifBrowserApp.cpp; sourceTree = "<group>"; };
+		C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VisibleApp.cpp; path = ../src/VisibleApp.cpp; sourceTree = "<group>"; };
 		C2EF8D19214873E600A5D3D6 /* Swatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Swatch.h; path = ../include/Swatch.h; sourceTree = "<group>"; };
 		C2EF8D1A214873E700A5D3D6 /* logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = logger.h; path = ../include/logger.h; sourceTree = "<group>"; };
 		C2EF8D1B214873E700A5D3D6 /* Item.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Item.h; path = ../include/Item.h; sourceTree = "<group>"; };
@@ -730,7 +730,7 @@
 				C2EF8D0D2148709300A5D3D6 /* Item.cpp */,
 				C2EF8D0E2148709300A5D3D6 /* logger.cpp */,
 				C2EF8D0F2148709300A5D3D6 /* ocv_frame_cache.cpp */,
-				C2EF8D102148709300A5D3D6 /* LifBrowserApp.cpp */,
+				C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */,
 				C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */,
 				C29DB075212B351200930CBD /* algo_Lif.cpp */,
 				C24EA2D2207F07EF00555D16 /* sg_filter.cpp */,
@@ -757,7 +757,7 @@
 				C221D9181E4B130400AF74CE /* visible_mov_dir_impl.cpp */,
 				C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */,
 				C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */,
-				C21946771CE4DC7100976025 /* VisibleApp.cpp */,
+				C21946771CE4DC7100976025 /* VisibleAllApp.cpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -1544,7 +1544,7 @@
 				C2EF8D1F2148768D00A5D3D6 /* Swatch.cpp in Sources */,
 				C254BECB1F4FB02500977307 /* OcvVideo.cpp in Sources */,
 				C20EDBC31CF277130074C47A /* time_spec.cpp in Sources */,
-				C24C0958214B2F4D004C8002 /* LifBrowserApp.cpp in Sources */,
+				C24C0958214B2F4D004C8002 /* VisibleApp.cpp in Sources */,
 				C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */,
 				C2FC7DAF1CF4F46100D18193 /* seq_frame_container.cpp in Sources */,
 				C2B38A571D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
