@@ -18,7 +18,7 @@
 #include "otherIO/lifFile.hpp"
 #include "algo_Lif.hpp"
 #include "Item.h"
-
+#include "logger.hpp"
 #include "core/singleton.hpp"
 #include "hockey_etc_cocoa_wrappers.h"
 #include "LifContext.h"
@@ -118,6 +118,7 @@ class LifBrowserApp : public App, public SingletonLight<LifBrowserApp> {
     Font                mFont;
     std::string            mLog;
     vec2                mSize;
+    fs::path            mCurrentLifFilePath;
 };
 
 
@@ -174,8 +175,7 @@ bool LifBrowserApp::shouldQuit()
 void LifBrowserApp::setup()
 {
 
-    hockeyAppSetup hockey;
-    
+ //   hockeyAppSetup hockey;
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "Visible.app/Contents/Info.plist";
     std::ifstream stream(plist.c_str(), std::ios::binary);
@@ -217,7 +217,14 @@ void LifBrowserApp::setup()
     auto platform = ci::app::Platform::get();
     
     auto home_path = platform->getHomeDirectory();
-    initData( getOpenFilePath(home_path, extensions) );
+    vlogger::instance().console()->info(home_path.string());
+    auto some_path = getOpenFilePath(); //"", extensions);
+    if (! some_path.empty() || exists(some_path))
+        initData(some_path);
+    else{
+            std::string msg = some_path.string() + " is not a valid path to a file ";
+            vlogger::instance().console()->info(msg);
+    }
 	
 	// textures and colors
 	mFgImage		= gl::Texture2d::create( APP_WIDTH, APP_HEIGHT );
@@ -226,8 +233,13 @@ void LifBrowserApp::setup()
 	mBgColor		= Color::white();
 	
 	// swatch graphics (square and blurry square)
-	mSwatchSmallTex	= gl::Texture2d::create( loadImage( loadAsset( "swatchSmall.png" ) ) );
-	mSwatchLargeTex	= gl::Texture2d::create( loadImage( loadAsset( "swatchLarge.png" ) ) );
+    auto palette_path = platform->getResourceDirectory();
+    std::string small =  "swatchSmall.png";
+    std::string large =  "swatchLarge.png";
+    auto small_path = palette_path / small ;
+	mSwatchSmallTex	= gl::Texture2d::create( loadImage( small_path ) );
+    auto large_path = palette_path / large ;
+	mSwatchLargeTex	= gl::Texture2d::create( loadImage( large_path ) );
 	
 	// state
 	mMouseOverItem		= mItems.end();
@@ -258,6 +270,12 @@ void LifBrowserApp::windowMove()
 
 void LifBrowserApp::initData( const fs::path &path )
 {
+    if(! exists(path))
+    {
+        std::string msg = path.string() + " is not a valid path to a file ";
+        vlogger::instance().console()->info(msg);
+    }
+    mCurrentLifFilePath = path;
     mLifRef = lif_browser::create(path);
     
     auto series = mLifRef->internal_serie_infos();
