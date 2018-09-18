@@ -14,7 +14,7 @@ TEST_DATA = $(SRCROOT)/Assets/test_data
 
 
 LOCAL_CINDER = $(EXTERNALS)/cinder
-LOCAL_OCV = /usr/local/opencv3/3.4.2
+LOCAL_OCV =  /usr/local/Cellar/opencv/3.4.2
 LOCAL_CIMG = $(EXTERNALS)/CImg
 LOCAL_SPDLOG = $(EXTERNALS)/spdlog
 
@@ -28,12 +28,10 @@ LOCAL_TINYXML = $(LOCAL_3rdParty)/tinyxml
 
 
 
-HEADER_SEARCH_PATHS = $(SRCROOT)/include/** /usr/local/include $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_TINYXML) $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG)  $(LOCAL_SPDLOG)/include $(SVL_X11_ROOT)/include
+HEADER_SEARCH_PATHS = $(inherited) $(SRCROOT)/include/** /usr/local/include $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_TINYXML) $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG)  $(LOCAL_SPDLOG)/include $(SVL_X11_ROOT)/include
 
-LIBRARY_SEARCH_PATHS = $(LOCAL_OCV)/lib/macosx /usr/local/lib
+LIBRARY_SEARCH_PATHS = $(inherited) $(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION) $(LOCAL_OCV)/lib /usr/local/lib /usr/local/Cellar/tbb/2018_U5/lib/ $(LOCAL_3rdParty)/boost/lib
 
 
-//:configuration = Debug
-OTHER_LDFLAGS = $(LOCAL_CINDER)/lib/macosx/Debug/libcinder_d.a $(LOCAL_OCV)/lib/macosx/libopencv_core.a $(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a $(LOCAL_OCV)/lib/macosx/libippicv.a $(LOCAL_OCV)/lib/macosx/libopencv_highgui.a $(LOCAL_OCV)/lib/macosx/libopencv_hal.a $(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a $(LOCAL_OCV)/lib/macosx/libzlib.a
 
 
