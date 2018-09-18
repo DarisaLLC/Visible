@@ -26,6 +26,8 @@
 	<string>public.app-category.productivity</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.12</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>
