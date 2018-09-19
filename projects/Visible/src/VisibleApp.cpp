@@ -174,8 +174,7 @@ bool VisibleApp::shouldQuit()
 //
 void VisibleApp::setup()
 {
-
- //   hockeyAppSetup hockey;
+    hockeyAppSetup hockey;
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "Visible.app/Contents/Info.plist";
     std::ifstream stream(plist.c_str(), std::ios::binary);
