@@ -15,7 +15,15 @@
 #endif
 #endif
 
+#if defined( HOCKEY_SUPPORT )
 #import <HockeySDK/HockeySDK.h>
+
+hockeyAppSetup::hockeyAppSetup (){
+    [[BITHockeyManager sharedHockeyManager] configureWithIdentifier:@"9614386b13784f67946728d5bc17f056"];
+    // Do some additional configuration if needed here
+    [[BITHockeyManager sharedHockeyManager] startManager];
+}
+#endif
 
 #include "cinder/qtime/QuickTimeImplAvf.h"
 #include "cinder/qtime/AvfUtils.h"
@@ -23,12 +31,6 @@
 
 using namespace cinder;
 using namespace cinder::qtime;
-
-hockeyAppSetup::hockeyAppSetup (){
-    [[BITHockeyManager sharedHockeyManager] configureWithIdentifier:@"9614386b13784f67946728d5bc17f056"];
-    // Do some additional configuration if needed here
-    [[BITHockeyManager sharedHockeyManager] startManager];
-}
 
 bool qtimeAvfLink::MovieBaseFrameReadyConnect(MovieSurfaceRef& movie, void (*frame_ready)())
 {

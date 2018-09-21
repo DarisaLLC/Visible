@@ -21,11 +21,13 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>273</string>
+	<string>293</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.12</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

@@ -1,5 +1,5 @@
  
-
+#include "opencv2/stitching.hpp"
 #include "guiContext.h"
 #include "core/stl_utils.hpp"
 
