@@ -1,3 +1,6 @@
+[submodule "externals/spdlog"]
+	path = externals/spdlog
+	url = https://github.com/gabime/spdlog.git
 [submodule "externals/cinder"]
 	path = externals/cinder
 	url = git://github.com/cinder/Cinder.git
@@ -7,11 +10,5 @@
 [submodule "externals/Cinder-OpenCV3"]
 	path = externals/Cinder-OpenCV3
 	url = git://github.com/cinder/Cinder-OpenCV3.git
-[submodule "externals/boost"]
-	path = externals/boost
-	url = https://github.com/gmnamra/cinder_boost.git
 
 
-[submodule "externals/spdlog"]
-	path = externals/spdlog
-	url = https://github.com/gabime/spdlog.git
