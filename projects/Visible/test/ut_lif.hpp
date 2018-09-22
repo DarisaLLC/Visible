@@ -16,7 +16,7 @@
 #include "vision/roiWindow.h"
 #include "vision/rowfunc.h"
 #include "core/stl_utils.hpp"
-#include "cinder/cinder_xchg.hpp"
+#include "cinder_cv/cinder_xchg.hpp"
 #include "otherIO/lifFile.hpp"
 #include "core/gtest_image_utils.hpp"
 #include "vision/roiMultiWindow.h"

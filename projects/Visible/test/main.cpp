@@ -12,11 +12,11 @@
 #include <memory>
 #include "boost/filesystem.hpp"
 #include "opencv2/highgui.hpp"
-#include "roiWindow.h"
+#include "vision/roiWindow.h"
 #include "vision/self_similarity.h"
 #include "seq_frame_container.hpp"
 #include "cinder/ImageIO.h"
-#include "cinder_xchg.hpp"
+#include "cinder_cv/cinder_xchg.hpp"
 #include "ut_sm.hpp"
 #include "AVReader.hpp"
 #include "cm_time.hpp"
@@ -38,8 +38,7 @@
 #include "core/stl_utils.hpp"
 #include "ut_localvar.hpp"
 #include "vision/labelBlob.hpp"
-
-
+#include "cvmat_cereal_serialization.h"
 using namespace boost;
 
 using namespace ci;

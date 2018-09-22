@@ -25,6 +25,17 @@
 		C20EDBC61CF2776D0074C47A /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBF1CF277130074C47A /* self_similarity.cpp */; };
 		C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C20EDBC81CF277740074C47A /* exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBE1CF277130074C47A /* exception.cpp */; };
+		C210F0EB2155C0D9002A82A3 /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DB22150A5FA004315C0 /* libopencv_core.a */; };
+		C210F0EC2155C146002A82A3 /* libopencv_highgui.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DB42150A645004315C0 /* libopencv_highgui.a */; };
+		C210F0ED2155C15F002A82A3 /* libopencv_imgproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DB72150A647004315C0 /* libopencv_imgproc.a */; };
+		C210F0EE2155C16B002A82A3 /* libcinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC61F6B4D6500A0E908 /* libcinder.a */; };
+		C210F0EF2155C1D7002A82A3 /* libopencv_video.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DC22150A94A004315C0 /* libopencv_video.a */; };
+		C210F0F02155C1DA002A82A3 /* libopencv_videostab.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DC42150A94E004315C0 /* libopencv_videostab.a */; };
+		C210F0F12155C1DD002A82A3 /* libopencv_objdetect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DC82150A984004315C0 /* libopencv_objdetect.a */; };
+		C210F0F22155C1FB002A82A3 /* libopencv_features2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DC62150A978004315C0 /* libopencv_features2d.a */; };
+		C210F0F32155C23A002A82A3 /* libopencv_imgcodecs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DCA2150A9EE004315C0 /* libopencv_imgcodecs.a */; };
+		C210F0F52155C387002A82A3 /* libopencv_videoio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F0F42155C387002A82A3 /* libopencv_videoio.a */; };
+		C210F0F62155C38C002A82A3 /* libopencv_videoio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F0F42155C387002A82A3 /* libopencv_videoio.a */; };
 		C2175DBE2150A7FE004315C0 /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DB22150A5FA004315C0 /* libopencv_core.a */; };
 		C2175DBF2150A8B3004315C0 /* libippicv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DBC2150A69A004315C0 /* libippicv.a */; };
 		C2175DC02150A8C6004315C0 /* libopencv_highgui.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2175DB42150A645004315C0 /* libopencv_highgui.a */; };
@@ -42,6 +53,19 @@
 		C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
 		C2175DDC215154EA004315C0 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
 		C219467E1CE4DC7100976025 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
+		C21CFD3221546DFF002B1D35 /* libtbb.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DD02150AE20004315C0 /* libtbb.a */; };
+		C21CFD3321546DFF002B1D35 /* libippiw.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DCE2150AB36004315C0 /* libippiw.a */; };
+		C21CFD3421546DFF002B1D35 /* libittnotify.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DCC2150AB0F004315C0 /* libittnotify.a */; };
+		C21CFD3521546DFF002B1D35 /* libopencv_imgcodecs.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DCA2150A9EE004315C0 /* libopencv_imgcodecs.a */; };
+		C21CFD3621546DFF002B1D35 /* libopencv_objdetect.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DC82150A984004315C0 /* libopencv_objdetect.a */; };
+		C21CFD3721546DFF002B1D35 /* libopencv_features2d.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DC62150A978004315C0 /* libopencv_features2d.a */; };
+		C21CFD3821546DFF002B1D35 /* libopencv_videostab.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DC42150A94E004315C0 /* libopencv_videostab.a */; };
+		C21CFD3921546DFF002B1D35 /* libopencv_video.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DC22150A94A004315C0 /* libopencv_video.a */; };
+		C21CFD3A21546DFF002B1D35 /* libippicv.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DBC2150A69A004315C0 /* libippicv.a */; };
+		C21CFD3B21546DFF002B1D35 /* libopencv_highgui.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DB42150A645004315C0 /* libopencv_highgui.a */; };
+		C21CFD3C21546DFF002B1D35 /* libopencv_imgcodecs.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DB62150A646004315C0 /* libopencv_imgcodecs.a */; };
+		C21CFD3D21546DFF002B1D35 /* libopencv_imgproc.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DB72150A647004315C0 /* libopencv_imgproc.a */; };
+		C21CFD3E21546DFF002B1D35 /* libopencv_core.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2175DB22150A5FA004315C0 /* libopencv_core.a */; };
 		C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
 		C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
 		C21FFE721CFE0AA300C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
@@ -64,12 +88,10 @@
 		C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
 		C24CD8891CEA916E0008C72B /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
 		C24CD88A1CEA916E0008C72B /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8851CEA916E0008C72B /* libboost_system.a */; };
-		C24CD88C1CEA916E0008C72B /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8871CEA916E0008C72B /* libz.a */; };
 		C24CD8AA1CEB840C0008C72B /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784AF0FF439BC000DE1D7 /* Accelerate.framework */; };
 		C24CD8AB1CEB840C0008C72B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */; };
 		C24CD8AC1CEB840C0008C72B /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B10FF439BC000DE1D7 /* AudioUnit.framework */; };
 		C24CD8AD1CEB840C0008C72B /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B20FF439BC000DE1D7 /* CoreAudio.framework */; };
-		C24CD8AE1CEB840C0008C72B /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0097E3E40F3E9819005A4392 /* QuickTime.framework */; };
 		C24CD8AF1CEB840C0008C72B /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B50EAFCA7E003A9687 /* QTKit.framework */; };
 		C24CD8B01CEB840C0008C72B /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
 		C24CD8B11CEB840C0008C72B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53E3CDFB0E86099300238D2B /* Carbon.framework */; };
@@ -199,11 +221,6 @@
 		C2E0EE621F7B079300D32697 /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693D1CED3E2B0045FF57 /* libgtest.a */; };
 		C2E0EE631F7B079600D32697 /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693E1CED3E2B0045FF57 /* libgtest_main.a */; };
 		C2E0EE641F7B081D00D32697 /* OcvVideo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BE851F4FAF5C00977307 /* OcvVideo.cpp */; };
-		C2E0EE721F7B0B7300D32697 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC91F6C66F700A0E908 /* libjpeg.a */; };
-		C2E0EE731F7B0B7500D32697 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCA1F6C66F700A0E908 /* libpng16.a */; };
-		C2E0EE741F7B0B7700D32697 /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCB1F6C66F700A0E908 /* libtiff.a */; };
-		C2E0EE751F7B0B7900D32697 /* libwebp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DCC1F6C66F700A0E908 /* libwebp.a */; };
-		C2E0EE761F7B0B7C00D32697 /* libIlmImf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DD21F6C677100A0E908 /* libIlmImf.a */; };
 		C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
 		C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
 		C2E60A0921200A7F00059FA6 /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
@@ -224,6 +241,19 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				C21CFD3221546DFF002B1D35 /* libtbb.a in CopyFiles */,
+				C21CFD3321546DFF002B1D35 /* libippiw.a in CopyFiles */,
+				C21CFD3421546DFF002B1D35 /* libittnotify.a in CopyFiles */,
+				C21CFD3521546DFF002B1D35 /* libopencv_imgcodecs.a in CopyFiles */,
+				C21CFD3621546DFF002B1D35 /* libopencv_objdetect.a in CopyFiles */,
+				C21CFD3721546DFF002B1D35 /* libopencv_features2d.a in CopyFiles */,
+				C21CFD3821546DFF002B1D35 /* libopencv_videostab.a in CopyFiles */,
+				C21CFD3921546DFF002B1D35 /* libopencv_video.a in CopyFiles */,
+				C21CFD3A21546DFF002B1D35 /* libippicv.a in CopyFiles */,
+				C21CFD3B21546DFF002B1D35 /* libopencv_highgui.a in CopyFiles */,
+				C21CFD3C21546DFF002B1D35 /* libopencv_imgcodecs.a in CopyFiles */,
+				C21CFD3D21546DFF002B1D35 /* libopencv_imgproc.a in CopyFiles */,
+				C21CFD3E21546DFF002B1D35 /* libopencv_core.a in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,6 +309,7 @@
 		C20EDBC01CF277130074C47A /* time_spec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = time_spec.cpp; sourceTree = "<group>"; };
 		C20EDBC41CF277480074C47A /* simple_timing.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = simple_timing.hpp; sourceTree = "<group>"; };
 		C20EDBC51CF277480074C47A /* timestamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timestamp.h; sourceTree = "<group>"; };
+		C210F0F42155C387002A82A3 /* libopencv_videoio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_videoio.a; sourceTree = "<group>"; };
 		C2175DB22150A5FA004315C0 /* libopencv_core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_core.a; path = /usr/local/Cellar/opencv/3.4.2/lib/libopencv_core.a; sourceTree = "<absolute>"; };
 		C2175DB42150A645004315C0 /* libopencv_highgui.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_highgui.a; path = /usr/local/Cellar/opencv/3.4.2/lib/libopencv_highgui.a; sourceTree = "<absolute>"; };
 		C2175DB62150A646004315C0 /* libopencv_imgcodecs.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_imgcodecs.a; path = /usr/local/Cellar/opencv/3.4.2/lib/libopencv_imgcodecs.a; sourceTree = "<absolute>"; };
@@ -572,6 +603,8 @@
 		C2DA19561E7F30D800062DBC /* csv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = csv.cpp; sourceTree = "<group>"; };
 		C2DA19581E7F30E800062DBC /* csv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = csv.hpp; sourceTree = "<group>"; };
 		C2DA19591E8091FA00062DBC /* kmeans1d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kmeans1d.hpp; sourceTree = "<group>"; };
+		C2DB59B121557C0C00750C2E /* app_core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = app_core.h; path = ../include/app_core.h; sourceTree = "<group>"; };
+		C2DB59B221557CF800750C2E /* cvmat_cereal_serialization.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = cvmat_cereal_serialization.h; path = ../include/cvmat_cereal_serialization.h; sourceTree = "<group>"; };
 		C2E321FE1D038B16006DFE5E /* AVReader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AVReader.hpp; path = ../include/AVReader.hpp; sourceTree = "<group>"; };
 		C2E321FF1D0480E4006DFE5E /* mediaInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mediaInfo.h; path = ../include/mediaInfo.h; sourceTree = "<group>"; };
 		C2E322001D05B90C006DFE5E /* time_index.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time_index.h; path = ../include/time_index.h; sourceTree = "<group>"; };
@@ -596,6 +629,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C210F0F52155C387002A82A3 /* libopencv_videoio.a in Frameworks */,
 				C2175DD72151517E004315C0 /* QTKit.framework in Frameworks */,
 				C2175DD12150AE20004315C0 /* libtbb.a in Frameworks */,
 				C2175DCF2150AB36004315C0 /* libippiw.a in Frameworks */,
@@ -640,17 +674,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C2E0EE761F7B0B7C00D32697 /* libIlmImf.a in Frameworks */,
-				C2E0EE751F7B0B7900D32697 /* libwebp.a in Frameworks */,
-				C2E0EE741F7B0B7700D32697 /* libtiff.a in Frameworks */,
-				C2E0EE731F7B0B7500D32697 /* libpng16.a in Frameworks */,
-				C2E0EE721F7B0B7300D32697 /* libjpeg.a in Frameworks */,
+				C210F0F62155C38C002A82A3 /* libopencv_videoio.a in Frameworks */,
+				C210F0F32155C23A002A82A3 /* libopencv_imgcodecs.a in Frameworks */,
+				C210F0F22155C1FB002A82A3 /* libopencv_features2d.a in Frameworks */,
+				C210F0F12155C1DD002A82A3 /* libopencv_objdetect.a in Frameworks */,
+				C210F0F02155C1DA002A82A3 /* libopencv_videostab.a in Frameworks */,
+				C210F0EF2155C1D7002A82A3 /* libopencv_video.a in Frameworks */,
+				C210F0EE2155C16B002A82A3 /* libcinder.a in Frameworks */,
+				C210F0ED2155C15F002A82A3 /* libopencv_imgproc.a in Frameworks */,
+				C210F0EC2155C146002A82A3 /* libopencv_highgui.a in Frameworks */,
+				C210F0EB2155C0D9002A82A3 /* libopencv_core.a in Frameworks */,
 				C21FFE731CFE0E1D00C97013 /* OpenCL.framework in Frameworks */,
 				C24CD8AA1CEB840C0008C72B /* Accelerate.framework in Frameworks */,
 				C24CD8AB1CEB840C0008C72B /* AudioToolbox.framework in Frameworks */,
 				C24CD8AC1CEB840C0008C72B /* AudioUnit.framework in Frameworks */,
 				C24CD8AD1CEB840C0008C72B /* CoreAudio.framework in Frameworks */,
-				C24CD8AE1CEB840C0008C72B /* QuickTime.framework in Frameworks */,
 				C24CD8AF1CEB840C0008C72B /* QTKit.framework in Frameworks */,
 				C24CD8B01CEB840C0008C72B /* CoreVideo.framework in Frameworks */,
 				C24CD8B11CEB840C0008C72B /* Carbon.framework in Frameworks */,
@@ -667,7 +705,6 @@
 				C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */,
 				C24CD8891CEA916E0008C72B /* libboost_filesystem.a in Frameworks */,
 				C24CD88A1CEA916E0008C72B /* libboost_system.a in Frameworks */,
-				C24CD88C1CEA916E0008C72B /* libz.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -814,6 +851,7 @@
 				C2175DD02150AE20004315C0 /* libtbb.a */,
 				C2175DCE2150AB36004315C0 /* libippiw.a */,
 				C2175DCC2150AB0F004315C0 /* libittnotify.a */,
+				C210F0F42155C387002A82A3 /* libopencv_videoio.a */,
 				C2175DCA2150A9EE004315C0 /* libopencv_imgcodecs.a */,
 				C2175DC82150A984004315C0 /* libopencv_objdetect.a */,
 				C2175DC62150A978004315C0 /* libopencv_features2d.a */,
@@ -881,6 +919,8 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C2DB59B221557CF800750C2E /* cvmat_cereal_serialization.h */,
+				C2DB59B121557C0C00750C2E /* app_core.h */,
 				C2EF8D1B214873E700A5D3D6 /* Item.h */,
 				C2EF8D1A214873E700A5D3D6 /* logger.h */,
 				C2EF8D1C214873E700A5D3D6 /* ocv_frame_cache.hpp */,
@@ -1423,6 +1463,7 @@
 					};
 					C24CD87B1CEA5B1B0008C72B = {
 						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = W4F7HL2GN5;
 					};
 					C254BE881F4FAFCC00977307 = {
 						DevelopmentTeam = W4F7HL2GN5;
@@ -1656,7 +1697,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_ENTITLEMENTS = Visible/Visible.entitlements;
-				CODE_SIGN_IDENTITY = "Mac Developer: Arman Garakani (82CK93YNWZ)";
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = YES;
@@ -1677,6 +1718,7 @@
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
+					"$(LOCAL_CEREAL)",
 					"$(SRCROOT)/../projects/Visible/include/plistcpp",
 					"$(LOCAL_CINDER)/include",
 					"$(LOCAL_BOOST)",
@@ -1694,6 +1736,7 @@
 					"$(LOCAL_OCV)/lib",
 					/usr/local/Cellar/tbb/2018_U5/lib/,
 					/usr/local/lib,
+					"$(PROJECT_DIR)",
 				);
 				LOCAL_BOOST = "$(EXTERNALS)";
 				MACH_O_TYPE = mh_execute;
@@ -1702,7 +1745,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
 				PROVISIONING_PROFILE = "91c42467-c5f5-48ed-9096-751c56824448";
-				PROVISIONING_PROFILE_SPECIFIER = bothmachines;
+				PROVISIONING_PROFILE_SPECIFIER = appstore2;
 				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = include;
 				VALID_ARCHS = "i386 x86_64";
@@ -1721,7 +1764,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_ENTITLEMENTS = Visible/Visible.entitlements;
-				CODE_SIGN_IDENTITY = "Mac Developer: Arman Garakani (82CK93YNWZ)";
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = NO;
 				CURRENT_PROJECT_VERSION = 2;
@@ -1742,6 +1785,7 @@
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
+					"$(LOCAL_CEREAL)",
 					"$(SRCROOT)/../projects/Visible/include/plistcpp",
 					"$(LOCAL_CINDER)/include",
 					"$(LOCAL_BOOST)",
@@ -1759,6 +1803,7 @@
 					"$(LOCAL_OCV)/lib/",
 					/usr/local/Cellar/tbb/2018_U5/lib/,
 					/usr/local/lib,
+					"$(PROJECT_DIR)",
 				);
 				LOCAL_BOOST = "$(EXTERNALS)";
 				MACH_O_TYPE = mh_execute;
@@ -1767,7 +1812,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
 				PROVISIONING_PROFILE = "91c42467-c5f5-48ed-9096-751c56824448";
-				PROVISIONING_PROFILE_SPECIFIER = bothmachines;
+				PROVISIONING_PROFILE_SPECIFIER = appstore2;
 				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = include;
 				VALID_ARCHS = "i386 x86_64";
@@ -1785,7 +1830,10 @@
 				ASSET_PACK_MANIFEST_URL_PREFIX = assets;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = W4F7HL2GN5;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "";
@@ -1812,7 +1860,10 @@
 				ASSET_PACK_MANIFEST_URL_PREFIX = assets;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = W4F7HL2GN5;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "";
@@ -1869,6 +1920,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(LOCAL_CEREAL)",
 					"$(LOCAL_gtest)/include",
 					"$(LOCAL_CINDER)/include",
 					"$(LOCAL_BOOST)",
@@ -1882,29 +1934,16 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/local/boost/lib",
 					"$(LOCAL_gtest)/lib/Debug",
+					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
+					/usr/local/Cellar/opencv/3.4.2/lib,
 					"$(PROJECT_DIR)",
-					"$(LOCAL_OCV)/lib/macosx",
-					"$(LOCAL_CINDER)/lib/macosx",
-					/usr/local/Cellar/openexr/2.2.0/lib,
-					/usr/local/Cellar/libtiff/4.0.8/lib,
-					/usr/local/Cellar/libpng/1.6.29/lib,
-					/usr/local/Cellar/webp/0.5.2/lib,
 				);
 				LOCAL_BOOST = "$(EXTERNALS)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(PROJECT_DIR)/libcinder.a",
-					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
-					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
-					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
-					"$(LOCAL_OCV)/lib/macosx/libopencv_highgui.a",
-					"$(LOCAL_OCV)/lib/macosx/libopencv_hal.a",
-					"$(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a",
-					"$(LOCAL_OCV)/lib/macosx/libzlib.a",
-				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1942,6 +1981,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(LOCAL_CEREAL)",
 					"$(LOCAL_gtest)/include",
 					"$(LOCAL_CINDER)/include",
 					"$(LOCAL_BOOST)",
@@ -1955,28 +1995,15 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/local/boost/lib",
 					"$(LOCAL_gtest)/lib/Debug",
-					"$(PROJECT_DIR)",
-					"$(LOCAL_OCV)/lib/macosx",
 					"$(LOCAL_CINDER)/lib/macosx",
-					/usr/local/Cellar/openexr/2.2.0/lib,
-					/usr/local/Cellar/libtiff/4.0.8/lib,
-					/usr/local/Cellar/libpng/1.6.29/lib,
-					/usr/local/Cellar/webp/0.5.2/lib,
+					/usr/local/Cellar/opencv/3.4.2/lib,
+					"$(PROJECT_DIR)",
 				);
 				LOCAL_BOOST = "$(EXTERNALS)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(PROJECT_DIR)/libcinder.a",
-					"$(LOCAL_OCV)/lib/macosx/libopencv_core.a",
-					"$(LOCAL_OCV)/lib/macosx/libopencv_imgproc.a",
-					"$(LOCAL_OCV)/lib/macosx/libippicv.a",
-					"$(LOCAL_OCV)/lib/macosx/libopencv_highgui.a",
-					"$(LOCAL_OCV)/lib/macosx/libopencv_hal.a",
-					"$(LOCAL_OCV)/lib/macosx/libopencv_objdetect.a",
-					"$(LOCAL_OCV)/lib/macosx/libzlib.a",
-				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
