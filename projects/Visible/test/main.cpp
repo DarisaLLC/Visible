@@ -35,10 +35,16 @@
 #include "algo_mov.hpp"
 #include "sg_filter.h"
 #include "vision/drawUtils.hpp"
-#include "core/stl_utils.hpp"
 #include "ut_localvar.hpp"
 #include "vision/labelBlob.hpp"
 #include "cvmat_cereal_serialization.h"
+#include <cereal/cereal.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/utility.hpp>
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/binary.hpp>
+#include <fstream>
+
 using namespace boost;
 
 using namespace ci;
@@ -124,6 +130,41 @@ void savgol (const deque<double>& signal, deque<double>& dst)
     
 }
 
+TEST(ut_serialization, double_cv_mat){
+    uint32_t cols = 210;
+    uint32_t rows = 210;
+    cv::Mat data (rows, cols, CV_64F);
+    for (auto j = 0; j < rows; j++)
+        for (auto i = 0; i < cols; i++){
+            data.at<double>(j,i) = 1.0 / (i + j - 1);
+        }
+    
+    auto tempFilePath = boost::filesystem::temp_directory_path() / boost::filesystem::unique_path();
+    {
+        std::ofstream file(tempFilePath.c_str(), std::ios::binary);
+        cereal::BinaryOutputArchive ar(file);
+        ar(data);
+    }
+    // Load the data from the disk again:
+    {
+        cv::Mat loaded_data;
+        {
+            std::ifstream file(tempFilePath.c_str(), std::ios::binary);
+            cereal::BinaryInputArchive ar(file);
+            ar(loaded_data);
+
+            EXPECT_EQ(rows, data.rows);
+            EXPECT_EQ(cols, data.cols);
+            
+            EXPECT_EQ(data.rows, loaded_data.rows);
+            EXPECT_EQ(data.cols, loaded_data.cols);
+            for (auto j = 0; j < rows; j++)
+                for (auto i = 0; i < cols; i++){
+                    EXPECT_EQ(data.at<double>(j,i), loaded_data.at<double>(j,i));
+                }
+        }
+    }
+}
 
 TEST(ut_localvar, basic)
 {

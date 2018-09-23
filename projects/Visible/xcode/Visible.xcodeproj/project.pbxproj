@@ -200,7 +200,6 @@
 		C276ECA31C72B26F00242CDB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731919953389008149E2 /* CoreMedia.framework */; };
 		C276ECA91C72B5D900242CDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C276ECA81C72B5D900242CDB /* CoreGraphics.framework */; };
 		C294B1202152D22C00C916B1 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C294B11F2152D22C00C916B1 /* Media.xcassets */; };
-		C2960C12211E66DD00C5D449 /* HockeySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2960C11211E66DD00C5D449 /* HockeySDK.framework */; };
 		C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
 		C29DB077212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
 		C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611E1F66EA910069F665 /* PlistDate.cpp */; };
@@ -377,7 +376,6 @@
 		C24CD8871CEA916E0008C72B /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = ../../../svl/local/boost/lib/libz.a; sourceTree = "<group>"; };
 		C24CD88D1CEA91910008C72B /* libgtest_main.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest_main.a; path = ../../../svl/local/gtest/lib/Release/libgtest_main.a; sourceTree = "<group>"; };
 		C24CD88E1CEA91910008C72B /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = ../../../svl/local/gtest/lib/Release/libgtest.a; sourceTree = "<group>"; };
-		C24CD8A51CEB726B0008C72B /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
 		C24EA2D1207F07D100555D16 /* sg_filter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sg_filter.h; path = ../include/sg_filter.h; sourceTree = "<group>"; };
 		C24EA2D2207F07EF00555D16 /* sg_filter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sg_filter.cpp; path = ../src/sg_filter.cpp; sourceTree = "<group>"; };
 		C24FC84C1E5E40130071AA1A /* async_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = async_producer.h; path = ../include/async_producer.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -583,10 +581,8 @@
 		C276EC841C72988200242CDB /* cp-visible_release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "cp-visible_release.xcconfig"; sourceTree = "<group>"; };
 		C276ECA81C72B5D900242CDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		C294B11F2152D22C00C916B1 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
-		C2960C11211E66DD00C5D449 /* HockeySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HockeySDK.framework; path = "HockeySDK-Mac/HockeySDK.framework"; sourceTree = "<group>"; };
 		C29DB075212B351200930CBD /* algo_Lif.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = algo_Lif.cpp; path = ../src/algo_Lif.cpp; sourceTree = "<group>"; };
 		C29F43581CFA8D9B008EE460 /* time_index_cache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time_index_cache.h; path = ../include/time_index_cache.h; sourceTree = "<group>"; };
-		C2A5DBAA2079FE01001C6608 /* HockeySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HockeySDK.framework; path = "HockeySDK-Mac/HockeySDK.framework"; sourceTree = "<group>"; };
 		C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "cp-visible-debug.xcconfig"; sourceTree = "<group>"; };
 		C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = hockey_etc_cocoa_wrappers.mm; path = ../src/hockey_etc_cocoa_wrappers.mm; sourceTree = "<group>"; };
 		C2B005861CFF8FE100AC2E64 /* hockey_etc_cocoa_wrappers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hockey_etc_cocoa_wrappers.h; path = ../include/hockey_etc_cocoa_wrappers.h; sourceTree = "<group>"; };
@@ -656,7 +652,6 @@
 				C2309DD01F6C66F700A0E908 /* libtiff.a in Frameworks */,
 				C276ECA11C72B26F00242CDB /* IOSurface.framework in Frameworks */,
 				C276ECA21C72B26F00242CDB /* AVFoundation.framework in Frameworks */,
-				C2960C12211E66DD00C5D449 /* HockeySDK.framework in Frameworks */,
 				C276ECA31C72B26F00242CDB /* CoreMedia.framework in Frameworks */,
 				C276EC961C72B26300242CDB /* Accelerate.framework in Frameworks */,
 				C276EC971C72B26300242CDB /* AudioToolbox.framework in Frameworks */,
@@ -811,7 +806,6 @@
 			children = (
 				C294B11F2152D22C00C916B1 /* Media.xcassets */,
 				C2175DD22150B779004315C0 /* Visible.entitlements */,
-				C2A5DBAA2079FE01001C6608 /* HockeySDK.framework */,
 				C260099A1CED3E010045FF57 /* svl */,
 				C21946B11CE4EA6100976025 /* include */,
 				C21946891CE4DC9700976025 /* Configurations */,
@@ -862,7 +856,6 @@
 				C2175DB62150A646004315C0 /* libopencv_imgcodecs.a */,
 				C2175DB72150A647004315C0 /* libopencv_imgproc.a */,
 				C2175DB22150A5FA004315C0 /* libopencv_core.a */,
-				C2960C11211E66DD00C5D449 /* HockeySDK.framework */,
 				C2309DC91F6C66F700A0E908 /* libjpeg.a */,
 				C2309DCA1F6C66F700A0E908 /* libpng16.a */,
 				C2309DCB1F6C66F700A0E908 /* libtiff.a */,
@@ -889,7 +882,6 @@
 				53E3CDFB0E86099300238D2B /* Carbon.framework */,
 				0091D8F80E81B9330029341E /* OpenGL.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
-				C24CD8A51CEB726B0008C72B /* QuickTime.framework */,
 				C24CD88D1CEA91910008C72B /* libgtest_main.a */,
 				C24CD88E1CEA91910008C72B /* libgtest.a */,
 				C24CD8831CEA916E0008C72B /* libboost_date_time.a */,
