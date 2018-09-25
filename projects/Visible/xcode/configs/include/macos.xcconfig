@@ -13,7 +13,7 @@ SDKROOT = macosx
 MACOSX_DEPLOYMENT_TARGET = 10.10
 
 // Build for PPC and Intel, 32- and 64-bit
-ARCHS = i386 x86_64
+ARCHS = x86_64
 
 // Zerolink prevents link warnings so turn it off
 ZERO_LINK = NO
@@ -21,8 +21,8 @@ ZERO_LINK = NO
 // Prebinding considered unhelpful in 10.3 and later
 PREBINDING = NO
 
-// Strictest warning policy
-WARNING_CFLAGS = -Wall -Werror -Wendif-labels -Wnewline-eof -Wno-sign-compare -Wshadow
+// Strictest warning policy -Wshadow ? 
+WARNING_CFLAGS = -Wall -Werror -Wendif-labels -Wnewline-eof -Wno-sign-compare
 
 // Work around Xcode bugs by using external strip. See:
 // http://lists.apple.com/archives/Xcode-users/2006/Feb/msg00050.html
@@ -99,7 +99,6 @@ GTM_GENERAL_WARNING_CFLAGS = $(GTM_GENERAL_WARNING_CFLAGS1) $(GTM_GENERAL_WARNIN
 // GCC_WARN_UNINITIALIZED_AUTOS is defined in the release/debug xcconfigs.
 GCC_WARN_CHECK_SWITCH_STATEMENTS = YES
 GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = YES
-GCC_WARN_ABOUT_MISSING_NEWLINE = YES
 GCC_TREAT_WARNINGS_AS_ERRORS = YES
 GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES
 GCC_WARN_ABOUT_RETURN_TYPE = YES
@@ -128,4 +127,5 @@ GCC_TREAT_NONCONFORMANT_CODE_ERRORS_AS_WARNINGS = NO
 GCC_WARN_UNUSED_PARAMETER = NO
 // Use of Gestalt requires 4 char constants (amongst other things)
 GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO
+GCC_WARN_ABOUT_MISSING_NEWLINE = NO
 
