@@ -17,7 +17,7 @@ public:
     void    addChild(Object *obj){ if(obj != NULL) mChildren.push_back(obj); }
     void    addChild( Object *obj, int index){ if(obj != NULL) mChildren.insert( mChildren.begin()+index, obj ); };
     
-    int getNumChildren(){ return mChildren.size(); }
+    int getNumChildren(){ return (int) mChildren.size(); }
 //    bool  contains(const DisplayObject &obj){};
     
     Object*   getChildAt(int index){ return mChildren[index]; }

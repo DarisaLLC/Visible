@@ -2,11 +2,10 @@
 #define __OPENCV_UTILS__
 
 
-#include <cstdint>
-
-#include <algorithm>
-#include <iostream>
-#include <typeinfo>
+//#include <cstdint>
+//#include <algorithm>
+//#include <iostream>
+//#include <typeinfo>
 #include <deque>
 #include "opencv2/opencv.hpp"
 #include "vision/roiWindow.h"

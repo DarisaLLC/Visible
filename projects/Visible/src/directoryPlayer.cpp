@@ -1,5 +1,11 @@
-#include "directoryPlayer.h"
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+
 #include "cinder/app/App.h"
+#include "directoryPlayer.h"
 #include "cinder/Utilities.h"
 #include "cinder/CinderMath.h"
 #include "core/stl_utils.hpp"
@@ -319,3 +325,5 @@ directoryPlayer::nextFramePosition()
         else mCurrentFrameIdx = 0;
     }
 }
+
+#pragma GCC diagnostic pop

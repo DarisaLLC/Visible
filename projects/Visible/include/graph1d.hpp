@@ -178,7 +178,7 @@ public:
         mMesh = make_shared<TriMesh>( triangulator.calcMesh() );
 
     }
-    void draw() const
+    void draw()
     {
         
         if (mIsSet) make_plot_mesh ();

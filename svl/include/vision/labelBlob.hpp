@@ -21,6 +21,7 @@
 #include <atomic>
 #include "angle_units.h"
 #include <memory>
+#include <atomic>
 
 using namespace cv;
 
@@ -30,7 +31,7 @@ namespace svl
     class momento : CvMoments
     {
     public:
-        momento(): m_is_loaded (false) {}
+        momento(): m_is_loaded (false), m_eigen_done(false) {}
         momento(const momento& other);
         ~momento() {}
         
@@ -41,6 +42,8 @@ namespace svl
         fPair getEllipseAspect () const;
         uRadian getOrientation () const;
         bool isLoaded () const { return m_is_loaded; }
+        bool isValidEigen () const { return m_eigen_ok; }
+        bool isEigenDone () const { return m_eigen_done; }
         
     private:
         mutable cv::Point m_offset;
@@ -51,9 +54,9 @@ namespace svl
         mutable double eigen_angle;
         mutable double inv_m00;
         mutable Point2f mc;
-        mutable bool eigen_ok;
+        mutable bool m_eigen_ok;
         mutable bool m_is_loaded;
-        mutable bool eigen_done;
+        mutable bool m_eigen_done;
         void getDirectionals () const;
         
     };

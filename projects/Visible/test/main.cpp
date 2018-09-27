@@ -5,7 +5,6 @@
 //  Created by Arman Garakani on 5/16/16.
 //
 //
-
 #include <iostream>
 #include <chrono>
 #include "gtest/gtest.h"
@@ -15,7 +14,7 @@
 #include "vision/roiWindow.h"
 #include "vision/self_similarity.h"
 #include "seq_frame_container.hpp"
-#include "cinder/ImageIO.h"
+#include "cinder/ImageIo.h"
 #include "cinder_cv/cinder_xchg.hpp"
 #include "ut_sm.hpp"
 #include "AVReader.hpp"
@@ -44,7 +43,7 @@
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/archives/binary.hpp>
 #include <fstream>
-
+#include "vision/opencv_utils.hpp"
 using namespace boost;
 
 using namespace ci;
@@ -129,6 +128,59 @@ void savgol (const deque<double>& signal, deque<double>& dst)
     }
     
 }
+
+
+TEST(timing8, corr)
+{
+    std::shared_ptr<uint8_t> img1 = test_utils::create_trig(1920, 1080);
+    std::shared_ptr<uint8_t> img2 = test_utils::create_trig(1920, 1080);
+    double endtime;
+    std::clock_t start;
+    int l;
+    start = std::clock();
+    int num_loops = 1000;
+    // Time setting and resetting
+    for (l = 0; l < num_loops; ++l)
+    {
+        basicCorrRowFunc<uint8_t> corrfunc(img1.get(), img2.get(), 1920, 1920, 1920, 1080);
+        corrfunc.areaFunc();
+        CorrelationParts cp;
+        corrfunc.epilog(cp);
+    }
+    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    double scale = 1000.0 / (num_loops);
+    std::cout << " Correlation: 1920 * 1080 * 8 bit " << endtime * scale << " millieseconds per " << std::endl;
+}
+
+TEST(timing8, corr_ocv)
+{
+    std::shared_ptr<uint8_t> img1 = test_utils::create_trig(1920, 1080);
+    std::shared_ptr<uint8_t> img2 = test_utils::create_trig(1920, 1080);
+    cv::Mat mat1(1080, 1920, CV_8UC(1), img1.get(), 1920);
+    cv::Mat mat2(1080, 1920, CV_8UC(1), img2.get(), 1920);
+    auto binfo = cv::getBuildInformation();
+    auto numth = cv::getNumThreads();
+    std::cout << binfo << std::endl << numth << std::endl;
+
+    double endtime;
+    std::clock_t start;
+    int l;
+
+    int num_loops = 1000;
+    Mat space(cv::Size(1,1), CV_32F);
+    // Time setting and resetting
+    start = std::clock();
+    for (l = 0; l < num_loops; ++l)
+    {
+        cv::matchTemplate (mat1, mat2, space, CV_TM_CCOEFF_NORMED);
+    }
+
+    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    double scale = 1000.0 / (num_loops);
+    std::cout << " OCV_Correlation: 1920 * 1080 * 8 bit " << endtime * scale << " millieseconds per " << std::endl;
+}
+
+
 
 TEST(ut_serialization, double_cv_mat){
     uint32_t cols = 210;
@@ -315,10 +367,7 @@ TEST(UT_contraction, basic)
     contraction_analyzer::contraction ctr;
     typedef vector<double>::iterator dItr_t;
     
-    double contraction_start_threshold = 0.1;
-    
     std::vector<double> fder, fder2;
-    auto bItr = acid.begin();
     fder.resize (acid.size());
     fder2.resize (acid.size());
 
@@ -360,7 +409,7 @@ TEST(UT_contraction, basic)
     
     contraction_profile_analyzer ca;
     ca.run(acid);
-    bool test = contraction_analyzer::contraction::equal(ca.pols(), ctr);
+    bool test = contraction_analyzer::contraction::equal(ca.contraction(), ctr);
     EXPECT_TRUE(test);
     
     
@@ -425,7 +474,6 @@ TEST (UT_algo, AVReader)
 TEST(ut_similarity, run)
 {
     vector<roiWindow<P8U>> images(4);
-    double tiny = 1e-10;
     
     self_similarity_producer<P8U> sm((uint32_t) images.size(),0);
     
@@ -658,7 +706,8 @@ int main(int argc, char ** argv)
     testing::InitGoogleTest(&argc, argv);
     
     
-    RUN_ALL_TESTS();
+    auto ret = RUN_ALL_TESTS();
+    std::cerr << ret << std::endl;
     
 }
 

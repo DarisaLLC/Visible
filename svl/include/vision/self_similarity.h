@@ -173,8 +173,8 @@ class self_similarity_producer
    */
   bool aborted() const { return !_finished; }
 
-  uint32_t matrixSz() const { return _matrixSz; }
-  uint32_t cacheSz() const { return _cacheSz; }
+  size_t matrixSz() const { return _matrixSz; }
+  size_t cacheSz() const { return _cacheSz; }
   int32_t depth() const { return _depth; }
 
   friend ostream& operator<< (ostream&, const self_similarity_producer&);
@@ -285,8 +285,8 @@ class self_similarity_producer
   /* Control information
    */
    int32_t                _depth;
-  const uint32_t                     _matrixSz;
-  const uint32_t                     _cacheSz;
+  const size_t                     _matrixSz;
+  const size_t                     _cacheSz;
   const bool                         _notify;
   bool                               _finished;
   const double                       _tiny;

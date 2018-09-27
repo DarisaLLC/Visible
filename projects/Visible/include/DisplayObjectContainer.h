@@ -2,6 +2,8 @@
 #pragma once
 #include "DisplayObject.h"
 #include "ObjectContainer.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
 namespace rph {
 
@@ -15,3 +17,6 @@ namespace rph {
     };
     
 }
+
+#pragma GCC diagnostic pop
+

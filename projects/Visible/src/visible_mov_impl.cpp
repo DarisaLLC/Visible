@@ -6,6 +6,11 @@
 //
 //
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+
 #include "opencv2/stitching.hpp"
 #include <stdio.h>
 #include "guiContext.h"
@@ -46,11 +51,7 @@ namespace
         return AppBase::get()->console();
     }
     
-    double				ci_getElapsedSeconds()
-    {
-        return AppBase::get()->getElapsedSeconds();
-    }
-    
+
     
     static layoutManager vl (ivec2 (10, 10));
     
@@ -195,7 +196,7 @@ void movContext::processDrag( ivec2 pos )
 {
     if( mMainTimeLineSlider.hitTest( pos ) ) {
         mTimeMarker.from_norm(mMainTimeLineSlider.valueScaled());
-        seekToFrame(mTimeMarker.current_frame());
+        seekToFrame((int)mTimeMarker.current_frame());
     }
     
 }
@@ -203,7 +204,7 @@ void movContext::processDrag( ivec2 pos )
 
 void movContext::onMarked ( marker_info& t)
 {
-    seekToFrame(t.current_frame());
+    seekToFrame(int(t.current_frame()));
 }
 
 
@@ -404,7 +405,7 @@ void movContext::mouseMove( MouseEvent event )
         for (auto pp = 0; pp < vl.plot_rects().size(); pp++) dds[pp] = vl.plot_rects()[pp].distanceSquared(event.getPos());
         
         auto min_iter = std::min_element(dds.begin(),dds.end());
-        mMouseInGraphs = min_iter - dds.begin();
+        mMouseInGraphs = int(min_iter - dds.begin());
     }
     
 }
@@ -487,21 +488,21 @@ gl::TextureRef movContext::pixelInfoTexture ()
   
     
     std::string pos =  "[ " +
-    toString(((int)m_instant_pixel_Color.r)) + " , " + toString(((int)m_instant_pixel_Color.g)) +
-        " , " + toString(((int)m_instant_pixel_Color.b)) + " @ " + to_string(imagePos().x) + "," + to_string(imagePos().y) + "]";
+    svl::toString(((int)m_instant_pixel_Color.r)) + " , " + svl::toString(((int)m_instant_pixel_Color.g)) +
+    " , " + svl::toString(((int)m_instant_pixel_Color.b)) + " @ " + svl::toString(imagePos().x) + "," + svl::toString(imagePos().y) + "]";
     vec2                mSize(250, 100);
     TextBox tbox = TextBox().alignment( TextBox::LEFT).font( mFont ).size( ivec2( mSize.x, TextBox::GROW ) ).text( pos );
     tbox.setFont( Font( "Times New Roman", 24 ) );
     tbox.setColor( ColorA(0.0,0.0,0.0,1.0) );
     tbox.setBackgroundColor( ColorA( 0.3, 0.3, 0.3, 0.3 ) );
-    ivec2 sz = tbox.measure();
+    __attribute__((unused)) ivec2 sz = tbox.measure();
     return  gl::Texture2d::create( tbox.render() );
 }
 
 
 
 
-bool movContext::is_valid () { return m_valid && is_context_type(guiContext::qtime_viewer); }
+bool movContext::is_valid () const { return m_valid && is_context_type(guiContext::qtime_viewer); }
 
 void movContext::resize ()
 {
@@ -634,3 +635,4 @@ void movContext::draw_info ()
 }
 
 
+#pragma GCC diagnostic pop

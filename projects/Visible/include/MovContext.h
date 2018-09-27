@@ -37,7 +37,7 @@ public:
 	static const std::string& caption () { static std::string cp ("Movie Viewer # "); return cp; }
 	virtual void draw ();
 	virtual void setup ();
-	virtual bool is_valid ();
+	virtual bool is_valid () const;
 	virtual void update ();
 	virtual void resize ();
 	void draw_window ();

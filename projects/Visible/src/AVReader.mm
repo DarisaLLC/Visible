@@ -126,8 +126,7 @@ static inline CGAffineTransform tansformForTrack(AVAssetTrack* assetTrack, CGRec
 
 - (void)dealloc
 {
-
-
+//    [super dealloc];
 }
 
 
@@ -481,10 +480,7 @@ static bool progressOfSampleBufferInTimeRange(CMSampleBufferRef sampleBuffer, CM
 
 - (void)dealloc
 {
-	//if (serializationQueue)
-	//	dispatch_release(serializationQueue);
-	
-	//[super dealloc];
+//	[super dealloc];
 }
 
 - (NSString *)mediaType

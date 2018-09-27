@@ -1,3 +1,11 @@
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+
+
+
+
 #include "cinder/Cinder.h"
 #include <AvailabilityMacros.h>
 
@@ -118,3 +126,4 @@ void qtimeAvfLink::GetTocOfMovie(const MovieSurfaceRef& movie, std::vector<cm_ti
 }
 
 
+#pragma GCC diagnostic pop

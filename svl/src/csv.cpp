@@ -21,13 +21,13 @@ namespace spiritcsv
                    std::string const& separator,
                    bool no_header)
     : m_stream(strm)
+    , m_no_header (no_header)
     , m_escape(escape)
-    , m_quote(quote)
     , m_separator(separator)
+    , m_quote(quote)
     , m_strict(false)
     , m_verbosity(0)
     , m_logstream(0)
-    , m_no_header (no_header)
     , m_newline('\n')
     {
         initialize();
@@ -80,7 +80,7 @@ namespace spiritcsv
     
     void Parser::detectNewlines()
     {
-        char newline = '\n';
+
         int newline_count = 0;
         int carriage_count = 0;
         
@@ -130,9 +130,9 @@ namespace spiritcsv
         {
             // default to ','
             m_separator = ",";
-            int num_commas = std::count(csv_line.begin(), csv_line.end(), ',');
+            auto num_commas = std::count(csv_line.begin(), csv_line.end(), ',');
             // detect tabs
-            int num_tabs = std::count(csv_line.begin(), csv_line.end(), '\t');
+            auto num_tabs = std::count(csv_line.begin(), csv_line.end(), '\t');
             if (num_tabs > 0)
             {
                 if (num_tabs > num_commas)
@@ -144,7 +144,7 @@ namespace spiritcsv
             }
             else // pipes
             {
-                int num_pipes = std::count(csv_line.begin(), csv_line.end(), '|');
+                auto num_pipes = std::count(csv_line.begin(), csv_line.end(), '|');
                 
                 if (num_pipes > num_commas)
                 {
@@ -155,7 +155,7 @@ namespace spiritcsv
                 }
                 else // semicolons
                 {
-                    int num_semicolons = std::count(csv_line.begin(), csv_line.end(), ';');
+                    auto num_semicolons = std::count(csv_line.begin(), csv_line.end(), ';');
                     if (num_semicolons > num_commas)
                     {
                         m_separator = ";";
@@ -237,7 +237,7 @@ namespace spiritcsv
     }
     
     
-    std::shared_ptr<std::vector<entry_t>> spiritcsv::rankOutput (const std::string& str,
+    std::shared_ptr<std::vector<entry_t>> rankOutput (const std::string& str,
                                                       std::string const& escape,
                                                       std::string const& quote,
                                                       std::string const& separator,

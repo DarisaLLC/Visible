@@ -67,7 +67,9 @@ void lif_browser::get_first_frame (internal_serie_info& si,  const int frameCoun
 {
     auto serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(si.index), stl_utils::null_deleter());
     // opencv rows, cols
-    cv::Mat dst (si.dimensions[1] * si.channelCount , si.dimensions[0], CV_8U);
+    uint64_t rows (si.dimensions[1] * si.channelCount);
+    uint64_t cols (si.dimensions[0]);
+    cv::Mat dst ( static_cast<uint32_t>(rows),static_cast<uint32_t>(cols), CV_8U);
     serie_ref->fill2DBuffer(dst.ptr(0), 0);
     out = dst;
 }
@@ -81,10 +83,10 @@ void  lif_browser::get_series_info (const std::shared_ptr<lifIO::LifReader>& lif
         
         si.index = ss;
         si.name = lifer->getSerie(ss).getName();
-        si.timesteps = lifer->getSerie(ss).getNbTimeSteps();
-        si.pixelsInOneTimestep = lifer->getSerie(ss).getNbPixelsInOneTimeStep();
+        si.timesteps = static_cast<uint32_t>(lifer->getSerie(ss).getNbTimeSteps());
+        si.pixelsInOneTimestep = static_cast<uint32_t>(lifer->getSerie(ss).getNbPixelsInOneTimeStep());
         si.dimensions = lifer->getSerie(ss).getSpatialDimensions();
-        si.channelCount = lifer->getSerie(ss).getChannels().size();
+        si.channelCount = static_cast<uint32_t>(lifer->getSerie(ss).getChannels().size());
         si.channels.clear ();
         for (lifIO::ChannelData cda : lifer->getSerie(ss).getChannels())
         {
@@ -254,7 +256,7 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_processor::run_pci (const int
     channel_images_t c2 = m_all_by_channel[channel_to_use];
     auto sp =  sm();
     sp->load_images (c2);
-    std::packaged_task<bool()> task([sp](){ return sp->operator()(0, 0);}); // wrap the function
+    std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
     std::future<bool>  future_ss = task.get_future();  // get a future
     std::thread(std::move(task)).join(); // Finish on a thread
     if (future_ss.get())

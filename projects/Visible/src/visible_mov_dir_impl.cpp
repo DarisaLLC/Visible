@@ -1,17 +1,22 @@
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+
 #include "opencv2/stitching.hpp"
 #include <stdio.h>
 #include "guiContext.h"
 #include "core/stl_utils.hpp"
-#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Timeline.h"
 #include "cinder/Timer.h"
 #include "cinder/Camera.h"
-#include "cinder/qtime/Quicktime.h"
+#include "cinder/qtime/QuickTime.h"
 #include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"
 #include "seq_frame_container.hpp"
-#include "Cinder/ip/Blend.h"
+#include "cinder/ip/Blend.h"
 #include "opencv2/highgui.hpp"
 #include "vision/opencv_utils.hpp"
 #include "cinder/ip/Flip.h"
@@ -40,22 +45,15 @@ namespace
     {
         return AppBase::get()->console();
     }
-    
-    double				ci_getElapsedSeconds()
-    {
-        return AppBase::get()->getElapsedSeconds();
-    }
+
     
     inline ivec2 expected_window_size () { return vec2 (960, 540); }
     inline ivec2 trim () { return vec2(10,10); }
-    vec2 trim_norm () { return vec2(trim().x, trim().y) / vec2(getWindowWidth(), getWindowHeight()); }
+
     inline ivec2 desired_window_size () { return expected_window_size() + trim () + trim (); }
     inline ivec2 canvas_size () { return getWindowSize() - trim() - trim (); }
     inline ivec2 image_frame_size () { return ivec2 (canvas_size().x / 2, (canvas_size().y * 3) / 4); }
-    inline ivec2 plot_frame_size () { return ivec2 (canvas_size().x / 2, (canvas_size().y * 3) / 4); }
-    inline vec2 canvas_norm_size () { return vec2(canvas_size().x, canvas_size().y) / vec2(getWindowWidth(), getWindowHeight()); }
-    inline Rectf text_norm_rect () { return Rectf(0.0, 1.0 - 0.125, 1.0, 0.125); }
-    
+  
     
     
 }
@@ -412,7 +410,7 @@ void movDirContext::draw_info ()
     
 }
 
-
+#pragma GCC diagnostic push
 
 #if 0
 

@@ -67,7 +67,7 @@ uRadian momento::getOrientation () const
 
 void momento::getDirectionals () const
 {
-    if (eigen_done) return;
+    if (m_eigen_done) return;
     
     Mat M = (Mat_<double>(2,2) << m20, m11, m11, m02);
     
@@ -76,26 +76,29 @@ void momento::getDirectionals () const
     Mat e_vals = (Mat_<float>(1,2) << 0.0,0.0);
     
     bool eigenok = cv::eigen(M, e_vals, e_vects);
-    int ev = (e_vals.at<float>(0,0) > e_vals.at<float>(0,1)) ? 0 : 1;
-    double angle = atan2 (e_vects.at<float>(ev, 0),e_vects.at<float>(ev, 1));
+    if (eigenok){
+        int ev = (e_vals.at<float>(0,0) > e_vals.at<float>(0,1)) ? 0 : 1;
+        double angle = atan2 (e_vects.at<float>(ev, 0),e_vects.at<float>(ev, 1));
+
+
+        double mm2 = m20 - m02;
+        auto tana = mm2 + std::sqrt (4*m11*m11 + mm2*mm2);
+        theta = atan(2*m11 / tana);
+
+        double cos2 = cos(theta)*cos(theta);
+        double sin2 = sin(theta)*sin(theta);
+        double sin2x = sin(theta)*cos(theta);
+
+        double lambda1 = m20*cos2 + m11 * sin2x + m02*sin2;
+        double lambda2 = m20*cos2 - m11 * sin2x + m02*sin2;
+
+        a = 2.0 * std::sqrt(lambda1/m00);
+        b = 2.0 * std::sqrt(lambda2/m00);
+        eigen_angle = angle;
+    }
     
-    
-    double mm2 = m20 - m02;
-    auto tana = mm2 + std::sqrt (4*m11*m11 + mm2*mm2);
-    theta = atan(2*m11 / tana);
-    
-    double cos2 = cos(theta)*cos(theta);
-    double sin2 = sin(theta)*sin(theta);
-    double sin2x = sin(theta)*cos(theta);
-    
-    double lambda1 = m20*cos2 + m11 * sin2x + m02*sin2;
-    double lambda2 = m20*cos2 - m11 * sin2x + m02*sin2;
-    
-    a = 2.0 * std::sqrt(lambda1/m00);
-    b = 2.0 * std::sqrt(lambda2/m00);
-    eigen_angle = angle;
-    eigen_ok = eigenok;
-    eigen_done = true;
+    m_eigen_ok = eigenok;
+    m_eigen_done = true;
 }
 
 svl::labelBlob::labelBlob() : m_results_ready(false){

@@ -23,7 +23,18 @@
 
 namespace svl // protection from unintended ADL
 {
+   
 
+    template<typename T>
+    std::string toString( const T &t ) { std::ostringstream ss; ss << t; return ss.str(); }
+    
+    template<typename T>
+    T fromString( const std::string &s ) { std::stringstream ss; ss << s; T temp; ss >> temp; return temp; }
+    
+    template<>
+    inline std::string fromString( const std::string &s ) { return s; }
+    
+    
     // Sigmoid Clamping
     template<class T>
     T sigmoid_clip(T x, T min, T max) {
@@ -122,19 +133,20 @@ namespace svl // protection from unintended ADL
         
         
         
-        // Need this useless class for explicitly instatiating template constructor
-        template <typename T>
-        struct tid {
-            typedef T type;
-        };
-        
-        // c++11
-        static bool is_number(const std::string& s)
-        {
-            return !s.empty() && std::find_if(s.begin(),
-                                              s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
-        }
-        
+    // Need this useless class for explicitly instatiating template constructor
+    template <typename T>
+    struct tid {
+        typedef T type;
+    };
+
+#if defined(IS_NUMBER_USED)
+    // c++11
+    static bool is_number(const std::string& s)
+    {
+        return !s.empty() && std::find_if(s.begin(),
+                                          s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
+    }
+#endif
         
 #if have_boost_random
         static std::string default_random_string_char_set ("abcdefghijklmnopqrstuvwxyz"
@@ -161,7 +173,7 @@ namespace svl // protection from unintended ADL
             // obtain a seed from the system clock:
             auto seed = std::chrono::system_clock::now().time_since_epoch().count();
             
-            std::default_random_engine generator (seed);
+            std::default_random_engine generator (static_cast<unsigned int>(seed));
             
             return std::generate_canonical<T,std::numeric_limits<T>::digits>(generator);
             
@@ -282,13 +294,13 @@ namespace svl // protection from unintended ADL
                 {
                     T val = *iit;
                     if (in_place)
-                        *iit = (val - min_val) / scale;
+                    *iit = (val - min_val) / scale;
                 }
             }
             return std::pair<T,T>(min_val, max_val);
         }
         
-            
+        
         
         
         // Rounding Templates and Specialization
@@ -318,10 +330,10 @@ namespace svl // protection from unintended ADL
         
         class noncopyable
         {
-        protected:
+            protected:
             noncopyable() = default;
             ~noncopyable() = default;
-        private:
+            private:
             noncopyable(const noncopyable&);
             noncopyable& operator=(const noncopyable&);
         };
@@ -391,7 +403,7 @@ namespace svl // protection from unintended ADL
                 assert(s->m_refs > 0);
                 
                 if (--s->m_refs == 0)
-                    checked_array_delete  (static_cast<const T*>(s));
+                checked_array_delete  (static_cast<const T*>(s));
             }
             
             int64_t refcount() const { return m_refs; }

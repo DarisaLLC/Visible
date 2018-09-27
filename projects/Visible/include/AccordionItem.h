@@ -26,7 +26,7 @@ class AccordionItem {
   private:	
 	ci::Anim<float>	mX, mWidth;
 	float			mY, mHeight;
-	float			mExpandedWidth;
+//	float			mExpandedWidth;
 	ci::Anim<float>	mTextAlpha;
 	
 	std::string		mTitle, mSubtitle;

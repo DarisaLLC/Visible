@@ -1,6 +1,9 @@
 
 #pragma once
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 #include "DisplayObject.h"
 
 class Square : public rph::DisplayObject2D{
@@ -15,4 +18,4 @@ public:
     void fadeOutAndDie();
 };
     
-
+#pragma GCC diagnostic pop

@@ -99,12 +99,12 @@ class stats
 template <class T>
 double Median (const std::vector<T>& a )
 {
-    const int32_t length =  a.size();
+    auto length =  a.size();
     if ( length == 0 )
         return 0.0;
     
     const bool is_odd = length % 2;
-    const int array_length = (length / 2) + 1;
+    auto array_length = (length / 2) + 1;
     std::vector<T> array (array_length);
     
     

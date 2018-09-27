@@ -43,18 +43,17 @@ public:
     typedef void (sig_cb_frames_cached) ();
     typedef void (sig_cb_sm1d_available) ();
     typedef void (sig_cb_sm2d_available) ();
-    sm_producer (bool auto_on_off = false);
+    sm_producer ();
     
     bool load_content_file (const string& fq_path);
     bool load_image_directory (const string& fq_path, sizeMappingOption szmap = dontCare);
     void load_images (const images_vector_t&);
+
+    // launch async Will assert if not has_content
+    std::future<bool> launch_async (int frames) const;
     
-    bool operator () (int start_frame = 0, int frames = 0) const;
-    
-    
-    
-    bool set_auto_run_on () const;
-    bool set_auto_run_off () const;
+    // blocking call. Will not assert
+    bool operator () ( int frames = 0) const;
     
     bool has_content () const;
     int bytes_per_pixel () const;

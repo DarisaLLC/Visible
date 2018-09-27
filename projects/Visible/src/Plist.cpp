@@ -23,6 +23,9 @@
 //   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //   THE SOFTWARE.
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+
 #include "Plist.hpp"
 #include <boost/locale/encoding_utf.hpp>
 #include <list>
@@ -1207,3 +1210,6 @@ std::vector<unsigned char> getRange(const std::vector<unsigned char>& origBytes,
 }
 
 } // namespace Plist
+
+#pragma GCC diagnostic pop
+

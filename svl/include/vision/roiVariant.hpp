@@ -21,9 +21,11 @@ namespace svl
     typedef variant<roiWindow_P8U_t,roiWindow_P8UC3_t,roiWindow_P8UC4_t> roiVP8UC;
     
     template<typename P> static uint32_t vroIndex ();
+#if defined(USED)
     template <> uint32_t vroIndex<roiWindow_P8U_t> () { return 0; }
     template <> uint32_t vroIndex<roiWindow_P8UC3_t> () { return 1; }
     template <> uint32_t vroIndex<roiWindow_P8UC4_t> () { return 2; }
+#endif
     
     
     class roiVP8UC_Visitor: public boost::static_visitor<void>

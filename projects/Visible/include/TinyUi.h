@@ -130,15 +130,15 @@ namespace tinyUi
         uint32_t add_timepoint_marker (const timepoint_marker_t& tm)
         {
             // Find the next available map point
-            uint32_t count = mTimePoints.size();
+            auto count = mTimePoints.size();
             if (! m_available_timepoint_indicies.empty())
             {
                 count = m_available_timepoint_indicies.front();
                 m_available_timepoint_indicies.pop();
             }
 
-            mTimePoints[count] = tm;
-            return count;
+            mTimePoints[(uint32_t)count] = tm;
+            return (uint32_t)count;
         }
         
         const float & value () const { return mValue; }
