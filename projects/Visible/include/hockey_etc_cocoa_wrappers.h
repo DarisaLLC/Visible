@@ -3,7 +3,7 @@
 #ifndef __qtimeAvfLink___h
 #define __qtimeAvfLink___h
 
-#include "cinder/app/App.h"
+//#include "cinder/app/App.h"
 #include "cinder/qtime/QuickTimeGl.h"
 #include "core/cm_time.hpp"
 
@@ -19,12 +19,15 @@ public:
     static bool MovieBaseFrameReadyConnect(cinder::qtime::MovieSurfaceRef& movie, void (*frame_ready)());
 };
 
+#if defined( HOCKEY_SUPPORT )
+
 class hockeyAppSetup
 {
 public:
     hockeyAppSetup ();
 };
 
+#endif
 
 
 

@@ -2,12 +2,14 @@
 
 #pragma once
 
-#include "cinder/App/App.h"
 #include "cinder/CinderMath.h"
 #include "cinder/Utilities.h"
 #include "cinder/Timeline.h"
 #include "Object.h"
-
+#include "cinder/Color.h"
+#include "cinder/Rect.h"
+#include "cinder/Area.h"
+#include "cinder/Vector.h"
 namespace rph {
     
     class DisplayObject3D : public Object{

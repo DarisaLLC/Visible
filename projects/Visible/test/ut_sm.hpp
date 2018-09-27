@@ -26,12 +26,8 @@ struct cb_similarity_producer
             std::function<void ()> content_loaded_cb = std::bind (&cb_similarity_producer::signal_content_loaded, this);
             boost::signals2::connection fl_connection = sp->registerCallback(frame_loaded_cb);
             boost::signals2::connection ml_connection = sp->registerCallback(content_loaded_cb);
-            
-            int error;
-//            if (m_auto) sp->set_auto_run_on ();
-            
             sp->load_content_file (m_filename);
-           if (! m_auto) sp->operator()(0, sp->frames_in_content());
+           if (! m_auto) sp->operator()( sp->frames_in_content());
             
         }
         catch (...)
@@ -90,16 +86,12 @@ struct dir_producer
             std::function<void ()> content_loaded_cb = std::bind (&dir_producer::signal_content_loaded, this);
             boost::signals2::connection fl_connection = sp->registerCallback(frame_loaded_cb);
             boost::signals2::connection ml_connection = sp->registerCallback(content_loaded_cb);
-            
-            int error;
-            //            if (m_auto) sp->set_auto_run_on ();
-            
             auto fdone = std::async(&sm_producer::load_image_directory, sp, m_imagedir, sm_producer::sizeMappingOption::mostCommon);
             
             
             if (fdone.get() )
             {
-                sp->operator()(0, sp->frames_in_content());
+                sp->operator()( sp->frames_in_content());
             }
             
         }

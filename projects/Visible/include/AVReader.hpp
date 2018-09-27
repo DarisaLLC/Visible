@@ -9,7 +9,7 @@
 #include <condition_variable>
 #include "time_index.h"
 #include "mediaInfo.h"
-#include <cinder/cinder.h>
+#include <cinder/Cinder.h>
 #include <cinder/Surface.h>
 #include "shared_queue.hpp"
 #include "cm_time.hpp"

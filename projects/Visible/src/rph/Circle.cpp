@@ -44,8 +44,8 @@ void Circle::setup()
 }
 
 void Circle::fadeOutAndDie(){
-    ci::app::timeline().apply(&mPos, mPos()+ci::vec2(0,100), 1 );
-    ci::app::timeline().apply(&mColorA, ci::ColorA(mColorA().r, mColorA().g, mColorA().b, 0.5), 1 ).finishFn(std::bind(&Circle::die, this));
+    ci::Timeline().apply(&mPos, mPos()+ci::vec2(0,100), 1 );
+    ci::Timeline().apply(&mColorA, ci::ColorA(mColorA().r, mColorA().g, mColorA().b, 0.5), 1 ).finishFn(std::bind(&Circle::die, this));
 }
 
 void Circle::update()

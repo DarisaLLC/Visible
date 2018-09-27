@@ -12,7 +12,7 @@
 
 using namespace SGF;
 
-ScalarSavitzkyGolayFilter::ScalarSavitzkyGolayFilter(int order,int winlen, real sample_time): order_(order), winlen_(winlen), sample_time_(sample_time)
+ScalarSavitzkyGolayFilter::ScalarSavitzkyGolayFilter(int order,int winlen, real sample_time):  winlen_(winlen), order_(order), sample_time_(sample_time)
 {
   n_added_ = 0;
   data_buffer_ = new real[winlen_];

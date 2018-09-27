@@ -26,24 +26,24 @@ namespace kmeans1D{
     /* data that return by kmeans.1d.dp()*/
     class data{
     public:
-        vector<int> cluster;  	/*record which cluster each point belongs to*/
+        vector<size_t> cluster;  	/*record which cluster each point belongs to*/
         vector<double> centers;	/*record the center of each cluster*/
         vector<double> withinss;/*within sum of distance square of each cluster*/
-        vector<int> size;		/*size of each cluster*/
-        int num_clusters;
+        vector<size_t> size;		/*size of each cluster*/
+        size_t num_clusters;
     };
     
     /*one-dimensional cluster algorithm implemented in C*/
     /*x is input one-dimensional vector and K stands for the cluster level*/
     //all vectors in this program is considered starting at position 1, position 0 is not used.
-    data kmeans( InputVector x, int K)
+    data kmeans( InputVector x, size_t expected)
     {
         // Input:
         //  x -- a vector of numbers, not necessarily sorted
         //  K -- the number of clusters expected
         
         data result;
-        int N = x.size()-1;  //N: is the size of input vector
+        int N = (int) x.size()-1;  //N: is the size of input vector
         
         vector<double> temp(N);
         
@@ -52,10 +52,10 @@ namespace kmeans1D{
         
         sort(temp.begin(), temp.end());
         temp.resize(unique( temp.begin(), temp.end())-temp.begin() );
-        int vector_size = temp.size();
+        auto vector_size = temp.size();
         
-        if(vector_size < K)//The input array will be clustered to at most N clusters if K > N.
-            K = vector_size;
+        if(vector_size < expected)//The input array will be clustered to at most N clusters if K > N.
+            expected = vector_size;
         
         if(vector_size > 1) //The case when not all elements are equal.
         {
@@ -74,22 +74,22 @@ namespace kmeans1D{
                     }
             
             sort(x.begin()+1, x.end());
-            vector< vector< double> > D( (K+1),vector<double>(N+1));
-            vector< vector< double> > B( (K+1),vector<double>(N+1));
+            vector< vector< double> > D( (expected+1),vector<double>(N+1));
+            vector< vector< double> > B( (expected+1),vector<double>(N+1));
             
             int cubic = 0;
             /*When cubic==1, which means "True", the algorithm runs in cubic time of array length N;
              otherwise it runs in quadratic time.  The TRUE option is for
              testing purpose only. */
             
-            for(int i=1;i<=K;i++)
+            for(int i=1;i<=expected;i++)
             {
                 D[i][1] = 0;
                 B[i][1] = 1;
             }
             
             double mean_x1, mean_xj,d;
-            for(int k=1;k<=K;k++)
+            for(int k=1;k<=expected;k++)
             {
                 mean_x1 = x[1] ;
                 
@@ -185,12 +185,12 @@ namespace kmeans1D{
             int cluster_right = N;
             double cluster_left;
             result.cluster.resize(N+1);
-            result.centers.resize(K+1);
-            result.withinss.resize(K+1);
-            result.size.resize(K+1);
+            result.centers.resize(expected+1);
+            result.withinss.resize(expected+1);
+            result.size.resize(expected+1);
             
             /*Forming final result*/
-            for(int k=K;k>=1;k--)
+            for(auto k=expected;k>=1;k--)
             {
                 cluster_left = B[k][cluster_right];
                 
@@ -215,7 +215,7 @@ namespace kmeans1D{
             }
             
             //restore the original order
-            vector<int> tt = result.cluster;
+            vector<size_t> tt = result.cluster;
             for(int i=1; i<(int)x.size(); i++)
                 result.cluster[i] = tt[ y[i] ];
             

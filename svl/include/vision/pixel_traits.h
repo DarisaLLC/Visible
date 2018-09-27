@@ -10,7 +10,6 @@
 #include <ostream>
 #include <vector>
 #include "core/core.hpp"
-//#include <glut/glut.h>
 #include "cinder/ImageIo.h"
 
 
@@ -31,16 +30,16 @@ using namespace ci;
  * is an extract from IPL headers.
  * Copyright (c) 1995 Intel Corporation.
  */
-#define IPL_DEPTH_SIGN 0x80000000
+#define _IPL_DEPTH_SIGN 0x80000000
 
-#define IPL_DEPTH_1U 1
-#define IPL_DEPTH_8U 8
-#define IPL_DEPTH_16U 16
-#define IPL_DEPTH_32F 32
+#define _IPL_DEPTH_1U 1
+#define _IPL_DEPTH_8U 8
+#define _IPL_DEPTH_16U 16
+#define _IPL_DEPTH_32F 32
 
-#define IPL_DEPTH_8S (IPL_DEPTH_SIGN | 8)
-#define IPL_DEPTH_16S (IPL_DEPTH_SIGN | 16)
-#define IPL_DEPTH_32S (IPL_DEPTH_SIGN | 32)
+#define _IPL_DEPTH_8S (_IPL_DEPTH_SIGN | 8)
+#define _IPL_DEPTH_16S (_IPL_DEPTH_SIGN | 16)
+#define _IPL_DEPTH_32S (_IPL_DEPTH_SIGN | 32)
 
 
 #define D_CN_SHIFT 3
@@ -202,7 +201,7 @@ namespace svl
         static bool is_signed() { return std::is_signed<uint8_t>::value; }
         static int planes() { return 1; }
         static int components() { return 1; }
-        static int cv() { return IPL_DEPTH_8U; }
+        static int cv() { return _IPL_DEPTH_8U; }
         static int depth() { return D_8U; }
         static int bytes() { return 1; }
         static int bits() { return 8; }
@@ -222,7 +221,7 @@ namespace svl
         static bool is_signed() { return std::is_signed<uint16_t>::value; }
         static int planes() { return 1; }
         static int components() { return 1; }
-        static int cv() { return IPL_DEPTH_16U; }
+        static int cv() { return _IPL_DEPTH_16U; }
         static int depth() { return D_16U; }
         static int bytes() { return 2; }
         static int bits() { return 16; }
@@ -243,7 +242,7 @@ namespace svl
         static bool is_signed() { return std::is_signed<int8_t>::value; }
         static int planes() { return 1; }
         static int components() { return 1; }
-        static int cv() { return IPL_DEPTH_8S; }
+        static int cv() { return _IPL_DEPTH_8S; }
         static int depth() { return D_8S; }
         static int bytes() { return 1; }
         static int bits() { return 8; }
@@ -264,7 +263,7 @@ namespace svl
         static bool is_signed() { return std::is_signed<int16_t>::value; }
         static int planes() { return 1; }
         static int components() { return 1; }
-        static int cv() { return IPL_DEPTH_16S; }
+        static int cv() { return _IPL_DEPTH_16S; }
         static int depth() { return D_16S; }
         static int bytes() { return 2; }
         static int bits() { return 16; }
@@ -285,7 +284,7 @@ namespace svl
         static bool is_signed() { return std::is_signed<int32_t>::value; }
         static int planes() { return 1; }
         static int components() { return 1; }
-        static int cv() { return IPL_DEPTH_32S; }
+        static int cv() { return _IPL_DEPTH_32S; }
         static int depth() { return D_32S; }
         static int bytes() { return 4; }
         static int bits() { return 32; }
@@ -306,7 +305,7 @@ namespace svl
         static bool is_signed() { return std::is_signed<float>::value; }
         static int planes() { return 1; }
         static int components() { return 1; }
-        static int cv() { return IPL_DEPTH_32F; }
+        static int cv() { return _IPL_DEPTH_32F; }
         static int depth() { return D_32F; }
         static int bytes() { return 4; }
         static int bits() { return 32; }
@@ -327,7 +326,7 @@ namespace svl
         static bool is_signed() { return std::is_signed<uint8_t>::value; }
         static int planes() { return 1; }
         static int components() { return 3; }
-        static int cv() { return IPL_DEPTH_8U; }
+        static int cv() { return _IPL_DEPTH_8U; }
         static int depth() { return D_8UC3; }
         static int bytes() { return 3; }
         static int bits() { return 24; }
@@ -348,7 +347,7 @@ namespace svl
         static bool is_signed() { return std::is_signed<uint8_t>::value; }
         static int planes() { return 1; }
         static int components() { return 4; }
-        static int cv() { return IPL_DEPTH_8U; }
+        static int cv() { return _IPL_DEPTH_8U; }
         static int depth() { return D_8UC4; }
         static int bytes() { return 4; }
         static int bits() { return 32; }
@@ -371,7 +370,7 @@ namespace svl
         static bool is_signed() { return std::is_signed<uint8_t>::value; }
         static int planes() { return 3; }
         static int components() { return 1; }
-        static int cv() { return IPL_DEPTH_8U; }
+        static int cv() { return _IPL_DEPTH_8U; }
         static int depth() { return D_8UP3; }
         static int bytes() { return 1; }
         static int bits() { return 8; }

@@ -65,7 +65,7 @@ public:
     
 private:
     void init(const size_t s, const size_t e, const size_t a){
-        at(0) = s, at(1) = e, at(2) = a;
+        at(0) = uint32_t(s), at(1) = uint32_t(e), at(2) = uint32_t(a);
     }
 };
 

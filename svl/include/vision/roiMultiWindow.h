@@ -78,8 +78,7 @@ namespace svl
         const roiWindow<trait_t>& plane (const std::string& name)
         {
             int idx = index ( name );
-            if (idx < 0)
-                return roiWindow<trait_t> ();
+            assert(idx >= 0 && idx < 3);
             return plane (idx);
         }
         

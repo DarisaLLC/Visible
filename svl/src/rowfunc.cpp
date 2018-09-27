@@ -14,11 +14,14 @@ ostream & operator<<(ostream & os, const CorrelationParts & corr)
 
 // public
 
+CorrelationParts::CorrelationParts ()
+    : mR(0.0),  mSi(0),mSm(0),  mCosine(0), mEi(0),mEm(0),mSii(0), mSmm(0),mSim(0),  mN(0), mRp(0) {}
+
 
 template <class T>
 basicCorrRowFunc<T>::basicCorrRowFunc(const T * baseA, const T * baseB, uint32_t rowPelsA, uint32_t rowPelsB,
                                       uint32_t width, uint32_t height, bool ffMaskOn)
-    : mRUP(rowPelsA, rowPelsB), mffMaskOn(ffMaskOn)
+    :  mffMaskOn(ffMaskOn),mRUP(rowPelsA, rowPelsB)
 {
     rowFuncTwoSource<T>::mWidth = width;
     rowFuncTwoSource<T>::mHeight = height;

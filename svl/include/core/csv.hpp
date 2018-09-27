@@ -20,6 +20,15 @@
 namespace spiritcsv
 {
     
+
+    typedef std::tuple<uint32_t, double, std::string> entry_t;
+    
+    std::shared_ptr<std::vector<entry_t>> rankOutput (const std::string& str,
+                                                      std::string const& escape="",
+                                                      std::string const& quote="",
+                                                      std::string const& separator="",
+                                                      bool no_header = true);
+
     class csv_error : public std::runtime_error
     {
     public:
@@ -81,14 +90,6 @@ namespace spiritcsv
         boost::escaped_list_separator<char> m_grammer;
     };
     
-
-    typedef std::tuple<uint32_t, double, std::string> entry_t;
-    
-    std::shared_ptr<std::vector<entry_t>> rankOutput (const std::string& str,
-                                       std::string const& escape="",
-                                       std::string const& quote="",
-                                       std::string const& separator="",
-                                                      bool no_header = true);
 
 }
 

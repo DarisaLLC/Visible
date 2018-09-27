@@ -26,16 +26,16 @@ using namespace stl_utils;
 
 namespace
 {
-    
+#if defined(USED)
     std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr)
     {
         return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
     }
-    
     std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename)
     {
         return make_shared_ofstream(new std::ofstream(filename, std::ofstream::out));
     }
+#endif
     
     std::shared_ptr<std::ifstream> make_shared_ifstream(std::ifstream * ifstream_ptr)
     {

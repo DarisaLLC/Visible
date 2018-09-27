@@ -65,7 +65,7 @@ public:
                    const std::string& image_name = "image",
                    const file_naming_fn_t namer = OCVImageWriter::default_namer,
                    const std::string& file_sep = "/"):
-    m_fqfn(std::move(dir_fqfn)), m_name(std::move(image_name)), m_namer(namer), m_sep(std::move(file_sep))
+    m_fqfn(std::move(dir_fqfn)), m_name(std::move(image_name)), m_sep(std::move(file_sep)),m_namer(namer)
     {
         m_valid = boost::filesystem::exists( dir_fqfn );
         m_valid = boost::filesystem::is_directory( dir_fqfn );
@@ -126,7 +126,7 @@ struct fbFlowRunner
         for (int ii = 0; ii < channel.size(); ii++)
         {
             const roiWindow<P8U>& image = channel[ii];
-            std::string imgpath = "/Users/arman/oflow/out" + toString(ii) + ".png";
+            std::string imgpath = "/Users/arman/oflow/out" + svl::toString(ii) + ".png";
             cv::Mat mat (image.height(), image.width(), CV_8UC(1), image.pelPointer(0,0), size_t(image.rowUpdate()));
             cv::Mat lv;
             tv.process (mat,lv);

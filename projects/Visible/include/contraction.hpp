@@ -142,16 +142,16 @@ protected:
 };
 
 
+
+
 class contraction_profile_analyzer
 {
 public:
   
     
-    contraction_profile_analyzer ( unsigned long min_contraction_width = 7,
-                          double contraction_start_threshold = 0.1,
+    contraction_profile_analyzer (double contraction_start_threshold = 0.1,
                           double relaxation_end_threshold = 0.1,
-                         size_t movingMedianFilterSize = 7):
-    m_minimum_contraction_width (min_contraction_width),
+                         uint32_t movingMedianFilterSize = 7):
     m_start_thr(contraction_start_threshold ),
     m_end_thr(relaxation_end_threshold ),
     m_median_window (movingMedianFilterSize ), m_valid (false)
@@ -177,17 +177,19 @@ public:
         
     }
     
-    void check_contraction_point (size_t p_index) {}
+    const contractionMesh& contraction () const { return mctr; }
     
-    bool measure_contraction_at_point (const size_t p_index, contractionMesh& mctr)
+    bool measure_contraction_at_point (const size_t p_index)
     {
         if (! m_valid) return false;
         contractionMesh::clear(mctr);
         mctr.contraction_peak.first = p_index;
         
+        auto thr = std::min(m_start_thr, m_end_thr);
+        
         // find first element greater than 0.1
         auto pos = find_if (m_fder_filtered.begin(), m_fder_filtered.end(),    // range
-                            bind2nd(greater<double>(),0.1));  // criterion
+                            bind2nd(greater<double>(),thr));  // criterion
         
         mctr.contraction_start.first = std::distance(m_fder_filtered.begin(),pos);
         auto max_accel = std::min_element(m_fder.begin()+ mctr.contraction_start.first ,m_fder.begin()+mctr.contraction_peak.first);
@@ -201,8 +203,10 @@ public:
         // If there is no such value, initialize rpos = to begin
         // If the last occurance is the last element, initialize this it to end
         dItr_t rpos = find_if (m_fder_filtered.rbegin(), m_fder_filtered.rend(),    // range
-                               bind2nd(greater<double>(),0.1)).base();  // criterion
+                               bind2nd(greater<double>(),thr)).base();  // criterion
         mctr.relaxation_end.first = std::distance (m_fder_filtered.begin(), rpos);
+        
+        // Check the length of the entire contraction
         return true;
     }
     
@@ -215,25 +219,23 @@ public:
     
     void run (const std::vector<double>& acid)
     {
-        m_ctr.contraction_peak.first = get_most_contracted(acid);
+        auto mostc = get_most_contracted(acid);
         load(acid);
-        measure_contraction_at_point(m_ctr.contraction_peak.first, m_ctr);
+        measure_contraction_at_point(mostc);
     }
-    
-    const contractionMesh& pols () const { return m_ctr; }
     
 private:
     typedef vector<double>::iterator dItr_t;
     double m_start_thr;
     double m_end_thr;
-    unsigned long m_median_window;
-    size_t m_minimum_contraction_width;
+    uint32_t m_median_window;
     
-    mutable contractionMesh m_ctr;
+    mutable contractionMesh mctr;
     mutable std::vector<double> m_fder;
     mutable std::vector<double> m_fder_filtered;
     mutable bool m_valid;
 };
+
 
 
 #endif

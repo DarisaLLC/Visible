@@ -73,7 +73,7 @@ void self_similarity_producer<P>::norm_scale (const std::deque<double>& src, std
     }
 }
 
-static int32_t log2max(int32_t n);
+
 
 template<typename P>
 self_similarity_producer<P>::self_similarity_producer() : _matrixSz (0), _maskValid(false), _cacheSz (0),
@@ -338,13 +338,13 @@ bool self_similarity_producer<P>::ssMatrixFill(deque<image_t >& tWin)
 {
   assert(_SMatrix.size() == _matrixSz);
 
-  const int32_t tWinSz = tWin.size();
+  auto tWinSz = tWin.size();
   assert(tWinSz <= (int32_t)_matrixSz);
 
-  int32_t cacheSz = _cacheSz;
+  auto cacheSz = _cacheSz;
   if (cacheSz <= 2)
     cacheSz = tWinSz + 2;
-  const int32_t cacheBlkSz = cacheSz - 2;
+  auto cacheBlkSz = cacheSz - 2;
 
 
   /* The following was designed to work well when the number of images
@@ -379,7 +379,7 @@ bool self_similarity_producer<P>::ssMatrixFill(deque<image_t >& tWin)
   for (int32_t i = 0; i < tWinSz;
        /* Step 3 - Update start */ i += cacheBlkSz) {
     int32_t cacheIncr = 1, cacheBegin, cacheEnd;
-    int32_t firstUncachedFrame = i + cacheBlkSz;
+    auto firstUncachedFrame = i + cacheBlkSz;
     if (firstUncachedFrame > tWinSz)
       firstUncachedFrame = tWinSz;
 
@@ -412,12 +412,12 @@ bool self_similarity_producer<P>::ssMatrixFill(deque<image_t >& tWin)
 
     /* Step 2 - Correlate remaining images against cached images.
      */
-    for (int32_t j = firstUncachedFrame; j < tWinSz; j++) {
+    for (auto j = firstUncachedFrame; j < tWinSz; j++) {
       if (cacheIncr == 1) {
-	cacheIncr = -1;	cacheBegin = firstUncachedFrame-1; cacheEnd = i-1;
+	cacheIncr = -1;	cacheBegin = int32_t(firstUncachedFrame)-1; cacheEnd = i-1;
       }
       else {
-	cacheIncr = 1; cacheBegin = i; cacheEnd = firstUncachedFrame;
+	cacheIncr = 1; cacheBegin = i; cacheEnd = int32_t(firstUncachedFrame);
       }
 
       for (int32_t k = cacheBegin; k != cacheEnd; k += cacheIncr) {
@@ -653,36 +653,7 @@ ostream& operator<< (ostream& ous, const self_similarity_producer<P>& rc)
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-//
-//	log2max
-//
-//	This function computes the ceiling of log2(n).  For example:
-//
-//	log2max(7) = 3
-//	log2max(8) = 3
-//	log2max(9) = 4
-//
-////////////////////////////////////////////////////////////////////////////////
-static int32_t log2max(int32_t n)
-{
-  int32_t power = 1;
-  int32_t k = 1;
-  
-  if (n==1) {
-    return 0;
-  }
-	
-  while ((k <<= 1) < n) {
-    power++;
-  }
-	
-  return power;
-}
 
-      
-
-  
 
 
 // 1D Distance Histogram

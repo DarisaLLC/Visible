@@ -1,25 +1,15 @@
- 
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+
 #include "opencv2/stitching.hpp"
 #include "guiContext.h"
 #include "core/stl_utils.hpp"
 
 using namespace boost;
 
-
-namespace
-{
-    
-    std::ostream& ci_console ()
-    {
-        return AppBase::get()->console();
-    }
-    
-    double				ci_getElapsedSeconds()
-    {
-        return AppBase::get()->getElapsedSeconds();
-    }
-    
-}
 
 guiContext::guiContext (ci::app::WindowRef& ww)
 : mWindow (ww), m_valid (false), m_type (null_viewer)
@@ -69,4 +59,7 @@ mainContext::mainContext(ci::app::WindowRef& ww, const boost::filesystem::path& 
     
 }
 
+
+
+#pragma GCC diagnostic pop
 

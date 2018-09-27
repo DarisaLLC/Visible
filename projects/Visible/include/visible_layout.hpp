@@ -211,12 +211,13 @@ public:
             m_signal_plot_size_changed->operator()();
     }
     
-    int add_slider_rect ()
+    uint32_t add_slider_rect ()
     {
         Rectf slider = display_timeline_rect ();
         slider.offset(vec2(0, (1 + m_slider_rects.size()) * slider.getHeight()));
         m_slider_rects.push_back(slider);
-        return m_slider_rects.size() - 1;
+        // @todo FIX ME Please 
+        return uint32_t(m_slider_rects.size() - 1);
     }
     
 private:

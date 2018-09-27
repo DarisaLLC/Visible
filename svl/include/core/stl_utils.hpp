@@ -507,7 +507,7 @@ namespace stl_utils
         
     public:
         
-        median1D(const unsigned long window_size)
+        median1D(int32_t window_size)
         :
         _history(keep_odd(window_size), T()),
         _pool(_history),
@@ -1002,26 +1002,12 @@ namespace stl_utils
         return out;
     }
     
-}
-
-namespace gen_filename
-{
-    
-    static bool insensitive_case_compare (const std::string& str1, const std::string& str2)
-    {
-        for(unsigned int i=0; i<str1.length(); i++){
-            if(toupper(str1[i]) != toupper(str2[i]))
-                return false;
-        }
-        return true;
-    }
-    
     class random_name
     {
         
         std::string _chars;
         std::mt19937 mBase;
-    public:
+        public:
         
         random_name ()
         {
@@ -1040,7 +1026,8 @@ namespace gen_filename
         std::string get_anew ()
         {
             std::string ns;
-            for(int i = 0; i < 8; ++i) ns.push_back (_chars[nextInt(_chars.size()-1)]);
+            int32_t last_index = static_cast<int32_t>(_chars.size()) - 1;
+            for(int i = 0; i < 8; ++i) ns.push_back (_chars[nextInt(last_index)]);
             assert (ns.length() == 8);
             return ns;
         }
@@ -1048,8 +1035,25 @@ namespace gen_filename
     
 }
 
+#if defined(USED)
 
-#if 0
+namespace gen_filename
+{
+    
+    bool insensitive_case_compare (const std::string& str1, const std::string& str2)
+    {
+        for(unsigned int i=0; i<str1.length(); i++){
+            if(toupper(str1[i]) != toupper(str2[i]))
+                return false;
+        }
+        return true;
+    }
+    
+  
+}
+
+
+
 static std::string get_random_string (int length)
 {
     static std::string chars(

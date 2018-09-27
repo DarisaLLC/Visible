@@ -6,6 +6,10 @@
 //
 //
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+
 #include "opencv2/stitching.hpp"
 #include <stdio.h>
 #include "guiContext.h"
@@ -49,14 +53,6 @@ using namespace svl;
 
 namespace
 {
-    std::ostream& ci_console ()
-    {
-        return AppBase::get()->console();
-    }
-    double				ci_getElapsedSeconds()
-    {
-        return AppBase::get()->getElapsedSeconds();
-    }
     static layoutManager sLayoutMgr ( ivec2 (10, 10));
 }
 
@@ -283,7 +279,7 @@ void lifContext::signal_contraction_available (lif_processor::contractionContain
     m_contractions = contras;
     reset_entire_clip(mMediaInfo.count);
     uint32_t index = 0;
-    string name = " C " + toString(index) + " ";
+    string name = " C " + svl::toString(index) + " ";
     m_contraction_names.push_back(name);
     m_clips.emplace_back(m_contractions[0].contraction_start.first,
                          m_contractions[0].relaxation_end.first,
@@ -373,7 +369,7 @@ bool lifContext::have_lif_serie ()
 }
 
 
-bool lifContext::is_valid () { return m_valid && is_context_type(guiContext::lif_file_viewer); }
+bool lifContext::is_valid () const { return m_valid && is_context_type(guiContext::lif_file_viewer); }
 
 
 
@@ -525,7 +521,7 @@ int lifContext::getNumFrames ()
 
 int lifContext::getCurrentFrame ()
 {
-    return m_seek_position;
+    return int(m_seek_position);
 }
 
 time_spec_t lifContext::getCurrentTime ()
@@ -555,7 +551,7 @@ void lifContext::seekToFrame (int mark)
 
 void lifContext::onMarked ( marker_info& t)
 {
-    seekToFrame(t.current_frame());
+    seekToFrame((int) t.current_frame());
 }
 
 vec2 lifContext::getZoom ()
@@ -582,7 +578,7 @@ void lifContext::processDrag( ivec2 pos )
     {
         if( wPtr->hitTest( pos ) ) {
             mTimeMarker.from_norm(wPtr->valueScaled());
-            seekToFrame(mTimeMarker.current_frame());
+            seekToFrame((int) mTimeMarker.current_frame());
         }
     }
 }
@@ -621,7 +617,7 @@ void lifContext::mouseMove( MouseEvent event )
         for (auto pp = 0; pp < sLayoutMgr.plot_rects().size(); pp++) dds[pp] = sLayoutMgr.plot_rects()[pp].distanceSquared(event.getPos());
         
         auto min_iter = std::min_element(dds.begin(),dds.end());
-        mMouseInGraphs = min_iter - dds.begin();
+        mMouseInGraphs = int(min_iter - dds.begin());
     }
     
     mMouseInWidgets.resize(0);
@@ -638,7 +634,7 @@ void lifContext::mouseDrag( MouseEvent event )
     for (graph1d::ref graphRef : m_plots)
         graphRef->mouseDrag( event );
     
-    if (getManualEditMode() != notset && mMouseInImage && channelIndex() == 2)
+    if (isEditing () && mMouseInImage && channelIndex() == 2)
     {
         sides_length_t& which = mCellEnds[getManualEditMode()];
         which.second = event.getPos();
@@ -655,7 +651,7 @@ void lifContext::mouseDown( MouseEvent event )
         graphRef->get_marker_position(mAuxTimeMarker);
     }
     
-    if (getManualEditMode() != notset && mMouseInImage && channelIndex() == 2)
+    if (isEditing() && mMouseInImage && channelIndex() == 2)
     {
         sides_length_t& which = mCellEnds[getManualEditMode()];
         which.first = event.getPos();
@@ -1004,7 +1000,7 @@ gl::TextureRef lifContext::pixelInfoTexture ()
     
     // LIF has 3 Channels.
     uint32_t channel_height = mMediaInfo.getChannelSize().y;
-    std::string pos = " " + toString(((int)m_instant_pixel_Color.g)) + " @ [ " +
+    std::string pos = " " + svl::toString(((int)m_instant_pixel_Color.g)) + " @ [ " +
     to_string(imagePos().x) + "," + to_string(imagePos().y % channel_height) + "]";
     vec2                textSize(250, 100);
     TextBox tbox = TextBox().alignment( TextBox::LEFT).font( mFont ).size( ivec2( textSize.x, TextBox::GROW ) ).text( pos );
@@ -1016,7 +1012,7 @@ gl::TextureRef lifContext::pixelInfoTexture ()
     else
         tbox.setColor( ColorA(0.0,0.0,0.0,1.0) );
     tbox.setBackgroundColor( ColorA( 0.3, 0.3, 0.3, 0.3 ) );
-    ivec2 sz = tbox.measure();
+    ivec2 sz = tbox.measure(); sz.x = sz.y;
     return  gl::Texture2d::create( tbox.render() );
 }
 
@@ -1088,7 +1084,7 @@ void lifContext::draw ()
         }
         
         
-        if (getManualEditMode() != notset && mCellEnds.size() == 2)
+        if (isEditing() && mCellEnds.size() == 2)
         {
             const sides_length_t& length = mCellEnds[0];
             const sides_length_t& width = mCellEnds[1];
@@ -1125,3 +1121,4 @@ void lifContext::draw ()
     
 }
 
+#pragma GCC diagnostic pop

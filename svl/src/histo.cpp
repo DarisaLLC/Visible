@@ -8,14 +8,14 @@
 
 
 histoStats::histoStats()
-: computedMoments_(0), computedIC_(0), computedMode_(0),computedSumSq_(false), n_(0), mode_(0),
+: computedMoments_(0), computedSumSq_(false), computedIC_(0), computedMode_(0), n_(0), mode_(0),
 mean_(0), sDev_(0), var_(0), ic_(101), sum_(0), sumsq_(0)
 {
     valid_bins_.resize(0);
 }
 
 histoStats::histoStats(vector<uint32_t> & histogram)
-: computedMoments_(0), computedIC_(0), computedMode_(0),computedSumSq_(false), n_(0), mode_(0),
+: computedMoments_(0), computedSumSq_(false), computedIC_(0), computedMode_(0),n_(0), mode_(0),
     mean_(0), sDev_(0), var_(0), ic_(101), sum_(0), sumsq_(0)
 {
     valid_bins_.resize(0);
@@ -25,7 +25,7 @@ histoStats::histoStats(vector<uint32_t> & histogram)
 
 
 histoStats::histoStats(const cv::Mat & histogram)
-: computedMoments_(0), computedIC_(0), computedMode_(0),computedSumSq_(false), n_(0), mode_(0),
+: computedMoments_(0), computedSumSq_(false), computedIC_(0), computedMode_(0),n_(0), mode_(0),
 mean_(0), sDev_(0), var_(0), ic_(101), sum_(0), sumsq_(0)
 {
     valid_bins_.resize(0);
@@ -77,7 +77,7 @@ int32_t histoStats::mode() const
 {
     std::unique_lock <std::mutex> lock(m_mutex, std::try_to_lock);
     
-    if (computedMode_) return mode_;
+    if (computedMode_) return static_cast<int32_t>(mode_);
     
     // compute mode, make valid, return mode_
     
@@ -105,7 +105,8 @@ int32_t histoStats::mode() const
         if (*++pBinI > maxCountSoFar) maxCountSoFar = *pBinI, indexOfMax = i;
     
     ((histoStats * const) this)->computedMode_ = 1;
-    return ((histoStats * const) this)->mode_ = indexOfMax;
+    ((histoStats * const) this)->mode_ = indexOfMax;
+    return static_cast<int32_t>(indexOfMax);
 }
 
 int32_t histoStats::median() const
@@ -121,8 +122,8 @@ int32_t histoStats::min(const int32_t discardPels) const
     if (!discardPels)
         return inverseCum(0);
     int32_t sum(0);
-    long i = 0;
-    long endI = (long)histogram_.size();
+    int32_t i = 0;
+    int32_t endI = (int32_t)histogram_.size();
     
     if (n_)
         while (i < endI && sum < discardPels)
@@ -138,7 +139,7 @@ int32_t histoStats::max(const int32_t discardPels) const
     if (!discardPels)
         return inverseCum(100);
     int32_t sum(0);
-    long i = (long)histogram_.size() - 1;
+    int32_t i = (int32_t)histogram_.size() - 1;
     if (n_)
         while (i >= 0 && sum < discardPels)
         {
@@ -328,9 +329,9 @@ ostream & operator<<(ostream & o, const histoStats & p)
 int32_t histoStats::inverseCum(int percent) const
 {
     if (computedIC_)
-        return ic_[percent];
+        return static_cast<int32_t>(ic_[percent]);
     else
-        return ((histoStats * const) this)->computeInverseCum(percent);
+    return static_cast<int32_t>(((histoStats * const) this)->computeInverseCum(percent));
 }
 
 
@@ -394,7 +395,7 @@ void  histoStats::init (const std::array<uint32_t, PixelBinSize<P>::bins>& ah)
     std::lock_guard <std::mutex> lock(m_mutex);
     clear ();
     valid_bins_.resize(0);
-    bins_ = ah.size();
+    bins_ = static_cast<uint32_t>(ah.size());
     histogram_.resize(bins_);
     std::copy(ah.begin(), ah.end(), histogram_.begin());
     computeNsamp();

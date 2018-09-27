@@ -30,8 +30,7 @@ public:
         return 1000.0;
     }
     
-    ColorSpaceHistogram(const cv::Mat& src, bool ChromocityNorm = true) : uniform(true), accumulate(false),
-    norm_chromocity (ChromocityNorm)
+    ColorSpaceHistogram(const cv::Mat& src, bool ChromocityNorm = true)
     {
         mChannels = {0,1,2};
         mSizes = {bins(), bins(), bins()};
@@ -165,9 +164,10 @@ private:
     std::vector<int> mSizes;
     
     cv::Size mBounds;
-    bool uniform;
-    bool accumulate;
-    bool norm_chromocity;
+    // @todo
+//    bool uniform;
+//    bool accumulate;
+//    bool norm_chromocity;
     std::vector<cv::Mat> mhists;
     cv::Mat mHistImage;
     cv::Mat deep_copy;

@@ -225,8 +225,6 @@ unsigned int SpatialEdge(const roiWindow<P8U> & magImage, const roiWindow<P8U> &
     iPair kernel_5(5, 5);
     iPair halfK = kernel_5 / 2;
     int magUpdate(magImage.rowUpdate());
-    int dstUpdate(peaks_.rowUpdate());
-    
     
     for (int y = halfK.y(); y < peaks_.height() - halfK.y(); y++)
     {

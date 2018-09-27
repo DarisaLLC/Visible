@@ -38,15 +38,13 @@ public:
 
     // Constructors
     root(image_memory_alignment_policy imap = align_every_row, int alignment_bytes = 8)
-        : m_align_policy(imap), _bayer_type(NoneBayer), m_align(alignment_bytes),
-            m_channels  (T::components())
-
+        : m_align(alignment_bytes), m_channels  (T::components()),_bayer_type(NoneBayer), m_align_policy(imap)
     {
         
     }
 
     root(int32_t width, int32_t height, image_memory_alignment_policy imap = align_every_row, int alignment_bytes = 8)
-        : m_align_policy(imap), _bayer_type(NoneBayer), m_align(alignment_bytes),   m_channels  (T::components())
+        :  m_align(alignment_bytes),  m_channels  (T::components()) ,  _bayer_type(NoneBayer),  m_align_policy(imap)
     {
         setup_native(width, height);
     }
@@ -54,7 +52,7 @@ public:
 
     /* Row update for SRC pixels, not DEST frame */
     root(uint8_t * rawPixels, int32_t RowUpdateBytes, int32_t awidth, int32_t aheight, image_memory_alignment_policy imap = align_every_row, int alignment_bytes = 8)
-        : m_align_policy(imap), _bayer_type(NoneBayer), m_align(alignment_bytes),   m_channels  (T::components())
+        :   m_align(alignment_bytes),  m_channels  (T::components()),  _bayer_type(NoneBayer), m_align_policy(imap)
     {
         assert(aheight > 0);
         assert(awidth > 0);

@@ -27,8 +27,8 @@ public:
     typedef std::pair<sumproduct_t, sumproduct_t> imagesum_t;
 
 
-    CorrelationParts()
-        : mR(0.0), mSi(0), mSm(0), mSii(0), mSmm(0), mSim(0), mN(0), mRp(0), mEi(0), mEm(0), mCosine(0) {}
+    CorrelationParts();
+    
 
     // default copy, assignment, dtor ok
 

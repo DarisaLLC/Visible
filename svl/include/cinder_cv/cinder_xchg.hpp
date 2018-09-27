@@ -5,7 +5,6 @@
 #include <cinder/Channel.h>
 #include <cinder/Area.h>
 #include <limits>
-#include "cinder/Utilities.h"
 #include "vision/roiWindow.h"
 #include "vision/roiVariant.hpp"
 #include "vision/roiMultiWindow.h"
@@ -56,8 +55,70 @@ namespace svl
         static bool const mapsTo = true;
     };
      
+    template<typename P, class pixel_t = typename PixelType<P>::pixel_t>
+    std::shared_ptr<ChannelT<pixel_t> >  newCiChannel (const roiWindow<P>& w);
+    
+    std::pair<Surface8uRef, Channel8uRef> image_io_read_surface (const boost::filesystem::path & pp);
+    /*
+     * Returns a channel if the color order indicates monochrome, then a channel is returned, otherwise a surface
+     */
+    svl::roiVP8UC image_io_read_varoi (const boost::filesystem::path & pp, const std::string& = "red", uint32_t dst_channels = 1);
+    
+    
+    //! Converts Surface \a srcSurface to grayscale and stores the result in Surface \a dstSurface. Uses primary weights dictated by the Rec. 709 Video Standard
+    template<typename T>
+    void graygmean( const SurfaceT<T> &srcSurface, SurfaceT<T> *dstSurface );
+    //! Converts Surface \a srcSurface to grayscale and stores the result in Channel \a dstChannel. Uses primary weights dictated by the Rec. 709 Video Standard
+    template<typename T>
+    void graygmean ( const SurfaceT<T> &srcSurface, ChannelT<T> *dstChannel );
+    
+    // ci is the step number for channel.
+    roiWindow<P8U> NewFromChannel ( ChannelT<uint8_t>& onec, uint8_t ci);
+    roiWindow<P8U> NewRedFromSurface (const Surface8uRef& src);
+    roiWindow<P8U> NewBlueFromSurface (const Surface8uRef& src);
+    roiWindow<P8U> NewGreenFromSurface (const Surface8uRef& src);
+    roiWindow<P8U> NewGrayFromSurface (const Surface8uRef& src);
+    
+    // LIF File Support 
+    // P8UP3 is 3 planes mapped as in the header file
+    std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromChannel ( ChannelT<uint8_t>& onec,
+        const std::vector<std::string>& names_l2r, int64_t timestamp = 0);
+   
+    std::shared_ptr<roiWindow<P8U>> NewRefSingleFromSurface (const Surface8uRef& src,
+        const std::vector<std::string>& names_l2r = {" C ", " C "," C "},int64_t timestamp = 0);
+    
+    
+    //@todo move implementation to cinder_support.cpp 
+    template<typename P, class pixel_t>
+    std::shared_ptr<ChannelT<pixel_t> >  newCiChannel (const roiWindow<P>& w)
+    {
+        if (!w.isBound()) return 0;
+        auto chP = ChannelT<pixel_t>::create( w.width(), w.height () );
+        
+        const cinder::Area clippedArea = chP->getBounds();
+        auto rowBytes = chP->getRowBytes();
+        
+        for( int32_t y = clippedArea.getY1(); y < clippedArea.getY2(); ++y )
+        {
+            pixel_t *dstPtr = reinterpret_cast<pixel_t*>( reinterpret_cast<pixel_t*>( chP->getData() + clippedArea.getX1() ) + y * rowBytes );
+            const pixel_t *srcPtr = w.rowPointer(y);
+            for( int32_t x = 0; x < clippedArea.getWidth(); ++x, dstPtr++, srcPtr++)
+            {
+                *dstPtr = *srcPtr;
+            }
+        }
+        
+        return chP;
+    }
+    
+    
+    
+#if defined (USED)
+    
+
+    
     ci::Surface8uRef load_from_path (const fs::path& path, bool assume_jpg_if_no_extension = true);
-//    cv::Mat load_from_path_ocv (const fs::path& path,  bool assume_jpg_if_no_extension = true);
+    //    cv::Mat load_from_path_ocv (const fs::path& path,  bool assume_jpg_if_no_extension = true);
     
     static std::shared_ptr<roiWindow<P8U>> NewRefFromChannel ( ChannelT<uint8_t>& onec)
     {
@@ -67,19 +128,6 @@ namespace svl
         return std::shared_ptr<roiWindow<P8U>> (new roiWindow<P8U>(rootref, 0, 0, onec.getWidth(), onec.getHeight()));
     }
     
-    
-    
-    // ci is the step number for channel.
-    static roiWindow<P8U> NewFromChannel ( ChannelT<uint8_t>& onec, uint8_t ci)
-    {
-        assert(ci >= 0 && ci < 4);
-        
-        uint8_t* pixels = onec.getData();
-        roiWindow<P8U> window (onec.getWidth (),onec.getHeight (), image_memory_alignment_policy::align_first_row);
-        
-        window.copy_pixels_from(pixels, onec.getWidth (),onec.getHeight (), (int32_t) onec.getRowBytes (), ci);
-        return window;
-    }
     
     static roiWindow<P8U> NewChannelFromSurfaceAtIndex (const Surface8uRef& src, uint8_t ci)
     {
@@ -99,98 +147,22 @@ namespace svl
                 window3.copy_pixels_from(pixels, ones->getWidth (),ones->getHeight (), (int32_t) ones->getRowBytes ());
                 unknown = window3;
             }
-                break;
+            break;
             case 4:
             {
                 roiWindow<P8UC4> window4 (ones->getWidth (),ones->getHeight ());
                 window4.copy_pixels_from(pixels, ones->getWidth (),ones->getHeight (), (int32_t) ones->getRowBytes ());
                 unknown = window4;
             }
-                break;
+            break;
             default:
-                assert(false);
-                break;
+            assert(false);
+            break;
         }
         return unknown;
     }
     
-    
-    static roiWindow<P8U> NewRedFromSurface (const Surface8uRef& src)
-    {
-        return NewFromChannel (src->getChannel(src->getRedOffset()), src->getRedOffset());
-    }
-    
-    static roiWindow<P8U> NewBlueFromSurface (const Surface8uRef& src)
-    {
-        return NewFromChannel (src->getChannel(src->getBlueOffset()), src->getBlueOffset());
-    }
-    
-    static roiWindow<P8U> NewGreenFromSurface (const Surface8uRef& src)
-    {
-        return NewFromChannel (src->getChannel(src->getGreenOffset()), src->getGreenOffset());
-    }
-    
-    static roiWindow<P8U> NewGrayFromSurface (const Surface8uRef& src)
-    {
-        Channel8uRef ci8 = ChannelT<uint8_t>::create(src->getWidth(), src->getHeight());
-        ip::grayscale (*src, ci8.get());
-        return NewFromChannel (*ci8, 0);
-    }
-
-    
-    
-    
-    template<typename P, class pixel_t = typename PixelType<P>::pixel_t>
-    static std::shared_ptr<ChannelT<pixel_t> >  newCiChannel (const roiWindow<P>& w)
-    {
-        if (!w.isBound()) return 0;
-        auto chP = ChannelT<pixel_t>::create( w.width(), w.height () );
-        
-        const cinder::Area clippedArea = chP->getBounds();
-        int32_t rowBytes = chP->getRowBytes();
-        
-        for( int32_t y = clippedArea.getY1(); y < clippedArea.getY2(); ++y )
-        {
-            pixel_t *dstPtr = reinterpret_cast<pixel_t*>( reinterpret_cast<pixel_t*>( chP->getData() + clippedArea.getX1() ) + y * rowBytes );
-            const pixel_t *srcPtr = w.rowPointer(y);
-            for( int32_t x = 0; x < clippedArea.getWidth(); ++x, dstPtr++, srcPtr++)
-            {
-                *dstPtr = *srcPtr;
-            }
-        }
-        
-        return chP;
-    }
-    
-    std::pair<Surface8uRef, Channel8uRef> image_io_read_surface (const boost::filesystem::path & pp);
-    
-    
-    /*
-     * Returns a channel if the color order indicates monochrome, then a channel is returned, otherwise a surface
-     */
-    
-    svl::roiVP8UC image_io_read_varoi (const boost::filesystem::path & pp, const std::string& = "red", uint32_t dst_channels = 1);
-    
-    
-    //! Converts Surface \a srcSurface to grayscale and stores the result in Surface \a dstSurface. Uses primary weights dictated by the Rec. 709 Video Standard
-    template<typename T>
-    void graygmean( const SurfaceT<T> &srcSurface, SurfaceT<T> *dstSurface );
-    //! Converts Surface \a srcSurface to grayscale and stores the result in Channel \a dstChannel. Uses primary weights dictated by the Rec. 709 Video Standard
-    template<typename T>
-    void graygmean ( const SurfaceT<T> &srcSurface, ChannelT<T> *dstChannel );
-    
-
-    // LIF File Support 
-    // P8UP3 is 3 planes mapped as in the header file
-    static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromChannel ( ChannelT<uint8_t>& onec,
-                                                                          const std::vector<std::string>& names_l2r, int64_t timestamp = 0)
-    {
-        uint8_t* pixels = onec.getData();
-        std::shared_ptr<roiMultiWindow<P8UP3>> mwRef (new roiMultiWindow<P8UP3>(names_l2r, timestamp));
-        assert (onec.getWidth() == mwRef->width() && onec.getHeight() == mwRef->height());
-        mwRef->copy_pixels_from(pixels, onec.getWidth (),onec.getHeight (), (int32_t) onec.getRowBytes ());
-        return mwRef;
-    }
+  
     
     static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromSurface (const Surface8uRef& src,
                                                                           const std::vector<std::string>& names_l2r = {"Red", "Green","Blue"},
@@ -198,18 +170,8 @@ namespace svl
     {
         return NewRefMultiFromChannel (src->getChannel(0), names_l2r, timestamp);
     }
-    
-    static std::shared_ptr<roiWindow<P8U>> NewRefSingleFromSurface (const Surface8uRef& src,
-                                                                          const std::vector<std::string>& names_l2r = {" C ", " C "," C "},
-                                                                          int64_t timestamp = 0)
-    {
-        auto channel = src->getChannel(0);
-        uint8_t* pixels = channel.getData();
-        std::shared_ptr<roiWindow<P8U>> mwRef (new roiWindow<P8U>(src->getWidth(), src->getHeight()));
-        assert (channel.getWidth() == mwRef->width() && channel.getHeight() == mwRef->height());
-        mwRef->copy_pixels_from(pixels, channel.getWidth (),channel.getHeight (), (int32_t) channel.getRowBytes ());
-        return mwRef;
-    }
+ 
+#endif
     
     
 }

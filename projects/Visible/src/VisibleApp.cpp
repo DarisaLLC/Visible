@@ -2,6 +2,13 @@
  * Code Copyright 2011 Darisa LLC
  */
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+
+
+
 #include "cinder_opencv.h"
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
@@ -33,25 +40,6 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-
-namespace
-{
-    
-    std::ostream& ci_console ()
-    {
-        return App::get()->console();
-    }
-    
-    double                ci_getElapsedSeconds()
-    {
-        return App::get()->getElapsedSeconds();
-    }
-    
-    uint32_t ci_getNumWindows ()
-    {
-        return App::get()->getNumWindows();
-    }
-}
 
 #if 0
 void prepareSettings( App::Settings *settings )
@@ -283,7 +271,7 @@ void VisibleApp::initData( const fs::path &path )
     auto series = mLifRef->internal_serie_infos();
 
 	for( vector<internal_serie_info>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt )
-		createItem( *serieIt, serieIt - series.begin() );
+		createItem( *serieIt, int(serieIt - series.begin()) );
 }
 
 void VisibleApp::createItem( const internal_serie_info &serie, int index )
@@ -528,3 +516,6 @@ void VisibleApp::resize ()
 CINDER_APP( VisibleApp, RendererGl( RendererGl::Options().msaa( 4 ) ), []( App::Settings *settings ) {
 	settings->setWindowSize( APP_WIDTH, APP_HEIGHT );
 } )
+
+
+#pragma GCC diagnostic pop

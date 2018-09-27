@@ -29,7 +29,6 @@
 
 #include "graph1d.hpp"
 #include "roiWindow.h"
-#include "AccordionItem.h"
 #include "otherIO/lifFile.hpp"
 #include "core/stl_utils.hpp"
 #include "async_producer.h"
@@ -41,8 +40,8 @@
 #include <sstream>
 
 #include "DisplayObjectContainer.h"
-#include "Square.h"
-#include "Circle.h"
+//#include "Square.h"
+//#include "Circle.h"
 
 using namespace tinyUi;
 
@@ -100,7 +99,7 @@ public:
 	virtual void draw () = 0;
 	virtual void update () = 0;
 	virtual void setup () = 0;
-    virtual bool is_valid () const ;
+    virtual bool is_valid () const = 0;
 
     
     // u implementation does nothing
@@ -153,7 +152,6 @@ public:
 	virtual void resize ();
     virtual void draw ();
     virtual void setup ();
-    virtual bool is_valid ();
     virtual void update ();
     virtual void mouseDrag( MouseEvent event );
     virtual void mouseDown( MouseEvent event );
@@ -271,7 +269,7 @@ public:
 	
 	const  boost::filesystem::path source_path () const;
 
-	virtual bool is_valid ()
+	virtual bool is_valid () const
 	{
 		return m_valid && is_context_type(guiContext::movie_dir_viewer);
 	}

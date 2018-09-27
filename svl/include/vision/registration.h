@@ -47,7 +47,6 @@ struct spaceResult
 template <typename T>
 static locationPeak parInterpAtLocation(const roiWindow<T> & image, const iPair & loc)
 {
-    typedef typename PixelType<T>::pixel_ptr_t pixel_ptr_t;
     typedef typename PixelType<T>::pixel_t pixel_t;
 
     locationPeak lp;
@@ -61,13 +60,14 @@ static locationPeak parInterpAtLocation(const roiWindow<T> & image, const iPair 
     lp.interpolated = fPair(numeric_limits<float>::infinity(), numeric_limits<float>::infinity());
     if (lp.onVEdge.all())
     {
-        auto pval = parabolicFit<pixel_t, float>(image.getPixel(loc.first, loc.second - 1), image.getPixel(loc.first, loc.second),
+        parabolicFit<pixel_t, float>(image.getPixel(loc.first, loc.second - 1), image.getPixel(loc.first, loc.second),
                                                  image.getPixel(loc.first, loc.second + 1), &lp.interpolated.second);
+        
     }
 
     if (lp.onHEdge.all())
     {
-        auto pval = parabolicFit<pixel_t, float>(image.getPixel(loc.first - 1, loc.second), image.getPixel(loc.first, loc.second),
+        parabolicFit<pixel_t, float>(image.getPixel(loc.first - 1, loc.second), image.getPixel(loc.first, loc.second),
                                                  image.getPixel(loc.first + 1, loc.second), &lp.interpolated.first);
     }
 

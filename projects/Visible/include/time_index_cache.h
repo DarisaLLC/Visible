@@ -1,7 +1,7 @@
 #ifndef __TimeIndex_CACHE_
 #define __TimeIndex_CACHE_
 
-#include "cinder/app/App.h"
+
 #include <cinder/Channel.h>
 #include <cinder/Area.h>
 #include <limits>

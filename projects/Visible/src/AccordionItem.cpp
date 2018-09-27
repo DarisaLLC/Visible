@@ -4,7 +4,6 @@
 #include "cinder/Rand.h"
 #include "cinder/Text.h"
 #include "cinder/CinderMath.h"
-#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/gl/Texture.h"
@@ -21,7 +20,7 @@ float quickRound( float n )
 }
 
 AccordionItem::AccordionItem( Timeline &timeline, float x, float y, float height, float contractedWidth, float expandedWidth, gl::TextureRef image, string title, string subtitle )
-	: mTimeline(timeline), mX(x), mY(y), mWidth(contractedWidth), mHeight(height), mExpandedWidth(expandedWidth), mImage(image), mTitle(title), mSubtitle(subtitle)
+	: mTimeline(timeline), mX(x), mY(y), mWidth(contractedWidth), mHeight(height),  mImage(image), mTitle(title), mSubtitle(subtitle)
 {
 #if defined( CINDER_COCOA )
 	std::string normalFont( "Arial" );

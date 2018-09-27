@@ -31,8 +31,6 @@ public:
     {
         major = 0,
         minor = 1,
-        notset = 2,
-        number_of_sides = notset
     };
 
     typedef std::pair<vec2,vec2> sides_length_t;
@@ -53,7 +51,7 @@ public:
 	static const std::string& caption () { static std::string cp ("Lif Viewer # "); return cp; }
 	virtual void draw ();
 	virtual void setup ();
-	virtual bool is_valid ();
+	virtual bool is_valid () const;
 	virtual void update ();
 	virtual void resize ();
 	void draw_window ();
@@ -112,6 +110,7 @@ public:
     void play ();
     void pause ();
     bool isPlaying () const { return m_is_playing; }
+    bool isEditing () const { return m_is_editing; }
     
     bool isFixedSerieContext () const { return m_fixed_serie; }
     

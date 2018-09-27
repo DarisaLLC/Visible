@@ -4,7 +4,6 @@
 //
 //  Created by Arman Garakani on 9/25/18.
 //
-
 // Configuration settings file format documentation can be found at:
 // https://help.apple.com/xcode/#/dev745c5c974
 
@@ -21,8 +20,8 @@ ZERO_LINK = NO
 // Prebinding considered unhelpful in 10.3 and later
 PREBINDING = NO
 
-// Strictest warning policy -Wshadow ? 
-WARNING_CFLAGS = -Wall -Werror -Wendif-labels -Wnewline-eof -Wno-sign-compare
+// Strictest warning policy -Wshadow -Wnewline-eof ?
+WARNING_CFLAGS = -Wall -Werror -Wendif-labels  -Wno-sign-compare -Wno-reorder
 
 // Work around Xcode bugs by using external strip. See:
 // http://lists.apple.com/archives/Xcode-users/2006/Feb/msg00050.html
@@ -30,6 +29,24 @@ SEPARATE_STRIP = YES
 
 // not sure why apple defaults this on, but it's pretty risky
 ALWAYS_SEARCH_USER_PATHS = NO
+
+
+CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = NO
+CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES
+CLANG_WARN_MISSING_NOESCAPE = YES
+CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = NO
+CLANG_WARN_OBJC_INTERFACE_IVARS = NO
+CLANG_WARN_OBJC_LITERAL_CONVERSION = NO
+CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = NO
+CLANG_WARN_OBJC_ROOT_CLASS = YES
+CLANG_WARN__DUPLICATE_METHOD_MATCH = YES
+
+CLANG_WARN_CXX0X_EXTENSIONS  = NO
+CLANG_WARN_DELETE_NON_VIRTUAL_DTOR = YES
+CLANG_WARN_RANGE_LOOP_ANALYSIS  = NO
+CLANG_WARN_SUSPICIOUS_MOVE  = NO
+CLANG_WARN_VEXING_PARSE = YES
+CLANG_WARN__EXIT_TIME_DESTRUCTORS = NO
 
 // Turn on position dependent code for most cases (overridden where appropriate)
 GCC_DYNAMIC_NO_PIC = YES
@@ -80,9 +97,9 @@ GTM_GENERAL_OTHER_CFLAGS = -Wreserved-id-macro -Wdiv-by-zero -Wbad-function-cast
 // C++ Only Warnings
 GTM_GENERAL_OTHER_CPLUSPLUSFLAGS = -Wabi -Wctor-dtor-privacy -Wstrict-null-sentinel -Wsign-promo
 GCC_WARN_EFFECTIVE_CPLUSPLUS_VIOLATIONS = YES
-GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES
+GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = NO
 GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = YES
-GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES
+GCC_WARN_NON_VIRTUAL_DESTRUCTOR = NO
 
 // General C/C++/ObjC/ObjC++ warnings
 // These are generally ordered in easiest to hardest to support.

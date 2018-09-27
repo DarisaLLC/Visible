@@ -20,7 +20,7 @@
 
 #include "roiWindow.h"
 #include "seq_frame_container.hpp"
-#include "avReader.hpp"
+#include "AVReader.hpp"
 
 #include "sm_producer.h"
 
@@ -31,7 +31,7 @@ class sm_signaler : public base_signaler
 };
 
 
-SINGLETON_FCN(gen_filename::random_name,get_name_generator);
+SINGLETON_FCN(stl_utils::random_name,get_name_generator);
 
 class sm_producer::spImpl : public sm_signaler
 {
@@ -44,7 +44,7 @@ public:
 
  
     
-    spImpl () :  m_auto_run (false)
+    spImpl ()
     {
         m_name = get_name_generator().get_anew();
         signal_content_loaded = createSignal<sm_producer::sig_cb_content_loaded>();
@@ -61,14 +61,10 @@ public:
     
     void loadImages ( const images_vector_t& );
     
-    bool set_auto_run_on () { bool tmp = m_auto_run; m_auto_run = true; return tmp; }
-    bool set_auto_run_off () { bool tmp = m_auto_run; m_auto_run = false; return tmp; }
-
-    
     const source_type type () const { return m_source_type; }
     
     bool done_grabbing () const;
-    bool generate_ssm (int start_frame, int frames);
+    bool generate_ssm (int frames);
     int64_t frame_count () { return _frameCount; }
     bool image_file_entropy_result_ok () const;
     
@@ -92,7 +88,6 @@ protected:
 private:
     
     bool setup_image_directory_result_repo () const;
-    mutable bool m_auto_run;
     mutable source_type m_source_type;
     
     void get_next_frame ();

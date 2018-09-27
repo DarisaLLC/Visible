@@ -1,6 +1,7 @@
 #include "sm_producer.h"
 #include "sm_producer_impl.h"
 #include "self_similarity.h"
+#include "cinder_xchg.hpp"
 #include <iostream>
 #include <algorithm>
 #include <cctype>
@@ -10,7 +11,7 @@
 #include <mutex>
 #include <memory>
 #include <functional>
-#include "cinder_xchg.hpp"
+
 #include "core/simple_timing.hpp"
 #include "vision/opencv_utils.hpp"
 #include "vision/histo.h"
@@ -61,14 +62,9 @@ namespace anonymous
     }
 }
 
-sm_producer::sm_producer (bool auto_on_off)
+sm_producer::sm_producer ()
 {
     _impl = std::shared_ptr<sm_producer::spImpl> (new sm_producer::spImpl);
-    if (auto_on_off)
-        set_auto_run_on();
-    
-
-    
 }
 
 bool sm_producer::load_content_file (const std::string& movie_fqfn)
@@ -88,12 +84,17 @@ bool sm_producer::load_image_directory (const std::string& dir_fqfn, sm_producer
     return false;
 }
 
-bool sm_producer::operator() (int start_frame, int frames ) const
+std::future<bool> sm_producer::launch_async (int frames)const {
+    assert(has_content());
+    
+    auto fcnt = (frames == 0) ? _impl-> _frameCount : frames;
+    return std::async(std::launch::async, &sm_producer::spImpl::generate_ssm, _impl, fcnt);
+}
+
+bool sm_producer::operator() (int frames ) const
 {
-    if (_impl)
-    {
-        auto fcnt = (frames == 0) ? _impl-> _frameCount : frames;
-        std::future<bool> bright = std::async(std::launch::async, &sm_producer::spImpl::generate_ssm, _impl, start_frame, fcnt);
+    if(has_content()){
+        std::future<bool> bright = launch_async(frames);
         bright.wait();
         return bright.get();
     }
@@ -117,10 +118,8 @@ sm_producer::providesCallback () const
     return _impl->providesCallback<T> ();
 }
 
+bool sm_producer::has_content () const { return (frames_in_content() > 1 ); }
 
-
-bool sm_producer::set_auto_run_on() const { return (_impl) ? _impl->set_auto_run_on() : false; }
-bool sm_producer::set_auto_run_off() const { return (_impl) ? _impl->set_auto_run_off() : false; }
 int sm_producer::frames_in_content() const { return (_impl) ? (int) _impl->frame_count(): -1; }
 
 //grabber_error sm_producer::last_error () const { if (_impl) return _impl->last_error(); return grabber_error::Unknown; }
@@ -322,7 +321,7 @@ int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_pr
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
         signal_content_loaded->operator()();
     
-    if (m_auto_run) generate_ssm (0,0);
+
     
     return (int) _frameCount;
 }
@@ -355,7 +354,7 @@ int sm_producer::spImpl::loadMovie( const std::string& movieFile )
             m_qtime_cache_ref->convertTo (m_loaded_ref);
         }
         _frameCount = m_loaded_ref.size ();
-        if (m_auto_run) generate_ssm (0,0);
+
         return (int) _frameCount;
         
     }
@@ -384,9 +383,6 @@ void sm_producer::spImpl::loadImages (const images_vector_t& images)
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
         signal_content_loaded->operator()();
 
-    if (m_auto_run) generate_ssm (0,0);
-    
-    
 }
 
 bool sm_producer::spImpl::done_grabbing () const
@@ -422,7 +418,7 @@ bool sm_producer::spImpl::setup_image_directory_result_repo () const
     
 }
 // @todo add sampling and offset
-bool sm_producer::spImpl::generate_ssm (int start_frames, int frames)
+bool sm_producer::spImpl::generate_ssm ( int frames)
 {
     std::unique_lock<std::mutex> lock( m_mutex, std::try_to_lock );
     
@@ -447,8 +443,6 @@ bool sm_producer::spImpl::generate_ssm (int start_frames, int frames)
     if (ok && signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
         signal_sm1d_available->operator()();
 
-   
-    
     // Fetch the SS matrix and verify
     simi->selfSimilarityMatrix(m_SMatrix);
     bool smOk = anonymous::smatrix_ok(m_SMatrix, m_entropies.size());

@@ -199,7 +199,7 @@ namespace svl
         int result_cols =  img.cols - model.cols + 1;
         int result_rows = img.rows - model.rows + 1;
         space.create(result_rows, result_cols, CV_32FC1);
-        cv::matchTemplate ( img, model, space, CV_TM_CCORR_NORMED);
+        cv::matchTemplate ( img, model, space, CV_TM_CCOEFF_NORMED);
         if (squareit)
             space.mul(space);
         return space.at<float>(0,0);
@@ -351,12 +351,12 @@ namespace svl
         int highest_point = static_cast<int>(0.9*((float)number_of_bins)*scaling_factor);
         for (int channel=0; (channel < number_of_histograms); channel++)
         {
-            int last_height;
+            int last_height = 0;
             for( int h = 0; h < number_of_bins; h++ )
             {
                 float value = histograms[channel].at<float>(h);
                 int height = static_cast<int>(value*highest_point/max_value);
-                int where = (int)(((float)h)*scaling_factor);
+//                int where = (int)(((float)h)*scaling_factor);
                 if (h > 0)
                     line(histogram_image,cv::Point((int)(((float)(h-1))*scaling_factor),(int)(((float)number_of_bins)*scaling_factor)-last_height),
                          cv::Point((int)(((float)h)*scaling_factor),(int)(((float)number_of_bins)*scaling_factor)-height),
@@ -616,7 +616,6 @@ namespace svl
     {
         assert((1 == fmat.rows) || (1 == fmat.cols));
         
-        const int32_t length =  fmat.cols == 1 ? fmat.rows : fmat.cols;
         std::vector<float> array;
         auto sum = std::accumulate(fmat.begin<float>(), fmat.end<float>(), 0.0f);
         auto med_target = sum / 2;

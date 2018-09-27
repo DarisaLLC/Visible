@@ -262,7 +262,6 @@ void imageTranslation<P>::run()
 template <typename P>
 bool Correlation::autoCorrelation(const roiWindow<P> & fixed, const uint32_t half_size, spaceResult& result)
 {
-    typedef typename PixelType<P>::pixel_t pixel_t;
     int delta = 2 * half_size + 1;
     iRect fr (half_size, half_size, fixed.width() - delta, fixed.height() - delta);
     bool contains = fixed.contains (fr);

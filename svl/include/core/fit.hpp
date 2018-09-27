@@ -69,9 +69,6 @@ double normalized1DCorr (Iterator Ib, Iterator Ie, Iterator Mb)
   n = Ie - Ib;
   assert (n);
 
-  // Get container value type
-  typedef typename std::iterator_traits<Iterator>::value_type value_type;
-
   Iterator ip = Ib;
   Iterator mp = Mb;
 
