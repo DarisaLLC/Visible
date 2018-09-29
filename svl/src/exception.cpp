@@ -1,3 +1,5 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
 
 #include "core/svl_exception.hpp"
 #include <boost/functional/hash.hpp>
@@ -29,3 +31,5 @@ make_exception_impl("OSError",               os_error,                environmen
 make_exception_impl("SystemError",           system_error,            exception)
 make_exception_impl("SingularError",         singular_error,          exception)
 make_exception_impl("WindowingError",         window_geometry_error,  exception)
+
+#pragma GCC diagnostic pop

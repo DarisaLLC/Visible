@@ -1,3 +1,8 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
+
+
 #include "InteractiveObject.h"
 
 #include "cinder/gl/gl.h"
@@ -146,3 +151,4 @@ void InteractiveObject::removeListener( CallbackId callbackId ){
     mEvents.unregisterCb( callbackId );
 }
 
+#pragma GCC diagnostic pop

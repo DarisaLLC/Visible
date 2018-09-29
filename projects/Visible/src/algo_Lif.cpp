@@ -5,6 +5,10 @@
 //  Created by Arman Garakani on 8/20/18.
 //
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
 #include <stdio.h>
 
 #include <mutex>
@@ -461,5 +465,6 @@ const int64_t lif_processor::channel_count () const
     return m_channel_count;
 }
 
+#pragma GCC diagnostic pop
 
 

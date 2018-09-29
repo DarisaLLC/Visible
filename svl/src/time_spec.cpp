@@ -1,6 +1,11 @@
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
+
+
 #include "core/timestamp.h"
 #include <boost/math/special_functions/round.hpp>
-
 
 
 /***********************************************************************
@@ -123,3 +128,5 @@ time_spec_t &time_spec_t::operator-=(const time_spec_t &rhs){
     );
     return *this;
 }
+#pragma GCC diagnostic pop
+

@@ -34,6 +34,10 @@
  *
  */
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
 #include "ObjectContainer.h"
 namespace rph {
     
@@ -63,3 +67,6 @@ namespace rph {
     }
 
 }
+
+#pragma GCC diagnostic pop
+

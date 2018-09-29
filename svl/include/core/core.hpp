@@ -20,6 +20,8 @@
 #include <random>
 #include <chrono>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
 
 namespace svl // protection from unintended ADL
 {
@@ -118,7 +120,7 @@ namespace svl // protection from unintended ADL
     template<class Ch, class Tr, class Tuple, std::size_t... Is>
     void print_tuple(std::basic_ostream<Ch,Tr>& os, Tuple const& t, seq<Is...>){
         using swallow = int[];
-        (void)swallow{0, (void(os << (Is == 0? "" : ", ") << std::get<Is>(t)), 0)...};
+        (void)swallow{0, (static_cast<void>(void(os << (Is == 0? "" : ", ") << std::get<Is>(t))), 0)...};
     }
     
     
@@ -495,6 +497,6 @@ namespace svl // protection from unintended ADL
         
         }
         
-        
+ #pragma GCC diagnostic pop
         
 #endif

@@ -1,3 +1,8 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
+
+
 /** @dir src
  * @brief Namespace @ref svl
  */
@@ -264,3 +269,4 @@ namespace spiritcsv
     
 }
 
+#pragma GCC diagnostic pop
