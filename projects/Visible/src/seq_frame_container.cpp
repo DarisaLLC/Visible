@@ -1,4 +1,8 @@
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
 #include "seq_frame_container.hpp"
 #include <iterator>
 #include "core/stl_utils.hpp"
@@ -6,6 +10,7 @@
 #include <algorithm>
 #include "cinder/ip/Fill.h"
 #include "vision/roiMultiWindow.h"
+
 
 /*
  *  Concepte:
@@ -406,6 +411,7 @@ size_t seqFrameContainer::convertTo(std::vector<roiWindow<P8U> >& dst)
 const std::vector<std::string>& seqFrameContainer::channel_names () const { return m_names; }
 void seqFrameContainer::channel_names (const std::vector<std::string>& cnames) const { m_names = cnames; }
 
+#pragma GCC diagnostic pop
 
 
 #if 0

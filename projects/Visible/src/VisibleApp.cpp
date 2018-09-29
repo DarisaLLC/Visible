@@ -3,11 +3,11 @@
  */
 
 
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 #pragma GCC diagnostic ignored "-Wunused-private-field"
-
-
+#pragma GCC diagnostic ignored "-Wcomma"
 
 #include "cinder_opencv.h"
 #include "cinder/app/App.h"

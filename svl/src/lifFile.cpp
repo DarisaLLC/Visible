@@ -1,3 +1,7 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
+
 /**
   
  * \file lifFile.cpp
@@ -590,4 +594,5 @@ ostream &lifIO::operator<<(ostream& out, const DimensionData &d)
     return out;
 }
 
+#pragma GCC diagnostic pop
 

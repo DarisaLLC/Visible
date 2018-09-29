@@ -1,3 +1,6 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
 /*
  * Copyright (c) 2002 Reify Corp. All rights reserved.
  */
@@ -687,4 +690,5 @@ void rf1DdistanceHistogram (const vector<double>& signal, vector<double>& dHist)
 template class self_similarity_producer<P8U>;
 
 
+#pragma GCC diagnostic pop
 

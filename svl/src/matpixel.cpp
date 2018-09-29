@@ -1,4 +1,5 @@
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
 
 #include <string>
 #include <sstream>
@@ -568,6 +569,8 @@ namespace svl
     
     template class roiMultiWindow<P8UP3>;    
 }
+
+#pragma GCC diagnostic pop
 //
 //   |                      /----------------
 //  O|                     / |

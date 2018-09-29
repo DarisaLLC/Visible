@@ -1,3 +1,8 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
+
+
 #include "sm_producer.h"
 #include "sm_producer_impl.h"
 #include "self_similarity.h"
@@ -463,5 +468,5 @@ template boost::signals2::connection sm_producer::registerCallback(const std::fu
 template boost::signals2::connection sm_producer::registerCallback(const std::function<sm_producer::sig_cb_frame_loaded>&);
 
 
-
+#pragma GCC diagnostic pop
 

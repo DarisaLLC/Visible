@@ -1,3 +1,5 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
 
 #import "AVReader.h"
 #import "AVReader.hpp"
@@ -189,4 +191,4 @@ namespace avcc
     
 }
 
-
+#pragma GCC diagnostic pop
