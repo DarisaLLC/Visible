@@ -25,7 +25,6 @@
 		C20EDBC61CF2776D0074C47A /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBF1CF277130074C47A /* self_similarity.cpp */; };
 		C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C20EDBC81CF277740074C47A /* exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBE1CF277130074C47A /* exception.cpp */; };
-		C2102C6E215C2E1B000BE4B9 /* libippicv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2102C6D215C2E1B000BE4B9 /* libippicv.a */; };
 		C210F0EE2155C16B002A82A3 /* libcinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC61F6B4D6500A0E908 /* libcinder.a */; };
 		C210F1022159A44E002A82A3 /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F0FE2159A347002A82A3 /* libopencv_core.a */; };
 		C210F1032159A468002A82A3 /* libopencv_imgproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F1012159A347002A82A3 /* libopencv_imgproc.a */; };
@@ -35,7 +34,6 @@
 		C210F1072159A4A4002A82A3 /* libopencv_imgcodecs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F1002159A347002A82A3 /* libopencv_imgcodecs.a */; };
 		C210F1112159A725002A82A3 /* libopencv_videostab.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F0FA2159A325002A82A3 /* libopencv_videostab.a */; };
 		C210F1122159A727002A82A3 /* libopencv_video.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F0FC2159A325002A82A3 /* libopencv_video.a */; };
-		C210F11E2159A832002A82A3 /* libippiw.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F1142159A827002A82A3 /* libippiw.a */; };
 		C210F12D2159A84F002A82A3 /* liblibprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F11B2159A831002A82A3 /* liblibprotobuf.a */; };
 		C210F13A2159A85B002A82A3 /* libopencv_objdetect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F0FB2159A325002A82A3 /* libopencv_objdetect.a */; };
 		C210F13C2159A967002A82A3 /* libIlmImf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F1192159A82E002A82A3 /* libIlmImf.a */; };
@@ -47,13 +45,13 @@
 		C210F1422159A97F002A82A3 /* liblibtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F11C2159A832002A82A3 /* liblibtiff.a */; };
 		C210F1432159A982002A82A3 /* liblibwebp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F1172159A82B002A82A3 /* liblibwebp.a */; };
 		C210F1442159A985002A82A3 /* libzlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F1132159A826002A82A3 /* libzlib.a */; };
-		C210F1472159B2E2002A82A3 /* libtbb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C210F1452159B2DF002A82A3 /* libtbb.a */; };
 		C210F14A215AAC04002A82A3 /* cp-visible_release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */; };
 		C210F14B215AAC09002A82A3 /* cp-visible-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */; };
 		C2175DD72151517E004315C0 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C254BEE01F4FB3D300977307 /* QTKit.framework */; };
 		C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
 		C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
 		C2175DDC215154EA004315C0 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
+		C2177BDE215E04FC003E6C3E /* appstore.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2177BDD215E04FB003E6C3E /* appstore.xcconfig */; };
 		C219467E1CE4DC7100976025 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
 		C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
 		C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
@@ -276,8 +274,6 @@
 		C20EDBC01CF277130074C47A /* time_spec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = time_spec.cpp; sourceTree = "<group>"; };
 		C20EDBC41CF277480074C47A /* simple_timing.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = simple_timing.hpp; sourceTree = "<group>"; };
 		C20EDBC51CF277480074C47A /* timestamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timestamp.h; sourceTree = "<group>"; };
-		C2102C6D215C2E1B000BE4B9 /* libippicv.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libippicv.a; sourceTree = "<group>"; };
-		C2102C73215C31BA000BE4B9 /* libopencv_shape.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_shape.a; sourceTree = "<group>"; };
 		C2102C75215C340E000BE4B9 /* libopencv_shape.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_shape.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/lib/Release/libopencv_shape.a"; sourceTree = "<group>"; };
 		C210F0F82159A325002A82A3 /* libopencv_imgcodecs.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_imgcodecs.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/lib/Release/libopencv_imgcodecs.a"; sourceTree = "<group>"; };
 		C210F0F92159A325002A82A3 /* libopencv_videoio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_videoio.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/lib/Release/libopencv_videoio.a"; sourceTree = "<group>"; };
@@ -299,11 +295,11 @@
 		C210F11A2159A82F002A82A3 /* libittnotify.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libittnotify.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/libittnotify.a"; sourceTree = "<group>"; };
 		C210F11B2159A831002A82A3 /* liblibprotobuf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibprotobuf.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/liblibprotobuf.a"; sourceTree = "<group>"; };
 		C210F11C2159A832002A82A3 /* liblibtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibtiff.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/liblibtiff.a"; sourceTree = "<group>"; };
-		C210F1452159B2DF002A82A3 /* libtbb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libtbb.a; sourceTree = "<group>"; };
 		C210F148215AA720002A82A3 /* macos.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = macos.xcconfig; path = configs/include/macos.xcconfig; sourceTree = "<group>"; };
 		C2175DD22150B779004315C0 /* Visible.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Visible.entitlements; path = Visible/Visible.entitlements; sourceTree = "<group>"; };
 		C2175DD8215154A9004315C0 /* swatchLarge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = swatchLarge.png; path = ../assets/swatchLarge.png; sourceTree = "<group>"; };
 		C2175DD9215154A9004315C0 /* swatchSmall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = swatchSmall.png; path = ../assets/swatchSmall.png; sourceTree = "<group>"; };
+		C2177BDD215E04FB003E6C3E /* appstore.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = appstore.xcconfig; path = configs/include/appstore.xcconfig; sourceTree = "<group>"; };
 		C219076A1F7D4FB500CC4780 /* contraction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = contraction.hpp; path = ../include/contraction.hpp; sourceTree = "<group>"; };
 		C21946611CE4D95E00976025 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		C21946651CE4DC7100976025 /* AudioDrawUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AudioDrawUtils.cpp; path = ../src/AudioDrawUtils.cpp; sourceTree = "<group>"; };
@@ -605,14 +601,12 @@
 				C276ECA11C72B26F00242CDB /* IOSurface.framework in Frameworks */,
 				C276ECA21C72B26F00242CDB /* AVFoundation.framework in Frameworks */,
 				C276ECA31C72B26F00242CDB /* CoreMedia.framework in Frameworks */,
-				C2102C6E215C2E1B000BE4B9 /* libippicv.a in Frameworks */,
 				C276EC961C72B26300242CDB /* Accelerate.framework in Frameworks */,
 				C276EC971C72B26300242CDB /* AudioToolbox.framework in Frameworks */,
 				C276EC981C72B26300242CDB /* AudioUnit.framework in Frameworks */,
 				C276EC991C72B26300242CDB /* CoreAudio.framework in Frameworks */,
 				C276EC9C1C72B26300242CDB /* CoreVideo.framework in Frameworks */,
 				C276EC9D1C72B26300242CDB /* Carbon.framework in Frameworks */,
-				C210F11E2159A832002A82A3 /* libippiw.a in Frameworks */,
 				C276EC9E1C72B26300242CDB /* OpenGL.framework in Frameworks */,
 				C276EC9F1C72B26300242CDB /* Cocoa.framework in Frameworks */,
 			);
@@ -622,7 +616,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C210F1472159B2E2002A82A3 /* libtbb.a in Frameworks */,
 				C210F13C2159A967002A82A3 /* libIlmImf.a in Frameworks */,
 				C210F13D2159A96A002A82A3 /* libippiw.a in Frameworks */,
 				C210F13E2159A96C002A82A3 /* libittnotify.a in Frameworks */,
@@ -845,20 +838,18 @@
 		C210F0F72159A325002A82A3 /* OpenCV */ = {
 			isa = PBXGroup;
 			children = (
-				C210F1452159B2DF002A82A3 /* libtbb.a */,
 				C210F13B2159A86A002A82A3 /* 3rdParty */,
 				C210F0FF2159A347002A82A3 /* libopencv_highgui.a */,
-				C2102C73215C31BA000BE4B9 /* libopencv_shape.a */,
 				C2102C75215C340E000BE4B9 /* libopencv_shape.a */,
 				C210F1002159A347002A82A3 /* libopencv_imgcodecs.a */,
 				C210F1012159A347002A82A3 /* libopencv_imgproc.a */,
 				C210F0FE2159A347002A82A3 /* libopencv_core.a */,
 				C210F0F92159A325002A82A3 /* libopencv_videoio.a */,
 				C210F0F82159A325002A82A3 /* libopencv_imgcodecs.a */,
+				C210F0FC2159A325002A82A3 /* libopencv_video.a */,
 				C210F0FB2159A325002A82A3 /* libopencv_objdetect.a */,
 				C210F0FD2159A325002A82A3 /* libopencv_features2d.a */,
 				C210F0FA2159A325002A82A3 /* libopencv_videostab.a */,
-				C210F0FC2159A325002A82A3 /* libopencv_video.a */,
 			);
 			name = OpenCV;
 			sourceTree = "<group>";
@@ -866,7 +857,6 @@
 		C210F13B2159A86A002A82A3 /* 3rdParty */ = {
 			isa = PBXGroup;
 			children = (
-				C2102C6D215C2E1B000BE4B9 /* libippicv.a */,
 				C210F1192159A82E002A82A3 /* libIlmImf.a */,
 				C210F1142159A827002A82A3 /* libippiw.a */,
 				C210F11A2159A82F002A82A3 /* libittnotify.a */,
@@ -884,6 +874,7 @@
 		C21946891CE4DC9700976025 /* Configurations */ = {
 			isa = PBXGroup;
 			children = (
+				C2177BDD215E04FB003E6C3E /* appstore.xcconfig */,
 				C276EC841C72988200242CDB /* cp-visible_release.xcconfig */,
 				C210F148215AA720002A82A3 /* macos.xcconfig */,
 				C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */,
@@ -1475,6 +1466,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2177BDE215E04FC003E6C3E /* appstore.xcconfig in Resources */,
 				C210F14A215AAC04002A82A3 /* cp-visible_release.xcconfig in Resources */,
 				C2175DDC215154EA004315C0 /* palette.png in Resources */,
 				C210F14B215AAC09002A82A3 /* cp-visible-debug.xcconfig in Resources */,
@@ -1667,7 +1659,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_ENTITLEMENTS = Visible/Visible.entitlements;
-				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = YES;
@@ -1703,39 +1695,23 @@
 					/usr/local/Cellar/tbb/2018_U5/lib/,
 					/usr/local/lib,
 					"$(PROJECT_DIR)",
-					"/usr/local/opencv-3.4.3/build/lib/Release",
 					"/usr/local/opencv-3.4.3/build/3rdparty/lib/Release",
+					"/usr/local/opencv-3.4.3/build/lib/Release",
 				);
 				LOCAL_BOOST = "$(EXTERNALS)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_LDFLAGS = (
-					"-lopencv_core",
-					"-lopencv_imgproc",
-					"-lopencv_videoio",
-					"-lopencv_imgcodecs",
-					"-lopencv_shape",
-					"-lopencv_objdetect",
-					"-lopencv_features2d",
-					"-lopencv_highgui",
-					"-llibpng",
-					"-llibtiff",
-					"-llibwebp",
-					"-lzlib",
-					"-llibjasper",
-					"-littnotify",
-					"-lIlmImf",
-					"-ltbb",
-					"-llibprotobuf",
-					"-lopencv_video",
-					"-llibjpeg-turbo",
-					"-lcinder",
-					"-lopencv_videostab",
+					/usr/local/lib/libopencv_core.a,
+					"$(LOCAL_OCV)/build/3rdparty/lib/Release/libippiw.a",
+					"$(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/Release/libittnotify.a",
+					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
-				PROVISIONING_PROFILE = "91c42467-c5f5-48ed-9096-751c56824448";
-				PROVISIONING_PROFILE_SPECIFIER = appstore2;
+				PROVISIONING_PROFILE = "606854d0-2fff-476c-91c4-43d74f58ee5f";
+				PROVISIONING_PROFILE_SPECIFIER = "bina-laptop-mac-dev";
 				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = include;
 				VALID_ARCHS = "i386 x86_64";
@@ -1754,7 +1730,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_ENTITLEMENTS = Visible/Visible.entitlements;
-				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = NO;
 				CURRENT_PROJECT_VERSION = 2;
@@ -1790,39 +1766,23 @@
 					/usr/local/Cellar/tbb/2018_U5/lib/,
 					/usr/local/lib,
 					"$(PROJECT_DIR)",
-					"/usr/local/opencv-3.4.3/build/lib/Release",
 					"/usr/local/opencv-3.4.3/build/3rdparty/lib/Release",
+					"/usr/local/opencv-3.4.3/build/lib/Release",
 				);
 				LOCAL_BOOST = "$(EXTERNALS)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_LDFLAGS = (
-					"-lopencv_core",
-					"-lopencv_imgproc",
-					"-lopencv_videoio",
-					"-lopencv_imgcodecs",
-					"-lopencv_shape",
-					"-lopencv_objdetect",
-					"-lopencv_features2d",
-					"-lopencv_highgui",
-					"-llibpng",
-					"-llibtiff",
-					"-llibwebp",
-					"-lzlib",
-					"-llibjasper",
-					"-littnotify",
-					"-lIlmImf",
-					"-ltbb",
-					"-llibprotobuf",
-					"-lopencv_video",
-					"-llibjpeg-turbo",
-					"-lcinder",
-					"-lopencv_videostab",
+					/usr/local/lib/libopencv_core.a,
+					"$(LOCAL_OCV)/build/3rdparty/lib/Release/libippiw.a",
+					"$(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/Release/libittnotify.a",
+					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
-				PROVISIONING_PROFILE = "91c42467-c5f5-48ed-9096-751c56824448";
-				PROVISIONING_PROFILE_SPECIFIER = appstore2;
+				PROVISIONING_PROFILE = "606854d0-2fff-476c-91c4-43d74f58ee5f";
+				PROVISIONING_PROFILE_SPECIFIER = "bina-laptop-mac-dev";
 				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = include;
 				VALID_ARCHS = "i386 x86_64";
@@ -1949,7 +1909,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "-v";
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				VALID_ARCHS = x86_64;
@@ -2015,7 +1975,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "-v";
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				VALID_ARCHS = x86_64;

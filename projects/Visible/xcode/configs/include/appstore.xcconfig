@@ -1,0 +1,17 @@
+//
+//  appstore.xcconfig
+//  Visible
+//
+//  Created by Arman Garakani on 9/25/18.
+//
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+COPY_PHASE_STRIP = YES
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
+DEPLOYMENT_POSTPROCESSING = YES
+STRIP_INSTALLED_PRODUCT = YES
+STRIP_STYLE = all
+SEPARATE_STRIP = YES
+VALIDATE_PRODUCT = YES
+
