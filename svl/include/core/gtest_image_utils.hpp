@@ -58,46 +58,7 @@ bool has_correct_adjacent_backward_diff(const std::shared_ptr<T> & left, unsigne
     return true;
 }
 
-#if defined(USED)
-    
-static std::shared_ptr<uint16_t> create_ramp16(int asp, int pct = 100)
-{
-    static int full_pct(100);
-    int count = 65536; // 256 * 256
-    int cliff = (count * pct) / full_pct;
-    int w = 256;
-    int h = 256;
-    int index = 0;
-    std::shared_ptr<uint16_t> image = create<uint16_t>(w / asp, h * asp);
-    uint16_t * pptr = image.get();
 
-    for (; index < count; index++)
-    {
-        pptr[index] = (index < cliff) ? index : cliff;
-    }
-
-    return image;
-}
-
-
-
-
-static std::shared_ptr<uint16_t> create_easy_ramp16(int w, int h)
-{
-    int count = w * h;
-    int index = 0;
-    std::shared_ptr<uint16_t> image = create<uint16_t>(w, h);
-    uint16_t * pptr = image.get();
-
-    for (; index < count; index++)
-    {
-        pptr[index] = (uint16_t)std::sqrt(index);
-    }
-
-    return image;
-}
-
-#endif
     
 static std::shared_ptr<uint8_t> create_trig(int w, int h)
 {

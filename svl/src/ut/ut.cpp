@@ -17,7 +17,7 @@
 #include "core/stl_utils.hpp"
 #include "vision/labelconnect.hpp"
 #include "vision/registration.h"
-#include "cinder/cinder_xchg.hpp"
+#include "cinder_cv/cinder_xchg.hpp"
 #include "ut_localvar.hpp"
 #include "core/cv_gabor.hpp"
 #include "opencv2/highgui.hpp"
@@ -134,6 +134,44 @@ const char * pi341234[] =
     "0000000000000000",
     "0000000000000000",
     "0000000000000000", 0};
+
+
+std::shared_ptr<uint16_t> create_ramp16(int asp, int pct = 100)
+{
+    static int full_pct(100);
+    int count = 65536; // 256 * 256
+    int cliff = (count * pct) / full_pct;
+    int w = 256;
+    int h = 256;
+    int index = 0;
+    std::shared_ptr<uint16_t> image = test_utils::create<uint16_t>(w / asp, h * asp);
+    uint16_t * pptr = image.get();
+    
+    for (; index < count; index++)
+    {
+        pptr[index] = (index < cliff) ? index : cliff;
+    }
+    
+    return image;
+}
+
+
+
+
+std::shared_ptr<uint16_t> create_easy_ramp16(int w, int h)
+{
+    int count = w * h;
+    int index = 0;
+    std::shared_ptr<uint16_t> image = test_utils::create<uint16_t>(w, h);
+    uint16_t * pptr = image.get();
+    
+    for (; index < count; index++)
+    {
+        pptr[index] = (uint16_t)std::sqrt(index);
+    }
+    
+    return image;
+}
 
 
 
@@ -780,8 +818,8 @@ TEST(basic, corr8)
 
 TEST(basic, corr16)
 {
-    std::shared_ptr<uint16_t> img1 = test_utils::create_easy_ramp16(1920, 1080);
-    std::shared_ptr<uint16_t> img2 = test_utils::create_easy_ramp16(1920, 1080);
+    std::shared_ptr<uint16_t> img1 = create_easy_ramp16(1920, 1080);
+    std::shared_ptr<uint16_t> img2 = create_easy_ramp16(1920, 1080);
     
     basicCorrRowFunc<uint16_t> corrfunc(img1.get(), img2.get(), 1920, 1920, 1920, 1080);
     corrfunc.areaFunc();
@@ -815,8 +853,8 @@ TEST(timing8, corr)
 
 TEST(timing16, corr)
 {
-    std::shared_ptr<uint16_t> img1 = test_utils::create_easy_ramp16(1920, 1080);
-    std::shared_ptr<uint16_t> img2 = test_utils::create_easy_ramp16(1920, 1080);
+    std::shared_ptr<uint16_t> img1 = create_easy_ramp16(1920, 1080);
+    std::shared_ptr<uint16_t> img2 = create_easy_ramp16(1920, 1080);
     double endtime;
     std::clock_t start;
     int l;
