@@ -127,6 +127,7 @@
 		C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069701CED3E2C0045FF57 /* rowfunc.cpp */; };
 		C2606E721CED44370045FF57 /* seq_frame_container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* seq_frame_container.cpp */; };
 		C2606EA51CEE0E660045FF57 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
+		C264F94C215F0B6D00AF3130 /* Visible.icns in Resources */ = {isa = PBXBuildFile; fileRef = C264F94B215F0B6D00AF3130 /* Visible.icns */; };
 		C2677585212A325F00B5E080 /* contraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction.cpp */; };
 		C2677586212A325F00B5E080 /* contraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction.cpp */; };
 		C26A053D1E771CCF00BDC954 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26A053C1E771CCF00BDC954 /* main.cpp */; };
@@ -180,7 +181,6 @@
 		C276ECA21C72B26F00242CDB /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731819953389008149E2 /* AVFoundation.framework */; };
 		C276ECA31C72B26F00242CDB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731919953389008149E2 /* CoreMedia.framework */; };
 		C276ECA91C72B5D900242CDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C276ECA81C72B5D900242CDB /* CoreGraphics.framework */; };
-		C294B1202152D22C00C916B1 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C294B11F2152D22C00C916B1 /* Media.xcassets */; };
 		C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
 		C29DB077212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
 		C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611E1F66EA910069F665 /* PlistDate.cpp */; };
@@ -533,6 +533,7 @@
 		C2606E731CEE05320045FF57 /* svl_exception.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = svl_exception.hpp; sourceTree = "<group>"; };
 		C2606EA41CEE0E660045FF57 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
 		C26207011D10A9FE007DA78A /* visible_idir_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_idir_impl.cpp; path = ../src/visible_idir_impl.cpp; sourceTree = "<group>"; };
+		C264F94B215F0B6D00AF3130 /* Visible.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Visible.icns; sourceTree = "<group>"; };
 		C2677584212A325F00B5E080 /* contraction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = contraction.cpp; path = ../src/contraction.cpp; sourceTree = "<group>"; };
 		C26916141E6C78E8005C79F2 /* spimple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = spimple.h; path = ../../../svl/include/core/spimple.h; sourceTree = "<group>"; };
 		C26A053A1E771CCF00BDC954 /* sscli */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sscli; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -786,6 +787,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C264F94B215F0B6D00AF3130 /* Visible.icns */,
 				C2175DD8215154A9004315C0 /* swatchLarge.png */,
 				C2175DD9215154A9004315C0 /* swatchSmall.png */,
 				C24C0953214A1ED5004C8002 /* palette.png */,
@@ -1471,7 +1473,7 @@
 				C2175DDC215154EA004315C0 /* palette.png in Resources */,
 				C210F14B215AAC09002A82A3 /* cp-visible-debug.xcconfig in Resources */,
 				C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */,
-				C294B1202152D22C00C916B1 /* Media.xcassets in Resources */,
+				C264F94C215F0B6D00AF3130 /* Visible.icns in Resources */,
 				C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
