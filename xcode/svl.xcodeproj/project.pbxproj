@@ -105,6 +105,9 @@
 		C24B1FC11D8DADF400292F85 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBD1D8DADF400292F85 /* libboost_system.a */; };
 		C24B1FC21D8DADF400292F85 /* libboost_thread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBE1D8DADF400292F85 /* libboost_thread.a */; };
 		C24B1FC31D8DADF400292F85 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24B1FBF1D8DADF400292F85 /* libz.a */; };
+		C264F94E21615BEC00AF3130 /* libopencv_highgui.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26840971DBADDC2003BBBEF /* libopencv_highgui.a */; };
+		C264F94F21615BFE00AF3130 /* libopencv_imgproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26840991DBADDC2003BBBEF /* libopencv_imgproc.a */; };
+		C264F95021615C1700AF3130 /* libopencv_imgcodecs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26840981DBADDC2003BBBEF /* libopencv_imgcodecs.a */; };
 		C26840821DBADB5C003BBBEF /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C268407C1DBADA85003BBBEF /* QTKit.framework */; };
 		C26840A11DBADDC2003BBBEF /* libIlmImf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C268408B1DBADDC2003BBBEF /* libIlmImf.a */; };
 		C26840A21DBADDC2003BBBEF /* libippicv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C268408C1DBADDC2003BBBEF /* libippicv.a */; };
@@ -118,9 +121,6 @@
 		C26840AA1DBADDC2003BBBEF /* libopencv_features2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26840941DBADDC2003BBBEF /* libopencv_features2d.a */; };
 		C26840AB1DBADDC2003BBBEF /* libopencv_flann.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26840951DBADDC2003BBBEF /* libopencv_flann.a */; };
 		C26840AC1DBADDC2003BBBEF /* libopencv_hal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26840961DBADDC2003BBBEF /* libopencv_hal.a */; };
-		C26840AD1DBADDC2003BBBEF /* libopencv_highgui.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26840971DBADDC2003BBBEF /* libopencv_highgui.a */; };
-		C26840AE1DBADDC2003BBBEF /* libopencv_imgcodecs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26840981DBADDC2003BBBEF /* libopencv_imgcodecs.a */; };
-		C26840AF1DBADDC2003BBBEF /* libopencv_imgproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26840991DBADDC2003BBBEF /* libopencv_imgproc.a */; };
 		C26840B01DBADDC2003BBBEF /* libopencv_ml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C268409A1DBADDC2003BBBEF /* libopencv_ml.a */; };
 		C26840B11DBADDC2003BBBEF /* libopencv_objdetect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C268409B1DBADDC2003BBBEF /* libopencv_objdetect.a */; };
 		C26840B21DBADDC2003BBBEF /* libopencv_photo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C268409C1DBADDC2003BBBEF /* libopencv_photo.a */; };
@@ -376,6 +376,7 @@
 				C26840A31DBADDC2003BBBEF /* liblibjasper.a in Frameworks */,
 				C26840A41DBADDC2003BBBEF /* liblibjpeg.a in Frameworks */,
 				C26840A51DBADDC2003BBBEF /* liblibpng.a in Frameworks */,
+				C264F94F21615BFE00AF3130 /* libopencv_imgproc.a in Frameworks */,
 				C26840A61DBADDC2003BBBEF /* liblibtiff.a in Frameworks */,
 				C26840A71DBADDC2003BBBEF /* liblibwebp.a in Frameworks */,
 				C26840A81DBADDC2003BBBEF /* libopencv_calib3d.a in Frameworks */,
@@ -383,17 +384,16 @@
 				C26840AA1DBADDC2003BBBEF /* libopencv_features2d.a in Frameworks */,
 				C26840AB1DBADDC2003BBBEF /* libopencv_flann.a in Frameworks */,
 				C26840AC1DBADDC2003BBBEF /* libopencv_hal.a in Frameworks */,
-				C26840AD1DBADDC2003BBBEF /* libopencv_highgui.a in Frameworks */,
-				C26840AE1DBADDC2003BBBEF /* libopencv_imgcodecs.a in Frameworks */,
-				C26840AF1DBADDC2003BBBEF /* libopencv_imgproc.a in Frameworks */,
 				C26840B01DBADDC2003BBBEF /* libopencv_ml.a in Frameworks */,
 				C26840B11DBADDC2003BBBEF /* libopencv_objdetect.a in Frameworks */,
 				C26840B21DBADDC2003BBBEF /* libopencv_photo.a in Frameworks */,
 				C26840B31DBADDC2003BBBEF /* libopencv_shape.a in Frameworks */,
 				C26840B41DBADDC2003BBBEF /* libopencv_stitching.a in Frameworks */,
+				C264F95021615C1700AF3130 /* libopencv_imgcodecs.a in Frameworks */,
 				C26840B51DBADDC2003BBBEF /* libopencv_superres.a in Frameworks */,
 				C26840BC1DBADEF9003BBBEF /* libopencv_video.a in Frameworks */,
 				C26840BD1DBADEF9003BBBEF /* libopencv_videoio.a in Frameworks */,
+				C264F94E21615BEC00AF3130 /* libopencv_highgui.a in Frameworks */,
 				C26840BE1DBADEF9003BBBEF /* libopencv_videostab.a in Frameworks */,
 				C26840B61DBADDC2003BBBEF /* libzlib.a in Frameworks */,
 				C26840821DBADB5C003BBBEF /* QTKit.framework in Frameworks */,
@@ -516,6 +516,7 @@
 				C20EDBF61CF3780E0074C47A /* svl */,
 				C20E94131CF378E60074C47A /* svlUT */,
 				C20EDBE91CF3773C0074C47A /* Products */,
+				C264F94D21615BEC00AF3130 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -670,7 +671,8 @@
 				C20EDC3F1CF3780E0074C47A /* editableRectangle.hpp */,
 				C20EDC411CF3780E0074C47A /* snippets */,
 			);
-			path = cinder;
+			name = cinder;
+			path = cinder_cv;
 			sourceTree = "<group>";
 		};
 		C20EDC411CF3780E0074C47A /* snippets */ = {
@@ -802,6 +804,13 @@
 				C24B1FB51D8B55E500292F85 /* cardiomyocyte_model.hpp */,
 			);
 			path = cardio_model;
+			sourceTree = "<group>";
+		};
+		C264F94D21615BEC00AF3130 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		C27C765B1D80E25A000D9C9B /* otherIO */ = {
@@ -1041,11 +1050,9 @@
 					"$(LOCAL_CINDER)/lib",
 					"$(LOCAL_BOOST)/lib",
 					"$(LOCAL_gtest)/lib/Release",
-					"$(LOCAL_OCV)/lib/macosx",
 					/usr/local/Cellar/libtiff/4.0.6_2/lib,
 					/usr/local/Cellar/libpng/1.6.25/lib,
 					/usr/local/Cellar/jpeg/8d/lib,
-					/opt/X11/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1071,11 +1078,9 @@
 					"$(LOCAL_CINDER)/lib",
 					"$(LOCAL_BOOST)/lib",
 					"$(LOCAL_gtest)/lib/Release",
-					"$(LOCAL_OCV)/lib/macosx",
 					/usr/local/Cellar/libtiff/4.0.6_2/lib,
 					/usr/local/Cellar/libpng/1.6.25/lib,
 					/usr/local/Cellar/jpeg/8d/lib,
-					/opt/X11/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
