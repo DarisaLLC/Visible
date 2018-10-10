@@ -186,7 +186,7 @@ void VisibleApp::setup()
     
 	// fonts
 	Font smallFont = Font( "TrebuchetMS-Bold", 16 );
-	Font bigFont   = Font( "TrebuchetMS-Bold", 100 );
+	Font bigFont   = Font( "TrebuchetMS-Bold", 72 );
 	Item::setFonts( smallFont, bigFont );
 	
 	// title text
@@ -217,8 +217,8 @@ void VisibleApp::setup()
     }
 	
 	// textures and colors
-	mFgImage		= gl::Texture2d::create( APP_WIDTH, APP_HEIGHT );
-	mBgImage		= gl::Texture2d::create( APP_WIDTH, APP_HEIGHT );
+	mFgImage		= gl::Texture2d::create( APP_WIDTH / 2, APP_HEIGHT / 2 );
+	mBgImage		= gl::Texture2d::create( APP_WIDTH / 2, APP_HEIGHT / 2 );
 	mFgAlpha		= 1.0f;
 	mBgColor		= Color::white();
 	
@@ -381,6 +381,9 @@ void VisibleApp::update()
 
 void VisibleApp::draw()
 {
+    // Note: this function is called once per frame for EACH WINDOW
+    gl::ScopedViewport scpViewport( ivec2( 0 ), getWindowSize() );
+    
     guiContext  *data = getWindow()->getUserData<guiContext>();
     
     bool valid_data = data != nullptr && data->is_valid ();
@@ -418,7 +421,7 @@ void VisibleApp::draw()
         
         gl::context()->bindTexture( mSwatchLargeTex->getTarget(), mSwatchLargeTex->getId(), 0 );
         for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
-            if( ! itemIt->getSelected() )
+          //  if( ! itemIt->getSelected() )
                 itemIt->drawSwatches();
         }
         gl::context()->popTextureBinding( mSwatchLargeTex->getTarget(), 0 );

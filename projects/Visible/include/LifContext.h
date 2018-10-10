@@ -119,6 +119,8 @@ private:
     
     bool init_with_browser (const lif_browser::ref& );
     void setup_signals ();
+    void reset_params ();
+    
     // LIF Support
     lif_browser::ref m_lifBrowser;
     std::shared_ptr<lif_processor> m_lifProcRef;
@@ -176,6 +178,7 @@ private:
     int64_t m_seek_position;
     bool m_is_playing, m_is_looping;
     bool m_is_editing, m_show_probe;
+    bool m_is_in_params;
     vec2 m_zoom;
     vec2 mMousePos;
     bool mMouseIsDown;
@@ -200,6 +203,7 @@ private:
     // Update GUI
     void clear_playback_params ();
     void update_instant_image_mouse ();
+    void update_with_mouse_position ( MouseEvent event );
     Rectf get_image_display_rect ();
     vec2 texture_to_display_zoom ();
     void add_plots ();

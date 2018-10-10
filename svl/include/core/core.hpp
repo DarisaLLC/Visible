@@ -25,8 +25,8 @@
 
 namespace svl // protection from unintended ADL
 {
-   
-
+    
+    
     template<typename T>
     std::string toString( const T &t ) { std::ostringstream ss; ss << t; return ss.str(); }
     
@@ -55,7 +55,7 @@ namespace svl // protection from unintended ADL
         return (a_value >= 0 ? a_value : -a_value);
     }
     
-    
+
 #define MedOf3(a, b, c)                                       \
 ((a) > (b) ? ((a) < (c) ? (a) : ((b) < (c) ? (c) : (b))) :    \
 ((a) > (c) ? (a) : ((b) < (c) ? (b) : (c))))
@@ -106,7 +106,7 @@ namespace svl // protection from unintended ADL
         return(a_value*a_value);
     }
     
-    
+
     
     // http://stackoverflow.com/a/6245777
     template<std::size_t...> struct seq{};
@@ -125,9 +125,7 @@ namespace svl // protection from unintended ADL
     
     
     template<class Ch, class Tr, class... Args>
-    auto operator<<(std::basic_ostream<Ch, Tr>& os, std::tuple<Args...> const& t)
-    -> std::basic_ostream<Ch, Tr>&
-    {
+    auto operator<<(std::basic_ostream<Ch, Tr>& os, std::tuple<Args...> const& t)-> std::basic_ostream<Ch, Tr>&{
         os << "(";
         svl::print_tuple(os, t, svl::gen_seq<sizeof...(Args)>());
         return os << ")";
@@ -135,19 +133,19 @@ namespace svl // protection from unintended ADL
         
         
         
-    // Need this useless class for explicitly instatiating template constructor
-    template <typename T>
-    struct tid {
-        typedef T type;
-    };
-
+        // Need this useless class for explicitly instatiating template constructor
+        template <typename T>
+        struct tid {
+            typedef T type;
+        };
+        
 #if defined(IS_NUMBER_USED)
-    // c++11
-    static bool is_number(const std::string& s)
-    {
-        return !s.empty() && std::find_if(s.begin(),
-                                          s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
-    }
+        // c++11
+        static bool is_number(const std::string& s)
+        {
+            return !s.empty() && std::find_if(s.begin(),
+                                              s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
+        }
 #endif
         
 #if have_boost_random
@@ -296,7 +294,7 @@ namespace svl // protection from unintended ADL
                 {
                     T val = *iit;
                     if (in_place)
-                    *iit = (val - min_val) / scale;
+                        *iit = (val - min_val) / scale;
                 }
             }
             return std::pair<T,T>(min_val, max_val);
@@ -332,10 +330,10 @@ namespace svl // protection from unintended ADL
         
         class noncopyable
         {
-            protected:
+        protected:
             noncopyable() = default;
             ~noncopyable() = default;
-            private:
+        private:
             noncopyable(const noncopyable&);
             noncopyable& operator=(const noncopyable&);
         };
@@ -405,7 +403,7 @@ namespace svl // protection from unintended ADL
                 assert(s->m_refs > 0);
                 
                 if (--s->m_refs == 0)
-                checked_array_delete  (static_cast<const T*>(s));
+                    checked_array_delete  (static_cast<const T*>(s));
             }
             
             int64_t refcount() const { return m_refs; }
@@ -445,13 +443,6 @@ namespace svl // protection from unintended ADL
             return std::fabs(x - y) <= epsilon;
         }
         
-#define MedOf3(a, b, c)                                       \
-((a) > (b) ? ((a) < (c) ? (a) : ((b) < (c) ? (c) : (b))) :    \
-((a) > (c) ? (a) : ((b) < (c) ? (b) : (c))))
-        
-#define MaxOf3(a, b, c) (std::max(std::max(a, b), c))
-        
-#define MinOf3(a, b, c) (std::min(std::min(a, b), c))
         
         template<class T>
         T Sigmoid(T x)
@@ -464,7 +455,7 @@ namespace svl // protection from unintended ADL
         {
             // Transform x [0 1] to [-1 1]
             T xp = x + x + (T) (-1);
-            xp = rfSigmoid (xp);
+            xp = Sigmoid (xp);
             
             // Transform [-1 1] back to [0 1]
             xp = (xp + 1) / (T) 2;
@@ -476,7 +467,7 @@ namespace svl // protection from unintended ADL
         template<class T>
         bool Quadradic (T a, T b, T c, T& pos, T& neg)
         {
-            T det = rmSquare (b) - (4 * a * c);
+            T det = (b*b) - (4 * a * c);
             
             if (a == T (0))
             {
@@ -497,6 +488,7 @@ namespace svl // protection from unintended ADL
         
         }
         
- #pragma GCC diagnostic pop
+        
+#pragma GCC diagnostic pop
         
 #endif

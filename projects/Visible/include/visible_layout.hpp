@@ -62,10 +62,11 @@ public:
     {
         // Load defaults
         // from config file ?
-        m_image_frame_size_norm = vec2(0.60, 0.75);
+        m_image_frame_size_norm = vec2(0.33, 0.33);
         m_single_plot_size_norm = vec2(0.25, 0.15);
-        m_timeline_size_norm = vec2(0.60, 0.08);
-        m_log_size_norm = vec2(0.95, 0.08);
+        m_timeline_size_norm = vec2(0.33, 0.08);
+        m_log_size_norm = vec2(0.95, 0.15);
+        m_scale = 1.0f;
         
         // Two signals we provide
         m_signal_window_size_changed = createSignal<sig_window_size_changed_cb>();
@@ -81,10 +82,11 @@ public:
     }
     
     // Constructor
-    void init (const vec2& uiWinSize, const tiny_media_info& tmi, const int num_channels_plots = 3)
+    void init (const vec2& uiWinSize, const tiny_media_info& tmi, const int num_channels_plots = 3, const float scale = 0.75)
     
     {
         m_cc = num_channels_plots;
+        m_scale = scale;
         // Load defaults
         // from config file ?
         m_image_frame_size_norm = vec2(0.67, 0.75);
@@ -96,7 +98,14 @@ public:
         m_canvas_size = uiWinSize;
         Area wi (0, 0, m_canvas_size.x, m_canvas_size.y);
         m_window_rect = Rectf(wi);
-        Area ai (0, 0, tmi.getWidth(), tmi.getHeight());
+        Area ai (0, 0, tmi.getWidth() * m_scale, tmi.getHeight() * m_scale);
+        m_image_frame_size_norm.x *= m_scale;
+        m_image_frame_size_norm.y *= m_scale;
+        m_timeline_size_norm.x *= m_scale;
+        m_timeline_size_norm.y *= m_scale;
+        m_single_plot_size_norm.x = m_image_frame_size_norm.x / 2;
+        m_single_plot_size_norm.y = m_image_frame_size_norm.y / 3;
+        
         m_image_rect = Rectf (ai);
         m_aspect = layoutManager::aspect(tmi.getSize());
         m_isSet = true;
@@ -258,13 +267,14 @@ private:
     // Plot areas on the right
     inline vec2 plots_frame_position_norm ()
     {
-        vec2 np = vec2 (1.0 - trim_norm().x - plots_frame_size_norm().x , 1.5 * trim_norm().y);
+        vec2 np = vec2 (image_frame_position_norm().x + image_frame_size_norm().x, 1.5 * trim_norm().y);
         return np;
     }
     
     inline vec2 plots_frame_position ()
     {
-        vec2 np = vec2 (plots_frame_position_norm().x * desired_window_size().x, plots_frame_position_norm().y * desired_window_size().y);
+        auto fp = image_frame_rect ();
+        vec2 np = fp.getUpperRight();
         return np;
     }
     
@@ -380,7 +390,7 @@ private:
     mutable Rectf m_plots_display;
     mutable std::vector<Rectf> m_plot_rects;
     mutable std::vector<Rectf> m_slider_rects;
-    
+    mutable float m_scale;
     static float aspect (const ivec2& s) { return s.x / (float) s.y; }
     mutable int m_cc;
     mutable RectMapping m_display2image;

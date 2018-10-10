@@ -448,24 +448,6 @@ TEST (UT_algo, AVReader)
     
     EXPECT_TRUE(rref->isValid());
     EXPECT_TRUE(sm->count() == 57);
-
-#if 0 // UpdatetothenewAPI
-    meanLumAlgorithm::Ref_t al0 = meanLumAlgorithm::create("zero", sm);
-    
-    std::vector<std::string> names = {"zero", "one", "two"};
-    meanLumMultiChannelAlgorithm::Ref_t al3 = meanLumMultiChannelAlgorithm::create(names, sm);
-
-    al0->run();
-    
-    al3->run();
-#endif
-//    std::unique_ptr<lum_func_t> f_ut(new lum_func_t (&algo_registry_ut));
-//    
-//    auto lum_func_ti = algo_library::instance().add(f_ut);
-//    
-//    auto return_val = algo_library::instance().call(lum_func_ti, al);
-//    
-//    EXPECT_TRUE(return_val);
     
 }
 

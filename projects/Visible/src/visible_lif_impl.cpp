@@ -148,27 +148,13 @@ void lifContext::setup_signals(){
     
 }
 
-
-void lifContext::setup()
-{
-    srand( 133 );
-    setup_signals();
-    assert(is_valid());
-    if (! isFixedSerieContext()){
-        mWindow->setTitle( mPath.filename().string() );
-        mWindow->setSize(960, 540);
-    }else{
-        mWindow->setTitle( m_serie.name);
-        mWindow->setSize(1280, 768);
-    }
-    mFont = Font( "Menlo", 18 );
-    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-
-
-    mUIParams = params::InterfaceGl( " Control ", toPixels( ivec2( 300, 400 )));
-    mUIParams.setPosition(getWindowSize() / 3);
-    m_contraction_names = m_contraction_none;
-    clear_playback_params();
+void lifContext::reset_params () {
+    
+    mUIParams = params::InterfaceGl( " Control ", toPixels( ivec2(getWindowWidth(), 100 )));
+    mUIParams.setOptions("", "movable=false, sizeable=false");
+    mUIParams.setOptions( "TW_HELP", "visible=false" );
+    mUIParams.setPosition(vec2(0,getWindowHeight()-250));
+    
     
     mUIParams.addSeparator();
     m_perform_names.clear ();
@@ -225,6 +211,27 @@ void lifContext::setup()
         // Attach a callback that is fired after a target is updated.
         mUIParams.addParam( "CutOff Pct", setter, getter );
     }
+    
+}
+
+
+void lifContext::setup()
+{
+    srand( 133 );
+    setup_signals();
+    assert(is_valid());
+    if (! isFixedSerieContext()){
+        mWindow->setTitle( mPath.filename().string() );
+        mWindow->setSize(960, 540);
+    }else{
+        mWindow->setTitle( m_serie.name);
+        mWindow->setSize(1280, 768);
+    }
+    mFont = Font( "Menlo", 18 );
+    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+    m_contraction_names = m_contraction_none;
+    clear_playback_params();
+    reset_params ();
     
     if (isFixedSerieContext()) shared_from_above()->update();
 }
@@ -600,6 +607,14 @@ mPov.adjustDist( event.getWheelIncrement() * -5.0f );
 
 void lifContext::mouseMove( MouseEvent event )
 {
+    update_with_mouse_position (event);
+}
+
+void lifContext::update_with_mouse_position ( MouseEvent event )
+{
+    Rectf pb(mUIParams.getPosition(), mUIParams.getSize());
+    m_is_in_params = pb.contains(event.getPos());
+    
     mMouseInImage = false;
     mMouseInGraphs  = -1;
     
@@ -919,7 +934,7 @@ void lifContext::resize ()
     {
         m_plots[cc]->setRect (sLayoutMgr.plot_rects()[cc]);
     }
-    
+    reset_params ();
     
 }
 
@@ -1117,6 +1132,8 @@ void lifContext::draw ()
         mContainer.draw();
         draw_info ();
         mUIParams.draw();
+      
+        
     }
     
     
