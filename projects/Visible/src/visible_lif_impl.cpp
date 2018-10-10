@@ -148,7 +148,7 @@ void lifContext::setup_signals(){
     
 }
 
-void lifContext::reset_params () {
+void lifContext::setup_params () {
     
     mUIParams = params::InterfaceGl( " Control ", toPixels( ivec2(getWindowWidth(), 100 )));
     mUIParams.setOptions("", "movable=false, sizeable=false");
@@ -231,7 +231,7 @@ void lifContext::setup()
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     m_contraction_names = m_contraction_none;
     clear_playback_params();
-    reset_params ();
+    setup_params ();
     
     if (isFixedSerieContext()) shared_from_above()->update();
 }
@@ -934,8 +934,6 @@ void lifContext::resize ()
     {
         m_plots[cc]->setRect (sLayoutMgr.plot_rects()[cc]);
     }
-    reset_params ();
-    
 }
 
 bool lifContext::haveTracks()

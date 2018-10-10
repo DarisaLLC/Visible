@@ -119,7 +119,7 @@ private:
     
     bool init_with_browser (const lif_browser::ref& );
     void setup_signals ();
-    void reset_params ();
+    void setup_params ();
     
     // LIF Support
     lif_browser::ref m_lifBrowser;
