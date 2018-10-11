@@ -32,6 +32,7 @@
 #include "core/core.hpp"
 #include "Plist.hpp"
 #include <map>
+#include "CinderImGui.h"
 
 #define APP_WIDTH 1024
 #define APP_HEIGHT 768
@@ -165,6 +166,8 @@ void VisibleApp::setup()
 #if defined (  HOCKEY_SUPPORT )
     hockeyAppSetup hockey;
 #endif
+    
+    ImGui::initialize();
     
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "Visible.app/Contents/Info.plist";
@@ -381,9 +384,10 @@ void VisibleApp::update()
 
 void VisibleApp::draw()
 {
+    
     // Note: this function is called once per frame for EACH WINDOW
     gl::ScopedViewport scpViewport( ivec2( 0 ), getWindowSize() );
-    
+
     guiContext  *data = getWindow()->getUserData<guiContext>();
     
     bool valid_data = data != nullptr && data->is_valid ();
