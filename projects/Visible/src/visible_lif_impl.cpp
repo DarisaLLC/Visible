@@ -43,6 +43,7 @@
 #include "contraction.hpp"
 #include "logger.hpp"
 #include "cinder/Log.h"
+#include "CinderImGui.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -151,7 +152,7 @@ void lifContext::setup_signals(){
 void lifContext::setup_params () {
     
     mUIParams = params::InterfaceGl( " Control ", toPixels( ivec2(getWindowWidth(), 100 )));
-    mUIParams.setOptions("", "movable=false, sizeable=false");
+    mUIParams.setOptions("", "movable=false sizeable=false");
     mUIParams.setOptions( "TW_HELP", "visible=false" );
     mUIParams.setPosition(vec2(0,getWindowHeight()-250));
     
@@ -1077,6 +1078,7 @@ void lifContext::draw_info ()
 
 void lifContext::draw ()
 {
+    ImGui::Text("Hello, world!");
     
     if( have_lif_serie()  && mSurface )
     {
