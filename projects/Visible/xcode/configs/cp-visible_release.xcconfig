@@ -32,9 +32,7 @@ LOCAL_TINYXML = $(LOCAL_3rdParty)/tinyxml
 
 
 HEADER_SEARCH_PATHS = $(inherited) $(SRCROOT)/include/** /usr/local/include $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_TINYXML) $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG)  $(LOCAL_SPDLOG)/include $(EXTERNALS)/imgui
-
-LIBRARY_SEARCH_PATHS = $(inherited)  $(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION) $(LOCAL_OCV)/build/lib/Release /usr/local/lib /usr/local/Cellar/tbb/2018_U5/lib/ $(LOCAL_3rdParty)/boost/lib
-
+LIBRARY_SEARCH_PATHS = $(inherited) $(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION) $(LOCAL_OCV)/build/lib/$(CONFIGURATION) /usr/local/lib /usr/local/Cellar/tbb/2018_U5/lib/ $(LOCAL_3rdParty)/boost/lib $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)
 
 
 

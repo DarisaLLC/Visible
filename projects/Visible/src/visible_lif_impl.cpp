@@ -1078,7 +1078,7 @@ void lifContext::draw_info ()
 
 void lifContext::draw ()
 {
-    ImGui::Text("Hello, world!");
+   // ImGui::Text("Hello, world!");
     
     if( have_lif_serie()  && mSurface )
     {
