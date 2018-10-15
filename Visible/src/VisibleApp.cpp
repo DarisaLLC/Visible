@@ -9,114 +9,34 @@
 #pragma GCC diagnostic ignored "-Wunused-private-field"
 #pragma GCC diagnostic ignored "-Wcomma"
 
-#include "cinder_opencv.h"
-#include "cinder/app/App.h"
-#include "cinder/app/RendererGl.h"
-#include "cinder/gl/Context.h"
-#include "cinder/gl/gl.h"
-#include "cinder/ImageIo.h"
-#include "cinder/Utilities.h"
-#include "cinder/app/Platform.h"
-#include "cinder/Url.h"
-#include "cinder/System.h"
-#include <iostream>
-#include <fstream>
-#include <string>
-#include "otherIO/lifFile.hpp"
-#include "algo_Lif.hpp"
-#include "Item.h"
-#include "logger.hpp"
-#include "core/singleton.hpp"
-#include "hockey_etc_cocoa_wrappers.h"
-#include "LifContext.h"
-#include "core/core.hpp"
-#include "Plist.hpp"
-#include <map>
-#include "CinderImGui.h"
+#include "VisibleApp.h"
 
-#define APP_WIDTH 1024
-#define APP_HEIGHT 768
-
-using namespace ci;
-using namespace ci::app;
-using namespace std;
-
-
-#if 0
+namespace VisibleAppControl{
+    /**
+     When this is set to false the threads managed by this program will stop and join the main thread.
+     */
+    bool ThreadsShouldStop = false;
+    
+    /**
+     Logger which will show output on the Log window in the application.
+     */
+    AppLog app_log;
+    
+}
 void prepareSettings( App::Settings *settings )
 {
-    settings->setHighDensityDisplayEnabled();
-    settings->setWindowSize(APP_WIDTH,APP_HEIGHT);
-    settings->setFrameRate( 60 );
-    settings->setResizable( true );
+    //settings->setHighDensityDisplayEnabled();
+    settings->setWindowPos(0, 0);
+    settings->setFrameRate(10);
+    //Prevent the computer from dimming the display or sleeping
+    settings->setPowerManagementEnabled(false);
 }
-
-#endif
-
-
-class VisibleApp : public App, public SingletonLight<VisibleApp> {
-  public:
-    
- //   void prepareSettings( Settings *settings );
-	void setup() override;
-    void mouseMove( MouseEvent event ) override;
-    void mouseDrag( MouseEvent event ) override;
-	void mouseDown( MouseEvent event ) override;
-    void mouseUp( MouseEvent event )override;
-    void keyDown( KeyEvent event )override;
-	void update() override;
-	void draw() override;
-    void windowClose();
-    void windowMove();
-    void windowMouseDown( MouseEvent &mouseEvt );
-    void displayChange();
-    void resize() override;
-    
-	void initData( const fs::path &path );
-	void createItem( const internal_serie_info &serie, int serieNumber );
-
-    void fileDrop( FileDropEvent event ) override;
-    
-    bool shouldQuit();
-    void update_log (const std::string& msg);
-    WindowRef createConnectedWindow (Window::Format& format);
-    void create_lif_viewer (const int serie_index);
-    
-	vector<Item>			mItems;
-	vector<Item>::iterator	mMouseOverItem;
-	vector<Item>::iterator	mNewMouseOverItem;
-	vector<Item>::iterator	mSelectedItem;
-	
-    vector<gl::Texture2dRef>    mImages;
-	
-	float mLeftBorder;
-	float mTopBorder;
-	float mItemSpacing;
-	
-	gl::Texture2dRef mTitleTex;
-	gl::Texture2dRef mBgImage;
-	gl::Texture2dRef mFgImage;
-	gl::Texture2dRef mSwatchSmallTex, mSwatchLargeTex;
-	
-	Anim<float> mFgAlpha;
-	Anim<Color> mBgColor;
-    
-    lif_browser::ref mLifRef;
-    mutable std::list <std::unique_ptr<guiContext> > mContexts;
-    map<string, boost::any> mPlist;
-    Font                mFont;
-    std::string            mLog;
-    vec2                mSize;
-    fs::path            mCurrentLifFilePath;
-};
-
 
 void VisibleApp::create_lif_viewer (const int serie_index)
 {
     Window::Format format( RendererGl::create() );
     WindowRef ww = createConnectedWindow(format);
     mContexts.push_back(std::unique_ptr<lifContext>(new lifContext(ww, mLifRef, serie_index)));
-    
 }
 
 WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
@@ -154,6 +74,7 @@ void VisibleApp::fileDrop( FileDropEvent event )
     }
 }
 
+void VisibleApp::SetupGUIVariables(){}
 
 bool VisibleApp::shouldQuit()
 {
@@ -166,8 +87,14 @@ void VisibleApp::setup()
 #if defined (  HOCKEY_SUPPORT )
     hockeyAppSetup hockey;
 #endif
+    ui::initialize(ui::Options()
+                   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
+                   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
+                   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
+                   .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
+                 //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
+                   );
     
-    ImGui::initialize();
     
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "Visible.app/Contents/Info.plist";
@@ -179,9 +106,12 @@ void VisibleApp::setup()
     {
     }
     
+    setWindowSize(APP_WIDTH/2,APP_HEIGHT/2);
+    setFrameRate( 60 );
     setWindowPos(getWindowSize()/4);
     getWindow()->setAlwaysOnTop();
     WindowRef ww = getWindow ();
+    ww->getRenderer()->makeCurrentContext(true);
     std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
     ww->setTitle ("Visible ( build: " + buildN + " ) ");
     mFont = Font( "Menlo", 18 );
@@ -244,7 +174,7 @@ void VisibleApp::setup()
     
     getWindow()->getSignalMove().connect( std::bind( &VisibleApp::windowMove, this ) );
     getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
-    getWindow()->getSignalDraw().connect(std::bind( &VisibleApp::draw, this) );
+    getWindow()->getSignalDraw().connect([&]{draw();});
     getWindow()->getSignalClose().connect(std::bind( &VisibleApp::windowClose, this) );
     getWindow()->getSignalResize().connect(std::bind( &VisibleApp::resize, this) );
     
@@ -255,6 +185,77 @@ void VisibleApp::setup()
     
 }
 
+void VisibleApp::QuitApp(){
+   // fg::ThreadsShouldStop = true;
+    quit();
+}
+
+
+void VisibleApp::DrawGUI(){
+    // Draw the menu bar
+    {
+        ui::ScopedMainMenuBar menuBar;
+        
+        if( ui::BeginMenu( "File" ) ){
+            //if(ui::MenuItem("Fullscreen")){
+            //    setFullScreen(!isFullScreen());
+            //}
+            if(ui::MenuItem("Swap Eyes", "S")){
+                swapEyes = !swapEyes;
+            }
+            ui::MenuItem("Help", nullptr, &showHelp);
+            if(ui::MenuItem("Quit", "ESC")){
+                QuitApp();
+            }
+            ui::EndMenu();
+        }
+        
+        if( ui::BeginMenu( "View" ) ){
+            ui::MenuItem( "General Settings", nullptr, &showGUI );
+        //    ui::MenuItem( "Edge Detection", nullptr, &edgeDetector.showGUI );
+        //    ui::MenuItem( "Face Detection", nullptr, &faceDetector.showGUI );
+            ui::MenuItem( "Log", nullptr, &showLog );
+            //ui::MenuItem( "PS3 Eye Settings", nullptr, &showWindowWithMenu );
+            ui::EndMenu();
+        }
+        
+        //ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.0f FPS", ui::GetIO().Framerate);
+        ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
+    }
+    
+    //Draw general settings window
+    if(showGUI)
+    {
+        ui::Begin("General Settings", &showGUI, ImGuiWindowFlags_AlwaysAutoResize);
+        
+        ui::SliderInt("Stereo Convergence", &convergence, 0, 100);
+        
+        ui::End();
+    }
+ 
+    //Draw the log if desired
+    if(showLog){
+        vac::app_log.Draw("Log", &showLog);
+    }
+    
+    if(showHelp) ui::OpenPopup("Help");
+    //ui::ScopedWindow window( "Help", ImGuiWindowFlags_AlwaysAutoResize );
+    std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
+    buildN = "Visible ( build: " + buildN + " ) ";
+    if(ui::BeginPopupModal("Help", &showHelp)){
+        ui::TextColored(ImVec4(0.92f, 0.18f, 0.29f, 1.00f), "%s", buildN.c_str());
+        ui::Text("Arman Garakani, Darisa LLC");
+        if(ui::Button("Copy")) ui::LogToClipboard();
+        ui::SameLine();
+      //  ui::Text("github.com/");
+        ui::LogFinish();
+        ui::Text("");
+        ui::Text("Mouse over any"); ShowHelpMarker("We did it!"); ui::SameLine(); ui::Text("to show help.");
+        ui::Text("Ctrl+Click any slider to set its value manually.");
+        ui::EndPopup();
+    }
+    
+}
 
 void VisibleApp::windowMove()
 {
@@ -441,6 +442,7 @@ void VisibleApp::draw()
             itemIt->drawText();
         }
     }
+    DrawGUI();
 }
 
 

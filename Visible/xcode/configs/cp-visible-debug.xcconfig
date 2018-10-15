@@ -8,8 +8,8 @@
 
 #include "include/macos.xcconfig"
 
-SRCROOT = $(PROJECT_DIR)/../../../svl
-EXTERNALS = $(PROJECT_DIR)/../../../svl/../externals
+SRCROOT = $(PROJECT_DIR)/../../svl
+EXTERNALS = $(PROJECT_DIR)/../../svl/../externals
 
 // Only one in the test 
 TEST_DATA = $(SRCROOT)/Assets/test_data

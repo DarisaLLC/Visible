@@ -41,6 +41,7 @@ public:
     // From a lif_browser
     lifContext(ci::app::WindowRef& ww, const lif_browser::ref&, const uint32_t serie_index );
     
+    // shared_from_this() through base class
     lifContext* shared_from_above () {
         return static_cast<lifContext*>(((guiContext*)this)->shared_from_this().get());
     }
@@ -120,6 +121,7 @@ private:
     bool init_with_browser (const lif_browser::ref& );
     void setup_signals ();
     void setup_params ();
+    ci::app::WindowRef& get_windowRef();
     
     // LIF Support
     lif_browser::ref m_lifBrowser;

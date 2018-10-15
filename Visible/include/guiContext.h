@@ -85,10 +85,6 @@ public:
 	guiContext (ci::app::WindowRef& ww);
 	virtual ~guiContext ();
 	
-	std::shared_ptr<guiContext> getRef();
-	
-
-	
 	virtual const std::string & getName() const ;
 	virtual void setName (const std::string& name);
 	virtual guiContext::Type context_type () const;
@@ -123,8 +119,6 @@ public:
 	marker_info mAuxTimeMarker;
 	
 };
-
-typedef std::shared_ptr<guiContext> guiContextRef;
 
 class mainContext : public guiContext
 {

@@ -8,9 +8,8 @@
 #include "include/macos.xcconfig"
 #include "include/appstore.xcconfig"
 
-
-SRCROOT = $(PROJECT_DIR)/../../../svl
-EXTERNALS = $(PROJECT_DIR)/../../../svl/../externals
+SRCROOT = $(PROJECT_DIR)/../../svl
+EXTERNALS = $(PROJECT_DIR)/../../svl/../externals
 
 TEST_DATA = $(SRCROOT)/Assets/test_data
 
