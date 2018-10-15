@@ -19,11 +19,6 @@ guiContext::guiContext (ci::app::WindowRef& ww)
         ww->setUserData (this);
 }
 
-guiContextRef guiContext::getRef ()
-{
-    return shared_from_this();
-}
-
 guiContext::~guiContext ()
 {
    // std::cout << " guiContext Dtor called " << std::endl;

@@ -70,6 +70,9 @@ namespace
 lifContext::lifContext(WindowRef& ww, const lif_browser::ref& lb, const uint32_t serie_index):
 sequencedImageContext(ww), m_lifBrowser(lb), m_fixed_serie(true) {
     m_valid = init_with_browser(m_lifBrowser);
+    auto thisww = get_windowRef();
+    thisww->getRenderer()->makeCurrentContext(true);
+    thisww->getSignalDraw().connect( [&]{ draw(); } );
     if (! m_valid) return;
     m_valid &= (serie_index < m_lifBrowser->internal_serie_infos().size());
     if (! m_valid) return;
@@ -118,33 +121,37 @@ bool lifContext::init_with_browser (const lif_browser::ref& lb){
     return true;
 }
 
+ci::app::WindowRef&  lifContext::get_windowRef(){
+    return shared_from_above()->mWindow;
+}
+
 void lifContext::setup_signals(){
 
     // Create a Processing Object to attach signals to
     m_lifProcRef = std::make_shared<lif_processor> ();
     
     // Support lifProcessor::content_loaded
-    std::function<void (int64_t&)> content_loaded_cb = boost::bind (&lifContext::signal_content_loaded, this, _1);
+    std::function<void (int64_t&)> content_loaded_cb = boost::bind (&lifContext::signal_content_loaded, shared_from_above(), _1);
     boost::signals2::connection ml_connection = m_lifProcRef->registerCallback(content_loaded_cb);
     
     // Support lifProcessor::flu results available
-    std::function<void ()> flu_stats_available_cb = std::bind (&lifContext::signal_flu_stats_available, this);
+    std::function<void ()> flu_stats_available_cb = boost::bind (&lifContext::signal_flu_stats_available, shared_from_above());
     boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(flu_stats_available_cb);
     
     // Support lifProcessor::initial ss results available
-    std::function<void (int&)> sm1d_available_cb = boost::bind (&lifContext::signal_sm1d_available, this, _1);
+    std::function<void (int&)> sm1d_available_cb = boost::bind (&lifContext::signal_sm1d_available, shared_from_above(), _1);
     boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_available_cb);
     
     // Support lifProcessor::median level set ss results available
-    std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&lifContext::signal_sm1dmed_available, this, _1, _2);
+    std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&lifContext::signal_sm1dmed_available, shared_from_above(), _1, _2);
     boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_available_cb);
     
     // Support lifProcessor::contraction results available
-    std::function<void (lif_processor::contractionContainer_t&)> contraction_available_cb = boost::bind (&lifContext::signal_contraction_available, this, _1);
+    std::function<void (lif_processor::contractionContainer_t&)> contraction_available_cb = boost::bind (&lifContext::signal_contraction_available, shared_from_above(), _1);
     boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_available_cb);
     
     // Support lifProcessor::channel mats available
-    std::function<void (int&)> channelmats_available_cb = boost::bind (&lifContext::signal_channelmats_available, this, _1);
+    std::function<void (int&)> channelmats_available_cb = boost::bind (&lifContext::signal_channelmats_available, shared_from_above(), _1);
     boost::signals2::connection channelmats_connection = m_lifProcRef->registerCallback(channelmats_available_cb);
     
 }
@@ -218,23 +225,32 @@ void lifContext::setup_params () {
 
 void lifContext::setup()
 {
+    ci::app::WindowRef ww = get_windowRef();
+//    ImGui::Options imgo;
+//    imgo.window(ww);
+//    ImGui::initialize(imgo);
+
+    
     srand( 133 );
     setup_signals();
     assert(is_valid());
     if (! isFixedSerieContext()){
-        mWindow->setTitle( mPath.filename().string() );
-        mWindow->setSize(960, 540);
+        ww->setTitle( mPath.filename().string() );
+        ww->setSize(960, 540);
     }else{
-        mWindow->setTitle( m_serie.name);
-        mWindow->setSize(1280, 768);
+        ww->setTitle( m_serie.name);
+        ww->setSize(1280, 768);
     }
     mFont = Font( "Menlo", 18 );
-    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+    auto ws = ww->getSize();
+    mSize = vec2( ws[0], ws[1] / 12);
     m_contraction_names = m_contraction_none;
     clear_playback_params();
     setup_params ();
-    
+  
     if (isFixedSerieContext()) shared_from_above()->update();
+    
+    ww->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
 }
 
 
@@ -687,6 +703,8 @@ void lifContext::mouseUp( MouseEvent event )
 
 void lifContext::keyDown( KeyEvent event )
 {
+     ci::app::WindowRef ww = get_windowRef();
+    
     if( event.getChar() == 'f' ) {
         setFullScreen( ! isFullScreen() );
     }
@@ -795,9 +813,7 @@ void lifContext::add_plots ()
     mMainTimeLineSlider.setTitle ("Time Line");
     m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mMainTimeLineSlider, std::placeholders::_1));
     mWidgets.push_back( &mMainTimeLineSlider );
-    
-    
-    getWindow()->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
+  
 
     
 }
@@ -844,8 +860,10 @@ void lifContext::loadCurrentSerie ()
         
         
         auto title = m_series_names[m_cur_selected_index] + " @ " + mPath.filename().string();
-        getWindow()->setTitle( title );
-        getWindow()->getApp()->setFrameRate(mMediaInfo.getFramerate());
+        
+        auto ww = get_windowRef();
+        ww->setTitle( title );
+        ww->getApp()->setFrameRate(mMediaInfo.getFramerate());
         
         
         mScreenSize = mMediaInfo.getSize();
@@ -854,9 +872,7 @@ void lifContext::loadCurrentSerie ()
         
         mTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
         mAuxTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
-        
-      //  ivec2 window_size (sLayoutMgr.desired_window_size());
-      //  setWindowSize(window_size);
+   
         add_plots();
         looping(false);
         resize();
@@ -903,11 +919,8 @@ void lifContext::process_async (){
 
 Rectf lifContext::get_image_display_rect ()
 {
-    sLayoutMgr.update_window_size(getWindowSize ());
     return sLayoutMgr.display_frame_rect();
 }
-
-
 
 void  lifContext::update_log (const std::string& msg)
 {
@@ -925,9 +938,10 @@ void lifContext::resize ()
 {
     if (! have_lif_serie () || ! mSurface ) return;
     if (! sLayoutMgr.isSet()) return;
-    
-    sLayoutMgr.update_window_size(getWindowSize ());
-    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+    auto ww = get_windowRef();
+    auto ws = ww->getSize();
+    sLayoutMgr.update_window_size(ws);
+    mSize = vec2(ws[0], ws[1] / 12);
     mMainTimeLineSlider.setBounds (sLayoutMgr.display_timeline_rect());
     if (m_plots.empty()) return;
     
@@ -944,9 +958,13 @@ bool lifContext::haveTracks()
 
 void lifContext::update ()
 {
+    ci::app::WindowRef ww = get_windowRef();
+    
+    ww->getRenderer()->makeCurrentContext(true);
     if (! have_lif_serie() ) return;
     mContainer.update();
-    sLayoutMgr.update_window_size(getWindowSize ());
+    auto ws = ww->getSize();
+    sLayoutMgr.update_window_size(ws);
     
     // If Plots are ready, set them up
     // It is ready only for new data
@@ -1035,8 +1053,9 @@ gl::TextureRef lifContext::pixelInfoTexture ()
 void lifContext::draw_info ()
 {
     if (! m_lifRef) return;
-    
-    gl::setMatricesWindow( getWindowSize() );
+    auto ww = get_windowRef();
+    auto ws = ww->getSize();
+    gl::setMatricesWindow( ws );
     
     gl::ScopedBlendAlpha blend_;
     
@@ -1066,7 +1085,7 @@ void lifContext::draw_info ()
     
     if (mTextTexture)
     {
-        Rectf textrect (0.0, getWindowHeight() - mTextTexture->getHeight(), getWindowWidth(), getWindowHeight());
+        Rectf textrect (0.0, ws[1] - mTextTexture->getHeight(), ws[0],ws[1]);
         gl::draw(mTextTexture, textrect);
     }
     
@@ -1078,7 +1097,7 @@ void lifContext::draw_info ()
 
 void lifContext::draw ()
 {
-   // ImGui::Text("Hello, world!");
+   ImGui::Text("Hello, world!");
     
     if( have_lif_serie()  && mSurface )
     {
