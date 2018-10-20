@@ -441,8 +441,10 @@ void VisibleApp::draw()
         for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
             itemIt->drawText();
         }
+        
+        DrawGUI();
     }
-    DrawGUI();
+
 }
 
 

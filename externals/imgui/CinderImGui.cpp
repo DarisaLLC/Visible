@@ -31,7 +31,7 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-private-field"
-
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 #include "CinderImGui.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_PLACEMENT_NEW

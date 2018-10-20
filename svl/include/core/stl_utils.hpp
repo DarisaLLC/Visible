@@ -354,13 +354,29 @@ namespace stl_utils
         return s.x = x;
     }
     
-    template <class T>
-    bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&))
+    template<typename T>
+    T from_string (const std::string& value)
     {
-        std::istringstream iss(s);
-        return !(iss >> f >> t).fail ();
+        T ret = 0;
+        std::stringstream ss(value);
+        
+        if (sizeof(T) == 1) {
+            int ret1;
+            ss >> ret1;
+            ret = static_cast<T> (ret1);
+            return ret;
+        }
+        ss >> ret;
+        return ret;
     }
     
+//    template <class T>
+//    bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&))
+//    {
+//        std::istringstream iss(s);
+//        return !(iss >> f >> t).fail ();
+//    }
+//
     /**
      * RAIII (Resource Allocation is Initialization) Exception safe handling of openning and closing of files.
      * a functor object to delete an ifstream

@@ -33,7 +33,7 @@ std::shared_ptr<contraction_analyzer> contraction_analyzer::create()
 }
 
 contraction_analyzer::contraction_analyzer() :
-m_cached(false),  mValid (false), m_median_levelset_frac (0.0)
+m_cached(false),  mValidInput (false), m_median_levelset_frac (0.0)
 {
     m_peaks.resize(0);
     
@@ -50,7 +50,7 @@ void contraction_analyzer::load(const deque<double>& entropies, const deque<dequ
     m_ranks.resize (m_matsize);
     m_signal.resize (m_matsize);
     m_peaks.resize(0);
-    mValid = verify_input ();
+    mValidInput = verify_input ();
 }
 
 // @todo: add multi-contraction
@@ -65,39 +65,18 @@ bool contraction_analyzer::find_best () const
         // Cache Rank Calculations
         compute_median_levelsets ();
         // If the fraction of entropies values expected is zero, then just find the minimum and call it contraction
-        size_t count = std::floor (m_entropies.size () * m_median_levelset_frac);
-        if (count == 0)
+        size_t count = recompute_signal();
+        if (count == 0) m_signal = m_entropies;
+        auto result = std::minmax_element(m_signal.begin(), m_signal.end() );
+        m_filtered_min_max.first = *result.first;
+        m_filtered_min_max.second = *result.second;
+        auto min_itr = result.first;
+        if (min_itr != m_signal.end())
         {
-            m_signal = m_entropies;
-            auto min_itr = min_element( m_signal.begin(), m_signal.end() );
-            if (min_itr != m_signal.end())
-            {
-                auto min_index = std::distance(m_signal.begin(), min_itr);
-                if (min_index >= 0){
-                    lowest.first = static_cast<size_t>(min_index);
-                    lowest.second = *min_itr;
-                }
-            }
-        }
-        else  // @note: re-compute entropies using ranks and find the lowest ( corresponding to contraction )
-        {
-            assert(count < m_ranks.size());
-            m_signal.resize(m_entropies.size (), 0.0);
-            for (auto ii = 0; ii < m_signal.size(); ii++)
-            {
-                double val = 0;
-                for (int index = 0; index < count; index++)
-                {
-                    auto jj = m_ranks[index]; // get the actual index from rank
-                    val += m_SMatrix[jj][ii]; // fetch the cross match value for
-                }
-                val = val / count;
-                m_signal[ii] = val;
-                if (val < lowest.second)
-                {
-                    lowest.second = val;
-                    lowest.first = ii;
-                }
+            auto min_index = std::distance(m_signal.begin(), min_itr);
+            if (min_index >= 0){
+                lowest.first = static_cast<size_t>(min_index);
+                lowest.second = *min_itr;
             }
         }
         
@@ -114,6 +93,7 @@ bool contraction_analyzer::find_best () const
                 signal_contraction_analyzed->operator()(m_contractions);
             std::string c0("Contraction Detected @ ");
             c0 = c0 + to_string(one.contraction_peak.first);
+            mValidOutput = true;
             vlogger::instance().console()->info(c0);
             return true;
         }
@@ -147,6 +127,76 @@ double contraction_analyzer::Median_levelsets (const deque<double>& entropies,  
     return median_value;
 }
 
+size_t contraction_analyzer::recompute_signal () const
+{
+    // If the fraction of entropies values expected is zero, then just find the minimum and call it contraction
+    size_t count = std::floor (m_entropies.size () * m_median_levelset_frac);
+    assert(count < m_ranks.size());
+    m_signal.resize(m_entropies.size (), 0.0);
+    for (auto ii = 0; ii < m_signal.size(); ii++)
+    {
+        double val = 0;
+        for (int index = 0; index < count; index++)
+        {
+            auto jj = m_ranks[index]; // get the actual index from rank
+            val += m_SMatrix[jj][ii]; // fetch the cross match value for
+        }
+        val = val / count;
+        m_signal[ii] = val;
+    }
+    return count;
+}
+void contraction_analyzer::compute_median_levelsets () const
+{
+    if (m_cached) return;
+    m_median_value = contraction_analyzer::Median_levelsets (m_entropies, m_ranks);
+    m_cached = true;
+}
+
+float contraction_analyzer::entropy_interpolated_length (sigIterator_t , float min_length, float max_length){
+    return -1.0f;
+    
+}
+
+void contraction_analyzer::interpolated_length(vector<double>& dst, float min_length, float max_length){
+    if(!isOutputValid() || max_length < 1.0f || min_length >= max_length ){
+        dst = vector<double> ();
+        return;
+    }
+    double entOlenScale = (1.0 - m_filtered_min_max.first / m_filtered_min_max.second) / (1.0 - min_length / max_length);
+    
+    dst.resize(m_signal.size());
+    for (auto ii = 0; ii < m_signal.size(); ii++)
+    {
+        auto nn = 1.0 - m_signal[ii] / m_filtered_min_max.second;
+        nn = 1.0 - nn / entOlenScale;
+        dst[ii] = nn * max_length;
+    }
+    
+}
+void contraction_analyzer::clear_outputs () const
+{
+    m_peaks.resize(0);
+    m_contractions.resize(0);
+}
+bool contraction_analyzer::verify_input () const
+{
+    if (m_entropies.empty() || m_SMatrix.empty ())
+        return false;
+    
+    bool ok = m_entropies.size() == m_matsize;
+    if (!ok) return ok;
+    ok &= m_SMatrix.size() == m_matsize;
+    if (!ok) return ok;
+    for (int row = 0; row < m_matsize; row++)
+    {
+        ok &= m_SMatrix[row].size () == m_matsize;
+        if (!ok) return ok;
+    }
+    return ok;
+}
+
+
 
 
 void contraction_analyzer::savgol (const deque<double>& signal, deque<double>& dst, int winlen)
@@ -176,35 +226,6 @@ bool contraction_analyzer::savgol_filter () const
     
     savgol (m_entropies, m_signal, wlen);
     return true;
-}
-
-void contraction_analyzer::compute_median_levelsets () const
-{
-    if (m_cached) return;
-    contraction_analyzer::Median_levelsets (m_entropies, m_ranks);
-    m_cached = true;
-}
-
-void contraction_analyzer::clear_outputs () const
-{
-    m_peaks.resize(0);
-    m_contractions.resize(0);
-}
-bool contraction_analyzer::verify_input () const
-{
-    if (m_entropies.empty() || m_SMatrix.empty ())
-        return false;
-    
-    bool ok = m_entropies.size() == m_matsize;
-    if (!ok) return ok;
-    ok &= m_SMatrix.size() == m_matsize;
-    if (!ok) return ok;
-    for (int row = 0; row < m_matsize; row++)
-    {
-        ok &= m_SMatrix[row].size () == m_matsize;
-        if (!ok) return ok;
-    }
-    return ok;
 }
 
 template boost::signals2::connection contraction_analyzer::registerCallback(const std::function<contraction_analyzer::sig_cb_contraction_analyzed>&);

@@ -46,6 +46,7 @@ namespace spiritcsv
                std::string const& escape="",
                std::string const& quote="",
                std::string const& separator="",
+               char const new_line='\n',
                bool no_header = true);
         
         void parse();
