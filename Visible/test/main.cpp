@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 #include <memory>
 #include "boost/filesystem.hpp"
+#include "boost/algorithm/string.hpp"
 #include "opencv2/highgui.hpp"
 #include "vision/roiWindow.h"
 #include "vision/self_similarity.h"
@@ -44,6 +45,8 @@
 #include <cereal/archives/binary.hpp>
 #include <fstream>
 #include "vision/opencv_utils.hpp"
+#include "ut_units.hpp"
+
 using namespace boost;
 
 using namespace ci;
@@ -93,6 +96,7 @@ std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655,
     39.2749, 39.4703, 39.2846};
 
 
+
 void norm_scale (const std::vector<double>& src, std::deque<double>& dst)
 {
     vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
@@ -130,6 +134,45 @@ void savgol (const deque<double>& signal, deque<double>& dst)
 }
 
 
+namespace cardiac_ut
+{
+    static void run ()
+    {
+        {
+            auto res = dgenv_ptr->asset_path("sm.csv");
+            EXPECT_TRUE(res.second);
+            EXPECT_TRUE(boost::filesystem::exists(res.first));
+            
+            deque<deque<double>> array;
+            load_sm(res.first.string(), array, false);
+            EXPECT_EQ(size_t(500), array.size());
+            for (auto row = 0; row<500; row++){
+                EXPECT_EQ(size_t(500), array[row].size());
+                EXPECT_EQ(1.0,array[row][row]);
+            }
+        }
+        {
+            auto res = dgenv_ptr->asset_path("avg_baseline25_28_length_length_pct_short_pct.csv");
+            EXPECT_TRUE(res.second);
+            EXPECT_TRUE(boost::filesystem::exists(res.first));
+            
+            deque<deque<double>> array;
+            load_sm(res.first.string(), array, false);
+            EXPECT_EQ(size_t(500), array.size());
+            for (auto row = 0; row<500; row++){
+                EXPECT_EQ(size_t(5), array[row].size());
+            }
+        }
+    }
+}
+
+TEST(units,basic)
+{
+    units_ut::run();
+    eigen_ut::run();
+    cardiac_ut::run();
+    
+}
 TEST(timing8, corr)
 {
     std::shared_ptr<uint8_t> img1 = test_utils::create_trig(1920, 1080);
@@ -692,6 +735,7 @@ int main(int argc, char ** argv)
     std::cerr << ret << std::endl;
     
 }
+
 
 #include "ut_lif.hpp"
 

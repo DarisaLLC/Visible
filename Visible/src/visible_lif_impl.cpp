@@ -1097,8 +1097,6 @@ void lifContext::draw_info ()
 
 void lifContext::draw ()
 {
-   ImGui::Text("Hello, world!");
-    
     if( have_lif_serie()  && mSurface )
     {
         Rectf dr = get_image_display_rect();

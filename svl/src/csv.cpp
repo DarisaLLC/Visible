@@ -24,6 +24,7 @@ namespace spiritcsv
                    std::string const& escape,
                    std::string const& quote,
                    std::string const& separator,
+                   char const new_line,
                    bool no_header)
     : m_stream(strm)
     , m_no_header (no_header)
@@ -33,7 +34,7 @@ namespace spiritcsv
     , m_strict(false)
     , m_verbosity(0)
     , m_logstream(0)
-    , m_newline('\n')
+    , m_newline(new_line)
     {
         initialize();
     }
@@ -120,6 +121,8 @@ namespace spiritcsv
                 }
             }
         }
+        std::cout << newline_count << std::endl;
+        std::cout << carriage_count << std::endl;
     }
     
     void Parser::detectSeparator()
@@ -250,7 +253,7 @@ namespace spiritcsv
     {
         std::shared_ptr<std::vector<entry_t>> entries = std::shared_ptr<std::vector<entry_t>> (new std::vector<entry_t> );
         std::ifstream file(str.c_str(), std::ios_base::in|std::ios_base::binary);
-        spiritcsv::Parser p(file, escape, quote, separator, no_header);
+        spiritcsv::Parser p(file, escape, quote, separator, '\n', no_header);
         
         auto rows = p.getRows ();
         for (const auto & ss : rows)

@@ -73,20 +73,23 @@ public:
     
     using contraction = contractionMesh;
     using index_val_t = contractionMesh::index_val_t;
+
+    typedef std::vector<contraction> contractionContainer_t;
+    typedef std::deque<double> sigContainer_t;
+    typedef std::deque<double>::iterator sigIterator_t;
     
     // Signals we provide
     // signal_contraction_available
-    typedef std::vector<contraction> contractionContainer_t;
+
     typedef void (sig_cb_contraction_analyzed) (contractionContainer_t&);
- 
-    
     static std::shared_ptr<contraction_analyzer> create();
     
     void load (const deque<double>& entropies, const deque<deque<double>>& mmatrix);
     // @todo: add multi-contraction
     bool find_best () const;
     
-    bool isValid () const { return mValid; }
+    bool isValid () const { return mValidInput; }
+    bool isOutputValid () const { return mValidOutput; }
     size_t size () const { return m_matsize; }
     
     // Original
@@ -94,6 +97,11 @@ public:
     
     // Filtered 
     const deque<double>& filtered () { return m_signal; }
+    const std::pair<double,double>& filtered_min_max ();
+    
+    // Length Interpolation
+    void interpolated_length(vector<double>& dst, float min_length, float max_length);
+    float entropy_interpolated_length (sigIterator_t , float min_length, float max_length);
     
     void set_median_levelset_pct (float frac) const { m_median_levelset_frac = frac;  }
     float get_median_levelset_pct () const { return m_median_levelset_frac; }
@@ -118,11 +126,12 @@ public:
 private:
     contraction_analyzer();
     void compute_median_levelsets () const;
+    size_t recompute_signal () const;
     void clear_outputs () const;
     bool verify_input () const;
     bool savgol_filter () const;
-  
-    
+    mutable double m_median_value;
+    mutable std::pair<double,double> m_filtered_min_max;
     mutable float m_median_levelset_frac;
     mutable deque<deque<double>>        m_SMatrix;   // Used in eExhaustive and
     deque<double>               m_entropies;
@@ -131,7 +140,8 @@ private:
     mutable std::vector<int>            m_ranks;
     size_t m_matsize;
     mutable std::atomic<bool> m_cached;
-    mutable bool mValid;
+    mutable bool mValidInput;
+    mutable bool mValidOutput;
     mutable std::vector<index_val_t> m_peaks;
     mutable std::vector<contraction> m_contractions;
     
