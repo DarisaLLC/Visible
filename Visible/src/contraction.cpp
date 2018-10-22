@@ -46,27 +46,37 @@ void contraction_analyzer::load(const deque<double>& entropies, const deque<dequ
 {
     m_entropies = entropies;
     m_SMatrix = mmatrix;
-    m_matsize = m_entropies.size();
-    m_ranks.resize (m_matsize);
-    m_signal.resize (m_matsize);
+    mNoSMatrix = m_SMatrix.empty();
+    
+    m_entsize = m_entropies.size();
+    if (isPreProcessed()) m_signal = m_entropies;
+    else{
+        m_ranks.resize (m_entsize);
+        m_signal.resize (m_entsize);
+    }
     m_peaks.resize(0);
     mValidInput = verify_input ();
 }
 
+void contraction_analyzer::regenerate() const{
+    // Cache Rank Calculations
+    compute_median_levelsets ();
+    // If the fraction of entropies values expected is zero, then just find the minimum and call it contraction
+    size_t count = recompute_signal();
+    if (count == 0) m_signal = m_entropies;
+}
 // @todo: add multi-contraction
 bool contraction_analyzer::find_best () const
 {
     if (verify_input())
     {
+        if(! isPreProcessed())
+            regenerate();
+        
         auto invalid = m_entropies.size ();
         index_val_t lowest;
         lowest.first = invalid;
         lowest.second = std::numeric_limits<double>::max ();
-        // Cache Rank Calculations
-        compute_median_levelsets ();
-        // If the fraction of entropies values expected is zero, then just find the minimum and call it contraction
-        size_t count = recompute_signal();
-        if (count == 0) m_signal = m_entropies;
         auto result = std::minmax_element(m_signal.begin(), m_signal.end() );
         m_filtered_min_max.first = *result.first;
         m_filtered_min_max.second = *result.second;
@@ -181,17 +191,19 @@ void contraction_analyzer::clear_outputs () const
 }
 bool contraction_analyzer::verify_input () const
 {
-    if (m_entropies.empty() || m_SMatrix.empty ())
-        return false;
-    
-    bool ok = m_entropies.size() == m_matsize;
-    if (!ok) return ok;
-    ok &= m_SMatrix.size() == m_matsize;
-    if (!ok) return ok;
-    for (int row = 0; row < m_matsize; row++)
-    {
-        ok &= m_SMatrix[row].size () == m_matsize;
+    bool ok = ! m_entropies.empty();
+    if (!ok)return false;
+
+    if ( ! m_SMatrix.empty () ){
+        ok = m_entropies.size() == m_entsize;
         if (!ok) return ok;
+        ok &= m_SMatrix.size() == m_entsize;
+        if (!ok) return ok;
+        for (int row = 0; row < m_entsize; row++)
+        {
+            ok &= m_SMatrix[row].size () == m_entsize;
+            if (!ok) return ok;
+        }
     }
     return ok;
 }

@@ -80,24 +80,29 @@ public:
     
     // Signals we provide
     // signal_contraction_available
-
     typedef void (sig_cb_contraction_analyzed) (contractionContainer_t&);
+
+    // Factory create method
     static std::shared_ptr<contraction_analyzer> create();
     
-    void load (const deque<double>& entropies, const deque<deque<double>>& mmatrix);
+    // Load raw entropies and the self-similarity matrix
+    // If no self-similarity matrix is given, entropies are assumed to be filtered and used directly
+    void load (const deque<double>& entropies, const deque<deque<double>>& mmatrix = deque<deque<double>>());
+    
     // @todo: add multi-contraction
     bool find_best () const;
     
     bool isValid () const { return mValidInput; }
     bool isOutputValid () const { return mValidOutput; }
-    size_t size () const { return m_matsize; }
+    bool isPreProcessed () const { return mNoSMatrix; }
+    size_t size () const { return m_entsize; }
     
     // Original
     const deque<double>& entropies () { return m_entropies; }
     
     // Filtered 
     const deque<double>& filtered () { return m_signal; }
-    const std::pair<double,double>& filtered_min_max ();
+    const std::pair<double,double>& filtered_min_max () { return m_filtered_min_max; };
     
     // Length Interpolation
     void interpolated_length(vector<double>& dst, float min_length, float max_length);
@@ -125,6 +130,7 @@ public:
     
 private:
     contraction_analyzer();
+    void regenerate () const;
     void compute_median_levelsets () const;
     size_t recompute_signal () const;
     void clear_outputs () const;
@@ -138,10 +144,11 @@ private:
     deque<double>               m_accum;
     mutable deque<double>              m_signal;
     mutable std::vector<int>            m_ranks;
-    size_t m_matsize;
+    size_t m_entsize;
     mutable std::atomic<bool> m_cached;
     mutable bool mValidInput;
     mutable bool mValidOutput;
+    mutable bool mNoSMatrix;
     mutable std::vector<index_val_t> m_peaks;
     mutable std::vector<contraction> m_contractions;
     

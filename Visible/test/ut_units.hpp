@@ -14,6 +14,7 @@
 #include <boost/units/systems/si/resistance.hpp>
 #include <boost/units/systems/si/io.hpp>
 #include <Eigen/Dense>
+#include <Eigen/Core>
 #include <cassert>
 #include "core/pair.hpp"
 
@@ -24,6 +25,17 @@ using namespace boost::units;
 using namespace boost::units::si;
 using namespace std;
 namespace bi=boost::units;
+
+// 2-d array, column major
+template <typename T>
+using CArrXXt = Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>;
+using CArrXXd = Eigen::ArrayXXd;
+
+// 2-d array, row major
+template <typename T>
+using RArrXXt =
+  Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+using RArrXXd = RArrXXt<double>;
 
 quantity<energy>
 work(const quantity<force>& F, const quantity<bi::si::length>& dx)
@@ -47,6 +59,26 @@ std::shared_ptr<std::ifstream> make_shared_ifstream(std::string filename)
     return make_shared_ifstream(new std::ifstream(filename, std::ifstream::in));
 }
 
+void flip(const data_t& src, data_t& dst)
+{
+    std::vector<size_t> sizes;
+    for (auto n = 0; n < src.size(); n++)
+        sizes.push_back(src[n].size());
+    auto result = std::minmax_element(sizes.begin(), sizes.end() );
+    if (*result.first != *result.second || *result.first == src.size()){
+        std::cout << src.size() << "   " << *result.first << "," << *result.second << std::endl;
+        return;
+    }
+    dst.resize(*result.first);
+    for (auto row = 0; row < src.size(); row++){
+        for (auto col = 0; col < dst.size(); col++)
+        {
+            auto val = src[row][col];
+            dst[col].push_back(val);
+        }
+    }
+  
+}
 //-----------------------------------------------------------------------------
 // Let's overload the stream input operator to read a list of CSV fields (which a CSV record).
 // Remember, a record is a list of doubles separated by commas ','.
@@ -110,15 +142,12 @@ int load_sm(const std::string& file, data_t& data, bool debug = false)
     if (!infileRef->eof())
         return 1;
     
+ 
+    
     if(debug)
         cout << "CSV file contains " << data.size() << " records.\n";
-    
-    size_t max_record_size = 0;
-    for (auto n = 0; n < data.size(); n++)
-        if (max_record_size < data[ n ].size())
-            max_record_size = data[ n ].size();
+ 
     if(debug){
-        cout << "The largest record has " << max_record_size << " fields.\n";
         cout << "The second field in the fourth record contains the value " << data[ 0 ][ 0 ] << ".\n";
     }
     return 0;
