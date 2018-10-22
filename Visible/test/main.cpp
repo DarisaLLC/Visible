@@ -133,46 +133,78 @@ void savgol (const deque<double>& signal, deque<double>& dst)
     
 }
 
-
-namespace cardiac_ut
-{
-    static void run ()
-    {
-        {
-            auto res = dgenv_ptr->asset_path("sm.csv");
-            EXPECT_TRUE(res.second);
-            EXPECT_TRUE(boost::filesystem::exists(res.first));
-            
-            deque<deque<double>> array;
-            load_sm(res.first.string(), array, false);
-            EXPECT_EQ(size_t(500), array.size());
-            for (auto row = 0; row<500; row++){
-                EXPECT_EQ(size_t(500), array[row].size());
-                EXPECT_EQ(1.0,array[row][row]);
-            }
-        }
-        {
-            auto res = dgenv_ptr->asset_path("avg_baseline25_28_length_length_pct_short_pct.csv");
-            EXPECT_TRUE(res.second);
-            EXPECT_TRUE(boost::filesystem::exists(res.first));
-            
-            deque<deque<double>> array;
-            load_sm(res.first.string(), array, false);
-            EXPECT_EQ(size_t(500), array.size());
-            for (auto row = 0; row<500; row++){
-                EXPECT_EQ(size_t(5), array[row].size());
-            }
-        }
-    }
-}
-
 TEST(units,basic)
 {
     units_ut::run();
     eigen_ut::run();
-    cardiac_ut::run();
+}
+
+TEST(cardiac_ut, load_sm)
+{
+    auto res = dgenv_ptr->asset_path("sm.csv");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    
+    deque<deque<double>> array;
+    load_sm(res.first.string(), array, false);
+    EXPECT_EQ(size_t(500), array.size());
+    for (auto row = 0; row<500; row++){
+        EXPECT_EQ(size_t(500), array[row].size());
+        EXPECT_EQ(1.0,array[row][row]);
+    }
+    
     
 }
+TEST(cardiac_ut, interpolated_length)
+{
+    auto res = dgenv_ptr->asset_path("avg_baseline25_28_length_length_pct_short_pct.csv");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    
+    deque<deque<double>> array;
+    load_sm(res.first.string(), array, false);
+    EXPECT_EQ(size_t(500), array.size());
+    for (auto row = 0; row<500; row++){
+        EXPECT_EQ(size_t(5), array[row].size());
+    }
+    
+    double            Length_max   = 67.42584072;
+    double            Lenght_min   = 60.59880018;
+    double            MSI_max  =  0.37240525;
+    double            MSI_min   = 0.1277325;
+    // double            shortening_um   = 6.827040547;
+    
+    data_t dst;
+    flip(array,dst);
+    auto check = std::minmax_element(dst[1].begin(), dst[1].end() );
+    EXPECT_TRUE(svl::equal(*check.first, MSI_min, 1.e-05));
+    EXPECT_TRUE(svl::equal(*check.second, MSI_max, 1.e-05));
+    
+    auto car = contraction_analyzer::create();
+    car->load(dst[1]);
+    EXPECT_TRUE(car->isPreProcessed());
+    EXPECT_TRUE(car->isValid());
+    car->find_best();
+    const std::pair<double,double>& minmax = car->filtered_min_max ();
+    EXPECT_TRUE(svl::equal(*check.first, minmax.first, 1.e-05));
+    EXPECT_TRUE(svl::equal(*check.second, minmax.second, 1.e-05));
+    
+    vector<double> lengths;
+    car->interpolated_length(lengths,Lenght_min, Length_max);
+    EXPECT_EQ(dst[2].size(), lengths.size());
+    std::vector<double> diffs;
+    for(auto row = 0; row < dst[2].size(); row++)
+    {
+        auto dd = dst[2][row] - lengths[row];
+        diffs.push_back(dd);
+    }
+    
+    auto dcheck = std::minmax_element(diffs.begin(), diffs.end() );
+    EXPECT_TRUE(svl::equal(*dcheck.first, 0.0, 1.e-05));
+    EXPECT_TRUE(svl::equal(*dcheck.second, 0.0, 1.e-05));
+}
+
+
 TEST(timing8, corr)
 {
     std::shared_ptr<uint8_t> img1 = test_utils::create_trig(1920, 1080);
@@ -201,9 +233,9 @@ TEST(timing8, corr_ocv)
     std::shared_ptr<uint8_t> img2 = test_utils::create_trig(1920, 1080);
     cv::Mat mat1(1080, 1920, CV_8UC(1), img1.get(), 1920);
     cv::Mat mat2(1080, 1920, CV_8UC(1), img2.get(), 1920);
-    auto binfo = cv::getBuildInformation();
-    auto numth = cv::getNumThreads();
-    std::cout << binfo << std::endl << numth << std::endl;
+//    auto binfo = cv::getBuildInformation();
+//    auto numth = cv::getNumThreads();
+//    std::cout << binfo << std::endl << numth << std::endl;
 
     double endtime;
     std::clock_t start;
@@ -402,10 +434,7 @@ TEST(basicU8, histo)
     EXPECT_EQ(hh.sumSquared(), 28); // 2 * 9 + 2 * 4 + 2 * 1
 }
 
-
-
-
-TEST(UT_contraction, basic)
+TEST(UT_contraction_profiler, basic)
 {
     contraction_analyzer::contraction ctr;
     typedef vector<double>::iterator dItr_t;
