@@ -241,6 +241,9 @@ public:
         measure_contraction_at_point(mostc);
     }
     
+    const std::vector<double>& first_derivative () const { return m_fder; }
+    const std::vector<double>& first_derivative_filtered () const { return m_fder_filtered; }
+    
 private:
     typedef vector<double>::iterator dItr_t;
     double m_start_thr;
