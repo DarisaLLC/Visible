@@ -47,6 +47,7 @@
 #include "vision/opencv_utils.hpp"
 #include "ut_units.hpp"
 #include "ut_cardio.hpp"
+#include "cvplot/cvplot.h"
 
 using namespace boost;
 
@@ -173,7 +174,7 @@ TEST(cardiac_ut, interpolated_length)
     double            MicronPerPixel = 291.19 / 512.0;
     double            Length_max   = 118.555 * MicronPerPixel; // 67.42584072;
     double            Lenght_min   = 106.551 * MicronPerPixel; // 60.59880018;
-    double            shortening   = Length_max - Lenght_min;
+   // double            shortening   = Length_max - Lenght_min;
     double            MSI_max  =  0.37240525;
     double            MSI_min   = 0.1277325;
     // double            shortening_um   = 6.827040547;
@@ -211,6 +212,62 @@ TEST(cardiac_ut, interpolated_length)
 }
 
 
+TEST(UT_contraction_profiler, basic)
+{
+    contraction_analyzer::contraction ctr;
+    typedef vector<double>::iterator dItr_t;
+    
+    std::vector<double> fder, fder2;
+    fder.resize (acid.size());
+    fder2.resize (acid.size());
+    
+    // Get contraction peak ( valley ) first
+    auto min_iter = std::min_element(acid.begin(),acid.end());
+    ctr.contraction_peak.first = std::distance(acid.begin(),min_iter);
+    
+    // Computer First Difference,
+    adjacent_difference(acid.begin(),acid.end(), fder.begin());
+    std::rotate(fder.begin(), fder.begin()+1, fder.end());
+    fder.pop_back();
+    auto medianD = stl_utils::median1D<double>(7);
+    fder = medianD.filter(fder);
+    std::transform(fder.begin(), fder.end(), fder2.begin(), [](double f)->double { return f * f; });
+    // find first element greater than 0.1
+    auto pos = find_if (fder2.begin(), fder2.end(),    // range
+                        std::bind2nd(greater<double>(),0.1));  // criterion
+    
+    ctr.contraction_start.first = std::distance(fder2.begin(),pos);
+    auto max_accel = std::min_element(fder.begin()+ ctr.contraction_start.first ,fder.begin()+ctr.contraction_peak.first);
+    ctr.contraction_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_start.first, max_accel);
+    ctr.contraction_max_acceleration.first += ctr.contraction_start.first;
+    auto max_relax = std::max_element(fder.begin()+ ctr.contraction_peak.first ,fder.end());
+    ctr.relaxation_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_peak.first, max_relax);
+    ctr.relaxation_max_acceleration.first += ctr.contraction_peak.first;
+    
+    // Initialize rpos to point to the element following the last occurance of a value greater than 0.1
+    // If there is no such value, initialize rpos = to begin
+    // If the last occurance is the last element, initialize this it to end
+    dItr_t rpos = find_if (fder2.rbegin(), fder2.rend(),    // range
+                           std::bind2nd(greater<double>(),0.1)).base();  // criterion
+    ctr.relaxation_end.first = std::distance (fder2.begin(), rpos);
+    
+    EXPECT_EQ(ctr.contraction_start.first,16);
+    EXPECT_EQ(ctr.contraction_peak.first,35);
+    EXPECT_EQ(ctr.contraction_max_acceleration.first,27);
+    EXPECT_EQ(ctr.relaxation_max_acceleration.first,43);
+    EXPECT_EQ(ctr.relaxation_end.first,52);
+    
+    contraction_profile_analyzer ca;
+    ca.run(acid);
+    bool test = contraction_analyzer::contraction::equal(ca.contraction(), ctr);
+    EXPECT_TRUE(test);
+    {
+        cvplot::figure("myplot").series("myline").addValue(ca.first_derivative_filtered());
+        cvplot::figure("myplot").show();
+    }
+    
+    
+}
 TEST(timing8, corr)
 {
     std::shared_ptr<uint8_t> img1 = test_utils::create_trig(1920, 1080);
@@ -440,58 +497,6 @@ TEST(basicU8, histo)
     EXPECT_EQ(hh.sumSquared(), 28); // 2 * 9 + 2 * 4 + 2 * 1
 }
 
-TEST(UT_contraction_profiler, basic)
-{
-    contraction_analyzer::contraction ctr;
-    typedef vector<double>::iterator dItr_t;
-    
-    std::vector<double> fder, fder2;
-    fder.resize (acid.size());
-    fder2.resize (acid.size());
-
-    // Get contraction peak ( valley ) first
-    auto min_iter = std::min_element(acid.begin(),acid.end());
-    ctr.contraction_peak.first = std::distance(acid.begin(),min_iter);
-    
-    // Computer First Difference, 
-    adjacent_difference(acid.begin(),acid.end(), fder.begin());
-    std::rotate(fder.begin(), fder.begin()+1, fder.end());
-    fder.pop_back();
-    auto medianD = stl_utils::median1D<double>(7);
-    fder = medianD.filter(fder);
-    std::transform(fder.begin(), fder.end(), fder2.begin(), [](double f)->double { return f * f; });
-    // find first element greater than 0.1
-    auto pos = find_if (fder2.begin(), fder2.end(),    // range
-                        std::bind2nd(greater<double>(),0.1));  // criterion
-
-    ctr.contraction_start.first = std::distance(fder2.begin(),pos);
-    auto max_accel = std::min_element(fder.begin()+ ctr.contraction_start.first ,fder.begin()+ctr.contraction_peak.first);
-    ctr.contraction_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_start.first, max_accel);
-    ctr.contraction_max_acceleration.first += ctr.contraction_start.first;
-    auto max_relax = std::max_element(fder.begin()+ ctr.contraction_peak.first ,fder.end());
-    ctr.relaxation_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_peak.first, max_relax);
-     ctr.relaxation_max_acceleration.first += ctr.contraction_peak.first;
-    
-    // Initialize rpos to point to the element following the last occurance of a value greater than 0.1
-    // If there is no such value, initialize rpos = to begin
-    // If the last occurance is the last element, initialize this it to end
-    dItr_t rpos = find_if (fder2.rbegin(), fder2.rend(),    // range
-                           std::bind2nd(greater<double>(),0.1)).base();  // criterion
-    ctr.relaxation_end.first = std::distance (fder2.begin(), rpos);
-    
-    EXPECT_EQ(ctr.contraction_start.first,16);
-    EXPECT_EQ(ctr.contraction_peak.first,35);
-    EXPECT_EQ(ctr.contraction_max_acceleration.first,27);
-    EXPECT_EQ(ctr.relaxation_max_acceleration.first,43);
-    EXPECT_EQ(ctr.relaxation_end.first,52);
-    
-    contraction_profile_analyzer ca;
-    ca.run(acid);
-    bool test = contraction_analyzer::contraction::equal(ca.contraction(), ctr);
-    EXPECT_TRUE(test);
-    
-    
-}
 void done_callback (void)
 {
         std::cout << "Done"  << std::endl;
