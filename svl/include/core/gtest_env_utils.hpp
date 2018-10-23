@@ -115,6 +115,9 @@ public:
         add_content_directory(m_exec_dir);
     }
     
+    bool executable_path_exists () const{
+        return boost::filesystem::exists(m_exec_dir);
+    }
     void setUpFromArgs (int argc, char** argv,  std::string input_marker = "--assets")
     {
         boost::filesystem::path installpath = std::string(argv[0]);

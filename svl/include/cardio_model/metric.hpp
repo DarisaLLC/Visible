@@ -1,6 +1,10 @@
 #ifndef _METRIC_HPP
 #define _METRIC_HPP
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+
 #include <iostream>
 
 #include <cereal/cereal.hpp>
@@ -17,6 +21,9 @@
 #include <cereal/types/map.hpp>
 
 #include <cereal/external/rapidjson/filestream.h>
+
+#pragma GCC diagnostic pop
+
 #include "boost/math/constants/constants.hpp"
 #include <boost/units/physical_dimensions.hpp>
 #include <boost/units/systems/cgs.hpp>
@@ -74,6 +81,7 @@ namespace boost {
     } // namespace units
 } // namespace boost
 
+
 // string output
 template<class Y>
 inline
@@ -84,10 +92,10 @@ std::string units_string (const quantity<Y>& val)
     using boost::units::cgs::second;
     using boost::units::cgs::dyne;
     std::strstream ss;
-    
+   
     ss << symbol_format << val;
-    
-    return ss.str();
+    std::string s_s = ss.str();
+    return s_s;
 }
 
 template <class Archive, class Y, cereal::traits::EnableIf<cereal::traits::is_text_archive<Archive>::value> = cereal::traits::sfinae>
@@ -161,7 +169,6 @@ namespace cm
     {
         ar(
            cereal::make_nvp("length", units_string(t.length)),
-
            cereal::make_nvp("width", units_string(t.width)),
            cereal::make_nvp("thickness", units_string(t.thickness)),
            cereal::make_nvp("elongation", units_string(t.elongation)),

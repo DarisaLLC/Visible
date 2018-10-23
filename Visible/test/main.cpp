@@ -20,7 +20,7 @@
 #include "ut_sm.hpp"
 #include "AVReader.hpp"
 #include "cm_time.hpp"
-#include "core/gtest_image_utils.hpp"
+#include "core/gtest_env_utils.hpp"
 #include "vision/colorhistogram.hpp"
 #include "cinder_opencv.h"
 #include "algoFunctions.hpp"
@@ -46,6 +46,7 @@
 #include <fstream>
 #include "vision/opencv_utils.hpp"
 #include "ut_units.hpp"
+#include "ut_cardio.hpp"
 
 using namespace boost;
 
@@ -137,6 +138,7 @@ TEST(units,basic)
 {
     units_ut::run();
     eigen_ut::run();
+    cardio_ut::run(dgenv_ptr);
 }
 
 TEST(cardiac_ut, load_sm)
@@ -168,8 +170,10 @@ TEST(cardiac_ut, interpolated_length)
         EXPECT_EQ(size_t(5), array[row].size());
     }
     
-    double            Length_max   = 67.42584072;
-    double            Lenght_min   = 60.59880018;
+    double            MicronPerPixel = 291.19 / 512.0;
+    double            Length_max   = 118.555 * MicronPerPixel; // 67.42584072;
+    double            Lenght_min   = 106.551 * MicronPerPixel; // 60.59880018;
+    double            shortening   = Length_max - Lenght_min;
     double            MSI_max  =  0.37240525;
     double            MSI_min   = 0.1277325;
     // double            shortening_um   = 6.827040547;
@@ -202,6 +206,8 @@ TEST(cardiac_ut, interpolated_length)
     auto dcheck = std::minmax_element(diffs.begin(), diffs.end() );
     EXPECT_TRUE(svl::equal(*dcheck.first, 0.0, 1.e-05));
     EXPECT_TRUE(svl::equal(*dcheck.second, 0.0, 1.e-05));
+    
+    // Calculate
 }
 
 
@@ -456,7 +462,7 @@ TEST(UT_contraction_profiler, basic)
     std::transform(fder.begin(), fder.end(), fder2.begin(), [](double f)->double { return f * f; });
     // find first element greater than 0.1
     auto pos = find_if (fder2.begin(), fder2.end(),    // range
-                   bind2nd(greater<double>(),0.1));  // criterion
+                        std::bind2nd(greater<double>(),0.1));  // criterion
 
     ctr.contraction_start.first = std::distance(fder2.begin(),pos);
     auto max_accel = std::min_element(fder.begin()+ ctr.contraction_start.first ,fder.begin()+ctr.contraction_peak.first);
@@ -470,7 +476,7 @@ TEST(UT_contraction_profiler, basic)
     // If there is no such value, initialize rpos = to begin
     // If the last occurance is the last element, initialize this it to end
     dItr_t rpos = find_if (fder2.rbegin(), fder2.rend(),    // range
-                        bind2nd(greater<double>(),0.1)).base();  // criterion
+                           std::bind2nd(greater<double>(),0.1)).base();  // criterion
     ctr.relaxation_end.first = std::distance (fder2.begin(), rpos);
     
     EXPECT_EQ(ctr.contraction_start.first,16);
@@ -767,4 +773,5 @@ int main(int argc, char ** argv)
 
 
 #include "ut_lif.hpp"
+
 
