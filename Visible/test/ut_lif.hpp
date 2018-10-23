@@ -18,7 +18,7 @@
 #include "core/stl_utils.hpp"
 #include "cinder_cv/cinder_xchg.hpp"
 #include "otherIO/lifFile.hpp"
-#include "core/gtest_image_utils.hpp"
+#include "core/gtest_env_utils.hpp"
 #include "vision/roiMultiWindow.h"
 #include "vision/opencv_utils.hpp"
 #include "algo_Lif.hpp"

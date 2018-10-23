@@ -106,14 +106,18 @@ namespace cm  // protection from unintended ADL
     public:
   
         
-        cardio_model () :
-        Cs_(200.0 * bi::cgs::centimeters/cgs::second),
-        dL_(0.0100 * bi::cgs::centimeters),
-        t_(0.0002 * bi::cgs::centimeters),
-        w_(0.0030 * bi::cgs::centimeters),
-        l_(0.0100 * bi::cgs::centimeters),
-        dl_(0.0100 * bi::cgs::centimeters),
-        N_(1.0f),
+        cardio_model (float shear = 1.0f,//parameter controlling shear distribution
+                      float e_cm = 0.0100,// total elongation, cm
+                      float l_cm = 0.0100,// total length of cell [cm]
+                      float w_cm = 0.003, // width [cm]
+                      float t_cm = 0.0002,// thickness [cm]
+                      float shearv_cm_sec = 200.0) :
+        Cs_(shearv_cm_sec * bi::cgs::centimeters/cgs::second),
+        dl_(e_cm * bi::cgs::centimeters),
+        l_(l_cm * bi::cgs::centimeters),
+        t_(t_cm * bi::cgs::centimeters),
+        w_(w_cm * bi::cgs::centimeters),
+        N_(shear),
         n_ (1000, 1000),
         F_ (1000,1000)
         {
@@ -154,7 +158,7 @@ namespace cm  // protection from unintended ADL
             Eigen::Map<Eigen::VectorXd> eQ(Q_.data(), Q_.size());
             
             Eigen::VectorXd U = F_.matrix() * eQ;
-            double scale = (dL_.value() /2.0)/U(0);
+            double scale = (dl_.value() /2.0)/U(0);
             U *= scale;
             auto p = scale * eQ;
             quantity<cgs::force> total_exerted = p.segment (0, n_.first/2).sum() * bi::cgs::dynes;
@@ -165,7 +169,7 @@ namespace cm  // protection from unintended ADL
             res.length = l_;
             res.width = w_;
             res.thickness = t_;
-            res.elongation = dL_;
+            res.elongation = dl_;
             res.total_reactive = total_exerted;
             res.moment_of_dipole = (- xn.dot(p));
             res.moment_arm_fraction = res.moment_of_dipole / res.total_reactive.value() / l_.value();
@@ -194,7 +198,6 @@ namespace cm  // protection from unintended ADL
         quantity<cgs::mass_density> rho_;
         quantity<cgs::length> dx_;
         std::pair<size_t,size_t> n_;
-        quantity<cgs::length> dL_;
         quantity<cgs::length> t_;
         quantity<cgs::length> w_;
         quantity<cgs::length> l_;
