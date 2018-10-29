@@ -1,4 +1,8 @@
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wobjc-missing-super-calls"
+
 #import "AVReader.h"
 
 /*
@@ -552,3 +556,5 @@ static bool progressOfSampleBufferInTimeRange(CMSampleBufferRef sampleBuffer, CM
 
 
 @end
+#pragma GCC diagnostic pop
+
