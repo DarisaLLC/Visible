@@ -45,8 +45,8 @@ work(const quantity<force>& F, const quantity<bi::si::length>& dx)
 
 
 
-typedef deque <double> record_t;
-typedef deque <record_t> data_t;
+typedef vector <double> record_t;
+typedef vector <record_t> data_t;
 
 
 std::shared_ptr<std::ifstream> make_shared_ifstream(std::ifstream * ifstream_ptr)

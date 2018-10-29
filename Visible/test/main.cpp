@@ -99,7 +99,7 @@ std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655,
 
 
 
-void norm_scale (const std::vector<double>& src, std::deque<double>& dst)
+void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
 {
     vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
     vector<double>::const_iterator top = std::max_element (src.begin (), src.end() );
@@ -114,7 +114,7 @@ void norm_scale (const std::vector<double>& src, std::deque<double>& dst)
 
 
 
-void savgol (const deque<double>& signal, deque<double>& dst)
+void savgol (const vector<double>& signal, vector<double>& dst)
 {
     // for scalar data:
     int order = 4;
@@ -148,7 +148,7 @@ TEST(cardiac_ut, load_sm)
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
     
-    deque<deque<double>> array;
+    vector<vector<double>> array;
     load_sm(res.first.string(), array, false);
     EXPECT_EQ(size_t(500), array.size());
     for (auto row = 0; row<500; row++){
@@ -164,7 +164,7 @@ TEST(cardiac_ut, interpolated_length)
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
     
-    deque<deque<double>> array;
+    vector<vector<double>> array;
     load_sm(res.first.string(), array, false);
     EXPECT_EQ(size_t(500), array.size());
     for (auto row = 0; row<500; row++){
@@ -207,8 +207,8 @@ TEST(cardiac_ut, interpolated_length)
     auto dcheck = std::minmax_element(diffs.begin(), diffs.end() );
     EXPECT_TRUE(svl::equal(*dcheck.first, 0.0, 1.e-05));
     EXPECT_TRUE(svl::equal(*dcheck.second, 0.0, 1.e-05));
+   
     
-    // Calculate
 }
 
 
@@ -256,16 +256,17 @@ TEST(UT_contraction_profiler, basic)
     EXPECT_EQ(ctr.contraction_max_acceleration.first,27);
     EXPECT_EQ(ctr.relaxation_max_acceleration.first,43);
     EXPECT_EQ(ctr.relaxation_end.first,52);
+  
+    
     
     contraction_profile_analyzer ca;
     ca.run(acid);
-    bool test = contraction_analyzer::contraction::equal(ca.contraction(), ctr);
-    EXPECT_TRUE(test);
+        bool test = contraction_analyzer::contraction::equal(ca.contraction(), ctr);
+       EXPECT_TRUE(test);
     {
         cvplot::figure("myplot").series("myline").addValue(ca.first_derivative_filtered());
         cvplot::figure("myplot").show();
     }
-    
     
 }
 TEST(timing8, corr)
@@ -453,11 +454,11 @@ TEST(ut_stl_utils, accOverTuple)
 TEST(UT_smfilter, basic)
 {
     vector<int> ranks;
-    deque<double> norms;
+    vector<double> norms;
     norm_scale(acid,norms);
 //    stl_utils::Out(norms);
     
-    deque<double> output;
+    vector<double> output;
     savgol(norms, output);
   //  stl_utils::Out(norms);
   //  stl_utils::Out(output);

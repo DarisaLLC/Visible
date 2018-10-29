@@ -14,10 +14,10 @@
 
 namespace anonymous
 {
-    void norm_scale (const std::deque<double>& src, std::deque<double>& dst)
+    void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
     {
-        deque<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
-        deque<double>::const_iterator top = std::max_element (src.begin (), src.end() );
+        vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
+        vector<double>::const_iterator top = std::max_element (src.begin (), src.end() );
         
         if (svl::equal(*top, *bot)) return;
         double scaleBy = *top - *bot;
@@ -42,7 +42,7 @@ m_cached(false),  mValidInput (false), m_median_levelset_frac (0.0)
     
 }
 
-void contraction_analyzer::load(const deque<double>& entropies, const deque<deque<double>>& mmatrix)
+void contraction_analyzer::load(const vector<double>& entropies, const vector<vector<double>>& mmatrix)
 {
     m_entropies = entropies;
     m_SMatrix = mmatrix;
@@ -118,7 +118,7 @@ bool contraction_analyzer::find_best () const
  * 3. Sort according to distance to Median
  * 4. Fill up rank vector
  */
-double contraction_analyzer::Median_levelsets (const deque<double>& entropies,  std::vector<int>& ranks )
+double contraction_analyzer::Median_levelsets (const vector<double>& entropies,  std::vector<int>& ranks )
 {
     vector<double> entcpy;
     
@@ -211,7 +211,7 @@ bool contraction_analyzer::verify_input () const
 
 
 
-void contraction_analyzer::savgol (const deque<double>& signal, deque<double>& dst, int winlen)
+void contraction_analyzer::savgol (const vector<double>& signal, vector<double>& dst, int winlen)
 {
     // for scalar data:
     int order = 4;
