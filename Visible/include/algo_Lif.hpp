@@ -210,12 +210,12 @@ private:
     
     // One similarity engine
     mutable smProducerRef m_sm;
-    deque<double> m_entropies;
-    deque<deque<double>> m_smat;
+    vector<double> m_entropies;
+    vector<vector<double>> m_smat;
     
     // Channels by channel as cv::Mats
     mutable std::array<std::vector<cv::Mat>,4> m_channel_mats;
-    std::deque<double> m_medianLevel;
+    std::vector<double> m_medianLevel;
     
     channel_images_t m_images;
     channel_vec_t m_all_by_channel;

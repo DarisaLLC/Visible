@@ -4,7 +4,6 @@
 
 #include <stdio.h>
 #include <algorithm>
-#include <deque>
 #include <vector>
 #include <memory>
 #include <typeinfo>
@@ -75,8 +74,8 @@ public:
     using index_val_t = contractionMesh::index_val_t;
 
     typedef std::vector<contraction> contractionContainer_t;
-    typedef std::deque<double> sigContainer_t;
-    typedef std::deque<double>::iterator sigIterator_t;
+    typedef std::vector<double> sigContainer_t;
+    typedef std::vector<double>::iterator sigIterator_t;
     
     // Signals we provide
     // signal_contraction_available
@@ -87,7 +86,7 @@ public:
     
     // Load raw entropies and the self-similarity matrix
     // If no self-similarity matrix is given, entropies are assumed to be filtered and used directly
-    void load (const deque<double>& entropies, const deque<deque<double>>& mmatrix = deque<deque<double>>());
+    void load (const vector<double>& entropies, const vector<vector<double>>& mmatrix = vector<vector<double>>());
     
     // @todo: add multi-contraction
     bool find_best () const;
@@ -98,10 +97,10 @@ public:
     size_t size () const { return m_entsize; }
     
     // Original
-    const deque<double>& entropies () { return m_entropies; }
+    const vector<double>& entropies () { return m_entropies; }
     
     // Filtered 
-    const deque<double>& filtered () { return m_signal; }
+    const vector<double>& filtered () { return m_signal; }
     const std::pair<double,double>& filtered_min_max () { return m_filtered_min_max; };
     
     // Length Interpolation
@@ -123,8 +122,8 @@ public:
      * 3. Sort according to distance to Median
      * 4. Fill up rank vector
      */
-    static double Median_levelsets (const deque<double>& entropies,  std::vector<int>& ranks );
-    static void savgol (const deque<double>& signal, deque<double>& dst, int winlen);
+    static double Median_levelsets (const vector<double>& entropies,  std::vector<int>& ranks );
+    static void savgol (const vector<double>& signal, vector<double>& dst, int winlen);
  
     
     
@@ -139,10 +138,10 @@ private:
     mutable double m_median_value;
     mutable std::pair<double,double> m_filtered_min_max;
     mutable float m_median_levelset_frac;
-    mutable deque<deque<double>>        m_SMatrix;   // Used in eExhaustive and
-    deque<double>               m_entropies;
-    deque<double>               m_accum;
-    mutable deque<double>              m_signal;
+    mutable vector<vector<double>>        m_SMatrix;   // Used in eExhaustive and
+    vector<double>               m_entropies;
+    vector<double>               m_accum;
+    mutable vector<double>              m_signal;
     mutable std::vector<int>            m_ranks;
     size_t m_entsize;
     mutable std::atomic<bool> m_cached;

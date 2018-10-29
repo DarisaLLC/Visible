@@ -265,8 +265,14 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_processor::run_pci (const int
     std::thread(std::move(task)).join(); // Finish on a thread
     if (future_ss.get())
     {
-        m_entropies = sp->shannonProjection ();
-        m_smat = sp->similarityMatrix();
+        const deque<double>& entropies = sp->shannonProjection ();
+        m_entropies.insert(m_entropies.end(), entropies.begin(), entropies.end());
+        const std::deque<deque<double>>& sm = sp->similarityMatrix();
+        for (auto row : sm){
+            vector<double> rowv;
+            rowv.insert(rowv.end(), row.begin(), row.end());
+            m_smat.push_back(rowv);
+        }
         m_caRef->load(m_entropies,m_smat);
         update ();
         
