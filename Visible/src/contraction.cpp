@@ -12,9 +12,22 @@
 #include "core/stl_utils.hpp"
 #include "logger.hpp"
 
+
 namespace anonymous
 {
     void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
+    {
+        vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
+        vector<double>::const_iterator top = std::max_element (src.begin (), src.end() );
+        
+        if (svl::equal(*top, *bot)) return;
+        double scaleBy = *top - *bot;
+        dst.resize (src.size ());
+        for (int ii = 0; ii < src.size (); ii++)
+            dst[ii] = (src[ii] - *bot) / scaleBy;
+    }
+    
+    void exponential_smoother (const std::vector<double>& src, std::vector<double>& dst)
     {
         vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
         vector<double>::const_iterator top = std::max_element (src.begin (), src.end() );
@@ -163,24 +176,28 @@ void contraction_analyzer::compute_median_levelsets () const
     m_cached = true;
 }
 
-float contraction_analyzer::entropy_interpolated_length (sigIterator_t , float min_length, float max_length){
+float contraction_analyzer::entropy_compute_interpolated_geometries (sigIterator_t , float min_length, float max_length){
     return -1.0f;
     
 }
 
-void contraction_analyzer::interpolated_length(vector<double>& dst, float min_length, float max_length){
+void contraction_analyzer::compute_interpolated_geometries( float min_length, float max_length){
     if(!isOutputValid() || max_length < 1.0f || min_length >= max_length ){
-        dst = vector<double> ();
         return;
     }
     double entOlenScale = (1.0 - m_filtered_min_max.first / m_filtered_min_max.second) / (1.0 - min_length / max_length);
     
-    dst.resize(m_signal.size());
+    m_elongation.resize(m_signal.size());
+    m_interpolation.resize(m_signal.size());
+    m_interpolated_length.resize(m_signal.size());
+    
     for (auto ii = 0; ii < m_signal.size(); ii++)
     {
         auto nn = 1.0 - m_signal[ii] / m_filtered_min_max.second;
         nn = 1.0 - nn / entOlenScale;
-        dst[ii] = nn * max_length;
+        m_interpolation[ii] = nn;
+        m_interpolated_length[ii] = nn * max_length;
+        m_elongation[ii] = (1.0 - nn) * max_length;
     }
     
 }

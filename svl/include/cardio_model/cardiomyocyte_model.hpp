@@ -18,6 +18,7 @@
 #include "cardio_model/cerruti_rectangle_integral.hpp"
 #include "core/stl_utils.hpp"
 #include <cmath>
+#include <map>
 
 //**************************************************************************
 //                 Mechanical model for a cardiomyocyte
@@ -61,12 +62,6 @@
 
 namespace anonymous
 {
-    // Create a buffer T sized width * height, i.e. stride equals width
-    template <typename T>
-    static std::shared_ptr<T> create(size_t W, size_t H)
-    {
-        return std::shared_ptr<T>(new T[W * H]);
-    }
 
     /// shear modulus in cgs units
     template<class Y>
@@ -104,7 +99,26 @@ namespace cm  // protection from unintended ADL
     {
         
     public:
-  
+        typedef std::tuple< std::string,float,
+        std::string, quantity<cgs::length>,
+        std::string, quantity<cgs::length>,
+        std::string, quantity<cgs::length>,
+        std::string, quantity<cgs::length>,
+        std::string, quantity<cgs::velocity>> param_t;
+        
+        class input_params : param_t
+        {
+            input_params():
+            (std::make_tuple("shear_ctrl", 1.0f, "elongation", 0.0, "length", 0.0, "width", 0.0, "thickness", 0.0, "shear"){}
+            
+             const quantity<cgs::length>& length () const { return std::get<names["length"]>; }
+             void length (quantity<cgs::length> lcm) const { std::get<names["length"]> = lcm; }
+             
+            
+             private:
+             static const std::map<std::string,size_t> names {{"shear_ctrl", 1},{"elongation",3}, {"length", 5}, {"width", 7},
+                {"thickness", 9}, {"shear", 11}};
+            };
         
         cardio_model (float shear = 1.0f,//parameter controlling shear distribution
                       float e_cm = 0.0100,// total elongation, cm

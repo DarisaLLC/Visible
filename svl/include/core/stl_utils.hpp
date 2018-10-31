@@ -495,8 +495,30 @@ namespace stl_utils
             std::cout << v.back() << std::endl;
     }
     
- 
+    /*
+       * Exponential Smoothing
+     */
 
+    template<typename T = double>
+    class eMAvg{
+    public:
+        eMAvg(const T alpha,  const T start_value) : m_alpha(alpha), m_value(start_value) {}
+        
+        bool is_valid () const { return m_alpha >= 0.0 && m_alpha <= 1.0; }
+        
+        // reworking next = (new_val * alpha) + ((1-alpha) * current) to produce incremental change
+        T update(const T new_val) const {
+            return (m_value -= m_alpha * (m_value - new_val));
+        }
+        
+        const T& current () const { return m_value; }
+        const T& alpah () const { return m_alpha; }
+    private:
+        mutable T m_alpha;//variable (in [0,1])
+        mutable T m_value;//current value
+        
+    };
+    
     /*
         Simple 1D filter interface and median filtering derivation
      
