@@ -192,7 +192,6 @@
 		C2AFCEFE216E79590080462D /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
 		C2AFCEFF216E79590080462D /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
 		C2AFCF00216E79590080462D /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
-		C2AFCF01216E79590080462D /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFD216E79590080462D /* imgui_demo.cpp */; };
 		C2AFCF09216F0CF10080462D /* CinderImGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCF08216F0CF10080462D /* CinderImGui.cpp */; };
 		C2B005821CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
 		C2B38A571D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
@@ -348,6 +347,8 @@
 		C24306661FC8D32C00B2B39C /* MovContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MovContext.h; path = ../include/MovContext.h; sourceTree = "<group>"; };
 		C24C0953214A1ED5004C8002 /* palette.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = palette.png; path = ../assets/palette.png; sourceTree = "<group>"; };
 		C24C095A214B3291004C8002 /* cinder_opencv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cinder_opencv.h; sourceTree = "<group>"; };
+		C24CB5922187D16700142667 /* persistence1d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = persistence1d.hpp; path = ../time_series/persistence1d.hpp; sourceTree = "<group>"; };
+		C24CB5932187D16900142667 /* basicTimeSeries.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basicTimeSeries.h; path = ../time_series/basicTimeSeries.h; sourceTree = "<group>"; };
 		C24CD87C1CEA5B1B0008C72B /* VisibleGtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VisibleGtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C24CD87E1CEA5B1B0008C72B /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		C24CD8831CEA916E0008C72B /* libboost_date_time.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_date_time.a; path = ../../svl/local/boost/lib/libboost_date_time.a; sourceTree = "<group>"; };
@@ -979,6 +980,16 @@
 			path = otherIO;
 			sourceTree = "<group>";
 		};
+		C24CB5942187D18200142667 /* time_series */ = {
+			isa = PBXGroup;
+			children = (
+				C24CB5932187D16900142667 /* basicTimeSeries.h */,
+				C24CB5922187D16700142667 /* persistence1d.hpp */,
+			);
+			name = time_series;
+			path = "New Group";
+			sourceTree = "<group>";
+		};
 		C24CD87D1CEA5B1B0008C72B /* VisibleGtest */ = {
 			isa = PBXGroup;
 			children = (
@@ -1131,6 +1142,7 @@
 		C26009DF1CED3E010045FF57 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C24CB5942187D18200142667 /* time_series */,
 				C259982E1ECF66950015EE7B /* cardio */,
 				C23D0F491E29826F0049ADDB /* otherIO */,
 				C26009E01CED3E010045FF57 /* cinder_cv */,
@@ -1634,7 +1646,6 @@
 				C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */,
 				C2AFCF09216F0CF10080462D /* CinderImGui.cpp in Sources */,
 				C2601BB91E69042B004415A3 /* bitvector.cpp in Sources */,
-				C2AFCF01216E79590080462D /* imgui_demo.cpp in Sources */,
 				C20EDBC11CF277130074C47A /* exception.cpp in Sources */,
 				C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */,
 				C2AFCF00216E79590080462D /* imgui.cpp in Sources */,

@@ -48,7 +48,7 @@
 #include "ut_units.hpp"
 #include "ut_cardio.hpp"
 #include "cvplot/cvplot.h"
-
+#include "time_series/persistence1d.hpp"
 using namespace boost;
 
 using namespace ci;
@@ -194,8 +194,9 @@ TEST(cardiac_ut, interpolated_length)
     EXPECT_TRUE(svl::equal(*check.first, minmax.first, 1.e-05));
     EXPECT_TRUE(svl::equal(*check.second, minmax.second, 1.e-05));
     
-    vector<double> lengths;
-    car->interpolated_length(lengths,Lenght_min, Length_max);
+  
+    car->compute_interpolated_geometries(Lenght_min, Length_max);
+    const vector<double>& lengths = car->interpolated_length();
     EXPECT_EQ(dst[2].size(), lengths.size());
     std::vector<double> diffs;
     for(auto row = 0; row < dst[2].size(); row++)
@@ -207,10 +208,80 @@ TEST(cardiac_ut, interpolated_length)
     auto dcheck = std::minmax_element(diffs.begin(), diffs.end() );
     EXPECT_TRUE(svl::equal(*dcheck.first, 0.0, 1.e-05));
     EXPECT_TRUE(svl::equal(*dcheck.second, 0.0, 1.e-05));
-   
+ 
+    
+    
+  
     
 }
 
+TEST(cardiac_ut, locate_contractions)
+{
+    auto res = dgenv_ptr->asset_path("avg_baseline25_28_length_length_pct_short_pct.csv");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    
+    vector<vector<double>> array;
+    load_sm(res.first.string(), array, false);
+    EXPECT_EQ(size_t(500), array.size());
+    for (auto row = 0; row<500; row++){
+        EXPECT_EQ(size_t(5), array[row].size());
+    }
+    
+    data_t dst;
+    flip(array,dst);
+    
+    // Persistence of Extremas
+    persistenace1d<double> p;
+    vector<double> dst_1;
+    dst_1.insert(dst_1.end(),dst[1].begin(), dst[1].end());
+    
+    // Exponential Smoothing
+    eMAvg<double> emm(0.333,0.0);
+    vector<double> filtered;
+    for (double d : dst_1){
+        filtered.push_back(emm.update(d));
+    }
+    
+    auto median_filtered_val = Median(filtered);
+    p.RunPersistence(filtered);
+    std::vector<int> tmins, lmins, tmaxs, lmaxs;
+    p.GetExtremaIndices(tmins,tmaxs);
+    std::cout << " Median val" << median_filtered_val << std::endl;
+    Out(tmins);
+    Out(tmaxs);
+    
+    for (auto tmi : tmins){
+        if (dst_1[tmi] > median_filtered_val) continue;
+        lmins.push_back(tmi);
+    }
+    
+    for (auto tma : tmaxs){
+        if (dst_1[tma] < median_filtered_val) continue;
+        lmaxs.push_back(tma);
+    }
+    
+    std::sort(lmins.begin(),lmins.end());
+    std::sort(lmaxs.begin(),lmaxs.end());
+    Out(lmins);
+    Out(lmaxs);
+    std::vector<std::pair<float, float>> contractions;
+    for (auto lmi : lmins){
+        contractions.emplace_back(lmi,dst_1[lmi]);
+    }
+    
+    {
+        auto name = "cardiac_ut";
+        cvplot::setWindowTitle(name, "Contraction");
+        cvplot::moveWindow(name, 300, 100);
+        cvplot::resizeWindow(name, 1024, 512);
+        cvplot::figure(name).series("Raw").addValue(dst_1);
+        cvplot::figure(name).series("filtered").addValue(filtered);
+        cvplot::figure(name).series("contractions").set(contractions).type(cvplot::Dots).color(cvplot::Red);
+        cvplot::figure(name).show();
+    }
+    
+}
 
 TEST(UT_contraction_profiler, basic)
 {

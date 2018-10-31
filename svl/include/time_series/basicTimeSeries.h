@@ -5,11 +5,59 @@
 //#include <boost/serialization/set.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
-#include "TimeWindow.h"
-namespace SEISPP
-{
+
 using namespace std;
-using namespace SEISPP;
+ using namespace SEISPP;
+ class time_window_t
+ {
+ public:
+     double start;
+     double  end;
+    time_window_t(){start=0.0;end=1.0e99;};
+     time_window_t(double ts,double te){start=ts;end=te;};
+     time_window_t shift(double tshift)
+    {
+         time_window_t newwindow(*this);
+         newwindow.start+=tshift;
+         newwindow.end += tshift;
+         return(newwindow);
+     }
+    double length()
+     {
+         return(end-start);
+     };
+ };
+
+ class time_window_tCmp
+ {
+     public:
+         bool operator()(const time_window_t ti1,const time_window_t ti2) const
+         {return(ti1.end<ti2.start);};
+     };
+};
+
+class sample_mesh_t
+{
+public:
+    int nstart;
+    int nend;
+    int nsamp;
+    sample_mesh_t(int ns, int ne)
+    {
+        nstart=ns;
+        nend=ne;
+        if(nend<=nstart)
+        {
+            nend=nstart;
+            nsamp=0;
+        }
+        else
+        {
+            nsamp = nend - nstart + 1;
+        }
+    };
+};
+
 /*!
 // Nearest integer function.
 // This is the same as the standard intrinsic function by the same name.
@@ -112,9 +160,9 @@ public:
 // gaps so normal practice would be to drop data with any gaps in a 
 // requested time segment.
 //\return true if time segment has any data gaps
-//@param twin time window of data to test defined by a TimeWindow object
+//@param twin time window of data to test defined by a time_window_t object
 **/
-	bool is_gap(TimeWindow twin);
+	bool is_gap(time_window_t twin);
 /*!
 // Global test to see if data has any gaps defined. 
 // Gap processing is expensive and we need this simple method to
@@ -128,7 +176,7 @@ public:
 // or a constructor).
 // This function provides a common mechanism to define such a gap in the data.
 **/
-	void add_gap(TimeWindow tw){gaps.insert(tw);};
+	void add_gap(time_window_t tw){gaps.insert(tw);};
 /*!
 //  \brief Clear gaps.
 //
@@ -201,10 +249,10 @@ public:
 protected:
 /*! Holds data gap definitions.
 * We use an STL set object to define data gaps for any time series 
-* object derived from this base class.  The set is keyed by a TimeWindow
+* object derived from this base class.  The set is keyed by a time_window_t
 * which allows a simple, fast way to define a time range with invalid 
 * data. */
-	set<TimeWindow,TimeWindowCmp> gaps;
+	set<time_window_t,time_window_tCmp> gaps;
 	
 private:
     friend class boost::serialization::access;
@@ -223,28 +271,28 @@ is found that it breaks.
 */
     };
 };
-/*! Convert a TimeWindow to a SampleRange object.
+/*! Convert a time_window_t to a sample_mesh_t object.
 
-TimeWindow objects define a range as a set of floating point numbers.
+time_window_t objects define a range as a set of floating point numbers.
 Any object that is a subclass of BasicTimeSeries may find it convenient to
-convert a time window to a range of sample values (the SampleRange object).
+convert a time window to a range of sample values (the sample_mesh_t object).
 This generic algorithm does this for any class that inherits BasicTimeSeries.
 An attempt to use this template for an object that does not inherit
 BasicTimeSeries should fail at compile time when templates are 
 instantiated.
 */
-template <class T> SampleRange get_sample_range(T& d, TimeWindow win)
+template <class T> sample_mesh_t get_sample_range(T& d, time_window_t win)
 {
 	/* This requires T to be a subclass of BasicTimeSeries.
 	The live and sample_number() methods come from BasicTimeSeries. */
-	if(!d.live) return(SampleRange(0,0));
+	if(!d.live) return(sample_mesh_t(0,0));
 	int nstart,nend;
 	nstart=d.sample_number(win.start);
 	if(nstart<0) nstart=0;
 	nend=d.sample_number(win.end);
 	if(nend>=d.ns)nend = d.ns - 1;
-	return(SampleRange(nstart,nend));
+	return(sample_mesh_t(nstart,nend));
 }
 
-} // End namespace declaration SEISPP
+
 #endif

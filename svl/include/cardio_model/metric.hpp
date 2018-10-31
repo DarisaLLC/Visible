@@ -26,13 +26,16 @@
 
 #include "boost/math/constants/constants.hpp"
 #include <boost/units/physical_dimensions.hpp>
+#include <boost/units/quantity.hpp>
 #include <boost/units/systems/cgs.hpp>
+#include <boost/units/io.hpp>
+#include <boost/units/scale.hpp>
 #include <boost/units/pow.hpp>
 #include "boost/multi_array.hpp"
 #include <Eigen/Dense>
 #include <cassert>
 #include <tuple>
-
+#include <boost/units/detail/utility.hpp>
 #include <boost/math/special_functions.hpp>
 #include <iostream>
 #include <strstream>
@@ -44,19 +47,6 @@ using Eigen::MatrixXd;
 using namespace boost::units;
 using namespace boost::units::si;
 namespace bi=boost::units;
-
-namespace boost {
-    namespace units {
-        std::string name_string(const cgs::force&)
-        {
-            return "dyne";
-        }
-        std::string symbol_string(const cgs::force&)
-        {
-            return "dyn";
-        }
-    }
-}
 
 #include <boost/units/derived_dimension.hpp>
 namespace boost {
@@ -87,6 +77,7 @@ template<class Y>
 inline
 std::string units_string (const quantity<Y>& val)
 {
+    using namespace boost::units;
     using boost::units::cgs::centimeter;
     using boost::units::cgs::gram;
     using boost::units::cgs::second;
@@ -190,46 +181,6 @@ namespace cm
     }
     
 }
-
-#if 0
-
-"TotalDipoleMoment": {
-    "value": 3.24,
-    "unit": "dyne-cm"
-},
-"AverageContactStress": {
-    "value": 3.14,
-    "unit": "M-dyne\/cm^2"
-},
-"TotalReactiveForce": {
-    "value": 3.14,
-    "unit": "dyne"
-},
-"TotalForce": {
-    "value": 3.14,
-    "unit": "dyne"
-},
-"AverageContractiveStrain": {
-    "value": 3.14,
-    "unit": "dL\/L"
-},
-"Elongation": {
-    "value": 3.14,
-    "unit": "cm"
-},
-"Thickness": {
-    "value": 3.14,
-    "unit": "cm"
-},
-"Width": {
-    "value": 3.14,
-    "unit": "cm"
-},
-"Length": {
-    "value": 3.14,
-    "unit": "cm"
-}
-#endif
 
 
 #endif

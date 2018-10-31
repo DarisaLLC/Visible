@@ -15,16 +15,17 @@
 #define RESIZE_FACTOR 20
 #define MATLAB_INDEX_FACTOR 1
 
-namespace p1d 
-{
-
 /** Used to sort data according to its absolute value and refer to its original index in the Data vector.
 
 	A collection of indexed_data_t is sorted according to its data value (if values are equal, according
 	to indices). The index allows access back to the vertex in the Data vector. 
 */
-struct indexed_data_t
+template<typename T = float>
+class indexed_data_t
 {
+public:
+    typedef T data_t;
+    
 	indexed_data_t():Idx(-1),Data(0){}
 
 	bool operator<(const indexed_data_t& other) const
@@ -38,7 +39,7 @@ struct indexed_data_t
 	int Idx;
 
 	///Vertex data value from the original Data vector sent as an argument to RunPersistence.
-	float Data;
+	data_t Data;
 };
 
 
@@ -103,6 +104,7 @@ struct paired_extremas_t
 	We assume a connected one-dimensional domain.
 	Think of "data on a line", or a function f(x) over some domain xmin <= x <= xmax.
 */
+template<typename T = float>
 class persistenace1d
 {
 public:
@@ -113,7 +115,10 @@ public:
 	~persistenace1d()
 	{
 	}
-			
+		
+    typedef T data_t;
+    typedef indexed_data_t<data_t> id_t;
+    
 	/*!
 		Call this function with a vector of one dimensional data to find extrema features in the data.
 		The function runs once for, results can be retrieved with different persistent thresholds without
@@ -125,13 +130,13 @@ public:
 
 		@param[in] InputData Vector of data to find features on, ordered according to its axis.
 	*/
-	bool RunPersistence(const std::vector<float>& InputData)
+	bool RunPersistence(const std::vector<T>& InputData)
 	{	
-		Data = InputData; 
+		m_data = InputData; 
 		Init();
 
 		//If a user runs this on an empty vector, then they should not get the results of the previous run.
-		if (Data.empty()) return false;
+		if (m_data.empty()) return false;
 
 		CreateIndexValueVector();
 		Watershed();
@@ -143,7 +148,9 @@ public:
 	}
 
 
-
+    const std::vector<component_t>& components () const { return m_components; }
+    const std::vector<int>& colors () const { return m_colors; }
+    
 	/*!
 		Prints the contents of the paired_extremas_t vector.
 		If called directly with a paired_extremas_t vector, the global minimum is not printed.
@@ -177,7 +184,7 @@ public:
 		}
 		if (threshold==0 && !matlabIndexing)
 		{
-			PrintPairs(PairedExtrema);
+			PrintPairs(m_paired_extrema);
 		}
 		else 
 		{
@@ -208,13 +215,13 @@ public:
 		//make sure the user does not use previous results that do not match the data
 		pairs.clear();
 
-		if (PairedExtrema.empty() || threshold < 0.0) return false;
+		if (m_paired_extrema.empty() || threshold < 0.0) return false;
 
 		std::vector<paired_extremas_t>::const_iterator lower_bound = FilterByPersistence(threshold);
 
-		if (lower_bound == PairedExtrema.end()) return false;
+		if (lower_bound == m_paired_extrema.end()) return false;
 		
-		pairs = std::vector<paired_extremas_t>(lower_bound, PairedExtrema.end());
+		pairs = std::vector<paired_extremas_t>(lower_bound, m_paired_extrema.end());
 		
 		if (matlabIndexing) //match matlab indices by adding one
 		{
@@ -244,17 +251,17 @@ public:
 		min.clear();
 		max.clear();
 				
-		if (PairedExtrema.empty() || threshold < 0.0) return false;
+		if (m_paired_extrema.empty() || threshold < 0.0) return false;
 		
-		min.reserve(PairedExtrema.size());
-		max.reserve(PairedExtrema.size());
+		min.reserve(m_paired_extrema.size());
+		max.reserve(m_paired_extrema.size());
 		
 		int matlabIndexFactor = 0;
 		if (matlabIndexing) matlabIndexFactor = MATLAB_INDEX_FACTOR;
 
 		std::vector<paired_extremas_t>::const_iterator lower_bound = FilterByPersistence(threshold);
 
-		for (std::vector<paired_extremas_t>::const_iterator p = lower_bound; p != PairedExtrema.end(); p++)
+		for (std::vector<paired_extremas_t>::const_iterator p = lower_bound; p != m_paired_extrema.end(); p++)
 		{
 			min.push_back((*p).MinIndex + matlabIndexFactor);
 			max.push_back((*p).MaxIndex + matlabIndexFactor);
@@ -268,15 +275,15 @@ public:
 	*/
 	int GetGlobalMinimumIndex(const bool matlabIndexing = false) const
 	{
-		if (Components.empty()) return -1;
+		if (m_components.empty()) return -1;
 
-		assert(Components.front().Alive);
+		assert(m_components.front().Alive);
 		if (matlabIndexing)
 		{
-			return Components.front().MinIndex + 1;
+			return m_components.front().MinIndex + 1;
 		}
 
-		return Components.front().MinIndex;
+		return m_components.front().MinIndex;
 	}
 
 	/*!
@@ -286,10 +293,10 @@ public:
 	*/
 	float GetGlobalMinimumValue() const
 	{
-		if (Components.empty()) return 0;
+		if (m_components.empty()) return 0;
 
-		assert(Components.front().Alive);
-		return Components.front().MinValue;
+		assert(m_components.front().Alive);
+		return m_components.front().MinValue;
 	}
 	/*!
 		Runs basic sanity checks on results of RunPersistence: 
@@ -323,7 +330,7 @@ public:
 		   flag = false;
 		}
 
-		if ((globalMinIdx > (int)Data.size()-1) || (globalMinIdx < -1)) flag = false;
+		if ((globalMinIdx > (int)m_data.size()-1) || (globalMinIdx < -1)) flag = false;
 		if (globalMinIdx == -1 && min.size() != 0) flag = false;
 		
 		std::vector<int>::iterator minUniqueEnd = std::unique(min.begin(), min.end());
@@ -343,13 +350,13 @@ protected:
 	/*!
 		Contain a copy of the original input data.
 	*/
-	std::vector<float> Data;
+	std::vector<data_t> m_data;
 	
 	
 	/*!
 		Contains a copy the value and index pairs of Data, sorted according to the data values.
 	*/
-	std::vector<indexed_data_t> SortedData;
+	std::vector<id_t> m_sortedData;
 
 
 	/*!
@@ -357,20 +364,20 @@ protected:
 		Only edges of destroyed components are updated to the new component color.
 		The Component values in this vector are invalid at the end of the algorithm.
 	*/
-	std::vector<int> Colors;		//need to init to empty
+	std::vector<int> m_colors;		//need to init to empty
 
 
 	/*!
 		A vector of Components. 
 		The component index within the vector is used as its Colors in the Watershed function.
 	*/
-	std::vector<component_t> Components;
+	std::vector<component_t> m_components;
 
 
 	/*!
 		A vector of paired extrema features - always a minimum and a maximum.
 	*/
-	std::vector<paired_extremas_t> PairedExtrema;
+	std::vector<paired_extremas_t> m_paired_extrema;
 	
 		
 	unsigned int TotalComponents;	//keeps track of component vector size and newest component "color"
@@ -390,12 +397,12 @@ protected:
 	{
 		int survivorIdx, destroyedIdx;
 		//survivor - component whose hub is bigger
-		if (Components[firstIdx].MinValue < Components[secondIdx].MinValue)
+		if (m_components[firstIdx].MinValue < m_components[secondIdx].MinValue)
 		{
 			survivorIdx = firstIdx;
 			destroyedIdx = secondIdx; 
 		}
-		else if (Components[firstIdx].MinValue > Components[secondIdx].MinValue)
+		else if (m_components[firstIdx].MinValue > m_components[secondIdx].MinValue)
 		{
 			survivorIdx = secondIdx;
 			destroyedIdx = firstIdx; 
@@ -413,20 +420,20 @@ protected:
 		}
 
 		//survivor and destroyed are decided, now destroy!
-		Components[destroyedIdx].Alive = false;
+		m_components[destroyedIdx].Alive = false;
 
 		//Update the color of the edges of the destroyed component to the color of the surviving component.
-		Colors[Components[destroyedIdx].RightEdgeIndex] = survivorIdx;
-		Colors[Components[destroyedIdx].LeftEdgeIndex] = survivorIdx;
+		m_colors[m_components[destroyedIdx].RightEdgeIndex] = survivorIdx;
+		m_colors[m_components[destroyedIdx].LeftEdgeIndex] = survivorIdx;
 
 		//Update the relevant edge index of surviving component, such that it contains the destroyed component's region.
-		if (Components[survivorIdx].MinIndex > Components[destroyedIdx].MinIndex) //destroyed index to the left of survivor, update left edge
+		if (m_components[survivorIdx].MinIndex > m_components[destroyedIdx].MinIndex) //destroyed index to the left of survivor, update left edge
 		{
-			Components[survivorIdx].LeftEdgeIndex = Components[destroyedIdx].LeftEdgeIndex;
+			m_components[survivorIdx].LeftEdgeIndex = m_components[destroyedIdx].LeftEdgeIndex;
 		}
 		else 
 		{
-			Components[survivorIdx].RightEdgeIndex = Components[destroyedIdx].RightEdgeIndex;		
+			m_components[survivorIdx].RightEdgeIndex = m_components[destroyedIdx].RightEdgeIndex;		
 		}
 	}
 	
@@ -441,12 +448,12 @@ protected:
 		
 		//There might be a potential bug here, todo (we're checking data, not sorted data)
 		//example case: 1 1 1 1 1 1 -5 might remove if after else
-		if (Data[firstIdx] > Data[secondIdx])
+		if (m_data[firstIdx] > m_data[secondIdx])
 		{
 			pair.MaxIndex = firstIdx; 
 			pair.MinIndex = secondIdx;
 		}
-		else if (Data[secondIdx] > Data[firstIdx])
+		else if (m_data[secondIdx] > m_data[firstIdx])
 		{
 			pair.MaxIndex = secondIdx; 
 			pair.MinIndex = firstIdx;
@@ -463,17 +470,17 @@ protected:
 			pair.MaxIndex = firstIdx;
 		}
 				
-		pair.Persistence = Data[pair.MaxIndex] - Data[pair.MinIndex];
+		pair.Persistence = m_data[pair.MaxIndex] - m_data[pair.MinIndex];
 
 #ifdef _DEBUG
 		assert(pair.Persistence >= 0);
 #endif
-		if (PairedExtrema.capacity() == PairedExtrema.size()) 
+		if (m_paired_extrema.capacity() == m_paired_extrema.size()) 
 		{
-			PairedExtrema.reserve(PairedExtrema.size() * 2 + 1);
+			m_paired_extrema.reserve(m_paired_extrema.size() * 2 + 1);
 		}
 
-		PairedExtrema.push_back(pair);
+		m_paired_extrema.push_back(pair);
 	}
 
 
@@ -495,16 +502,16 @@ protected:
 		comp.LeftEdgeIndex = minIdx;
 		comp.RightEdgeIndex = minIdx;
 		comp.MinIndex = minIdx;
-		comp.MinValue = Data[minIdx];
+		comp.MinValue = m_data[minIdx];
 
 		//place at the end of component vector and get the current size
-		if (Components.capacity() <= TotalComponents)
+		if (m_components.capacity() <= TotalComponents)
 		{	
-			Components.reserve(2 * TotalComponents + 1);
+			m_components.reserve(2 * TotalComponents + 1);
 		}
 
-		Components.push_back(comp);
-		Colors[minIdx] = TotalComponents;
+		m_components.push_back(comp);
+		m_colors[minIdx] = TotalComponents;
 		TotalComponents++;
 	}
 
@@ -525,14 +532,14 @@ protected:
 #endif 
 
 		//extend to the left
-		if (dataIdx + 1 == Components[componentIdx].LeftEdgeIndex)
+		if (dataIdx + 1 == m_components[componentIdx].LeftEdgeIndex)
 		{
-			Components[componentIdx].LeftEdgeIndex = dataIdx;
+			m_components[componentIdx].LeftEdgeIndex = dataIdx;
 		}
 		//extend to the right
-		else if (dataIdx - 1 == Components[componentIdx].RightEdgeIndex) 
+		else if (dataIdx - 1 == m_components[componentIdx].RightEdgeIndex) 
 		{
-			Components[componentIdx].RightEdgeIndex = dataIdx;
+			m_components[componentIdx].RightEdgeIndex = dataIdx;
 		}
 		else
 		{
@@ -543,7 +550,7 @@ protected:
 #endif 
 		}
 
-		Colors[dataIdx] = componentIdx;
+		m_colors[dataIdx] = componentIdx;
 	}
 
 
@@ -556,20 +563,20 @@ protected:
 	*/
 	void Init()
 	{
-		SortedData.clear();
-		SortedData.reserve(Data.size());
+		m_sortedData.clear();
+		m_sortedData.reserve(m_data.size());
 		
-		Colors.clear();
-		Colors.resize(Data.size());
-		std::fill(Colors.begin(), Colors.end(), NO_COLOR);
+		m_colors.clear();
+		m_colors.resize(m_data.size());
+		std::fill(m_colors.begin(), m_colors.end(), NO_COLOR);
 		
-		int vectorSize = (int)(Data.size()/RESIZE_FACTOR) + 1; //starting reserved size >= 1 at least
+		int vectorSize = (int)(m_data.size()/RESIZE_FACTOR) + 1; //starting reserved size >= 1 at least
 		
-		Components.clear();
-		Components.reserve(vectorSize);
+		m_components.clear();
+		m_components.reserve(vectorSize);
 
-		PairedExtrema.clear();
-		PairedExtrema.reserve(vectorSize);
+		m_paired_extrema.clear();
+		m_paired_extrema.reserve(vectorSize);
 
 		TotalComponents = 0;
 		AliveComponentsVerified = false;
@@ -582,20 +589,20 @@ protected:
 	*/	
 	void CreateIndexValueVector()
 	{
-		if (Data.size()==0) return;
+		if (m_data.size()==0) return;
 				
-		for (std::vector<float>::size_type i = 0; i != Data.size(); i++)
+		for (std::vector<float>::size_type i = 0; i != m_data.size(); i++)
 		{
-			indexed_data_t dataidxpair;
+			id_t dataidxpair;
 
 			//this is going to make problems
-			dataidxpair.Data = Data[i]; 
+			dataidxpair.Data = m_data[i]; 
 			dataidxpair.Idx = (int)i; 
 
-			SortedData.push_back(dataidxpair);
+			m_sortedData.push_back(dataidxpair);
 		}
 
-		std::sort(SortedData.begin(), SortedData.end());
+		std::sort(m_sortedData.begin(), m_sortedData.end());
 	}
 
 
@@ -611,13 +618,13 @@ protected:
 	*/
 	void Watershed()
 	{
-		if (SortedData.size()==1)
+		if (m_sortedData.size()==1)
 		{
 			CreateComponent(0);
 			return;
 		}
 
-		for (std::vector<indexed_data_t>::iterator p = SortedData.begin(); p != SortedData.end(); p++)
+        for (typename std::vector<id_t>::iterator p = m_sortedData.begin(); p != m_sortedData.end(); p++)
 		{
 			int i = (*p).Idx;
 
@@ -625,62 +632,62 @@ protected:
 			//two options - either local minimum, or extend component
 			if (i==0)
 			{
-				if (Colors[i+1] == NO_COLOR) 
+				if (m_colors[i+1] == NO_COLOR) 
 				{
 					CreateComponent(i);
 				}
 				else
 				{
-					ExtendComponent(Colors[i+1], i);  //in this case, local max as well
+					ExtendComponent(m_colors[i+1], i);  //in this case, local max as well
 				}
 				
 				continue;
 			}
-			else if (i == Colors.size()-1) //right most vertex - look only to the left
+			else if (i == m_colors.size()-1) //right most vertex - look only to the left
 			{
-				if (Colors[i-1] == NO_COLOR) 
+				if (m_colors[i-1] == NO_COLOR) 
 				{
 					CreateComponent(i);
 				}
 				else
 				{
-					ExtendComponent(Colors[i-1], i);
+					ExtendComponent(m_colors[i-1], i);
 				}				
 				continue;
 			}
 
 			//look left and right
-			if (Colors[i-1] == NO_COLOR && Colors[i+1] == NO_COLOR) //local minimum - create new component
+			if (m_colors[i-1] == NO_COLOR && m_colors[i+1] == NO_COLOR) //local minimum - create new component
 			{
 				CreateComponent(i);
 			}
-			else if (Colors[i-1] != NO_COLOR && Colors[i+1] == NO_COLOR) //single neighbor on the left - extnd
+			else if (m_colors[i-1] != NO_COLOR && m_colors[i+1] == NO_COLOR) //single neighbor on the left - extnd
 			{
-				ExtendComponent(Colors[i-1], i);
+				ExtendComponent(m_colors[i-1], i);
 			}
-			else if (Colors[i-1] == NO_COLOR && Colors[i+1] != NO_COLOR) //single component on the right - extend
+			else if (m_colors[i-1] == NO_COLOR && m_colors[i+1] != NO_COLOR) //single component on the right - extend
 			{
-				ExtendComponent(Colors[i+1], i);
+				ExtendComponent(m_colors[i+1], i);
 			}
-			else if (Colors[i-1] != NO_COLOR && Colors[i+1] != NO_COLOR) //local maximum - merge components
+			else if (m_colors[i-1] != NO_COLOR && m_colors[i+1] != NO_COLOR) //local maximum - merge components
 			{
 				int leftComp, rightComp; 
 
-				leftComp = Colors[i-1];
-				rightComp = Colors[i+1]; 
+				leftComp = m_colors[i-1];
+				rightComp = m_colors[i+1]; 
 
 				//choose component with smaller hub destroyed component
-				if (Components[rightComp].MinValue < Components[leftComp].MinValue) //left component has smaller hub
+				if (m_components[rightComp].MinValue < m_components[leftComp].MinValue) //left component has smaller hub
 				{
-					CreatePairedExtrema(Components[leftComp].MinIndex, i);
+					CreatePairedExtrema(m_components[leftComp].MinIndex, i);
 				}
 				else	//either right component has smaller hub, or hubs are equal - destroy right component. 
 				{
-					CreatePairedExtrema(Components[rightComp].MinIndex, i);
+					CreatePairedExtrema(m_components[rightComp].MinIndex, i);
 				}
 					
 				MergeComponents(leftComp, rightComp);
-				Colors[i] = Colors[i-1]; //color should be correct at both sides at this point
+				m_colors[i] = m_colors[i-1]; //color should be correct at both sides at this point
 			}
 		}
 	}
@@ -692,7 +699,7 @@ protected:
 	*/
 	void SortPairedExtrema()
 	{
-		std::sort(PairedExtrema.begin(), PairedExtrema.end());
+		std::sort(m_paired_extrema.begin(), m_paired_extrema.end());
 	}
 
 
@@ -704,13 +711,13 @@ protected:
 	*/
 	std::vector<paired_extremas_t>::const_iterator FilterByPersistence(const float threshold = 0) const
 	{		
-		if (threshold == 0 || threshold < 0) return PairedExtrema.begin();
+		if (threshold == 0 || threshold < 0) return m_paired_extrema.begin();
 
 		paired_extremas_t searchPair;
 		searchPair.Persistence = threshold;
 		searchPair.MaxIndex = 0; 
 		searchPair.MinIndex = 0;
-		return(lower_bound(PairedExtrema.begin(), PairedExtrema.end(), searchPair));
+		return(lower_bound(m_paired_extrema.begin(), m_paired_extrema.end(), searchPair));
 	}
 	/*!
 		Runs at the end of RunPersistence, after Watershed. 
@@ -722,7 +729,7 @@ protected:
 	bool VerifyAliveComponents()
 	{
 		//verify that the Alive component is component #0 (contains global minimum by definition)
-		if ((*Components.begin()).Alive != true) 
+		if ((*m_components.begin()).Alive != true) 
 		{		
 				
 #ifndef _DEBUG 
@@ -733,7 +740,7 @@ protected:
 #endif
 		}
 		
-		for (std::vector<component_t>::const_iterator it = Components.begin()+1; it != Components.end(); it++)
+		for (std::vector<component_t>::const_iterator it = m_components.begin()+1; it != m_components.end(); it++)
 		{
 			if ((*it).Alive == true) 
 			{
@@ -750,5 +757,5 @@ protected:
 		return true;
 	}
 };
-}
+
 #endif
