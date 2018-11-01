@@ -209,6 +209,22 @@ TEST(cardiac_ut, interpolated_length)
     EXPECT_TRUE(svl::equal(*dcheck.first, 0.0, 1.e-05));
     EXPECT_TRUE(svl::equal(*dcheck.second, 0.0, 1.e-05));
  
+    {
+        auto name = "force";
+        cvplot::setWindowTitle(name, " Force ");
+        cvplot::moveWindow(name, 0, 256);
+        cvplot::resizeWindow(name, 512, 256);
+        cvplot::figure(name).series("Force").addValue(car->total_reactive_force()).type(cvplot::Line).color(cvplot::Red);
+        cvplot::figure(name).show();
+    }
+    {
+        auto name = "interpolated length";
+        cvplot::setWindowTitle(name, " Length ");
+        cvplot::moveWindow(name,0,0);
+        cvplot::resizeWindow(name, 512, 256);
+        cvplot::figure(name).series("Length").addValue(car->interpolated_length()).type(cvplot::Line).color(cvplot::Blue);
+        cvplot::figure(name).show();
+    }
     
     
   
@@ -271,7 +287,7 @@ TEST(cardiac_ut, locate_contractions)
     }
     
     {
-        auto name = "cardiac_ut";
+        auto name = "Contraction Localization";
         cvplot::setWindowTitle(name, "Contraction");
         cvplot::moveWindow(name, 300, 100);
         cvplot::resizeWindow(name, 1024, 512);

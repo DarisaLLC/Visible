@@ -11,6 +11,8 @@
 #include "core/core.hpp"
 #include "core/stl_utils.hpp"
 #include "logger.hpp"
+#include "cardiomyocyte_model.hpp"
+#include "core/boost_units.hpp"
 
 
 namespace anonymous
@@ -200,6 +202,20 @@ void contraction_analyzer::compute_interpolated_geometries( float min_length, fl
         m_elongation[ii] = (1.0 - nn) * max_length;
     }
     
+    // Compute force using cardio model
+    m_force.resize(m_signal.size());
+    cardio_model cmm;
+    cmm.shear_control(1.0f);
+    cmm.shear_velocity(200.0_cm_s);
+    for (auto ii = 0; ii < m_signal.size(); ii++)
+    {
+        cmm.length(m_interpolated_length[ii] * boost::units::cgs::micron);
+        cmm.elongation(m_elongation[ii] * boost::units::cgs::micron);
+        cmm.width((m_interpolated_length[ii]/3.0) * boost::units::cgs::micron);
+        cmm.thickness((m_interpolated_length[ii]/100.0)* boost::units::cgs::micron);
+        cmm.run();
+        m_force[ii] = cmm.result().total_reactive.value();
+    }
 }
 void contraction_analyzer::clear_outputs () const
 {
