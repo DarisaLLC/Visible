@@ -13,7 +13,7 @@
 #include "core/stats.hpp"
 #include "core/stl_utils.hpp"
 #include "core/signaler.h"
-#include "cardiomyocyte_model.hpp"
+//#include "cardiomyocyte_model.hpp"
 
 using namespace std;
 using namespace boost;
@@ -90,7 +90,6 @@ public:
     void load (const vector<double>& entropies, const vector<vector<double>>& mmatrix = vector<vector<double>>());
     
     // Compute Length Interpolation 
-    void compute_interpolated_geometries( float min_length, float max_length);
     void compute_interpolated_geometries( float min_length, float max_length);
     
     // @todo: add multi-contraction

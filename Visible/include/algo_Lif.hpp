@@ -17,7 +17,6 @@
 #include "sm_producer.h"
 #include "contraction.hpp"
 #include "vision/labelBlob.hpp"
-#include "logger.hpp"
 #include <boost/foreach.hpp>
 #include "seq_frame_container.hpp"
 

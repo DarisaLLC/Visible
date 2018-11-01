@@ -332,6 +332,7 @@
 		C21FFE741CFE104600C97013 /* ut_sm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_sm.hpp; sourceTree = "<group>"; };
 		C221D9181E4B130400AF74CE /* visible_mov_dir_impl.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = visible_mov_dir_impl.cpp; path = ../src/visible_mov_dir_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C221D91A1E4B176800AF74CE /* directoryPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = directoryPlayer.h; path = ../include/directoryPlayer.h; sourceTree = "<group>"; };
+		C2239AB2218A8298007558AB /* boost_units_literals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = boost_units_literals.h; sourceTree = "<group>"; };
 		C2309DC61F6B4D6500A0E908 /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../externals/Cinder/lib/macosx/Release/libcinder.a; sourceTree = SOURCE_ROOT; };
 		C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_lif_impl.cpp; path = ../src/visible_lif_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C23D0F481E2982690049ADDB /* lifFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = lifFile.hpp; sourceTree = "<group>"; };
@@ -986,8 +987,7 @@
 				C24CB5932187D16900142667 /* basicTimeSeries.h */,
 				C24CB5922187D16700142667 /* persistence1d.hpp */,
 			);
-			name = time_series;
-			path = "New Group";
+			path = time_series;
 			sourceTree = "<group>";
 		};
 		C24CD87D1CEA5B1B0008C72B /* VisibleGtest */ = {
@@ -1166,6 +1166,7 @@
 		C26009EA1CED3E010045FF57 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				C2239AB2218A8298007558AB /* boost_units_literals.h */,
 				C2DA19581E7F30E800062DBC /* csv.hpp */,
 				C2601BBB1E6B446A004415A3 /* make_function.hpp */,
 				C2601BB61E6903D2004415A3 /* bitvector.h */,
@@ -2068,7 +2069,6 @@
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjasper.a",
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a",
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a",
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libzlib.a",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2162,7 +2162,6 @@
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjasper.a",
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a",
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a",
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libzlib.a",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
