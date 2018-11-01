@@ -16,9 +16,15 @@
 #include "core/pair.hpp"
 #include "cardio_model/metric.hpp"
 #include "cardio_model/cerruti_rectangle_integral.hpp"
+#include "core/boost_units_literals.h"
 #include "core/stl_utils.hpp"
 #include <cmath>
 #include <map>
+#include "core/static.hpp"
+
+using namespace boost::units;
+using namespace boost::units::si;
+namespace bi=boost::units;
 
 //**************************************************************************
 //                 Mechanical model for a cardiomyocyte
@@ -62,7 +68,6 @@
 
 namespace anonymous
 {
-
     /// shear modulus in cgs units
     template<class Y>
     quantity<cgs::stress,Y>
@@ -72,10 +77,6 @@ namespace anonymous
         using namespace boost::units::cgs;
         return (Rho * V * V);
     }
-    
-
-    
-    
     // http://stackoverflow.com/a/39164765
     struct double_iota
     {
@@ -87,7 +88,7 @@ namespace anonymous
         double _inc;
     };
     
-    
+ 
 }
 
 
@@ -95,46 +96,86 @@ namespace anonymous
 
 namespace cm  // protection from unintended ADL
 {
+    class cardio_model_params_template
+    {
+    public:
+        typedef std::tuple< std::string,float,
+        std::string, quantity<boost::units::cgs::length>,
+        std::string, quantity<boost::units::cgs::length>,
+        std::string, quantity<boost::units::cgs::length>,
+        std::string, quantity<boost::units::cgs::length>,
+        std::string, quantity<boost::units::cgs::velocity>> params_t;
+        
+        cardio_model_params_template (){
+            const auto no_length = 0.0_cm;
+            const auto no_velocity = 0.0_cm_s;
+            
+            std::get<0>(m_template) = "shear_ctrl";
+            std::get<1>(m_template) = 1.0f;
+            std::get<2>(m_template) = "elongation";
+            std::get<3>(m_template) = no_length;
+            std::get<4>(m_template) = "length";
+            std::get<5>(m_template) = no_length;
+            std::get<6>(m_template) = "width";
+            std::get<7>(m_template) = no_length;
+            std::get<8>(m_template) = "thickness";
+            std::get<9>(m_template) = no_length;
+            std::get<10>(m_template) = "shesr";
+            std::get<11>(m_template) = no_velocity;
+        }
+        
+        const params_t& get_template () const { return m_template; }
+    private:
+        params_t m_template;
+        
+        
+    };
+    
+    SINGLETON_FCN(cardio_model_params_template,get_default)
+    
     class cardio_model
     {
         
     public:
-        typedef std::tuple< std::string,float,
-        std::string, quantity<cgs::length>,
-        std::string, quantity<cgs::length>,
-        std::string, quantity<cgs::length>,
-        std::string, quantity<cgs::length>,
-        std::string, quantity<cgs::velocity>> param_t;
+        typedef cardio_model_params_template::params_t params_t;
         
-        class input_params : param_t
-        {
-            input_params():
-            (std::make_tuple("shear_ctrl", 1.0f, "elongation", 0.0, "length", 0.0, "width", 0.0, "thickness", 0.0, "shear"){}
-            
-             const quantity<cgs::length>& length () const { return std::get<names["length"]>; }
-             void length (quantity<cgs::length> lcm) const { std::get<names["length"]> = lcm; }
-             
-            
-             private:
-             static const std::map<std::string,size_t> names {{"shear_ctrl", 1},{"elongation",3}, {"length", 5}, {"width", 7},
-                {"thickness", 9}, {"shear", 11}};
-            };
+        cardio_model (){
+            m_params = default_set();
+        }
         
-        cardio_model (float shear = 1.0f,//parameter controlling shear distribution
-                      float e_cm = 0.0100,// total elongation, cm
-                      float l_cm = 0.0100,// total length of cell [cm]
-                      float w_cm = 0.003, // width [cm]
-                      float t_cm = 0.0002,// thickness [cm]
-                      float shearv_cm_sec = 200.0) :
-        Cs_(shearv_cm_sec * bi::cgs::centimeters/cgs::second),
-        dl_(e_cm * bi::cgs::centimeters),
-        l_(l_cm * bi::cgs::centimeters),
-        t_(t_cm * bi::cgs::centimeters),
-        w_(w_cm * bi::cgs::centimeters),
-        N_(shear),
-        n_ (1000, 1000),
-        F_ (1000,1000)
-        {
+  
+        
+        void shear_control (float sc) const { std::get<1>(m_params) = sc; }
+        void elongation (quantity<boost::units::cgs::length> elo) const { std::get<3>(m_params) = elo; }
+        void length (quantity<boost::units::cgs::length> len) const { std::get<5>(m_params) = len; }
+        void width (quantity<boost::units::cgs::length> width) const { std::get<7>(m_params) = width; }
+        void thickness (quantity<boost::units::cgs::length> thick) const { std::get<9>(m_params) = thick; }
+        void shear_velocity(quantity<boost::units::cgs::velocity> sh_velo) const { std::get<11>(m_params) = sh_velo; }
+        
+        const float shear_control () const {return std::get<1>(m_params); }
+        const quantity<boost::units::cgs::length> elongation () const {return std::get<3>(m_params); }
+        const quantity<boost::units::cgs::length> length () const {return std::get<5>(m_params); }
+        const quantity<boost::units::cgs::length> width () const {return std::get<7>(m_params); }
+        const quantity<boost::units::cgs::length> thickness () const {return std::get<9>(m_params); }
+        const quantity<boost::units::cgs::velocity> shear_velocity () const {return std::get<11>(m_params); }
+        
+//        cardio_model (float shear = 1.0f,//parameter controlling shear distribution
+//                      float e_cm = 0.0100,// total elongation, cm
+//                      float l_cm = 0.0100,// total length of cell [cm]
+//                      float w_cm = 0.003, // width [cm]
+//                      float t_cm = 0.0002,// thickness [cm]
+//                      float shearv_cm_sec = 200.0) :
+//
+        void run (){
+            Cs_ = shear_velocity();
+            dl_=elongation();
+            l_ = length();
+        t_ = thickness();
+        w_ = width();
+        N_ = shear_control();
+            n_ = std::pair<size_t,size_t>(1000, 1000);
+            F_ = Eigen::ArrayXXd (1000,1000);
+        
             rho_ = ( 1.08 * ( bi::cgs::grams / bi::pow<3>(cgs::centimeters)) );
             dx_ = ( (l_.value() / static_cast<double>(n_.first ))* bi::cgs::centimeters);
             static double poisson_ratio (0.5);
@@ -201,6 +242,9 @@ namespace cm  // protection from unintended ADL
         }
         
     private:
+        static params_t default_set () { return get_default().get_template(); }
+        
+        mutable params_t m_params;
         quantity<cgs::force> factorOC_;
         quantity<cgs::stress> G_gel_;
         quantity<cgs::velocity> Cs_;

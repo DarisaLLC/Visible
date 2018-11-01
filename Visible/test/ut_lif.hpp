@@ -4,6 +4,10 @@
 //
 //  Created by Arman Garakani on 9/12/18.
 //
+#ifndef ut_lif_h
+#define ut_lif_h
+
+
 
 #include <iostream>
 #include "gtest/gtest.h"
@@ -23,9 +27,6 @@
 #include "vision/opencv_utils.hpp"
 #include "algo_Lif.hpp"
 #include <boost/foreach.hpp>
-
-#ifndef ut_lif_h
-#define ut_lif_h
 
 
 std::string  expectedNames []

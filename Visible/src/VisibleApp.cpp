@@ -186,6 +186,7 @@ void VisibleApp::setup()
 }
 
 void VisibleApp::QuitApp(){
+      ImGui::DestroyContext();
    // fg::ThreadsShouldStop = true;
     quit();
 }

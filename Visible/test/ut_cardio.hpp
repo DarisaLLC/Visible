@@ -21,7 +21,7 @@
 #include <boost/units/systems/si/io.hpp>
 #include <cassert>
 #include "cardio_model/cardiomyocyte_model.hpp"
-
+#include "boost_units_literals.h"
 using namespace svl;
 using namespace boost::units;
 using namespace boost::units::si;
@@ -38,6 +38,14 @@ namespace cardio_ut
         
         double epsilon = 1e-5;
         cardio_model cmm;
+        cmm.length(0.01_cm);
+        cmm.elongation(0.01_cm);
+        cmm.width(0.003_cm);
+        cmm.thickness(0.0002_cm);
+        cmm.shear_velocity(200.0_cm_s);
+        cmm.shear_control(1.0f);
+        cmm.run();
+        
         EXPECT_NEAR(cmm.result().length.value(), 0.01, epsilon);
         EXPECT_NEAR(cmm.result().width.value(), 0.003, epsilon);
         EXPECT_NEAR(cmm.result().thickness.value(), 0.00020, epsilon);
