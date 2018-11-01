@@ -13,7 +13,7 @@
 #include "core/stats.hpp"
 #include "core/stl_utils.hpp"
 #include "core/signaler.h"
-//#include "cardiomyocyte_model.hpp"
+
 
 using namespace std;
 using namespace boost;
@@ -112,6 +112,9 @@ public:
     const vector<double>& interpolated_length () { return m_interpolated_length; }
     const vector<double>& elongations () { return m_elongation; }
   
+    // Force Over Time
+    const vector<double>& total_reactive_force () { return m_force; }
+    
     
     const std::vector<index_val_t>& low_peaks () const { return m_peaks; }
     const std::vector<contraction>& contractions () const { return m_contractions; }
@@ -158,6 +161,7 @@ private:
     mutable vector<double>              m_interpolation;
     mutable vector<double>              m_elongation;
     mutable vector<double>              m_interpolated_length;
+    mutable vector<double>             m_force;
     mutable std::vector<int>            m_ranks;
     size_t m_entsize;
     mutable std::atomic<bool> m_cached;

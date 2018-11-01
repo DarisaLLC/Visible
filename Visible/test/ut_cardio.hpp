@@ -21,7 +21,7 @@
 #include <boost/units/systems/si/io.hpp>
 #include <cassert>
 #include "cardio_model/cardiomyocyte_model.hpp"
-#include "boost_units_literals.h"
+
 using namespace svl;
 using namespace boost::units;
 using namespace boost::units::si;
