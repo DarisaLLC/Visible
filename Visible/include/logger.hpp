@@ -8,6 +8,7 @@
 #ifndef logger_h
 #define logger_h
 
+
 #include "core/singleton.hpp"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"

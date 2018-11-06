@@ -20,5 +20,5 @@ quantity<boost::units::cgs::length> operator"" _cm(long double x)
 
 quantity<boost::units::cgs::time> operator"" _s(long double x)
 {
-    return double(x)*second;
+    return double(x)*boost::units::cgs::second;
 }
