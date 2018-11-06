@@ -337,6 +337,7 @@
 		C2239AB2218A8298007558AB /* boost_units_literals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = boost_units_literals.h; sourceTree = "<group>"; };
 		C2239AB3218B6270007558AB /* boost_literals.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = boost_literals.cpp; sourceTree = "<group>"; };
 		C2239AB6218B6F30007558AB /* boost_units.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = boost_units.hpp; sourceTree = "<group>"; };
+		C2239AB721922F72007558AB /* cardiomyocyte_model_detail.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model_detail.hpp; sourceTree = "<group>"; };
 		C2309DC61F6B4D6500A0E908 /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../externals/Cinder/lib/macosx/Release/libcinder.a; sourceTree = SOURCE_ROOT; };
 		C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_lif_impl.cpp; path = ../src/visible_lif_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C23D0F481E2982690049ADDB /* lifFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = lifFile.hpp; sourceTree = "<group>"; };
@@ -1014,6 +1015,7 @@
 			isa = PBXGroup;
 			children = (
 				C259982B1ECF668F0015EE7B /* cardiomyocyte_model.hpp */,
+				C2239AB721922F72007558AB /* cardiomyocyte_model_detail.hpp */,
 				C259982C1ECF668F0015EE7B /* cerruti_rectangle_integral.hpp */,
 				C259982D1ECF668F0015EE7B /* metric.hpp */,
 			);
