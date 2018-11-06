@@ -10,6 +10,7 @@
 #include <string>
 #include <tuple>
 #include <chrono>
+#include "cardiomyocyte_model.hpp"
 #include "core/stats.hpp"
 #include "core/stl_utils.hpp"
 #include "core/signaler.h"
@@ -76,11 +77,17 @@ public:
 
     typedef std::vector<contraction> contractionContainer_t;
     typedef std::vector<double> sigContainer_t;
+    typedef std::vector<double> forceContainer_t;
     typedef std::vector<double>::iterator sigIterator_t;
+    typedef std::vector<double>::iterator forceIterator_t;
+    typedef std::pair<sigIterator_t, forceIterator_t> forceOtimeIterator_t;
+    
     
     // Signals we provide
     // signal_contraction_available
     typedef void (sig_cb_contraction_analyzed) (contractionContainer_t&);
+    typedef void (sig_cb_cell_length_ready) (sigContainer_t&);
+    typedef void (sig_cb_force_ready) (sigContainer_t&);
 
     // Factory create method
     static std::shared_ptr<contraction_analyzer> create();
@@ -91,6 +98,7 @@ public:
     
     // Compute Length Interpolation 
     void compute_interpolated_geometries( float min_length, float max_length);
+    forceOtimeIterator_t compute_force (sigIterator_t , sigIterator_t, float min_length, float max_length);
     
     // @todo: add multi-contraction
     bool find_best () const;
@@ -148,8 +156,8 @@ private:
     void clear_outputs () const;
     bool verify_input () const;
     bool savgol_filter () const;
-  
-    float entropy_compute_interpolated_geometries (sigIterator_t , float min_length, float max_length);
+    
+
     
     mutable double m_median_value;
     mutable std::pair<double,double> m_filtered_min_max;
@@ -193,6 +201,8 @@ private:
 protected:
     
     boost::signals2::signal<contraction_analyzer::sig_cb_contraction_analyzed>* signal_contraction_analyzed;
+    boost::signals2::signal<contraction_analyzer::sig_cb_cell_length_ready>* cell_length_ready;
+    boost::signals2::signal<contraction_analyzer::sig_cb_force_ready>* total_reactive_force_ready;
     
 };
 

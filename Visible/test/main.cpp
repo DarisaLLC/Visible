@@ -196,6 +196,7 @@ TEST(cardiac_ut, interpolated_length)
     
   
     car->compute_interpolated_geometries(Lenght_min, Length_max);
+    car->compute_force(dst[1].begin(),dst[1].end(),Lenght_min, Length_max );
     const vector<double>& lengths = car->interpolated_length();
     EXPECT_EQ(dst[2].size(), lengths.size());
     std::vector<double> diffs;
@@ -264,8 +265,8 @@ TEST(cardiac_ut, locate_contractions)
     std::vector<int> tmins, lmins, tmaxs, lmaxs;
     p.GetExtremaIndices(tmins,tmaxs);
     std::cout << " Median val" << median_filtered_val << std::endl;
-    Out(tmins);
-    Out(tmaxs);
+ //   Out(tmins);
+ //   Out(tmaxs);
     
     for (auto tmi : tmins){
         if (dst_1[tmi] > median_filtered_val) continue;
@@ -279,8 +280,8 @@ TEST(cardiac_ut, locate_contractions)
     
     std::sort(lmins.begin(),lmins.end());
     std::sort(lmaxs.begin(),lmaxs.end());
-    Out(lmins);
-    Out(lmaxs);
+//    Out(lmins);
+//    Out(lmaxs);
     std::vector<std::pair<float, float>> contractions;
     for (auto lmi : lmins){
         contractions.emplace_back(lmi,dst_1[lmi]);

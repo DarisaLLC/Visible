@@ -10,9 +10,10 @@
 #include "sg_filter.h"
 #include "core/core.hpp"
 #include "core/stl_utils.hpp"
-#include "logger.hpp"
-#include "cardiomyocyte_model.hpp"
+//#include "logger.hpp"
+#include "cardiomyocyte_model_detail.hpp"
 #include "core/boost_units.hpp"
+
 
 
 namespace anonymous
@@ -42,6 +43,8 @@ namespace anonymous
     }
 }
 
+
+
 std::shared_ptr<contraction_analyzer> contraction_analyzer::create()
 {
     return std::shared_ptr<contraction_analyzer>(new contraction_analyzer());
@@ -54,6 +57,8 @@ m_cached(false),  mValidInput (false), m_median_levelset_frac (0.0)
     
     // Signals we provide
     signal_contraction_analyzed = createSignal<contraction_analyzer::sig_cb_contraction_analyzed> ();
+    total_reactive_force_ready = createSignal<contraction_analyzer::sig_cb_force_ready>();
+    cell_length_ready = createSignal<contraction_analyzer::sig_cb_cell_length_ready>();
     
 }
 
@@ -119,7 +124,7 @@ bool contraction_analyzer::find_best () const
             std::string c0("Contraction Detected @ ");
             c0 = c0 + to_string(one.contraction_peak.first);
             mValidOutput = true;
-            vlogger::instance().console()->info(c0);
+//            vlogger::instance().console()->info(c0);
             return true;
         }
     }
@@ -178,10 +183,6 @@ void contraction_analyzer::compute_median_levelsets () const
     m_cached = true;
 }
 
-float contraction_analyzer::entropy_compute_interpolated_geometries (sigIterator_t , float min_length, float max_length){
-    return -1.0f;
-    
-}
 
 void contraction_analyzer::compute_interpolated_geometries( float min_length, float max_length){
     if(!isOutputValid() || max_length < 1.0f || min_length >= max_length ){
@@ -202,6 +203,9 @@ void contraction_analyzer::compute_interpolated_geometries( float min_length, fl
         m_elongation[ii] = (1.0 - nn) * max_length;
     }
     
+    if (cell_length_ready && cell_length_ready->num_slots() > 0)
+        cell_length_ready->operator()(m_interpolated_length);
+    
     // Compute force using cardio model
     m_force.resize(m_signal.size());
     cardio_model cmm;
@@ -216,7 +220,37 @@ void contraction_analyzer::compute_interpolated_geometries( float min_length, fl
         cmm.run();
         m_force[ii] = cmm.result().total_reactive.value();
     }
+    
+    if (total_reactive_force_ready && total_reactive_force_ready->num_slots() > 0)
+        total_reactive_force_ready->operator()(m_force);
 }
+
+contraction_analyzer::forceOtimeIterator_t contraction_analyzer::compute_force (sigIterator_t _begin , sigIterator_t _end,
+                                                          float min_length, float max_length){
+    
+    auto bindex = std::distance( m_signal.begin(), _begin);
+    auto eindex = std::distance( m_signal.begin(), _begin);
+    // Compute force using cardio model
+    m_force.clear();
+    cardio_model cmm;
+    cmm.shear_control(1.0f);
+    cmm.shear_velocity(200.0_cm_s);
+    for (auto ii = bindex; ii < eindex; ii++)
+    {
+        cmm.length(m_interpolated_length[ii] * boost::units::cgs::micron);
+        cmm.elongation(m_elongation[ii] * boost::units::cgs::micron);
+        cmm.width((m_interpolated_length[ii]/3.0) * boost::units::cgs::micron);
+        cmm.thickness((m_interpolated_length[ii]/100.0)* boost::units::cgs::micron);
+        cmm.run();
+        m_force.push_back(cmm.result().total_reactive.value());
+    }
+    
+    if (total_reactive_force_ready && total_reactive_force_ready->num_slots() > 0)
+        total_reactive_force_ready->operator()(m_force);
+    
+    return std::make_pair(_begin,m_force.begin());
+}
+
 void contraction_analyzer::clear_outputs () const
 {
     m_peaks.resize(0);
