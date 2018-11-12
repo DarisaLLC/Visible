@@ -1,0 +1,29 @@
+
+SRCROOT = $(PROJECT_DIR)/../../svl
+
+//:configuration = Release
+SDKROOT = iphoneos
+
+//:configuration = Debug
+VALID_ARCHS = arm64 armv7
+
+LOCAL_SVL = $(SRCROOT)
+LOCAL_3rdParty = $(LOCAL_SVL)/local
+LOCAL_GLM = $(LOCAL_SVL)/local/glm
+LOCAL_CINDER = $(LOCAL_SVL)/local/cinder/cinder_0.9
+LOCAL_EIGEN = $(LOCAL_3rdParty)/Eigen
+LOCAL_OPENCV = $(LOCAL_CINDER)/blocks/OpenCV3
+LOCAL_BOOST = $(LOCAL_CINDER)/lib/ios
+
+HEADER_SEARCH_PATHS = . $(LOCAL_SVL)/include $(LOCAL_GLM)  $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(LOCAL_OPENCV)/include $(LOCAL_SVL)/include $(LOCAL_EIGEN)
+SWIFT_INCLUDE_PATHS = . $(LOCAL_GLM)  $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(LOCAL_OPENCV)/include $(LOCAL_SVL)/include
+
+
+
+//:configuration = Debug
+OTHER_LDFLAGS = $(LOCAL_BOOST)/libboost_system.a $(LOCAL_BOOST)/libboost_filesystem.a
+
+//:configuration = Debug
+LIBRARY_SEARCH_PATHS = $(inherited) $(LOCAL_OPENCV)/lib/ios $(PROJECT_DIR)
+
+
