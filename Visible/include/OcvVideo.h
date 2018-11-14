@@ -46,7 +46,7 @@
 #include <string>
 
 typedef std::shared_ptr<cv::VideoCapture>				VideoCaptureRef;
-typedef std::chrono::high_resolution_clock::time_point	time_point;
+typedef std::chrono::time_point<std::chrono::high_resolution_clock>	time_point_t;
 
 class OcvVideoPlayer
 {
@@ -97,7 +97,7 @@ protected:
 	ci::fs::path 			mFilePath;
 	double					mFrameDuration	= 0.0;
 	double					mFrameRate		= 0.0;
-	time_point				mGrabTime;
+	time_point_t				mGrabTime;
 	bool					mLoaded			= false;
 	bool					mLoop			= true;
 	bool					mPlaying		= false;

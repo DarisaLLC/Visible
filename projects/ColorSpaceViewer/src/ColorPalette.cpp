@@ -2,7 +2,8 @@
 
 #include "cinder/CinderAssert.h"
 #include "cinder/Rand.h"
-
+#include "core/core.hpp"
+#include "cinder/ip/fill.h"
 #include <algorithm>
 #include <numeric>
 
@@ -96,15 +97,40 @@ std::pair<RgbCube, RgbCube> RgbCube::splitAtMedian()
 /////////////////////////// COLOR PALETTE GENERATOR /////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 
-PaletteGenerator::PaletteGenerator( ci::Surface8u surface )
+PaletteGenerator::PaletteGenerator( ci::Surface8u surface,  uint32_t bins)
 {
 	Surface8u::ConstIter iter = surface.getIter();
+    mmx.first = 1.0; mmx.second =  -1.0;
+    mmy = mmx;
+    
 	while( iter.line() ) {
 		while( iter.pixel() ) {
-			mColorsVecs.emplace_back( iter.r(), iter.g(), iter.b() );
+            auto fr =  (float) iter.r();
+            auto fg = (float) iter.g();
+            auto fb = (float) iter.b();
+            mColorsVecs.emplace_back(ivec3(fr, fg, fb));
+            auto sum = fr + fg + fb;
+        //    fr = fr / sum;
+        //    fg = fg / sum;
+        //    fb = fb / sum;
+            vec2 chm (log(fb / fr), log(fg / fr));
+            if(!isinf(chm.x) && !isinf(chm.y))
+            {
+                if (chm.x <= mmx.first) mmx.first = chm.x;
+                if (chm.y <= mmy.first) mmy.first = chm.y;
+                if (chm.x >= mmx.second) mmx.second = chm.x;
+                if (chm.y >= mmy.second) mmy.second = chm.y;
+
+                mLogChrom.first.push_back(chm.x);
+                mLogChrom.second.push_back(chm.y);
+            }
+
 		}
-	}
-}
+    }
+    
+    std::cout << "[" << mmx.first << "," << mmx.second << ";" << mmy.first << "," << mmy.second << std::endl;
+    
+ }
 
 Color8u PaletteGenerator::randomSample() const
 {
@@ -133,6 +159,18 @@ std::vector<ci::Color8u> PaletteGenerator::randomPalette( size_t num, float lumi
 		}
 	}
 	return samples;
+}
+
+std::vector<ci::Color8u> PaletteGenerator::colorList(int pct)
+{
+    std::vector<ci::Color8u> samples;
+    
+    
+    float percent = (pct % 100) / 100.0f;
+    size_t num = mColorsVecs.size() * percent;
+    
+    return randomPalette(num);
+    
 }
 
 std::vector<Color8u> PaletteGenerator::medianCutPalette( size_t num, bool randomize, float luminanceThreshold ) const
@@ -177,27 +215,6 @@ std::vector<Color8u> PaletteGenerator::medianCutPalette( size_t num, bool random
 	return palette;
 }
 
-std::vector<ci::Color8u> PaletteGenerator::kmeansPalette( size_t num ) const
-{
-	
-	RgbCube cube( mColorsVecs );
-	auto redBounds = cube.getBounds( RED );
-	auto greenBounds = cube.getBounds( GREEN);
-	auto blueBounds = cube.getBounds( BLUE );
-	
-	std::vector<ivec3> centroids;
-	
-	for( size_t i=0; i<num; ++i ) {
-		int r = Rand::randInt( redBounds.first, redBounds.second + 1 );
-		int g = Rand::randInt( greenBounds.first, greenBounds.second + 1 );
-		int b = Rand::randInt( blueBounds.first, blueBounds.second + 1 );
-		centroids.emplace_back( r, g, b );
-	}
-
-	CI_ASSERT_MSG( false, "Not fully implemented yet..." );
-
-	return {};
-}
 
 std::vector<ci::Color8u> randomPalette( ci::Surface8u surface, size_t num )
 {

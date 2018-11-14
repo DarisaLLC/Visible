@@ -428,10 +428,10 @@ void lif_processor::entropiesToTracks (namedTrackOfdouble_t& track)
             return;
         
         if (! m_caRef->find_best  ()) return;
-        m_medianLevel = m_caRef->filtered();
+        m_medianLevel = m_caRef->leveled();
         track.second.clear();
-        auto mee = m_caRef->filtered().begin();
-        for (auto ss = 0; mee != m_caRef->filtered().end() && ss < frame_count(); ss++, mee++)
+        auto mee = m_caRef->leveled().begin();
+        for (auto ss = 0; mee != m_caRef->leveled().end() && ss < frame_count(); ss++, mee++)
         {
             index_time_t ti;
             ti.first = ss;

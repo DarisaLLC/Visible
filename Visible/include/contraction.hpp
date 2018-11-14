@@ -78,8 +78,8 @@ public:
     typedef std::vector<contraction> contractionContainer_t;
     typedef std::vector<double> sigContainer_t;
     typedef std::vector<double> forceContainer_t;
-    typedef std::vector<double>::iterator sigIterator_t;
-    typedef std::vector<double>::iterator forceIterator_t;
+    typedef std::vector<double>::const_iterator sigIterator_t;
+    typedef std::vector<double>::const_iterator forceIterator_t;
     typedef std::pair<sigIterator_t, forceIterator_t> forceOtimeIterator_t;
     
     
@@ -111,9 +111,9 @@ public:
     // Original
     const vector<double>& entropies () { return m_entropies; }
     
-    // Filtered 
-    const vector<double>& filtered () { return m_signal; }
-    const std::pair<double,double>& filtered_min_max () { return m_filtered_min_max; };
+    // LevelSet corresponding to last coverage pct setting
+    const vector<double>& leveled () { return m_signal; }
+    const std::pair<double,double>& leveled_min_max () { return m_leveled_min_max; };
   
     
     // Elongstion Over time
@@ -160,7 +160,7 @@ private:
 
     
     mutable double m_median_value;
-    mutable std::pair<double,double> m_filtered_min_max;
+    mutable std::pair<double,double> m_leveled_min_max;
     mutable float m_median_levelset_frac;
     mutable vector<vector<double>>        m_SMatrix;   // Used in eExhaustive and
     vector<double>               m_entropies;

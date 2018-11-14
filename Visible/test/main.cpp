@@ -189,14 +189,21 @@ TEST(cardiac_ut, interpolated_length)
     car->load(dst[1]);
     EXPECT_TRUE(car->isPreProcessed());
     EXPECT_TRUE(car->isValid());
+    EXPECT_TRUE(car->leveled().size() == dst[1].size());
     car->find_best();
-    const std::pair<double,double>& minmax = car->filtered_min_max ();
+    const std::pair<double,double>& minmax = car->leveled_min_max ();
     EXPECT_TRUE(svl::equal(*check.first, minmax.first, 1.e-05));
     EXPECT_TRUE(svl::equal(*check.second, minmax.second, 1.e-05));
     
-  
+    const vector<double>& signal = car->leveled();
+    auto start = std::clock();
     car->compute_interpolated_geometries(Lenght_min, Length_max);
-    car->compute_force(dst[1].begin(),dst[1].end(),Lenght_min, Length_max );
+    auto endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    std::cout << endtime << " interpolated length " << std::endl;
+    start = std::clock();
+    car->compute_force(signal.begin(),signal.end(),Lenght_min, Length_max );
+    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    std::cout << endtime << " FORCE " << std::endl;
     const vector<double>& lengths = car->interpolated_length();
     EXPECT_EQ(dst[2].size(), lengths.size());
     std::vector<double> diffs;
@@ -351,10 +358,10 @@ TEST(UT_contraction_profiler, basic)
     ca.run(acid);
         bool test = contraction_analyzer::contraction::equal(ca.contraction(), ctr);
        EXPECT_TRUE(test);
-    {
-        cvplot::figure("myplot").series("myline").addValue(ca.first_derivative_filtered());
-        cvplot::figure("myplot").show();
-    }
+//    {
+//        cvplot::figure("myplot").series("myline").addValue(ca.first_derivative_filtered());
+//        cvplot::figure("myplot").show();
+//    }
     
 }
 TEST(timing8, corr)
