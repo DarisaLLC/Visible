@@ -3,12 +3,15 @@
 
 #include <cmath>
 #include <string>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <chrono>
+#include <iostream>
 
+using namespace std::chrono;
 
   /** \brief Posix based timer. Reports time since last reset
     * 
     */
+
   class chronometer
   {
     public:
@@ -17,32 +20,26 @@
         reset ();
       }
 
-      static boost::posix_time::ptime get_ptime ()
+      template<typename TT = std::chrono::microseconds>
+      int64_t getTime ()
       {
-          return boost::posix_time::microsec_clock::local_time ();
-      }
-      
-
-      inline double
-      getTime ()
-      {
-        boost::posix_time::ptime end_time = boost::posix_time::microsec_clock::local_time ();
-          return ((double) ((end_time - start_time_).total_microseconds()));
+        auto duration = std::chrono::duration_cast<TT>(std::chrono::steady_clock::now () - start_time_);
+          return duration.count();
       }
 
      
       inline void
       reset ()
       {
-        start_time_ = boost::posix_time::microsec_clock::local_time ();
+        start_time_ = std::chrono::steady_clock::now ();
       }
 
     protected:
-      boost::posix_time::ptime start_time_;
+      std::chrono::steady_clock::time_point start_time_;
   };
 
   /** \brief ScopeTimer
-    *
+    * @todo take a callback to call on destruction
     * Uses destructor to read time from ctor
     * create an instance at the beginning of the function. Example:
     *
@@ -51,24 +48,17 @@
     *   // ... 
     * }
     */
-  class ScopeTimer : public chronometer
+class ScopeTimer : public chronometer
   {
     public:
-      inline ScopeTimer (const char* title)
+      inline ScopeTimer (const char* title = " scope_timer " ) : chronometer (), title_(title)
       {
-        title_ = std::string (title);
-        start_time_ = boost::posix_time::microsec_clock::local_time ();
-      }
-
-      inline ScopeTimer ()
-      {
-        start_time_ = boost::posix_time::microsec_clock::local_time ();
       }
 
       inline ~ScopeTimer ()
       {
-        double val = this->getTime ();
-        std::cerr << title_ << " took " << val/1000.0 << "msecs.\n";
+        auto val = this->getTime<std::chrono::nanoseconds> ();
+        std::cerr << title_ << " took " << val << " nanosecs.\n";
       }
 
     private:

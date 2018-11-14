@@ -201,6 +201,7 @@
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2B6E6701D0618E400235FB7 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
+		C2D23FCB219B9B6D00F4A49E /* libboost_thread-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2D23FCA219B9B3E00F4A49E /* libboost_thread-mt.a */; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
@@ -213,7 +214,6 @@
 		C2E60A0921200A7F00059FA6 /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
 		C2E60A0A21200A7F00059FA6 /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
 		C2E60A0B21200A7F00059FA6 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8851CEA916E0008C72B /* libboost_system.a */; };
-		C2E60A0C21200A7F00059FA6 /* libboost_thread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8861CEA916E0008C72B /* libboost_thread.a */; };
 		C2EF8D1E2148768800A5D3D6 /* Item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0D2148709300A5D3D6 /* Item.cpp */; };
 		C2EF8D1F2148768D00A5D3D6 /* Swatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */; };
 		C2FB69D92134C3E800DDEFCA /* visible_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946761CE4DC7100976025 /* visible_impl.cpp */; };
@@ -597,6 +597,7 @@
 		C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccordionItem.h; path = ../include/AccordionItem.h; sourceTree = "<group>"; };
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
 		C2C68C3B1ED9F9440095FFC4 /* tracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tracker.h; path = ../include/tracker.h; sourceTree = "<group>"; };
+		C2D23FCA219B9B3E00F4A49E /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../../../../../../../usr/local/Cellar/boost/1.67.0_1/lib/libboost_thread-mt.a"; sourceTree = "<group>"; };
 		C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cinder_support.cpp; sourceTree = "<group>"; };
 		C2DA19561E7F30D800062DBC /* csv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = csv.cpp; sourceTree = "<group>"; };
 		C2DA19581E7F30E800062DBC /* csv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = csv.hpp; sourceTree = "<group>"; };
@@ -625,6 +626,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2D23FCB219B9B6D00F4A49E /* libboost_thread-mt.a in Frameworks */,
 				C2820F2F217528D000DFA7A6 /* libconfig++.a in Frameworks */,
 				C203D2FB21714D6D00B6B4A8 /* IOKit.framework in Frameworks */,
 				C203D2F221714B7500B6B4A8 /* libavutil.a in Frameworks */,
@@ -636,7 +638,6 @@
 				C2E60A0921200A7F00059FA6 /* libboost_date_time.a in Frameworks */,
 				C2E60A0A21200A7F00059FA6 /* libboost_filesystem.a in Frameworks */,
 				C2E60A0B21200A7F00059FA6 /* libboost_system.a in Frameworks */,
-				C2E60A0C21200A7F00059FA6 /* libboost_thread.a in Frameworks */,
 				C203D2F621714C3C00B6B4A8 /* VideoDecodeAcceleration.framework in Frameworks */,
 				C2606EA51CEE0E660045FF57 /* OpenCL.framework in Frameworks */,
 				C276ECA91C72B5D900242CDB /* CoreGraphics.framework in Frameworks */,
@@ -829,6 +830,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C2D23FCA219B9B3E00F4A49E /* libboost_thread-mt.a */,
 				C2820F2E217528CF00DFA7A6 /* libconfig++.a */,
 				C2820F272175249F00DFA7A6 /* libconfig.a */,
 				C203D2F721714C6100B6B4A8 /* libz.tbd */,
@@ -1781,12 +1783,12 @@
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
+					"$(LOCAL_BOOST)/include",
 					"$(LOCAL_IMGUI)",
 					/usr/local/include,
 					"$(LOCAL_CEREAL)",
 					"$(SRCROOT)/../projects/Visible/include/plistcpp",
 					"$(LOCAL_CINDER)/include",
-					"$(LOCAL_BOOST)",
 					"$(SRCROOT)/include",
 					"$(LOCAL_EIGEN)",
 					"$(LOCAL_TINYXML)",
@@ -1796,7 +1798,7 @@
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
-					"$(LOCAL_3rdParty)/boost/lib",
+					"$(LOCAL_BOOST)/lib",
 					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
 					/usr/local/Cellar/tbb/2018_U5/lib/,
 					"$(PROJECT_DIR)",
@@ -1805,8 +1807,9 @@
 					/usr/local/Cellar/libdc1394/2.2.2_1/lib,
 					/usr/local/Cellar/ffmpeg/4.0.2/lib,
 					/usr/local/Cellar/libconfig/1.7.2/lib,
+					/usr/local/Cellar/boost/1.67.0_1/lib,
 				);
-				LOCAL_BOOST = "$(EXTERNALS)";
+				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_LDFLAGS = (
@@ -1872,12 +1875,12 @@
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
+					"$(LOCAL_BOOST)/include",
 					"$(LOCAL_IMGUI)",
 					/usr/local/include,
 					"$(LOCAL_CEREAL)",
 					"$(SRCROOT)/../projects/Visible/include/plistcpp",
 					"$(LOCAL_CINDER)/include",
-					"$(LOCAL_BOOST)",
 					"$(SRCROOT)/include",
 					"$(LOCAL_EIGEN)",
 					"$(LOCAL_TINYXML)",
@@ -1887,7 +1890,7 @@
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
-					"$(LOCAL_3rdParty)/boost/lib",
+					"$(LOCAL_BOOST)/lib",
 					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
 					/usr/local/Cellar/tbb/2018_U5/lib/,
 					"$(PROJECT_DIR)",
@@ -1896,8 +1899,9 @@
 					/usr/local/Cellar/libdc1394/2.2.2_1/lib,
 					/usr/local/Cellar/ffmpeg/4.0.2/lib,
 					/usr/local/Cellar/libconfig/1.7.2/lib,
+					/usr/local/Cellar/boost/1.67.0_1/lib,
 				);
-				LOCAL_BOOST = "$(EXTERNALS)";
+				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_LDFLAGS = (

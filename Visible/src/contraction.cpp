@@ -13,7 +13,7 @@
 //#include "logger.hpp"
 #include "cardiomyocyte_model_detail.hpp"
 #include "core/boost_units.hpp"
-
+#include "core/simple_timing.hpp"
 
 
 namespace anonymous
@@ -98,8 +98,8 @@ bool contraction_analyzer::find_best () const
         lowest.first = invalid;
         lowest.second = std::numeric_limits<double>::max ();
         auto result = std::minmax_element(m_signal.begin(), m_signal.end() );
-        m_filtered_min_max.first = *result.first;
-        m_filtered_min_max.second = *result.second;
+        m_leveled_min_max.first = *result.first;
+        m_leveled_min_max.second = *result.second;
         auto min_itr = result.first;
         if (min_itr != m_signal.end())
         {
@@ -188,7 +188,8 @@ void contraction_analyzer::compute_interpolated_geometries( float min_length, fl
     if(!isOutputValid() || max_length < 1.0f || min_length >= max_length ){
         return;
     }
-    double entOlenScale = (1.0 - m_filtered_min_max.first / m_filtered_min_max.second) / (1.0 - min_length / max_length);
+    
+    double entOlenScale = (1.0 - m_leveled_min_max.first / m_leveled_min_max.second) / (1.0 - min_length / max_length);
     
     m_elongation.resize(m_signal.size());
     m_interpolation.resize(m_signal.size());
@@ -196,7 +197,7 @@ void contraction_analyzer::compute_interpolated_geometries( float min_length, fl
     
     for (auto ii = 0; ii < m_signal.size(); ii++)
     {
-        auto nn = 1.0 - m_signal[ii] / m_filtered_min_max.second;
+        auto nn = 1.0 - m_signal[ii] / m_leveled_min_max.second;
         nn = 1.0 - nn / entOlenScale;
         m_interpolation[ii] = nn;
         m_interpolated_length[ii] = nn * max_length;
@@ -205,36 +206,20 @@ void contraction_analyzer::compute_interpolated_geometries( float min_length, fl
     
     if (cell_length_ready && cell_length_ready->num_slots() > 0)
         cell_length_ready->operator()(m_interpolated_length);
-    
-    // Compute force using cardio model
-    m_force.resize(m_signal.size());
-    cardio_model cmm;
-    cmm.shear_control(1.0f);
-    cmm.shear_velocity(200.0_cm_s);
-    for (auto ii = 0; ii < m_signal.size(); ii++)
-    {
-        cmm.length(m_interpolated_length[ii] * boost::units::cgs::micron);
-        cmm.elongation(m_elongation[ii] * boost::units::cgs::micron);
-        cmm.width((m_interpolated_length[ii]/3.0) * boost::units::cgs::micron);
-        cmm.thickness((m_interpolated_length[ii]/100.0)* boost::units::cgs::micron);
-        cmm.run();
-        m_force[ii] = cmm.result().total_reactive.value();
-    }
-    
-    if (total_reactive_force_ready && total_reactive_force_ready->num_slots() > 0)
-        total_reactive_force_ready->operator()(m_force);
+
 }
 
 contraction_analyzer::forceOtimeIterator_t contraction_analyzer::compute_force (sigIterator_t _begin , sigIterator_t _end,
                                                           float min_length, float max_length){
-    
-    auto bindex = std::distance( m_signal.begin(), _begin);
-    auto eindex = std::distance( m_signal.begin(), _begin);
+    sigIterator_t const_begin = m_signal.begin();
+    auto bindex = std::distance( const_begin, _begin);
+    auto eindex = std::distance( const_begin, _end);
     // Compute force using cardio model
     m_force.clear();
     cardio_model cmm;
     cmm.shear_control(1.0f);
     cmm.shear_velocity(200.0_cm_s);
+
     for (auto ii = bindex; ii < eindex; ii++)
     {
         cmm.length(m_interpolated_length[ii] * boost::units::cgs::micron);
