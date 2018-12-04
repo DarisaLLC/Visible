@@ -30,7 +30,11 @@
 #include "Item.h"
 #include "logger.hpp"
 #include "core/singleton.hpp"
+
+#if defined (  HOCKEY_SUPPORT )
 #include "hockey_etc_cocoa_wrappers.h"
+#endif
+
 #include "LifContext.h"
 #include "core/core.hpp"
 #include "Plist.hpp"
@@ -39,6 +43,7 @@
 #include "gui_handler.hpp"
 #include "gui_base.hpp"
 #include "app_logger.hpp"
+#include "console.h"
 
 #define APP_WIDTH 1024
 #define APP_HEIGHT 768

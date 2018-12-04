@@ -281,7 +281,7 @@ lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, uns
     \brief fill a memory buffer that already has the good dimension
     If more than one channel, all channels are retrieved interlaced
   */
-void lifIO::LifSerie::fill3DBuffer(void* buffer, size_t t)
+void lifIO::LifSerie::fill3DBuffer(void* buffer, size_t t) const
 {
     char *pos = static_cast<char*>(buffer);
     unsigned long int frameDataSize = getNbPixelsInOneTimeStep()*channels.size();
@@ -293,7 +293,7 @@ void lifIO::LifSerie::fill3DBuffer(void* buffer, size_t t)
     \brief fill a memory buffer that already has the good dimension
     If more than one channel, all channels are retrieved interlaced
   */
-void lifIO::LifSerie::fill2DBuffer(void* buffer, size_t t, size_t z)
+void lifIO::LifSerie::fill2DBuffer(void* buffer, size_t t, size_t z) const
 {
     char *pos = static_cast<char*>(buffer);
     unsigned long int sliceDataSize = getNbPixelsInOneSlice()*channels.size();

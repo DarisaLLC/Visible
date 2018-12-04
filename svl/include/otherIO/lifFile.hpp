@@ -102,8 +102,8 @@ namespace lifIO
     public:
         explicit LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize);
         
-        void fill3DBuffer(void* buffer, size_t t=0);
-        void fill2DBuffer(void* buffer, size_t t=0, size_t z=0);
+        void fill3DBuffer(void* buffer, size_t t=0) const;
+        void fill2DBuffer(void* buffer, size_t t=0, size_t z=0) const;
         
         
         std::istreambuf_iterator<char> begin(size_t t=0);
@@ -113,7 +113,7 @@ namespace lifIO
     private:
         unsigned long long offset;
         unsigned long long memorySize;
-        std::ifstream file;
+        mutable std::ifstream file;
         std::streampos fileSize;
         
         

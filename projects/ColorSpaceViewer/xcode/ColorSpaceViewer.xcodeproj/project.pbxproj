@@ -19,10 +19,12 @@
 		5323E6B20EAFCA74003A9687 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
 		5323E6B60EAFCA7E003A9687 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B50EAFCA7E003A9687 /* QTKit.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		C23917B71E9FE82700D43EBC /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C23917B61E9FE82700D43EBC /* Carbon.framework */; };
 		C24FC84A1E5CA91F0071AA1A /* cp_release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C24FC8481E5CA91F0071AA1A /* cp_release.xcconfig */; };
 		C24FC84B1E5CA91F0071AA1A /* cp-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C24FC8491E5CA91F0071AA1A /* cp-debug.xcconfig */; };
 		C2B04C2B1E5BC260009E1CC6 /* ColorSpaceViewerApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2B04C2A1E5BC260009E1CC6 /* ColorSpaceViewerApp.cpp */; };
-		C2B04C2E1E5BD772009E1CC6 /* ColorPalette.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2B04C2C1E5BD772009E1CC6 /* ColorPalette.cpp */; };
+		C2DA088F1E8B71E500BD5FFE /* ColorPalette.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA088E1E8B71E500BD5FFE /* ColorPalette.cpp */; };
+		C2FA97171E819E65006EC61E /* hue.icns in Resources */ = {isa = PBXBuildFile; fileRef = C2FA97161E819E65006EC61E /* hue.icns */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,12 +49,19 @@
 		53E3CDFB0E86099300238D2B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* ColorSpaceViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ColorSpaceViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C23917B61E9FE82700D43EBC /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
+		C23917BA1E9FEFC800D43EBC /* libcairo.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcairo.a; path = ../../../svl/local/cinder/cinder_0.9/blocks/Cairo/lib/macosx/libcairo.a; sourceTree = "<group>"; };
+		C23917BC1E9FF02A00D43EBC /* libpng16.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng16.a; path = ../../../svl/local/cinder/cinder_0.9/blocks/Cairo/lib/macosx/libpng16.a; sourceTree = "<group>"; };
+		C23917BE1E9FF05200D43EBC /* libpixman-1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libpixman-1.a"; path = "../../../svl/local/cinder/cinder_0.9/blocks/Cairo/lib/macosx/libpixman-1.a"; sourceTree = "<group>"; };
+		C23917C01E9FF0DC00D43EBC /* libpng16.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng16.a; path = ../../../../../../../usr/local/Cellar/libpng/1.6.28/lib/libpng16.a; sourceTree = "<group>"; };
+		C23917C21E9FF20900D43EBC /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		C24FC8481E5CA91F0071AA1A /* cp_release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = cp_release.xcconfig; sourceTree = "<group>"; };
 		C24FC8491E5CA91F0071AA1A /* cp-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "cp-debug.xcconfig"; sourceTree = "<group>"; };
 		C2B04C2A1E5BC260009E1CC6 /* ColorSpaceViewerApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ColorSpaceViewerApp.cpp; path = ../src/ColorSpaceViewerApp.cpp; sourceTree = "<group>"; };
-		C2B04C2C1E5BD772009E1CC6 /* ColorPalette.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ColorPalette.cpp; path = ../src/ColorPalette.cpp; sourceTree = "<group>"; };
 		C2B04C2D1E5BD772009E1CC6 /* ColorQuantizationApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ColorQuantizationApp.cpp; path = ../src/ColorQuantizationApp.cpp; sourceTree = "<group>"; };
 		C2B04C331E5BD974009E1CC6 /* include */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = folder; name = include; path = ../include; sourceTree = "<group>"; };
+		C2DA088E1E8B71E500BD5FFE /* ColorPalette.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ColorPalette.cpp; path = ../src/ColorPalette.cpp; sourceTree = "<group>"; };
+		C2FA97161E819E65006EC61E /* hue.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = hue.icns; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C23917B71E9FE82700D43EBC /* Carbon.framework in Frameworks */,
 				00B9955B1B128DF400A5C623 /* IOSurface.framework in Frameworks */,
 				00B9955A1B128DF400A5C623 /* IOKit.framework in Frameworks */,
 				00A1AC2819BA007D00F89C9F /* AVFoundation.framework in Frameworks */,
@@ -81,7 +91,7 @@
 		080E96DDFE201D6D7F000001 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				C2B04C2C1E5BD772009E1CC6 /* ColorPalette.cpp */,
+				C2DA088E1E8B71E500BD5FFE /* ColorPalette.cpp */,
 				C2B04C2D1E5BD772009E1CC6 /* ColorQuantizationApp.cpp */,
 				C2B04C2A1E5BC260009E1CC6 /* ColorSpaceViewerApp.cpp */,
 			);
@@ -150,6 +160,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C2FA97161E819E65006EC61E /* hue.icns */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 			);
 			name = Resources;
@@ -158,6 +169,12 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C23917C21E9FF20900D43EBC /* libz.tbd */,
+				C23917C01E9FF0DC00D43EBC /* libpng16.a */,
+				C23917BE1E9FF05200D43EBC /* libpixman-1.a */,
+				C23917BC1E9FF02A00D43EBC /* libpng16.a */,
+				C23917BA1E9FEFC800D43EBC /* libcairo.a */,
+				C23917B61E9FE82700D43EBC /* Carbon.framework */,
 				00B995581B128DF400A5C623 /* IOKit.framework */,
 				00B995591B128DF400A5C623 /* IOSurface.framework */,
 				00A1AC2619BA007D00F89C9F /* AVFoundation.framework */,
@@ -220,6 +237,7 @@
 			files = (
 				C24FC84A1E5CA91F0071AA1A /* cp_release.xcconfig in Resources */,
 				C24FC84B1E5CA91F0071AA1A /* cp-debug.xcconfig in Resources */,
+				C2FA97171E819E65006EC61E /* hue.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,7 +249,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C2B04C2B1E5BC260009E1CC6 /* ColorSpaceViewerApp.cpp in Sources */,
-				C2B04C2E1E5BD772009E1CC6 /* ColorPalette.cpp in Sources */,
+				C2DA088F1E8B71E500BD5FFE /* ColorPalette.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -251,9 +269,30 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ColorSpaceViewer_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/include/**",
+					"$(COMMON_PROJECTS)",
+					/usr/local/include,
+					"$(LOCAL_CINDER)/include",
+					"$(LOCAL_BOOST)/include",
+					"$(SRCROOT)/include",
+					"$(LOCAL_gtest)/include",
+					"$(LOCAL_OCV)/include",
+					"$(LOCAL_PUGIXML)/include",
+					"$(LOCAL_EIGEN)",
+					"$(LOCAL_CEREAL)",
+					"$(LOCAL_TINYXML)",
+					"$(LOCAL_CIMG)",
+					"$(SVL_X11_ROOT)/include",
+				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(LOCAL_OCV)/lib/macosx",
+					/usr/local/Cellar/libpng/1.6.28/lib,
+				);
 				OTHER_LDFLAGS = "$(LOCAL_CINDER)/lib/libcinder_d.a ";
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.ColorSpaceViewer;
 				PRODUCT_NAME = ColorSpaceViewer;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
@@ -274,9 +313,30 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ColorSpaceViewer_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/include/**",
+					"$(COMMON_PROJECTS)",
+					/usr/local/include,
+					"$(LOCAL_CINDER)/include",
+					"$(LOCAL_BOOST)/include",
+					"$(SRCROOT)/include",
+					"$(LOCAL_gtest)/include",
+					"$(LOCAL_OCV)/include",
+					"$(LOCAL_PUGIXML)/include",
+					"$(LOCAL_EIGEN)",
+					"$(LOCAL_CEREAL)",
+					"$(LOCAL_TINYXML)",
+					"$(LOCAL_CIMG)",
+					"$(SVL_X11_ROOT)/include",
+				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(LOCAL_OCV)/lib/macosx",
+					/usr/local/Cellar/libpng/1.6.28/lib,
+				);
 				OTHER_LDFLAGS = "$(LOCAL_CINDER)/lib/libcinder.a ";
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.ColorSpaceViewer;
 				PRODUCT_NAME = ColorSpaceViewer;
 				STRIP_INSTALLED_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
