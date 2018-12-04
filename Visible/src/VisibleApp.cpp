@@ -34,9 +34,20 @@ void prepareSettings( App::Settings *settings )
 
 void VisibleApp::create_lif_viewer (const int serie_index)
 {
-    Window::Format format( RendererGl::create() );
-    WindowRef ww = createConnectedWindow(format);
-    mContexts.push_back(std::unique_ptr<lifContext>(new lifContext(ww, mLifRef, serie_index)));
+    auto name_index_itr = mLifRef->index_to_name_map().find(serie_index);
+    auto sep = boost::filesystem::path::preferred_separator;
+    if (name_index_itr != mLifRef->index_to_name_map().end())
+    {
+        const std::string& name = name_index_itr->second;
+        auto command = ci::app::getAppPath().string() + sep + "Visible.app" + sep + "Contents" + sep + "MacOS" + sep +
+            "VisibleRun.app" + sep + "Contents" + sep + "MacOS" + sep + "VisibleRun " +
+            mCurrentLifFilePath.string() + " " + name;
+        std::cout << command << std::endl;
+        std::system(command.c_str());
+    }
+//    Window::Format format( RendererGl::create() );
+ //   WindowRef ww = createConnectedWindow(format);
+ //   mContexts.push_back(std::unique_ptr<lifContext>(new lifContext(ww, mLifRef, serie_index)));
 }
 
 WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
@@ -182,6 +193,15 @@ void VisibleApp::setup()
     getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
     
     getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
+    
+    gl::enableVerticalSync();
+    
+    // Setup APP LOG
+    auto logging_container = logging::get_mutable_logging_container();
+    logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
+    logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>("Log", 23, 59));
+    
+    auto logger = std::make_shared<spdlog::logger>(APPLOG, logging_container);
     
 }
 

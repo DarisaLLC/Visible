@@ -4,6 +4,8 @@
 #include "guiContext.h"
 #include "algo_Lif.hpp"
 #include "clipManager.hpp"
+#include "visible_layout.hpp"
+
 
 using namespace tinyUi;
 
@@ -41,6 +43,9 @@ public:
     // From a lif_browser
     lifContext(ci::app::WindowRef& ww, const lif_browser::ref&, const uint32_t serie_index );
     
+    // From a lif_browser
+    lifContext(ci::app::WindowRef& ww, const lif_browser::ref&, const std::string& serie_name );
+    
     // shared_from_this() through base class
     lifContext* shared_from_above () {
         return static_cast<lifContext*>(((guiContext*)this)->shared_from_this().get());
@@ -50,29 +55,29 @@ public:
 	Signal <void(bool)> signalManualEditMode;
 	
 	static const std::string& caption () { static std::string cp ("Lif Viewer # "); return cp; }
-	virtual void draw ();
-	virtual void setup ();
-	virtual bool is_valid () const;
-	virtual void update ();
-	virtual void resize ();
+	virtual void draw () override;
+	virtual void setup () override;
+	virtual bool is_valid () const override;
+	virtual void update () override;
+	virtual void resize () override;
 	void draw_window ();
-	void draw_info ();
+	void draw_info () override;
 	
-	virtual void onMarked (marker_info_t&);
-	virtual void mouseDown( MouseEvent event );
-	virtual void mouseMove( MouseEvent event );
-	virtual void mouseUp( MouseEvent event );
-	virtual void mouseDrag( MouseEvent event );
-	virtual void mouseWheel( MouseEvent event );
-	virtual void keyDown( KeyEvent event );
+	virtual void onMarked (marker_info_t&) ;
+	virtual void mouseDown( MouseEvent event ) override;
+	virtual void mouseMove( MouseEvent event ) override;
+	virtual void mouseUp( MouseEvent event ) override;
+	virtual void mouseDrag( MouseEvent event ) override;
+	virtual void mouseWheel( MouseEvent event ) ;
+	virtual void keyDown( KeyEvent event ) override;
 	
-	virtual void seekToStart ();
-	virtual void seekToEnd ();
-	virtual void seekToFrame (int);
-	virtual int getCurrentFrame ();
-	virtual time_spec_t getCurrentTime ();
-	virtual int getNumFrames ();
-	virtual void processDrag (ivec2 pos);
+	virtual void seekToStart () override;
+	virtual void seekToEnd () override;
+	virtual void seekToFrame (int) override;
+	virtual int getCurrentFrame () override;
+	virtual time_spec_t getCurrentTime () override;
+	virtual int getNumFrames () override;
+	virtual void processDrag (ivec2 pos) override;
     
     bool haveTracks();
 	
@@ -95,6 +100,9 @@ public:
 	vec2 getZoom ();
 	void setMedianCutOff (uint32_t newco);
 	uint32_t getMedianCutOff () const;
+    void setCellLength (uint32_t newco);
+    uint32_t getCellLength () const;
+
 
 	
 	void play_pause_button ();
@@ -115,9 +123,14 @@ public:
     
     bool isFixedSerieContext () const { return m_fixed_serie; }
     
+    // Supporting gui_base
+    void SetupGUIVariables() override;
+    void DrawGUI() override;
+    void QuitApp();
+    
 private:
     bool m_fixed_serie;
-    
+
     bool init_with_browser (const lif_browser::ref& );
     void setup_signals ();
     void setup_params ();
@@ -171,6 +184,8 @@ private:
     lif_processor::contractionContainer_t m_contractions;
     std::vector<std::string> m_contraction_none = {" Entire "};
     mutable std::vector<std::string> m_contraction_names;
+    int32_t m_cell_length;
+    
     
     // Content Info
     tiny_media_info      mMediaInfo;
@@ -200,20 +215,20 @@ private:
     // Screen Info
     vec2 mScreenSize;
     gl::TextureRef pixelInfoTexture ();
- 
+    std::string m_title;
     
     // Update GUI
     void clear_playback_params ();
     void update_instant_image_mouse ();
     void update_with_mouse_position ( MouseEvent event );
-    Rectf get_image_display_rect ();
+    Rectf get_image_display_rect () override;
     vec2 texture_to_display_zoom ();
     void add_plots ();
     
     // Navigation
-    void update_log (const std::string& meg = "");
-    bool looping ();
-    void looping (bool what);
+    void update_log (const std::string& meg = "") override;
+    bool looping () override;
+    void looping (bool what) override;
 	void seek( size_t xPos );
 
 	
@@ -225,8 +240,11 @@ private:
 	int mButton_title_index;
 	std::string mButton_title;
     
-
+    // Layout Manager
+    std::shared_ptr<layoutManager> m_layout;
   
+    // UI flags
+    bool m_showLog, m_showGUI, m_showHelp;
     
 	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
 	{

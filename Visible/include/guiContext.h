@@ -16,6 +16,7 @@
 #include "cinder/Surface.h"
 #include "cinder/Text.h"
 #include "cinder_cv/cinder_opencv.h"
+#include "gui_base.hpp"
 
 #include <memory>
 #include <utility>
@@ -171,7 +172,7 @@ private:
 
 ///////////////////   Visual Browsing Contexts
 
-class sequencedImageContext : public guiContext
+class sequencedImageContext : public guiContext, public gui_base
 {
 public:
 	

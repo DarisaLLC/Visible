@@ -34,6 +34,8 @@
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * 
 */
+#ifndef _OCV_VIDEO_
+#define _OCV_VIDEO_
 
 #pragma once
 #include "opencv2/opencv.hpp"
@@ -108,3 +110,6 @@ protected:
 };
 
 typedef std::shared_ptr<OcvVideoPlayer>			ocvPlayerRef;
+
+#endif
+

@@ -108,7 +108,13 @@ void  lif_browser::get_series_info (const std::shared_ptr<lifIO::LifReader>& lif
         si.length_in_seconds = lifer->getSerie(ss).total_duration ();
         
         m_series_book.emplace_back (si);
+        // Fill up names / index map -- convenience
+        m_name_to_index[si.name] = static_cast<int>(ss);
+        m_index_to_name[m_name_to_index[si.name]] = si.name;
     }
+    
+  
+    
 }
 
 lif_processor::lif_processor ()

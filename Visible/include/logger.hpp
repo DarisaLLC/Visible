@@ -15,6 +15,7 @@
 #include "spdlog/sinks/syslog_sink.h"
 #include "spdlog/async.h"
 #include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/daily_file_sink.h"
 
 class vlogger : public svl::SingletonLight<vlogger>
 {
@@ -40,5 +41,35 @@ private:
     std::shared_ptr<spdlog::logger> m_syslog;
     std::string m_sys_ident;
 };
+
+#include "spdlog/sinks/dist_sink.h"
+
+namespace spdlog
+{
+    namespace sinks
+    {
+        using platform_sink_mt = stdout_color_sink_mt;
+        using platform_sink_st = stdout_color_sink_st;
+    }
+}
+
+namespace logging
+{
+    using namespace spdlog;
+    // return a distributed sink.
+    inline std::shared_ptr<sinks::dist_sink_mt> get_mutable_logging_container()
+    {
+        static auto sink = std::make_shared<sinks::dist_sink_mt>();
+        return sink;
+    }
+#define APPLOG "Log"
+#define APPLOG_INFO(...) spdlog::get("Log")->info(__VA_ARGS__)
+#define APPLOG_TRACE(...) spdlog::get("Log")->trace(__VA_ARGS__)
+#define APPLOG_ERROR(...) spdlog::get("Log")->error(__VA_ARGS__)
+#define APPLOG_WARNING(...) spdlog::get("Log")->warn(__VA_ARGS__)
+#define APPLOG_NOTICE(...) spdlog::get("Log")->notice(__VA_ARGS__)
+#define APPLOG_SEPARATOR() APPLOG_INFO("-----------------------------")
+}
+
 
 #endif /* logger_h */

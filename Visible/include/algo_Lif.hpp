@@ -102,12 +102,17 @@ public:
     const std::vector<internal_serie_info>& internal_serie_infos () const { return m_series_book; }
     const boost::filesystem::path& path () const { return mPath; }
     const std::vector<std::string>& names () const { return m_series_names; }
+    const std::map<std::string,int>& name_to_index_map () const { return m_name_to_index; }
+    const std::map<int,std::string>& index_to_name_map () const { return m_index_to_name; }
     
 private:
     std::shared_ptr<lifIO::LifReader> m_lifRef;
     std::vector<internal_serie_info> m_series_book;
     std::vector<cv::Mat> m_series_posters;
     std::vector<std::string> m_series_names;
+    std::map<std::string,int> m_name_to_index;
+    std::map<int,std::string> m_index_to_name;
+    
     boost::filesystem::path mPath;
     void get_first_frame (internal_serie_info& si,  const int frameCount, cv::Mat& out);
     void  get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer);

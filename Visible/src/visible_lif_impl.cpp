@@ -44,6 +44,9 @@
 #include "logger.hpp"
 #include "cinder/Log.h"
 #include "CinderImGui.h"
+#include "gui_handler.hpp"
+#include "gui_base.hpp"
+#include <boost/any.hpp>
 
 using namespace ci;
 using namespace ci::app;
@@ -51,12 +54,6 @@ using namespace std;
 using namespace svl;
 
 
-/// Layout for this widget. Poor design !!
-
-namespace
-{
-    static layoutManager sLayoutMgr ( ivec2 (10, 10));
-}
 
 
               /************************
@@ -70,6 +67,7 @@ namespace
 lifContext::lifContext(WindowRef& ww, const lif_browser::ref& lb, const uint32_t serie_index):
 sequencedImageContext(ww), m_lifBrowser(lb), m_fixed_serie(true) {
     m_valid = init_with_browser(m_lifBrowser);
+    m_layout = std::make_shared<layoutManager>  ( ivec2 (10, 10) );
     auto thisww = get_windowRef();
     thisww->getRenderer()->makeCurrentContext(true);
     thisww->getSignalDraw().connect( [&]{ draw(); } );
@@ -90,6 +88,7 @@ sequencedImageContext(ww), m_lifBrowser(lb), m_fixed_serie(true) {
 lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
 : sequencedImageContext(ww), mPath (dp), m_fixed_serie(false){
     m_valid = false;
+    m_layout = std::make_shared<layoutManager>  ( ivec2 (10, 10) );
     m_type = Type::lif_file_viewer;
     if (mPath.string().empty())
         mPath = getOpenFilePath();
@@ -219,6 +218,14 @@ void lifContext::setup_params () {
         // Attach a callback that is fired after a target is updated.
         mUIParams.addParam( "CutOff Pct", setter, getter );
     }
+    {
+        // Add a param with no target, but instead provide setter and getter functions.
+        const std::function<void(uint32_t)> setter    = std::bind(&lifContext::setCellLength, this, std::placeholders::_1 );
+        const std::function<uint32_t()> getter    = std::bind( &lifContext::getCellLength, this);
+        
+        // Attach a callback that is fired after a target is updated.
+        mUIParams.addParam( "Cell Length ", setter, getter );
+    }
     
 }
 
@@ -226,10 +233,22 @@ void lifContext::setup_params () {
 void lifContext::setup()
 {
     ci::app::WindowRef ww = get_windowRef();
-//    ImGui::Options imgo;
-//    imgo.window(ww);
-//    ImGui::initialize(imgo);
+    gl::enableVerticalSync();
+    
+    ui::initialize(ui::Options()
+                   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
+                   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
+                   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
+                   .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
+                   //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
+                   );
+    ImGui::Options imgo;
+    imgo.window(ww);
+    ImGui::initialize(imgo);
 
+    m_showGUI = false;
+    m_showLog = false;
+    m_showHelp = false;
     
     srand( 133 );
     setup_signals();
@@ -387,7 +406,7 @@ void lifContext::clear_playback_params ()
 
 bool lifContext::have_lif_serie ()
 {
-    bool have = m_lifRef && m_cur_lif_serie_ref >= 0 && mFrameSet && sLayoutMgr.isSet();
+    bool have = m_lifRef && m_cur_lif_serie_ref >= 0 && mFrameSet && m_layout->isSet();
     //  if (! have )
     //     mUIParams.setOptions( "mode", "label=`Nothing Loaded`" );
     return have;
@@ -644,10 +663,10 @@ void lifContext::update_with_mouse_position ( MouseEvent event )
         update_instant_image_mouse ();
     }
     
-    if (sLayoutMgr.display_plots_rect().contains(event.getPos()))
+    if (m_layout->display_plots_rect().contains(event.getPos()))
     {
-        std::vector<float> dds (sLayoutMgr.plot_rects().size());
-        for (auto pp = 0; pp < sLayoutMgr.plot_rects().size(); pp++) dds[pp] = sLayoutMgr.plot_rects()[pp].distanceSquared(event.getPos());
+        std::vector<float> dds (m_layout->plot_rects().size());
+        for (auto pp = 0; pp < m_layout->plot_rects().size(); pp++) dds[pp] = m_layout->plot_rects()[pp].distanceSquared(event.getPos());
         
         auto min_iter = std::min_element(dds.begin(),dds.end());
         mMouseInGraphs = int(min_iter - dds.begin());
@@ -770,6 +789,24 @@ uint32_t lifContext::getMedianCutOff () const
     return 0;
 }
 
+void lifContext::setCellLength (uint32_t newco){
+    if (! m_lifProcRef) return;
+    // Get a shared_ptr from weak and check if it had not expired
+    auto spt = m_lifProcRef->contractionWeakRef().lock();
+    if (! spt ) return;
+    m_cell_length = newco;
+}
+uint32_t lifContext::getCellLength () const{
+    if (! m_cur_lif_serie_ref) return 0;
+    
+    // Get a shared_ptr from weak and check if it had not expired
+    auto spt = m_lifProcRef->contractionWeakRef().lock();
+    if (spt)
+    {
+        return m_cell_length;
+    }
+    return 0;
+}
 
 
 
@@ -784,14 +821,14 @@ void lifContext::add_plots ()
 
     std::lock_guard<std::mutex> lock(m_track_mutex);
     
-    assert (  sLayoutMgr.plot_rects().size() >= channel_count());
+    assert (  m_layout->plot_rects().size() >= channel_count());
     
     m_plots.resize (0);
     
     for (int cc = 0; cc < channel_count(); cc++)
     {
         m_plots.push_back( graph1d::ref (new graph1d (m_cur_lif_serie_ref->getChannels()[cc].getName(),
-                                                    sLayoutMgr.plot_rects() [cc])));
+                                                    m_layout->plot_rects() [cc])));
     }
     
     for (graph1d::ref gr : m_plots)
@@ -806,8 +843,8 @@ void lifContext::add_plots ()
         m_plots[2]->strokeColor = ColorA(0.0,0.0,0.0,1.0);
     }
     
-    vlogger::instance().console()->info(tostr(sLayoutMgr.display_timeline_rect()));
-    auto rect = sLayoutMgr.display_timeline_rect();
+    vlogger::instance().console()->info(tostr(m_layout->display_timeline_rect()));
+    auto rect = m_layout->display_timeline_rect();
     mMainTimeLineSlider = tinyUi::TimeLineSlider(rect);
     mMainTimeLineSlider.clear_timepoint_markers();
     mMainTimeLineSlider.setTitle ("Time Line");
@@ -835,6 +872,7 @@ void lifContext::loadCurrentSerie ()
         m_clips.clear();
         mWidgets.clear ();
         setMedianCutOff(0);
+        setCellLength(0);
         pause();
         
         // Create the frameset and assign the channel names
@@ -850,7 +888,7 @@ void lifContext::loadCurrentSerie ()
         mChannelCount = (uint32_t) mMediaInfo.getNumChannels();
         assert(mChannelCount > 0 && mChannelCount < 4);
         mMediaInfo.output(std::cout);
-        sLayoutMgr.init (getWindowSize() , mFrameSet->media_info(), channel_count());
+        m_layout->init (getWindowSize() , mFrameSet->media_info(), channel_count());
         
         // Start Loading Images on a different thread
         auto future_res = std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names);
@@ -859,10 +897,10 @@ void lifContext::loadCurrentSerie ()
         reset_entire_clip(mFrameSet->count());
         
         
-        auto title = m_series_names[m_cur_selected_index] + " @ " + mPath.filename().string();
+        m_title = m_series_names[m_cur_selected_index] + " @ " + mPath.filename().string();
         
         auto ww = get_windowRef();
-        ww->setTitle( title );
+        ww->setTitle(m_title );
         ww->getApp()->setFrameRate(mMediaInfo.getFramerate());
         
         
@@ -877,7 +915,7 @@ void lifContext::loadCurrentSerie ()
         looping(false);
         resize();
         seekToStart();
-        play();
+//        play();
         
     }
     catch( const std::exception &ex ) {
@@ -917,9 +955,76 @@ void lifContext::process_async (){
  *
  ************************/
 
+void  lifContext::SetupGUIVariables() {}
+
+void  lifContext::DrawGUI(){
+    // Draw the menu bar
+    {
+        ui::ScopedMainMenuBar menuBar;
+        
+        if( ui::BeginMenu( "File" ) ){
+            //if(ui::MenuItem("Fullscreen")){
+            //    setFullScreen(!isFullScreen());
+            //}
+            if(ui::MenuItem("Swap Eyes", "S")){
+          //      swapEyes = !swapEyes;
+            }
+        //    ui::MenuItem("Help", nullptr, &showHelp);
+        //    if(ui::MenuItem("Quit", "ESC")){
+        //        QuitApp();
+        //    }
+            ui::EndMenu();
+        }
+        
+        if( ui::BeginMenu( "View" ) ){
+            ui::MenuItem( "General Settings", nullptr, &m_showGUI );
+            //    ui::MenuItem( "Edge Detection", nullptr, &edgeDetector.showGUI );
+            //    ui::MenuItem( "Face Detection", nullptr, &faceDetector.showGUI );
+            ui::MenuItem( "Log", nullptr, &m_showLog );
+            //ui::MenuItem( "PS3 Eye Settings", nullptr, &showWindowWithMenu );
+            ui::EndMenu();
+        }
+        
+        //ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.0f FPS", ui::GetIO().Framerate);
+        ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", ui::GetIO().Framerate);
+    }
+    
+    //Draw general settings window
+    if(m_showGUI)
+    {
+        ui::Begin("General Settings", &m_showGUI, ImGuiWindowFlags_AlwaysAutoResize);
+        
+        ui::SliderInt("Cell Length", &m_cell_length, 0, 100);
+        
+        ui::End();
+    }
+    
+    //Draw the log if desired
+    if(m_showLog){
+        
+    //    vac::app_log.Draw("Log", &m_showLog);
+    }
+    
+    if(m_showHelp) ui::OpenPopup("Help");
+    //ui::ScopedWindow window( "Help", ImGuiWindowFlags_AlwaysAutoResize );
+    if(ui::BeginPopupModal("Help", &m_showHelp)){
+        ui::TextColored(ImVec4(0.92f, 0.18f, 0.29f, 1.00f), "%s", m_title.c_str());
+        ui::Text("Arman Garakani, Darisa LLC");
+        if(ui::Button("Copy")) ui::LogToClipboard();
+        ui::SameLine();
+        //  ui::Text("github.com/");
+        ui::LogFinish();
+        ui::Text("");
+        ui::Text("Mouse over any"); gui_base::ShowHelpMarker("We did it!"); ui::SameLine(); ui::Text("to show help.");
+        ui::Text("Ctrl+Click any slider to set its value manually.");
+        ui::EndPopup();
+    }
+    
+}
+
 Rectf lifContext::get_image_display_rect ()
 {
-    return sLayoutMgr.display_frame_rect();
+    return m_layout->display_frame_rect();
 }
 
 void  lifContext::update_log (const std::string& msg)
@@ -937,17 +1042,17 @@ void  lifContext::update_log (const std::string& msg)
 void lifContext::resize ()
 {
     if (! have_lif_serie () || ! mSurface ) return;
-    if (! sLayoutMgr.isSet()) return;
+    if (! m_layout->isSet()) return;
     auto ww = get_windowRef();
     auto ws = ww->getSize();
-    sLayoutMgr.update_window_size(ws);
+    m_layout->update_window_size(ws);
     mSize = vec2(ws[0], ws[1] / 12);
-    mMainTimeLineSlider.setBounds (sLayoutMgr.display_timeline_rect());
+    mMainTimeLineSlider.setBounds (m_layout->display_timeline_rect());
     if (m_plots.empty()) return;
     
-    for (int cc = 0; cc < sLayoutMgr.plot_rects().size(); cc++)
+    for (int cc = 0; cc < m_layout->plot_rects().size(); cc++)
     {
-        m_plots[cc]->setRect (sLayoutMgr.plot_rects()[cc]);
+        m_plots[cc]->setRect (m_layout->plot_rects()[cc]);
     }
 }
 
@@ -959,12 +1064,12 @@ bool lifContext::haveTracks()
 void lifContext::update ()
 {
     ci::app::WindowRef ww = get_windowRef();
-    
+
     ww->getRenderer()->makeCurrentContext(true);
     if (! have_lif_serie() ) return;
     mContainer.update();
     auto ws = ww->getSize();
-    sLayoutMgr.update_window_size(ws);
+    m_layout->update_window_size(ws);
     
     // If Plots are ready, set them up
     // It is ready only for new data
@@ -1012,7 +1117,7 @@ void lifContext::update ()
 // In channel x is pos.x, In channel y is pos.y % channel_height
 void lifContext::update_instant_image_mouse ()
 {
-    auto image_pos = sLayoutMgr.display2image(mMouseInImagePosition);
+    auto image_pos = m_layout->display2image(mMouseInImagePosition);
     uint32_t channel_height = mMediaInfo.getChannelSize().y;
     m_instant_channel = ((int) image_pos.y) / channel_height;
     m_instant_mouse_image_pos = image_pos;
@@ -1065,11 +1170,11 @@ void lifContext::draw_info ()
     }
     {
         gl::ScopedColor (ColorA::gray(0.0));
-        gl::drawStrokedRect(sLayoutMgr.display_timeline_rect(), 3.0f);
+        gl::drawStrokedRect(m_layout->display_timeline_rect(), 3.0f);
     }
     {
         gl::ScopedColor (ColorA::gray(0.1));
-        gl::drawStrokedRect(sLayoutMgr.display_plots_rect(), 3.0f);
+        gl::drawStrokedRect(m_layout->display_plots_rect(), 3.0f);
     }
     
     if (m_show_probe)
@@ -1141,7 +1246,7 @@ void lifContext::draw ()
         {
             for (int cc = 0; cc < m_plots.size(); cc++)
             {
-                m_plots[cc]->setRect (sLayoutMgr.plot_rects()[cc]);
+                m_plots[cc]->setRect (m_layout->plot_rects()[cc]);
                 m_plots[cc]->draw();
             }
         }
@@ -1150,6 +1255,8 @@ void lifContext::draw ()
         draw_info ();
         mUIParams.draw();
       
+        if(m_showGUI)
+            DrawGUI();
         
     }
     

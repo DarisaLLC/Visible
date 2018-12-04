@@ -32,7 +32,7 @@ namespace anonymous
 {
     std::vector<std::string> d_names { "green", "red", "gray" };
     
-    void internal_fill_one (lifIO::LifSerie& lifserie, const tiny_media_info& tm, const int frameCount, std::vector<Surface8uRef>& out,
+    void internal_fill_one (const lifIO::LifSerie& lifserie, const tiny_media_info& tm, const int frameCount, std::vector<Surface8uRef>& out,
                             std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator time_iter,
                             std::vector<std::string>& names = d_names)
     {
@@ -64,7 +64,8 @@ namespace anonymous
 }
 std::string seqFrameContainer::getName () const { return "qTimeFrameCache"; }
 
-std::shared_ptr<seqFrameContainer> seqFrameContainer::create (lifIO::LifSerie& lifserie)
+template<>
+std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const lifIO::LifSerie& lifserie)
 {
     std::vector<std::string> names { "green", "red", "gray" };
     
@@ -134,7 +135,8 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (lifIO::LifSerie& l
     return thisref;
 }
 
-
+#if OCV_PLAYER
+template<>
 std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const ocvPlayerRef& mMovie)
 {
     tiny_media_info minfo;
@@ -147,8 +149,10 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const ocvPlayerRef
     return thisref;
     
 }
+#endif
 
-std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const ci::qtime::MovieSurfaceRef& mMovie)
+template<>
+std::shared_ptr<seqFrameContainer> seqFrameContainer::create  (const ci::qtime::MovieSurfaceRef& mMovie)
 {
     tiny_media_info minfo;
     minfo.size.width = mMovie->getWidth();
@@ -161,7 +165,8 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const ci::qtime::M
     
 }
 
-std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const ci::qtime::MovieGlRef& mMovie)
+template<>
+std::shared_ptr<seqFrameContainer> seqFrameContainer::create  (const ci::qtime::MovieGlRef& mMovie)
 {
     tiny_media_info minfo;
     minfo.size.width = mMovie->getWidth();
@@ -174,6 +179,7 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const ci::qtime::M
     
 }
 
+template<>
 std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const std::shared_ptr<avcc::avReader>& asset_reader)
 {
     seqFrameContainer::ref thisref (new seqFrameContainer(asset_reader->info()));
@@ -187,7 +193,7 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const std::shared_
     return thisref;
 }
 
-
+template<>
 std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const std::vector<ci::Surface8uRef>& folderImages)
 {
     tiny_media_info minfo;
