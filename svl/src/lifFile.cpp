@@ -17,6 +17,32 @@
 #include <numeric>
 #include <sstream>
 
+namespace anonymous {
+    
+    struct ifStreamDeleter
+    {
+        void operator()(std::ifstream* p) const
+        {
+            if ( p != nullptr )
+            {
+                p->close();
+                delete p;
+            }
+        }
+    };
+    
+
+    std::shared_ptr<std::ifstream> make_shared_ifstream(std::ifstream * ifstream_ptr)
+    {
+        return std::shared_ptr<std::ifstream>(ifstream_ptr, ifStreamDeleter());
+    }
+    
+    std::shared_ptr<std::ifstream> make_shared_ifstream(std::string filename)
+    {
+        return make_shared_ifstream(new std::ifstream(filename, std::ifstream::in | std::ifstream::binary));
+    }
+    
+}
 
 using namespace std;
 
@@ -257,13 +283,13 @@ float lifIO::LifSerieHeader::frame_duration_ms() const
 lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize) :
  LifSerieHeader(serie)
 {
-    file.open(filename.c_str(), ios::in | ios::binary);
-    if(!file)
+    fileRef = anonymous::make_shared_ifstream(filename.c_str());
+    if(! fileRef || !fileRef->is_open())
         throw invalid_argument(("No such file as "+filename).c_str());
 
     //get size of the file
-    file.seekg(0,ios::end);
-    fileSize = file.tellg();
+    fileRef->seekg(0,ios::end);
+    fileSize = fileRef->tellg();
 
     //check the validity of the offset and memorysize parameters
     if(offset >= (unsigned long long)fileSize)
@@ -285,8 +311,8 @@ void lifIO::LifSerie::fill3DBuffer(void* buffer, size_t t) const
 {
     char *pos = static_cast<char*>(buffer);
     unsigned long int frameDataSize = getNbPixelsInOneTimeStep()*channels.size();
-    file.seekg(getOffset(t) ,ios::beg);
-    file.read(pos,frameDataSize);
+    fileRef->seekg(getOffset(t) ,ios::beg);
+    fileRef->read(pos,frameDataSize);
 }
 
 /**
@@ -297,8 +323,8 @@ void lifIO::LifSerie::fill2DBuffer(void* buffer, size_t t, size_t z) const
 {
     char *pos = static_cast<char*>(buffer);
     unsigned long int sliceDataSize = getNbPixelsInOneSlice()*channels.size();
-    file.seekg(getOffset(t) + z *  sliceDataSize, ios::beg);
-    file.read(pos, sliceDataSize);
+    fileRef->seekg(getOffset(t) + z *  sliceDataSize, ios::beg);
+    fileRef->read(pos, sliceDataSize);
 }
 
 /** @brief return an iterator to the begining of the data of time step t
@@ -306,8 +332,8 @@ void lifIO::LifSerie::fill2DBuffer(void* buffer, size_t t, size_t z) const
 */
 istreambuf_iterator<char> lifIO::LifSerie::begin(size_t t)
 {
-    file.seekg(getOffset(t));
-    return istreambuf_iterator<char>(file);
+    fileRef->seekg(getOffset(t));
+    return istreambuf_iterator<char>(*fileRef);
 }
 
 
@@ -374,26 +400,28 @@ void lifIO::LifHeader::parseHeader()
 
 
 /** \brief Constructor from lif file name */
-lifIO::LifReader::LifReader(const string &filename) : file(filename.c_str(), ios::in | ios::binary)
+lifIO::LifReader::LifReader(const string &filename)
 {
     static std::mutex sMutex;
     const int MemBlockCode = 0x70, TestCode = 0x2a;
     char lifChar;
-
-    if(!file.is_open())
+    
+    fileRef = anonymous::make_shared_ifstream(filename.c_str());
+    if(! fileRef) //|| !fileRef->is_open())
         throw invalid_argument(("No such file as "+filename).c_str());
+    
     // Get size of the file
-    file.seekg(0,ios::end);
-    fileSize = file.tellg();
-    file.seekg(0,ios::beg);
+    fileRef->seekg(0,ios::end);
+    fileSize = fileRef->tellg();
+    fileRef->seekg(0,ios::beg);
     cout<<filename<<" is "<<fileSize<<" bytes"<<endl;
 
     if(readInt() != MemBlockCode)
         throw invalid_argument((filename+" is not a Leica SP5 file").c_str());
 
     // Skip the size of next block
-    file.seekg(4,ios::cur);
-    file>>lifChar;
+    fileRef->seekg(4,ios::cur);
+    *fileRef>>lifChar;
     if(lifChar != TestCode)
         throw invalid_argument((filename+" is not a Leica SP5 file").c_str());
 
@@ -406,7 +434,7 @@ lifIO::LifReader::LifReader(const string &filename) : file(filename.c_str(), ios
     
     {
         std::shared_ptr<char> xmlHeader (new char[xmlChars]);
-        file.read(xmlHeader.get(),xmlChars);
+        fileRef->read(xmlHeader.get(),xmlChars);
         for(unsigned int p=0;p<xmlChars/2;++p)
             xmlString.push_back(xmlHeader.get()[2*p]);
     }
@@ -415,7 +443,7 @@ lifIO::LifReader::LifReader(const string &filename) : file(filename.c_str(), ios
     header.reset(new LifHeader(xmlString));
 
     size_t s = 0;
-    while (file.tellg() < fileSize)
+    while (fileRef->tellg() < fileSize)
     {
         std::lock_guard<std::mutex> lock( sMutex );
         
@@ -425,9 +453,9 @@ lifIO::LifReader::LifReader(const string &filename) : file(filename.c_str(), ios
             throw logic_error("File contains wrong MemBlockCode");
 
         // Don't care about the size of the next block
-        file.seekg(4,ios::cur);
+        fileRef->seekg(4,ios::cur);
         // Read testcode
-        file>>lifChar;
+        *fileRef>>lifChar;
         if (lifChar != TestCode)
             throw logic_error("File contains wrong TestCode");
 
@@ -441,10 +469,10 @@ lifIO::LifReader::LifReader(const string &filename) : file(filename.c_str(), ios
 
         // Find next testcode
         lifChar=0;
-        while (lifChar != TestCode) {file>>lifChar;}
+        while (lifChar != TestCode) {*fileRef>>lifChar;}
         unsigned int memDescrSize = readUnsignedInt() * 2;
         // Skip over memory description
-        file.seekg(memDescrSize,ios::cur);
+        fileRef->seekg(memDescrSize,ios::cur);
 
         // Add serie if memory size is > 0
         if (memorySize > 0)
@@ -455,12 +483,12 @@ lifIO::LifReader::LifReader(const string &filename) : file(filename.c_str(), ios
             series.push_back(new LifSerie(
                     this->header->getSerieHeader(s),
                     filename,
-                    file.tellg(),
+                                          fileRef->tellg(),
                     memorySize)
                     );
             s++;
             //jump to the next memory block
-            file.seekg(static_cast<streampos>(memorySize),ios::cur);
+            fileRef->seekg(static_cast<streampos>(memorySize),ios::cur);
         }
     }
 
@@ -471,24 +499,30 @@ lifIO::LifReader::LifReader(const string &filename) : file(filename.c_str(), ios
 int lifIO::LifReader::readInt()
 {
     char buffer[4];
-    file.read(buffer,4);
+    fileRef->read(buffer,4);
     return *((int*)(buffer));
 }
 /** \brief read an unsigned int form file advancing the cursor*/
 unsigned int lifIO::LifReader::readUnsignedInt()
 {
     char buffer[4];
-    file.read(buffer,4);
+    fileRef->read(buffer,4);
     return *((unsigned int*)(buffer));
 }
 /** \brief read an unsigned long long int form file advancing the cursor*/
 unsigned long long lifIO::LifReader::readUnsignedLongLong()
 {
     char buffer[8];
-    file.read(buffer,8);
+    fileRef->read(buffer,8);
     return *((unsigned long long*)(buffer));
 }
 
+/** \brief read an unsigned long long int form file advancing the cursor*/
+void lifIO::LifReader::close_file()
+{
+    if(fileRef && fileRef->is_open())
+        fileRef->close();
+}
 
 /** \brief constructor from XML  */
 lifIO::ChannelData::ChannelData(TiXmlElement *element)

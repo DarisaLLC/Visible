@@ -17,19 +17,41 @@ namespace cm  // protection from unintended ADL
     
     typedef std::function<double(const double&, const double&)> integrate_func_t;
     
-    class cerruti_rect : public internal_singleton<cerruti_rect>
-    {
-    public:
+ //   class cerruti_rect : public internal_singleton<cerruti_rect>
+ //   {
+ //   public:
+    namespace cerruti_rect {
         
-        cerruti_rect ()
-        {
+    //    cerruti_rect ()
+    //    {
             
-        }
+     //   }
         
         //        X Y are the coordinates relative to the center
         //        a b are the half-sizes of the rectangular load
   
-        integral4_t integrate (double& X, double& Y , const double& a, const double& b) const 
+        static double integ1(const double& a, const double& b)
+        {
+            return b*asinh(a/b)+a*asinh(b/a);
+        }
+        
+        static double integ2(const double& a, const double& b)
+        {
+            return b*asinh(a/b);
+        }
+        
+        static double integ3(const double& a, const double& b)
+        {
+            return a+b - std::sqrt(a*a+b*b);
+        }
+        
+        static double integ4(const double& a, const double& b)
+        {
+            double rtn = a*atan(b/a)+0.5*b*log(1+std::pow(a/b, 2.0) );
+            return - rtn;
+        }
+        
+        static inline integral4_t integrate (double& X, double& Y , const double& a, const double& b)
         {
             integral4_t I;
        
@@ -185,28 +207,8 @@ namespace cm  // protection from unintended ADL
         }
   
     
-        static double integ1(const double& a, const double& b)
-        {
-            return b*asinh(a/b)+a*asinh(b/a);
-        }
         
-        static double integ2(const double& a, const double& b)
-        {
-            return b*asinh(a/b);
-        }
-        
-        static double integ3(const double& a, const double& b)
-        {
-            return a+b - std::sqrt(a*a+b*b);
-        }
-        
-        static double integ4(const double& a, const double& b)
-        {
-            double rtn = a*atan(b/a)+0.5*b*log(1+std::pow(a/b, 2.0) );
-            return - rtn;
-        }
-        
-      };
+      }
 }
 
 

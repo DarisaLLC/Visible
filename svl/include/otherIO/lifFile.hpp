@@ -37,12 +37,16 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 
 
+
+
 namespace lifIO
 {
     struct ChannelData;
     struct DimensionData;
     struct ScannerSettingRecord;
     struct FilterSettingRecord;
+    
+ 
     
     class LifSerieHeader
     {
@@ -107,13 +111,14 @@ namespace lifIO
         
         
         std::istreambuf_iterator<char> begin(size_t t=0);
-        std::streampos tellg(){return file.tellg();}
+        std::streampos tellg(){return fileRef->tellg();}
         unsigned long long getOffset(size_t t=0) const;
         
     private:
         unsigned long long offset;
         unsigned long long memorySize;
-        mutable std::ifstream file;
+        std::shared_ptr<std::ifstream> fileRef;
+//        mutable std::ifstream file;
         std::streampos fileSize;
         
         
@@ -151,7 +156,11 @@ namespace lifIO
         
     public:
         typedef std::shared_ptr<LifReader> ref;
-        explicit LifReader(const std::string &filename);
+        LifReader(const std::string &filename);
+        
+        static LifReader::ref create (const std::string&  fqfn_path){
+            return LifReader::ref ( new LifReader (fqfn_path));
+        }
         
         const LifHeader& getLifHeader() const {return *this->header;};
         const TiXmlDocument& getXMLHeader() const{return getLifHeader().getXMLHeader();};
@@ -163,16 +172,24 @@ namespace lifIO
         LifSerie& getSerie(size_t s){return series[s];};
         const LifSerie& getSerie(size_t s) const {return series[s];};
         
+        void close_file ();
+        
     private:
+        /**
+         * RAIII (Resource Allocation is Initialization) Exception safe handling of openning and closing of files.
+         * a functor object to delete an ifstream
+         * utility functions to create
+         */
+  
+        
         int readInt();
         unsigned int readUnsignedInt();
         unsigned long long readUnsignedLongLong();
         std::auto_ptr<LifHeader> header;
-        std::ifstream file;
+        std::shared_ptr<std::ifstream> fileRef;
         std::streampos fileSize;
         boost::ptr_vector<LifSerie> series;
-        
-        
+       
         
         
     };

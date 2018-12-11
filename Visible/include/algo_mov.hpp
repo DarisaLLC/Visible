@@ -11,7 +11,7 @@
 #include <typeindex>
 #include <map>
 #include <future>
-#include "core/singleton.hpp"
+//#include "core/singleton.hpp"
 #include "async_producer.h"
 #include "core/signaler.h"
 #include "sm_producer.h"

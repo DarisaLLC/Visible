@@ -152,7 +152,8 @@ void VisibleApp::setup()
     
     auto home_path = platform->getHomeDirectory();
     vlogger::instance().console()->info(home_path.string());
-    auto some_path = getOpenFilePath(); //"", extensions);
+//    auto some_path = getOpenFilePath(); //"", extensions);
+    boost::filesystem::path some_path = "/Users/arman/Pictures/lif/3channels.lif";
     if (! some_path.empty() || exists(some_path))
         initData(some_path);
     else{

@@ -14,7 +14,7 @@
 #include "core/signaler.h"
 #include "roiWindow.h"
 #include <chrono>
-#include "core/singleton.hpp"
+//#include "core/singleton.hpp"
 #include "core/stats.hpp"
 #include "core/stl_utils.hpp"
 
