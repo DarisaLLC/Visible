@@ -698,7 +698,7 @@ TEST(ut_similarity, run)
 }
 
 
-
+#if 0 // Not Yet
 TEST (UT_mov_processor, basic)
 {
     boost::filesystem::path test_filepath;
@@ -730,7 +730,7 @@ TEST (UT_mov_processor, basic)
     std::vector<mov_processor::channel_images_t> channels;
     mov_processor::load_channels_from_images(mFrameSet, channels);
     
-#if 0 // Not Yet
+
     auto sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
     sp->load_images(channels[0]);
     sp->operator()(0, 0);
@@ -743,9 +743,10 @@ TEST (UT_mov_processor, basic)
         for(auto i = sp->shannonProjection().begin(); i != sp->shannonProjection().end(); ++i) {
             f << *i << '\n';
         }
-#endif
+
     
 }
+#endif
 
 
 TEST (UT_cm_timer, run)

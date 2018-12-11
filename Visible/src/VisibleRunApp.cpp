@@ -23,7 +23,7 @@
 #include "algo_Lif.hpp"
 #include "Item.h"
 #include "logger.hpp"
-#include "core/singleton.hpp"
+
 
 #if defined (  HOCKEY_SUPPORT )
 #include "hockey_etc_cocoa_wrappers.h"
@@ -38,8 +38,11 @@
 #include "gui_base.hpp"
 #include "logger.hpp"
 
+
 //#include "console.h"
 
+#define APP_WIDTH 1024
+#define APP_HEIGHT 768
 
 
 
@@ -50,18 +53,19 @@ using namespace std;
 
 
 
-class VisibleRunApp : public App, public SingletonLight<VisibleRunApp>
+class VisibleRunApp : public App, public gui_base
 {
 public:
     
-    virtual ~VisibleRunApp(){
-        std::cout << " Visible App Dtor " << std::endl;
-        
-    }
+ //   VisibleRunApp();
+  //  ~VisibleRunApp();
+    
+    virtual void SetupGUIVariables() override {}
+    virtual void DrawGUI() override {}
+    virtual void QuitApp() {}
+    
     void prepareSettings( Settings *settings );
     void setup()override;
-  //  void create_lif_viewer (const boost::filesystem::path& pp = boost::filesystem::path ());
-    
     void mouseDown( MouseEvent event )override;
     void mouseMove( MouseEvent event )override;
     void mouseUp( MouseEvent event )override;
@@ -70,7 +74,6 @@ public:
     
     void update()override;
     void draw()override;
-    void close_main();
     void resize()override;
     void windowMove();
     void windowClose();
@@ -82,7 +85,7 @@ public:
     
 private:
     std::vector<std::string> m_args;
-    params::InterfaceGlRef         mTopParams;
+  //  params::InterfaceGlRef         mTopParams;
     vec2				mSize;
     Font				mFont;
     std::string			mLog;
@@ -95,8 +98,6 @@ private:
     
   
 };
-
-
 
 
 bool VisibleRunApp::shouldQuit()
@@ -126,8 +127,33 @@ void VisibleRunApp::setup()
     const fs::path plist = appPath / "VisibleRun.app/Contents/Info.plist";
     std::ifstream stream(plist.c_str(), std::ios::binary);
     Plist::readPlist(stream, mPlist);
-    
-    
+  
+    // Get the LIF file and Serie from the command line arguments
+    // args[0] = Run App Path
+    // args[1] = LIF file full path
+    // args[3] = Serie name
+    m_args = getCommandLineArgs();
+    if( ! m_args.empty() ) {
+        std::cout <<  "command line args: " ;
+        for( size_t i = 0; i < m_args.size(); i++ )
+            std::cout << "\t[" << i << "] " << m_args[i] << endl;
+    }
+#if 0
+ auto some_path = getOpenFilePath(); //"", extensions);
+    if (! some_path.empty() || exists(some_path)){
+        std::cout << m_args[1] << std::endl;
+        std::cout << some_path.string() << std::endl;
+        auto cmp = m_args[1].compare(some_path.string());
+        std::cout << cmp << std::endl;
+      //  m_args[1] = some_path.string();
+    }
+    else{
+        std::string msg = some_path.string() + " is not a valid path to a file ";
+        vlogger::instance().console()->info(msg);
+    }
+#endif
+        
+        
     for( auto display : Display::getDisplays() )
     {
         mGlobalBounds.include(display->getBounds());
@@ -135,43 +161,51 @@ void VisibleRunApp::setup()
     
     setWindowPos(getWindowSize()/3);
     
+  
     WindowRef ww = getWindow ();
+  
+    std::string cmds = m_args[1] + " [ " +  m_args[2] + " ] ";
+    
+    fs::path bpath = "/Users/arman/Pictures/lif/3channels.lif";
+    bpath = expandPath(bpath);
+    auto parts = split(bpath.string(), getPathSeparator(), true);
+    for (auto part : parts)
+        std::cout << part << std::endl;
+    
+    if(! exists(bpath))
+        cmds += " Does Not Exist ";
+    else{
+        mBrowser = lif_browser::create(bpath);
+        mContext = std::unique_ptr<lifContext>(new lifContext (ww,mBrowser, 0));
+        if (mContext->is_valid()) cmds += "  Ok ";
+    }
+   // auto bItr = mBrowser->name_to_index_map().find(m_args[2]);
+   // if (bItr != mBrowser->name_to_index_map().end())
+   // {
+   //     auto index = 0; //bItr->second;
+   //     mContext = std::unique_ptr<lifContext>(new lifContext (ww,mBrowser, index));
+   //     if (mContext->is_valid()) cmds += "  Ok ";
+   // }
+    
+    
+ 
     std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
-    ww->setTitle ("Visible build: " + buildN);
+    ww->setTitle (cmds + " Visible build: " + buildN);
     mFont = Font( "Menlo", 18 );
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     
-    ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
-    
-    // Get the LIF file and Serie from the command line arguments
-    // args[0] = Run App Path
-    // args[1] = LIF file full path
-    // args[3] = Serie name
-    m_args = getCommandLineArgs();
-
-    
-    if( ! m_args.empty() ) {
-        std::cout <<  "command line args: " ;
-        for( size_t i = 0; i < m_args.size(); i++ )
-            std::cout << "\t[" << i << "] " << m_args[i] << endl;
-    }
-
-    mBrowser = lif_browser::create(fs::path(m_args[1]));
-    auto bItr = mBrowser->name_to_index_map().find(m_args[2]);
-    if (bItr != mBrowser->name_to_index_map().end())
-    {
-        auto index = bItr->second;
-        mContext = std::unique_ptr<lifContext>(new lifContext (ww,mBrowser, index));
-    }
+   // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
     
   
     getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
     
+#if 1
     getWindow()->getSignalMove().connect( std::bind( &VisibleRunApp::windowMove, this ) );
     getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
     getWindow()->getSignalDraw().connect(std::bind( &VisibleRunApp::draw, this) );
     getWindow()->getSignalClose().connect(std::bind( &VisibleRunApp::windowClose, this) );
     getWindow()->getSignalResize().connect(std::bind( &VisibleRunApp::resize, this) );
+#endif
     
     getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
     getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
@@ -193,12 +227,12 @@ void VisibleRunApp::update_log (const std::string& msg)
 
 void VisibleRunApp::windowMouseDown( MouseEvent &mouseEvt )
 {
-  //  update_log ( "Mouse down in window" );
+  update_log ( "Mouse down in window" );
 }
 
 void VisibleRunApp::windowMove()
 {
-  //  update_log("window pos: " + toString(getWindow()->getPos()));
+    update_log("window pos: " + ci::toString(getWindow()->getPos()));
 }
 
 void VisibleRunApp::displayChange()
@@ -309,7 +343,9 @@ void prepareSettings( App::Settings *settings )
                                                          
 
 // This line tells Cinder to actually create the application
-CINDER_APP( VisibleRunApp, RendererGl, prepareSettings )
+CINDER_APP( VisibleRunApp, RendererGl( RendererGl::Options().msaa( 4 ) ), []( App::Settings *settings ) {
+    settings->setWindowSize( APP_WIDTH, APP_HEIGHT );
+} )
 
 
 #pragma GCC diagnostic pop

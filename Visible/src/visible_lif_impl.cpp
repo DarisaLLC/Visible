@@ -72,6 +72,7 @@ sequencedImageContext(ww), m_lifBrowser(lb), m_fixed_serie(true) {
     thisww->getRenderer()->makeCurrentContext(true);
     thisww->getSignalDraw().connect( [&]{ draw(); } );
     if (! m_valid) return;
+    vlogger::instance().console()->info(__LINE__);
     m_valid &= (serie_index < m_lifBrowser->internal_serie_infos().size());
     if (! m_valid) return;
     m_cur_selected_index = serie_index;
@@ -82,11 +83,12 @@ sequencedImageContext(ww), m_lifBrowser(lb), m_fixed_serie(true) {
     std::cout << std::this_thread::get_id() << std::endl;
     loadCurrentSerie();
     resize();
-
+    vlogger::instance().console()->info(__LINE__);
 }
 
 lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
 : sequencedImageContext(ww), mPath (dp), m_fixed_serie(false){
+    vlogger::instance().console()->info(__LINE__);
     m_valid = false;
     m_layout = std::make_shared<layoutManager>  ( ivec2 (10, 10) );
     m_type = Type::lif_file_viewer;
@@ -99,17 +101,20 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
     if (! m_valid) return;
     m_prev_selected_index = -1;
     setup ();
+    vlogger::instance().console()->info(__LINE__);
 }
 
 
 bool lifContext::init_with_browser (const lif_browser::ref& lb){
+    vlogger::instance().console()->info(__LINE__);
     m_valid =lb.get() != nullptr;
     if (! m_valid) return false;
     m_type = Type::lif_file_viewer;
     mPath =lb->path();
     m_valid &= (! mPath.string().empty() && exists(mPath));
     if (! m_valid) return false;
-    
+    auto logtxt = ci::toString(lb->names().size()) + " ~ " + ci::toString(lb->internal_serie_infos().size());
+    vlogger::instance().console()->info(logtxt);
     m_valid &= lb->names().size() == lb->internal_serie_infos().size();
     if (! m_valid) return false;
     m_series_names =lb->names();
@@ -117,6 +122,7 @@ bool lifContext::init_with_browser (const lif_browser::ref& lb){
     m_lifRef =lb->reader();
     auto msg = tostr(m_series_book.size()) + "  Series  ";
     vlogger::instance().console()->info(msg);
+    vlogger::instance().console()->info(__LINE__);
     return true;
 }
 

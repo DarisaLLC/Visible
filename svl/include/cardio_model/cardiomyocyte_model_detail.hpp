@@ -168,7 +168,7 @@ void applied_shearing_stress (const float N, const size_t nx, std::vector<double
             
             for (auto i = 0; i < x_.size(); i++)
             {
-                cm::integral4_t I = cm::cerruti_rect::instance().integrate(x_[i], zerod, a, b) * C;
+                cm::integral4_t I = cm::cerruti_rect::integrate(x_[i], zerod, a, b) * C;
                 F_(i,0) = (1.0 - poisson_ratio)*I(0)+poisson_ratio*I(1);
             }
             clone_column(F_);

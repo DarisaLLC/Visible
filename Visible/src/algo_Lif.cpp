@@ -21,7 +21,7 @@
 #include <typeindex>
 #include <map>
 #include <future>
-#include "core/singleton.hpp"
+//#include "core/singleton.hpp"
 #include "async_producer.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
@@ -36,14 +36,11 @@
 
 lif_browser::lif_browser(const boost::filesystem::path&  fqfn_path) : mPath(fqfn_path){
     
-    if ( ! mPath.empty () )
+    if ( ! mPath.empty () && exists(mPath))
     {
-        std::string msg = mPath.string() + " Loaded ";
-        vlogger::instance().console()->info(msg);
-        
+ 
         try {
-            
-            m_lifRef =  std::shared_ptr<lifIO::LifReader> (new lifIO::LifReader (mPath.string()));
+            m_lifRef =  lifIO::LifReader::create(fqfn_path.string());
             get_series_info (m_lifRef);
             m_series_names.clear();
             BOOST_FOREACH(internal_serie_info& si, m_series_book){
@@ -51,10 +48,18 @@ lif_browser::lif_browser(const boost::filesystem::path&  fqfn_path) : mPath(fqfn
                 get_first_frame(si,0, mat);
                 si.poster = mat.clone();
                 m_series_names.push_back (si.name);
+                std::cout << si.name << std::endl;
             }
-            auto msg = tostr(m_series_book.size()) + "  Series  ";
+            std::string msg = mPath.string() + " Loaded ";
+            vlogger::instance().console()->info(msg);
+            msg = tostr(m_series_book.size()) + "  Series  ";
             vlogger::instance().console()->info(msg);
         }
+        catch( std::exception & excp )
+        {
+            std::cerr << std::string(excp.what()) << std::endl;
+        }
+
         catch( ... ) {
             vlogger::instance().console()->debug("Unable to load LIF file");
             return;
