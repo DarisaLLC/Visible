@@ -173,6 +173,7 @@ namespace lifIO
         const LifSerie& getSerie(size_t s) const {return series[s];};
         
         void close_file ();
+        bool isValid () const { return m_Valid; }
         
     private:
         /**
@@ -189,6 +190,8 @@ namespace lifIO
         std::shared_ptr<std::ifstream> fileRef;
         std::streampos fileSize;
         boost::ptr_vector<LifSerie> series;
+        mutable bool m_Valid;
+        mutable std::mutex m_mutex;
        
         
         

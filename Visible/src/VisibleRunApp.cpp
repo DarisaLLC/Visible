@@ -22,12 +22,10 @@
 #include "otherIO/lifFile.hpp"
 #include "algo_Lif.hpp"
 #include "Item.h"
-#include "logger.hpp"
+#include "cinder/Log.h"
+#include "cinder/CinderAssert.h"
 
 
-#if defined (  HOCKEY_SUPPORT )
-#include "hockey_etc_cocoa_wrappers.h"
-#endif
 
 #include "LifContext.h"
 #include "core/core.hpp"
@@ -36,7 +34,7 @@
 #include "CinderImGui.h"
 #include "gui_handler.hpp"
 #include "gui_base.hpp"
-#include "logger.hpp"
+//#include "logger.hpp"
 
 
 //#include "console.h"
@@ -44,6 +42,63 @@
 #define APP_WIDTH 1024
 #define APP_HEIGHT 768
 
+
+namespace anonymous {
+    
+    struct ifStreamDeleter
+    {
+        void operator()(std::ifstream* p) const
+        {
+            if ( p != nullptr )
+            {
+                p->close();
+                delete p;
+            }
+        }
+    };
+    
+    
+    std::shared_ptr<std::ifstream> make_shared_ifstream(std::ifstream * ifstream_ptr)
+    {
+        return std::shared_ptr<std::ifstream>(ifstream_ptr, ifStreamDeleter());
+    }
+    
+    std::shared_ptr<std::ifstream> make_shared_ifstream(std::string filename)
+    {
+        return make_shared_ifstream(new std::ifstream(filename, std::ifstream::in | std::ifstream::binary));
+    }
+    
+}
+
+bool check_input (const string &filename){
+    const int MemBlockCode = 0x70, TestCode = 0x2a;
+    char lifChar;
+    bool ok = false;
+    
+    auto fileRef = anonymous::make_shared_ifstream(filename.c_str());
+    ok = (fileRef &&  fileRef->is_open());
+    if (! fileRef) return false;
+    
+    // Get size of the file
+    fileRef->seekg(0,ios::end);
+    auto fileSize = fileRef->tellg();
+    fileRef->seekg(0,ios::beg);
+    cout<<filename<<" is "<<fileSize<<" bytes"<<endl;
+    
+    char buffer[4];
+    fileRef->read(buffer,4);
+    int32_t ibuf = *((int*)(buffer));
+    ok = MemBlockCode == ibuf;
+    
+    
+    // Skip the size of next block
+    fileRef->seekg(4,ios::cur);
+    *fileRef>>lifChar;
+    ok = lifChar == TestCode;
+    
+    return ok;
+    
+}
 
 
 
@@ -328,23 +383,79 @@ void VisibleRunApp::resize ()
 
 
 void prepareSettings( App::Settings *settings )
-    {
-  
-        
-        settings->setHighDensityDisplayEnabled();
-        settings->setWindowSize(lifContext::startup_display_size().x, lifContext::startup_display_size().y);
-        settings->setFrameRate( 60 );
-        settings->setResizable( true );
-        //    settings->setWindowSize( 640, 480 );
-        //    settings->setFullScreen( false );
-        //    settings->setResizable( true );
+{
+    CI_LOG_I( "entering prepareSettings()" );
+    
+    const auto &args = settings->getCommandLineArgs();
+    if( ! args.empty() ) {
+        CI_LOG_I( "command line args: " );
+        for( size_t i = 0; i < args.size(); i++ )
+            console() << "\t[" << i << "] " << args[i] << endl;
     }
-                                                         
+    
+    auto ok = check_input(args[1]);
+    std::cout << "File is " << std::boolalpha << ok << std::endl;
+    
+    CI_LOG_I( "environment vars: " );
+    const auto &envVars = getEnvironmentVariables();
+    for( auto &env : envVars )
+        CI_LOG_I( "{" << env.first  << "} = {" << env.second << "}" );
+    
+    settings->setWindowPos( 50, 50 );
+    settings->setWindowSize( 900, 500 );
+    settings->setHighDensityDisplayEnabled();
+    //    settings->setResizable( false );
+    //    settings->setBorderless();
+    //    settings->setAlwaysOnTop();
+    //    settings->setMultiTouchEnabled();
+    //    settings->setMultiTouchEnabled( false );
+    //    settings->disableFrameRate();
+    //    settings->setFrameRate( 20 );
+    //    settings->setTitle( "Blarg" ); // FIXME: seems broken on mac, but did it ever work?
+    //    settings->setShouldQuit();
+    
+#if defined( CINDER_COCOA_TOUCH )
+    settings->setStatusBarEnabled( false ); // FIXME: status bar is always visible?
+#endif
+    
+#if defined( CINDER_MSW )
+    settings->setConsoleWindowEnabled();
+#endif
+    
+
+}
+
+//void prepareSettings( App::Settings *settings )
+//    {
+//
+//
+//        settings->setHighDensityDisplayEnabled();
+//        settings->setWindowSize(lifContext::startup_display_size().x, lifContext::startup_display_size().y);
+//        settings->setFrameRate( 60 );
+//        settings->setResizable( true );
+//        //    settings->setWindowSize( 640, 480 );
+//        //    settings->setFullScreen( false );
+//        //    settings->setResizable( true );
+//    }
+//
+
+#define VISIBLERUN_APP_MAC( APP, RENDERER, ... )                                        \
+int main( int argc, char* argv[] )                                            \
+{                                                                                    \
+cinder::app::RendererRef renderer( new RENDERER );                                \
+cinder::app::AppMac::main<APP>( renderer, #APP, argc, argv, ##__VA_ARGS__ );    \
+return 0;                                                                        \
+}
+
+VISIBLERUN_APP_MAC( VisibleRunApp, RendererGl )
 
 // This line tells Cinder to actually create the application
-CINDER_APP( VisibleRunApp, RendererGl( RendererGl::Options().msaa( 4 ) ), []( App::Settings *settings ) {
-    settings->setWindowSize( APP_WIDTH, APP_HEIGHT );
-} )
+
+///CINDER_APP( VisibleRunApp, RendererGl, prepareSettings )
+
+//CINDER_APP( VisibleRunApp, RendererGl( RendererGl::Options().msaa( 4 ) ), []( App::Settings *settings ) {
+//    settings->setWindowSize( APP_WIDTH, APP_HEIGHT );
+//} )
 
 
 #pragma GCC diagnostic pop

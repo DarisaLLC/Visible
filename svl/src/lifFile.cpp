@@ -17,7 +17,7 @@
 #include <numeric>
 #include <sstream>
 
-namespace anonymous {
+namespace  {
     
     struct ifStreamDeleter
     {
@@ -283,7 +283,7 @@ float lifIO::LifSerieHeader::frame_duration_ms() const
 lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize) :
  LifSerieHeader(serie)
 {
-    fileRef = anonymous::make_shared_ifstream(filename.c_str());
+    fileRef = make_shared_ifstream(filename.c_str());
     if(! fileRef || !fileRef->is_open())
         throw invalid_argument(("No such file as "+filename).c_str());
 
@@ -402,30 +402,41 @@ void lifIO::LifHeader::parseHeader()
 /** \brief Constructor from lif file name */
 lifIO::LifReader::LifReader(const string &filename)
 {
-    static std::mutex sMutex;
-    std::unique_lock <std::mutex> lock(sMutex);
+
+const int MemBlockCode = 0x70, TestCode = 0x2a;
+char lifChar;
+
+    bool ok = false;
     
-    const int MemBlockCode = 0x70, TestCode = 0x2a;
-    char lifChar;
-    
-    fileRef = anonymous::make_shared_ifstream(filename.c_str());
-    if(! fileRef) //|| !fileRef->is_open())
-        throw invalid_argument(("No such file as "+filename).c_str());
+    auto fileRef = make_shared_ifstream(filename.c_str());
+    ok = (fileRef &&  fileRef->is_open());
+    if (! fileRef){
+        m_Valid = false;
+        return;
+    }
     
     // Get size of the file
     fileRef->seekg(0,ios::end);
-    fileSize = fileRef->tellg();
+    auto fileSize = fileRef->tellg();
     fileRef->seekg(0,ios::beg);
     cout<<filename<<" is "<<fileSize<<" bytes"<<endl;
+    
+    char buffer[4];
 
-    if(readInt() != MemBlockCode)
-        throw invalid_argument((filename+" is not a Leica SP5 file").c_str());
-
+    fileRef->read(buffer,4);
+    int32_t ibuf = *((int*)(buffer));
+    ok = MemBlockCode == ibuf;
+    
+    
     // Skip the size of next block
     fileRef->seekg(4,ios::cur);
     *fileRef>>lifChar;
-    if(lifChar != TestCode)
-        throw invalid_argument((filename+" is not a Leica SP5 file").c_str());
+    ok = lifChar == TestCode;
+    
+    if (!ok){
+        m_Valid = false;
+        return;
+    }
 
     unsigned int xmlChars = readUnsignedInt();
     xmlChars*=2;
@@ -444,10 +455,11 @@ lifIO::LifReader::LifReader(const string &filename)
 
     header.reset(new LifHeader(xmlString));
 
+
     size_t s = 0;
     while (fileRef->tellg() < fileSize)
     {
-        std::lock_guard<std::mutex> lock( sMutex );
+        std::lock_guard<std::mutex> lock( m_mutex );
         
         // Check LIF test value
         int lifCheck = readInt();
