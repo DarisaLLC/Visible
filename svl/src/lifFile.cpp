@@ -403,6 +403,8 @@ void lifIO::LifHeader::parseHeader()
 lifIO::LifReader::LifReader(const string &filename)
 {
     static std::mutex sMutex;
+    std::unique_lock <std::mutex> lock(sMutex);
+    
     const int MemBlockCode = 0x70, TestCode = 0x2a;
     char lifChar;
     

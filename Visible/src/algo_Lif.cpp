@@ -34,45 +34,30 @@
 #include "algo_Lif.hpp"
 #include "logger.hpp"
 
-lif_browser::lif_browser(const boost::filesystem::path&  fqfn_path) : mPath(fqfn_path){
+lif_browser::lif_browser(const std::string&  fqfn_path) : mFqfnPath(fqfn_path){
     
-    if ( ! mPath.empty () && exists(mPath))
-    {
- 
-        try {
-            m_lifRef =  lifIO::LifReader::create(fqfn_path.string());
-            get_series_info (m_lifRef);
-            m_series_names.clear();
-            BOOST_FOREACH(internal_serie_info& si, m_series_book){
-                cv::Mat mat;
-                get_first_frame(si,0, mat);
-                si.poster = mat.clone();
-                m_series_names.push_back (si.name);
-                std::cout << si.name << std::endl;
-            }
-            std::string msg = mPath.string() + " Loaded ";
-            vlogger::instance().console()->info(msg);
-            msg = tostr(m_series_book.size()) + "  Series  ";
-            vlogger::instance().console()->info(msg);
-        }
-        catch( std::exception & excp )
-        {
-            std::cerr << std::string(excp.what()) << std::endl;
-        }
-
-        catch( ... ) {
-            vlogger::instance().console()->debug("Unable to load LIF file");
-            return;
-        }
-        
-    }
 }
 
+const lif_serie_data  lif_browser::get_serie_by_index (unsigned index){
+    lif_serie_data si;
+    if (m_series_book.empty())
+        get_series_info();
+    if (index < m_series_book.size())
+        si = m_series_book[index];
+    return si;
+    
+}
+
+const std::vector<lif_serie_data>& lif_browser::get_all_series  () const{
+    if (m_series_book.empty())
+        get_series_info();
+    return m_series_book;
+}
 /*
  * LIF files are plane organized. 3 Channel LIF file is 3 * rows by cols by ONE byte. 
  */
 
-void lif_browser::get_first_frame (internal_serie_info& si,  const int frameCount, cv::Mat& out)
+void lif_browser::get_first_frame (lif_serie_data& si,  const int frameCount, cv::Mat& out)
 {
     auto serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(si.index), stl_utils::null_deleter());
     // opencv rows, cols
@@ -83,41 +68,48 @@ void lif_browser::get_first_frame (internal_serie_info& si,  const int frameCoun
     out = dst;
 }
 
-void  lif_browser::get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer)
+void  lif_browser::get_series_info () const
 {
-    m_series_book.clear ();
-    for (unsigned ss = 0; ss < lifer->getNbSeries(); ss++)
-    {
-        internal_serie_info si;
-        
-        si.index = ss;
-        si.name = lifer->getSerie(ss).getName();
-        si.timesteps = static_cast<uint32_t>(lifer->getSerie(ss).getNbTimeSteps());
-        si.pixelsInOneTimestep = static_cast<uint32_t>(lifer->getSerie(ss).getNbPixelsInOneTimeStep());
-        si.dimensions = lifer->getSerie(ss).getSpatialDimensions();
-        si.channelCount = static_cast<uint32_t>(lifer->getSerie(ss).getChannels().size());
-        si.channels.clear ();
-        for (lifIO::ChannelData cda : lifer->getSerie(ss).getChannels())
-        {
-            si.channel_names.push_back(cda.getName());
-            si.channels.emplace_back(cda);
-        }
-        
-        // Get timestamps in to time_spec_t and store it in info
-        si.timeSpecs.resize (lifer->getSerie(ss).getTimestamps().size());
-        
-        // Adjust sizes based on the number of bytes
-        std::transform(lifer->getSerie(ss).getTimestamps().begin(), lifer->getSerie(ss).getTimestamps().end(),
-                       si.timeSpecs.begin(), [](lifIO::LifSerie::timestamp_t ts) { return time_spec_t ( ts / 10000.0); });
-        
-        si.length_in_seconds = lifer->getSerie(ss).total_duration ();
-        
-        m_series_book.emplace_back (si);
-        // Fill up names / index map -- convenience
-        m_name_to_index[si.name] = static_cast<int>(ss);
-        m_index_to_name[m_name_to_index[si.name]] = si.name;
-    }
+    std::lock_guard<std::mutex> lock(m_mutex);
     
+    if ( exists(boost::filesystem::path(mFqfnPath)))
+    {
+        m_lifRef =  lifIO::LifReader::create(mFqfnPath);
+        m_series_book.clear ();
+        
+        for (unsigned ss = 0; ss < m_lifRef->getNbSeries(); ss++)
+        {
+            lif_serie_data si;
+            
+            si.index = ss;
+            si.name = m_lifRef->getSerie(ss).getName();
+            si.timesteps = static_cast<uint32_t>(m_lifRef->getSerie(ss).getNbTimeSteps());
+            si.pixelsInOneTimestep = static_cast<uint32_t>(m_lifRef->getSerie(ss).getNbPixelsInOneTimeStep());
+            si.dimensions = m_lifRef->getSerie(ss).getSpatialDimensions();
+            si.channelCount = static_cast<uint32_t>(m_lifRef->getSerie(ss).getChannels().size());
+            si.channels.clear ();
+            for (lifIO::ChannelData cda : m_lifRef->getSerie(ss).getChannels())
+            {
+                si.channel_names.push_back(cda.getName());
+                si.channels.emplace_back(cda);
+            }
+            
+            // Get timestamps in to time_spec_t and store it in info
+            si.timeSpecs.resize (m_lifRef->getSerie(ss).getTimestamps().size());
+            
+            // Adjust sizes based on the number of bytes
+            std::transform(m_lifRef->getSerie(ss).getTimestamps().begin(), m_lifRef->getSerie(ss).getTimestamps().end(),
+                           si.timeSpecs.begin(), [](lifIO::LifSerie::timestamp_t ts) { return time_spec_t ( ts / 10000.0); });
+            
+            si.length_in_seconds = m_lifRef->getSerie(ss).total_duration ();
+            
+            m_series_book.emplace_back (si);
+            // Fill up names / index map -- convenience
+            auto index = static_cast<int>(ss);
+            m_name_to_index[si.name] = index;
+            m_index_to_name[index] = si.name;
+        }
+    }
   
     
 }

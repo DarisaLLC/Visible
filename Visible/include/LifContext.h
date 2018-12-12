@@ -140,12 +140,12 @@ private:
     lif_browser::ref m_lifBrowser;
     std::shared_ptr<lif_processor> m_lifProcRef;
     std::shared_ptr<lifIO::LifReader> m_lifRef;
-    std::vector<internal_serie_info> m_series_book;
+    std::vector<lif_serie_data> m_series_book;
     std::vector<std::string> m_series_names;
 	void loadCurrentSerie ();
 	bool have_lif_serie ();
     std::shared_ptr<lifIO::LifSerie> m_cur_lif_serie_ref;
-    internal_serie_info m_serie;
+    lif_serie_data m_serie;
     boost::filesystem::path mPath;
     int m_cur_selected_index;
     int m_prev_selected_index;
