@@ -294,13 +294,13 @@ void VisibleApp::initData( const fs::path &path )
     mCurrentLifFilePath = path;
     mLifRef = lif_browser::create(path);
     
-    auto series = mLifRef->internal_serie_infos();
+    auto series = mLifRef->get_all_series ();
 
-	for( vector<internal_serie_info>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt )
+	for( vector<lif_serie_data>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt )
 		createItem( *serieIt, int(serieIt - series.begin()) );
 }
 
-void VisibleApp::createItem( const internal_serie_info &serie, int index )
+void VisibleApp::createItem( const lif_serie_data &serie, int index )
 {
     string title				= serie.name;
     string desc					= " Channels: " + to_string(serie.channelCount) +

@@ -166,9 +166,8 @@ void VisibleRunApp::setup()
   
     std::string cmds = m_args[1] + " [ " +  m_args[2] + " ] ";
     
-    fs::path bpath = "/Users/arman/Pictures/lif/3channels.lif";
-    bpath = expandPath(bpath);
-    auto parts = split(bpath.string(), getPathSeparator(), true);
+    std::string bpath = m_args[1];
+    auto parts = split(bpath, getPathSeparator(), true);
     for (auto part : parts)
         std::cout << part << std::endl;
     

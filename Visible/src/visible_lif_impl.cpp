@@ -56,7 +56,7 @@ using namespace svl;
 
 
 
-              /************************
+                    /************************
                      *
                      *  Setup & Load File
                      *
@@ -73,7 +73,7 @@ sequencedImageContext(ww), m_lifBrowser(lb), m_fixed_serie(true) {
     thisww->getSignalDraw().connect( [&]{ draw(); } );
     if (! m_valid) return;
     vlogger::instance().console()->info(__LINE__);
-    m_valid &= (serie_index < m_lifBrowser->internal_serie_infos().size());
+    m_valid &= (serie_index < m_lifBrowser->get_all_series ().size());
     if (! m_valid) return;
     m_cur_selected_index = serie_index;
     m_serie = m_series_book[m_cur_selected_index];
@@ -96,7 +96,7 @@ lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
         mPath = getOpenFilePath();
     m_valid = ! mPath.string().empty() && exists(mPath);
  
-    m_lifBrowser = lif_browser::create(mPath);
+    m_lifBrowser = lif_browser::create(mPath.string());
     m_valid &= init_with_browser(m_lifBrowser);
     if (! m_valid) return;
     m_prev_selected_index = -1;
@@ -113,12 +113,12 @@ bool lifContext::init_with_browser (const lif_browser::ref& lb){
     mPath =lb->path();
     m_valid &= (! mPath.string().empty() && exists(mPath));
     if (! m_valid) return false;
-    auto logtxt = ci::toString(lb->names().size()) + " ~ " + ci::toString(lb->internal_serie_infos().size());
+    auto logtxt = ci::toString(lb->names().size()) + " ~ " + ci::toString(lb->get_all_series ().size());
     vlogger::instance().console()->info(logtxt);
-    m_valid &= lb->names().size() == lb->internal_serie_infos().size();
+    m_valid &= lb->names().size() == lb->get_all_series ().size();
     if (! m_valid) return false;
     m_series_names =lb->names();
-    m_series_book =lb->internal_serie_infos();
+    m_series_book =lb->get_all_series ();
     m_lifRef =lb->reader();
     auto msg = tostr(m_series_book.size()) + "  Series  ";
     vlogger::instance().console()->info(msg);

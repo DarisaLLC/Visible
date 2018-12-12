@@ -5,6 +5,10 @@
 //  Created by Arman Garakani on 5/16/16.
 //
 //
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 #include <iostream>
 #include <chrono>
 #include "gtest/gtest.h"
@@ -81,6 +85,7 @@ SurfaceRef get_surface(const std::string & path){
     return sp;
 }
 
+#if 0
 std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655, 39.0342,
     38.8791, 38.8527, 39.0099, 38.8608, 38.9188, 38.8499, 38.6693,
     38.2513, 37.9095, 37.3313, 36.765, 36.3621, 35.7261, 35.0656,
@@ -851,7 +856,7 @@ TEST (UT_QtimeCache, run)
 }
 
 
-
+#endif
 
 
 
@@ -877,3 +882,5 @@ int main(int argc, char ** argv)
 #include "ut_lif.hpp"
 
 
+
+#pragma GCC diagnostic pop

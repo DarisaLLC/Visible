@@ -42,7 +42,7 @@ using default_factory = synchronous_factory;
 
 #endif
 
-class internal_serie_info
+class lif_serie_data
 {
 public:
     uint32_t index;
@@ -60,7 +60,7 @@ public:
     float  length_in_seconds;
     
     
-    friend std::ostream& operator<< (std::ostream& out, const internal_serie_info& se)
+    friend std::ostream& operator<< (std::ostream& out, const lif_serie_data& se)
     {
         out << "Serie:    " << se.name << std::endl;
         out << "Channels: " << se.channelCount << std::endl;
@@ -92,30 +92,33 @@ class lif_browser : public LifBrowser
 public:
     
     typedef std::shared_ptr<class lif_browser> ref;
-    lif_browser(const boost::filesystem::path&  fqfn_path);
+    lif_browser(const std::string&  fqfn_path);
     
-    static lif_browser::ref create (const boost::filesystem::path&  fqfn_path){
+    static lif_browser::ref create (const std::string&  fqfn_path){
         return std::shared_ptr<lif_browser> ( new lif_browser (fqfn_path));
     }
     
     const lifIO::LifReader::ref& reader () const { return m_lifRef; }
-    const std::vector<internal_serie_info>& internal_serie_infos () const { return m_series_book; }
-    const boost::filesystem::path& path () const { return mPath; }
+    const lif_serie_data get_serie_by_index (unsigned index);
+    
+    const std::vector<lif_serie_data>& get_all_series  () const; 
+    const std::string& path () const { return mFqfnPath; }
     const std::vector<std::string>& names () const { return m_series_names; }
     const std::map<std::string,int>& name_to_index_map () const { return m_name_to_index; }
     const std::map<int,std::string>& index_to_name_map () const { return m_index_to_name; }
     
 private:
-    std::shared_ptr<lifIO::LifReader> m_lifRef;
-    std::vector<internal_serie_info> m_series_book;
+    mutable lifIO::LifReader::ref m_lifRef;
+    mutable std::vector<lif_serie_data> m_series_book;
     std::vector<cv::Mat> m_series_posters;
     std::vector<std::string> m_series_names;
-    std::map<std::string,int> m_name_to_index;
-    std::map<int,std::string> m_index_to_name;
+    mutable std::map<std::string,int> m_name_to_index;
+    mutable std::map<int,std::string> m_index_to_name;
+    mutable std::mutex m_mutex;
     
-    boost::filesystem::path mPath;
-    void get_first_frame (internal_serie_info& si,  const int frameCount, cv::Mat& out);
-    void  get_series_info (const std::shared_ptr<lifIO::LifReader>& lifer);
+    std::string mFqfnPath;
+    void get_first_frame (lif_serie_data& si,  const int frameCount, cv::Mat& out);
+    void  get_series_info () const;
     
 };
 

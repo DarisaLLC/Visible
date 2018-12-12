@@ -84,7 +84,7 @@ public:
     void resize() override;
     
     void initData( const fs::path &path );
-    void createItem( const internal_serie_info &serie, int serieNumber );
+    void createItem( const lif_serie_data &serie, int serieNumber );
     
     void fileDrop( FileDropEvent event ) override;
     
