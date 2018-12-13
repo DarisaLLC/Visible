@@ -402,13 +402,13 @@ void lifIO::LifHeader::parseHeader()
 /** \brief Constructor from lif file name */
 lifIO::LifReader::LifReader(const string &filename)
 {
-
-const int MemBlockCode = 0x70, TestCode = 0x2a;
-char lifChar;
+    std::lock_guard<std::mutex> lock( m_mutex );
+    const int MemBlockCode = 0x70, TestCode = 0x2a;
+    char lifChar;
 
     bool ok = false;
     
-    auto fileRef = make_shared_ifstream(filename.c_str());
+    auto fileRef = make_shared_ifstream(filename);
     ok = (fileRef &&  fileRef->is_open());
     if (! fileRef){
         m_Valid = false;

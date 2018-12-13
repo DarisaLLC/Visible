@@ -6,30 +6,28 @@
 #pragma GCC diagnostic ignored "-Wunused-private-field"
 #pragma GCC diagnostic ignored "-Wcomma"
 
-#include "cinder_opencv.h"
+#include "core/core.hpp"
+#include "Plist.hpp"
+#include "otherIO/lifFile.hpp"
+#include "algo_Lif.hpp"
+#include "LifContext.h"
+
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/Context.h"
 #include "cinder/gl/gl.h"
 #include "cinder/ImageIo.h"
-#include "cinder/Utilities.h"
-#include "cinder/app/Platform.h"
-#include "cinder/Url.h"
-#include "cinder/System.h"
+//#include "cinder/Utilities.h"
+//#include "cinder/app/Platform.h"
+//#include "cinder/Url.h"
+//#include "cinder/System.h"
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "otherIO/lifFile.hpp"
-#include "algo_Lif.hpp"
-#include "Item.h"
+
 #include "cinder/Log.h"
 #include "cinder/CinderAssert.h"
 
-
-
-#include "LifContext.h"
-#include "core/core.hpp"
-#include "Plist.hpp"
 #include <map>
 #include "CinderImGui.h"
 #include "gui_handler.hpp"
@@ -37,10 +35,16 @@
 //#include "logger.hpp"
 
 
+#include <stdexcept>
+
+#include <sys/stat.h>
+
 //#include "console.h"
 
 #define APP_WIDTH 1024
 #define APP_HEIGHT 768
+
+#pragma GCC diagnostic pop
 
 
 namespace anonymous {
@@ -65,36 +69,35 @@ namespace anonymous {
     
     std::shared_ptr<std::ifstream> make_shared_ifstream(std::string filename)
     {
-        return make_shared_ifstream(new std::ifstream(filename, std::ifstream::in | std::ifstream::binary));
+        return make_shared_ifstream(new std::ifstream(filename, ios::in | ios::binary));
     }
+ 
     
+        long int file_size(const std::string& file_name) {
+    #if defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
+    #define STAT_IDENTIFIER stat //for MacOS X and other Unix-like systems
+    #elif defined(_WIN32)
+    #define STAT_IDENTIFIER _stat //for Windows systems, both 32bit and 64bit?
+    #endif
+            struct STAT_IDENTIFIER st;
+            if(STAT_IDENTIFIER(file_name.c_str(), &st) == -1) {
+                throw std::runtime_error("stat error!");
+            }
+            return st.st_size;
+        }
+
 }
 
 bool check_input (const string &filename){
-    const int MemBlockCode = 0x70, TestCode = 0x2a;
-    char lifChar;
+ 
     bool ok = false;
     
-    auto fileRef = anonymous::make_shared_ifstream(filename.c_str());
-    ok = (fileRef &&  fileRef->is_open());
-    if (! fileRef) return false;
+    auto usize = file_size(filename);
     
-    // Get size of the file
-    fileRef->seekg(0,ios::end);
-    auto fileSize = fileRef->tellg();
-    fileRef->seekg(0,ios::beg);
-    cout<<filename<<" is "<<fileSize<<" bytes"<<endl;
-    
-    char buffer[4];
-    fileRef->read(buffer,4);
-    int32_t ibuf = *((int*)(buffer));
-    ok = MemBlockCode == ibuf;
-    
-    
-    // Skip the size of next block
-    fileRef->seekg(4,ios::cur);
-    *fileRef>>lifChar;
-    ok = lifChar == TestCode;
+    cout << "usize "  << usize << std::endl;
+    boost::filesystem::path bpath(filename);
+    ok = exists(bpath) && is_regular_file(bpath);
+    cout << boost::filesystem::file_size(bpath) << std::endl;
     
     return ok;
     
@@ -193,6 +196,8 @@ void VisibleRunApp::setup()
         for( size_t i = 0; i < m_args.size(); i++ )
             std::cout << "\t[" << i << "] " << m_args[i] << endl;
     }
+
+    
 #if 0
  auto some_path = getOpenFilePath(); //"", extensions);
     if (! some_path.empty() || exists(some_path)){
@@ -219,12 +224,14 @@ void VisibleRunApp::setup()
   
     WindowRef ww = getWindow ();
   
-    std::string cmds = m_args[1] + " [ " +  m_args[2] + " ] ";
+
     
     std::string bpath = m_args[1];
     auto parts = split(bpath, getPathSeparator(), true);
     for (auto part : parts)
         std::cout << part << std::endl;
+    
+    auto cmds = m_args[1];
     
     if(! exists(bpath))
         cmds += " Does Not Exist ";
@@ -244,7 +251,7 @@ void VisibleRunApp::setup()
     
  
     std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
-    ww->setTitle (cmds + " Visible build: " + buildN);
+    ww->setTitle ( " Visible build: " + buildN);
     mFont = Font( "Menlo", 18 );
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     
@@ -384,8 +391,6 @@ void VisibleRunApp::resize ()
 
 void prepareSettings( App::Settings *settings )
 {
-    CI_LOG_I( "entering prepareSettings()" );
-    
     const auto &args = settings->getCommandLineArgs();
     if( ! args.empty() ) {
         CI_LOG_I( "command line args: " );
@@ -396,66 +401,27 @@ void prepareSettings( App::Settings *settings )
     auto ok = check_input(args[1]);
     std::cout << "File is " << std::boolalpha << ok << std::endl;
     
-    CI_LOG_I( "environment vars: " );
-    const auto &envVars = getEnvironmentVariables();
-    for( auto &env : envVars )
-        CI_LOG_I( "{" << env.first  << "} = {" << env.second << "}" );
-    
-    settings->setWindowPos( 50, 50 );
-    settings->setWindowSize( 900, 500 );
     settings->setHighDensityDisplayEnabled();
-    //    settings->setResizable( false );
-    //    settings->setBorderless();
-    //    settings->setAlwaysOnTop();
-    //    settings->setMultiTouchEnabled();
-    //    settings->setMultiTouchEnabled( false );
-    //    settings->disableFrameRate();
-    //    settings->setFrameRate( 20 );
-    //    settings->setTitle( "Blarg" ); // FIXME: seems broken on mac, but did it ever work?
-    //    settings->setShouldQuit();
-    
-#if defined( CINDER_COCOA_TOUCH )
-    settings->setStatusBarEnabled( false ); // FIXME: status bar is always visible?
-#endif
-    
-#if defined( CINDER_MSW )
-    settings->setConsoleWindowEnabled();
-#endif
-    
-
+    settings->setWindowSize(lifContext::startup_display_size().x, lifContext::startup_display_size().y);
+    settings->setFrameRate( 60 );
+    settings->setResizable( true );
+    //    settings->setWindowSize( 640, 480 );
+    //    settings->setFullScreen( false );
+    //    settings->setResizable( true );
 }
 
-//void prepareSettings( App::Settings *settings )
-//    {
-//
-//
-//        settings->setHighDensityDisplayEnabled();
-//        settings->setWindowSize(lifContext::startup_display_size().x, lifContext::startup_display_size().y);
-//        settings->setFrameRate( 60 );
-//        settings->setResizable( true );
-//        //    settings->setWindowSize( 640, 480 );
-//        //    settings->setFullScreen( false );
-//        //    settings->setResizable( true );
-//    }
-//
-
-#define VISIBLERUN_APP_MAC( APP, RENDERER, ... )                                        \
-int main( int argc, char* argv[] )                                            \
-{                                                                                    \
-cinder::app::RendererRef renderer( new RENDERER );                                \
-cinder::app::AppMac::main<APP>( renderer, #APP, argc, argv, ##__VA_ARGS__ );    \
-return 0;                                                                        \
-}
-
-VISIBLERUN_APP_MAC( VisibleRunApp, RendererGl )
-
-// This line tells Cinder to actually create the application
-
-///CINDER_APP( VisibleRunApp, RendererGl, prepareSettings )
-
-//CINDER_APP( VisibleRunApp, RendererGl( RendererGl::Options().msaa( 4 ) ), []( App::Settings *settings ) {
-//    settings->setWindowSize( APP_WIDTH, APP_HEIGHT );
-//} )
 
 
-#pragma GCC diagnostic pop
+
+// settings fn from top of file:
+CINDER_APP( VisibleRunApp, RendererGl, prepareSettings )
+
+
+//int main( int argc, char* argv[] )
+//{
+//    cinder::app::RendererRef renderer( new RendererGl );
+//    cinder::app::AppMac::main<VisibleRunApp>( renderer, "VisibleRunApp", argc, argv, nullptr); // prepareSettings);
+//    return 0;
+//}
+
+
