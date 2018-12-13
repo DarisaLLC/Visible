@@ -205,7 +205,6 @@
 		C26F5FDA21B0AA6D00EAE156 /* matpixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696D1CED3E2C0045FF57 /* matpixel.cpp */; };
 		C26F5FDB21B0AA6D00EAE156 /* highgui.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7F217FDA6600FA9F43 /* highgui.cc */; };
 		C26F5FDF21B0AA6D00EAE156 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995581B128DF400A5C623 /* IOKit.framework */; };
-		C26F5FE521B0AA6D00EAE156 /* libcinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC61F6B4D6500A0E908 /* libcinder.a */; };
 		C26F5FEA21B0AA6D00EAE156 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
 		C26F5FEB21B0AA6D00EAE156 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C276ECA81C72B5D900242CDB /* CoreGraphics.framework */; };
 		C26F5FEC21B0AA6D00EAE156 /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995591B128DF400A5C623 /* IOSurface.framework */; };
@@ -216,7 +215,6 @@
 		C26F5FF121B0AA6D00EAE156 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B10FF439BC000DE1D7 /* AudioUnit.framework */; };
 		C26F5FF221B0AA6D00EAE156 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B20FF439BC000DE1D7 /* CoreAudio.framework */; };
 		C26F5FF321B0AA6D00EAE156 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
-		C26F5FF421B0AA6D00EAE156 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53E3CDFB0E86099300238D2B /* Carbon.framework */; };
 		C26F5FF521B0AA6D00EAE156 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0091D8F80E81B9330029341E /* OpenGL.framework */; };
 		C26F5FF721B0AA6D00EAE156 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		C26F5FFF21B0AA9D00EAE156 /* VisibleRunApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946771CE4DC7100976025 /* VisibleRunApp.cpp */; };
@@ -250,9 +248,6 @@
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2B6E6701D0618E400235FB7 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
-		C2D23C0F21C07EA200929930 /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
-		C2D23C1021C07EAC00929930 /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
-		C2D23C1121C07EC200929930 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8851CEA916E0008C72B /* libboost_system.a */; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
@@ -614,7 +609,7 @@
 		C26A054E1E77620C00BDC954 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		C26A05531E77629500BDC954 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		C26F5FFD21B0AA6D00EAE156 /* VisibleRun.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VisibleRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C26F5FFE21B0AA6F00EAE156 /* Visible copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Visible copy2-Info.plist"; path = "/Users/arman/code/darisallc/dev/Visible/xcode/Visible copy2-Info.plist"; sourceTree = "<absolute>"; };
+		C26F5FFE21B0AA6F00EAE156 /* Visible copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Visible copy2-Info.plist"; path = "/Users/arman/dev/Visible/xcode/Visible copy2-Info.plist"; sourceTree = "<absolute>"; };
 		C276EC841C72988200242CDB /* cp-visible_release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "cp-visible_release.xcconfig"; path = "configs/cp-visible_release.xcconfig"; sourceTree = "<group>"; };
 		C276ECA81C72B5D900242CDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		C2820F23217523A700DFA7A6 /* configHandler.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = configHandler.hpp; path = ../include/configHandler.hpp; sourceTree = "<group>"; };
@@ -753,7 +748,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C26F5FE521B0AA6D00EAE156 /* libcinder.a in Frameworks */,
 				C26F5FDF21B0AA6D00EAE156 /* IOKit.framework in Frameworks */,
 				C26F5FEA21B0AA6D00EAE156 /* OpenCL.framework in Frameworks */,
 				C26F5FEB21B0AA6D00EAE156 /* CoreGraphics.framework in Frameworks */,
@@ -765,12 +759,8 @@
 				C26F5FF121B0AA6D00EAE156 /* AudioUnit.framework in Frameworks */,
 				C26F5FF221B0AA6D00EAE156 /* CoreAudio.framework in Frameworks */,
 				C26F5FF321B0AA6D00EAE156 /* CoreVideo.framework in Frameworks */,
-				C26F5FF421B0AA6D00EAE156 /* Carbon.framework in Frameworks */,
 				C26F5FF521B0AA6D00EAE156 /* OpenGL.framework in Frameworks */,
 				C26F5FF721B0AA6D00EAE156 /* Cocoa.framework in Frameworks */,
-				C2D23C1021C07EAC00929930 /* libboost_date_time.a in Frameworks */,
-				C2D23C0F21C07EA200929930 /* libboost_filesystem.a in Frameworks */,
-				C2D23C1121C07EC200929930 /* libboost_system.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1913,8 +1903,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_LDFLAGS = (
 					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
-					"$(LOCAL_BOOST)/lib/libboost_system-mt.a",
-					"$(LOCAL_BOOST)/lib/libboost_date_time-mt.a",
+					"$(LOCAL_BOOST)/lib/libboost_system.a",
+					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
@@ -2007,8 +1997,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_LDFLAGS = (
 					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
-					"$(LOCAL_BOOST)/lib/libboost_system-mt.a",
-					"$(LOCAL_BOOST)/lib/libboost_date_time-mt.a",
+					"$(LOCAL_BOOST)/lib/libboost_system.a",
+					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
@@ -2442,15 +2432,15 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
-				CODE_SIGN_ENTITLEMENTS = Visible/Visible.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 2;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = W4F7HL2GN5;
-				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
+				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = NO;
 				ENABLE_ON_DEMAND_RESOURCES = NO;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2459,8 +2449,10 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_REUSE_STRINGS = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(LOCAL_BOOST)/include",
 					"$(LOCAL_IMGUI)",
@@ -2494,9 +2486,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_LDFLAGS = (
 					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
-					"$(LOCAL_BOOST)/lib/libboost_system-mt.a",
-					"$(LOCAL_BOOST)/lib/libboost_filesystem-mt.a",
-					"$(LOCAL_BOOST)/lib/libboost_date_time-mt.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
@@ -2505,17 +2494,9 @@
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_video.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_objdetect.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videostab.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a",
 					"$(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a",
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libittnotify.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibpng.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libIlmImf.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibwebp.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjpeg-turbo.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libzlib.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjasper.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.VisibleRun;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2538,7 +2519,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
-				CODE_SIGN_ENTITLEMENTS = Visible/Visible.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = NO;
@@ -2546,17 +2526,20 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = W4F7HL2GN5;
-				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
+				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = NO;
 				ENABLE_ON_DEMAND_RESOURCES = NO;
 				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_FAST_MATH = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_REUSE_STRINGS = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(LOCAL_BOOST)/include",
 					"$(LOCAL_IMGUI)",
@@ -2590,9 +2573,9 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_LDFLAGS = (
 					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
-					"$(LOCAL_BOOST)/lib/libboost_system-mt.a",
-					"$(LOCAL_BOOST)/lib/libboost_filesystem-mt.a",
-					"$(LOCAL_BOOST)/lib/libboost_date_time-mt.a",
+					"$(LOCAL_BOOST)/lib/libboost_system.a",
+					"$(LOCAL_BOOST)/lib/libboost_filesystem.a",
+					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
