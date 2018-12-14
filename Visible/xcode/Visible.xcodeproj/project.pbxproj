@@ -17,7 +17,6 @@
 		C20BBC091E4E34F0002C7D68 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
 		C20BBC0B1E4E39E6002C7D68 /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
 		C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
-		C20D233921BF73810069D104 /* VisibleRun.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = C26F5FFD21B0AA6D00EAE156 /* VisibleRun.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696D1CED3E2C0045FF57 /* matpixel.cpp */; };
 		C20EDBB61CEFC2D20074C47A /* registration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696F1CED3E2C0045FF57 /* registration.cpp */; };
 		C20EDBB71CEFC2E70074C47A /* rowfunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069701CED3E2C0045FF57 /* rowfunc.cpp */; };
@@ -248,6 +247,7 @@
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2B6E6701D0618E400235FB7 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
+		C2BDEFEC21C44E4B00A8CB94 /* VisibleRun.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = C26F5FFD21B0AA6D00EAE156 /* VisibleRun.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
@@ -287,7 +287,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				C20D233921BF73810069D104 /* VisibleRun.app in CopyFiles */,
+				C2BDEFEC21C44E4B00A8CB94 /* VisibleRun.app in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

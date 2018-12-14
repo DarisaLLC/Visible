@@ -129,6 +129,49 @@ public:
     bool showOverlay = false;
 };
 
+class VisibleRunApp : public App, public gui_base
+{
+public:
 
+ //   VisibleRunApp();
+  //  ~VisibleRunApp();
+
+    virtual void SetupGUIVariables() override {}
+    virtual void DrawGUI() override {}
+    virtual void QuitApp() {}
+
+    void prepareSettings( Settings *settings );
+    void setup()override;
+    void mouseDown( MouseEvent event )override;
+    void mouseMove( MouseEvent event )override;
+    void mouseUp( MouseEvent event )override;
+    void mouseDrag( MouseEvent event )override;
+    void keyDown( KeyEvent event )override;
+
+    void update()override;
+    void draw()override;
+    void resize()override;
+    void windowMove();
+    void windowClose();
+    void windowMouseDown( MouseEvent &mouseEvt );
+    void displayChange();
+    void update_log (const std::string& msg);
+
+    bool shouldQuit();
+
+private:
+    std::vector<std::string> m_args;
+    vec2                mSize;
+    Font                mFont;
+    std::string            mLog;
+
+    Rectf                        mGlobalBounds;
+    map<string, boost::any> mPlist;
+
+    mutable std::unique_ptr<lifContext> mContext;
+    mutable lif_browser::ref mBrowser;
+
+
+};
 
 #endif /* VisibleApp_h */
