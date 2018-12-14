@@ -10,6 +10,27 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 
 #include "VisibleApp.h"
+//#include <cstdio>
+//#include <iostream>
+//#include <memory>
+//#include <stdexcept>
+//#include <string>
+//#include <array>
+//
+//namespace {
+//std::string exec(const char* cmd) {
+//    std::array<char, 128> buffer;
+//    std::string result;
+//    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+//    if (!pipe) {
+//        throw std::runtime_error("popen() failed!");
+//    }
+//    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+//        result += buffer.data();
+//    }
+//    return result;
+//}
+//}
 
 namespace VisibleAppControl{
     /**
@@ -32,6 +53,7 @@ void prepareSettings( App::Settings *settings )
     settings->setPowerManagementEnabled(false);
 }
 
+
 void VisibleApp::create_lif_viewer (const int serie_index)
 {
     auto name_index_itr = mLifRef->index_to_name_map().find(serie_index);
@@ -39,11 +61,13 @@ void VisibleApp::create_lif_viewer (const int serie_index)
     if (name_index_itr != mLifRef->index_to_name_map().end())
     {
         const std::string& name = name_index_itr->second;
-        auto command = ci::app::getAppPath().string() + sep + "Visible.app" + sep + "Contents" + sep + "MacOS" + sep +
-            "VisibleRun.app" + sep + "Contents" + sep + "MacOS" + sep + "VisibleRun " +
+        auto command = ci::app::getAppPath().string() + sep + "Visible.app" + sep + "Contents" + sep + "MacOS" + sep + "VisibleRun.app" + sep  + " --args " +
             mCurrentLifFilePath.string() + " " + name;
+        command = "open -n -F -a " + command;
         std::cout << command << std::endl;
+        
         std::system(command.c_str());
+
     }
 //    Window::Format format( RendererGl::create() );
  //   WindowRef ww = createConnectedWindow(format);
@@ -292,7 +316,7 @@ void VisibleApp::initData( const fs::path &path )
         vlogger::instance().console()->info(msg);
     }
     mCurrentLifFilePath = path;
-    mLifRef = lif_browser::create(path);
+    mLifRef = lif_browser::create(path.string());
     
     auto series = mLifRef->get_all_series ();
 
@@ -302,17 +326,17 @@ void VisibleApp::initData( const fs::path &path )
 
 void VisibleApp::createItem( const lif_serie_data &serie, int index )
 {
-    string title				= serie.name;
-    string desc					= " Channels: " + to_string(serie.channelCount) +
-                                  "   width: " + to_string(serie.dimensions[0]) +
-                                  "   height: " + to_string(serie.dimensions[1]);
+    string title				= serie.name();
+    string desc					= " Channels: " + to_string(serie.channelCount()) +
+                                  "   width: " + to_string(serie.dimensions()[0]) +
+                                  "   height: " + to_string(serie.dimensions()[1]);
     
     auto platform = ci::app::Platform::get();
     auto palette_path = platform->getResourceDirectory();
     string paletteFilename        = "palette.png";
     palette_path = palette_path / paletteFilename;
     Surface palette = Surface( loadImage(  palette_path ) ) ;
-    gl::Texture2dRef image = gl::Texture::create(Surface( ImageSourceRef( new ImageSourceCvMat( serie.poster ))));
+    gl::Texture2dRef image = gl::Texture::create(Surface( ImageSourceRef( new ImageSourceCvMat( serie.poster() ))));
 	vec2 pos( mLeftBorder, mTopBorder + index * mItemSpacing );
 	Item item = Item(index, pos, title, desc, palette );
 	mItems.push_back( item );

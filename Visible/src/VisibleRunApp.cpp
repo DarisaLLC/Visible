@@ -32,8 +32,8 @@
 #include "CinderImGui.h"
 #include "gui_handler.hpp"
 #include "gui_base.hpp"
-//#include "logger.hpp"
-
+#include "logger.hpp"
+#include "VisibleApp.h"
 
 #include <stdexcept>
 
@@ -49,29 +49,7 @@
 
 namespace anonymous {
     
-    struct ifStreamDeleter
-    {
-        void operator()(std::ifstream* p) const
-        {
-            if ( p != nullptr )
-            {
-                p->close();
-                delete p;
-            }
-        }
-    };
-    
-    
-    std::shared_ptr<std::ifstream> make_shared_ifstream(std::ifstream * ifstream_ptr)
-    {
-        return std::shared_ptr<std::ifstream>(ifstream_ptr, ifStreamDeleter());
-    }
-    
-    std::shared_ptr<std::ifstream> make_shared_ifstream(std::string filename)
-    {
-        return make_shared_ifstream(new std::ifstream(filename, ios::in | ios::binary));
-    }
- 
+  
     
         long int file_size(const std::string& file_name) {
     #if defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
@@ -93,11 +71,10 @@ bool check_input (const string &filename){
     bool ok = false;
     
     auto usize = file_size(filename);
-    
-    cout << "usize "  << usize << std::endl;
     boost::filesystem::path bpath(filename);
     ok = exists(bpath) && is_regular_file(bpath);
-    cout << boost::filesystem::file_size(bpath) << std::endl;
+    auto bsize = boost::filesystem::file_size(bpath);
+    ok &= (usize == bsize);
     
     return ok;
     
@@ -111,51 +88,50 @@ using namespace std;
 
 
 
-class VisibleRunApp : public App, public gui_base
-{
-public:
-    
- //   VisibleRunApp();
-  //  ~VisibleRunApp();
-    
-    virtual void SetupGUIVariables() override {}
-    virtual void DrawGUI() override {}
-    virtual void QuitApp() {}
-    
-    void prepareSettings( Settings *settings );
-    void setup()override;
-    void mouseDown( MouseEvent event )override;
-    void mouseMove( MouseEvent event )override;
-    void mouseUp( MouseEvent event )override;
-    void mouseDrag( MouseEvent event )override;
-    void keyDown( KeyEvent event )override;
-    
-    void update()override;
-    void draw()override;
-    void resize()override;
-    void windowMove();
-    void windowClose();
-    void windowMouseDown( MouseEvent &mouseEvt );
-    void displayChange();
-    void update_log (const std::string& msg);
-    
-    bool shouldQuit();
-    
-private:
-    std::vector<std::string> m_args;
-  //  params::InterfaceGlRef         mTopParams;
-    vec2				mSize;
-    Font				mFont;
-    std::string			mLog;
-    
-    Rectf						mGlobalBounds;
-    map<string, boost::any> mPlist;
-    
-    mutable std::unique_ptr<lifContext> mContext;
-    mutable lif_browser::ref mBrowser;
-    
-  
-};
+//class VisibleRunApp : public App, public gui_base
+//{
+//public:
+//
+// //   VisibleRunApp();
+//  //  ~VisibleRunApp();
+//
+//    virtual void SetupGUIVariables() override {}
+//    virtual void DrawGUI() override {}
+//    virtual void QuitApp() {}
+//
+//    void prepareSettings( Settings *settings );
+//    void setup()override;
+//    void mouseDown( MouseEvent event )override;
+//    void mouseMove( MouseEvent event )override;
+//    void mouseUp( MouseEvent event )override;
+//    void mouseDrag( MouseEvent event )override;
+//    void keyDown( KeyEvent event )override;
+//
+//    void update()override;
+//    void draw()override;
+//    void resize()override;
+//    void windowMove();
+//    void windowClose();
+//    void windowMouseDown( MouseEvent &mouseEvt );
+//    void displayChange();
+//    void update_log (const std::string& msg);
+//
+//    bool shouldQuit();
+//
+//private:
+//    std::vector<std::string> m_args;
+//    vec2                mSize;
+//    Font                mFont;
+//    std::string            mLog;
+//
+//    Rectf                        mGlobalBounds;
+//    map<string, boost::any> mPlist;
+//
+//    mutable std::unique_ptr<lifContext> mContext;
+//    mutable lif_browser::ref mBrowser;
+//
+//
+//};
 
 
 bool VisibleRunApp::shouldQuit()
@@ -165,27 +141,14 @@ bool VisibleRunApp::shouldQuit()
 
 
 
-//
-// We allow one movie and multiple clips or matrix view.
-//
-//
-//void VisibleRunApp::create_lif_viewer (const boost::filesystem::path& pp)
-//{
-//    Window::Format format( RendererGl::create() );
-//    WindowRef ww = createConnectedWindow(format);
-//    mContexts.push_back(std::unique_ptr<lifContext>(new lifContext(ww, pp)));
-//}
-//
-
-
-
 void VisibleRunApp::setup()
 {
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "VisibleRun.app/Contents/Info.plist";
-    std::ifstream stream(plist.c_str(), std::ios::binary);
-    Plist::readPlist(stream, mPlist);
-  
+    if (exists (appPath)){
+        std::ifstream stream(plist.c_str(), std::ios::binary);
+        Plist::readPlist(stream, mPlist);
+    }
     // Get the LIF file and Serie from the command line arguments
     // args[0] = Run App Path
     // args[1] = LIF file full path
@@ -245,7 +208,10 @@ void VisibleRunApp::setup()
             
             mContext = std::unique_ptr<lifContext>(new lifContext (ww,serie));
     
-            if (mContext->is_valid()) cmds += "  Ok ";
+            if (mContext->is_valid()){
+                cmds += " [ " + m_args[2] + " ] ";
+                cmds += "  Ok ";
+            }
         
             mContext->resize();
             mContext->seekToStart();
@@ -257,7 +223,7 @@ void VisibleRunApp::setup()
     
  
     std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
-    ww->setTitle ( " Visible build: " + buildN);
+    ww->setTitle ( cmds + " Visible build: " + buildN);
     mFont = Font( "Menlo", 18 );
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     
@@ -398,12 +364,7 @@ void VisibleRunApp::resize ()
 void prepareSettings( App::Settings *settings )
 {
     const auto &args = settings->getCommandLineArgs();
-    if( ! args.empty() ) {
-        CI_LOG_I( "command line args: " );
-        for( size_t i = 0; i < args.size(); i++ )
-            console() << "\t[" << i << "] " << args[i] << endl;
-    }
-    
+
     auto ok = check_input(args[1]);
     std::cout << "File is " << std::boolalpha << ok << std::endl;
     
@@ -420,7 +381,7 @@ void prepareSettings( App::Settings *settings )
 
 
 // settings fn from top of file:
-CINDER_APP( VisibleRunApp, RendererGl, prepareSettings )
+ CINDER_APP( VisibleRunApp, RendererGl, prepareSettings )
 
 
 //int main( int argc, char* argv[] )
