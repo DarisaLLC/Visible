@@ -402,42 +402,43 @@ void lifIO::LifHeader::parseHeader()
 /** \brief Constructor from lif file name */
 lifIO::LifReader::LifReader(const string &filename)
 {
-    std::lock_guard<std::mutex> lock( m_mutex );
     const int MemBlockCode = 0x70, TestCode = 0x2a;
     char lifChar;
-
+    m_path = filename;
+    
     bool ok = false;
     
-    auto fileRef = make_shared_ifstream(filename);
-    ok = (fileRef &&  fileRef->is_open());
-    if (! fileRef){
+    m_fileRef = make_shared_ifstream(filename);
+    ok = (m_fileRef &&  m_fileRef->is_open());
+    if (! m_fileRef){
         m_Valid = false;
         return;
     }
     
     // Get size of the file
-    fileRef->seekg(0,ios::end);
-    auto fileSize = fileRef->tellg();
-    fileRef->seekg(0,ios::beg);
-    cout<<filename<<" is "<<fileSize<<" bytes"<<endl;
-    
+    m_fileRef->seekg(0,ios::end);
+    m_lif_file_size = m_fileRef->tellg();
+    m_fileRef->seekg(0,ios::beg);
     char buffer[4];
 
-    fileRef->read(buffer,4);
+    m_fileRef->read(buffer,4);
     int32_t ibuf = *((int*)(buffer));
-    ok = MemBlockCode == ibuf;
+    ok &= (MemBlockCode == ibuf);
     
     
     // Skip the size of next block
-    fileRef->seekg(4,ios::cur);
-    *fileRef>>lifChar;
-    ok = lifChar == TestCode;
+    m_fileRef->seekg(4,ios::cur);
+    *m_fileRef>>lifChar;
+    ok &= (lifChar == TestCode);
     
     if (!ok){
         m_Valid = false;
         return;
     }
-
+    m_Valid = ok;
+    
+    if (! m_Valid) return;
+    
     unsigned int xmlChars = readUnsignedInt();
     xmlChars*=2;
 
@@ -447,7 +448,7 @@ lifIO::LifReader::LifReader(const string &filename)
     
     {
         std::shared_ptr<char> xmlHeader (new char[xmlChars]);
-        fileRef->read(xmlHeader.get(),xmlChars);
+        m_fileRef->read(xmlHeader.get(),xmlChars);
         for(unsigned int p=0;p<xmlChars/2;++p)
             xmlString.push_back(xmlHeader.get()[2*p]);
     }
@@ -457,21 +458,25 @@ lifIO::LifReader::LifReader(const string &filename)
 
 
     size_t s = 0;
-    while (fileRef->tellg() < fileSize)
+    while (m_fileRef->tellg() < m_lif_file_size)
     {
         std::lock_guard<std::mutex> lock( m_mutex );
         
         // Check LIF test value
         int lifCheck = readInt();
-        if (lifCheck != MemBlockCode)
-            throw logic_error("File contains wrong MemBlockCode");
+        if (lifCheck != MemBlockCode){
+            m_Valid = false;
+            break;
+        }
 
         // Don't care about the size of the next block
-        fileRef->seekg(4,ios::cur);
+        m_fileRef->seekg(4,ios::cur);
         // Read testcode
-        *fileRef>>lifChar;
-        if (lifChar != TestCode)
-            throw logic_error("File contains wrong TestCode");
+        *m_fileRef>>lifChar;
+        if (lifChar != TestCode){
+            m_Valid = false;
+            break;
+        }
 
         // Read size of memory, this is 4 bytes in version 1 and 8 in version 2
         unsigned long long memorySize;
@@ -483,26 +488,28 @@ lifIO::LifReader::LifReader(const string &filename)
 
         // Find next testcode
         lifChar=0;
-        while (lifChar != TestCode) {*fileRef>>lifChar;}
+        while (lifChar != TestCode) {*m_fileRef>>lifChar;}
         unsigned int memDescrSize = readUnsignedInt() * 2;
         // Skip over memory description
-        fileRef->seekg(memDescrSize,ios::cur);
+        m_fileRef->seekg(memDescrSize,ios::cur);
 
         // Add serie if memory size is > 0
         if (memorySize > 0)
         {
-            if(s >= getLifHeader().getNbSeries())
-                throw logic_error("Too many memory blocks");
+            if(s >= getLifHeader().getNbSeries()){
+                m_Valid = false;
+                break;
+            }
 
             series.push_back(new LifSerie(
                     this->header->getSerieHeader(s),
                     filename,
-                                          fileRef->tellg(),
+                                          m_fileRef->tellg(),
                     memorySize)
                     );
             s++;
             //jump to the next memory block
-            fileRef->seekg(static_cast<streampos>(memorySize),ios::cur);
+            m_fileRef->seekg(static_cast<streampos>(memorySize),ios::cur);
         }
     }
 
@@ -513,29 +520,29 @@ lifIO::LifReader::LifReader(const string &filename)
 int lifIO::LifReader::readInt()
 {
     char buffer[4];
-    fileRef->read(buffer,4);
+    m_fileRef->read(buffer,4);
     return *((int*)(buffer));
 }
 /** \brief read an unsigned int form file advancing the cursor*/
 unsigned int lifIO::LifReader::readUnsignedInt()
 {
     char buffer[4];
-    fileRef->read(buffer,4);
+    m_fileRef->read(buffer,4);
     return *((unsigned int*)(buffer));
 }
 /** \brief read an unsigned long long int form file advancing the cursor*/
 unsigned long long lifIO::LifReader::readUnsignedLongLong()
 {
     char buffer[8];
-    fileRef->read(buffer,8);
+    m_fileRef->read(buffer,8);
     return *((unsigned long long*)(buffer));
 }
 
 /** \brief read an unsigned long long int form file advancing the cursor*/
 void lifIO::LifReader::close_file()
 {
-    if(fileRef && fileRef->is_open())
-        fileRef->close();
+    if(m_fileRef && m_fileRef->is_open())
+        m_fileRef->close();
 }
 
 /** \brief constructor from XML  */
