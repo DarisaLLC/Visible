@@ -62,69 +62,28 @@ using namespace svl;
                      *
                      ************************/
 
-/////////////  lifContext Implementation  ////////////////
 
-lifContext::lifContext(WindowRef& ww, const lif_browser::ref& lb, const uint32_t serie_index):
-sequencedImageContext(ww), m_lifBrowser(lb), m_fixed_serie(true) {
-    m_valid = init_with_browser(m_lifBrowser);
-    m_layout = std::make_shared<layoutManager>  ( ivec2 (10, 10) );
-    auto thisww = get_windowRef();
-    thisww->getRenderer()->makeCurrentContext(true);
-    thisww->getSignalDraw().connect( [&]{ draw(); } );
-    if (! m_valid) return;
-    vlogger::instance().console()->info(__LINE__);
-    m_valid &= (serie_index < m_lifBrowser->get_all_series ().size());
-    if (! m_valid) return;
-    m_cur_selected_index = serie_index;
-    m_serie = m_series_book[m_cur_selected_index];
-    m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(m_cur_selected_index), stl_utils::null_deleter());
-    m_prev_selected_index = m_cur_selected_index;
-    setup();
-    std::cout << std::this_thread::get_id() << std::endl;
-    loadCurrentSerie();
-    resize();
-    vlogger::instance().console()->info(__LINE__);
-}
 
-lifContext::lifContext(WindowRef& ww, const boost::filesystem::path& dp)
-: sequencedImageContext(ww), mPath (dp), m_fixed_serie(false){
-    vlogger::instance().console()->info(__LINE__);
+    /////////////  lifContext Implementation  ////////////////
+
+lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd) :sequencedImageContext(ww), m_serie(sd) {
+    m_type = guiContext::Type::lif_file_viewer;
     m_valid = false;
-    m_layout = std::make_shared<layoutManager>  ( ivec2 (10, 10) );
-    m_type = Type::lif_file_viewer;
-    if (mPath.string().empty())
-        mPath = getOpenFilePath();
-    m_valid = ! mPath.string().empty() && exists(mPath);
- 
-    m_lifBrowser = lif_browser::create(mPath.string());
-    m_valid &= init_with_browser(m_lifBrowser);
-    if (! m_valid) return;
-    m_prev_selected_index = -1;
-    setup ();
-    vlogger::instance().console()->info(__LINE__);
+        m_valid = sd.index() >= 0;
+        if (m_valid){
+            m_layout = std::make_shared<layoutManager>  ( ivec2 (10, 10) );
+            if (auto lifRef = m_serie.readerWeakRef().lock()){
+                m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&lifRef->getSerie(sd.index()), stl_utils::null_deleter());
+                setup();
+                std::cout << std::this_thread::get_id() << std::endl;
+                loadCurrentSerie();
+                ww->getRenderer()->makeCurrentContext(true);
+                ww->getSignalDraw().connect( [&]{ draw(); } );
+                vlogger::instance().console()->info(__LINE__);
+            }
+    }
 }
 
-
-bool lifContext::init_with_browser (const lif_browser::ref& lb){
-    vlogger::instance().console()->info(__LINE__);
-    m_valid =lb.get() != nullptr;
-    if (! m_valid) return false;
-    m_type = Type::lif_file_viewer;
-    mPath =lb->path();
-    m_valid &= (! mPath.string().empty() && exists(mPath));
-    if (! m_valid) return false;
-    auto logtxt = ci::toString(lb->names().size()) + " ~ " + ci::toString(lb->get_all_series ().size());
-    vlogger::instance().console()->info(logtxt);
-    m_valid &= lb->names().size() == lb->get_all_series ().size();
-    if (! m_valid) return false;
-    m_series_names =lb->names();
-    m_series_book =lb->get_all_series ();
-    m_lifRef =lb->reader();
-    auto msg = tostr(m_series_book.size()) + "  Series  ";
-    vlogger::instance().console()->info(msg);
-    vlogger::instance().console()->info(__LINE__);
-    return true;
-}
 
 ci::app::WindowRef&  lifContext::get_windowRef(){
     return shared_from_above()->mWindow;
@@ -173,32 +132,7 @@ void lifContext::setup_params () {
     m_perform_names.clear ();
     m_perform_names.push_back("Manual Cell End Tracing");
     
-    if (! isFixedSerieContext()){
-        // If it is first time
-        if (m_prev_selected_index < 0)
-        {
-            m_cur_selected_index = 0;
-            m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>();
-        }
-        
-        mUIParams.addParam( "Series ", m_series_names, &m_cur_selected_index )
-        //        .keyDecr( "[" )
-        //        .keyIncr( "]" )
-        .updateFn( [this]
-                  {
-                      bool exists = m_prev_selected_index  >= 0 && m_prev_selected_index == m_cur_selected_index;
-                      if (! exists && m_cur_selected_index >= 0 && m_cur_selected_index < m_series_names.size() )
-                      {
-                          m_serie = m_series_book[m_cur_selected_index];
-                          m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(m_cur_selected_index), stl_utils::null_deleter());
-                          loadCurrentSerie ();
-                          m_prev_selected_index = m_cur_selected_index;
-                      }
-                  });
-        
-        mUIParams.addSeparator();
-        mUIParams.addSeparator();
-    }
+    loadCurrentSerie ();
     
     {
         const std::function<void (int)> setter = std::bind(&lifContext::seekToFrame, this, std::placeholders::_1);
@@ -259,13 +193,8 @@ void lifContext::setup()
     srand( 133 );
     setup_signals();
     assert(is_valid());
-    if (! isFixedSerieContext()){
-        ww->setTitle( mPath.filename().string() );
-        ww->setSize(960, 540);
-    }else{
-        ww->setTitle( m_serie.name);
-        ww->setSize(1280, 768);
-    }
+    ww->setTitle( m_serie.name());
+    ww->setSize(1280, 768);
     mFont = Font( "Menlo", 18 );
     auto ws = ww->getSize();
     mSize = vec2( ws[0], ws[1] / 12);
@@ -273,7 +202,7 @@ void lifContext::setup()
     clear_playback_params();
     setup_params ();
   
-    if (isFixedSerieContext()) shared_from_above()->update();
+    shared_from_above()->update();
     
     ww->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
 }
@@ -412,9 +341,7 @@ void lifContext::clear_playback_params ()
 
 bool lifContext::have_lif_serie ()
 {
-    bool have = m_lifRef && m_cur_lif_serie_ref >= 0 && mFrameSet && m_layout->isSet();
-    //  if (! have )
-    //     mUIParams.setOptions( "mode", "label=`Nothing Loaded`" );
+    bool have =   m_serie.readerWeakRef().lock() && m_cur_lif_serie_ref  && mFrameSet && m_layout->isSet();
     return have;
 }
 
@@ -576,8 +503,8 @@ int lifContext::getCurrentFrame ()
 
 time_spec_t lifContext::getCurrentTime ()
 {
-    if (m_seek_position >= 0 && m_seek_position < m_serie.timeSpecs.size())
-        return m_serie.timeSpecs[m_seek_position];
+    if (m_seek_position >= 0 && m_seek_position < m_serie.timeSpecs().size())
+        return m_serie.timeSpecs()[m_seek_position];
     else return -1.0;
 }
 
@@ -870,7 +797,7 @@ void lifContext::add_plots ()
 
 void lifContext::loadCurrentSerie ()
 {
-    if ( ! is_valid() || ! (m_lifRef || ! m_cur_lif_serie_ref) )
+    if ( ! is_valid() || ! m_cur_lif_serie_ref)
         return;
     
     try {
@@ -897,13 +824,13 @@ void lifContext::loadCurrentSerie ()
         m_layout->init (getWindowSize() , mFrameSet->media_info(), channel_count());
         
         // Start Loading Images on a different thread
-        auto future_res = std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names);
+        auto future_res = std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names());
         
-        mFrameSet->channel_names (m_series_book[m_cur_selected_index].channel_names);
+        mFrameSet->channel_names (m_serie.channel_names());
         reset_entire_clip(mFrameSet->count());
         
         
-        m_title = m_series_names[m_cur_selected_index] + " @ " + mPath.filename().string();
+        m_title = m_serie.name() + " @ " + mPath.filename().string();
         
         auto ww = get_windowRef();
         ww->setTitle(m_title );
@@ -918,10 +845,7 @@ void lifContext::loadCurrentSerie ()
         mAuxTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
    
         add_plots();
-        looping(false);
-        resize();
-        seekToStart();
-//        play();
+      
         
     }
     catch( const std::exception &ex ) {
@@ -1139,7 +1063,7 @@ gl::TextureRef lifContext::pixelInfoTexture ()
 {
     if (! mMouseInImage) return gl::TextureRef ();
     TextLayout lout;
-    const auto names = m_series_book[m_cur_selected_index].channel_names;
+    const auto names = m_serie.channel_names();
     auto channel_name = (m_instant_channel < names.size()) ? names[m_instant_channel] : " ";
     
     // LIF has 3 Channels.
@@ -1163,7 +1087,7 @@ gl::TextureRef lifContext::pixelInfoTexture ()
 
 void lifContext::draw_info ()
 {
-    if (! m_lifRef) return;
+   
     auto ww = get_windowRef();
     auto ws = ww->getSize();
     gl::setMatricesWindow( ws );

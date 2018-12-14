@@ -156,6 +156,7 @@ namespace lifIO
         
     public:
         typedef std::shared_ptr<LifReader> ref;
+        typedef std::weak_ptr<LifReader> weak_ref;
         LifReader(const std::string &filename);
         
         static LifReader::ref create (const std::string&  fqfn_path){
@@ -171,6 +172,8 @@ namespace lifIO
         
         LifSerie& getSerie(size_t s){return series[s];};
         const LifSerie& getSerie(size_t s) const {return series[s];};
+        const std::string& file_path () const { return m_path; }
+        size_t file_size () const { return m_lif_file_size; }
         
         void close_file ();
         bool isValid () const { return m_Valid; }
@@ -187,11 +190,13 @@ namespace lifIO
         unsigned int readUnsignedInt();
         unsigned long long readUnsignedLongLong();
         std::auto_ptr<LifHeader> header;
-        std::shared_ptr<std::ifstream> fileRef;
+        std::shared_ptr<std::ifstream> m_fileRef;
         std::streampos fileSize;
         boost::ptr_vector<LifSerie> series;
         mutable bool m_Valid;
         mutable std::mutex m_mutex;
+        std::string m_path;
+        size_t m_lif_file_size;
        
         
         

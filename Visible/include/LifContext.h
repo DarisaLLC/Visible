@@ -37,14 +37,8 @@ public:
 
     typedef std::pair<vec2,vec2> sides_length_t;
     
-	// From a name and a path
-	lifContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path () );
- 
-    // From a lif_browser
-    lifContext(ci::app::WindowRef& ww, const lif_browser::ref&, const uint32_t serie_index );
-    
-    // From a lif_browser
-    lifContext(ci::app::WindowRef& ww, const lif_browser::ref&, const std::string& serie_name );
+    // From a lif_serie_data
+    lifContext(ci::app::WindowRef& ww, const lif_serie_data& );
     
     // shared_from_this() through base class
     lifContext* shared_from_above () {
@@ -121,34 +115,24 @@ public:
     bool isPlaying () const { return m_is_playing; }
     bool isEditing () const { return m_is_editing; }
     
-    bool isFixedSerieContext () const { return m_fixed_serie; }
-    
     // Supporting gui_base
     void SetupGUIVariables() override;
     void DrawGUI() override;
     void QuitApp();
     
 private:
-    bool m_fixed_serie;
 
-    bool init_with_browser (const lif_browser::ref& );
     void setup_signals ();
     void setup_params ();
     ci::app::WindowRef& get_windowRef();
     
     // LIF Support
-    lif_browser::ref m_lifBrowser;
     std::shared_ptr<lif_processor> m_lifProcRef;
-    std::shared_ptr<lifIO::LifReader> m_lifRef;
-    std::vector<lif_serie_data> m_series_book;
-    std::vector<std::string> m_series_names;
 	void loadCurrentSerie ();
 	bool have_lif_serie ();
     std::shared_ptr<lifIO::LifSerie> m_cur_lif_serie_ref;
     lif_serie_data m_serie;
     boost::filesystem::path mPath;
-    int m_cur_selected_index;
-    int m_prev_selected_index;
     
     // Callbacks
     void signal_content_loaded (int64_t&);

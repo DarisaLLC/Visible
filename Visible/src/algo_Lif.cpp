@@ -34,10 +34,64 @@
 #include "algo_Lif.hpp"
 #include "logger.hpp"
 
-lif_browser::lif_browser(const std::string&  fqfn_path) : mFqfnPath(fqfn_path){
+
+
+
+lif_serie_data:: lif_serie_data () : m_index (-1) {}
+
+lif_serie_data:: lif_serie_data (const lifIO::LifReader::ref& m_lifRef, const unsigned index): m_index(-1) {
+    
+    if (index >= m_lifRef->getNbSeries()) return;
+    
+    m_index = index;
+    m_name = m_lifRef->getSerie(m_index).getName();
+    m_timesteps = static_cast<uint32_t>(m_lifRef->getSerie(m_index).getNbTimeSteps());
+    m_pixelsInOneTimestep = static_cast<uint32_t>(m_lifRef->getSerie(m_index).getNbPixelsInOneTimeStep());
+    m_dimensions = m_lifRef->getSerie(m_index).getSpatialDimensions();
+    m_channelCount = static_cast<uint32_t>(m_lifRef->getSerie(m_index).getChannels().size());
+    m_channels.clear ();
+    for (lifIO::ChannelData cda : m_lifRef->getSerie(m_index).getChannels())
+    {
+        m_channel_names.push_back(cda.getName());
+        m_channels.emplace_back(cda);
+    }
+    
+    // Get timestamps in to time_spec_t and store it in info
+    m_timeSpecs.resize (m_lifRef->getSerie(m_index).getTimestamps().size());
+    
+    // Adjust sizes based on the number of bytes
+    std::transform(m_lifRef->getSerie(m_index).getTimestamps().begin(), m_lifRef->getSerie(m_index).getTimestamps().end(),
+                   m_timeSpecs.begin(), [](lifIO::LifSerie::timestamp_t ts) { return time_spec_t ( ts / 10000.0); });
+    
+    m_length_in_seconds = m_lifRef->getSerie(m_index).total_duration ();
+    
+    auto serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(m_index), stl_utils::null_deleter());
+    // opencv rows, cols
+    uint64_t rows (m_dimensions[1] * m_channelCount);
+    uint64_t cols (m_dimensions[0]);
+    cv::Mat dst ( static_cast<uint32_t>(rows),static_cast<uint32_t>(cols), CV_8U);
+    serie_ref->fill2DBuffer(dst.ptr(0), 0);
+    m_poster = dst;
+
+    m_lifWeakRef = m_lifRef;
     
 }
 
+// Check if the returned has expired
+const lifIO::LifReader::weak_ref& lif_serie_data::readerWeakRef () const{
+    return m_lifWeakRef;
+}
+
+    
+lif_browser::lif_browser (const std::string&  fqfn_path) : mFqfnPath(fqfn_path){
+    if ( boost::filesystem::exists(boost::filesystem::path(mFqfnPath)) )
+    {
+        std::string msg = mFqfnPath + " Loaded ";
+        vlogger::instance().console()->info(msg);
+        get_series_info();
+        
+    }
+}
 const lif_serie_data  lif_browser::get_serie_by_index (unsigned index){
     lif_serie_data si;
     if (m_series_book.empty())
@@ -59,10 +113,10 @@ const std::vector<lif_serie_data>& lif_browser::get_all_series  () const{
 
 void lif_browser::get_first_frame (lif_serie_data& si,  const int frameCount, cv::Mat& out)
 {
-    auto serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(si.index), stl_utils::null_deleter());
+    auto serie_ref = std::shared_ptr<lifIO::LifSerie>(&m_lifRef->getSerie(si.index()), stl_utils::null_deleter());
     // opencv rows, cols
-    uint64_t rows (si.dimensions[1] * si.channelCount);
-    uint64_t cols (si.dimensions[0]);
+    uint64_t rows (si.dimensions()[1] * si.channelCount());
+    uint64_t cols (si.dimensions()[0]);
     cv::Mat dst ( static_cast<uint32_t>(rows),static_cast<uint32_t>(cols), CV_8U);
     serie_ref->fill2DBuffer(dst.ptr(0), 0);
     out = dst;
@@ -79,35 +133,12 @@ void  lif_browser::get_series_info () const
         
         for (unsigned ss = 0; ss < m_lifRef->getNbSeries(); ss++)
         {
-            lif_serie_data si;
-            
-            si.index = ss;
-            si.name = m_lifRef->getSerie(ss).getName();
-            si.timesteps = static_cast<uint32_t>(m_lifRef->getSerie(ss).getNbTimeSteps());
-            si.pixelsInOneTimestep = static_cast<uint32_t>(m_lifRef->getSerie(ss).getNbPixelsInOneTimeStep());
-            si.dimensions = m_lifRef->getSerie(ss).getSpatialDimensions();
-            si.channelCount = static_cast<uint32_t>(m_lifRef->getSerie(ss).getChannels().size());
-            si.channels.clear ();
-            for (lifIO::ChannelData cda : m_lifRef->getSerie(ss).getChannels())
-            {
-                si.channel_names.push_back(cda.getName());
-                si.channels.emplace_back(cda);
-            }
-            
-            // Get timestamps in to time_spec_t and store it in info
-            si.timeSpecs.resize (m_lifRef->getSerie(ss).getTimestamps().size());
-            
-            // Adjust sizes based on the number of bytes
-            std::transform(m_lifRef->getSerie(ss).getTimestamps().begin(), m_lifRef->getSerie(ss).getTimestamps().end(),
-                           si.timeSpecs.begin(), [](lifIO::LifSerie::timestamp_t ts) { return time_spec_t ( ts / 10000.0); });
-            
-            si.length_in_seconds = m_lifRef->getSerie(ss).total_duration ();
-            
+            lif_serie_data si(m_lifRef, ss);
             m_series_book.emplace_back (si);
             // Fill up names / index map -- convenience
             auto index = static_cast<int>(ss);
-            m_name_to_index[si.name] = index;
-            m_index_to_name[index] = si.name;
+            m_name_to_index[si.name()] = index;
+            m_index_to_name[index] = si.name();
         }
     }
   

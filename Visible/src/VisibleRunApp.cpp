@@ -237,17 +237,23 @@ void VisibleRunApp::setup()
         cmds += " Does Not Exist ";
     else{
         mBrowser = lif_browser::create(bpath);
-        mContext = std::unique_ptr<lifContext>(new lifContext (ww,mBrowser, 0));
-        if (mContext->is_valid()) cmds += "  Ok ";
-    }
-   // auto bItr = mBrowser->name_to_index_map().find(m_args[2]);
-   // if (bItr != mBrowser->name_to_index_map().end())
-   // {
-   //     auto index = 0; //bItr->second;
-   //     mContext = std::unique_ptr<lifContext>(new lifContext (ww,mBrowser, index));
-   //     if (mContext->is_valid()) cmds += "  Ok ";
-   // }
+        mBrowser->get_series_info();
+        
+        auto indexItr = mBrowser->name_to_index_map().find(m_args[2]);
+        if (indexItr != mBrowser->name_to_index_map().end()){
+            auto serie = mBrowser->get_serie_by_index(indexItr->second);
+            
+            mContext = std::unique_ptr<lifContext>(new lifContext (ww,serie));
     
+            if (mContext->is_valid()) cmds += "  Ok ";
+        
+            mContext->resize();
+            mContext->seekToStart();
+            mContext->play();
+        }
+       
+    }
+ 
     
  
     std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);

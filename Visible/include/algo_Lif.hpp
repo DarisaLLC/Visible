@@ -42,31 +42,54 @@ using default_factory = synchronous_factory;
 
 #endif
 
+/*
+ * if index is -1, data is not valid 
+ */
+
 class lif_serie_data
 {
 public:
-    uint32_t index;
-    std::string name;
-    uint32_t    timesteps;
-    uint32_t    pixelsInOneTimestep;
-    uint32_t    channelCount;
-    std::vector<size_t> dimensions;
-    std::vector<lifIO::ChannelData> channels;
-    std::vector<std::string> channel_names;
-    std::vector<time_spec_t> timeSpecs;
-    cv::Mat poster;
-
+    lif_serie_data ();
+    lif_serie_data (const lifIO::LifReader::ref& m_lifRef, const unsigned index);
+    int index () const { return m_index; }
+    const std::string name () const { return m_name; }
+   
+    float seconds () const { return m_length_in_seconds; }
+    uint32_t timesteps () const { return m_timesteps; }
+    uint32_t pixelsInOneTimestep () const { return m_pixelsInOneTimestep; }
+    uint32_t channelCount () const { return m_channelCount; }
+    const std::vector<size_t>& dimensions () const { return m_dimensions; }
+    const std::vector<lifIO::ChannelData>& channels () const { return m_channels; }
+    const std::vector<std::string>& channel_names () const { return m_channel_names; }
+    const std::vector<time_spec_t>& timeSpecs () const { return  m_timeSpecs; }
+    const lifIO::LifReader::weak_ref& readerWeakRef () const;
+    const cv::Mat& poster () const { return m_poster; }
     
-    float  length_in_seconds;
+ 
+
+private:
+    mutable int32_t m_index;
+    mutable std::string m_name;
+    uint32_t    m_timesteps;
+    uint32_t    m_pixelsInOneTimestep;
+    uint32_t    m_channelCount;
+    std::vector<size_t> m_dimensions;
+    std::vector<lifIO::ChannelData> m_channels;
+    std::vector<std::string> m_channel_names;
+    std::vector<time_spec_t> m_timeSpecs;
+    cv::Mat m_poster;
+    mutable lifIO::LifReader::weak_ref m_lifWeakRef;
+    
+    mutable float  m_length_in_seconds;
     
     
     friend std::ostream& operator<< (std::ostream& out, const lif_serie_data& se)
     {
-        out << "Serie:    " << se.name << std::endl;
-        out << "Channels: " << se.channelCount << std::endl;
-        out << "TimeSteps  " << se.timesteps << std::endl;
-        out << "Dimensions:" << se.dimensions[0]  << " x " << se.dimensions[1] << std::endl;
-        out << "Time Length:" << se.length_in_seconds    << std::endl;
+        out << "Serie:    " << se.name() << std::endl;
+        out << "Channels: " << se.channelCount() << std::endl;
+        out << "TimeSteps  " << se.timesteps() << std::endl;
+        out << "Dimensions:" << se.dimensions()[0]  << " x " << se.dimensions()[1] << std::endl;
+        out << "Time Length:" << se.seconds()    << std::endl;
         return out;
     }
     
@@ -100,7 +123,7 @@ public:
     
     const lifIO::LifReader::ref& reader () const { return m_lifRef; }
     const lif_serie_data get_serie_by_index (unsigned index);
-    
+    void  get_series_info () const;
     const std::vector<lif_serie_data>& get_all_series  () const; 
     const std::string& path () const { return mFqfnPath; }
     const std::vector<std::string>& names () const { return m_series_names; }
@@ -118,7 +141,7 @@ private:
     
     std::string mFqfnPath;
     void get_first_frame (lif_serie_data& si,  const int frameCount, cv::Mat& out);
-    void  get_series_info () const;
+  
     
 };
 
