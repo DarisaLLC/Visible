@@ -10,27 +10,7 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 
 #include "VisibleApp.h"
-//#include <cstdio>
-//#include <iostream>
-//#include <memory>
-//#include <stdexcept>
-//#include <string>
-//#include <array>
-//
-//namespace {
-//std::string exec(const char* cmd) {
-//    std::array<char, 128> buffer;
-//    std::string result;
-//    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
-//    if (!pipe) {
-//        throw std::runtime_error("popen() failed!");
-//    }
-//    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
-//        result += buffer.data();
-//    }
-//    return result;
-//}
-//}
+
 
 namespace VisibleAppControl{
     /**
@@ -54,7 +34,7 @@ void prepareSettings( App::Settings *settings )
 }
 
 
-void VisibleApp::create_lif_viewer (const int serie_index)
+void VisibleApp::dispatch_lif_viewer (const int serie_index)
 {
     auto name_index_itr = mLifRef->index_to_name_map().find(serie_index);
     auto sep = boost::filesystem::path::preferred_separator;
@@ -246,8 +226,8 @@ void VisibleApp::DrawGUI(){
             //if(ui::MenuItem("Fullscreen")){
             //    setFullScreen(!isFullScreen());
             //}
-            if(ui::MenuItem("Swap Eyes", "S")){
-                swapEyes = !swapEyes;
+            if(ui::MenuItem("Flip ", "S")){
+                
             }
             ui::MenuItem("Help", nullptr, &showHelp);
             if(ui::MenuItem("Quit", "ESC")){
@@ -346,87 +326,73 @@ void VisibleApp::createItem( const lif_serie_data &serie, int index )
 
 void VisibleApp::mouseMove( MouseEvent event )
 {
-    guiContext  *data = getWindow()->getUserData<guiContext>();
-    if(data)
-        data->mouseMove(event);
-    else
-    {
-        mNewMouseOverItem = mItems.end();
 
-        for( vector<Item>::iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
-            if( itemIt->isPointIn( event.getPos() ) && !itemIt->getSelected() ) {
-                mNewMouseOverItem = itemIt;
+    mNewMouseOverItem = mItems.end();
 
-                break;
-            }
+    for( vector<Item>::iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+        if( itemIt->isPointIn( event.getPos() ) && !itemIt->getSelected() ) {
+            mNewMouseOverItem = itemIt;
+
+            break;
         }
-        
-        if( mNewMouseOverItem == mItems.end() ){
-            if( mMouseOverItem != mItems.end() && mMouseOverItem != mSelectedItem ){
-                mMouseOverItem->mouseOff( timeline() );
-                mMouseOverItem = mItems.end();
-            }
-        } else {
-        
-            if( mNewMouseOverItem != mMouseOverItem && !mNewMouseOverItem->getSelected() ){
-                if( mMouseOverItem != mItems.end() && mMouseOverItem != mSelectedItem )
-                    mMouseOverItem->mouseOff( timeline() );
-                mMouseOverItem = mNewMouseOverItem;
-                mMouseOverItem->mouseOver( timeline() );
-            }
-        }
-        
+    }
+    
+    if( mNewMouseOverItem == mItems.end() ){
         if( mMouseOverItem != mItems.end() && mMouseOverItem != mSelectedItem ){
-            mFgImage = mImages[mMouseOverItem->mIndex];
-      //      mFgAlpha = 0.0f;
-       //     timeline().apply( &mFgAlpha, 1.0f, 0.4f, EaseInQuad() );
+            mMouseOverItem->mouseOff( timeline() );
+            mMouseOverItem = mItems.end();
         }
+    } else {
+    
+        if( mNewMouseOverItem != mMouseOverItem && !mNewMouseOverItem->getSelected() ){
+            if( mMouseOverItem != mItems.end() && mMouseOverItem != mSelectedItem )
+                mMouseOverItem->mouseOff( timeline() );
+            mMouseOverItem = mNewMouseOverItem;
+            mMouseOverItem->mouseOver( timeline() );
+        }
+    }
+    
+    if( mMouseOverItem != mItems.end() && mMouseOverItem != mSelectedItem ){
+        mFgImage = mImages[mMouseOverItem->mIndex];
+  //      mFgAlpha = 0.0f;
+   //     timeline().apply( &mFgAlpha, 1.0f, 0.4f, EaseInQuad() );
     }
 }
 
 void VisibleApp::mouseDown( MouseEvent event )
 {
-    guiContext  *data = getWindow()->getUserData<guiContext>();
-    if(data)
-        data->mouseDown(event);
-    else
-    {
-        if( mMouseOverItem != mItems.end() ){
-            vector<Item>::iterator prevSelected = mSelectedItem;
-            mSelectedItem = mMouseOverItem;
-            
-            // deselect previous selected item
-            if( prevSelected != mItems.end() && prevSelected != mMouseOverItem ){
-                prevSelected->deselect( timeline() );
-                mBgImage = mFgImage;
-                mBgColor = Color::white();
-                timeline().apply( &mBgColor, Color::black(), 0.4f, EaseInQuad() );
-            }
-            
-            // select current mouseover item
-            mSelectedItem->select( timeline(), mLeftBorder );
-            mFgImage = mImages[mSelectedItem->mIndex];
-            mFgAlpha = 0.0f;
-            timeline().apply( &mFgAlpha, 1.0f, 0.4f, EaseInQuad() );
-            mMouseOverItem = mItems.end();
-            mNewMouseOverItem = mItems.end();
-            
-            // Open a LIF Context for this serie
-           create_lif_viewer(mSelectedItem->mIndex);
+    if( mMouseOverItem != mItems.end() ){
+        vector<Item>::iterator prevSelected = mSelectedItem;
+        mSelectedItem = mMouseOverItem;
+        
+        // deselect previous selected item
+        if( prevSelected != mItems.end() && prevSelected != mMouseOverItem ){
+            prevSelected->deselect( timeline() );
+            mBgImage = mFgImage;
+            mBgColor = Color::white();
+            timeline().apply( &mBgColor, Color::black(), 0.4f, EaseInQuad() );
         }
+        
+        // select current mouseover item
+        mSelectedItem->select( timeline(), mLeftBorder );
+        mFgImage = mImages[mSelectedItem->mIndex];
+        mFgAlpha = 0.0f;
+        timeline().apply( &mFgAlpha, 1.0f, 0.4f, EaseInQuad() );
+        mMouseOverItem = mItems.end();
+        mNewMouseOverItem = mItems.end();
+        
+        // Open a LIF Context for this serie
+       dispatch_lif_viewer(mSelectedItem->mIndex);
     }
 }
 
 void VisibleApp::update()
 {
-    guiContext  *data = getWindow()->getUserData<guiContext>();
-    
-    if (data && data->is_valid()) data->update ();
-    else {
-        for( vector<Item>::iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
-            itemIt->update();
-        }
+
+    for( vector<Item>::iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+        itemIt->update();
     }
+
 }
 
 void VisibleApp::draw()
@@ -435,61 +401,53 @@ void VisibleApp::draw()
     // Note: this function is called once per frame for EACH WINDOW
     gl::ScopedViewport scpViewport( ivec2( 0 ), getWindowSize() );
 
-    guiContext  *data = getWindow()->getUserData<guiContext>();
+
     
-    bool valid_data = data != nullptr && data->is_valid ();
+    // clear out the window with black
+    gl::clear( Color( 0, 0, 0 ) );
+    gl::enableAlphaBlending();
     
-    if (valid_data){
-          gl::clear( Color::gray( 0.5f ) );
-         data->draw();
+    gl::setMatricesWindowPersp( getWindowSize() );
+    
+    // draw background image
+    if( mBgImage ){
+        gl::color( mBgColor );
+        gl::draw( mBgImage, getWindowBounds() );
     }
-    else {
-        
-        // clear out the window with black
-        gl::clear( Color( 0, 0, 0 ) );
-        gl::enableAlphaBlending();
-        
-        gl::setMatricesWindowPersp( getWindowSize() );
-        
-        // draw background image
-        if( mBgImage ){
-            gl::color( mBgColor );
-            gl::draw( mBgImage, getWindowBounds() );
-        }
-        
-        // draw foreground image
-        if( mFgImage ){
-            Rectf bounds (mFgImage->getBounds());
-            bounds = bounds.getCenteredFit(getWindowBounds(), false);
-            gl::color( ColorA( 1.0f, 1.0f, 1.0f, mFgAlpha ) );
-            gl::draw( mFgImage, bounds );
-        }
-        
-        // draw swatches
-        gl::context()->pushTextureBinding( mSwatchLargeTex->getTarget(), mSwatchLargeTex->getId(), 0 );
-        if( mSelectedItem != mItems.end() )
-            mSelectedItem->drawSwatches();
-        
-        gl::context()->bindTexture( mSwatchLargeTex->getTarget(), mSwatchLargeTex->getId(), 0 );
-        for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
-          //  if( ! itemIt->getSelected() )
-                itemIt->drawSwatches();
-        }
-        gl::context()->popTextureBinding( mSwatchLargeTex->getTarget(), 0 );
-        
-        // turn off textures and draw bgBar
-        for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
-            itemIt->drawBgBar();
-        }
-        
-        // turn on textures and draw text
-        gl::color( Color( 1.0f, 1.0f, 1.0f ) );
-        for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
-            itemIt->drawText();
-        }
-        
-        DrawGUI();
+    
+    // draw foreground image
+    if( mFgImage ){
+        Rectf bounds (mFgImage->getBounds());
+        bounds = bounds.getCenteredFit(getWindowBounds(), false);
+        gl::color( ColorA( 1.0f, 1.0f, 1.0f, mFgAlpha ) );
+        gl::draw( mFgImage, bounds );
     }
+    
+    // draw swatches
+    gl::context()->pushTextureBinding( mSwatchLargeTex->getTarget(), mSwatchLargeTex->getId(), 0 );
+    if( mSelectedItem != mItems.end() )
+        mSelectedItem->drawSwatches();
+    
+    gl::context()->bindTexture( mSwatchLargeTex->getTarget(), mSwatchLargeTex->getId(), 0 );
+    for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+      //  if( ! itemIt->getSelected() )
+            itemIt->drawSwatches();
+    }
+    gl::context()->popTextureBinding( mSwatchLargeTex->getTarget(), 0 );
+    
+    // turn off textures and draw bgBar
+    for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+        itemIt->drawBgBar();
+    }
+    
+    // turn on textures and draw text
+    gl::color( Color( 1.0f, 1.0f, 1.0f ) );
+    for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+        itemIt->drawText();
+    }
+    
+    DrawGUI();
+
 
 }
 
@@ -517,10 +475,7 @@ void VisibleApp::windowClose()
 
 void VisibleApp::mouseDrag( MouseEvent event )
 {
-    guiContext  *data = getWindow()->getUserData<guiContext>();
-    if(data)
-        data->mouseDrag(event);
-    else
+  
         cinder::app::App::mouseDrag(event);
 }
 
@@ -529,32 +484,24 @@ void VisibleApp::mouseDrag( MouseEvent event )
 
 void VisibleApp::mouseUp( MouseEvent event )
 {
-    guiContext  *data = getWindow()->getUserData<guiContext>();
-    if(data)
-        data->mouseUp(event);
-    else
+ 
         cinder::app::App::mouseUp(event);
 }
 
 
 void VisibleApp::keyDown( KeyEvent event )
 {
-    guiContext  *data = getWindow()->getUserData<guiContext>();
-    if(data)
-        data->keyDown(event);
-    else
-    {
-        if( event.getChar() == 'f' ) {
-            // Toggle full screen when the user presses the 'f' key.
-            setFullScreen( ! isFullScreen() );
-        }
-        else if( event.getCode() == KeyEvent::KEY_ESCAPE ) {
-            // Exit full screen, or quit the application, when the user presses the ESC key.
-            if( isFullScreen() )
-                setFullScreen( false );
-            else
-                quit();
-        }
+ 
+    if( event.getChar() == 'f' ) {
+        // Toggle full screen when the user presses the 'f' key.
+        setFullScreen( ! isFullScreen() );
+    }
+    else if( event.getCode() == KeyEvent::KEY_ESCAPE ) {
+        // Exit full screen, or quit the application, when the user presses the ESC key.
+        if( isFullScreen() )
+            setFullScreen( false );
+        else
+            quit();
     }
     
 }
@@ -563,10 +510,7 @@ void VisibleApp::keyDown( KeyEvent event )
 
 void VisibleApp::resize ()
 {
-    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-    guiContext  *data = getWindow()->getUserData<guiContext>();
-    
-    if (data && data->is_valid()) data->resize ();
+  
     
 }
 
