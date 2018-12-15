@@ -82,6 +82,19 @@ bool check_input (const string &filename){
 
 
 
+namespace VisibleRunAppControl{
+    /**
+     When this is set to false the threads managed by this program will stop and join the main thread.
+     */
+    bool ThreadsShouldStop = false;
+    
+    /**
+     Logger which will show output on the Log window in the application.
+     */
+    AppLog app_log;
+    
+}
+
 using namespace ci;
 using namespace ci::app;
 using namespace std;
@@ -133,6 +146,79 @@ using namespace std;
 //
 //};
 
+void VisibleRunApp::QuitApp(){
+    ImGui::DestroyContext();
+    // fg::ThreadsShouldStop = true;
+    quit();
+}
+
+void VisibleRunApp::SetupGUIVariables(){}
+
+void VisibleRunApp::DrawGUI(){
+    // Draw the menu bar
+    {
+        ui::ScopedMainMenuBar menuBar;
+        
+        if( ui::BeginMenu( "File" ) ){
+            //if(ui::MenuItem("Fullscreen")){
+            //    setFullScreen(!isFullScreen());
+            //}
+            if(ui::MenuItem("Looping", "S")){
+                mContext->loop_no_loop_button();
+            }
+            ui::MenuItem("Help", nullptr, &showHelp);
+            if(ui::MenuItem("Quit", "ESC")){
+                QuitApp();
+            }
+            ui::EndMenu();
+        }
+        
+        if( ui::BeginMenu( "View" ) ){
+            ui::MenuItem( "General Settings", nullptr, &showGUI );
+            //    ui::MenuItem( "Edge Detection", nullptr, &edgeDetector.showGUI );
+            //    ui::MenuItem( "Face Detection", nullptr, &faceDetector.showGUI );
+            ui::MenuItem( "Log", nullptr, &showLog );
+            //ui::MenuItem( "PS3 Eye Settings", nullptr, &showWindowWithMenu );
+            ui::EndMenu();
+        }
+        
+        //ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.0f FPS", ui::GetIO().Framerate);
+        ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
+    }
+    
+    //Draw general settings window
+    if(showGUI)
+    {
+        ui::Begin("General Settings", &showGUI, ImGuiWindowFlags_AlwaysAutoResize);
+        
+        ui::SliderInt("Cover Percent", &convergence, 0, 100);
+        
+        ui::End();
+    }
+    
+    //Draw the log if desired
+    if(showLog){
+        VisibleRunAppControl::app_log.Draw("Log", &showLog);
+    }
+    
+    if(showHelp) ui::OpenPopup("Help");
+    //ui::ScopedWindow window( "Help", ImGuiWindowFlags_AlwaysAutoResize );
+    std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
+    buildN = "Visible ( build: " + buildN + " ) ";
+    if(ui::BeginPopupModal("Help", &showHelp)){
+        ui::TextColored(ImVec4(0.92f, 0.18f, 0.29f, 1.00f), "%s", buildN.c_str());
+        ui::Text("Arman Garakani, Darisa LLC");
+        if(ui::Button("Copy")) ui::LogToClipboard();
+        ui::SameLine();
+        //  ui::Text("github.com/");
+        ui::LogFinish();
+        ui::Text("");
+        ui::Text("Mouse over any"); ShowHelpMarker("We did it!"); ui::SameLine(); ui::Text("to show help.");
+        ui::Text("Ctrl+Click any slider to set its value manually.");
+        ui::EndPopup();
+    }
+    
+}
 
 bool VisibleRunApp::shouldQuit()
 {
@@ -143,6 +229,15 @@ bool VisibleRunApp::shouldQuit()
 
 void VisibleRunApp::setup()
 {
+    ui::initialize(ui::Options()
+                   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
+                   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
+                   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
+                   .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
+                   //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
+                   );
+    
+    
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "VisibleRun.app/Contents/Info.plist";
     if (exists (appPath)){
@@ -247,7 +342,12 @@ void VisibleRunApp::setup()
     
     gl::enableVerticalSync();
     
-  
+    // Setup APP LOG
+    auto logging_container = logging::get_mutable_logging_container();
+    logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
+    logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>("Log", 23, 59));
+    
+    auto logger = std::make_shared<spdlog::logger>(APPLOG, logging_container);
     
 }
 
@@ -349,6 +449,7 @@ void VisibleRunApp::draw ()
 {
     gl::clear( Color::gray( 0.5f ) );
     if (mContext && mContext->is_valid()) mContext->draw ();
+    DrawGUI();
 }
 
 

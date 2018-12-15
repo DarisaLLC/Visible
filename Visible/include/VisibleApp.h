@@ -91,7 +91,7 @@ public:
     bool shouldQuit();
     void update_log (const std::string& msg);
     WindowRef createConnectedWindow (Window::Format& format);
-    void create_lif_viewer (const int serie_index);
+    void dispatch_lif_viewer (const int serie_index);
     
     vector<Item>            mItems;
     vector<Item>::iterator    mMouseOverItem;
@@ -120,7 +120,6 @@ public:
     vec2                mSize;
     fs::path            mCurrentLifFilePath;
     
-    bool swapEyes = false;
     
     int convergence = 0;
     
@@ -136,9 +135,9 @@ public:
  //   VisibleRunApp();
   //  ~VisibleRunApp();
 
-    virtual void SetupGUIVariables() override {}
-    virtual void DrawGUI() override {}
-    virtual void QuitApp() {}
+    virtual void SetupGUIVariables() override;
+    virtual void DrawGUI() override;
+    virtual void QuitApp();
 
     void prepareSettings( Settings *settings );
     void setup()override;
@@ -170,7 +169,11 @@ private:
 
     mutable std::unique_ptr<lifContext> mContext;
     mutable lif_browser::ref mBrowser;
-
+    
+    bool showLog = false;
+    bool showHelp = false;
+    bool showOverlay = false;
+    int convergence = 0;
 
 };
 
