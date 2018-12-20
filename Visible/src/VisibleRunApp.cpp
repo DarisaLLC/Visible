@@ -7,6 +7,7 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 
 #include "core/core.hpp"
+#include "core/file_system.hpp"
 #include "Plist.hpp"
 #include "otherIO/lifFile.hpp"
 #include "algo_Lif.hpp"
@@ -24,6 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <mutex>
 
 #include "cinder/Log.h"
 #include "cinder/CinderAssert.h"
@@ -32,12 +34,9 @@
 #include "CinderImGui.h"
 #include "gui_handler.hpp"
 #include "gui_base.hpp"
+#include "app_logger.hpp"
 #include "logger.hpp"
 #include "VisibleApp.h"
-
-#include <stdexcept>
-
-#include <sys/stat.h>
 
 //#include "console.h"
 
@@ -47,40 +46,37 @@
 #pragma GCC diagnostic pop
 
 
-namespace anonymous {
-    
-  
-    
-        long int file_size(const std::string& file_name) {
-    #if defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
-    #define STAT_IDENTIFIER stat //for MacOS X and other Unix-like systems
-    #elif defined(_WIN32)
-    #define STAT_IDENTIFIER _stat //for Windows systems, both 32bit and 64bit?
-    #endif
-            struct STAT_IDENTIFIER st;
-            if(STAT_IDENTIFIER(file_name.c_str(), &st) == -1) {
-                throw std::runtime_error("stat error!");
-            }
-            return st.st_size;
-        }
+namespace {
 
-}
 
 bool check_input (const string &filename){
  
-    bool ok = false;
+    auto check_file_and_size = svl::io::check_file(filename);
+    if(! check_file_and_size.first) return check_file_and_size.first;
     
-    auto usize = file_size(filename);
     boost::filesystem::path bpath(filename);
-    ok = exists(bpath) && is_regular_file(bpath);
+    auto boost_file_and_size = svl::io::existsFile(bpath);
+    if(! boost_file_and_size) return boost_file_and_size;
+
     auto bsize = boost::filesystem::file_size(bpath);
-    ok &= (usize == bsize);
+    return check_file_and_size.second == bsize;
+}
+imGuiLog visualLog;
+void setup_loggers (){
+   using imgui_sink_mt = spdlog::sinks::imGuiLogSink<std::mutex> ;
     
-    return ok;
-    
+    // Setup APP LOG
+    auto logging_container = logging::get_mutable_logging_container();
+    logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
+    logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>("Log", 23, 59));
+    logging_container->add_sink(std::make_shared<imgui_sink_mt>(visualLog));
+   // logging_container->add_sink(std::make_shared<spdlog::sinks::stdout_sink_mt>(vlogger::instance().console()));
+    auto combined_logger = std::make_shared<spdlog::logger>("Log", logging_container);
+    //register it if you need to access it globally
+    spdlog::register_logger(combined_logger);
 }
 
-
+}
 
 namespace VisibleRunAppControl{
     /**
@@ -91,7 +87,7 @@ namespace VisibleRunAppControl{
     /**
      Logger which will show output on the Log window in the application.
      */
-    AppLog app_log;
+    imGuiLog app_log;
     
 }
 
@@ -100,57 +96,13 @@ using namespace ci::app;
 using namespace std;
 
 
-
-//class VisibleRunApp : public App, public gui_base
-//{
-//public:
-//
-// //   VisibleRunApp();
-//  //  ~VisibleRunApp();
-//
-//    virtual void SetupGUIVariables() override {}
-//    virtual void DrawGUI() override {}
-//    virtual void QuitApp() {}
-//
-//    void prepareSettings( Settings *settings );
-//    void setup()override;
-//    void mouseDown( MouseEvent event )override;
-//    void mouseMove( MouseEvent event )override;
-//    void mouseUp( MouseEvent event )override;
-//    void mouseDrag( MouseEvent event )override;
-//    void keyDown( KeyEvent event )override;
-//
-//    void update()override;
-//    void draw()override;
-//    void resize()override;
-//    void windowMove();
-//    void windowClose();
-//    void windowMouseDown( MouseEvent &mouseEvt );
-//    void displayChange();
-//    void update_log (const std::string& msg);
-//
-//    bool shouldQuit();
-//
-//private:
-//    std::vector<std::string> m_args;
-//    vec2                mSize;
-//    Font                mFont;
-//    std::string            mLog;
-//
-//    Rectf                        mGlobalBounds;
-//    map<string, boost::any> mPlist;
-//
-//    mutable std::unique_ptr<lifContext> mContext;
-//    mutable lif_browser::ref mBrowser;
-//
-//
-//};
-
 void VisibleRunApp::QuitApp(){
     ImGui::DestroyContext();
     // fg::ThreadsShouldStop = true;
     quit();
 }
+
+
 
 void VisibleRunApp::SetupGUIVariables(){}
 
@@ -198,7 +150,7 @@ void VisibleRunApp::DrawGUI(){
     
     //Draw the log if desired
     if(showLog){
-        VisibleRunAppControl::app_log.Draw("Log", &showLog);
+        visualLog.Draw("Log", &showLog);
     }
     
     if(showHelp) ui::OpenPopup("Help");
@@ -237,6 +189,10 @@ void VisibleRunApp::setup()
                    //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
                    );
     
+  
+    setup_loggers();
+
+    
     
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "VisibleRun.app/Contents/Info.plist";
@@ -249,27 +205,17 @@ void VisibleRunApp::setup()
     // args[1] = LIF file full path
     // args[3] = Serie name
     m_args = getCommandLineArgs();
-    if( ! m_args.empty() ) {
-        std::cout <<  "command line args: " ;
-        for( size_t i = 0; i < m_args.size(); i++ )
-            std::cout << "\t[" << i << "] " << m_args[i] << endl;
-    }
 
-    
-#if 0
- auto some_path = getOpenFilePath(); //"", extensions);
-    if (! some_path.empty() || exists(some_path)){
-        std::cout << m_args[1] << std::endl;
-        std::cout << some_path.string() << std::endl;
-        auto cmp = m_args[1].compare(some_path.string());
-        std::cout << cmp << std::endl;
-      //  m_args[1] = some_path.string();
+    if(m_args.size() == 1){
+        auto some_path = getOpenFilePath(); //"", extensions);
+        if (! some_path.empty() || exists(some_path)){
+            m_args.push_back(some_path.string());
+        }
+        else{
+            std::string msg = some_path.string() + " is not a valid path to a file ";
+            vlogger::instance().console()->info(msg);
+        }
     }
-    else{
-        std::string msg = some_path.string() + " is not a valid path to a file ";
-        vlogger::instance().console()->info(msg);
-    }
-#endif
         
         
     for( auto display : Display::getDisplays() )
@@ -278,21 +224,15 @@ void VisibleRunApp::setup()
     }
     
     setWindowPos(getWindowSize()/3);
-    
-  
     WindowRef ww = getWindow ();
-  
+    std::string bpath = m_args[1];
+    auto cmds = m_args[1];
 
     
-    std::string bpath = m_args[1];
-    auto parts = split(bpath, getPathSeparator(), true);
-    for (auto part : parts)
-        std::cout << part << std::endl;
-    
-    auto cmds = m_args[1];
-    
-    if(! exists(bpath))
+    if(! exists(bpath)){
         cmds += " Does Not Exist ";
+        APPLOG_INFO(cmds.c_str());
+    }
     else{
         mBrowser = lif_browser::create(bpath);
         mBrowser->get_series_info();
@@ -307,7 +247,7 @@ void VisibleRunApp::setup()
                 cmds += " [ " + m_args[2] + " ] ";
                 cmds += "  Ok ";
             }
-        
+            APPLOG_INFO(cmds.c_str());
             mContext->resize();
             mContext->seekToStart();
             mContext->play();
@@ -342,12 +282,7 @@ void VisibleRunApp::setup()
     
     gl::enableVerticalSync();
     
-    // Setup APP LOG
-    auto logging_container = logging::get_mutable_logging_container();
-    logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
-    logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>("Log", 23, 59));
-    
-    auto logger = std::make_shared<spdlog::logger>(APPLOG, logging_container);
+   
     
 }
 
@@ -445,11 +380,15 @@ void VisibleRunApp::update()
     
 }
 
+static int n = 0;
+static float minRadius = 1;
 void VisibleRunApp::draw ()
 {
     gl::clear( Color::gray( 0.5f ) );
     if (mContext && mContext->is_valid()) mContext->draw ();
     DrawGUI();
+    ui::SliderInt( "Circles", &n, 0, 500 );
+    ui::SliderFloat( "Min Radius", &minRadius, 1, 499 );
 }
 
 
@@ -465,9 +404,10 @@ void VisibleRunApp::resize ()
 void prepareSettings( App::Settings *settings )
 {
     const auto &args = settings->getCommandLineArgs();
-
-    auto ok = check_input(args[1]);
-    std::cout << "File is " << std::boolalpha << ok << std::endl;
+    if(args.size() > 1){
+        auto ok = check_input(args[1]);
+        std::cout << "File is " << std::boolalpha << ok << std::endl;
+    }
     
     settings->setHighDensityDisplayEnabled();
     settings->setWindowSize(lifContext::startup_display_size().x, lifContext::startup_display_size().y);

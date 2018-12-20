@@ -9,10 +9,24 @@
 #define app_logger_h
 
 #include "CinderImGui.h"
-#include <stdio.h>
+#include <mutex>
 
-struct AppLog
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/sink.h"
+#include "spdlog/sinks/base_sink.h"
+#include "spdlog/sinks/ostream_sink.h"
+#include "spdlog/details/os.h"
+#include "spdlog/fmt/fmt.h"
+#include "spdlog/formatter.h"
+#include "spdlog/details/log_msg.h"
+#include "spdlog/sinks/null_sink.h"
+
+
+using namespace spdlog;
+
+class imGuiLog
 {
+public:
     ImGuiTextBuffer     Buf;
     ImGuiTextFilter     Filter;
     ImVector<int>       LineOffsets;        // Index to lines offset
@@ -87,6 +101,45 @@ struct AppLog
     }
 };
 
+namespace spdlog{
+    namespace sinks
+    {
+        template<typename Mutex>
+        class imGuiLogSink : public sinks::base_sink <Mutex> {
+        public:
+            imGuiLogSink(imGuiLog& c) : m_logger(c) {};
+            
+            // SPDLog sink interface
+            
+        protected:
+            void sink_it_(const spdlog::details::log_msg& msg) override
+            {
+                
+                // log_msg is a struct containing the log entry info like level, timestamp, thread id etc.
+                // msg.raw contains pre formatted log
+                
+                // If needed (very likely but not mandatory), the sink formats the message before sending it to its final destination:
+                fmt::memory_buffer formatted ;
+                sink::formatter_->format(msg, formatted);
+                auto str = fmt::to_string(formatted);
+                m_logger.AddLog("%s", str.c_str());
+            }
+            
+            void flush_() override
+            {
+                std::cout << std::flush;
+            }
+            
+            
+            
+            
+        private:
+            imGuiLog& m_logger;
+        };
+     
+        
+    }
+}
 
 
 #endif /* app_logger_h */

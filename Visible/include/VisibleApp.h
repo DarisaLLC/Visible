@@ -57,7 +57,7 @@ namespace VisibleAppControl{
      When this is set to false the threads managed by this program will stop and join the main thread.
      */
     extern bool ThreadsShouldStop;
-    extern AppLog app_log;
+    extern imGuiLog app_log;
 }
 
 namespace vac = VisibleAppControl;
@@ -174,6 +174,7 @@ private:
     bool showHelp = false;
     bool showOverlay = false;
     int convergence = 0;
+    
 
 };
 

@@ -11,7 +11,9 @@
 #include <iostream>
 
 using namespace std;
+#ifndef BOOL
 #define BOOL bool
+#endif
 #endif
 
 struct tiny_media_info
@@ -73,6 +75,10 @@ struct tiny_media_info
         std_stream << "Framerate: " << getFramerate() << std::endl;
         return std_stream;
     }
+#ifdef BOOL
+#undef BOOL
+#endif
+    
 #endif
     
     
