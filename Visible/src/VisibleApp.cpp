@@ -21,7 +21,7 @@ namespace VisibleAppControl{
     /**
      Logger which will show output on the Log window in the application.
      */
-    AppLog app_log;
+    imGuiLog app_log;
     
 }
 void prepareSettings( App::Settings *settings )

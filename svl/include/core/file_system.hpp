@@ -7,11 +7,46 @@
 #define BOOST_NO_CXX11_SCOPED_ENUMS
 #include <boost/filesystem.hpp>
 #undef BOOST_NO_CXX11_SCOPED_ENUMS
+#include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 
 namespace bf = boost::filesystem;
 
 namespace svl {
     namespace io {
+        
+        
+        /** checks if a file exists
+         * @param rFile
+         * @return true if file exsits
+         */
+        bool existsFile(const boost::filesystem::path &rFile){
+            return (bf::exists(rFile) && bf::is_regular_file(rFile));
+        }
+        
+        
+        /** checks if a folder exists
+         * @param rFolder
+         * @return true if folder exsits
+         */
+        bool existsFolder(const boost::filesystem::path &dir) {
+            return bf::exists(dir);
+        }
+        /** checks if folder already exists and if not, creates one
+         * @param folder_name
+         */
+        void createDirIfNotExist(const boost::filesystem::path &dir){
+            if (!bf::exists(dir))
+                bf::create_directories(dir);
+        }
+        
+        /** checks if the path for the filename already exists,
+         * otherwise creates it
+         * @param filename
+         */
+        void createDirForFileIfNotExist(const boost::filesystem::path &filename){
+            createDirIfNotExist(filename.parent_path());
+        }
         
         /** Returns folder names in a folder </br>
          * @param dir
@@ -73,46 +108,16 @@ namespace svl {
             return relative_paths;
         }
         
+     
         
-        /** checks if a file exists
-         * @param rFile
-         * @return true if file exsits
+        /** @brief copies a directory from source to destination
+         * @param path of source directory
+         * @param path of destination directory
          */
-        bool existsFile(const boost::filesystem::path &rFile){
-            return (bf::exists(rFile) && bf::is_regular_file(rFile));
-        }
+        void copyDir(const bf::path &sourceDir, const bf::path &destinationDir){
+            
+            throw std::runtime_error("Source directory " + sourceDir.string() + " does not exist or is not a directory");
         
-        
-        /** checks if a folder exists
-         * @param rFolder
-         * @return true if folder exsits
-         */
-        bool existsFolder(const boost::filesystem::path &dir) {
-            return bf::exists(dir);
-            
-            /** checks if folder already exists and if not, creates one
-             * @param folder_name
-             */
-            void createDirIfNotExist(const boost::filesystem::path &dir){
-                if (!bf::exists(dir))
-                    bf::create_directories(dir);
-            }
-            
-            /** checks if the path for the filename already exists,
-             * otherwise creates it
-             * @param filename
-             */
-            void createDirForFileIfNotExist(const boost::filesystem::path &filename){
-                createDirIfNotExist(filename.parent_path());
-            }
-            
-            /** @brief copies a directory from source to destination
-             * @param path of source directory
-             * @param path of destination directory
-             */
-            void copyDir(const bf::path &sourceDir, const bf::path &destinationDir){
-                throw std::runtime_error("Source directory " + sourceDir.string() + " does not exist or is not a directory");
-            }
             if (bf::exists(destinationDir)) {
                 throw std::runtime_error("Destination directory " + destinationDir.string() + " already exists");
             }
@@ -128,9 +133,9 @@ namespace svl {
                 
                 bf::copy(iteratorPath, destinationDir / relativeIteratorPathString);
             }
-        }
-        
-        
+    }
+    
+    
         /**
          * @brief removeDir remove a directory with all its contents (including subdirectories) from disk
          * @param path folder path

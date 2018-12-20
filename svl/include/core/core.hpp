@@ -20,12 +20,16 @@
 #include <random>
 #include <chrono>
 
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomma"
 
 namespace svl // protection from unintended ADL
 {
-
+    namespace io{
+        std::pair<bool,uint64_t> check_file (const std::string &filename);
+    }
+        
 template<typename T>
 std::string toString( const T &t ) { std::ostringstream ss; ss << t; return ss.str(); }
 
