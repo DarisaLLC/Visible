@@ -19,8 +19,6 @@
 #include "cinder/gl/gl.h"
 #include "cinder/Timeline.h"
 #include "cinder/Timer.h"
-#include "cinder/Camera.h"
-#include "cinder/qtime/QuickTime.h"
 #include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"
 #include "cinder/ip/Blend.h"
@@ -228,7 +226,7 @@ void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
     {
         auto tracksRef = m_pci_trackWeakRef.lock();
         if (!tracksRef->at(0).second.empty())
-            m_plots[channel_count()-1]->setup(tracksRef->at(0));
+            m_plots[channel_count()-1]->load(tracksRef->at(0));
     }
     vlogger::instance().console()->info("self-similarity available: ");
 }
@@ -241,7 +239,9 @@ void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
 }
 void lifContext::signal_flu_stats_available ()
 {
+    update();
     vlogger::instance().console()->info(" Flu Stats Available ");
+
 }
 
 void lifContext::signal_contraction_available (lif_processor::contractionContainer_t& contras)
@@ -776,6 +776,11 @@ void lifContext::add_plots ()
         m_plots[2]->strokeColor = ColorA(0.0,0.0,0.0,1.0);
     }
     
+}
+
+void lifContext::add_timeline(){
+    
+    std::lock_guard<std::mutex> lock(m_track_mutex);
     vlogger::instance().console()->info(tostr(m_layout->display_timeline_rect()));
     auto rect = m_layout->display_timeline_rect();
     mMainTimeLineSlider = tinyUi::TimeLineSlider(rect);
@@ -783,11 +788,7 @@ void lifContext::add_plots ()
     mMainTimeLineSlider.setTitle ("Time Line");
     m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mMainTimeLineSlider, std::placeholders::_1));
     mWidgets.push_back( &mMainTimeLineSlider );
-  
-
-    
 }
-
 
 // Set window size according to layout
 //  Channel             Data
@@ -845,7 +846,7 @@ void lifContext::loadCurrentSerie ()
         mAuxTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
    
         add_plots();
-      
+        add_timeline();
         
     }
     catch( const std::exception &ex ) {
@@ -888,6 +889,13 @@ void lifContext::process_async (){
 void  lifContext::SetupGUIVariables() {}
 
 void  lifContext::DrawGUI(){
+    {
+        static bool animate = true;
+        ImGui::Checkbox("Animate", &animate);
+        
+        static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
+        ImGui::PlotLines("Frame Times", arr, IM_ARRAYSIZE(arr));
+    }
     // Draw the menu bar
     {
         ui::ScopedMainMenuBar menuBar;
@@ -1012,13 +1020,13 @@ void lifContext::update ()
     {
         assert(channel_count() >= 3);
         auto tracksRef = m_trackWeakRef.lock();
-        m_plots[0]->setup(tracksRef->at(0));
-        m_plots[1]->setup(tracksRef->at(1));
+        m_plots[0]->load(tracksRef->at(0));
+        m_plots[1]->load(tracksRef->at(1));
     }
     if ( ! m_pci_trackWeakRef.expired())
     {
         auto tracksRef = m_pci_trackWeakRef.lock();
-        m_plots[channel_count()-1]->setup(tracksRef->at(0));
+        m_plots[channel_count()-1]->load(tracksRef->at(0));
     }
     
     if (have_lif_serie ()){

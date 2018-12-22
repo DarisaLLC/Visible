@@ -208,6 +208,7 @@ private:
     Rectf get_image_display_rect () override;
     vec2 texture_to_display_zoom ();
     void add_plots ();
+    void add_timeline ();
     
     // Navigation
     void update_log (const std::string& meg = "") override;

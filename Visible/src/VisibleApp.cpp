@@ -38,30 +38,21 @@ void VisibleApp::dispatch_lif_viewer (const int serie_index)
 {
     auto name_index_itr = mLifRef->index_to_name_map().find(serie_index);
     auto sep = boost::filesystem::path::preferred_separator;
+    static std::string space ("  ");
     if (name_index_itr != mLifRef->index_to_name_map().end())
     {
         const std::string& name = name_index_itr->second;
         auto command = ci::app::getAppPath().string() + sep + "Visible.app" + sep + "Contents" + sep + "MacOS" + sep + "VisibleRun.app" + sep  + " --args " +
-            mCurrentLifFilePath.string() + " " + name;
+            mCurrentLifFilePath.string() + space + name;
+        command += space + mFileExtension;
+        if (m_isIdLabLif) command += space + "IdLab";
+        
         command = "open -n -F -a " + command;
         std::cout << command << std::endl;
         
         std::system(command.c_str());
 
     }
-//    Window::Format format( RendererGl::create() );
- //   WindowRef ww = createConnectedWindow(format);
- //   mContexts.push_back(std::unique_ptr<lifContext>(new lifContext(ww, mLifRef, serie_index)));
-}
-
-WindowRef VisibleApp::createConnectedWindow(Window::Format& format)
-{
-    WindowRef win = createWindow( Window::Format().size( APP_WIDTH, APP_HEIGHT ) );
-    win->getSignalClose().connect( std::bind( &VisibleApp::windowClose, this ) );
-    win->getSignalMouseDown().connect( std::bind( &VisibleApp::windowMouseDown, this, std::placeholders::_1 ) );
-    win->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
-    return win;
-    
 }
 
 
@@ -156,8 +147,10 @@ void VisibleApp::setup()
     
     auto home_path = platform->getHomeDirectory();
     vlogger::instance().console()->info(home_path.string());
-//    auto some_path = getOpenFilePath(); //"", extensions);
-    boost::filesystem::path some_path = "/Users/arman/Pictures/lif/3channels.lif";
+    auto some_path = getOpenFilePath(); //"", extensions);
+    mFileExtension = some_path.extension().string();
+    mFileName = some_path.filename().string();
+ //   boost::filesystem::path some_path = "/Users/arman/Pictures/lif/3channels.lif";
     if (! some_path.empty() || exists(some_path))
         initData(some_path);
     else{
@@ -223,12 +216,14 @@ void VisibleApp::DrawGUI(){
         ui::ScopedMainMenuBar menuBar;
         
         if( ui::BeginMenu( "File" ) ){
-            //if(ui::MenuItem("Fullscreen")){
-            //    setFullScreen(!isFullScreen());
-            //}
-            if(ui::MenuItem("Flip ", "S")){
-                
+            if(ui::MenuItem("Fullscreen")){
+                setFullScreen(!isFullScreen());
             }
+            if(ui::MenuItem("Is IdLab LIF ", "I")){
+                m_isIdLabLif = ! m_isIdLabLif;
+            }
+            ImGui::Checkbox("Is IdLab LIF", &m_isIdLabLif);
+            
             ui::MenuItem("Help", nullptr, &showHelp);
             if(ui::MenuItem("Quit", "ESC")){
                 QuitApp();
@@ -238,10 +233,7 @@ void VisibleApp::DrawGUI(){
         
         if( ui::BeginMenu( "View" ) ){
             ui::MenuItem( "General Settings", nullptr, &showGUI );
-        //    ui::MenuItem( "Edge Detection", nullptr, &edgeDetector.showGUI );
-        //    ui::MenuItem( "Face Detection", nullptr, &faceDetector.showGUI );
             ui::MenuItem( "Log", nullptr, &showLog );
-            //ui::MenuItem( "PS3 Eye Settings", nullptr, &showWindowWithMenu );
             ui::EndMenu();
         }
         
