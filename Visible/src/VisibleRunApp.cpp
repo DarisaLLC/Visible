@@ -248,9 +248,10 @@ void VisibleRunApp::setup()
                 cmds += "  Ok ";
             }
             APPLOG_INFO(cmds.c_str());
-            mContext->resize();
-            mContext->seekToStart();
-            mContext->play();
+            update();
+//            mContext->resize();
+//            mContext->seekToStart();
+//            mContext->play();
         }
        
     }

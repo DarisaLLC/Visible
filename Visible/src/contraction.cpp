@@ -18,6 +18,22 @@
 
 namespace anonymous
 {
+    template<typename P, template<typename ELEM, typename ALLOC = std::allocator<ELEM>> class CONT = std::deque >
+    void norm_scale (const CONT<P>& src, CONT<P>& dst, double pw)
+    {
+        auto bot = std::min_element (src.begin (), src.end() );
+        auto top = std::max_element (src.begin (), src.end() );
+        
+        P scaleBy = *top - *bot;
+        dst.resize (src.size ());
+        for (int ii = 0; ii < src.size (); ii++)
+        {
+            P dd = (src[ii] - *bot) / scaleBy;
+            dst[ii] = pow (dd, 1.0 / pw);
+        }
+    }
+
+
     void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
     {
         vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );

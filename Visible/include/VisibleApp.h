@@ -119,10 +119,11 @@ public:
     std::string            mLog;
     vec2                mSize;
     fs::path            mCurrentLifFilePath;
-    
+    std::string         mFileName;
+    std::string         mFileExtension;
     
     int convergence = 0;
-    
+    bool m_isIdLabLif = false;
     bool showLog = false;
     bool showHelp = false;
     bool showOverlay = false;

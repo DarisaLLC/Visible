@@ -96,6 +96,7 @@ public:
         
         *((tiny_media_info*)this) = tmi;
         m_canvas_size = uiWinSize;
+        m_canvas_size.x -= 100;
         Area wi (0, 0, m_canvas_size.x, m_canvas_size.y);
         m_window_rect = Rectf(wi);
         Area ai (0, 0, tmi.getWidth() * m_scale, tmi.getHeight() * m_scale);

@@ -63,7 +63,7 @@ public:
     // TBD: implement reset
     // Call back is set ony once
     // Others, setup can be called to update
-    void setup (size_t length, graph1d::get_callback callback)
+    void load (size_t length, graph1d::get_callback callback)
     {
         if ( mIsSet ) return;
         mBuffer.resize (length);
@@ -71,7 +71,7 @@ public:
         mIsSet = true;
     }
     // load the data and bind a function to access it
-    void setup (const std::vector<float>& buffer)
+    void load (const std::vector<float>& buffer)
     {
         if ( mIsSet ) return;
         mBuffer.clear ();
@@ -85,26 +85,22 @@ public:
     }
     
     // load the data and bind a function to access it
-    void setup (const namedTrackOfdouble_t& track)
+    void load (const namedTrackOfdouble_t& track)
     {
         try
         {
-        const timed_double_vec_t& ds = track.second;
-        mBuffer.clear ();
-        std::vector<timed_double_t>::const_iterator reader = ds.begin ();
-        while (reader != ds.end())
-        {
-            mBuffer.push_back (reader->second);
-            reader++;
-        }
-        
-        mRawBuffer = mBuffer;
-        mMinMax = svl::norm_min_max (mBuffer.begin(), mBuffer.end(), false);
-        svl::norm_min_max (mBuffer.begin(), mBuffer.end(), true);
-        
-        m_CB = std::bind (&graph1d::get, this, std::placeholders::_1);
-        make_plot_mesh ();
-        mIsSet = mBuffer.size() == ds.size();
+            const timed_double_vec_t& ds = track.second;
+            mBuffer.clear ();
+            std::vector<timed_double_t>::const_iterator reader = ds.begin ();
+            while (reader++ != ds.end())mBuffer.push_back (reader->second);
+            
+            mRawBuffer = mBuffer;
+            mMinMax = svl::norm_min_max (mBuffer.begin(), mBuffer.end(), false);
+            svl::norm_min_max (mBuffer.begin(), mBuffer.end(), true);
+            
+            m_CB = std::bind (&graph1d::get, this, std::placeholders::_1);
+            make_plot_mesh ();
+            mIsSet = mBuffer.size() == ds.size();
         }
         catch(const std::exception & ex)
         {
@@ -120,7 +116,7 @@ public:
         int32_t index = floor (tnormed * (buf.size()-1));
         return (index >= 0 && index < buf.size()) ? buf[index] : -1.0f;
     }
-
+    
     float getRaw (float tnormed) const
     {
         const std::vector<float>& buf = mRawBuffer;
@@ -137,10 +133,10 @@ public:
     
     void set_marker_position (marker_info t) const
     {
-     //   std::cout << t.current_frame() << "/" << t.count() << std::endl;
+        //   std::cout << t.current_frame() << "/" << t.count() << std::endl;
         vec2 pp ((float)t.norm_index(), 0.0);
         norm_pos (pp);
-
+        
     }
     
     void draw_value_label (float v, float x, float y) const
@@ -176,7 +172,7 @@ public:
             triangulator.addPolyLine( *polyIt );
         
         mMesh = make_shared<TriMesh>( triangulator.calcMesh() );
-
+        
     }
     void draw()
     {
