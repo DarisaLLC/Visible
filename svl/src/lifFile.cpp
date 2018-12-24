@@ -280,7 +280,7 @@ float lifIO::LifSerieHeader::frame_duration_ms() const
 }
 
 /** @brief LifSerie constructor  */
-lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize) :
+lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize, int ct) :
  LifSerieHeader(serie)
 {
     fileRef = make_shared_ifstream(filename.c_str());
@@ -299,6 +299,7 @@ lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, uns
 
     this->offset = offset;
     this->memorySize = memorySize;
+    this->m_content_type = ct;
 }
 
 
@@ -399,8 +400,10 @@ void lifIO::LifHeader::parseHeader()
 
 
 
-/** \brief Constructor from lif file name */
-lifIO::LifReader::LifReader(const string &filename)
+/** \brief Constructor from lif file name
+  * Content type specifies if it has a known none default content organization
+ */
+lifIO::LifReader::LifReader(const string &filename, ContentType ct)
 {
     const int MemBlockCode = 0x70, TestCode = 0x2a;
     char lifChar;
@@ -438,6 +441,8 @@ lifIO::LifReader::LifReader(const string &filename)
     m_Valid = ok;
     
     if (! m_Valid) return;
+    
+    m_content_type = ct;
     
     unsigned int xmlChars = readUnsignedInt();
     xmlChars*=2;
@@ -505,7 +510,7 @@ lifIO::LifReader::LifReader(const string &filename)
                     this->header->getSerieHeader(s),
                     filename,
                                           m_fileRef->tellg(),
-                    memorySize)
+                    memorySize, m_content_type)
                     );
             s++;
             //jump to the next memory block
@@ -513,7 +518,7 @@ lifIO::LifReader::LifReader(const string &filename)
         }
     }
 
-    return;
+
 }
 
 /** \brief read an int form file advancing the cursor*/

@@ -34,10 +34,10 @@
 #include "CinderImGui.h"
 #include "gui_handler.hpp"
 #include "gui_base.hpp"
-#include "app_logger.hpp"
+#include "imGuiLogger.hpp"
 #include "logger.hpp"
 #include "VisibleApp.h"
-
+#include "core/stl_utils.hpp"
 //#include "console.h"
 
 #define APP_WIDTH 1024
@@ -45,37 +45,58 @@
 
 #pragma GCC diagnostic pop
 
-
+// /Users/arman/Library/Application Support
 namespace {
+    
+    
+    bool check_input (const string &filename){
+        
+        auto check_file_and_size = svl::io::check_file(filename);
+        if(! check_file_and_size.first) return check_file_and_size.first;
+        
+        boost::filesystem::path bpath(filename);
+        auto boost_file_and_size = svl::io::existsFile(bpath);
+        if(! boost_file_and_size) return boost_file_and_size;
+        
+        auto bsize = boost::filesystem::file_size(bpath);
+        return check_file_and_size.second == bsize;
+    }
+    imGuiLog visualLog;
+    
+    fs::path get_app_directory_exists (){
+        fs::path app_support = getHomeDirectory() / vac::c_user_app_support / vac::c_app_directory;
+        bool success = exists (app_support);
+        if (! success )
+            success = fs::create_directories (app_support);
+        if (success) return app_support;
+        return fs::path ();
+    }
+    
+    bool setup_loggers (const fs::path app_support_dir, std::string id_name){
+        using imgui_sink_mt = spdlog::sinks::imGuiLogSink<std::mutex> ;
+        
+        // Check app support directory
+        bool app_support_ok = exists(app_support_dir);
+        if (! app_support_ok ) return app_support_ok;
+        
 
-
-bool check_input (const string &filename){
+        // get a temporary file name
+        std::string logname =  logging::reserve_unique_file_name(app_support_dir.string(),
+                                                                     logging::create_timestamped_template(id_name));
+        
+        // Setup APP LOG
+        auto logging_container = logging::get_mutable_logging_container();
+        logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
+        logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>(logname, 23, 59));
+        logging_container->add_sink(std::make_shared<imgui_sink_mt>(visualLog));
+        // logging_container->add_sink(std::make_shared<spdlog::sinks::stdout_sink_mt>(vlogger::instance().console()));
+        auto combined_logger = std::make_shared<spdlog::logger>(logname, logging_container);
+        //register it if you need to access it globally
+        spdlog::register_logger(combined_logger);
+        
+   
+    }
  
-    auto check_file_and_size = svl::io::check_file(filename);
-    if(! check_file_and_size.first) return check_file_and_size.first;
-    
-    boost::filesystem::path bpath(filename);
-    auto boost_file_and_size = svl::io::existsFile(bpath);
-    if(! boost_file_and_size) return boost_file_and_size;
-
-    auto bsize = boost::filesystem::file_size(bpath);
-    return check_file_and_size.second == bsize;
-}
-imGuiLog visualLog;
-void setup_loggers (){
-   using imgui_sink_mt = spdlog::sinks::imGuiLogSink<std::mutex> ;
-    
-    // Setup APP LOG
-    auto logging_container = logging::get_mutable_logging_container();
-    logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
-    logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>("Log", 23, 59));
-    logging_container->add_sink(std::make_shared<imgui_sink_mt>(visualLog));
-   // logging_container->add_sink(std::make_shared<spdlog::sinks::stdout_sink_mt>(vlogger::instance().console()));
-    auto combined_logger = std::make_shared<spdlog::logger>("Log", logging_container);
-    //register it if you need to access it globally
-    spdlog::register_logger(combined_logger);
-}
-
 }
 
 namespace VisibleRunAppControl{
@@ -178,6 +199,22 @@ bool VisibleRunApp::shouldQuit()
 }
 
 
+/*
+ * Browse the LIF file and dispatch VisibleRun with the selected chapter
+ * Setsp Up Loggers
+ * Loads PLIST ?? Maybe not necessary
+ * @todo: use JSON
+ // Get the LIF file and Serie from the command line arguments
+ // args[0] = Run App Path
+ // args[1] = content file full path
+ // args[2] = Serie name
+ // args[3] = content_type if not assume default from the content file
+ */
+
+
+#define ADD_ERR_AND_RETURN(sofar,addition)\
+sofar += addition;\
+APPLOG_INFO(sofar.c_str());
 
 void VisibleRunApp::setup()
 {
@@ -189,23 +226,16 @@ void VisibleRunApp::setup()
                    //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
                    );
     
-  
+    
     setup_loggers();
-
-    
-    
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "VisibleRun.app/Contents/Info.plist";
     if (exists (appPath)){
         std::ifstream stream(plist.c_str(), std::ios::binary);
         Plist::readPlist(stream, mPlist);
     }
-    // Get the LIF file and Serie from the command line arguments
-    // args[0] = Run App Path
-    // args[1] = LIF file full path
-    // args[3] = Serie name
     m_args = getCommandLineArgs();
-
+    
     if(m_args.size() == 1){
         auto some_path = getOpenFilePath(); //"", extensions);
         if (! some_path.empty() || exists(some_path)){
@@ -216,8 +246,7 @@ void VisibleRunApp::setup()
             vlogger::instance().console()->info(msg);
         }
     }
-        
-        
+    
     for( auto display : Display::getDisplays() )
     {
         mGlobalBounds.include(display->getBounds());
@@ -227,45 +256,62 @@ void VisibleRunApp::setup()
     WindowRef ww = getWindow ();
     std::string bpath = m_args[1];
     auto cmds = m_args[1];
+    
+    // @todo enujerate args and implement in JSON
+    // Custom Content for LIF files is only IDLab 
+    if(exists(bpath)){
+        
+        bool selected_by_dialog_no_custom_content_no_chapter = m_args.size() == 2;
+        bool chapter_ok_custom_content_ok = m_args.size() == 4 && m_args[3] == vac::LIF_CUSTOM;
+        
+        if (selected_by_dialog_no_custom_content_no_chapter) mBrowser =  lif_browser::create(bpath, lifIO::LifReader::ContentType::isDefault);
+        else if (chapter_ok_custom_content_ok) mBrowser = lif_browser::create(bpath, lifIO::LifReader::ContentType::IDLab);
+        
+        if(mBrowser){
+            mBrowser->get_series_info();
+            if (! mBrowser->names().empty()){
+                auto chapter = mBrowser->names()[0];
+                if (selected_by_dialog_no_custom_content_no_chapter){ // Selected by File Dialog
+                    m_args.push_back(chapter);
+                }
+                
+                
+                auto indexItr = mBrowser->name_to_index_map().find(m_args[2]);
+                if (indexItr != mBrowser->name_to_index_map().end()){
+                    auto serie = mBrowser->get_serie_by_index(indexItr->second);
+                    
+                    mContext = std::unique_ptr<lifContext>(new lifContext (ww,serie));
+                    
+                    if (mContext->is_valid()){
+                        cmds += " [ " + m_args[2] + " ] ";
+                        cmds += "  Ok ";
+                    }
+                    APPLOG_INFO(cmds.c_str());
+                    update();
+                }
+            } else{
+            ADD_ERR_AND_RETURN(cmds, " No Chapters or Series ")
+            }
+     //        cmds += " No Chapters or Series ";
+        }else{
+         ADD_ERR_AND_RETURN(cmds, " Content type is not clear ")
+        }
+    }else{
+     ADD_ERR_AND_RETURN(cmds,  " Does Not Exist ")
+    }
 
     
-    if(! exists(bpath)){
-        cmds += " Does Not Exist ";
-        APPLOG_INFO(cmds.c_str());
-    }
-    else{
-        mBrowser = lif_browser::create(bpath);
-        mBrowser->get_series_info();
-        
-        auto indexItr = mBrowser->name_to_index_map().find(m_args[2]);
-        if (indexItr != mBrowser->name_to_index_map().end()){
-            auto serie = mBrowser->get_serie_by_index(indexItr->second);
-            
-            mContext = std::unique_ptr<lifContext>(new lifContext (ww,serie));
     
-            if (mContext->is_valid()){
-                cmds += " [ " + m_args[2] + " ] ";
-                cmds += "  Ok ";
-            }
-            APPLOG_INFO(cmds.c_str());
-            update();
-//            mContext->resize();
-//            mContext->seekToStart();
-//            mContext->play();
-        }
-       
-    }
- 
     
- 
+    
     std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
     ww->setTitle ( cmds + " Visible build: " + buildN);
     mFont = Font( "Menlo", 18 );
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     
-   // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
+    // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
     
-  
+    
     getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
     
 #if 1
@@ -283,7 +329,7 @@ void VisibleRunApp::setup()
     
     gl::enableVerticalSync();
     
-   
+    
     
 }
 
@@ -296,7 +342,7 @@ void VisibleRunApp::update_log (const std::string& msg)
 
 void VisibleRunApp::windowMouseDown( MouseEvent &mouseEvt )
 {
-  update_log ( "Mouse down in window" );
+    update_log ( "Mouse down in window" );
 }
 
 void VisibleRunApp::windowMove()
@@ -423,7 +469,7 @@ void prepareSettings( App::Settings *settings )
 
 
 // settings fn from top of file:
- CINDER_APP( VisibleRunApp, RendererGl, prepareSettings )
+CINDER_APP( VisibleRunApp, RendererGl, prepareSettings )
 
 
 //int main( int argc, char* argv[] )

@@ -42,7 +42,8 @@
 #include "CinderImGui.h"
 #include "gui_handler.hpp"
 #include "gui_base.hpp"
-#include "app_logger.hpp"
+#include "imGuiLogger.hpp"
+#include "visible_logger_macro.h"
 #include "console.h"
 
 #define APP_WIDTH 1024
@@ -58,6 +59,10 @@ namespace VisibleAppControl{
      */
     extern bool ThreadsShouldStop;
     extern imGuiLog app_log;
+    std::string LIF_CUSTOM = "IDLab_0";
+    static constexpr const char c_user_app_support[] = "Library/Application Support";
+    static constexpr const char c_app_directory[] = "net.darisallc.VisibleRun";
+    fs::path getLoggingDirectory ();
 }
 
 namespace vac = VisibleAppControl;

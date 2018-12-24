@@ -44,8 +44,7 @@ void VisibleApp::dispatch_lif_viewer (const int serie_index)
         const std::string& name = name_index_itr->second;
         auto command = ci::app::getAppPath().string() + sep + "Visible.app" + sep + "Contents" + sep + "MacOS" + sep + "VisibleRun.app" + sep  + " --args " +
             mCurrentLifFilePath.string() + space + name;
-        command += space + mFileExtension;
-        if (m_isIdLabLif) command += space + "IdLab";
+        if (m_isIdLabLif) command += space + vac::LIF_CUSTOM;
         
         command = "open -n -F -a " + command;
         std::cout << command << std::endl;
@@ -197,9 +196,8 @@ void VisibleApp::setup()
     // Setup APP LOG
     auto logging_container = logging::get_mutable_logging_container();
     logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
-    logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>("Log", 23, 59));
-    
-    auto logger = std::make_shared<spdlog::logger>(APPLOG, logging_container);
+    logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>("VLog", 23, 59));
+    auto logger = std::make_shared<spdlog::logger>(VAPPLOG, logging_container);
     
 }
 

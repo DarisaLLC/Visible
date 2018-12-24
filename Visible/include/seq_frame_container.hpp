@@ -41,30 +41,8 @@ public:
     typedef typename container_t::size_type container_index_t;
     typedef std::map<int64_t, container_index_t > indexToContainer;
     
- 
-    
-    template<typename S>
+    template<typename S, class... Args>
     static std::shared_ptr<seqFrameContainer> create (const S &);
-  
-#if 0
-    
-    // Cinder Movie requires rendering though the App
-    static std::shared_ptr<seqFrameContainer> create (const ci::qtime::MovieSurfaceRef& movie);
-    static std::shared_ptr<seqFrameContainer> create (const ci::qtime::MovieGlRef& movie);
-    
-    // OpenCv based movie reader
-    static std::shared_ptr<seqFrameContainer> create (const ocvPlayerRef&);
-    
-    // Offline movie loader
-    static std::shared_ptr<seqFrameContainer> create (const std::shared_ptr<avcc::avReader>& assetReader);
-    
-    // From directory of images
-    static std::shared_ptr<seqFrameContainer> create (const std::vector<ci::Surface8uRef>& folderImages);
-
-    
-    // From LIF files
-    static std::shared_ptr<seqFrameContainer> create (const lifIO::LifSerie&);
-#endif
 
     // todo: also return index to time mapping 
     size_t convertTo (std::vector<roiWindow<P8U> >& dst);
