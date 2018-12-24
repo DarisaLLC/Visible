@@ -83,7 +83,7 @@ const lifIO::LifReader::weak_ref& lif_serie_data::readerWeakRef () const{
 }
 
     
-lif_browser::lif_browser (const std::string&  fqfn_path) : mFqfnPath(fqfn_path){
+lif_browser::lif_browser (const std::string&  fqfn_path, lifIO::LifReader::ContentType ct) : mFqfnPath(fqfn_path), m_content_type(ct) {
     if ( boost::filesystem::exists(boost::filesystem::path(mFqfnPath)) )
     {
         std::string msg = mFqfnPath + " Loaded ";
@@ -128,13 +128,15 @@ void  lif_browser::get_series_info () const
     
     if ( exists(boost::filesystem::path(mFqfnPath)))
     {
-        m_lifRef =  lifIO::LifReader::create(mFqfnPath);
+        m_lifRef =  lifIO::LifReader::create(mFqfnPath, m_content_type);
         m_series_book.clear ();
+        m_series_names.clear();
         
         for (unsigned ss = 0; ss < m_lifRef->getNbSeries(); ss++)
         {
             lif_serie_data si(m_lifRef, ss);
             m_series_book.emplace_back (si);
+            m_series_names.push_back(si.name());
             // Fill up names / index map -- convenience
             auto index = static_cast<int>(ss);
             m_name_to_index[si.name()] = index;

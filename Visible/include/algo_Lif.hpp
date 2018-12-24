@@ -115,13 +115,18 @@ class lif_browser : public LifBrowser
 public:
     
     typedef std::shared_ptr<class lif_browser> ref;
-    lif_browser(const std::string&  fqfn_path);
     
-    static lif_browser::ref create (const std::string&  fqfn_path){
-        return std::shared_ptr<lif_browser> ( new lif_browser (fqfn_path));
+    // @todo move ctor to private
+    lif_browser(const std::string&  fqfn_path, lifIO::LifReader::ContentType ct);
+    
+    static lif_browser::ref create (const std::string&  fqfn_path,
+                                    lifIO::LifReader::ContentType ct = lifIO::LifReader::ContentType::isDefault){
+        return std::shared_ptr<lif_browser> ( new lif_browser (fqfn_path, ct));
     }
     
     const lifIO::LifReader::ref& reader () const { return m_lifRef; }
+    const lifIO::LifReader::ContentType& content_type () const { return m_content_type; }
+    
     const lif_serie_data get_serie_by_index (unsigned index);
     void  get_series_info () const;
     const std::vector<lif_serie_data>& get_all_series  () const; 
@@ -134,11 +139,11 @@ private:
     mutable lifIO::LifReader::ref m_lifRef;
     mutable std::vector<lif_serie_data> m_series_book;
     std::vector<cv::Mat> m_series_posters;
-    std::vector<std::string> m_series_names;
+    mutable std::vector<std::string> m_series_names;
     mutable std::map<std::string,int> m_name_to_index;
     mutable std::map<int,std::string> m_index_to_name;
     mutable std::mutex m_mutex;
-    
+    lifIO::LifReader::ContentType m_content_type;
     std::string mFqfnPath;
     void get_first_frame (lif_serie_data& si,  const int frameCount, cv::Mat& out);
   

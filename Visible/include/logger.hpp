@@ -64,13 +64,21 @@ namespace logging
         
         return sink;
     }
-#define APPLOG "Log"
-#define APPLOG_INFO(...) spdlog::get("Log")->info(__VA_ARGS__)
-#define APPLOG_TRACE(...) spdlog::get("Log")->trace(__VA_ARGS__)
-#define APPLOG_ERROR(...) spdlog::get("Log")->error(__VA_ARGS__)
-#define APPLOG_WARNING(...) spdlog::get("Log")->warn(__VA_ARGS__)
-#define APPLOG_NOTICE(...) spdlog::get("Log")->notice(__VA_ARGS__)
-#define APPLOG_SEPARATOR() APPLOG_INFO("-----------------------------")
+    
+    static constexpr const char c_sync_directory[] = "realm-object-server";
+    static constexpr const char c_utility_directory[] = "io.realm.object-server-utility";
+    
+   
+/// Given a file path and a path component, return a new path created by appending the component to the path.
+    std::string file_path_by_appending_component(const std::string& path, const std::string& component, bool is_directory);
+ /// Given a file path and an extension, append the extension to the path.
+    std::string file_path_by_appending_extension(const std::string& path, const std::string& extension);
+
+  /// Create a timestamped `mktemp`-compatible template string using the current local time.
+    std::string create_timestamped_template(const std::string& prefix, int wildcard_count = 8);
+    /// Reserve a unique file name based on a base directory path and a `mktemp`-compatible template string.
+    /// Returns the path of the file.
+    std::string reserve_unique_file_name(const std::string& path, const std::string& template_string);
 }
 
 

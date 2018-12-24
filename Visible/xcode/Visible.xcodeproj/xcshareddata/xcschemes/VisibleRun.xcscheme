@@ -70,6 +70,10 @@
             argument = "Series027"
             isEnabled = "YES">
          </CommandLineArgument>
+         <CommandLineArgument
+            argument = "IDLab_0"
+            isEnabled = "YES">
+         </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
