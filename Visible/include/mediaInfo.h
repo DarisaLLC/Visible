@@ -62,19 +62,7 @@ struct tiny_media_info
     uint32_t getNumChannels () const { return mChannels; }
     
     
-    std::ostream& output (std::ostream& std_stream)
-    {
-        if (! isImageFolder ())
-            std::cout  << " -- General Movie Info -- " << std::endl;
-        else
-            std::cout  << " -- Image Folder Info -- " << std::endl;
-        
-        std_stream << "Dimensions:" << getWidth() << " x " << getHeight() << std::endl;
-        std_stream << "Duration:  " << getDuration() << " seconds" << std::endl;
-        std_stream << "Frames:    " << getNumFrames() << std::endl;
-        std_stream << "Framerate: " << getFramerate() << std::endl;
-        return std_stream;
-    }
+  
 #ifdef BOOL
 #undef BOOL
 #endif
@@ -84,6 +72,22 @@ struct tiny_media_info
     
 };
 
+#ifdef __cplusplus
+std::ostream& operator<<(std::ostream& std_stream, const tiny_media_info& t)
+{
+    if (! t.isImageFolder ())
+        std_stream  << " -- General Movie Info -- " << std::endl;
+    else
+        std_stream  << " -- Image Folder Info -- " << std::endl;
+    
+    std_stream << "Dimensions:" << t.getWidth() << " x " << t.getHeight() << std::endl;
+    std_stream << "Duration:  " << t.getDuration() << " seconds" << std::endl;
+    std_stream << "Frames:    " << t.getNumFrames() << std::endl;
+    std_stream << "Framerate: " << t.getFramerate() << std::endl;
+    return std_stream;
+}
+
+#endif
 
 #endif
 

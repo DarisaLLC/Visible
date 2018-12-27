@@ -4,6 +4,7 @@
 #include <string>
 #include  <iomanip>
 
+namespace logging {
 std::string file_path_by_appending_component(const std::string& path, const std::string& component, bool is_directory)
 {
     // FIXME: Does this have to be changed to accomodate Windows platforms?
@@ -73,5 +74,7 @@ std::string reserve_unique_file_name(const std::string& path, const std::string&
     close(fd);
     unlink(path_buffer.c_str());
     return path_buffer;
+}
+
 }
 
