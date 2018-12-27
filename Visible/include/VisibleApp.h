@@ -30,6 +30,7 @@
 #include "Item.h"
 #include "logger.hpp"
 #include "core/singleton.hpp"
+#include "core/file_system.hpp"
 
 #if defined (  HOCKEY_SUPPORT )
 #include "hockey_etc_cocoa_wrappers.h"
@@ -58,11 +59,10 @@ namespace VisibleAppControl{
      When this is set to false the threads managed by this program will stop and join the main thread.
      */
     extern bool ThreadsShouldStop;
-    extern imGuiLog app_log;
     std::string LIF_CUSTOM = "IDLab_0";
-    static constexpr const char c_user_app_support[] = "Library/Application Support";
-    static constexpr const char c_app_directory[] = "net.darisallc.VisibleRun";
-    fs::path getLoggingDirectory ();
+    static constexpr const char c_visible_app_support[] = "Library/Application Support/net.darisallc.Visible";
+    static constexpr const char c_visible_runner_app_support[] = "Library/Application Support/net.darisallc.VisibleRun";
+
 }
 
 namespace vac = VisibleAppControl;
@@ -88,6 +88,8 @@ public:
     void displayChange();
     void resize() override;
     
+private:
+    fs::path getLoggingDirectory ();
     void initData( const fs::path &path );
     void createItem( const lif_serie_data &serie, int serieNumber );
     
@@ -165,6 +167,7 @@ public:
     bool shouldQuit();
 
 private:
+    fs::path getLoggingDirectory ();
     std::vector<std::string> m_args;
     vec2                mSize;
     Font                mFont;
@@ -180,8 +183,9 @@ private:
     bool showHelp = false;
     bool showOverlay = false;
     int convergence = 0;
-    
-
+    std::string         mFileName;
+    std::string         mFileExtension;
+    bool m_isIdLabLif = false;
 };
 
 #endif /* VisibleApp_h */

@@ -46,7 +46,7 @@ public:
         //Print to stdout
         va_list args;
         va_start(args, fmt);
-        printf("[Log] ");
+        printf("[VLog] ");
         std::vprintf(fmt, args);
         va_end(args);
         

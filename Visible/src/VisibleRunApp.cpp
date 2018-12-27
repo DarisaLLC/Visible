@@ -6,39 +6,9 @@
 #pragma GCC diagnostic ignored "-Wunused-private-field"
 #pragma GCC diagnostic ignored "-Wcomma"
 
-#include "core/core.hpp"
-#include "core/file_system.hpp"
-#include "Plist.hpp"
-#include "otherIO/lifFile.hpp"
-#include "algo_Lif.hpp"
-#include "LifContext.h"
 
-#include "cinder/app/App.h"
-#include "cinder/app/RendererGl.h"
-#include "cinder/gl/Context.h"
-#include "cinder/gl/gl.h"
-#include "cinder/ImageIo.h"
-//#include "cinder/Utilities.h"
-//#include "cinder/app/Platform.h"
-//#include "cinder/Url.h"
-//#include "cinder/System.h"
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <mutex>
-
-#include "cinder/Log.h"
-#include "cinder/CinderAssert.h"
-
-#include <map>
-#include "CinderImGui.h"
-#include "gui_handler.hpp"
-#include "gui_base.hpp"
-#include "imGuiLogger.hpp"
-#include "logger.hpp"
 #include "VisibleApp.h"
-#include "core/stl_utils.hpp"
-//#include "console.h"
+
 
 #define APP_WIDTH 1024
 #define APP_HEIGHT 768
@@ -46,10 +16,18 @@
 #pragma GCC diagnostic pop
 
 // /Users/arman/Library/Application Support
+
+namespace VisibleRunAppControl{
+    /**
+     When this is set to false the threads managed by this program will stop and join the main thread.
+     */
+    bool ThreadsShouldStop = false;
+}
+
 namespace {
+    imGuiLog visualLog;
     
-    
-    bool check_input (const string &filename){
+     bool check_input (const string &filename){
         
         auto check_file_and_size = svl::io::check_file(filename);
         if(! check_file_and_size.first) return check_file_and_size.first;
@@ -61,10 +39,14 @@ namespace {
         auto bsize = boost::filesystem::file_size(bpath);
         return check_file_and_size.second == bsize;
     }
-    imGuiLog visualLog;
+
     
     fs::path get_app_directory_exists (){
-        fs::path app_support = getHomeDirectory() / vac::c_user_app_support / vac::c_app_directory;
+        auto platform = ci::app::Platform::get();
+        auto home_path = platform->getHomeDirectory();
+        fs::path app_support (vac::c_visible_runner_app_support);
+        app_support = home_path / app_support;
+        
         bool success = exists (app_support);
         if (! success )
             success = fs::create_directories (app_support);
@@ -79,37 +61,35 @@ namespace {
         bool app_support_ok = exists(app_support_dir);
         if (! app_support_ok ) return app_support_ok;
         
-
-        // get a temporary file name
-        std::string logname =  logging::reserve_unique_file_name(app_support_dir.string(),
-                                                                     logging::create_timestamped_template(id_name));
-        
-        // Setup APP LOG
-        auto logging_container = logging::get_mutable_logging_container();
-        logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
-        logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>(logname, 23, 59));
-        logging_container->add_sink(std::make_shared<imgui_sink_mt>(visualLog));
-        // logging_container->add_sink(std::make_shared<spdlog::sinks::stdout_sink_mt>(vlogger::instance().console()));
-        auto combined_logger = std::make_shared<spdlog::logger>(logname, logging_container);
-        //register it if you need to access it globally
-        spdlog::register_logger(combined_logger);
-        
-   
+        try{
+            // get a temporary file name
+            std::string logname =  logging::reserve_unique_file_name(app_support_dir.string(),
+                                                                         logging::create_timestamped_template(id_name));
+            
+            // Setup APP LOG
+            auto daily_file_sink = std::make_shared<logging::sinks::daily_file_sink_mt>(logname, 23, 59);
+            auto visual_sink = std::make_shared<imgui_sink_mt>(visualLog);
+            auto console_sink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
+            console_sink->set_level(spdlog::level::warn);
+            console_sink->set_pattern("[%H:%M:%S:%e:%f %z] [%n] [%^---%L---%$] [thread %t] %v");
+            std::vector<spdlog::sink_ptr> sinks;
+            sinks.push_back(daily_file_sink);
+            sinks.push_back(visual_sink);
+            sinks.push_back(console_sink);
+          
+            auto combined_logger = std::make_shared<spdlog::logger>("VLog", sinks.begin(),sinks.end());
+            combined_logger->info("Daily Log File: " + logname);
+            //register it if you need to access it globally
+            spdlog::register_logger(combined_logger);
+        }
+        catch (const spdlog::spdlog_ex& ex)
+        {
+            std::cout << "Log initialization failed: " << ex.what() << std::endl;
+            return false;
+        }
+        return app_support_ok;
     }
  
-}
-
-namespace VisibleRunAppControl{
-    /**
-     When this is set to false the threads managed by this program will stop and join the main thread.
-     */
-    bool ThreadsShouldStop = false;
-    
-    /**
-     Logger which will show output on the Log window in the application.
-     */
-    imGuiLog app_log;
-    
 }
 
 using namespace ci;
@@ -214,7 +194,7 @@ bool VisibleRunApp::shouldQuit()
 
 #define ADD_ERR_AND_RETURN(sofar,addition)\
 sofar += addition;\
-APPLOG_INFO(sofar.c_str());
+VAPPLOG_INFO(sofar.c_str());
 
 void VisibleRunApp::setup()
 {
@@ -226,8 +206,9 @@ void VisibleRunApp::setup()
                    //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
                    );
     
+    const fs::path root_output_dir = get_app_directory_exists();
     
-    setup_loggers();
+    
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "VisibleRun.app/Contents/Info.plist";
     if (exists (appPath)){
@@ -256,8 +237,12 @@ void VisibleRunApp::setup()
     WindowRef ww = getWindow ();
     std::string bpath = m_args[1];
     auto cmds = m_args[1];
+  
     
-    // @todo enujerate args and implement in JSON
+    setup_loggers(root_output_dir, fs::path(bpath).filename().string());
+    static std::string cok = "chapter_ok_custom_content_ok";
+    static std::string used_dialog = "selected_by_dialog_no_custom_content_no_chapter";
+    // @todo enumerate args and implement in JSON
     // Custom Content for LIF files is only IDLab 
     if(exists(bpath)){
         
@@ -266,6 +251,9 @@ void VisibleRunApp::setup()
         
         if (selected_by_dialog_no_custom_content_no_chapter) mBrowser =  lif_browser::create(bpath, lifIO::LifReader::ContentType::isDefault);
         else if (chapter_ok_custom_content_ok) mBrowser = lif_browser::create(bpath, lifIO::LifReader::ContentType::IDLab);
+
+        std::string info = chapter_ok_custom_content_ok ? cok : selected_by_dialog_no_custom_content_no_chapter ? used_dialog : " Not Good";
+        VAPPLOG_INFO(info.c_str());
         
         if(mBrowser){
             mBrowser->get_series_info();
@@ -274,8 +262,6 @@ void VisibleRunApp::setup()
                 if (selected_by_dialog_no_custom_content_no_chapter){ // Selected by File Dialog
                     m_args.push_back(chapter);
                 }
-                
-                
                 auto indexItr = mBrowser->name_to_index_map().find(m_args[2]);
                 if (indexItr != mBrowser->name_to_index_map().end()){
                     auto serie = mBrowser->get_serie_by_index(indexItr->second);
@@ -286,7 +272,7 @@ void VisibleRunApp::setup()
                         cmds += " [ " + m_args[2] + " ] ";
                         cmds += "  Ok ";
                     }
-                    APPLOG_INFO(cmds.c_str());
+                    VAPPLOG_INFO(cmds.c_str());
                     update();
                 }
             } else{

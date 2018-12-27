@@ -73,7 +73,6 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd) :sequen
             if (auto lifRef = m_serie.readerWeakRef().lock()){
                 m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&lifRef->getSerie(sd.index()), stl_utils::null_deleter());
                 setup();
-                std::cout << std::this_thread::get_id() << std::endl;
                 loadCurrentSerie();
                 ww->getRenderer()->makeCurrentContext(true);
                 ww->getSignalDraw().connect( [&]{ draw(); } );
@@ -821,7 +820,8 @@ void lifContext::loadCurrentSerie ()
         mMediaInfo = mFrameSet->media_info();
         mChannelCount = (uint32_t) mMediaInfo.getNumChannels();
         assert(mChannelCount > 0 && mChannelCount < 4);
-        mMediaInfo.output(std::cout);
+        // @todo output media info to console log
+     //   vlogger::instance().console()->info(" ", mMediaInfo);
         m_layout->init (getWindowSize() , mFrameSet->media_info(), channel_count());
         
         // Start Loading Images on a different thread
