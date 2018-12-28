@@ -22,6 +22,8 @@ namespace fs = boost::filesystem;
 
 typedef std::shared_ptr<class lifContext> lifContextRef;
 
+
+
 class lifContext : public sequencedImageContext
 {
 public:

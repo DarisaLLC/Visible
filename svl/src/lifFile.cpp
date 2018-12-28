@@ -46,6 +46,9 @@ namespace  {
 
 using namespace std;
 
+bool lifIO::isKnownCustomContent (const std::string& cand ){
+    return std::find(ContentTypes.begin(), ContentTypes.end(), cand) != ContentTypes.end();
+}
 
 /** @brief LifSerieHeader constructor  */
 lifIO::LifSerieHeader::LifSerieHeader(TiXmlElement *root) : name(root->Attribute("Name")), rootElement(root)
@@ -280,7 +283,7 @@ float lifIO::LifSerieHeader::frame_duration_ms() const
 }
 
 /** @brief LifSerie constructor  */
-lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize, int ct) :
+lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize, const std::string& ct) :
  LifSerieHeader(serie)
 {
     fileRef = make_shared_ifstream(filename.c_str());
@@ -403,7 +406,7 @@ void lifIO::LifHeader::parseHeader()
 /** \brief Constructor from lif file name
   * Content type specifies if it has a known none default content organization
  */
-lifIO::LifReader::LifReader(const string &filename, ContentType ct)
+lifIO::LifReader::LifReader(const string &filename, const std::string& ct)
 {
     const int MemBlockCode = 0x70, TestCode = 0x2a;
     char lifChar;

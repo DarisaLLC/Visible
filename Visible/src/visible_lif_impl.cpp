@@ -73,7 +73,6 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd) :sequen
             if (auto lifRef = m_serie.readerWeakRef().lock()){
                 m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&lifRef->getSerie(sd.index()), stl_utils::null_deleter());
                 setup();
-                loadCurrentSerie();
                 ww->getRenderer()->makeCurrentContext(true);
                 ww->getSignalDraw().connect( [&]{ draw(); } );
                 vlogger::instance().console()->info(__LINE__);
@@ -128,8 +127,6 @@ void lifContext::setup_params () {
     mUIParams.addSeparator();
     m_perform_names.clear ();
     m_perform_names.push_back("Manual Cell End Tracing");
-    
-    loadCurrentSerie ();
     
     {
         const std::function<void (int)> setter = std::bind(&lifContext::seekToFrame, this, std::placeholders::_1);
@@ -198,7 +195,7 @@ void lifContext::setup()
     m_contraction_names = m_contraction_none;
     clear_playback_params();
     setup_params ();
-  
+    loadCurrentSerie();
     shared_from_above()->update();
     
     ww->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
@@ -862,8 +859,8 @@ void lifContext::process_async (){
         {
             m_async_luminance_tracks = std::async(std::launch::async,&lif_processor::run_flu_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
-            m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci,
-                                            m_lifProcRef.get(), 2);
+            m_async_pci_tracks = stl_utils::reallyAsync(&lif_processor::run_pci, m_lifProcRef.get(), 2);
+//            m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci,m_lifProcRef.get(), 2);
             auto res = m_lifProcRef->run_volume_sum_sumsq_count (2);
             res.PrintTo(res,&std::cout);
             break;

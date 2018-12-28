@@ -46,7 +46,16 @@ namespace lifIO
     struct ScannerSettingRecord;
     struct FilterSettingRecord;
 
+    /* Denoting Custom Types when there is no marker
+     * null string denotes the canonical LIF representation
+     */
+    
+    typedef std::string ContentType_t ;
 
+
+    static std::vector<ContentType_t> ContentTypes {"IDLab_0"};
+    
+    bool isKnownCustomContent (const std::string& cand );
     
     class LifSerieHeader
     {
@@ -104,7 +113,7 @@ namespace lifIO
     {
         
     public:
-        explicit LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize, int content_type);
+        explicit LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize, const ContentType_t& content_type = "");
         
         void fill3DBuffer(void* buffer, size_t t=0) const;
         void fill2DBuffer(void* buffer, size_t t=0, size_t z=0) const;
@@ -119,7 +128,7 @@ namespace lifIO
         unsigned long long memorySize;
         std::shared_ptr<std::ifstream> fileRef;
         std::streampos fileSize;
-        int m_content_type;
+        ContentType_t m_content_type;
         
     };
     
@@ -154,23 +163,19 @@ namespace lifIO
     {
         
     public:
-        enum ContentType : int {
-            isDefault = 0,
-            IDLab = 1
-        };
-
+   
         
         typedef std::shared_ptr<LifReader> ref;
         typedef std::weak_ptr<LifReader> weak_ref;
         
         // @todo move ctor to private
-        LifReader(const std::string &filename, ContentType ct );
+        LifReader(const std::string &filename, const std::string& ct );
         
-        static LifReader::ref create (const std::string&  fqfn_path, ContentType ct = isDefault){
+        static LifReader::ref create (const std::string&  fqfn_path, const std::string& ct = ""){
             return LifReader::ref ( new LifReader (fqfn_path, ct));
         }
         
-        const ContentType& getContentType () const { return m_content_type; }
+        const ContentType_t& getContentType () const { return m_content_type; }
         const LifHeader& getLifHeader() const {return *this->header;};
         const TiXmlDocument& getXMLHeader() const{return getLifHeader().getXMLHeader();};
         std::string getName() const {return getLifHeader().getName();};
@@ -205,7 +210,7 @@ namespace lifIO
         mutable std::mutex m_mutex;
         std::string m_path;
         size_t m_lif_file_size;
-        ContentType m_content_type;
+        ContentType_t m_content_type;
        
         
         

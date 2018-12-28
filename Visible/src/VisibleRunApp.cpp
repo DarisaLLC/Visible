@@ -54,6 +54,7 @@ namespace {
         return fs::path ();
     }
     
+    
     bool setup_loggers (const fs::path app_support_dir, std::string id_name){
         using imgui_sink_mt = spdlog::sinks::imGuiLogSink<std::mutex> ;
         
@@ -105,7 +106,15 @@ void VisibleRunApp::QuitApp(){
 
 
 
-void VisibleRunApp::SetupGUIVariables(){}
+void VisibleRunApp::SetupGUIVariables(){
+    //Set up global preferences for the GUI
+    //http://anttweakbar.sourceforge.net/doc/tools:anttweakbar:twbarparamsyntax
+    GetGUI().DefineGlobal("help = ' FaceOff 0.1.0 \n Jonathan Cole | Toni Kaplan'");
+    GetGUI().DefineGlobal("iconalign=horizontal");
+    
+    params::InterfaceGlRef generalWindow = GetGUI().GetWindow("General Settings");
+    generalWindow->addParam("Stereo Convergence", &convergence).min(0).max(100).keyDecr("-").keyIncr("=");
+}
 
 void VisibleRunApp::DrawGUI(){
     // Draw the menu bar
@@ -240,19 +249,42 @@ void VisibleRunApp::setup()
   
     
     setup_loggers(root_output_dir, fs::path(bpath).filename().string());
-    static std::string cok = "chapter_ok_custom_content_ok";
-    static std::string used_dialog = "selected_by_dialog_no_custom_content_no_chapter";
+    static std::string cok = "chapter_ok";
+    static std::string ccok = "chapter_ok_custom_content_ok";
+    static std::string cokcnk = "chapter_ok_custom_content_not_recognized";
+    static std::string used_dialog = "selected_by_dialog_using first_chapter";
     // @todo enumerate args and implement in JSON
     // Custom Content for LIF files is only IDLab 
     if(exists(bpath)){
         
         bool selected_by_dialog_no_custom_content_no_chapter = m_args.size() == 2;
-        bool chapter_ok_custom_content_ok = m_args.size() == 4 && m_args[3] == vac::LIF_CUSTOM;
+        bool chapter_ok =  m_args.size() == 3;
+        bool custom_id_exists = m_args.size() == 4;
+        bool known_custom_type =  custom_id_exists && lifIO::isKnownCustomContent(m_args[3]);
+        bool chapter_ok_unknown_custom_content = custom_id_exists && ! known_custom_type;
+        std::string info;
+        mContentType  = "";
         
-        if (selected_by_dialog_no_custom_content_no_chapter) mBrowser =  lif_browser::create(bpath, lifIO::LifReader::ContentType::isDefault);
-        else if (chapter_ok_custom_content_ok) mBrowser = lif_browser::create(bpath, lifIO::LifReader::ContentType::IDLab);
-
-        std::string info = chapter_ok_custom_content_ok ? cok : selected_by_dialog_no_custom_content_no_chapter ? used_dialog : " Not Good";
+        if (selected_by_dialog_no_custom_content_no_chapter){
+            mBrowser =  lif_browser::create(bpath);
+            info = selected_by_dialog_no_custom_content_no_chapter;
+        }
+        else if ( known_custom_type) {
+            mContentType = m_args[3];
+            mBrowser = lif_browser::create(bpath, mContentType);
+            info = ccok;
+        }
+        else if (chapter_ok_unknown_custom_content){
+            mBrowser =  lif_browser::create(bpath);
+            info = cokcnk + "  " + m_args[3];
+        }
+        else if (chapter_ok){
+            mBrowser =  lif_browser::create(bpath);
+            info = cok;
+        }else{
+            assert(0);
+        }
+        
         VAPPLOG_INFO(info.c_str());
         
         if(mBrowser){
@@ -323,7 +355,7 @@ void VisibleRunApp::setup()
 void VisibleRunApp::update_log (const std::string& msg)
 {
     if (msg.length() > 2)
-        std::cout << msg.c_str ();
+        VAPPLOG_INFO(msg.c_str());
 }
 
 void VisibleRunApp::windowMouseDown( MouseEvent &mouseEvt )

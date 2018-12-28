@@ -29,6 +29,7 @@ struct tiny_media_info
     float              orientation; // 0:Right, 90: Up, 180 Left, -90 Down
     BOOL mIsImageFolder;
     BOOL mIsLifSerie;
+    BOOL mIsMovie;
     uint32_t mChannels;
     
     
@@ -46,6 +47,7 @@ struct tiny_media_info
     }
     
 #ifdef __cplusplus
+    std::string mCustomLif; // if "", denotes canonical LIF file 
     tiny_media_info () { clear (); }
     void clear () { std::memset(this, 0, sizeof (tiny_media_info)); }
     BOOL isImageFolder () const { return mIsImageFolder; }
