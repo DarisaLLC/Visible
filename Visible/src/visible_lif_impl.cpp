@@ -75,7 +75,6 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd) :sequen
                 setup();
                 ww->getRenderer()->makeCurrentContext(true);
                 ww->getSignalDraw().connect( [&]{ draw(); } );
-                vlogger::instance().console()->info(__LINE__);
             }
     }
 }
@@ -168,21 +167,17 @@ void lifContext::setup()
 {
     ci::app::WindowRef ww = get_windowRef();
     gl::enableVerticalSync();
-    
     ui::initialize(ui::Options()
                    .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
                    .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
                    .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
                    .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
-                   //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
+                   .window(ww)
                    );
-    ImGui::Options imgo;
-    imgo.window(ww);
-    ImGui::initialize(imgo);
 
-    m_showGUI = false;
-    m_showLog = false;
-    m_showHelp = false;
+    m_showGUI = true;
+    m_showLog = true;
+    m_showHelp = true;
     
     srand( 133 );
     setup_signals();
@@ -893,36 +888,7 @@ void  lifContext::DrawGUI(){
         static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
         ImGui::PlotLines("Frame Times", arr, IM_ARRAYSIZE(arr));
     }
-    // Draw the menu bar
-    {
-        ui::ScopedMainMenuBar menuBar;
-        
-        if( ui::BeginMenu( "File" ) ){
-            //if(ui::MenuItem("Fullscreen")){
-            //    setFullScreen(!isFullScreen());
-            //}
-            if(ui::MenuItem("Swap Eyes", "S")){
-          //      swapEyes = !swapEyes;
-            }
-        //    ui::MenuItem("Help", nullptr, &showHelp);
-        //    if(ui::MenuItem("Quit", "ESC")){
-        //        QuitApp();
-        //    }
-            ui::EndMenu();
-        }
-        
-        if( ui::BeginMenu( "View" ) ){
-            ui::MenuItem( "General Settings", nullptr, &m_showGUI );
-            //    ui::MenuItem( "Edge Detection", nullptr, &edgeDetector.showGUI );
-            //    ui::MenuItem( "Face Detection", nullptr, &faceDetector.showGUI );
-            ui::MenuItem( "Log", nullptr, &m_showLog );
-            //ui::MenuItem( "PS3 Eye Settings", nullptr, &showWindowWithMenu );
-            ui::EndMenu();
-        }
-        
-        //ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.0f FPS", ui::GetIO().Framerate);
-        ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", ui::GetIO().Framerate);
-    }
+  
     
     //Draw general settings window
     if(m_showGUI)
@@ -934,27 +900,7 @@ void  lifContext::DrawGUI(){
         ui::End();
     }
     
-    //Draw the log if desired
-    if(m_showLog){
-        
-    //    vac::app_log.Draw("Log", &m_showLog);
-    }
-    
-    if(m_showHelp) ui::OpenPopup("Help");
-    //ui::ScopedWindow window( "Help", ImGuiWindowFlags_AlwaysAutoResize );
-    if(ui::BeginPopupModal("Help", &m_showHelp)){
-        ui::TextColored(ImVec4(0.92f, 0.18f, 0.29f, 1.00f), "%s", m_title.c_str());
-        ui::Text("Arman Garakani, Darisa LLC");
-        if(ui::Button("Copy")) ui::LogToClipboard();
-        ui::SameLine();
-        //  ui::Text("github.com/");
-        ui::LogFinish();
-        ui::Text("");
-        ui::Text("Mouse over any"); gui_base::ShowHelpMarker("We did it!"); ui::SameLine(); ui::Text("to show help.");
-        ui::Text("Ctrl+Click any slider to set its value manually.");
-        ui::EndPopup();
-    }
-    
+ 
 }
 
 Rectf lifContext::get_image_display_rect ()

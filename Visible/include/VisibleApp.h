@@ -15,37 +15,35 @@
 #include "cinder_opencv.h"
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
-#include "cinder/gl/Context.h"
 #include "cinder/gl/gl.h"
 #include "cinder/ImageIo.h"
 #include "cinder/Utilities.h"
 #include "cinder/app/Platform.h"
-#include "cinder/Url.h"
-#include "cinder/System.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "otherIO/lifFile.hpp"
+#include <map>
+
 #include "algo_Lif.hpp"
 #include "Item.h"
 #include "logger.hpp"
+#include "core/core.hpp"
 #include "core/singleton.hpp"
 #include "core/file_system.hpp"
+#include "otherIO/lifFile.hpp"
+#include "Plist.hpp"
 
 #if defined (  HOCKEY_SUPPORT )
 #include "hockey_etc_cocoa_wrappers.h"
 #endif
 
 #include "LifContext.h"
-#include "core/core.hpp"
-#include "Plist.hpp"
-#include <map>
-#include "CinderImGui.h"
 #include "gui_handler.hpp"
 #include "gui_base.hpp"
 #include "imGuiLogger.hpp"
 #include "visible_logger_macro.h"
-#include "console.h"
+
 
 #define APP_WIDTH 1024
 #define APP_HEIGHT 768
@@ -59,10 +57,8 @@ namespace VisibleAppControl{
      When this is set to false the threads managed by this program will stop and join the main thread.
      */
     extern bool ThreadsShouldStop;
-    std::string LIF_CUSTOM = "IDLab_0";
     static constexpr const char c_visible_app_support[] = "Library/Application Support/net.darisallc.Visible";
     static constexpr const char c_visible_runner_app_support[] = "Library/Application Support/net.darisallc.VisibleRun";
-
 }
 
 namespace vac = VisibleAppControl;
@@ -150,17 +146,11 @@ public:
     void prepareSettings( Settings *settings );
     void setup()override;
     void mouseDown( MouseEvent event )override;
-    void mouseMove( MouseEvent event )override;
-    void mouseUp( MouseEvent event )override;
-    void mouseDrag( MouseEvent event )override;
     void keyDown( KeyEvent event )override;
 
     void update()override;
     void draw()override;
     void resize()override;
-    void windowMove();
-    void windowClose();
-    void windowMouseDown( MouseEvent &mouseEvt );
     void displayChange();
     void update_log (const std::string& msg);
 
@@ -185,6 +175,7 @@ private:
     int convergence = 0;
     std::string         mFileName;
     std::string         mFileExtension;
+    lifIO::ContentType_t mContentType; // "" denotes canonical LIF file
     bool m_isIdLabLif = false;
 };
 
