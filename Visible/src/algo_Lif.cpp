@@ -35,11 +35,17 @@
 #include "logger.hpp"
 
 
+/****
+ 
+ lif_serie implementation
+ 
+ ****/
 
 
 lif_serie_data:: lif_serie_data () : m_index (-1) {}
 
-lif_serie_data:: lif_serie_data (const lifIO::LifReader::ref& m_lifRef, const unsigned index): m_index(-1) {
+lif_serie_data:: lif_serie_data (const lifIO::LifReader::ref& m_lifRef, const unsigned index, const lifIO::ContentType_t& ct):
+m_index(-1), m_contentType(ct) {
     
     if (index >= m_lifRef->getNbSeries()) return;
     
@@ -82,11 +88,19 @@ const lifIO::LifReader::weak_ref& lif_serie_data::readerWeakRef () const{
     return m_lifWeakRef;
 }
 
-    
-lif_browser::lif_browser (const std::string&  fqfn_path, lifIO::LifReader::ContentType ct) : mFqfnPath(fqfn_path), m_content_type(ct) {
+
+
+/****
+ 
+ lif_browser implementation
+ 
+ ****/
+
+lif_browser::lif_browser (const std::string&  fqfn_path, const lifIO::ContentType_t& ct) :
+    mFqfnPath(fqfn_path), m_content_type(ct) {
     if ( boost::filesystem::exists(boost::filesystem::path(mFqfnPath)) )
     {
-        std::string msg = mFqfnPath + " Loaded ";
+        std::string msg = " Loaded Series Info for " + mFqfnPath ;
         vlogger::instance().console()->info(msg);
         get_series_info();
         
@@ -134,7 +148,7 @@ void  lif_browser::get_series_info () const
         
         for (unsigned ss = 0; ss < m_lifRef->getNbSeries(); ss++)
         {
-            lif_serie_data si(m_lifRef, ss);
+            lif_serie_data si(m_lifRef, ss, m_content_type);
             m_series_book.emplace_back (si);
             m_series_names.push_back(si.name());
             // Fill up names / index map -- convenience
@@ -146,6 +160,13 @@ void  lif_browser::get_series_info () const
   
     
 }
+
+
+/****
+ 
+    lif_processor implementation
+ 
+ ****/
 
 lif_processor::lif_processor ()
 {
@@ -254,6 +275,8 @@ svl::stats<int64_t> lif_processor::run_volume_sum_sumsq_count (const int channel
     auto res = std::accumulate(cts.begin(), cts.end(), std::make_tuple(int64_t(0),int64_t(0), uint32_t(0)), stl_utils::tuple_sum<int64_t,uint32_t>());
     auto mes = std::accumulate(rts.begin(), rts.end(), std::make_tuple(uint8_t(255),uint8_t(0)), stl_utils::tuple_minmax<uint8_t, uint8_t>());
     m_3d_stats = svl::stats<int64_t> (std::get<0>(res), std::get<1>(res), std::get<2>(res), int64_t(std::get<0>(mes)), int64_t(std::get<1>(mes)));
+    
+    // Signal to listeners
     if (signal_3dstats_available && signal_3dstats_available->num_slots() > 0)
         signal_3dstats_available->operator()();
     return m_3d_stats;
