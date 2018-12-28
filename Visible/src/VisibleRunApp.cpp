@@ -332,7 +332,7 @@ void VisibleRunApp::setup()
     
     getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
     
-#if 1
+#if 0
     getWindow()->getSignalMove().connect( std::bind( &VisibleRunApp::windowMove, this ) );
     getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
     getWindow()->getSignalDraw().connect(std::bind( &VisibleRunApp::draw, this) );
@@ -358,46 +358,6 @@ void VisibleRunApp::update_log (const std::string& msg)
         VAPPLOG_INFO(msg.c_str());
 }
 
-void VisibleRunApp::windowMouseDown( MouseEvent &mouseEvt )
-{
-    update_log ( "Mouse down in window" );
-}
-
-void VisibleRunApp::windowMove()
-{
-    update_log("window pos: " + ci::toString(getWindow()->getPos()));
-}
-
-void VisibleRunApp::displayChange()
-{
-    update_log ( "window display changed: " + to_string(getWindow()->getDisplay()->getBounds()));
-    console() << "ContentScale = " << getWindowContentScale() << endl;
-    console() << "getWindowCenter() = " << getWindowCenter() << endl;
-}
-
-
-void VisibleRunApp::windowClose()
-{
-}
-
-void VisibleRunApp::mouseMove( MouseEvent event )
-{
-    if(mContext)
-        mContext->mouseMove(event);
-    else
-        cinder::app::App::mouseMove(event);
-    
-}
-
-
-void VisibleRunApp::mouseDrag( MouseEvent event )
-{
-    if(mContext)
-        mContext->mouseDrag(event);
-    else
-        cinder::app::App::mouseDrag(event);
-}
-
 
 void VisibleRunApp::mouseDown( MouseEvent event )
 {
@@ -407,14 +367,13 @@ void VisibleRunApp::mouseDown( MouseEvent event )
         cinder::app::App::mouseDown(event);
 }
 
-
-void VisibleRunApp::mouseUp( MouseEvent event )
+void VisibleRunApp::displayChange()
 {
-    if(mContext)
-        mContext->mouseUp(event);
-    else
-        cinder::app::App::mouseUp(event);
+    update_log ( "window display changed: " + to_string(getWindow()->getDisplay()->getBounds()));
+    update_log ( "ContentScale = " + to_string(getWindowContentScale()));
+                update_log ( "getWindowCenter = " + to_string(getWindowCenter()));
 }
+
 
 
 void VisibleRunApp::keyDown( KeyEvent event )
@@ -445,15 +404,15 @@ void VisibleRunApp::update()
     
 }
 
-static int n = 0;
-static float minRadius = 1;
+//static int n = 0;
+//static float minRadius = 1;
 void VisibleRunApp::draw ()
 {
     gl::clear( Color::gray( 0.5f ) );
     if (mContext && mContext->is_valid()) mContext->draw ();
     DrawGUI();
-    ui::SliderInt( "Circles", &n, 0, 500 );
-    ui::SliderFloat( "Min Radius", &minRadius, 1, 499 );
+//    ui::SliderInt( "Circles", &n, 0, 500 );
+//    ui::SliderFloat( "Min Radius", &minRadius, 1, 499 );
 }
 
 
