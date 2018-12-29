@@ -29,8 +29,6 @@ using namespace std;
 
 typedef std::pair<SurfaceRef, index_time_t> SurTiIndexRef_t;
 
-typedef std::function<SurfaceRef ()> getSurfaceCb_t;
-
 class seqFrameContainer : public tiny_media_info, public std::enable_shared_from_this<seqFrameContainer>
 {
 public:
@@ -41,9 +39,13 @@ public:
     typedef typename container_t::size_type container_index_t;
     typedef std::map<int64_t, container_index_t > indexToContainer;
     
+    typedef std::function<void (float)> progress_callback_t;
+    
     template<typename S, class... Args>
     static std::shared_ptr<seqFrameContainer> create (const S &);
 
+    void set_progress_callback(progress_callback_t pg = nullptr) const;
+    
     // todo: also return index to time mapping 
     size_t convertTo (std::vector<roiWindow<P8U> >& dst);
     
@@ -66,11 +68,9 @@ public:
     // If the frame is loaded in, it will return true.
     bool loadFrame (const Surface8uRef frame, const time_spec_t& tic );
     
+    // Check or get a frame at the time stamp indicated.
     const Surface8uRef  getFrame (const int64_t) const;
     const Surface8uRef  getFrame (const time_spec_t& ) const;
-    
-    
-    
     bool checkFrame (const int64_t) const;
     bool checkFrame (const time_spec_t& ) const;
     
@@ -103,7 +103,7 @@ private:
     indexToTime m_itt;
     indexToContainer m_itIter;
     std::vector<time_spec_t> m_time_hist;
-    getSurfaceCb_t m_getSurface_cb;
+    mutable progress_callback_t m_progress_cb;
     mutable std::pair<uint32_t,uint32_t> m_stats;
     mutable std::vector<std::string> m_names;
     mutable std::mutex			mMutex;

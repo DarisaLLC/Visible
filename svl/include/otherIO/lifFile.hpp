@@ -122,6 +122,7 @@ namespace lifIO
         std::istreambuf_iterator<char> begin(size_t t=0);
         std::streampos tellg(){return fileRef->tellg();}
         unsigned long long getOffset(size_t t=0) const;
+        const ContentType_t& content_type() const { return m_content_type; }
         
     private:
         unsigned long long offset;

@@ -41,8 +41,7 @@
 #include <sstream>
 
 #include "DisplayObjectContainer.h"
-//#include "Square.h"
-//#include "Circle.h"
+
 
 using namespace tinyUi;
 

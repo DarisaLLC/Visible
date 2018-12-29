@@ -103,6 +103,7 @@ using namespace ci;
 #define D_64FC(n) D_MAKETYPE(D_64F, (n))
 
 #define D_8UP3 D_MAKE_TYPE(D_USRTYPE1, 1)
+#define D_8UP4 D_MAKE_TYPE(D_USRTYPE1, 2)
 
 typedef unsigned int GLenum;
 typedef unsigned char GLboolean;
@@ -381,6 +382,29 @@ namespace svl
         static uint8_t maximum() { return numeric_limits<uint8_t>::max(); }
     };
 
+    template <>
+    struct dPixelTraits<uint8_t, 4, 1>
+    {
+        const static int planes_c = 4;
+        const static int components_c = 1;
+        
+        typedef uint8_t value_type;
+        static bool is_floating_point() { return false; }
+        static bool is_integral() { return std::is_integral<uint8_t>::value; }
+        static bool is_signed() { return std::is_signed<uint8_t>::value; }
+        static int planes() { return 4; }
+        static int components() { return 1; }
+        static int cv() { return _IPL_DEPTH_8U; }
+        static int depth() { return D_8UP4; }
+        static int bytes() { return 1; }
+        static int bits() { return 8; }
+        static int origin_style() { return 0; }
+        static int data_order() { return 0; }
+        static GLenum gl_type() { return GL_BYTE; }
+        static uint8_t minimum() { return numeric_limits<uint8_t>::min(); }
+        static uint8_t maximum() { return numeric_limits<uint8_t>::max(); }
+    };
+
     
     typedef dPixelTraits<int8_t, 1, 1> P8S;
     typedef dPixelTraits<uint8_t, 1, 1> P8U;
@@ -391,6 +415,7 @@ namespace svl
     typedef dPixelTraits<uint8_t, 1, 3> P8UC3;
     typedef dPixelTraits<uint8_t, 1, 4> P8UC4;
     typedef dPixelTraits<uint8_t, 3, 1> P8UP3;
+    typedef dPixelTraits<uint8_t, 4, 1> P8UP4;
     
     // Primary template class
     template <typename P>
@@ -461,6 +486,13 @@ namespace svl
         static int planes () { return P8UP3::planes(); }
     };
     
+    template <>
+    class PixelLayout<P8UP4>
+    {
+    public:
+        static int channels () { return P8UP4::components(); }
+        static int planes () { return P8UP4::planes(); }
+    };
     
     template <>
     class PixelType<P8U>
@@ -568,6 +600,25 @@ namespace svl
     
     template <>
     class PixelType<P8UP3>
+    {
+    public:
+        static enum ci::ImageIo::ColorModel cm () { return ci::ImageIo::ColorModel::CM_GRAY; }
+        static enum ci::ImageIo::DataType ct () { return ci::ImageIo::DataType::UINT8; }
+        static enum ci::ImageIo::ChannelOrder co () { return ci::ImageIo::ChannelOrder::Y; }
+        
+        typedef P8U pixel_trait_t;
+        typedef PixelType<pixel_trait_t>::pixel_t pixel_t;
+        typedef PixelType<pixel_trait_t>::pixel_ptr_t pixel_ptr_t;
+        
+        static GLenum data_type () { return GL_UNSIGNED_BYTE; }
+        static GLenum display_type () { return GL_LUMINANCE; }
+        
+        typedef std::pair<pixel_t, uint16_t> run_t;
+        
+    };
+    
+    template <>
+    class PixelType<P8UP4>
     {
     public:
         static enum ci::ImageIo::ColorModel cm () { return ci::ImageIo::ColorModel::CM_GRAY; }
