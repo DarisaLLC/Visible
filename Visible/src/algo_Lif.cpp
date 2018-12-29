@@ -446,7 +446,7 @@ void lif_processor::load_channels_from_images (const std::shared_ptr<seqFrameCon
                 // ID Lab 3 vertical roi 512 x (128x3)
             case 3  :
             {
-                auto m3 = roiMultiWindow<P8UP3>(*m1, names, ts);
+                auto m3 = roiFixedMultiWindow<P8UP3>(*m1, names, ts);
                 for (auto cc = 0; cc < m3.planes(); cc++)
                     m_all_by_channel[cc].emplace_back(m3.plane(cc));
                 

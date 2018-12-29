@@ -28,41 +28,93 @@ using namespace ci;
 using namespace ci::ip;
 using namespace stl_utils;
 
-namespace anonymous
+namespace
 {
     std::vector<std::string> d_names { "green", "red", "gray" };
     
-    void internal_fill_one (const lifIO::LifSerie& lifserie, const tiny_media_info& tm, const int frameCount, std::vector<Surface8uRef>& out,
-                            std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator time_iter,
-                            std::vector<std::string>& names = d_names)
-    {
+    void internal_fill_one_singleChannel (const lifIO::LifSerie& lifserie, const tiny_media_info& tm, const int frameCount, std::vector<Surface8uRef>& out){
         out.resize (0);
-        switch (tm.mChannels)
-        {
-            case 1:
-            {
-                Channel8u frame (tm.getWidth(), tm.getHeight());
-                lifserie.fill2DBuffer(frame.getData(), frameCount);
-                Surface8uRef chsurface = Surface8u::create(frame);
-                out.push_back(chsurface);
-                break;
-            }
+
+        Channel8u frame (tm.getWidth(), tm.getHeight());
+        lifserie.fill2DBuffer(frame.getData(), frameCount);
+        Surface8uRef chsurface = Surface8u::create(frame);
+        out.push_back(chsurface);
+    }
+    
+    // We treat the 3 channels as one read all. roiMultiWindow is specifically designed for ID_Lab0 arrangement that is 512 x 128 3 times
+    void internal_fill_one_singleByThreeChannels (const lifIO::LifSerie& lifserie, const tiny_media_info& tm, const int frameCount, std::vector<Surface8uRef>& out,
+                                          std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator time_iter,
+                                                  std::vector<std::string>& names = d_names){
+    
+        out.resize (0);
+        cm_time ts((*time_iter)/(10000.0));
+        roiFixedMultiWindow<P8UP3> oneBy3 (names, ts.getValue());
+        lifserie.fill2DBuffer(oneBy3.rowPointer(0), frameCount);
+        std::shared_ptr<Channel8u> cref = newCiChannel(oneBy3);
+        Surface8uRef chsurface = Surface8u::create(*cref);
+        out.push_back(chsurface);
+    }
+    void internal_fill_one_NChannels (const lifIO::LifSerie& lifserie, const tiny_media_info& tm, const int frameCount, std::vector<Surface8uRef>& out,
+                                                  std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator time_iter){
+        
+        out.resize (0);
+        cm_time ts((*time_iter)/(10000.0));
+        iPair size(tm.getWidth(), tm.getHeight());
+        switch(tm.getNumChannels()){
             case 3:
             {
-                cm_time ts((*time_iter)/(10000.0));
-                roiMultiWindow<P8UP3> oneBy3 (names, ts.getValue());
+                roiMultiWindow<P8UP3> oneBy3 (size, ts.getValue());
                 lifserie.fill2DBuffer(oneBy3.rowPointer(0), frameCount);
                 std::shared_ptr<Channel8u> cref = newCiChannel(oneBy3);
                 Surface8uRef chsurface = Surface8u::create(*cref);
                 out.push_back(chsurface);
                 break;
             }
+            case 4:
+            {
+                roiMultiWindow<P8UP4> oneBy4 (size, ts.getValue());
+                lifserie.fill2DBuffer(oneBy4.rowPointer(0), frameCount);
+                std::shared_ptr<Channel8u> cref = newCiChannel(oneBy4);
+                Surface8uRef chsurface = Surface8u::create(*cref);
+                out.push_back(chsurface);
+                break;
+            }
+            default:
+                assert(false);
+        }
+      
+        
+    }
+    
+    
+    
+    
+    void internal_fill (const lifIO::LifSerie& lifserie, const tiny_media_info& tm, const int frameCount, std::vector<Surface8uRef>& out,
+                            std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator time_iter, bool is_idLab0,
+                            std::vector<std::string>& names = d_names )
+    {
+        out.resize (0);
+        switch (tm.mChannels)
+        {
+            case 1:
+            {
+                return internal_fill_one_singleChannel(lifserie, tm, frameCount, out);
+            }
+            case 3:
+            {
+                if (is_idLab0){
+                    return internal_fill_one_singleByThreeChannels (lifserie, tm,  frameCount, out,time_iter,names);
+                }
+                return internal_fill_one_NChannels (lifserie, tm,  frameCount, out,time_iter);
+            }
+            case 4:
+                 return internal_fill_one_NChannels (lifserie, tm,  frameCount, out,time_iter);
             default:
                 assert(0);
         }
     }
 }
-std::string seqFrameContainer::getName () const { return "qTimeFrameCache"; }
+std::string seqFrameContainer::getName () const { return "seqFrameContainer"; }
 
 template<>
 std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const lifIO::LifSerie& lifserie)
@@ -88,6 +140,7 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const lifIO::LifSe
     seqFrameContainer::ref thisref (new seqFrameContainer(tm));
     
     thisref->channel_names (names);
+    bool is_idlab_0 = lifserie.content_type() == "IDLab_0";
     
     if (lifserie.getDurations().size ())
     {
@@ -99,10 +152,9 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const lifIO::LifSe
             int inc = 0;
             for (auto frame_count = 0; frame_count < tm.count; frame_count+=inc)
             {
-                anonymous::internal_fill_one(lifserie, tm, frame_count, out, tItr);
+                // Currently handling 1 or 1x3 or 1x4 content
+                internal_fill (lifserie, tm, frame_count, out, tItr, is_idlab_0);
                 
-                // For 3 Channel get the one by 3 image containing all.
-                //
                 if (! out.empty() && out.size() == 1){
                     bool check = thisref->loadFrame(out[0], frame_time);
                     if (! check){
@@ -287,7 +339,14 @@ tiny_media_info& seqFrameContainer::media_info ()
     return *((tiny_media_info*) this);
 }
 
-
+void seqFrameContainer::set_progress_callback(const progress_callback_t pg) const{
+    if(pg != nullptr){
+        m_progress_cb = std::bind(pg, placeholders::_1);
+    }
+    else{
+        m_progress_cb = nullptr;
+    }
+}
 const std::ostream& seqFrameContainer::print_to_ (std::ostream& std_stream)
 {
     std_stream << (tiny_media_info*)this << std::endl;

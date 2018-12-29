@@ -39,7 +39,7 @@ namespace svl
 
     
     template <typename T, typename trait_t = typename PixelType<T>::pixel_trait_t , int W = 512, int H = 128>
-    class roiMultiWindow    : public roiWindow<trait_t>
+    class roiFixedMultiWindow    : public roiWindow<trait_t>
     {
         
     public:
@@ -53,17 +53,17 @@ namespace svl
         typedef std::pair<uint32_t, window_t> indexed_window_t;
         
         // Constructors
-        roiMultiWindow();
-        roiMultiWindow(const window_t&,const std::vector<std::string>& names_l2r = {"Top","Middle","Bottom"}, int64_t timestamp = 0,
+        roiFixedMultiWindow();
+        roiFixedMultiWindow(const window_t&,const std::vector<std::string>& names_l2r = {"Top","Middle","Bottom"}, int64_t timestamp = 0,
                        image_memory_alignment_policy im = image_memory_alignment_policy::align_first_row);
         
-        roiMultiWindow(const std::vector<std::string>& names_l2r, int64_t timestamp = 0,
+        roiFixedMultiWindow(const std::vector<std::string>& names_l2r, int64_t timestamp = 0,
                        image_memory_alignment_policy im = image_memory_alignment_policy::align_first_row);
         
         
         //! copy / assignment  takes one arguments
-        roiMultiWindow(const roiMultiWindow & other);
-        const roiMultiWindow & operator=(const roiMultiWindow & rhs);
+        roiFixedMultiWindow(const roiFixedMultiWindow & other);
+        const roiFixedMultiWindow & operator=(const roiFixedMultiWindow & rhs);
       
         // Comparison Functions
         /*
@@ -72,8 +72,8 @@ namespace svl
          note       If both windows are unbound, but have the same offset,
          root-offset and size, returns true.
          */
-        bool operator==(const roiMultiWindow & other) const;
-        bool operator!=(const roiMultiWindow & other) const;
+        bool operator==(const roiFixedMultiWindow & other) const;
+        bool operator!=(const roiFixedMultiWindow & other) const;
  
         const roiWindow<trait_t>& plane (const std::string& name)
         {
@@ -111,7 +111,7 @@ namespace svl
         }
         
         // Destructor
-        virtual ~roiMultiWindow() {}
+        virtual ~roiFixedMultiWindow() {}
         
 
         
@@ -128,6 +128,77 @@ namespace svl
     };
     
 
+    
+    template <typename T, typename trait_t = typename PixelType<T>::pixel_trait_t >
+    class roiMultiWindow    : public roiWindow<trait_t>
+    {
+        
+    public:
+        typedef iRect rect_t;
+        typedef rect_t::point_t point_t;
+        
+        typedef typename PixelType<T>::pixel_t pixel_t;
+        typedef pixel_t * pixel_ptr_t;
+        typedef int64_t timestamp_t;
+        typedef roiWindow<trait_t> window_t;
+        typedef std::pair<uint32_t, window_t> indexed_window_t;
+        
+        // Constructors
+        // Only supports when window height is divisible by number of channels ( in trait_t )
+        roiMultiWindow(const iPair& size , int64_t timestamp = 0,
+                       image_memory_alignment_policy im = image_memory_alignment_policy::align_first_row);
+        roiMultiWindow(const window_t&, int64_t timestamp = 0,
+                            image_memory_alignment_policy im = image_memory_alignment_policy::align_first_row);
+        
+        
+        //! copy / assignment  takes one arguments
+        roiMultiWindow(const roiMultiWindow & other);
+        const roiMultiWindow & operator=(const roiMultiWindow & rhs);
+        
+        // Comparison Functions
+        /*
+         effect     Returns true if the two windows have the same frameBuf
+         and have the same size, offset and root-offset.
+         note       If both windows are unbound, but have the same offset,
+         root-offset and size, returns true.
+         */
+        bool operator==(const roiMultiWindow & other) const;
+        bool operator!=(const roiMultiWindow & other) const;
+        
+ 
+        const roiWindow<trait_t>& plane (const uint32_t index)
+        {
+            uint32_t idx = index % T::planes_c;
+            return m_planes[idx];
+        }
+        
+        const iRect& roi (const uint32_t& index)
+        {
+            return m_bounds[index];
+        }
+        
+        inline int planes () const
+        {
+            return T::planes_c;
+        }
+        
+        // Destructor
+        virtual ~roiMultiWindow() {}
+        
+        
+        
+    protected:
+        iPair m_size;
+        iPair m_spacing;
+        size_t num_channels;
+        std::vector<window_t> m_planes;// [T::planes_c];
+        std::vector<iRect> m_bounds;// [T::planes_c];
+        
+    private:
+        void init ( int64_t,image_memory_alignment_policy);
+        
+    };
+    
         
     
 }

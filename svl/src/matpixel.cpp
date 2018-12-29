@@ -428,16 +428,21 @@ roiWindow<P> roiWindow<P>::window(int32_t tl_x, int32_t tl_y, int32_t width, int
     return roiWindow<P>();
 }
 
+/***
+ 
+    roiFixedMultiWindow Implementation
+
+ ****/
 
  template <typename T, typename trait_t, int W, int H>
-roiMultiWindow<T,trait_t,W,H>::roiMultiWindow ()
+roiFixedMultiWindow<T,trait_t,W,H>::roiFixedMultiWindow ()
 {
     
 }
 
 
 template <typename T, typename trait_t, int W, int H>
-roiMultiWindow<T,trait_t,W,H>::roiMultiWindow (const window_t& root,const std::vector<std::string>& names_l2r, int64_t timestamp,
+roiFixedMultiWindow<T,trait_t,W,H>::roiFixedMultiWindow (const window_t& root,const std::vector<std::string>& names_l2r, int64_t timestamp,
                                                image_memory_alignment_policy im ) : roiWindow<trait_t>(root)
 {
     bool size_ok = root.width () == W && root.height() == (H*3);
@@ -447,7 +452,7 @@ roiMultiWindow<T,trait_t,W,H>::roiMultiWindow (const window_t& root,const std::v
 }
 
  template <typename T, typename trait_t, int W, int H>
-roiMultiWindow<T,trait_t,W,H>::roiMultiWindow(const std::vector<std::string>& names_l2r, int64_t timestamp,
+roiFixedMultiWindow<T,trait_t,W,H>::roiFixedMultiWindow(const std::vector<std::string>& names_l2r, int64_t timestamp,
                image_memory_alignment_policy im )
 : roiWindow<trait_t> (W, T::planes_c * H, im)
 {
@@ -456,7 +461,7 @@ roiMultiWindow<T,trait_t,W,H>::roiMultiWindow(const std::vector<std::string>& na
 
 
 template <typename T, typename trait_t, int W, int H>
-void roiMultiWindow<T,trait_t,W,H>::init (const std::vector<std::string>& names_l2r, int64_t timestamp,
+void roiFixedMultiWindow<T,trait_t,W,H>::init (const std::vector<std::string>& names_l2r, int64_t timestamp,
                                           image_memory_alignment_policy im )
 {
     static std::string defaults [3] { "top", "middle", "bottom" };
@@ -502,7 +507,7 @@ void roiMultiWindow<T,trait_t,W,H>::init (const std::vector<std::string>& names_
 }
 
  template <typename T, typename trait_t, int W, int H>
-roiMultiWindow<T,trait_t,W,H>::roiMultiWindow(const roiMultiWindow<T,trait_t,W,H> & other)
+roiFixedMultiWindow<T,trait_t,W,H>::roiFixedMultiWindow(const roiFixedMultiWindow<T,trait_t,W,H> & other)
 {
     for (unsigned ww = 0; ww < T::planes_c; ww++)
     {
@@ -514,7 +519,7 @@ roiMultiWindow<T,trait_t,W,H>::roiMultiWindow(const roiMultiWindow<T,trait_t,W,H
 }
 
 template <typename T, typename trait_t, int W, int H>
-bool roiMultiWindow<T,trait_t,W,H>::operator==(const roiMultiWindow<T,trait_t,W,H> & other) const
+bool roiFixedMultiWindow<T,trait_t,W,H>::operator==(const roiFixedMultiWindow<T,trait_t,W,H> & other) const
 {
     for (unsigned ww = 0; ww < T::planes_c; ww++)
     {
@@ -529,14 +534,14 @@ bool roiMultiWindow<T,trait_t,W,H>::operator==(const roiMultiWindow<T,trait_t,W,
 
 
 template <typename T, typename trait_t, int W, int H>
-bool roiMultiWindow<T,trait_t,W,H>::operator!=(const roiMultiWindow<T,trait_t,W,H> & other) const
+bool roiFixedMultiWindow<T,trait_t,W,H>::operator!=(const roiFixedMultiWindow<T,trait_t,W,H> & other) const
 {
     return !operator==(other);
 }
 
 
 template <typename T, typename trait_t, int W, int H>
-const roiMultiWindow<T,trait_t,W,H> & roiMultiWindow<T,trait_t,W,H>::operator=(const roiMultiWindow<T,trait_t,W,H> & rhs)
+const roiFixedMultiWindow<T,trait_t,W,H> & roiFixedMultiWindow<T,trait_t,W,H>::operator=(const roiFixedMultiWindow<T,trait_t,W,H> & rhs)
 {
     if (*this == rhs) return *this;
     for (unsigned ww = 0; ww < T::planes_c; ww++)
@@ -549,6 +554,108 @@ const roiMultiWindow<T,trait_t,W,H> & roiMultiWindow<T,trait_t,W,H>::operator=(c
     return *this;
 
 }
+
+
+/***
+ 
+ roiMultiWindow Implementation
+ 
+ ****/
+
+
+template <typename T, typename trait_t>
+roiMultiWindow<T,trait_t>::roiMultiWindow (const iPair& size, int64_t timestamp,image_memory_alignment_policy im ) : m_size(size),
+ roiWindow<trait_t> (size.first, T::planes_c * size.second, im)
+{
+    m_spacing.first = 0;
+    m_spacing.second = m_size.second;
+    
+    init(timestamp, im);
+}
+
+
+
+template <typename T, typename trait_t>
+roiMultiWindow<T,trait_t>::roiMultiWindow (const window_t& root, int64_t timestamp,image_memory_alignment_policy im ) : roiWindow<trait_t>(root)
+{
+    bool size_ok = (root.height() % T::planes_c) == 0;
+    assert(size_ok);
+    m_size.first = root.width ();
+    m_size.second = root.height() / T::planes_c;
+    m_spacing.first = 0;
+    m_spacing.second = m_size.second;
+    
+    init(timestamp, im);
+}
+
+
+template <typename T, typename trait_t>
+void roiMultiWindow<T,trait_t>::init ( int64_t timestamp, image_memory_alignment_policy im )
+{
+    
+    this->frameBuf ()->setTimestamp (timestamp);
+
+    m_bounds[0].size (m_size);
+    m_bounds[1] = m_bounds[0];
+    m_bounds[1].translate (m_spacing);
+    m_bounds[2] = m_bounds[1];
+    m_bounds[2].translate (m_spacing);
+    
+    auto allr = m_bounds[0] | m_bounds[1] | m_bounds[2];
+    assert (allr == this->bound ());
+    
+    for (unsigned ww = 0; ww < T::planes_c; ww++)
+    {
+        m_planes[ww] = roiWindow<trait_t>(this->frameBuf(),m_bounds[ww]);
+        assert(m_planes[ww].width() == m_size.first);
+        assert(m_planes[ww].height() == m_size.second);
+    }
+    
+}
+
+template <typename T, typename trait_t>
+roiMultiWindow<T,trait_t>::roiMultiWindow(const roiMultiWindow<T,trait_t> & other)
+{
+    for (unsigned ww = 0; ww < T::planes_c; ww++)
+    {
+        m_planes[ww] = other.m_planes[ww];
+        m_bounds[ww] = other.m_bounds [ww];
+    }
+}
+
+template <typename T, typename trait_t>
+bool roiMultiWindow<T,trait_t>::operator==(const roiMultiWindow<T,trait_t> & other) const
+{
+    for (unsigned ww = 0; ww < T::planes_c; ww++)
+    {
+        if (m_planes[ww] != other.m_planes[ww]) return false;
+        if (m_bounds[ww] != other.m_bounds [ww]) return false;
+    }
+    return true;
+}
+
+
+
+template <typename T, typename trait_t>
+bool roiMultiWindow<T,trait_t>::operator!=(const roiMultiWindow<T,trait_t> & other) const
+{
+    return !operator==(other);
+}
+
+
+template <typename T, typename trait_t>
+const roiMultiWindow<T,trait_t> & roiMultiWindow<T,trait_t>::operator=(const roiMultiWindow<T,trait_t> & rhs)
+{
+    if (*this == rhs) return *this;
+    for (unsigned ww = 0; ww < T::planes_c; ww++)
+    {
+        m_planes[ww] = rhs.m_planes[ww];
+        m_bounds[ww] = rhs.m_bounds [ww];
+    }
+    return *this;
+    
+}
+
 
 namespace svl
 {
@@ -567,7 +674,9 @@ namespace svl
     template class roiWindow<P8UC3>;
     template class roiWindow<P8UC4>;
     
-    template class roiMultiWindow<P8UP3>;    
+    template class roiFixedMultiWindow<P8UP3>;
+     template class roiMultiWindow<P8UP3>;
+     template class roiMultiWindow<P8UP4>;
 }
 
 #pragma GCC diagnostic pop
