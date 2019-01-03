@@ -881,6 +881,43 @@ void lifContext::process_async (){
 void  lifContext::SetupGUIVariables() {}
 
 void  lifContext::DrawGUI(){
+    
+    if(ui::MenuItem("Looping", "S")){
+        loop_no_loop_button();
+    }
+    
+    if (ImGui::TreeNode("Tabbing"))
+    {
+        ImGui::Text("Use TAB/SHIFT+TAB to cycle through keyboard editable fields.");
+        static char buf[32] = "dummy";
+        ImGui::InputText("1", buf, IM_ARRAYSIZE(buf));
+        ImGui::InputText("2", buf, IM_ARRAYSIZE(buf));
+        ImGui::InputText("3", buf, IM_ARRAYSIZE(buf));
+        ImGui::PushAllowKeyboardFocus(false);
+        ImGui::InputText("4 (tab skip)", buf, IM_ARRAYSIZE(buf));
+        //ImGui::SameLine(); ShowHelperMarker("Use ImGui::PushAllowKeyboardFocus(bool)\nto disable tabbing through certain widgets.");
+        ImGui::PopAllowKeyboardFocus();
+        ImGui::InputText("5", buf, IM_ARRAYSIZE(buf));
+        ImGui::TreePop();
+    }
+
+    {
+        if (ImGui::Begin("Settings", &m_showGUI)) {
+         
+            if (ImGui::CollapsingHeader("Display")) {
+              //  ShowDisplaySettings(runner_);
+            }
+            
+            ImGui::Spacing();
+            
+            if (ImGui::CollapsingHeader("Style")) {
+             //   ShowStyleSettings();
+            }
+        }
+        ImGui::End();
+    }
+    
+
     {
         static bool animate = true;
         ImGui::Checkbox("Animate", &animate);

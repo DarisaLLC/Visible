@@ -45,6 +45,14 @@
 		C22F1DEC21790CDA00E9A35B /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C203D2ED21714B4700B6B4A8 /* libavcodec.a */; };
 		C22F1DED21790CDD00E9A35B /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C203D2EB21714B0F00B6B4A8 /* libswscale.a */; };
 		C22F1DEE21790CFC00E9A35B /* libdc1394.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C203D2E421714A4600B6B4A8 /* libdc1394.a */; };
+		C2398A0921DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
+		C2398A0A21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
+		C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
+		C2398A0C21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
+		C2398A0D21DD8D3100B180A0 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
+		C2398A0E21DD8D3100B180A0 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
+		C2398A0F21DD8D3600B180A0 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
+		C2398A1021DD8D3600B180A0 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */; };
 		C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
 		C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
@@ -79,7 +87,6 @@
 		C25261081F6611A10069F665 /* ObjectContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C25261031F6611A10069F665 /* ObjectContainer.cpp */; };
 		C25261211F66EA910069F665 /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611F1F66EA910069F665 /* pugixml.cpp */; };
 		C25346422150521B002E1CC7 /* libcinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC61F6B4D6500A0E908 /* libcinder.a */; };
-		C253464521505A57002E1CC7 /* visible_mov_dir_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C221D9181E4B130400AF74CE /* visible_mov_dir_impl.cpp */; };
 		C254BE841F4F912E00977307 /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C2601BB81E690409004415A3 /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
 		C2601BB91E69042B004415A3 /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
@@ -151,7 +158,6 @@
 		C26F5F9F21B0AA6D00EAE156 /* Visible.icns in Resources */ = {isa = PBXBuildFile; fileRef = C264F94B215F0B6D00AF3130 /* Visible.icns */; };
 		C26F5FA021B0AA6D00EAE156 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
 		C26F5FA221B0AA6D00EAE156 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
-		C26F5FA421B0AA6D00EAE156 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C26F5FA521B0AA6D00EAE156 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
 		C26F5FA621B0AA6D00EAE156 /* contraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction.cpp */; };
 		C26F5FA721B0AA6D00EAE156 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
@@ -162,7 +168,6 @@
 		C26F5FAD21B0AA6D00EAE156 /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C26F5FAF21B0AA6D00EAE156 /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
 		C26F5FB021B0AA6D00EAE156 /* seq_frame_container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* seq_frame_container.cpp */; };
-		C26F5FB121B0AA6D00EAE156 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C26F5FB221B0AA6D00EAE156 /* Plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611B1F66E95B0069F665 /* Plist.cpp */; };
 		C26F5FB321B0AA6D00EAE156 /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
 		C26F5FB421B0AA6D00EAE156 /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
@@ -242,10 +247,8 @@
 		C2AFCF00216E79590080462D /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
 		C2AFCF09216F0CF10080462D /* CinderImGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCF08216F0CF10080462D /* CinderImGui.cpp */; };
 		C2B005821CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
-		C2B38A571D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
-		C2B6E6701D0618E400235FB7 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2B87C9921D012D700C91E35 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
 		C2B87C9A21D012DA00C91E35 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
 		C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
@@ -388,6 +391,7 @@
 		C2239AB6218B6F30007558AB /* boost_units.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = boost_units.hpp; sourceTree = "<group>"; };
 		C2239AB721922F72007558AB /* cardiomyocyte_model_detail.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model_detail.hpp; sourceTree = "<group>"; };
 		C2309DC61F6B4D6500A0E908 /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../externals/Cinder/lib/macosx/Release/libcinder.a; sourceTree = SOURCE_ROOT; };
+		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
 		C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_lif_impl.cpp; path = ../src/visible_lif_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C23D0F481E2982690049ADDB /* lifFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = lifFile.hpp; sourceTree = "<group>"; };
 		C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lifFile.cpp; sourceTree = "<group>"; };
@@ -1383,6 +1387,7 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C2398A0821DD8A0A00B180A0 /* file_system.cpp */,
 				C2239AB3218B6270007558AB /* boost_literals.cpp */,
 				C2618F7B217FDA6600FA9F43 /* color.cc */,
 				C2618F7D217FDA6600FA9F43 /* figure.cc */,
@@ -1667,8 +1672,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C2606DA91CED3E2E0045FF57 /* gradient.cpp in Sources */,
-				C253464521505A57002E1CC7 /* visible_mov_dir_impl.cpp in Sources */,
-				C2B6E6701D0618E400235FB7 /* AVReader.mm in Sources */,
 				C2820F3521752CB000DFA7A6 /* gui_handler.cpp in Sources */,
 				C242CCC5217E76D8004F7867 /* contraction.cpp in Sources */,
 				C2B005821CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm in Sources */,
@@ -1680,7 +1683,6 @@
 				C24C0958214B2F4D004C8002 /* VisibleApp.cpp in Sources */,
 				C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */,
 				C2FC7DAF1CF4F46100D18193 /* seq_frame_container.cpp in Sources */,
-				C2B38A571D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
 				C2A5DBAD207A003F001C6608 /* Plist.cpp in Sources */,
 				C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */,
 				C2606DAE1CED3E2E0045FF57 /* localvariance.cpp in Sources */,
@@ -1705,7 +1707,9 @@
 				C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */,
 				C2618F81217FDA6600FA9F43 /* figure.cc in Sources */,
 				C2606DAC1CED3E2E0045FF57 /* labelconnect.cpp in Sources */,
+				C2398A0F21DD8D3600B180A0 /* AVReader.mm in Sources */,
 				C2606DB11CED3E2E0045FF57 /* registration.cpp in Sources */,
+				C2398A0D21DD8D3100B180A0 /* AVReaderWrapper.mm in Sources */,
 				C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */,
 				C2AFCF09216F0CF10080462D /* CinderImGui.cpp in Sources */,
 				C2601BB91E69042B004415A3 /* bitvector.cpp in Sources */,
@@ -1722,6 +1726,7 @@
 				C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */,
 				C2606DAF1CED3E2E0045FF57 /* matpixel.cpp in Sources */,
 				C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */,
+				C2398A0921DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C2618F83217FDA6600FA9F43 /* highgui.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1749,6 +1754,7 @@
 				C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */,
 				C2618F87217FDA9E00FA9F43 /* figure.cc in Sources */,
 				C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */,
+				C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */,
 				C20EDBB61CEFC2D20074C47A /* registration.cpp in Sources */,
 				C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */,
@@ -1773,6 +1779,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2398A0C21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C26A057C1E7785C300BDC954 /* cinder_support.cpp in Sources */,
 				C26A05681E777E2100BDC954 /* tinyxmlerror.cpp in Sources */,
 				C26A055C1E77750C00BDC954 /* self_similarity.cpp in Sources */,
@@ -1804,7 +1811,6 @@
 			files = (
 				C2BDEFEF21C8237A00A8CB94 /* core_support.cpp in Sources */,
 				C26F5FA221B0AA6D00EAE156 /* gradient.cpp in Sources */,
-				C26F5FA421B0AA6D00EAE156 /* AVReader.mm in Sources */,
 				C26F5FA521B0AA6D00EAE156 /* gui_handler.cpp in Sources */,
 				C26F5FA621B0AA6D00EAE156 /* contraction.cpp in Sources */,
 				C26F5FA721B0AA6D00EAE156 /* hockey_etc_cocoa_wrappers.mm in Sources */,
@@ -1817,7 +1823,6 @@
 				C26F5FFF21B0AA9D00EAE156 /* VisibleRunApp.cpp in Sources */,
 				C26F5FAF21B0AA6D00EAE156 /* algo_Lif.cpp in Sources */,
 				C26F5FB021B0AA6D00EAE156 /* seq_frame_container.cpp in Sources */,
-				C26F5FB121B0AA6D00EAE156 /* AVReaderWrapper.mm in Sources */,
 				C26F5FB221B0AA6D00EAE156 /* Plist.cpp in Sources */,
 				C26F5FB321B0AA6D00EAE156 /* tinyxmlparser.cpp in Sources */,
 				C26F5FB421B0AA6D00EAE156 /* localvariance.cpp in Sources */,
@@ -1840,7 +1845,9 @@
 				C26F5FC721B0AA6D00EAE156 /* csv.cpp in Sources */,
 				C26F5FC821B0AA6D00EAE156 /* sg_filter.cpp in Sources */,
 				C26F5FC921B0AA6D00EAE156 /* tinyxml.cpp in Sources */,
+				C2398A1021DD8D3600B180A0 /* AVReader.mm in Sources */,
 				C26F5FCA21B0AA6D00EAE156 /* figure.cc in Sources */,
+				C2398A0E21DD8D3100B180A0 /* AVReaderWrapper.mm in Sources */,
 				C26F5FCB21B0AA6D00EAE156 /* labelconnect.cpp in Sources */,
 				C26F5FCC21B0AA6D00EAE156 /* registration.cpp in Sources */,
 				C26F5FCD21B0AA6D00EAE156 /* sm_producer.cpp in Sources */,
@@ -1857,6 +1864,7 @@
 				C26F5FD821B0AA6D00EAE156 /* TimeSeriesPlotUtils.cpp in Sources */,
 				C26F5FD921B0AA6D00EAE156 /* tinystr.cpp in Sources */,
 				C26F5FDA21B0AA6D00EAE156 /* matpixel.cpp in Sources */,
+				C2398A0A21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C26F5FDB21B0AA6D00EAE156 /* highgui.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1925,6 +1933,7 @@
 					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
 					"$(LOCAL_BOOST)/lib/libboost_system.a",
 					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
+					"$(LOCAL_BOOST)/lib/libboost_regex-mt.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
@@ -2019,6 +2028,7 @@
 					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
 					"$(LOCAL_BOOST)/lib/libboost_system.a",
 					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
+					"$(LOCAL_BOOST)/lib/libboost_regex-mt.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
@@ -2474,13 +2484,13 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/include",
 					"$(LOCAL_BOOST)/include",
 					"$(LOCAL_IMGUI)",
 					/usr/local/include,
 					"$(LOCAL_CEREAL)",
 					"$(SRCROOT)/../projects/Visible/include/plistcpp",
 					"$(LOCAL_CINDER)/include",
-					"$(SRCROOT)/include",
 					"$(LOCAL_EIGEN)",
 					"$(LOCAL_TINYXML)",
 					"$(LOCAL_SPDLOG)/include",
@@ -2561,13 +2571,13 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/include",
 					"$(LOCAL_BOOST)/include",
 					"$(LOCAL_IMGUI)",
 					/usr/local/include,
 					"$(LOCAL_CEREAL)",
 					"$(SRCROOT)/../projects/Visible/include/plistcpp",
 					"$(LOCAL_CINDER)/include",
-					"$(SRCROOT)/include",
 					"$(LOCAL_EIGEN)",
 					"$(LOCAL_TINYXML)",
 					"$(LOCAL_SPDLOG)/include",
@@ -2596,6 +2606,7 @@
 					"$(LOCAL_BOOST)/lib/libboost_system.a",
 					"$(LOCAL_BOOST)/lib/libboost_filesystem.a",
 					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
+					"$(LOCAL_BOOST)/lib/libboost_regex-mt.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",

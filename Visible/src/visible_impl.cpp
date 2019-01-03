@@ -6,10 +6,97 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 
 #include "opencv2/stitching.hpp"
-#include "guiContext.h"
 #include "core/stl_utils.hpp"
+#include "VisibleApp.h"
 
 using namespace boost;
+
+
+std::ostream& operator<<(std::ostream& std_stream, const tiny_media_info& t)
+{
+    if (! t.isImageFolder ())
+        std_stream  << " -- General Movie Info -- " << std::endl;
+    else
+        std_stream  << " -- Image Folder Info -- " << std::endl;
+    
+    std_stream << "Dimensions:" << t.getWidth() << " x " << t.getHeight() << std::endl;
+    std_stream << "Duration:  " << t.getDuration() << " seconds" << std::endl;
+    std_stream << "Frames:    " << t.getNumFrames() << std::endl;
+    std_stream << "Framerate: " << t.getFramerate() << std::endl;
+    return std_stream;
+}
+
+
+// Utils for both apps
+namespace {
+    
+    fs::path get_app_directory_exists (const fs::path&& user_app_support){
+        auto platform = ci::app::Platform::get();
+        auto home_path = platform->getHomeDirectory();
+        fs::path app_support = home_path / user_app_support;
+        
+        bool success = exists (app_support);
+        if (! success )
+            success = fs::create_directories (app_support);
+        if (success) return app_support;
+        return fs::path ();
+    }
+
+}
+bool VisibleAppControl::check_input (const string &filename){
+    
+    auto check_file_and_size = svl::io::check_file(filename);
+    if(! check_file_and_size.first) return check_file_and_size.first;
+    
+    boost::filesystem::path bpath(filename);
+    auto boost_file_and_size = svl::io::existsFile(bpath);
+    if(! boost_file_and_size) return boost_file_and_size;
+    
+    auto bsize = boost::filesystem::file_size(bpath);
+    return check_file_and_size.second == bsize;
+}
+
+
+fs::path  VisibleAppControl::get_visible_app_directory () { return get_app_directory_exists (fs::path(c_visible_app_support));}
+fs::path  VisibleAppControl::get_runner_app_directory () { return get_app_directory_exists (fs::path(c_visible_runner_app_support));}
+
+bool VisibleAppControl::setup_loggers (const fs::path app_support_dir,  imGuiLog& visualLog, std::string id_name){
+    using imgui_sink_mt = spdlog::sinks::imGuiLogSink<std::mutex> ;
+
+    // Check app support directory
+    bool app_support_ok = exists(app_support_dir);
+    if (! app_support_ok ) return app_support_ok;
+
+    try{
+        // get a temporary file name
+        std::string logname =  logging::reserve_unique_file_name(app_support_dir.string(),
+                                                                 logging::create_timestamped_template(id_name));
+        
+        // Setup APP LOG
+        auto daily_file_sink = std::make_shared<logging::sinks::daily_file_sink_mt>(logname, 23, 59);
+        auto visual_sink = std::make_shared<imgui_sink_mt>(visualLog);
+        auto console_sink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
+        console_sink->set_level(spdlog::level::warn);
+        console_sink->set_pattern("[%H:%M:%S:%e:%f %z] [%n] [%^---%L---%$] [thread %t] %v");
+        std::vector<spdlog::sink_ptr> sinks;
+        sinks.push_back(daily_file_sink);
+        sinks.push_back(visual_sink);
+        sinks.push_back(console_sink);
+        
+        auto combined_logger = std::make_shared<spdlog::logger>("VLog", sinks.begin(),sinks.end());
+        combined_logger->info("Daily Log File: " + logname);
+        //register it if you need to access it globally
+        spdlog::register_logger(combined_logger);
+    }
+    catch (const spdlog::spdlog_ex& ex)
+    {
+        std::cout << "Log initialization failed: " << ex.what() << std::endl;
+        return false;
+    }
+    return app_support_ok;
+}
+
+
 
 
 guiContext::guiContext (ci::app::WindowRef& ww)
