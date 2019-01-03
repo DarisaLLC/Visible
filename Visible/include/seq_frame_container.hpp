@@ -52,8 +52,7 @@ public:
     // Initializes for the movie. Frame indices are generated for unique increasing time stamps.
     // time-stamped Frames are copied and cached at the first load. Further references to the frame
     // by time stamp or index is from cache.
-   // qTimeFrameCache ( const tiny_media_info& );
-  //  qTimeFrameCache ();
+   
     bool isValid () const;
     
     tiny_media_info& media_info ();

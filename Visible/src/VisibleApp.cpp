@@ -19,69 +19,7 @@ namespace VisibleAppControl{
     bool ThreadsShouldStop = false;
 }
 
-namespace {
-    /**
-     Logger which will show output on the Log window in the application.
-     */
-    imGuiLog app_log;
-    
-  
-    bool check_input (const string &filename){
-        
-        auto check_file_and_size = svl::io::check_file(filename);
-        if(! check_file_and_size.first) return check_file_and_size.first;
-        
-        boost::filesystem::path bpath(filename);
-        auto boost_file_and_size = svl::io::existsFile(bpath);
-        if(! boost_file_and_size) return boost_file_and_size;
-        
-        auto bsize = boost::filesystem::file_size(bpath);
-        return check_file_and_size.second == bsize;
-    }
-    
-    
-    fs::path get_app_directory_exists (){
-        auto platform = ci::app::Platform::get();
-        auto home_path = platform->getHomeDirectory();
-        fs::path app_support (vac::c_visible_runner_app_support);
-        app_support = home_path / app_support;
-        
-        bool success = exists (app_support);
-        if (! success )
-            success = fs::create_directories (app_support);
-        if (success) return app_support;
-        return fs::path ();
-    }
-    
-    bool setup_loggers (const fs::path app_support_dir, std::string id_name){
-        using imgui_sink_mt = spdlog::sinks::imGuiLogSink<std::mutex> ;
-        
-        // Check app support directory
-        bool app_support_ok = exists(app_support_dir);
-        if (! app_support_ok ) return app_support_ok;
-        
-        try{
-            // get a temporary file name
-            std::string logname =  logging::reserve_unique_file_name(app_support_dir.string(),
-                                                                     logging::create_timestamped_template(id_name));
-            
-            // Setup APP LOG
-            auto logging_container = logging::get_mutable_logging_container();
-            logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
-            logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>(logname, 23, 59));
-            logging_container->add_sink(std::make_shared<imgui_sink_mt>(visualLog));
-            // logging_container->add_sink(std::make_shared<spdlog::sinks::stdout_sink_mt>(vlogger::instance().console()));
-            auto combined_logger = std::make_shared<spdlog::logger>(logname, logging_container);
-            //register it if you need to access it globally
-            spdlog::register_logger(combined_logger);
-        }
-        catch (...){
-            return false;
-        }
-        return app_support_ok;
-    }
-    
-}
+
 void prepareSettings( App::Settings *settings )
 {
     //settings->setHighDensityDisplayEnabled();
@@ -158,7 +96,7 @@ void VisibleApp::setup()
                  //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
                    );
     
-    fs::path root_output_dir = get_app_directory_exists();
+    fs::path root_output_dir = VisibleAppControl::get_visible_app_directory();
     
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "Visible.app/Contents/Info.plist";
@@ -199,6 +137,8 @@ void VisibleApp::setup()
 	mTopBorder		= 375.0f;
 	mItemSpacing	= 22.0f;
 	
+    VisibleAppControl::setup_loggers( root_output_dir, app_log, mFileName);
+    
 	// create items
     std::vector<std::string> extensions = {"lif"};
     auto platform = ci::app::Platform::get();
@@ -209,7 +149,8 @@ void VisibleApp::setup()
     mFileExtension = some_path.extension().string();
     mFileName = some_path.filename().string();
     
-    setup_loggers( root_output_dir, mFileName);
+ 
+    
  //   boost::filesystem::path some_path = "/Users/arman/Pictures/lif/3channels.lif";
     if (! some_path.empty() || exists(some_path))
         initData(some_path);
@@ -255,10 +196,10 @@ void VisibleApp::setup()
     gl::enableVerticalSync();
     
     // Setup APP LOG
-    auto logging_container = logging::get_mutable_logging_container();
-    logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
-    logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>("VLog", 23, 59));
-    auto logger = std::make_shared<spdlog::logger>(VAPPLOG, logging_container);
+    //auto logging_container = logging::get_mutable_logging_container();
+    //logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
+    //logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>("VLog", 23, 59));
+    //auto logger = std::make_shared<spdlog::logger>(VAPPLOG, logging_container);
     
 }
 
@@ -312,7 +253,7 @@ void VisibleApp::DrawGUI(){
  
     //Draw the log if desired
     if(showLog){
-        vac::app_log.Draw("Log", &showLog);
+        app_log.Draw("Log", &showLog);
     }
     
     if(showHelp) ui::OpenPopup("Help");

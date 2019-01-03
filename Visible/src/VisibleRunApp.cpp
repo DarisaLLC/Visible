@@ -17,81 +17,9 @@
 
 // /Users/arman/Library/Application Support
 
-namespace VisibleRunAppControl{
-    /**
-     When this is set to false the threads managed by this program will stop and join the main thread.
-     */
-    bool ThreadsShouldStop = false;
-}
 
-namespace {
-    imGuiLog visualLog;
-    
-     bool check_input (const string &filename){
-        
-        auto check_file_and_size = svl::io::check_file(filename);
-        if(! check_file_and_size.first) return check_file_and_size.first;
-        
-        boost::filesystem::path bpath(filename);
-        auto boost_file_and_size = svl::io::existsFile(bpath);
-        if(! boost_file_and_size) return boost_file_and_size;
-        
-        auto bsize = boost::filesystem::file_size(bpath);
-        return check_file_and_size.second == bsize;
-    }
+bool VisibleAppControl::ThreadsShouldStop = false;
 
-    
-    fs::path get_app_directory_exists (){
-        auto platform = ci::app::Platform::get();
-        auto home_path = platform->getHomeDirectory();
-        fs::path app_support (vac::c_visible_runner_app_support);
-        app_support = home_path / app_support;
-        
-        bool success = exists (app_support);
-        if (! success )
-            success = fs::create_directories (app_support);
-        if (success) return app_support;
-        return fs::path ();
-    }
-    
-    
-    bool setup_loggers (const fs::path app_support_dir, std::string id_name){
-        using imgui_sink_mt = spdlog::sinks::imGuiLogSink<std::mutex> ;
-        
-        // Check app support directory
-        bool app_support_ok = exists(app_support_dir);
-        if (! app_support_ok ) return app_support_ok;
-        
-        try{
-            // get a temporary file name
-            std::string logname =  logging::reserve_unique_file_name(app_support_dir.string(),
-                                                                         logging::create_timestamped_template(id_name));
-            
-            // Setup APP LOG
-            auto daily_file_sink = std::make_shared<logging::sinks::daily_file_sink_mt>(logname, 23, 59);
-            auto visual_sink = std::make_shared<imgui_sink_mt>(visualLog);
-            auto console_sink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
-            console_sink->set_level(spdlog::level::warn);
-            console_sink->set_pattern("[%H:%M:%S:%e:%f %z] [%n] [%^---%L---%$] [thread %t] %v");
-            std::vector<spdlog::sink_ptr> sinks;
-            sinks.push_back(daily_file_sink);
-            sinks.push_back(visual_sink);
-            sinks.push_back(console_sink);
-          
-            auto combined_logger = std::make_shared<spdlog::logger>("VLog", sinks.begin(),sinks.end());
-            combined_logger->info("Daily Log File: " + logname);
-            //register it if you need to access it globally
-            spdlog::register_logger(combined_logger);
-        }
-        catch (const spdlog::spdlog_ex& ex)
-        {
-            std::cout << "Log initialization failed: " << ex.what() << std::endl;
-            return false;
-        }
-        return app_support_ok;
-    }
- 
-}
 
 using namespace ci;
 using namespace ci::app;
@@ -122,12 +50,12 @@ void VisibleRunApp::DrawGUI(){
         ui::ScopedMainMenuBar menuBar;
         
         if( ui::BeginMenu( "File" ) ){
+            
+            // Not Working Yet
             //if(ui::MenuItem("Fullscreen")){
             //    setFullScreen(!isFullScreen());
-            //}
-            if(ui::MenuItem("Looping", "S")){
-                mContext->loop_no_loop_button();
-            }
+           // }
+
             ui::MenuItem("Help", nullptr, &showHelp);
             if(ui::MenuItem("Quit", "ESC")){
                 QuitApp();
@@ -144,7 +72,6 @@ void VisibleRunApp::DrawGUI(){
             ui::EndMenu();
         }
         
-        //ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.0f FPS", ui::GetIO().Framerate);
         ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
     }
     
@@ -153,14 +80,14 @@ void VisibleRunApp::DrawGUI(){
     {
         ui::Begin("General Settings", &showGUI, ImGuiWindowFlags_AlwaysAutoResize);
         
-        ui::SliderInt("Cover Percent", &convergence, 0, 100);
+//        ui::SliderInt("Cover Percent", &convergence, 0, 100);
         
         ui::End();
     }
     
     //Draw the log if desired
     if(showLog){
-        visualLog.Draw("Log", &showLog);
+        visual_log.Draw("Log", &showLog);
     }
     
     if(showHelp) ui::OpenPopup("Help");
@@ -215,7 +142,7 @@ void VisibleRunApp::setup()
                    //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
                    );
     
-    const fs::path root_output_dir = get_app_directory_exists();
+    const fs::path root_output_dir = vac::get_runner_app_directory();
     
     
     const fs::path& appPath = ci::app::getAppPath();
@@ -248,7 +175,7 @@ void VisibleRunApp::setup()
     auto cmds = m_args[1];
   
     
-    setup_loggers(root_output_dir, fs::path(bpath).filename().string());
+    VisibleAppControl::setup_loggers(root_output_dir, visual_log, fs::path(bpath).filename().string());
     static std::string cok = "chapter_ok";
     static std::string ccok = "chapter_ok_custom_content_ok";
     static std::string cokcnk = "chapter_ok_custom_content_not_recognized";
@@ -429,7 +356,7 @@ void prepareSettings( App::Settings *settings )
 {
     const auto &args = settings->getCommandLineArgs();
     if(args.size() > 1){
-        auto ok = check_input(args[1]);
+        auto ok = VisibleAppControl::check_input(args[1]);
         std::cout << "File is " << std::boolalpha << ok << std::endl;
     }
     

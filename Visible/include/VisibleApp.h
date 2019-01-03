@@ -59,6 +59,15 @@ namespace VisibleAppControl{
     extern bool ThreadsShouldStop;
     static constexpr const char c_visible_app_support[] = "Library/Application Support/net.darisallc.Visible";
     static constexpr const char c_visible_runner_app_support[] = "Library/Application Support/net.darisallc.VisibleRun";
+    
+    bool check_input (const string &filename);
+    
+    fs::path get_visible_app_directory ();
+    fs::path get_runner_app_directory ();
+    
+    bool setup_loggers (const fs::path app_support_dir,  imGuiLog& visualLog, std::string id_name);
+    
+    static const std::string LIF_CUSTOM = "IDLab_0";
 }
 
 namespace vac = VisibleAppControl;
@@ -130,6 +139,8 @@ private:
     bool showLog = false;
     bool showHelp = false;
     bool showOverlay = false;
+    
+    imGuiLog app_log;
 };
 
 class VisibleRunApp : public App, public gui_base
@@ -177,6 +188,8 @@ private:
     std::string         mFileExtension;
     lifIO::ContentType_t mContentType; // "" denotes canonical LIF file
     bool m_isIdLabLif = false;
+    
+    imGuiLog visual_log;
 };
 
 #endif /* VisibleApp_h */
