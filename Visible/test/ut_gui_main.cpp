@@ -11,7 +11,7 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 
 #include "VisibleApp.h"
-#include "imGuiPlotter.hpp"
+#include "imguivariouscontrols.h"
 using namespace std;
 
 
@@ -34,6 +34,22 @@ std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655,
 
 #define TEST_APP_WIDTH 1280
 #define TEST_APP_HEIGHT 960
+
+struct MultiplotData_F {
+    int mod;
+    size_t first;
+    size_t size;
+    const void* Y;
+    const void* X;
+};
+
+template <typename T>
+struct HistoData {
+    int mod;
+    size_t first;
+    size_t size;
+    const T* points;
+};
 
 class VisibleTestApp : public App, public gui_base
 {
@@ -134,10 +150,11 @@ private:
             ImColor{ 146, 36, 40 },
             ImColor{ 148, 139, 61 }
         };
+
         
         std::vector<void const*> metricsToDisplay;
         std::vector<const char*> deviceNames;
-        std::vector<ImGui::MultiplotData_F> userData;
+        std::vector<MultiplotData_F> userData;
         std::vector<ImColor> colors;
         size_t metricSize = 0;
         float maxValue = std::numeric_limits<float>::lowest();
@@ -151,10 +168,10 @@ private:
             std::vector<float> domain;
             std::vector<float> values;
             domainFromPairedTracks_D(track,domain,values);
-            ImGui::MultiplotData_F data;
+            MultiplotData_F data;
             data.size = domain.size();
             metricSize = domain.size();
-            data.mod = (int) domain.size();
+            data.mod = (int) 1;
             data.first = 0;
             data.X = domain.data();
             data.Y = values.data();
@@ -172,31 +189,40 @@ private:
             metricsToDisplay.push_back(&(userData[ui]));
         }
         auto getterY = [](const void* hData, int idx) -> float {
-            auto histoData = reinterpret_cast<const ImGui::MultiplotData_F*>(hData);
-            size_t pos = (histoData->first + static_cast<size_t>(idx)) % histoData->mod;
-            // size_t pos = (static_cast<size_t>(idx)) % histoData->mod;
-            assert(pos >= 0 && pos < 1024);
-            return static_cast<const float*>(histoData->Y)[pos];
+            auto pData = reinterpret_cast<const MultiplotData_F*>(hData);
+            float val = static_cast<const float*>(pData->Y)[idx];
+            std::cout << val << std::endl;
+            return val;
         };
-        auto getterX = [](const void* hData, int idx) -> size_t {
-            auto histoData = reinterpret_cast<const ImGui::MultiplotData_F*>(hData);
-            size_t pos = (histoData->first + static_cast<size_t>(idx)) % histoData->mod;
-            //size_t pos = (static_cast<size_t>(idx)) % histoData->mod;
-            assert(pos >= 0 && pos < 1024);
-            return static_cast<const size_t*>(histoData->X)[pos];
-        };
+//        auto getterX = [](const void* hData, int idx) -> size_t {
+//            auto histoData = reinterpret_cast<const MultiplotData_F*>(hData);
+//            size_t pos = (histoData->first + static_cast<size_t>(idx)) % histoData->mod;
+//            //size_t pos = (static_cast<size_t>(idx)) % histoData->mod;
+//            assert(pos >= 0 && pos < 1024);
+//            return static_cast<const size_t*>(histoData->X)[pos];
+//        };
+        
+        
+        //        void PlotMultiLines(
+        //                                     const char* label,
+        //                                     int num_datas,
+        //                                     const char** names,
+        //                                     const ImColor* colors,
+        //                                     float(*getter)(const void* data, int idx),
+        //                                     const void * const * datas,
+        //                                     int values_count,
+        //                                     float scale_min,
+        //                                     float scale_max,
+        //                                     ImVec2 graph_size);
         ImGui::PlotMultiLines(label,
                               (int)userData.size(),
                               deviceNames.data(),
                               colors.data(),
                               getterY,
-                              getterX,
                               metricsToDisplay.data(),
                               (int)metricSize,
                               minValue,
                               maxValue * 1.2f,
-                              minDomain,
-                              maxDomain,
                               canvasSize);
     }
     
@@ -207,3 +233,5 @@ private:
 CINDER_APP( VisibleTestApp, RendererGl( RendererGl::Options().msaa( 4 ) ), []( App::Settings *settings ) {
     settings->setWindowSize( TEST_APP_WIDTH, TEST_APP_HEIGHT );
 } )
+
+
