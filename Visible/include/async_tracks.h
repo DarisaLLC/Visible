@@ -1,5 +1,5 @@
-#ifndef __ASYNC_PRODUCER__
-#define __ASYNC_PRODUCER__
+#ifndef __ASYNC_TRACKS__
+#define __ASYNC_TRACKS__
 
 
 #include <map>
@@ -34,6 +34,14 @@ typedef std::pair<std::string, timed_double_vec_t> namedTrackOfdouble_t;
 typedef std::vector<namedTrackOfdouble_t>  vectorOfnamedTrackOfdouble_t;
 typedef std::vector<vectorOfnamedTrackOfdouble_t>  vectorOfVectorOfnamedTrackOfdouble_t;
 
+
+// track of timed result type of float
+typedef std::pair<index_time_t, float> timed_float_t;
+typedef std::vector<timed_float_t>  timed_float_vec_t;
+typedef std::pair<std::string, timed_float_vec_t> namedTrackOffloat_t;
+typedef std::vector<namedTrackOffloat_t>  vectorOfnamedTrackOffloat_t;
+typedef std::vector<vectorOfnamedTrackOffloat_t>  vectorOfVectorOfnamedTrackOffloat_t;
+
 // track of timed result type of cv::Mat
 typedef std::pair<index_time_t, cv::Mat> timed_mat_t;
 typedef std::vector<timed_mat_t>  timed_mat_vec_t;
@@ -41,6 +49,32 @@ typedef std::pair<std::string, timed_mat_vec_t> namedTrackOfmat_t;
 typedef std::vector<namedTrackOfmat_t>  vectorOfnamedTrackOfmat_t;
 typedef std::vector<vectorOfnamedTrackOfmat_t>  vectorOfVectorOfnamedTrackOfmat_t;
 
+
+/*
+ namedTrackOfdouble_t : first name, second a vector of timed_double_t (index_t, double)
+ index_t is int64_t and time_spec_t
+ */
+template<typename T>
+void domainFromPairedTracks_D (const namedTrackOfdouble_t& src, std::vector<T>& times, std::vector<T>& values){
+    
+    const timed_double_vec_t& data = src.second;
+    
+    const auto get_second = [](auto const& pair) -> auto const& { return pair.second; };
+    
+    // Get the values
+    std::transform(std::begin(data), std::end(data),
+                   std::back_inserter(values),
+                   get_second);
+    
+    // Get the domain -- timestamp
+    const auto get_first = [](auto const& pair) -> auto const& { return pair.first.first; };
+    
+    // Get the times in milliseconds
+    // Get the values
+    std::transform(std::begin(data), std::end(data),
+                   std::back_inserter(times),
+                   get_first);
+}
 
 // *****************
 // *                *
@@ -58,6 +92,8 @@ typedef std::vector<vectorOfnamedTrackOfmat_t>  vectorOfVectorOfnamedTrackOfmat_
 // bool is_ready(std::future<R> const& f)
 
 typedef std::future<std::shared_ptr<std::vector<namedTrackOfdouble_t>>> async_vectorOfnamedTrackOfdouble_t;
+typedef std::future<std::shared_ptr<std::vector<namedTrackOffloat_t>>> async_vectorOfnamedTrackOffloat_t;
+
 typedef std::future<std::shared_ptr<std::vector<namedTrackOfmat_t>>> async_vectorOfnamedTrackOfmat_t;
 
 template<typename R>

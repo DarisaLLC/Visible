@@ -10,7 +10,7 @@
 #include <sstream>
 #include <typeindex>
 #include <map>
-#include "async_producer.h"
+#include "async_tracks.h"
 #include "core/signaler.h"
 #include "vision/opencv_utils.hpp"
 #include "getLuminanceAlgo.hpp"
@@ -274,6 +274,33 @@ private:
     std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;
 };
 
+#if 0
+/*
+ namedTrackOfdouble_t : first name, second a vector of timed_double_t (index_t, double)
+ index_t is int64_t and time_spec_t
+ */
+template<typename T>
+void domainFromPairedTracks_D (const namedTrackOfdouble_t& src, std::vector<T>& times, std::vector<T>& values){
+    
+    const timed_double_vec_t& data = src.second;
+    
+    const auto get_second = [](auto const& pair) -> auto const& { return pair.second; };
+    
+    // Get the values
+    std::transform(std::begin(data), std::end(data),
+                   std::back_inserter(values),
+                   get_second);
+    
+    // Get the domain -- timestamp
+    const auto get_first = [](auto const& pair) -> auto const& { return pair.first.first; };
+    
+    // Get the times in milliseconds
+    // Get the values
+    std::transform(std::begin(data), std::end(data),
+                   std::back_inserter(times),
+                   get_first);
+}
+#endif
 
     
 #endif

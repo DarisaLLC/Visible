@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <future>
 #include <mutex>
-#include "async_producer.h"
+#include "async_tracks.h"
 #include "cinder_xchg.hpp"
 #include "visible_layout.hpp"
 #include "vision/opencv_utils.hpp"
@@ -45,6 +45,7 @@
 #include "gui_handler.hpp"
 #include "gui_base.hpp"
 #include <boost/any.hpp>
+#include "imGuiPlotter.hpp"
 
 using namespace ci;
 using namespace ci::app;
@@ -878,6 +879,7 @@ void lifContext::process_async (){
  *
  ************************/
 
+
 void  lifContext::SetupGUIVariables() {}
 
 void  lifContext::DrawGUI(){
@@ -886,21 +888,32 @@ void  lifContext::DrawGUI(){
         loop_no_loop_button();
     }
     
-    if (ImGui::TreeNode("Tabbing"))
     {
-        ImGui::Text("Use TAB/SHIFT+TAB to cycle through keyboard editable fields.");
-        static char buf[32] = "dummy";
-        ImGui::InputText("1", buf, IM_ARRAYSIZE(buf));
-        ImGui::InputText("2", buf, IM_ARRAYSIZE(buf));
-        ImGui::InputText("3", buf, IM_ARRAYSIZE(buf));
-        ImGui::PushAllowKeyboardFocus(false);
-        ImGui::InputText("4 (tab skip)", buf, IM_ARRAYSIZE(buf));
-        //ImGui::SameLine(); ShowHelperMarker("Use ImGui::PushAllowKeyboardFocus(bool)\nto disable tabbing through certain widgets.");
-        ImGui::PopAllowKeyboardFocus();
-        ImGui::InputText("5", buf, IM_ARRAYSIZE(buf));
-        ImGui::TreePop();
+        // If Plots are ready, set them up
+        // It is ready only for new data
+        if ( is_ready (m_async_luminance_tracks) )
+            m_trackWeakRef = m_async_luminance_tracks.get();
+        if ( is_ready (m_async_pci_tracks))
+            m_pci_trackWeakRef = m_async_pci_tracks.get();
+        
+        if (! m_trackWeakRef.expired())
+        {
+            assert(channel_count() >= 3);
+            auto tracksRef = m_trackWeakRef.lock();
+          
+            
+            m_plots[0]->load(tracksRef->at(0));
+            m_plots[1]->load(tracksRef->at(1));
+        }
+        if ( ! m_pci_trackWeakRef.expired())
+        {
+            auto tracksRef = m_pci_trackWeakRef.lock();
+            m_plots[channel_count()-1]->load(tracksRef->at(0));
+        }
+        
     }
-
+    
+    
     {
         if (ImGui::Begin("Settings", &m_showGUI)) {
          

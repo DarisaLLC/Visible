@@ -65,6 +65,11 @@ public:
         return this->_full_secs + this->_frac_secs;
     }
     
+    unsigned int milliseconds(void) const
+    {
+        return (this->_full_secs + this->_frac_secs) * 1000;
+    }
+    
     time_t get_full_secs(void) const
     {
         return this->_full_secs;
