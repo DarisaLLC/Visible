@@ -74,8 +74,8 @@ TEST (ut_liffile, browser_single_channel_basic)
     
     BOOST_FOREACH(const lif_serie_data& si, lb_ref->get_all_series ()){
         /// Show in a window
-        namedWindow(si.name, CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
-        imshow(si.name, si.poster);
+        namedWindow(si.name(), CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+        imshow(si.name(), si.poster());
         cv::waitKey(30.0);
     }
     
@@ -85,7 +85,7 @@ TEST (ut_lifFile, single_channel)
     std::string filename ("Sample1.lif");
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
     EXPECT_TRUE(res.second);
-    lifIO::LifReader lif(res.first.string());
+    lifIO::LifReader lif(res.first.string(), "");
     cout << "LIF version "<<lif.getVersion() << endl;
     EXPECT_EQ(14, lif.getNbSeries() );
     size_t serie = 0;
@@ -127,7 +127,7 @@ TEST (ut_lifFile, triple_channel)
     std::string filename ("3channels.lif");
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
     EXPECT_TRUE(res.second);
-    lifIO::LifReader lif(res.first.string());
+    lifIO::LifReader lif(res.first.string(), "");
     cout << "LIF version "<<lif.getVersion() << endl;
     EXPECT_EQ(13, lif.getNbSeries() );
     size_t serie = 0;

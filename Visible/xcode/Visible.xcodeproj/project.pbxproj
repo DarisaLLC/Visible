@@ -53,12 +53,101 @@
 		C2398A0E21DD8D3100B180A0 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C2398A0F21DD8D3600B180A0 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2398A1021DD8D3600B180A0 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
+		C2398A1321DD949800B180A0 /* imGuiPlotter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A1121DD949800B180A0 /* imGuiPlotter.cpp */; };
+		C2398A1421DD949800B180A0 /* imGuiPlotter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A1121DD949800B180A0 /* imGuiPlotter.cpp */; };
+		C2398A1521DE980C00B180A0 /* CinderImGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCF08216F0CF10080462D /* CinderImGui.cpp */; };
+		C2398A1621DE980C00B180A0 /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFD216E79590080462D /* imgui_demo.cpp */; };
+		C2398A1721DE980C00B180A0 /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
+		C2398A1821DE980C00B180A0 /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
+		C2398A1921DE980C00B180A0 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
+		C2398A1A21DF196100B180A0 /* imGuiPlotter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A1121DD949800B180A0 /* imGuiPlotter.cpp */; };
+		C2398A2921DF224B00B180A0 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
+		C2398A2A21DF224B00B180A0 /* appstore.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2177BDD215E04FB003E6C3E /* appstore.xcconfig */; };
+		C2398A2B21DF224B00B180A0 /* cp-visible_release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */; };
+		C2398A2C21DF224B00B180A0 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
+		C2398A2D21DF224B00B180A0 /* cp-visible-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */; };
+		C2398A2E21DF224B00B180A0 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
+		C2398A2F21DF224B00B180A0 /* Visible.icns in Resources */ = {isa = PBXBuildFile; fileRef = C264F94B215F0B6D00AF3130 /* Visible.icns */; };
+		C2398A3021DF224B00B180A0 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
+		C2398A3221DF224B00B180A0 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
+		C2398A3321DF224B00B180A0 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
+		C2398A3421DF224B00B180A0 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
+		C2398A3521DF224B00B180A0 /* contraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction.cpp */; };
+		C2398A3621DF224B00B180A0 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
+		C2398A3721DF224B00B180A0 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
+		C2398A3821DF224B00B180A0 /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
+		C2398A3921DF224B00B180A0 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
+		C2398A3A21DF224B00B180A0 /* Swatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */; };
+		C2398A3B21DF224B00B180A0 /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
+		C2398A3C21DF224B00B180A0 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
+		C2398A3E21DF224B00B180A0 /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
+		C2398A3F21DF224B00B180A0 /* seq_frame_container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* seq_frame_container.cpp */; };
+		C2398A4021DF224B00B180A0 /* Plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611B1F66E95B0069F665 /* Plist.cpp */; };
+		C2398A4121DF224B00B180A0 /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
+		C2398A4221DF224B00B180A0 /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
+		C2398A4321DF224B00B180A0 /* ObjectContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C25261031F6611A10069F665 /* ObjectContainer.cpp */; };
+		C2398A4421DF224B00B180A0 /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611F1F66EA910069F665 /* pugixml.cpp */; };
+		C2398A4521DF224B00B180A0 /* lineseg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696B1CED3E2C0045FF57 /* lineseg.cpp */; };
+		C2398A4621DF224B00B180A0 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
+		C2398A4721DF224B00B180A0 /* visible_lif_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */; };
+		C2398A4821DF224B00B180A0 /* visible_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946761CE4DC7100976025 /* visible_impl.cpp */; };
+		C2398A4921DF224B00B180A0 /* histo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069681CED3E2C0045FF57 /* histo.cpp */; };
+		C2398A4A21DF224B00B180A0 /* Item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0D2148709300A5D3D6 /* Item.cpp */; };
+		C2398A4B21DF224B00B180A0 /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
+		C2398A4C21DF224B00B180A0 /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
+		C2398A4D21DF224B00B180A0 /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
+		C2398A4E21DF224B00B180A0 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
+		C2398A4F21DF224B00B180A0 /* ip_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069691CED3E2C0045FF57 /* ip_utils.cpp */; };
+		C2398A5021DF224B00B180A0 /* window.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7E217FDA6600FA9F43 /* window.cc */; };
+		C2398A5121DF224B00B180A0 /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
+		C2398A5221DF224B00B180A0 /* rowfunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069701CED3E2C0045FF57 /* rowfunc.cpp */; };
+		C2398A5321DF224B00B180A0 /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
+		C2398A5421DF224B00B180A0 /* sg_filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24EA2D2207F07EF00555D16 /* sg_filter.cpp */; };
+		C2398A5521DF224B00B180A0 /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
+		C2398A5621DF224B00B180A0 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
+		C2398A5721DF224B00B180A0 /* figure.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7D217FDA6600FA9F43 /* figure.cc */; };
+		C2398A5821DF224B00B180A0 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
+		C2398A5921DF224B00B180A0 /* labelconnect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696A1CED3E2C0045FF57 /* labelconnect.cpp */; };
+		C2398A5A21DF224B00B180A0 /* registration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696F1CED3E2C0045FF57 /* registration.cpp */; };
+		C2398A5B21DF224B00B180A0 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
+		C2398A5C21DF224B00B180A0 /* CinderImGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCF08216F0CF10080462D /* CinderImGui.cpp */; };
+		C2398A5D21DF224B00B180A0 /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
+		C2398A5E21DF224B00B180A0 /* imGuiPlotter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A1121DD949800B180A0 /* imGuiPlotter.cpp */; };
+		C2398A5F21DF224B00B180A0 /* exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBE1CF277130074C47A /* exception.cpp */; };
+		C2398A6021DF224B00B180A0 /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
+		C2398A6121DF224B00B180A0 /* PlistDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611E1F66EA910069F665 /* PlistDate.cpp */; };
+		C2398A6221DF224B00B180A0 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
+		C2398A6321DF224B00B180A0 /* DisplayObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C25261021F6611A10069F665 /* DisplayObject.cpp */; };
+		C2398A6421DF224B00B180A0 /* color.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7B217FDA6600FA9F43 /* color.cc */; };
+		C2398A6521DF224B00B180A0 /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBF1CF277130074C47A /* self_similarity.cpp */; };
+		C2398A6621DF224B00B180A0 /* directoryPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946691CE4DC7100976025 /* directoryPlayer.cpp */; };
+		C2398A6721DF224B00B180A0 /* TimeSeriesPlotUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* TimeSeriesPlotUtils.cpp */; };
+		C2398A6821DF224B00B180A0 /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
+		C2398A6921DF224B00B180A0 /* matpixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696D1CED3E2C0045FF57 /* matpixel.cpp */; };
+		C2398A6A21DF224B00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
+		C2398A6B21DF224B00B180A0 /* highgui.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7F217FDA6600FA9F43 /* highgui.cc */; };
+		C2398A6D21DF224B00B180A0 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995581B128DF400A5C623 /* IOKit.framework */; };
+		C2398A6E21DF224B00B180A0 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
+		C2398A6F21DF224B00B180A0 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C276ECA81C72B5D900242CDB /* CoreGraphics.framework */; };
+		C2398A7021DF224B00B180A0 /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995591B128DF400A5C623 /* IOSurface.framework */; };
+		C2398A7121DF224B00B180A0 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731819953389008149E2 /* AVFoundation.framework */; };
+		C2398A7221DF224B00B180A0 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731919953389008149E2 /* CoreMedia.framework */; };
+		C2398A7321DF224B00B180A0 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784AF0FF439BC000DE1D7 /* Accelerate.framework */; };
+		C2398A7421DF224B00B180A0 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */; };
+		C2398A7521DF224B00B180A0 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B10FF439BC000DE1D7 /* AudioUnit.framework */; };
+		C2398A7621DF224B00B180A0 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B20FF439BC000DE1D7 /* CoreAudio.framework */; };
+		C2398A7721DF224B00B180A0 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
+		C2398A7821DF224B00B180A0 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0091D8F80E81B9330029341E /* OpenGL.framework */; };
+		C2398A7921DF224B00B180A0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		C2398A8021DF227000B180A0 /* ut_gui_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */; };
+		C2398A8121DF239700B180A0 /* VisibleRunApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946771CE4DC7100976025 /* VisibleRunApp.cpp */; };
 		C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */; };
 		C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
 		C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
 		C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
 		C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
 		C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
+		C240F9FB21E14C8900FBA228 /* sscli-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C240F9FA21E14C8900FBA228 /* sscli-Info.plist */; };
 		C242CCC5217E76D8004F7867 /* contraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction.cpp */; };
 		C248DD2C1F64601A00FF72B1 /* TimeSeriesPlotUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* TimeSeriesPlotUtils.cpp */; };
 		C24C0958214B2F4D004C8002 /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */; };
@@ -221,7 +310,6 @@
 		C26F5FF321B0AA6D00EAE156 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
 		C26F5FF521B0AA6D00EAE156 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0091D8F80E81B9330029341E /* OpenGL.framework */; };
 		C26F5FF721B0AA6D00EAE156 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		C26F5FFF21B0AA9D00EAE156 /* VisibleRunApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946771CE4DC7100976025 /* VisibleRunApp.cpp */; };
 		C27221161D1C912E008EF8B2 /* histo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069681CED3E2C0045FF57 /* histo.cpp */; };
 		C276EC961C72B26300242CDB /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784AF0FF439BC000DE1D7 /* Accelerate.framework */; };
 		C276EC971C72B26300242CDB /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */; };
@@ -392,6 +480,12 @@
 		C2239AB721922F72007558AB /* cardiomyocyte_model_detail.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model_detail.hpp; sourceTree = "<group>"; };
 		C2309DC61F6B4D6500A0E908 /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../externals/Cinder/lib/macosx/Release/libcinder.a; sourceTree = SOURCE_ROOT; };
 		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
+		C2398A1121DD949800B180A0 /* imGuiPlotter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imGuiPlotter.cpp; path = ../include/imGuiPlotter.cpp; sourceTree = "<group>"; };
+		C2398A1221DD949800B180A0 /* imGuiPlotter.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = imGuiPlotter.hpp; path = ../include/imGuiPlotter.hpp; sourceTree = "<group>"; };
+		C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ut_gui_main.cpp; path = ../test/ut_gui_main.cpp; sourceTree = "<group>"; };
+		C2398A2221DF222F00B180A0 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		C2398A7E21DF224B00B180A0 /* VisibleTestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VisibleTestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleTestApp-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleTestApp-Info.plist"; sourceTree = "<absolute>"; };
 		C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_lif_impl.cpp; path = ../src/visible_lif_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C23D0F481E2982690049ADDB /* lifFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = lifFile.hpp; sourceTree = "<group>"; };
 		C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lifFile.cpp; sourceTree = "<group>"; };
@@ -399,6 +493,7 @@
 		C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../local/tinyxml/tinyxml.cpp; sourceTree = "<group>"; };
 		C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../local/tinyxml/tinyxmlerror.cpp; sourceTree = "<group>"; };
 		C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
+		C240F9FA21E14C8900FBA228 /* sscli-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "sscli-Info.plist"; sourceTree = "<group>"; };
 		C241BBAA1FB11B51000DE36E /* algo_Lif.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = algo_Lif.hpp; path = ../include/algo_Lif.hpp; sourceTree = "<group>"; };
 		C242CCC4217BD30A004F7867 /* ut_units.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ut_units.hpp; sourceTree = "<group>"; };
 		C242CCC6217E93FC004F7867 /* ut_cardio.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_cardio.hpp; sourceTree = "<group>"; };
@@ -418,7 +513,7 @@
 		C24CD88E1CEA91910008C72B /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = ../../svl/local/gtest/lib/Release/libgtest.a; sourceTree = "<group>"; };
 		C24EA2D1207F07D100555D16 /* sg_filter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sg_filter.h; path = ../include/sg_filter.h; sourceTree = "<group>"; };
 		C24EA2D2207F07EF00555D16 /* sg_filter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sg_filter.cpp; path = ../src/sg_filter.cpp; sourceTree = "<group>"; };
-		C24FC84C1E5E40130071AA1A /* async_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = async_producer.h; path = ../include/async_producer.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		C24FC84C1E5E40130071AA1A /* async_tracks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = async_tracks.h; path = ../include/async_tracks.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		C24FC84D1E5E56960071AA1A /* roiMultiWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = roiMultiWindow.h; sourceTree = "<group>"; };
 		C25261021F6611A10069F665 /* DisplayObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DisplayObject.cpp; path = ../src/rph/DisplayObject.cpp; sourceTree = "<group>"; };
 		C25261031F6611A10069F665 /* ObjectContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ObjectContainer.cpp; path = ../src/rph/ObjectContainer.cpp; sourceTree = "<group>"; };
@@ -548,7 +643,6 @@
 		C2600A161CED3E010045FF57 /* sparsehist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sparsehist.h; sourceTree = "<group>"; };
 		C2600A171CED3E010045FF57 /* ss_segmenter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ss_segmenter.hpp; sourceTree = "<group>"; };
 		C2601BB41E674F88004415A3 /* visible_layout.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = visible_layout.hpp; path = ../include/visible_layout.hpp; sourceTree = "<group>"; };
-		C2601BB51E68F1CC004415A3 /* ut_algo.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_algo.hpp; sourceTree = "<group>"; };
 		C2601BB61E6903D2004415A3 /* bitvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bitvector.h; sourceTree = "<group>"; };
 		C2601BB71E690409004415A3 /* bitvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bitvector.cpp; sourceTree = "<group>"; };
 		C2601BBA1E6B41F4004415A3 /* ut_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_util.hpp; sourceTree = "<group>"; };
@@ -619,7 +713,7 @@
 		C26A054E1E77620C00BDC954 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		C26A05531E77629500BDC954 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		C26F5FFD21B0AA6D00EAE156 /* VisibleRun.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VisibleRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C26F5FFE21B0AA6F00EAE156 /* Visible copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Visible copy2-Info.plist"; path = "/Users/arman/dev/Visible/xcode/Visible copy2-Info.plist"; sourceTree = "<absolute>"; };
+		C26F5FFE21B0AA6F00EAE156 /* VisibleRunner-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleRunner-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleRunner-Info.plist"; sourceTree = "<absolute>"; };
 		C276EC841C72988200242CDB /* cp-visible_release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "cp-visible_release.xcconfig"; path = "configs/cp-visible_release.xcconfig"; sourceTree = "<group>"; };
 		C276ECA81C72B5D900242CDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		C2820F23217523A700DFA7A6 /* configHandler.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = configHandler.hpp; path = ../include/configHandler.hpp; sourceTree = "<group>"; };
@@ -699,6 +793,26 @@
 				C276EC9D1C72B26300242CDB /* Carbon.framework in Frameworks */,
 				C276EC9E1C72B26300242CDB /* OpenGL.framework in Frameworks */,
 				C276EC9F1C72B26300242CDB /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C2398A6C21DF224B00B180A0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C2398A6D21DF224B00B180A0 /* IOKit.framework in Frameworks */,
+				C2398A6E21DF224B00B180A0 /* OpenCL.framework in Frameworks */,
+				C2398A6F21DF224B00B180A0 /* CoreGraphics.framework in Frameworks */,
+				C2398A7021DF224B00B180A0 /* IOSurface.framework in Frameworks */,
+				C2398A7121DF224B00B180A0 /* AVFoundation.framework in Frameworks */,
+				C2398A7221DF224B00B180A0 /* CoreMedia.framework in Frameworks */,
+				C2398A7321DF224B00B180A0 /* Accelerate.framework in Frameworks */,
+				C2398A7421DF224B00B180A0 /* AudioToolbox.framework in Frameworks */,
+				C2398A7521DF224B00B180A0 /* AudioUnit.framework in Frameworks */,
+				C2398A7621DF224B00B180A0 /* CoreAudio.framework in Frameworks */,
+				C2398A7721DF224B00B180A0 /* CoreVideo.framework in Frameworks */,
+				C2398A7821DF224B00B180A0 /* OpenGL.framework in Frameworks */,
+				C2398A7921DF224B00B180A0 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -784,6 +898,7 @@
 		080E96DDFE201D6D7F000001 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C2398A1121DD949800B180A0 /* imGuiPlotter.cpp */,
 				C2203D6421CAFFD9003F2F33 /* logger.cpp */,
 				C2820F3121752BF600DFA7A6 /* gui_handler.cpp */,
 				C2EF8D0D2148709300A5D3D6 /* Item.cpp */,
@@ -825,6 +940,7 @@
 				C24CD87C1CEA5B1B0008C72B /* VisibleGtest */,
 				C26A053A1E771CCF00BDC954 /* sscli */,
 				C26F5FFD21B0AA6D00EAE156 /* VisibleRun.app */,
+				C2398A7E21DF224B00B180A0 /* VisibleTestApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -832,19 +948,22 @@
 		29B97314FDCFA39411CA2CEA /* QuickTimeIteration */ = {
 			isa = PBXGroup;
 			children = (
-				C294B11F2152D22C00C916B1 /* Media.xcassets */,
 				C2175DD22150B779004315C0 /* Visible.entitlements */,
 				C260099A1CED3E010045FF57 /* svl */,
 				C21946B11CE4EA6100976025 /* include */,
 				C21946891CE4DC9700976025 /* xconfs */,
 				080E96DDFE201D6D7F000001 /* src */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				C240F9F921E1466D00FBA228 /* VisibleTestApp */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				C24CD87D1CEA5B1B0008C72B /* VisibleGtest */,
 				C26A053B1E771CCF00BDC954 /* sscli */,
+				C2398A2121DF222F00B180A0 /* VisibleTestApp */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
-				C26F5FFE21B0AA6F00EAE156 /* Visible copy2-Info.plist */,
+				C26F5FFE21B0AA6F00EAE156 /* VisibleRunner-Info.plist */,
+				C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */,
+				C240F9FA21E14C8900FBA228 /* sscli-Info.plist */,
 			);
 			name = QuickTimeIteration;
 			sourceTree = "<group>";
@@ -862,6 +981,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C294B11F2152D22C00C916B1 /* Media.xcassets */,
 				C2820F2D217527EE00DFA7A6 /* Config */,
 				C264F94B215F0B6D00AF3130 /* Visible.icns */,
 				C2175DD8215154A9004315C0 /* swatchLarge.png */,
@@ -969,6 +1089,7 @@
 			children = (
 				C2B87C9721CEE27500C91E35 /* visible_cli.hpp */,
 				C2820F3721754C3100DFA7A6 /* imGuiLogger.hpp */,
+				C2398A1221DD949800B180A0 /* imGuiPlotter.hpp */,
 				C2B87C9821D008AC00C91E35 /* visible_logger_macro.h */,
 				C2820F3321752C1100DFA7A6 /* gui_base.hpp */,
 				C2820F3421752C1100DFA7A6 /* gui_handler.hpp */,
@@ -1003,7 +1124,7 @@
 				C21946931CE4EA4900976025 /* grabber.h */,
 				C21946941CE4EA4900976025 /* graph1d.hpp */,
 				C21946961CE4EA4900976025 /* InteractiveObject.h */,
-				C24FC84C1E5E40130071AA1A /* async_producer.h */,
+				C24FC84C1E5E40130071AA1A /* async_tracks.h */,
 				C2601BBC1E6B5A60004415A3 /* algo_registry.hpp */,
 				C213607821647E4A00F794AB /* cached_results.hpp */,
 				C241BBAA1FB11B51000DE36E /* algo_Lif.hpp */,
@@ -1028,12 +1149,28 @@
 			name = include;
 			sourceTree = "<group>";
 		};
+		C2398A2121DF222F00B180A0 /* VisibleTestApp */ = {
+			isa = PBXGroup;
+			children = (
+				C2398A2221DF222F00B180A0 /* main.cpp */,
+			);
+			path = VisibleTestApp;
+			sourceTree = "<group>";
+		};
 		C23D0F491E29826F0049ADDB /* otherIO */ = {
 			isa = PBXGroup;
 			children = (
 				C23D0F481E2982690049ADDB /* lifFile.hpp */,
 			);
 			path = otherIO;
+			sourceTree = "<group>";
+		};
+		C240F9F921E1466D00FBA228 /* VisibleTestApp */ = {
+			isa = PBXGroup;
+			children = (
+				C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */,
+			);
+			name = VisibleTestApp;
 			sourceTree = "<group>";
 		};
 		C24CB5942187D18200142667 /* time_series */ = {
@@ -1054,7 +1191,6 @@
 				C2EF8D2021498C8D00A5D3D6 /* ut_lif.hpp */,
 				C21FFE741CFE104600C97013 /* ut_sm.hpp */,
 				C2601BBA1E6B41F4004415A3 /* ut_util.hpp */,
-				C2601BB51E68F1CC004415A3 /* ut_algo.hpp */,
 				C24CD87E1CEA5B1B0008C72B /* main.cpp */,
 			);
 			name = VisibleGtest;
@@ -1493,6 +1629,25 @@
 			productReference = 8D1107320486CEB800E47090 /* Visible.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C2398A2721DF224B00B180A0 /* VisibleTestApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C2398A7B21DF224B00B180A0 /* Build configuration list for PBXNativeTarget "VisibleTestApp" */;
+			buildPhases = (
+				C2398A2821DF224B00B180A0 /* Resources */,
+				C2398A3121DF224B00B180A0 /* Sources */,
+				C2398A6C21DF224B00B180A0 /* Frameworks */,
+				C2398A7A21DF224B00B180A0 /* Build Number */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VisibleTestApp;
+			productInstallPath = "$(HOME)/Applications";
+			productName = QuickTimeIteration;
+			productReference = C2398A7E21DF224B00B180A0 /* VisibleTestApp.app */;
+			productType = "com.apple.product-type.application";
+		};
 		C24CD87B1CEA5B1B0008C72B /* VisibleGtest */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C24CD8821CEA5B1B0008C72B /* Build configuration list for PBXNativeTarget "VisibleGtest" */;
@@ -1563,6 +1718,10 @@
 							};
 						};
 					};
+					C2398A2721DF224B00B180A0 = {
+						DevelopmentTeam = W4F7HL2GN5;
+						ProvisioningStyle = Automatic;
+					};
 					C24CD87B1CEA5B1B0008C72B = {
 						CreatedOnToolsVersion = 7.3;
 						DevelopmentTeam = W4F7HL2GN5;
@@ -1598,6 +1757,7 @@
 				C26F5F9721B0AA6D00EAE156 /* VisibleRun */,
 				C24CD87B1CEA5B1B0008C72B /* VisibleGtest */,
 				C26A05391E771CCF00BDC954 /* sscli */,
+				C2398A2721DF224B00B180A0 /* VisibleTestApp */,
 			);
 		};
 /* End PBXProject section */
@@ -1611,10 +1771,26 @@
 				C2177BDE215E04FC003E6C3E /* appstore.xcconfig in Resources */,
 				C210F14A215AAC04002A82A3 /* cp-visible_release.xcconfig in Resources */,
 				C2175DDC215154EA004315C0 /* palette.png in Resources */,
+				C240F9FB21E14C8900FBA228 /* sscli-Info.plist in Resources */,
 				C210F14B215AAC09002A82A3 /* cp-visible-debug.xcconfig in Resources */,
 				C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */,
 				C264F94C215F0B6D00AF3130 /* Visible.icns in Resources */,
 				C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C2398A2821DF224B00B180A0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C2398A2921DF224B00B180A0 /* Visible.cfg in Resources */,
+				C2398A2A21DF224B00B180A0 /* appstore.xcconfig in Resources */,
+				C2398A2B21DF224B00B180A0 /* cp-visible_release.xcconfig in Resources */,
+				C2398A2C21DF224B00B180A0 /* palette.png in Resources */,
+				C2398A2D21DF224B00B180A0 /* cp-visible-debug.xcconfig in Resources */,
+				C2398A2E21DF224B00B180A0 /* swatchSmall.png in Resources */,
+				C2398A2F21DF224B00B180A0 /* Visible.icns in Resources */,
+				C2398A3021DF224B00B180A0 /* swatchLarge.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1636,6 +1812,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		C2398A7A21DF224B00B180A0 /* Build Number */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build Number";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#Update build number with number of git commits if in release mode\nbuildNumber=$(git rev-list HEAD | wc -l | tr -d ' ')\necho $buildNumber\n#if [ ${CONFIGURATION} == \"Release\" ]; then\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n#fi;\n";
+		};
 		C25261131F66D7BF0069F665 /* Build Number */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1715,6 +1905,7 @@
 				C2601BB91E69042B004415A3 /* bitvector.cpp in Sources */,
 				C20EDBC11CF277130074C47A /* exception.cpp in Sources */,
 				C2239AB4218B6270007558AB /* boost_literals.cpp in Sources */,
+				C2398A1321DD949800B180A0 /* imGuiPlotter.cpp in Sources */,
 				C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */,
 				C2AFCF00216E79590080462D /* imgui.cpp in Sources */,
 				C25261071F6611A10069F665 /* DisplayObject.cpp in Sources */,
@@ -1731,6 +1922,71 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C2398A3121DF224B00B180A0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C2398A3221DF224B00B180A0 /* core_support.cpp in Sources */,
+				C2398A3321DF224B00B180A0 /* gradient.cpp in Sources */,
+				C2398A3421DF224B00B180A0 /* gui_handler.cpp in Sources */,
+				C2398A3521DF224B00B180A0 /* contraction.cpp in Sources */,
+				C2398A3621DF224B00B180A0 /* hockey_etc_cocoa_wrappers.mm in Sources */,
+				C2398A3721DF224B00B180A0 /* opencv_utils.cpp in Sources */,
+				C2398A3821DF224B00B180A0 /* imgui_widgets.cpp in Sources */,
+				C2398A3921DF224B00B180A0 /* InteractiveObject.cpp in Sources */,
+				C2398A3A21DF224B00B180A0 /* Swatch.cpp in Sources */,
+				C2398A3B21DF224B00B180A0 /* time_spec.cpp in Sources */,
+				C2398A3C21DF224B00B180A0 /* logger.cpp in Sources */,
+				C2398A3E21DF224B00B180A0 /* algo_Lif.cpp in Sources */,
+				C2398A3F21DF224B00B180A0 /* seq_frame_container.cpp in Sources */,
+				C2398A4021DF224B00B180A0 /* Plist.cpp in Sources */,
+				C2398A4121DF224B00B180A0 /* tinyxmlparser.cpp in Sources */,
+				C2398A4221DF224B00B180A0 /* localvariance.cpp in Sources */,
+				C2398A4321DF224B00B180A0 /* ObjectContainer.cpp in Sources */,
+				C2398A4421DF224B00B180A0 /* pugixml.cpp in Sources */,
+				C2398A4521DF224B00B180A0 /* lineseg.cpp in Sources */,
+				C2398A4621DF224B00B180A0 /* cinder_support.cpp in Sources */,
+				C2398A4721DF224B00B180A0 /* visible_lif_impl.cpp in Sources */,
+				C2398A4821DF224B00B180A0 /* visible_impl.cpp in Sources */,
+				C2398A4921DF224B00B180A0 /* histo.cpp in Sources */,
+				C2398A4A21DF224B00B180A0 /* Item.cpp in Sources */,
+				C2398A4B21DF224B00B180A0 /* rand_support.cpp in Sources */,
+				C2398A4C21DF224B00B180A0 /* lifFile.cpp in Sources */,
+				C2398A4D21DF224B00B180A0 /* tinyxmlerror.cpp in Sources */,
+				C2398A4E21DF224B00B180A0 /* labelBlob.cpp in Sources */,
+				C2398A4F21DF224B00B180A0 /* ip_utils.cpp in Sources */,
+				C2398A5021DF224B00B180A0 /* window.cc in Sources */,
+				C2398A5121DF224B00B180A0 /* imgui_draw.cpp in Sources */,
+				C2398A8021DF227000B180A0 /* ut_gui_main.cpp in Sources */,
+				C2398A5221DF224B00B180A0 /* rowfunc.cpp in Sources */,
+				C2398A5321DF224B00B180A0 /* csv.cpp in Sources */,
+				C2398A5421DF224B00B180A0 /* sg_filter.cpp in Sources */,
+				C2398A5521DF224B00B180A0 /* tinyxml.cpp in Sources */,
+				C2398A5621DF224B00B180A0 /* AVReader.mm in Sources */,
+				C2398A5721DF224B00B180A0 /* figure.cc in Sources */,
+				C2398A5821DF224B00B180A0 /* AVReaderWrapper.mm in Sources */,
+				C2398A5921DF224B00B180A0 /* labelconnect.cpp in Sources */,
+				C2398A5A21DF224B00B180A0 /* registration.cpp in Sources */,
+				C2398A5B21DF224B00B180A0 /* sm_producer.cpp in Sources */,
+				C2398A5C21DF224B00B180A0 /* CinderImGui.cpp in Sources */,
+				C2398A5D21DF224B00B180A0 /* bitvector.cpp in Sources */,
+				C2398A5E21DF224B00B180A0 /* imGuiPlotter.cpp in Sources */,
+				C2398A5F21DF224B00B180A0 /* exception.cpp in Sources */,
+				C2398A6021DF224B00B180A0 /* boost_literals.cpp in Sources */,
+				C2398A6121DF224B00B180A0 /* PlistDate.cpp in Sources */,
+				C2398A6221DF224B00B180A0 /* imgui.cpp in Sources */,
+				C2398A6321DF224B00B180A0 /* DisplayObject.cpp in Sources */,
+				C2398A6421DF224B00B180A0 /* color.cc in Sources */,
+				C2398A6521DF224B00B180A0 /* self_similarity.cpp in Sources */,
+				C2398A6621DF224B00B180A0 /* directoryPlayer.cpp in Sources */,
+				C2398A6721DF224B00B180A0 /* TimeSeriesPlotUtils.cpp in Sources */,
+				C2398A6821DF224B00B180A0 /* tinystr.cpp in Sources */,
+				C2398A6921DF224B00B180A0 /* matpixel.cpp in Sources */,
+				C2398A6A21DF224B00B180A0 /* file_system.cpp in Sources */,
+				C2398A6B21DF224B00B180A0 /* highgui.cc in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C24CD8781CEA5B1B0008C72B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1740,10 +1996,12 @@
 				C20BBC041E4E33D3002C7D68 /* tinyxml.cpp in Sources */,
 				C20BBC091E4E34F0002C7D68 /* InteractiveObject.cpp in Sources */,
 				C24EA2D4207F081000555D16 /* sg_filter.cpp in Sources */,
+				C2398A1921DE980C00B180A0 /* imgui.cpp in Sources */,
 				C27221161D1C912E008EF8B2 /* histo.cpp in Sources */,
 				C20EDBB71CEFC2E70074C47A /* rowfunc.cpp in Sources */,
 				C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */,
 				C21FFE721CFE0AA300C97013 /* sm_producer.cpp in Sources */,
+				C2398A1A21DF196100B180A0 /* imGuiPlotter.cpp in Sources */,
 				C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */,
 				C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
 				C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */,
@@ -1756,13 +2014,17 @@
 				C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */,
 				C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */,
+				C2398A1821DE980C00B180A0 /* imgui_widgets.cpp in Sources */,
 				C20EDBB61CEFC2D20074C47A /* registration.cpp in Sources */,
+				C2398A1521DE980C00B180A0 /* CinderImGui.cpp in Sources */,
+				C2398A1721DE980C00B180A0 /* imgui_draw.cpp in Sources */,
 				C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */,
 				C2677586212A325F00B5E080 /* contraction.cpp in Sources */,
 				C2601BB81E690409004415A3 /* bitvector.cpp in Sources */,
 				C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */,
 				C20EDBC81CF277740074C47A /* exception.cpp in Sources */,
 				C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */,
+				C2398A1621DE980C00B180A0 /* imgui_demo.cpp in Sources */,
 				C29DB077212B351200930CBD /* algo_Lif.cpp in Sources */,
 				C20EDBC61CF2776D0074C47A /* self_similarity.cpp in Sources */,
 				C2618F84217FDA8400FA9F43 /* color.cc in Sources */,
@@ -1820,7 +2082,6 @@
 				C26F5FAB21B0AA6D00EAE156 /* Swatch.cpp in Sources */,
 				C26F5FAD21B0AA6D00EAE156 /* time_spec.cpp in Sources */,
 				C2B87C9A21D012DA00C91E35 /* logger.cpp in Sources */,
-				C26F5FFF21B0AA9D00EAE156 /* VisibleRunApp.cpp in Sources */,
 				C26F5FAF21B0AA6D00EAE156 /* algo_Lif.cpp in Sources */,
 				C26F5FB021B0AA6D00EAE156 /* seq_frame_container.cpp in Sources */,
 				C26F5FB221B0AA6D00EAE156 /* Plist.cpp in Sources */,
@@ -1832,6 +2093,7 @@
 				C26F5FB921B0AA6D00EAE156 /* cinder_support.cpp in Sources */,
 				C26F5FBA21B0AA6D00EAE156 /* visible_lif_impl.cpp in Sources */,
 				C26F5FBC21B0AA6D00EAE156 /* visible_impl.cpp in Sources */,
+				C2398A8121DF239700B180A0 /* VisibleRunApp.cpp in Sources */,
 				C26F5FBD21B0AA6D00EAE156 /* histo.cpp in Sources */,
 				C26F5FBE21B0AA6D00EAE156 /* Item.cpp in Sources */,
 				C26F5FBF21B0AA6D00EAE156 /* rand_support.cpp in Sources */,
@@ -1853,6 +2115,7 @@
 				C26F5FCD21B0AA6D00EAE156 /* sm_producer.cpp in Sources */,
 				C26F5FCE21B0AA6D00EAE156 /* CinderImGui.cpp in Sources */,
 				C26F5FCF21B0AA6D00EAE156 /* bitvector.cpp in Sources */,
+				C2398A1421DD949800B180A0 /* imGuiPlotter.cpp in Sources */,
 				C26F5FD021B0AA6D00EAE156 /* exception.cpp in Sources */,
 				C26F5FD121B0AA6D00EAE156 /* boost_literals.cpp in Sources */,
 				C26F5FD221B0AA6D00EAE156 /* PlistDate.cpp in Sources */,
@@ -2116,6 +2379,191 @@
 			};
 			name = Release;
 		};
+		C2398A7C21DF224B00B180A0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = NO;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = W4F7HL2GN5;
+				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = NO;
+				ENABLE_ON_DEMAND_RESOURCES = NO;
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Visible_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
+				GCC_REUSE_STRINGS = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/include",
+					"$(LOCAL_BOOST)/include",
+					"$(LOCAL_IMGUI)",
+					/usr/local/include,
+					"$(LOCAL_CEREAL)",
+					"$(SRCROOT)/../projects/Visible/include/plistcpp",
+					"$(LOCAL_CINDER)/include",
+					"$(LOCAL_EIGEN)",
+					"$(LOCAL_TINYXML)",
+					"$(LOCAL_SPDLOG)/include",
+				);
+				INFOPLIST_FILE = "VisibletestApp-Info.plist";
+				INSTALL_PATH = /Applications;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					"$(LOCAL_BOOST)/lib",
+					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
+					/usr/local/Cellar/tbb/2018_U5/lib/,
+					"$(PROJECT_DIR)",
+					"/usr/local/opencv-3.4.3/build/3rdparty/lib/$(CONFIGURATION)",
+					"/usr/local/opencv-3.4.3/build/lib/$(CONFIGURATION)",
+					/usr/local/Cellar/libdc1394/2.2.2_1/lib,
+					/usr/local/Cellar/ffmpeg/4.0.2/lib,
+					/usr/local/Cellar/libconfig/1.7.2/lib,
+					/usr/local/Cellar/boost/1.67.0_1/lib,
+					/usr/local/Cellar/tbb/2018_U5/lib,
+				);
+				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				MACH_O_TYPE = mh_execute;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				OTHER_LDFLAGS = (
+					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_highgui.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_features2d.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_video.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_objdetect.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videostab.a",
+					"$(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libittnotify.a",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.VisibleTestApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				STRIP_INSTALLED_PRODUCT = NO;
+				USER_HEADER_SEARCH_PATHS = include;
+				VALID_ARCHS = "i386 x86_64";
+				VERSIONING_SYSTEM = "apple-generic";
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		C2398A7D21DF224B00B180A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = NO;
+				CURRENT_PROJECT_VERSION = 2;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = W4F7HL2GN5;
+				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = NO;
+				ENABLE_ON_DEMAND_RESOURCES = NO;
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_FAST_MATH = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Visible_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
+				GCC_REUSE_STRINGS = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/include",
+					"$(LOCAL_BOOST)/include",
+					"$(LOCAL_IMGUI)",
+					/usr/local/include,
+					"$(LOCAL_CEREAL)",
+					"$(SRCROOT)/../projects/Visible/include/plistcpp",
+					"$(LOCAL_CINDER)/include",
+					"$(LOCAL_EIGEN)",
+					"$(LOCAL_TINYXML)",
+					"$(LOCAL_SPDLOG)/include",
+				);
+				INFOPLIST_FILE = "VisibletestApp-Info.plist";
+				INSTALL_PATH = /Applications;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					"$(LOCAL_BOOST)/lib",
+					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
+					/usr/local/Cellar/tbb/2018_U5/lib/,
+					"$(PROJECT_DIR)",
+					"/usr/local/opencv-3.4.3/build/3rdparty/lib/$(CONFIGURATION)",
+					"/usr/local/opencv-3.4.3/build/lib/$(CONFIGURATION)",
+					/usr/local/Cellar/libdc1394/2.2.2_1/lib,
+					/usr/local/Cellar/ffmpeg/4.0.2/lib,
+					/usr/local/Cellar/libconfig/1.7.2/lib,
+					/usr/local/Cellar/boost/1.67.0_1/lib,
+					/usr/local/Cellar/tbb/2018_U5/lib,
+				);
+				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				MACH_O_TYPE = mh_execute;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				OTHER_LDFLAGS = (
+					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
+					"$(LOCAL_BOOST)/lib/libboost_system.a",
+					"$(LOCAL_BOOST)/lib/libboost_filesystem.a",
+					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
+					"$(LOCAL_BOOST)/lib/libboost_regex-mt.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_highgui.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_features2d.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_video.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_objdetect.a",
+					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videostab.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a",
+					"$(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libittnotify.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibpng.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libIlmImf.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibwebp.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjpeg-turbo.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libzlib.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjasper.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a",
+					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.VisibleTestApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				STRIP_INSTALLED_PRODUCT = YES;
+				USER_HEADER_SEARCH_PATHS = include;
+				VALID_ARCHS = "i386 x86_64";
+				VERSIONING_SYSTEM = "apple-generic";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
 		C24CD8801CEA5B1B0008C72B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
@@ -2159,6 +2607,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(LOCAL_BOOST)/include",
 					/usr/local/include,
+					"$(LOCAL_IMGUI)",
 					"$(LOCAL_CEREAL)",
 					"$(LOCAL_gtest)/include",
 					"$(LOCAL_CINDER)/include",
@@ -2170,7 +2619,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"/usr/local/opencv-3.4.3/build/lib/Release",
-					"$(SRCROOT)/local/boost/lib",
+					"$(LOCAL_BOOST)/lib",
 					"$(LOCAL_gtest)/lib/Debug",
 					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
 					"$(PROJECT_DIR)",
@@ -2206,6 +2655,7 @@
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjasper.a",
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a",
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a",
+					"$(LOCAL_BOOST)/lib/libboost_regex-mt.a",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2251,6 +2701,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(LOCAL_BOOST)/include",
 					/usr/local/include,
+					"$(LOCAL_IMGUI)",
 					"$(LOCAL_CEREAL)",
 					"$(LOCAL_gtest)/include",
 					"$(LOCAL_CINDER)/include",
@@ -2263,7 +2714,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"/usr/local/opencv-3.4.3/build/lib/Release",
 					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
-					"$(SRCROOT)/local/boost/lib",
+					"$(LOCAL_BOOST)/lib",
 					"$(LOCAL_gtest)/lib/Debug",
 					"$(PROJECT_DIR)",
 					/usr/local/lib,
@@ -2278,6 +2729,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
+					"$(LOCAL_BOOST)/lib/libboost_regex-mt.a",
 					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
 					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
@@ -2353,6 +2805,7 @@
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
 				);
+				INFOPLIST_FILE = "$(PROJECT_DIR)/sscli-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(LOCAL_CINDER)/lib/macosx",
 					"$(LOCAL_CINDER)/lib",
@@ -2380,6 +2833,7 @@
 					"$(LOCAL_BOOST)/lib/libboost_filesystem.a",
 					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.sscli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -2424,6 +2878,7 @@
 					"$(LOCAL_OCV)/include",
 					"$(LOCAL_EIGEN)",
 				);
+				INFOPLIST_FILE = "$(PROJECT_DIR)/sscli-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(LOCAL_CINDER)/lib/macosx",
 					"$(LOCAL_CINDER)/lib",
@@ -2450,6 +2905,7 @@
 					"$(LOCAL_BOOST)/lib/libboost_filesystem.a",
 					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.sscli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -2495,7 +2951,7 @@
 					"$(LOCAL_TINYXML)",
 					"$(LOCAL_SPDLOG)/include",
 				);
-				INFOPLIST_FILE = "Visible copy2-Info.plist";
+				INFOPLIST_FILE = "VisibleRunner-Info.plist";
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
@@ -2582,7 +3038,7 @@
 					"$(LOCAL_TINYXML)",
 					"$(LOCAL_SPDLOG)/include",
 				);
-				INFOPLIST_FILE = "Visible copy2-Info.plist";
+				INFOPLIST_FILE = "VisibleRunner-Info.plist";
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
@@ -2656,6 +3112,15 @@
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,
 				C01FCF5008A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C2398A7B21DF224B00B180A0 /* Build configuration list for PBXNativeTarget "VisibleTestApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C2398A7C21DF224B00B180A0 /* Debug */,
+				C2398A7D21DF224B00B180A0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

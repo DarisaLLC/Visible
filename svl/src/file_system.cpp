@@ -111,8 +111,8 @@ namespace svl {
          * @param path of destination directory
          */
         void copyDir(const bf::path &sourceDir, const bf::path &destinationDir){
-            
-            throw std::runtime_error("Source directory " + sourceDir.string() + " does not exist or is not a directory");
+             if (!bf::exists(sourceDir) || !bf::is_directory(sourceDir))
+                 throw std::runtime_error("Source directory " + sourceDir.string() + " does not exist or is not a directory");
             
             if (bf::exists(destinationDir)) {
                 throw std::runtime_error("Destination directory " + destinationDir.string() + " already exists");

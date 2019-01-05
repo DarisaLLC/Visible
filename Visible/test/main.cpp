@@ -8,6 +8,8 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
 
 #include <iostream>
 #include <chrono>
@@ -29,11 +31,12 @@
 #include "cinder_opencv.h"
 #include "algoFunctions.hpp"
 #include "ut_util.hpp"
-#include "ut_algo.hpp"
+#include "ut_gui.hpp"
 #include "getLuminanceAlgo.hpp"
 #include "core/csv.hpp"
 #include "core/kmeans1d.hpp"
 #include "core/stl_utils.hpp"
+#include "core/core.hpp"
 #include "contraction.hpp"
 #include "sm_producer.h"
 #include "algo_mov.hpp"
@@ -53,6 +56,10 @@
 #include "ut_cardio.hpp"
 #include "cvplot/cvplot.h"
 #include "time_series/persistence1d.hpp"
+#include "async_tracks.h"
+#include "CinderImGui.h"
+#include "imGuiPlotter.hpp"
+
 using namespace boost;
 
 using namespace ci;
@@ -60,6 +67,8 @@ using namespace ci::ip;
 using namespace spiritcsv;
 using namespace kmeans1D;
 using namespace stl_utils;
+using namespace std;
+using namespace svl;
 
 namespace fs = boost::filesystem;
 
@@ -85,7 +94,22 @@ SurfaceRef get_surface(const std::string & path){
     return sp;
 }
 
-#if 0
+
+void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
+{
+    vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
+    vector<double>::const_iterator top = std::max_element (src.begin (), src.end() );
+    
+    if (svl::equal(*top, *bot)) return;
+    double scaleBy = *top - *bot;
+    dst.resize (src.size ());
+    for (int ii = 0; ii < src.size (); ii++)
+        dst[ii] = (src[ii] - *bot) / scaleBy;
+}
+
+
+
+
 std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655, 39.0342,
     38.8791, 38.8527, 39.0099, 38.8608, 38.9188, 38.8499, 38.6693,
     38.2513, 37.9095, 37.3313, 36.765, 36.3621, 35.7261, 35.0656,
@@ -103,18 +127,50 @@ std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655,
     39.2749, 39.4703, 39.2846};
 
 
-
-void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
-{
-    vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
-    vector<double>::const_iterator top = std::max_element (src.begin (), src.end() );
+TEST(tracks, basic){
     
-    if (svl::equal(*top, *bot)) return;
-    double scaleBy = *top - *bot;
-    dst.resize (src.size ());
-    for (int ii = 0; ii < src.size (); ii++)
-        dst[ii] = (src[ii] - *bot) / scaleBy;
+    // Generate test data
+    namedTrackOfdouble_t ntrack;
+    timed_double_vec_t& data = ntrack.second;
+    data.resize(acid.size());
+    for (int tt = 0; tt < acid.size(); tt++){
+        data[tt].second = acid[tt];
+        data[tt].first.first = tt;
+        data[tt].first.second = time_spec_t(tt / 1000.0);
+    }
+    
+    std::vector<float> X, Y;
+    domainFromPairedTracks_D (ntrack, X, Y);
+    
+    EXPECT_EQ(X.size(), acid.size());
+    EXPECT_EQ(Y.size(), acid.size());
+    for(auto ii = 0; ii < acid.size(); ii++){
+        EXPECT_TRUE(svl::RealEq(Y[ii],(float)acid[ii]));
+    }
+    
+  
+  
+    
+    
 }
+
+#if 0
+std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655, 39.0342,
+    38.8791, 38.8527, 39.0099, 38.8608, 38.9188, 38.8499, 38.6693,
+    38.2513, 37.9095, 37.3313, 36.765, 36.3621, 35.7261, 35.0656,
+    34.2602, 33.2523, 32.3183, 31.6464, 31.0073, 29.8166, 29.3423,
+    28.5223, 27.5152, 26.8191, 26.3114, 25.8164, 25.0818, 24.7631,
+    24.6277, 24.8184, 25.443, 26.2479, 27.8759, 29.2094, 30.7956,
+    32.3586, 33.6268, 35.1586, 35.9315, 36.808, 37.3002, 37.67, 37.9986,
+    38.2788, 38.465, 38.5513, 38.6818, 38.8076, 38.9388, 38.9592,
+    39.058, 39.1322, 39.0803, 39.1779, 39.1531, 39.1375, 39.1978,
+    39.0379, 39.1231, 39.202, 39.1581, 39.1777, 39.2971, 39.2366,
+    39.1555, 39.2822, 39.243, 39.1807, 39.1488, 39.2491, 39.265, 39.198,
+    39.2855, 39.2595, 39.4274, 39.3258, 39.3162, 39.4143, 39.3034,
+    39.2099, 39.2775, 39.5042, 39.1446, 39.188, 39.2006, 39.1799,
+    39.4077, 39.2694, 39.1967, 39.2828, 39.2438, 39.2093, 39.2167,
+    39.2749, 39.4703, 39.2846};
+
 
 
 

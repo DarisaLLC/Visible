@@ -37,11 +37,7 @@ void VisibleRunApp::QuitApp(){
 void VisibleRunApp::SetupGUIVariables(){
     //Set up global preferences for the GUI
     //http://anttweakbar.sourceforge.net/doc/tools:anttweakbar:twbarparamsyntax
-    GetGUI().DefineGlobal("help = ' FaceOff 0.1.0 \n Jonathan Cole | Toni Kaplan'");
     GetGUI().DefineGlobal("iconalign=horizontal");
-    
-    params::InterfaceGlRef generalWindow = GetGUI().GetWindow("General Settings");
-    generalWindow->addParam("Stereo Convergence", &convergence).min(0).max(100).keyDecr("-").keyIncr("=");
 }
 
 void VisibleRunApp::DrawGUI(){
