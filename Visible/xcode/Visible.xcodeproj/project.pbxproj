@@ -148,6 +148,7 @@
 		C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
 		C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
 		C240F9FB21E14C8900FBA228 /* sscli-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C240F9FA21E14C8900FBA228 /* sscli-Info.plist */; };
+		C240FA0121E15B0B00FBA228 /* imguivariouscontrols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C240F9FC21E15AC900FBA228 /* imguivariouscontrols.cpp */; };
 		C242CCC5217E76D8004F7867 /* contraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction.cpp */; };
 		C248DD2C1F64601A00FF72B1 /* TimeSeriesPlotUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* TimeSeriesPlotUtils.cpp */; };
 		C24C0958214B2F4D004C8002 /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */; };
@@ -480,7 +481,7 @@
 		C2239AB721922F72007558AB /* cardiomyocyte_model_detail.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model_detail.hpp; sourceTree = "<group>"; };
 		C2309DC61F6B4D6500A0E908 /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../externals/Cinder/lib/macosx/Release/libcinder.a; sourceTree = SOURCE_ROOT; };
 		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
-		C2398A1121DD949800B180A0 /* imGuiPlotter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imGuiPlotter.cpp; path = ../include/imGuiPlotter.cpp; sourceTree = "<group>"; };
+		C2398A1121DD949800B180A0 /* imGuiPlotter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imGuiPlotter.cpp; path = ../src/imGuiPlotter.cpp; sourceTree = "<group>"; };
 		C2398A1221DD949800B180A0 /* imGuiPlotter.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = imGuiPlotter.hpp; path = ../include/imGuiPlotter.hpp; sourceTree = "<group>"; };
 		C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ut_gui_main.cpp; path = ../test/ut_gui_main.cpp; sourceTree = "<group>"; };
 		C2398A2221DF222F00B180A0 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -494,6 +495,8 @@
 		C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../local/tinyxml/tinyxmlerror.cpp; sourceTree = "<group>"; };
 		C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
 		C240F9FA21E14C8900FBA228 /* sscli-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "sscli-Info.plist"; sourceTree = "<group>"; };
+		C240F9FC21E15AC900FBA228 /* imguivariouscontrols.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imguivariouscontrols.cpp; path = ../src/imguivariouscontrols.cpp; sourceTree = "<group>"; };
+		C240F9FE21E15ADE00FBA228 /* imguivariouscontrols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imguivariouscontrols.h; path = ../include/imguivariouscontrols.h; sourceTree = "<group>"; };
 		C241BBAA1FB11B51000DE36E /* algo_Lif.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = algo_Lif.hpp; path = ../include/algo_Lif.hpp; sourceTree = "<group>"; };
 		C242CCC4217BD30A004F7867 /* ut_units.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ut_units.hpp; sourceTree = "<group>"; };
 		C242CCC6217E93FC004F7867 /* ut_cardio.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_cardio.hpp; sourceTree = "<group>"; };
@@ -898,6 +901,7 @@
 		080E96DDFE201D6D7F000001 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C240F9FC21E15AC900FBA228 /* imguivariouscontrols.cpp */,
 				C2398A1121DD949800B180A0 /* imGuiPlotter.cpp */,
 				C2203D6421CAFFD9003F2F33 /* logger.cpp */,
 				C2820F3121752BF600DFA7A6 /* gui_handler.cpp */,
@@ -1087,6 +1091,7 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C240F9FE21E15ADE00FBA228 /* imguivariouscontrols.h */,
 				C2B87C9721CEE27500C91E35 /* visible_cli.hpp */,
 				C2820F3721754C3100DFA7A6 /* imGuiLogger.hpp */,
 				C2398A1221DD949800B180A0 /* imGuiPlotter.hpp */,
@@ -1929,6 +1934,7 @@
 				C2398A3221DF224B00B180A0 /* core_support.cpp in Sources */,
 				C2398A3321DF224B00B180A0 /* gradient.cpp in Sources */,
 				C2398A3421DF224B00B180A0 /* gui_handler.cpp in Sources */,
+				C240FA0121E15B0B00FBA228 /* imguivariouscontrols.cpp in Sources */,
 				C2398A3521DF224B00B180A0 /* contraction.cpp in Sources */,
 				C2398A3621DF224B00B180A0 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C2398A3721DF224B00B180A0 /* opencv_utils.cpp in Sources */,
