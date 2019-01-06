@@ -36,20 +36,10 @@ std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655,
 #define TEST_APP_HEIGHT 960
 
 struct MultiplotData_F {
-    int mod;
-    size_t first;
-    size_t size;
-    const void* Y;
-    const void* X;
+    std::vector<float> Y;
+    std::vector<float> X;
 };
 
-template <typename T>
-struct HistoData {
-    int mod;
-    size_t first;
-    size_t size;
-    const T* points;
-};
 
 class VisibleTestApp : public App, public gui_base
 {
@@ -68,7 +58,7 @@ public:
      
          ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
         if(! tracks.empty()){
-            imGuiPlotLineTracks(" imGui Plot Test ", ImVec2(1280.0, 960.0), tracks);
+            imGuiPlotLineTracks(" imGui Plot Test ", ImVec2(getWindowWidth(),getWindowHeight()), tracks);
         }
     }
     virtual void QuitApp(){
@@ -158,7 +148,7 @@ private:
         std::vector<ImColor> colors;
         size_t metricSize = 0;
         float maxValue = std::numeric_limits<float>::lowest();
-        float minValue = 0;
+        float minValue = std::numeric_limits<float>::max();
         size_t maxDomain = std::numeric_limits<size_t>::lowest();
         size_t minDomain = std::numeric_limits<size_t>::max();
         
@@ -169,12 +159,9 @@ private:
             std::vector<float> values;
             domainFromPairedTracks_D(track,domain,values);
             MultiplotData_F data;
-            data.size = domain.size();
+            data.X = domain;
+            data.Y = values;
             metricSize = domain.size();
-            data.mod = (int) 1;
-            data.first = 0;
-            data.X = domain.data();
-            data.Y = values.data();
             auto minItr = std::min_element(domain.begin(), domain.end());
             auto maxItr = std::max_element(domain.begin(), domain.end());
             auto minValItr = std::min_element(values.begin(), values.end());
@@ -184,23 +171,17 @@ private:
             minDomain = std::min(minDomain, (size_t)(*minItr));
             maxDomain = std::max(maxDomain, (size_t)(*maxItr));
             userData.emplace_back(data);
+          //  userData.emplace_back(data); causes a crash why ?
         }
         for (size_t ui = 0; ui < userData.size(); ++ui) {
             metricsToDisplay.push_back(&(userData[ui]));
         }
         auto getterY = [](const void* hData, int idx) -> float {
             auto pData = reinterpret_cast<const MultiplotData_F*>(hData);
-            float val = static_cast<const float*>(pData->Y)[idx];
-            std::cout << val << std::endl;
+            float val = static_cast<const float*>(pData->Y.data())[idx];
             return val;
         };
-//        auto getterX = [](const void* hData, int idx) -> size_t {
-//            auto histoData = reinterpret_cast<const MultiplotData_F*>(hData);
-//            size_t pos = (histoData->first + static_cast<size_t>(idx)) % histoData->mod;
-//            //size_t pos = (static_cast<size_t>(idx)) % histoData->mod;
-//            assert(pos >= 0 && pos < 1024);
-//            return static_cast<const size_t*>(histoData->X)[pos];
-//        };
+
         
         
         //        void PlotMultiLines(
@@ -222,7 +203,7 @@ private:
                               metricsToDisplay.data(),
                               (int)metricSize,
                               minValue,
-                              maxValue * 1.2f,
+                              maxValue * 1.05,
                               canvasSize);
     }
     
