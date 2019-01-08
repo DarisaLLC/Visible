@@ -45,7 +45,7 @@
 #include "gui_handler.hpp"
 #include "gui_base.hpp"
 #include <boost/any.hpp>
-#include "imGuiPlotter.hpp"
+
 
 using namespace ci;
 using namespace ci::app;

@@ -80,6 +80,8 @@ TEST (ut_liffile, browser_single_channel_basic)
     }
     
 }
+
+
 TEST (ut_lifFile, single_channel)
 {
     std::string filename ("Sample1.lif");
@@ -117,10 +119,9 @@ TEST (ut_lifFile, single_channel)
     EXPECT_NEAR(h.median(), 114.0, 0.001);
     EXPECT_NEAR(h.min(), 44.0, 0.001);
     EXPECT_NEAR(h.max(), 255.0, 0.001);
-    
-    
-    
+
 }
+
 
 TEST (ut_lifFile, triple_channel)
 {
@@ -201,5 +202,6 @@ TEST (ut_lifFile, triple_channel)
         EXPECT_NEAR(h.mode(), 125.0, 0.001);
     }
 }
+
 
 #endif /* ut_lif_h */

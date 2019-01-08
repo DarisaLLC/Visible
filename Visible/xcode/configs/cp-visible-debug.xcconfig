@@ -8,7 +8,7 @@
 SRCROOT = $(PROJECT_DIR)/../../svl
 EXTERNALS = $(PROJECT_DIR)/../../svl/../externals
 
-TEST_DATA = $(SRCROOT)/Assets/test_data
+TEST_DATA = $(SRCROOT)/Assets
 
 VISIBLE_ROOT = SRCROOT = $(PROJECT_DIR)/../../Visible
 
@@ -17,7 +17,8 @@ LOCAL_CINDER = $(EXTERNALS)/cinder
 LOCAL_OCV = /usr/local/opencv-3.4.3
 LOCAL_CIMG = $(EXTERNALS)/CImg
 LOCAL_SPDLOG = $(EXTERNALS)/spdlog
-LOCAL_IMGUI = $(EXTERNALS)/imgui
+LOCAL_IMGUI = $(EXTERNALS)/docking-imgui/imgui
+//LOCAL_IMGUI = $(EXTERNALS)/imgui
 
 LOCAL_3rdParty = $(SRCROOT)/local
 LOCAL_BOOST = /usr/local/boost/1.67.0_1

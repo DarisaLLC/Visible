@@ -31,7 +31,6 @@
 #include "cinder_opencv.h"
 #include "algoFunctions.hpp"
 #include "ut_util.hpp"
-#include "ut_gui.hpp"
 #include "getLuminanceAlgo.hpp"
 #include "core/csv.hpp"
 #include "core/kmeans1d.hpp"
@@ -52,13 +51,17 @@
 #include <cereal/archives/binary.hpp>
 #include <fstream>
 #include "vision/opencv_utils.hpp"
-#include "ut_units.hpp"
-#include "ut_cardio.hpp"
+
 #include "cvplot/cvplot.h"
 #include "time_series/persistence1d.hpp"
 #include "async_tracks.h"
 #include "CinderImGui.h"
-#include "imGuiPlotter.hpp"
+#include "logger.hpp"
+
+
+// @FIXME Logger has to come before these
+#include "ut_units.hpp"
+#include "ut_cardio.hpp"
 
 using namespace boost;
 
@@ -126,6 +129,88 @@ std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655,
     39.4077, 39.2694, 39.1967, 39.2828, 39.2438, 39.2093, 39.2167,
     39.2749, 39.4703, 39.2846};
 
+void done_callback (void)
+{
+    std::cout << "Done"  << std::endl;
+}
+
+
+TEST (UT_AVReaderBasic, run)
+{
+    static bool check_done_val = false;
+    static int frame_count = 0;
+    const auto check_done = [] (){
+        check_done_val = true;
+    };
+    
+    // Note current implementation uses default callbacks for building timestamps
+    // and images. User supplied callbacks for replace the default ones.
+    const auto progress_report = [] (CMTime time) {
+        cm_time t(time); std::cout << frame_count << "  " << t << std::endl; frame_count++;
+    };
+    
+    boost::filesystem::path test_filepath;
+    
+    // vf does not support QuickTime natively. The ut expectes and checks for failure
+    static std::string qmov_name ("box-move.m4v");
+    
+    auto res = dgenv_ptr->asset_path(qmov_name);
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    
+    if (res.second)
+        test_filepath = res.first;
+    
+    {
+        check_done_val = false;
+        avcc::avReader rr (test_filepath.string(), false);
+        rr.setUserDoneCallBack(check_done);
+        rr.setUserProgressCallBack(progress_report);
+        rr.run ();
+
+        EXPECT_TRUE(rr.info().count == 30);
+        EXPECT_FALSE(rr.isEmpty());
+        tiny_media_info mif (rr.info());
+        mif.printout();
+        
+        std::this_thread::sleep_for(std::chrono::duration<double, std::milli> (2000));
+        EXPECT_TRUE(check_done_val);
+        EXPECT_TRUE(rr.isValid());
+        EXPECT_TRUE(rr.size().first == 57);
+        EXPECT_TRUE(rr.size().second == 57);
+        EXPECT_FALSE(rr.isEmpty());
+        
+        
+    }
+    
+}
+
+TEST(SimpleGUITest, basic)
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    
+    // Build atlas
+    unsigned char* tex_pixels = nullptr;
+    int tex_w, tex_h;
+    io.Fonts->GetTexDataAsRGBA32(&tex_pixels, &tex_w, &tex_h);
+    
+    for (int n = 0; n < 5000; n++) {
+        io.DisplaySize = ImVec2(1920, 1080);
+        io.DeltaTime = 1.0f / 60.0f;
+        ImGui::NewFrame();
+        
+        static float f = 0.0f;
+        ImGui::Text("Hello, world!");
+        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        
+        ImGui::Render();
+    }
+    
+    ImGui::DestroyContext();
+}
 
 TEST(tracks, basic){
     
@@ -147,31 +232,7 @@ TEST(tracks, basic){
     for(auto ii = 0; ii < acid.size(); ii++){
         EXPECT_TRUE(svl::RealEq(Y[ii],(float)acid[ii]));
     }
-    
-  
-  
-    
-    
 }
-
-#if 0
-std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655, 39.0342,
-    38.8791, 38.8527, 39.0099, 38.8608, 38.9188, 38.8499, 38.6693,
-    38.2513, 37.9095, 37.3313, 36.765, 36.3621, 35.7261, 35.0656,
-    34.2602, 33.2523, 32.3183, 31.6464, 31.0073, 29.8166, 29.3423,
-    28.5223, 27.5152, 26.8191, 26.3114, 25.8164, 25.0818, 24.7631,
-    24.6277, 24.8184, 25.443, 26.2479, 27.8759, 29.2094, 30.7956,
-    32.3586, 33.6268, 35.1586, 35.9315, 36.808, 37.3002, 37.67, 37.9986,
-    38.2788, 38.465, 38.5513, 38.6818, 38.8076, 38.9388, 38.9592,
-    39.058, 39.1322, 39.0803, 39.1779, 39.1531, 39.1375, 39.1978,
-    39.0379, 39.1231, 39.202, 39.1581, 39.1777, 39.2971, 39.2366,
-    39.1555, 39.2822, 39.243, 39.1807, 39.1488, 39.2491, 39.265, 39.198,
-    39.2855, 39.2595, 39.4274, 39.3258, 39.3162, 39.4143, 39.3034,
-    39.2099, 39.2775, 39.5042, 39.1446, 39.188, 39.2006, 39.1799,
-    39.4077, 39.2694, 39.1967, 39.2828, 39.2438, 39.2093, 39.2167,
-    39.2749, 39.4703, 39.2846};
-
-
 
 
 
@@ -654,11 +715,6 @@ TEST(basicU8, histo)
     EXPECT_EQ(hh.sumSquared(), 28); // 2 * 9 + 2 * 4 + 2 * 1
 }
 
-void done_callback (void)
-{
-        std::cout << "Done"  << std::endl;
-}
-
 
 
 TEST (UT_make_function, make_function)
@@ -836,41 +892,6 @@ TEST (UT_cm_timer, run)
 }
 
 
-TEST (UT_AVReaderBasic, run)
-{
-    boost::filesystem::path test_filepath;
-    avcc::avReader::progress_callback pcb;
-    
-    // vf does not support QuickTime natively. The ut expectes and checks for failure
-    static std::string qmov_name ("Bars.mov");
-    
-    auto res = dgenv_ptr->asset_path(qmov_name);
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    
-    if (res.second)
-        test_filepath = res.first;
-    
-    {
-        avcc::avReader rr (test_filepath.string(), false);
-        rr.setUserDoneCallBack(done_callback);
-        rr.run ();
-        EXPECT_TRUE(rr.info().count == 11);
-        EXPECT_FALSE(rr.isEmpty());
-        tiny_media_info mif (rr.info());
-        mif.printout();
-        
-        std::this_thread::sleep_for(std::chrono::duration<double, std::milli> (2000));
-        EXPECT_TRUE(rr.isValid());
-        EXPECT_TRUE(rr.size().first == 11);
-        EXPECT_TRUE(rr.size().second == 11);
-        EXPECT_FALSE(rr.isEmpty());
-        
-        
-    }
-    
-}
-
 
 
 
@@ -912,7 +933,7 @@ TEST (UT_QtimeCache, run)
 }
 
 
-#endif
+
 
 
 
@@ -923,9 +944,12 @@ TEST (UT_QtimeCache, run)
 
 int main(int argc, char ** argv)
 {
+    static std::string id("VGtest");
     std::shared_ptr<test_utils::genv>  shared_env (new test_utils::genv(argv[0]));
     shared_env->setUpFromArgs(argc, argv);
     dgenv_ptr = shared_env;
+    fs::path pp(argv[0]);
+    logging::setup_loggers (pp.parent_path().string(), id);
     testing::InitGoogleTest(&argc, argv);
     
     
