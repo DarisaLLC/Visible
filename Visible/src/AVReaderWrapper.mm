@@ -45,42 +45,34 @@ namespace anonymous
                             );
     }
     
-    void default_done_cb ()
-    {
-        avReader::m_done = 1;
-        avReader::m_cv.notify_all();
-        if(avReader::m_user_done_cb)
-            avReader::m_user_done_cb ();
-    }
-    
-    
-    void default_progress_cb (CMTime progress)
-    {
-        avReader::m_timestamps.push(progress);
-        //        std::cout << cm_time(progress)  << std::endl;
-    }
-    
-    void default_image_cb (CVPixelBufferRef cvp)
-    {
-        avReader::m_surfaces.push(anonymous::convertCVPixelBufferToSurface (cvp));
-        //        std::cout << avReader::m_surfaces.size() << std::endl;
-    }
+ 
 }
 
 namespace avcc
 {
     
-    avReader::progress_cb avReader::m_progress_cb;// = std::bind(anonymous::default_progress_cb, std::placeholders::_1);
-    avReader::image_cb avReader::m_image_cb;
-    avReader::done_cb avReader::m_done_cb;
-    avReader::done_cb avReader::m_user_done_cb;
-    std::mutex avReader::m_mu;
-    std::condition_variable avReader::m_cv;
-    int avReader::m_done;
+    void avReader::default_done_cb ()
+    {
+        m_done = 1;
+        m_cv.notify_all();
+        if(m_user_done_cb)
+            m_user_done_cb ();
+    }
     
-    shared_queue<Surface8uRef> avReader::m_surfaces;
-    shared_queue<cm_time> avReader::m_timestamps;
+    void  avReader::default_progress_cb (CMTime progress)
+    {
+        m_timestamps.push(progress);
+        if(m_user_progress_cb)
+            m_user_progress_cb(progress);
+    }
     
+    void  avReader::default_image_cb (CVPixelBufferRef cvp)
+    {
+        m_surfaces.push(anonymous::convertCVPixelBufferToSurface (cvp));
+        if(m_user_image_cb)
+            m_user_image_cb(cvp);
+    }
+  
     struct avReader_impl
     {
         AVReader* wrapped;
@@ -92,9 +84,9 @@ namespace avcc
     
     avReader::avReader(const std::string& file_path, bool andRun) : m_impl(new avReader_impl())
     {
-        setProgressCallBack(anonymous::default_progress_cb);
-        setImageCallBack(anonymous::default_image_cb);
-        avReader::m_done_cb = std::bind(anonymous::default_done_cb);
+        avReader::m_done_cb = std::bind(&avReader::default_done_cb, this);
+        avReader::m_progress_cb = std::bind(&avReader::default_progress_cb,this, std::placeholders::_1);
+        avReader::m_image_cb = std::bind(&avReader::default_image_cb, this, std::placeholders::_1);
         
         internal_setup(file_path);
         if (andRun)
@@ -105,10 +97,13 @@ namespace avcc
     avReader::avReader (const std::string& file_path, void (*user_done)(void), void (*get_progress)(CMTime), void (*get_image)(CVPixelBufferRef))
     : m_impl(new avReader_impl())
     {
-        // base done callback is always called. User done will be called before it ends it execution.
-        avReader::m_done_cb = std::bind(anonymous::default_done_cb);
-        if (get_progress) setProgressCallBack(get_progress);
-        if (get_image) setImageCallBack(get_image);
+        // base callbacks are always called. User callbacks will be called before it ends it execution.
+        avReader::m_done_cb = std::bind(&avReader::default_done_cb, this);
+        avReader::m_progress_cb = std::bind(&avReader::default_progress_cb,this, std::placeholders::_1);
+        avReader::m_image_cb = std::bind(&avReader::default_image_cb, this, std::placeholders::_1);
+        
+        if (get_progress) setUserProgressCallBack(get_progress);
+        if (get_image) setUserImageCallBack(get_image);
         if (user_done) setUserDoneCallBack(user_done);
         
         internal_setup(file_path);
@@ -133,8 +128,8 @@ namespace avcc
     
     void avReader::pop (cm_time& ts, Surface8uRef& frame) const
     {
-        avReader::m_timestamps.wait_and_pop(ts);
-        avReader::m_surfaces.wait_and_pop(frame);
+        m_timestamps.wait_and_pop(ts);
+        m_surfaces.wait_and_pop(frame);
     }
     
     void avReader::internal_setup(const std::string& file_path)
@@ -163,7 +158,7 @@ namespace avcc
             [m_impl->wrapped setGetDone: [dblock copy]];
             
             [m_impl->wrapped run];
-            avReader::m_cv.wait (lk, [] { return avReader::m_done > 0; });
+            m_cv.wait (lk, [this] { return m_done > 0; });
             
         }
     }
@@ -173,14 +168,14 @@ namespace avcc
         return (! m_impl || ! m_impl->wrapped ) ? false : m_impl->m_valid;
     }
     
-    void avReader::setProgressCallBack(avReader::progress_cb pcb)
+    void avReader::setUserProgressCallBack(avReader::progress_cb pcb)
     {
-        avReader::m_progress_cb = std::bind(pcb, std::placeholders::_1);
+        avReader::m_user_progress_cb = std::bind(pcb, std::placeholders::_1);
     }
     
-    void avReader::setImageCallBack(avReader::image_cb icb)
+    void avReader::setUserImageCallBack(avReader::image_cb icb)
     {
-        avReader::m_image_cb = std::bind(icb, std::placeholders::_1);
+        avReader::m_user_image_cb = std::bind(icb, std::placeholders::_1);
     }
     
     void avReader::setUserDoneCallBack(avReader::done_cb dcb)

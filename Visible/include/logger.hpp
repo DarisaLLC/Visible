@@ -38,7 +38,6 @@ public:
 namespace logging
 {
     using namespace spdlog;
-
    
 /// Given a file path and a path component, return a new path created by appending the component to the path.
     std::string file_path_by_appending_component(const std::string& path, const std::string& component, bool is_directory);
@@ -64,7 +63,8 @@ namespace logging
         return input;
     }
 
-
+    // For UT usage. Sets up VLog
+    bool setup_loggers (const std::string& log_path, std::string& id_name);
 }
 
 
