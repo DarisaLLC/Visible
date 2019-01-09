@@ -61,24 +61,18 @@ public:
             if (ImGui::BeginTabItem("Full"))
             {
                 if(! tracks.empty())
-                    imGuiPlotLineTracks(" imGui Plot Test ", ImVec2(getWindowWidth(),getWindowHeight()), tracks);
-                ImGui::Text(" Full ");
+                    imGuiPlotLineTracks(" imGui Plot Test ", ImVec2(getWindowWidth()/2,getWindowHeight()/2), tracks);
+                ImGui::Text(" Length ");
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Half"))
             {
-                if(! tracks.empty())
-                    imGuiPlotLineTracks(" imGui Plot Test ", ImVec2(getWindowWidth()/2,getWindowHeight()/2), tracks);
-                ImGui::Text(" Half ");
+                if(! diffs_.empty())
+                    imGuiPlotLineTracks(" imGui Plot Test ", ImVec2(getWindowWidth()/2,getWindowHeight()/2), diffs_);
+                ImGui::Text(" First Derivative ");
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Quarter"))
-            {
-                if(! tracks.empty())
-                    imGuiPlotLineTracks(" imGui Plot Test ", ImVec2(getWindowWidth()/4,getWindowHeight()/4), tracks);
-                ImGui::Text(" Quarter ");
-                ImGui::EndTabItem();
-            }
+        
             ImGui::EndTabBar();
         }
         
@@ -104,8 +98,9 @@ public:
         setFrameRate( 60 );
         setWindowPos(getWindowSize()/4);
         getWindow()->setAlwaysOnTop();
+        run_cardiac();
         
-        ntrack.first = " acid ";
+        ntrack.first = " Length ";
         timed_double_vec_t& data = ntrack.second;
         data.resize(acid.size());
         for (int tt = 0; tt < acid.size(); tt++){
@@ -115,14 +110,18 @@ public:
         }
         tracks.clear();
         tracks.push_back(ntrack);
-        ntrack.first = " Length ";
-        for (int tt = 0; tt < acid.size(); tt++){
-            uRadian ntt (tt / (double)(acid.size()));
-            data[tt].second = cos(ntt);
-            data[tt].first.first = tt;
-            data[tt].first.second = time_spec_t(tt / 1000.0);
+        
+        
+        ntrack.first = " First Derivative ";
+        timed_double_vec_t& ddata = ntrack.second;
+        ddata.resize(fder2.size());
+        for (int tt = 0; tt < fder2.size(); tt++){
+            ddata[tt].second = fder2[tt];
+            ddata[tt].first.first = tt;
+            ddata[tt].first.second = time_spec_t(tt / 1000.0);
         }
-        tracks.push_back(ntrack);
+        diffs_.clear();
+        diffs_.push_back(ntrack);
         
     }
     void mouseDown( MouseEvent event )override{
@@ -155,11 +154,63 @@ public:
 private:
     
     namedTrackOfdouble_t ntrack;
-    vectorOfnamedTrackOfdouble_t tracks;
+    vectorOfnamedTrackOfdouble_t tracks, diffs_;
     bool closed = false;
     bool showLog = false;
     bool showHelp = false;
     bool showOverlay = false;
+    
+    contraction_analyzer::contraction ctr;
+    typedef vector<double>::iterator dItr_t;
+    
+    std::vector<double> fder, fder2;
+    
+    void run_cardiac (){
+    fder.resize (acid.size());
+    fder2.resize (acid.size());
+    
+    // Get contraction peak ( valley ) first
+    auto min_iter = std::min_element(acid.begin(),acid.end());
+    ctr.contraction_peak.first = std::distance(acid.begin(),min_iter);
+    
+    // Computer First Difference,
+    adjacent_difference(acid.begin(),acid.end(), fder.begin());
+    std::rotate(fder.begin(), fder.begin()+1, fder.end());
+    fder.pop_back();
+    auto medianD = stl_utils::median1D<double>(7);
+    fder = medianD.filter(fder);
+    std::transform(fder.begin(), fder.end(), fder2.begin(), [](double f)->double { return f * f; });
+    // find first element greater than 0.1
+    auto pos = find_if (fder2.begin(), fder2.end(),    // range
+                        std::bind2nd(greater<double>(),0.1));  // criterion
+    
+    ctr.contraction_start.first = std::distance(fder2.begin(),pos);
+    auto max_accel = std::min_element(fder.begin()+ ctr.contraction_start.first ,fder.begin()+ctr.contraction_peak.first);
+    ctr.contraction_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_start.first, max_accel);
+    ctr.contraction_max_acceleration.first += ctr.contraction_start.first;
+    auto max_relax = std::max_element(fder.begin()+ ctr.contraction_peak.first ,fder.end());
+    ctr.relaxation_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_peak.first, max_relax);
+    ctr.relaxation_max_acceleration.first += ctr.contraction_peak.first;
+    
+    // Initialize rpos to point to the element following the last occurance of a value greater than 0.1
+    // If there is no such value, initialize rpos = to begin
+    // If the last occurance is the last element, initialize this it to end
+    dItr_t rpos = find_if (fder2.rbegin(), fder2.rend(),    // range
+                           std::bind2nd(greater<double>(),0.1)).base();  // criterion
+    ctr.relaxation_end.first = std::distance (fder2.begin(), rpos);
+    
+//    EXPECT_EQ(ctr.contraction_start.first,16);
+//    EXPECT_EQ(ctr.contraction_peak.first,35);
+//    EXPECT_EQ(ctr.contraction_max_acceleration.first,27);
+//    EXPECT_EQ(ctr.relaxation_max_acceleration.first,43);
+//    EXPECT_EQ(ctr.relaxation_end.first,52);
+    
+    
+    
+    contraction_profile_analyzer ca;
+    ca.run(acid);
+        
+    }
     
     void imGuiPlotLineTracks (const char* label, ImVec2 canvasSize,const vectorOfnamedTrackOfdouble_t& tracks){
         static std::vector<ImColor> palette = {
