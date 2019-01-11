@@ -127,7 +127,6 @@ bool sm_producer::has_content () const { return (frames_in_content() > 1 ); }
 
 int sm_producer::frames_in_content() const { return (_impl) ? (int) _impl->frame_count(): -1; }
 
-//grabber_error sm_producer::last_error () const { if (_impl) return _impl->last_error(); return grabber_error::Unknown; }
 
 const sm_producer::sMatrix_t& sm_producer::similarityMatrix () const { return _impl->m_SMatrix; }
 

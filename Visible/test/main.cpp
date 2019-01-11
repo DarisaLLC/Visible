@@ -29,7 +29,6 @@
 #include "core/gtest_env_utils.hpp"
 #include "vision/colorhistogram.hpp"
 #include "cinder_opencv.h"
-#include "algoFunctions.hpp"
 #include "ut_util.hpp"
 #include "getLuminanceAlgo.hpp"
 #include "core/csv.hpp"
