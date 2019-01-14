@@ -7,6 +7,7 @@
 
 #include "core/file_system.hpp"
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 
 
 namespace svl {
@@ -62,50 +63,7 @@ namespace svl {
             return relative_paths;
         }
         
-        
-        /** Returns a the name of files in a folder </br>
-         * '(.*)bmp'
-         * @param dir
-         * @param regex_pattern examples "(.*)bmp",  "(.*)$"
-         * @param recursive (true if files in subfolders should be returned as well)
-         * @return files in folder
-         */
-        std::vector<std::string> getFilesInDirectory(const boost::filesystem::path &dir,  const std::string &regex_pattern, bool recursive){
-            std::vector<std::string> relative_paths;
-            
-            if (!svl::io::existsFolder(dir)) {
-                std::cerr << dir << " is not a directory!" << std::endl;
-            } else {
-                bf::path bf_dir = dir;
-                bf::directory_iterator end_itr;
-                for (bf::directory_iterator itr(bf_dir); itr != end_itr; ++itr) {
-                    const bf::path file = itr->path().filename();
-                    
-                    // check if its a directory, then get files in it
-                    if (bf::is_directory(*itr)) {
-                        if (recursive) {
-                            bf::path fn = dir / file;
-                            std::vector<std::string> files_in_subfolder = getFilesInDirectory(fn.string(), regex_pattern, recursive);
-                            for (const auto &sub_file : files_in_subfolder) {
-                                bf::path sub_fn = file / sub_file;
-                                relative_paths.push_back(sub_fn.string());
-                            }
-                        }
-                    } else {
-                        // check for correct file pattern (extension,..) and then add, otherwise ignore..
-                        boost::smatch what;
-                        const boost::regex file_filter(regex_pattern);
-                        if (boost::regex_match(file.string(), what, file_filter))
-                            relative_paths.push_back(file.string());
-                    }
-                }
-                std::sort(relative_paths.begin(), relative_paths.end());
-            }
-            return relative_paths;
-        }
-        
-        
-        
+
         /** @brief copies a directory from source to destination
          * @param path of source directory
          * @param path of destination directory
@@ -130,7 +88,8 @@ namespace svl {
                 bf::copy(iteratorPath, destinationDir / relativeIteratorPathString);
             }
         }
-        
+
+
         
         /**
          * @brief removeDir remove a directory with all its contents (including subdirectories) from disk
@@ -145,5 +104,9 @@ namespace svl {
             } else
                 std::cerr << "Folder " << path.string() << " does not exist." << std::endl;
         }
+
+        
     }
 }
+
+

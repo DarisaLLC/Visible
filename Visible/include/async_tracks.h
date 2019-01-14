@@ -13,7 +13,7 @@
 #include <map>
 #include <future>
 #include "core/bitvector.h"
-#include "timestamp.h"
+//#include "timestamp.h"
 #include "time_index.h"
 #include "vision/opencv_utils.hpp"
 
@@ -25,13 +25,13 @@
 
 // Begining of track types. For now, just a sequence of index/time and doubles
 
-typedef std::vector<index_time_t>  index_time_vec_t;
+typedef std::vector<index_time_t>  index_time_vec_t; // vector of pair of [ index, time_spec ]
 
 // track of timed result type of double
-typedef std::pair<index_time_t, double> timed_double_t;
-typedef std::vector<timed_double_t>  timed_double_vec_t;
-typedef std::pair<std::string, timed_double_vec_t> namedTrackOfdouble_t;
-typedef std::vector<namedTrackOfdouble_t>  vectorOfnamedTrackOfdouble_t;
+typedef std::pair<index_time_t, double> timed_double_t;  // Timed value
+typedef std::vector<timed_double_t>  timed_double_vec_t;  // Vector of timed value
+typedef std::pair<std::string, timed_double_vec_t> namedTrackOfdouble_t; // pair [ name, vector of timed values ]
+typedef std::vector<namedTrackOfdouble_t>  vectorOfnamedTrackOfdouble_t; // vector of pairs of  [ name, vector of timed values ]
 typedef std::vector<vectorOfnamedTrackOfdouble_t>  vectorOfVectorOfnamedTrackOfdouble_t;
 
 
@@ -51,7 +51,7 @@ typedef std::vector<vectorOfnamedTrackOfmat_t>  vectorOfVectorOfnamedTrackOfmat_
 
 
 /*
- namedTrackOfdouble_t : first name, second a vector of timed_double_t (index_t, double)
+ namedTrackOfdouble_t : first name, second a vector of pair: timed_double_t (index_t, double)
  index_t is int64_t and time_spec_t
  */
 template<typename T>
