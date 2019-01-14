@@ -1,16 +1,21 @@
 //
 //  Created by Arman Garakani on 11/5/15.
 //
-//
+//  @inherited reflects these in the UI
+
 #include "include/macos.xcconfig"
 #include "include/appstore.xcconfig"
 
-SRCROOT = $(PROJECT_DIR)/../../svl
-EXTERNALS = $(PROJECT_DIR)/../../svl/../externals
+SRCROOT = $(PROJECT_DIR)/../../Visible
 
-TEST_DATA = $(SRCROOT)/Assets
+ALL_ROOT = $(PROJECT_DIR)/../..
 
-VISIBLE_ROOT = SRCROOT = $(PROJECT_DIR)/../../Visible
+SVL_ROOT = $(PROJECT_DIR)/../../svl
+EXTERNALS = $(PROJECT_DIR)/../../externals
+VISIBLE_ROOT = $(PROJECT_DIR)/../../Visible
+
+
+TEST_DATA = $(SVL_ROOT)/Assets
 
 LOCAL_CINDER = $(EXTERNALS)/cinder
 
@@ -20,7 +25,7 @@ LOCAL_SPDLOG = $(EXTERNALS)/spdlog
 LOCAL_IMGUI = $(EXTERNALS)/docking-imgui/imgui
 //LOCAL_IMGUI = $(EXTERNALS)/imgui
 
-LOCAL_3rdParty = $(SRCROOT)/local
+LOCAL_3rdParty = $(SVL_ROOT)/local
 LOCAL_BOOST = /usr/local/boost/1.67.0_1
 LOCAL_PNG = $(LOCAL_3rdParty)/png/
 LOCAL_gtest = $(LOCAL_3rdParty)/gtest
@@ -29,10 +34,12 @@ LOCAL_CEREAL = $(LOCAL_3rdParty)/cereal-1.1.1/include
 LOCAL_TINYXML = $(LOCAL_3rdParty)/tinyxml
 
 
-HEADER_SEARCH_PATHS = $(inherited) $(VISIBLE_ROOT)/include $(SRCROOT)/include/** /usr/local/include $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_TINYXML) $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG)  $(LOCAL_SPDLOG)/include $(EXTERNALS)/imgui
+HEADER_SEARCH_PATHS =  $(VISIBLE_ROOT)/include $(VISIBLE_ROOT)/include/plistcpp $(SVL_ROOT)/include /usr/local/include $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_TINYXML) $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG)  $(LOCAL_SPDLOG)/include $(EXTERNALS)/imgui
 
-LIBRARY_SEARCH_PATHS = $(inherited) $(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION) $(LOCAL_OCV)/build/lib/$(CONFIGURATION) /usr/local/lib /usr/local/Cellar/tbb/2018_U5/lib/ $(LOCAL_BOOST)/lib $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)
+LIBRARY_SEARCH_PATHS = /usr/local/lib $(LOCAL_BOOST)/lib $(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION) /usr/local/Cellar/tbb/2018_U5/lib/ $(PROJECT_DIR) /usr/local/opencv-3.4.3/build/3rdparty/lib/$(CONFIGURATION) /usr/local/opencv-3.4.3/build/lib/$(CONFIGURATION) /usr/local/Cellar/libdc1394/2.2.2_1/lib /usr/local/Cellar/ffmpeg/4.0.2/lib /usr/local/Cellar/libconfig/1.7.2/lib /usr/local/Cellar/boost/1.67.0_1/lib /usr/local/Cellar/tbb/2018_U5/lib
 
 
+
+OTHER_LDFLAGS = $(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a $(LOCAL_BOOST)/lib/libboost_system-mt.a   $(LOCAL_BOOST)/lib/libboost_filesystem-mt.a $(LOCAL_BOOST)/lib/libboost_date_time-mt.a $(LOCAL_BOOST)/lib/libboost_regex-mt.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_highgui.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_features2d.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_video.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_objdetect.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videostab.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a $(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libittnotify.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibpng.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libIlmImf.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibwebp.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjpeg-turbo.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libzlib.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjasper.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a
 
 

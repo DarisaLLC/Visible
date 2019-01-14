@@ -12,6 +12,12 @@
 
 #include "VisibleApp.h"
 #include "imguivariouscontrols.h"
+#include "sequenceUtil.hpp"
+#include "imgui_internal.h"
+
+
+#include "Resources.h"
+
 using namespace std;
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
@@ -49,13 +55,13 @@ void SetStyle()
     st.FramePadding = ImVec2(4.0f,2.0f);
     st.ItemSpacing = ImVec2(8.0f,2.0f);
     st.WindowBorderSize = 1.0f;
-    st.TabBorderSize = 1.0f;
+ //   st.TabBorderSize = 1.0f;
     st.WindowRounding = 1.0f;
     st.ChildRounding = 1.0f;
     st.FrameRounding = 1.0f;
     st.ScrollbarRounding = 1.0f;
     st.GrabRounding = 1.0f;
-    st.TabRounding = 1.0f;
+  //  st.TabRounding = 1.0f;
     
     // Setup style
     ImVec4* colors = ImGui::GetStyle().Colors;
@@ -92,11 +98,11 @@ void SetStyle()
     colors[ImGuiCol_ResizeGrip] = ImVec4(0.87f, 0.87f, 0.87f, 0.53f);
     colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.87f, 0.87f, 0.87f, 0.74f);
     colors[ImGuiCol_ResizeGripActive] = ImVec4(0.87f, 0.87f, 0.87f, 0.74f);
-    colors[ImGuiCol_Tab] = ImVec4(0.01f, 0.01f, 0.01f, 0.86f);
-    colors[ImGuiCol_TabHovered] = ImVec4(0.29f, 0.29f, 0.79f, 1.00f);
-    colors[ImGuiCol_TabActive] = ImVec4(0.31f, 0.31f, 0.91f, 1.00f);
-    colors[ImGuiCol_TabUnfocused] = ImVec4(0.02f, 0.02f, 0.02f, 1.00f);
-    colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
+ //   colors[ImGuiCol_Tab] = ImVec4(0.01f, 0.01f, 0.01f, 0.86f);
+ //   colors[ImGuiCol_TabHovered] = ImVec4(0.29f, 0.29f, 0.79f, 1.00f);
+ //   colors[ImGuiCol_TabActive] = ImVec4(0.31f, 0.31f, 0.91f, 1.00f);
+ //   colors[ImGuiCol_TabUnfocused] = ImVec4(0.02f, 0.02f, 0.02f, 1.00f);
+ //   colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
     //  colors[ImGuiCol_DockingPreview] = ImVec4(0.38f, 0.48f, 0.60f, 1.00f);
     //  colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
     colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
@@ -111,6 +117,9 @@ void SetStyle()
     colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 }
 
+//MySequence mySequence(gNodeDelegate);
+
+
 class VisibleProtoApp : public App, public gui_base
 {
 public:
@@ -118,15 +127,64 @@ public:
     //   VisibleRunApp();
     //  ~VisibleRunApp();
     
+    
+    virtual void QuitApp(){
+        ImGui::DestroyContext();
+        // fg::ThreadsShouldStop = true;
+        quit();
+    }
+    
+    void prepareSettings( Settings *settings );
+    
+    void setup()override{
+        ui::initialize(ui::Options()
+                       .window(getWindow())
+                       .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
+                       .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
+                       .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
+                       .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
+                       //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
+                       );
+        SetStyle ();
+        setFrameRate( 60 );
+        setWindowPos(getWindowSize()/4);
+        getWindow()->setAlwaysOnTop();
+        
+        
+        
+        
+        
+    }
+    void mouseDown( MouseEvent event )override{
+        cinder::app::App::mouseDown(event);
+    }
+    void keyDown( KeyEvent event )override{
+        if( event.getChar() == 'f' ) {
+            // Toggle full screen when the user presses the 'f' key.
+            setFullScreen( ! isFullScreen() );
+        }
+        else if( event.getCode() == KeyEvent::KEY_ESCAPE ) {
+            // Exit full screen, or quit the application, when the user presses the ESC key.
+            if( isFullScreen() )
+                setFullScreen( false );
+            else
+                quit();
+        }
+        else if(event.getCode() == 'd' ) {
+            
+        }
+    }
     virtual void SetupGUIVariables() override{
         //Set up global preferences for the GUI
         //http://anttweakbar.sourceforge.net/doc/tools:anttweakbar:twbarparamsyntax
         GetGUI().DefineGlobal("iconalign=horizontal");
+        mLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PLOOP )));
+        mNoLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PNLOOP  )));
         
     }
     virtual void DrawGUI() override{
         ImGuiIO& io = ImGui::GetIO();
-        ImGui::ScopedMainMenuBar menubar;
+    //    ImGui::ScopedMainMenuBar menubar;
         ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
         
         ImVec2 rc = ImGui::GetItemRectSize();
@@ -134,10 +192,10 @@ public:
         ImGui::SetNextWindowPos(deltaHeight);
         auto tmp = io.DisplaySize - deltaHeight;
         ImGui::SetNextWindowSize(tmp);
-      //  int mSelectedNodeIndex = 0;
+        //  int mSelectedNodeIndex = 0;
         int gEvaluationTime = 0;
-        int mFrameMin = 0;
-        int mFrameMax = 00;
+     //   int mFrameMin = 0;
+     //   int mFrameMax = 0;
         
         if (ImGui::Begin("Visible", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
                          ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |ImGuiWindowFlags_NoScrollWithMouse |
@@ -145,17 +203,17 @@ public:
         {
             if (ImGui::Begin("Timeline"))
             {
-            //    int selectedEntry = mSelectedNodeIndex;
-           //     static int firstFrame = 0;
+                int selectedEntry =  gNodeDelegate.mSelectedNodeIndex;
+                static int firstFrame = 0;
                 int currentTime = gEvaluationTime;
                 
                 ImGui::PushItemWidth(80);
                 ImGui::PushID(200);
-                ImGui::InputInt("", &mFrameMin, 0, 0);
+                ImGui::InputInt("", &gNodeDelegate.mFrameMin, 0, 0);
                 ImGui::PopID();
                 ImGui::SameLine();
                 if (ImGui::Button("|<"))
-                    currentTime = mFrameMin;
+                    currentTime = gNodeDelegate.mFrameMin;
                 ImGui::SameLine();
                 if (ImGui::Button("<"))
                     currentTime--;
@@ -172,88 +230,96 @@ public:
                     currentTime++;
                 ImGui::SameLine();
                 if (ImGui::Button(">|"))
-                    currentTime = mFrameMax;
+                    currentTime = gNodeDelegate.mFrameMax;
                 ImGui::SameLine();
                 extern bool gbIsPlaying;
                 if (ImGui::Button(gbIsPlaying ? "Stop" : "Play"))
                 {
                     if (!gbIsPlaying)
                     {
-                        currentTime = mFrameMin;
+                        currentTime = gNodeDelegate.mFrameMin;
                     }
                     gbIsPlaying = !gbIsPlaying;
                 }
+#if 1
+            extern bool gPlayLoop;
+                if(mNoLoop == nullptr){
+                    mNoLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PNLOOP  )));
+                }
+                if (mLoop == nullptr){
+                      mLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PLOOP )));
+                }
+                
+            unsigned int playNoLoopTextureId = mNoLoop->getId();//  evaluation.GetTexture("Stock/PlayNoLoop.png");
+            unsigned int playLoopTextureId = mLoop->getId(); //evaluation.GetTexture("Stock/PlayLoop.png");
+            
+            ImGui::SameLine();
+            if (ImGui::ImageButton((ImTextureID)(uint64_t)(gPlayLoop ? playLoopTextureId : playNoLoopTextureId), ImVec2(16.f, 16.f)))
+                gPlayLoop = !gPlayLoop;
+            
+            ImGui::SameLine();
+            ImGui::PushID(202);
+            ImGui::InputInt("", & gNodeDelegate.mFrameMax, 0, 0);
+            ImGui::PopID();
+            ImGui::SameLine();
+            currentTime = ImMax(currentTime, 0);
+            ImGui::SameLine(0, 40.f);
+            if (ImGui::Button("Make Key") && selectedEntry != -1)
+            {
+         //       nodeGraphDelegate.MakeKey(currentTime, uint32_t(selectedEntry), 0);
             }
+            
+            ImGui::SameLine(0, 50.f);
+            
+            int setf = (mySequence.getKeyFrameOrValue.x<FLT_MAX)? int(mySequence.getKeyFrameOrValue.x):0;
+            ImGui::PushID(203);
+            if (ImGui::InputInt("", &setf, 0, 0))
+            {
+                mySequence.setKeyFrameOrValue.x = float(setf);
+            }
+            ImGui::SameLine();
+            float setv = (mySequence.getKeyFrameOrValue.y < FLT_MAX) ? mySequence.getKeyFrameOrValue.y : 0.f;
+            if (ImGui::InputFloat("Key", &setv))
+            {
+                mySequence.setKeyFrameOrValue.y = setv;
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            int timeMask[2] = { 0,0 };
+            if (selectedEntry != -1)
+            {
+                timeMask[0] = gNodeDelegate.mNodes[selectedEntry].mStartFrame;
+                timeMask[1] = gNodeDelegate.mNodes[selectedEntry].mEndFrame;
+            }
+            ImGui::PushItemWidth(120);
+            if (ImGui::InputInt2("Time Mask", timeMask) && selectedEntry != -1)
+            {
+              //  URChange<TileNodeEditGraphDelegate::ImogenNode> undoRedoChange(selectedEntry, [](int index) { return &gNodeDelegate.mNodes[index]; });
+                timeMask[1] = ImMax(timeMask[1], timeMask[0]);
+                timeMask[0] = ImMin(timeMask[1], timeMask[0]);
+             //   gNodeDelegate.SetTimeSlot(selectedEntry, timeMask[0], timeMask[1]);
+            }
+            ImGui::PopItemWidth();
+            ImGui::PopItemWidth();
+            
+                ImSequencer::Sequencer(&mySequence, &currentTime, NULL, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_CHANGE_FRAME);
+            if (selectedEntry != -1)
+            {
+                gNodeDelegate.mSelectedNodeIndex = selectedEntry;
+               // NodeGraphSelectNode(selectedEntry);
+             //   auto& imoNode = gNodeDelegate.mNodes[selectedEntry];
+            //    gEvaluation.SetStageLocalTime(selectedEntry, ImClamp(currentTime - imoNode.mStartFrame, 0, imoNode.mEndFrame - imoNode.mStartFrame), true);
+            }
+            if (currentTime != gEvaluationTime)
+            {
+                gEvaluationTime = currentTime;
+           //     nodeGraphDelegate.SetTime(currentTime, true);
+            //    nodeGraphDelegate.ApplyAnimation(currentTime);
+            }
+        }
             ImGui::End();
-#if 0
-                extern bool gPlayLoop;
-                unsigned int playNoLoopTextureId = evaluation.GetTexture("Stock/PlayNoLoop.png");
-                unsigned int playLoopTextureId = evaluation.GetTexture("Stock/PlayLoop.png");
-                
-                ImGui::SameLine();
-                if (ImGui::ImageButton((ImTextureID)(uint64_t)(gPlayLoop ? playLoopTextureId : playNoLoopTextureId), ImVec2(16.f, 16.f)))
-                    gPlayLoop = !gPlayLoop;
-                
-                ImGui::SameLine();
-                ImGui::PushID(202);
-                ImGui::InputInt("", &mFrameMax, 0, 0);
-                ImGui::PopID();
-                ImGui::SameLine();
-                currentTime = ImMax(currentTime, 0);
-                ImGui::SameLine(0, 40.f);
-                if (ImGui::Button("Make Key") && selectedEntry != -1)
-                {
-                    nodeGraphDelegate.MakeKey(currentTime, uint32_t(selectedEntry), 0);
-                }
-                
-                ImGui::SameLine(0, 50.f);
-                
-                int setf = (mySequence.getKeyFrameOrValue.x<FLT_MAX)? int(mySequence.getKeyFrameOrValue.x):0;
-                ImGui::PushID(203);
-                if (ImGui::InputInt("", &setf, 0, 0))
-                {
-                    mySequence.setKeyFrameOrValue.x = float(setf);
-                }
-                ImGui::SameLine();
-                float setv = (mySequence.getKeyFrameOrValue.y < FLT_MAX) ? mySequence.getKeyFrameOrValue.y : 0.f;
-                if (ImGui::InputFloat("Key", &setv))
-                {
-                    mySequence.setKeyFrameOrValue.y = setv;
-                }
-                ImGui::PopID();
-                ImGui::SameLine();
-                int timeMask[2] = { 0,0 };
-                if (selectedEntry != -1)
-                {
-                    timeMask[0] = gNodeDelegate.mNodes[selectedEntry].mStartFrame;
-                    timeMask[1] = gNodeDelegate.mNodes[selectedEntry].mEndFrame;
-                }
-                ImGui::PushItemWidth(120);
-                if (ImGui::InputInt2("Time Mask", timeMask) && selectedEntry != -1)
-                {
-                    URChange<TileNodeEditGraphDelegate::ImogenNode> undoRedoChange(selectedEntry, [](int index) { return &gNodeDelegate.mNodes[index]; });
-                    timeMask[1] = ImMax(timeMask[1], timeMask[0]);
-                    timeMask[0] = ImMin(timeMask[1], timeMask[0]);
-                    gNodeDelegate.SetTimeSlot(selectedEntry, timeMask[0], timeMask[1]);
-                }
-                ImGui::PopItemWidth();
-                ImGui::PopItemWidth();
-                
-                Sequencer(&mySequence, &currentTime, NULL, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_CHANGE_FRAME);
-                if (selectedEntry != -1)
-                {
-                    nodeGraphDelegate.mSelectedNodeIndex = selectedEntry;
-                    NodeGraphSelectNode(selectedEntry);
-                    auto& imoNode = nodeGraphDelegate.mNodes[selectedEntry];
-                    gEvaluation.SetStageLocalTime(selectedEntry, ImClamp(currentTime - imoNode.mStartFrame, 0, imoNode.mEndFrame - imoNode.mStartFrame), true);
-                }
-                if (currentTime != gEvaluationTime)
-                {
-                    gEvaluationTime = currentTime;
-                    nodeGraphDelegate.SetTime(currentTime, true);
-                    nodeGraphDelegate.ApplyAnimation(currentTime);
-                }
-  
+
+            
 #endif
             if (ImGui::Begin("Nodes"))
             {
@@ -295,75 +361,33 @@ public:
             }
             ImGui::End();
             
-         //   ImGui::SetWindowSize(ImVec2(300, 300));
+            //   ImGui::SetWindowSize(ImVec2(300, 300));
             if (ImGui::Begin("Parameters")){}
             ImGui::End();
         }
-            
-            ImGui::End();
-        }
         
-        
-        virtual void QuitApp(){
-            ImGui::DestroyContext();
-            // fg::ThreadsShouldStop = true;
-            quit();
-        }
-        
-        void prepareSettings( Settings *settings );
-        
-        void setup()override{
-            ui::initialize(ui::Options()
-                           .window(getWindow())
-                           .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
-                           .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
-                           .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
-                           .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
-                           //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
-                           );
-            SetStyle ();
-            setFrameRate( 60 );
-            setWindowPos(getWindowSize()/4);
-            getWindow()->setAlwaysOnTop();
-            
-            
-        }
-        void mouseDown( MouseEvent event )override{
-            cinder::app::App::mouseDown(event);
-        }
-        void keyDown( KeyEvent event )override{
-            if( event.getChar() == 'f' ) {
-                // Toggle full screen when the user presses the 'f' key.
-                setFullScreen( ! isFullScreen() );
-            }
-            else if( event.getCode() == KeyEvent::KEY_ESCAPE ) {
-                // Exit full screen, or quit the application, when the user presses the ESC key.
-                if( isFullScreen() )
-                    setFullScreen( false );
-                else
-                    quit();
-            }
-            else if(event.getCode() == 'd' ) {
-                
-            }
-        }
-        
-        void draw()override{
-            gl::clear( Color::gray( 0.5f ) );
-            DrawGUI();
-        }
-        
-        bool shouldQuit();
-        
-    private:
-        
-        
-        
-    };
+        ImGui::End();
+    }
+    
+
+    
+    void draw()override{
+        gl::clear( Color::gray( 0.5f ) );
+        DrawGUI();
+    }
+    
+    bool shouldQuit();
+    
+private:
+    ci::gl::TextureRef    mNoLoop, mLoop;
+    trackUIContainer gNodeDelegate;
     
     
-    CINDER_APP( VisibleProtoApp, RendererGl( RendererGl::Options().msaa( 4 ) ), []( App::Settings *settings ) {
-        settings->setWindowSize( TEST_APP_WIDTH, TEST_APP_HEIGHT );
-    } )
-    
-    
+};
+
+
+CINDER_APP( VisibleProtoApp, RendererGl( RendererGl::Options().msaa( 4 ) ), []( App::Settings *settings ) {
+    settings->setWindowSize( TEST_APP_WIDTH, TEST_APP_HEIGHT );
+} )
+
+

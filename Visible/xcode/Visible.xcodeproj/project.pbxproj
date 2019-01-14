@@ -26,18 +26,14 @@
 		C20EDBC61CF2776D0074C47A /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBF1CF277130074C47A /* self_similarity.cpp */; };
 		C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C20EDBC81CF277740074C47A /* exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBE1CF277130074C47A /* exception.cpp */; };
-		C210F14A215AAC04002A82A3 /* cp-visible_release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */; };
-		C210F14B215AAC09002A82A3 /* cp-visible-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */; };
 		C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
 		C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
 		C2175DDC215154EA004315C0 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
-		C2177BDE215E04FC003E6C3E /* appstore.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2177BDD215E04FB003E6C3E /* appstore.xcconfig */; };
 		C219467E1CE4DC7100976025 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
 		C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
 		C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
 		C21FFE721CFE0AA300C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
 		C21FFE731CFE0E1D00C97013 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
-		C221D9171E4B043A00AF74CE /* directoryPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946691CE4DC7100976025 /* directoryPlayer.cpp */; };
 		C2239AB4218B6270007558AB /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
 		C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
 		C22F1DEA21790CD400E9A35B /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C203D2F121714B7500B6B4A8 /* libavutil.a */; };
@@ -59,10 +55,7 @@
 		C2398A1821DE980C00B180A0 /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
 		C2398A1921DE980C00B180A0 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
 		C2398A2921DF224B00B180A0 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
-		C2398A2A21DF224B00B180A0 /* appstore.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2177BDD215E04FB003E6C3E /* appstore.xcconfig */; };
-		C2398A2B21DF224B00B180A0 /* cp-visible_release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */; };
 		C2398A2C21DF224B00B180A0 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
-		C2398A2D21DF224B00B180A0 /* cp-visible-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */; };
 		C2398A2E21DF224B00B180A0 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
 		C2398A2F21DF224B00B180A0 /* Visible.icns in Resources */ = {isa = PBXBuildFile; fileRef = C264F94B215F0B6D00AF3130 /* Visible.icns */; };
 		C2398A3021DF224B00B180A0 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
@@ -139,6 +132,10 @@
 		C2398A8121DF239700B180A0 /* VisibleRunApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946771CE4DC7100976025 /* VisibleRunApp.cpp */; };
 		C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
 		C23CFBDC21E7D96800C1DF16 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23CFBDB21E7D96800C1DF16 /* ImSequencer.cpp */; };
+		C23CFBDF21E9422F00C1DF16 /* sequenceUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23CFBDD21E9422F00C1DF16 /* sequenceUtil.cpp */; };
+		C23CFBE121E9612400C1DF16 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23CFBE021E9612400C1DF16 /* ImCurveEdit.cpp */; };
+		C23CFBE721E9785000C1DF16 /* PlayLoop.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C23CFBE521E9785000C1DF16 /* PlayLoop.png */; };
+		C23CFBE821E9785000C1DF16 /* PlayNoLoop.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */; };
 		C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */; };
 		C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
 		C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
@@ -238,10 +235,7 @@
 		C26A057D1E77A90600BDC954 /* histo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069681CED3E2C0045FF57 /* histo.cpp */; };
 		C26A057E1E77AB4700BDC954 /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
 		C26F5F9921B0AA6D00EAE156 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
-		C26F5F9A21B0AA6D00EAE156 /* appstore.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2177BDD215E04FB003E6C3E /* appstore.xcconfig */; };
-		C26F5F9B21B0AA6D00EAE156 /* cp-visible_release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */; };
 		C26F5F9C21B0AA6D00EAE156 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
-		C26F5F9D21B0AA6D00EAE156 /* cp-visible-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */; };
 		C26F5F9E21B0AA6D00EAE156 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
 		C26F5F9F21B0AA6D00EAE156 /* Visible.icns in Resources */ = {isa = PBXBuildFile; fileRef = C264F94B215F0B6D00AF3130 /* Visible.icns */; };
 		C26F5FA021B0AA6D00EAE156 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
@@ -291,7 +285,6 @@
 		C26F5FD421B0AA6D00EAE156 /* DisplayObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C25261021F6611A10069F665 /* DisplayObject.cpp */; };
 		C26F5FD521B0AA6D00EAE156 /* color.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7B217FDA6600FA9F43 /* color.cc */; };
 		C26F5FD621B0AA6D00EAE156 /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBF1CF277130074C47A /* self_similarity.cpp */; };
-		C26F5FD721B0AA6D00EAE156 /* directoryPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946691CE4DC7100976025 /* directoryPlayer.cpp */; };
 		C26F5FD821B0AA6D00EAE156 /* TimeSeriesPlotUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* TimeSeriesPlotUtils.cpp */; };
 		C26F5FD921B0AA6D00EAE156 /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
 		C26F5FDA21B0AA6D00EAE156 /* matpixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696D1CED3E2C0045FF57 /* matpixel.cpp */; };
@@ -358,6 +351,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		C23CFBE421E977FD00C1DF16 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				C23CFBE721E9785000C1DF16 /* PlayLoop.png in CopyFiles */,
+				C23CFBE821E9785000C1DF16 /* PlayNoLoop.png in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C24CD87A1CEA5B1B0008C72B /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -482,6 +486,12 @@
 		C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleTestApp-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleTestApp-Info.plist"; sourceTree = "<absolute>"; };
 		C23CFBDA21E6C3D700C1DF16 /* ut_gui_plot.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ut_gui_plot.cpp; path = ../ut_gui_plot.cpp; sourceTree = "<group>"; };
 		C23CFBDB21E7D96800C1DF16 /* ImSequencer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImSequencer.cpp; path = ../test/ImSequencer.cpp; sourceTree = "<group>"; };
+		C23CFBDD21E9422F00C1DF16 /* sequenceUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sequenceUtil.cpp; path = ../test/sequenceUtil.cpp; sourceTree = "<group>"; };
+		C23CFBDE21E9422F00C1DF16 /* sequenceUtil.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = sequenceUtil.hpp; path = ../test/sequenceUtil.hpp; sourceTree = "<group>"; };
+		C23CFBE021E9612400C1DF16 /* ImCurveEdit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImCurveEdit.cpp; path = ../test/ImCurveEdit.cpp; sourceTree = "<group>"; };
+		C23CFBE321E96D6700C1DF16 /* Resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../test/Resources.h; sourceTree = "<group>"; };
+		C23CFBE521E9785000C1DF16 /* PlayLoop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PlayLoop.png; path = data/PlayLoop.png; sourceTree = "<group>"; };
+		C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PlayNoLoop.png; path = data/PlayNoLoop.png; sourceTree = "<group>"; };
 		C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_lif_impl.cpp; path = ../src/visible_lif_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C23D0F481E2982690049ADDB /* lifFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = lifFile.hpp; sourceTree = "<group>"; };
 		C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lifFile.cpp; sourceTree = "<group>"; };
@@ -687,6 +697,8 @@
 		C26069941CED3E2C0045FF57 /* ut_localvar.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_localvar.hpp; sourceTree = "<group>"; };
 		C2606E731CEE05320045FF57 /* svl_exception.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = svl_exception.hpp; sourceTree = "<group>"; };
 		C2606EA41CEE0E660045FF57 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
+		C260AFCE21ED0691003B0FF0 /* sg_filter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sg_filter.cpp; path = ../src/sg_filter.cpp; sourceTree = "<group>"; };
+		C260AFCF21ED076F003B0FF0 /* sg_filter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sg_filter.h; path = ../include/sg_filter.h; sourceTree = "<group>"; };
 		C2618F7B217FDA6600FA9F43 /* color.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = color.cc; path = cvplot/color.cc; sourceTree = "<group>"; };
 		C2618F7C217FDA6600FA9F43 /* internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = internal.h; path = cvplot/internal.h; sourceTree = "<group>"; };
 		C2618F7D217FDA6600FA9F43 /* figure.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = figure.cc; path = cvplot/figure.cc; sourceTree = "<group>"; };
@@ -885,6 +897,7 @@
 		080E96DDFE201D6D7F000001 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C260AFCE21ED0691003B0FF0 /* sg_filter.cpp */,
 				C240F9FC21E15AC900FBA228 /* imguivariouscontrols.cpp */,
 				C2203D6421CAFFD9003F2F33 /* logger.cpp */,
 				C2820F3121752BF600DFA7A6 /* gui_handler.cpp */,
@@ -935,6 +948,9 @@
 		29B97314FDCFA39411CA2CEA /* QuickTimeIteration */ = {
 			isa = PBXGroup;
 			children = (
+				C23CFBE521E9785000C1DF16 /* PlayLoop.png */,
+				C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */,
+				C23CFBE321E96D6700C1DF16 /* Resources.h */,
 				C2175DD22150B779004315C0 /* Visible.entitlements */,
 				C260099A1CED3E010045FF57 /* svl */,
 				C21946B11CE4EA6100976025 /* include */,
@@ -1073,6 +1089,7 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C260AFCF21ED076F003B0FF0 /* sg_filter.h */,
 				C240F9FE21E15ADE00FBA228 /* imguivariouscontrols.h */,
 				C2B87C9721CEE27500C91E35 /* visible_cli.hpp */,
 				C2820F3721754C3100DFA7A6 /* imGuiLogger.hpp */,
@@ -1133,7 +1150,10 @@
 		C240F9F921E1466D00FBA228 /* VisibleTestApp */ = {
 			isa = PBXGroup;
 			children = (
+				C23CFBE021E9612400C1DF16 /* ImCurveEdit.cpp */,
 				C23CFBDB21E7D96800C1DF16 /* ImSequencer.cpp */,
+				C23CFBDD21E9422F00C1DF16 /* sequenceUtil.cpp */,
+				C23CFBDE21E9422F00C1DF16 /* sequenceUtil.hpp */,
 				C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */,
 				C23CFBDA21E6C3D700C1DF16 /* ut_gui_plot.cpp */,
 			);
@@ -1604,6 +1624,7 @@
 				C2398A3121DF224B00B180A0 /* Sources */,
 				C2398A6C21DF224B00B180A0 /* Frameworks */,
 				C2398A7A21DF224B00B180A0 /* Build Number */,
+				C23CFBE421E977FD00C1DF16 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -1674,7 +1695,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 1010;
 				TargetAttributes = {
 					8D1107260486CEB800E47090 = {
 						DevelopmentTeam = W4F7HL2GN5;
@@ -1735,11 +1756,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C2820F302175298F00DFA7A6 /* Visible.cfg in Resources */,
-				C2177BDE215E04FC003E6C3E /* appstore.xcconfig in Resources */,
-				C210F14A215AAC04002A82A3 /* cp-visible_release.xcconfig in Resources */,
 				C2175DDC215154EA004315C0 /* palette.png in Resources */,
 				C240F9FB21E14C8900FBA228 /* sscli-Info.plist in Resources */,
-				C210F14B215AAC09002A82A3 /* cp-visible-debug.xcconfig in Resources */,
 				C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */,
 				C264F94C215F0B6D00AF3130 /* Visible.icns in Resources */,
 				C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */,
@@ -1751,10 +1769,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C2398A2921DF224B00B180A0 /* Visible.cfg in Resources */,
-				C2398A2A21DF224B00B180A0 /* appstore.xcconfig in Resources */,
-				C2398A2B21DF224B00B180A0 /* cp-visible_release.xcconfig in Resources */,
 				C2398A2C21DF224B00B180A0 /* palette.png in Resources */,
-				C2398A2D21DF224B00B180A0 /* cp-visible-debug.xcconfig in Resources */,
 				C2398A2E21DF224B00B180A0 /* swatchSmall.png in Resources */,
 				C2398A2F21DF224B00B180A0 /* Visible.icns in Resources */,
 				C2398A3021DF224B00B180A0 /* swatchLarge.png in Resources */,
@@ -1766,10 +1781,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C26F5F9921B0AA6D00EAE156 /* Visible.cfg in Resources */,
-				C26F5F9A21B0AA6D00EAE156 /* appstore.xcconfig in Resources */,
-				C26F5F9B21B0AA6D00EAE156 /* cp-visible_release.xcconfig in Resources */,
 				C26F5F9C21B0AA6D00EAE156 /* palette.png in Resources */,
-				C26F5F9D21B0AA6D00EAE156 /* cp-visible-debug.xcconfig in Resources */,
 				C26F5F9E21B0AA6D00EAE156 /* swatchSmall.png in Resources */,
 				C26F5F9F21B0AA6D00EAE156 /* Visible.icns in Resources */,
 				C26F5FA021B0AA6D00EAE156 /* swatchLarge.png in Resources */,
@@ -1878,7 +1890,6 @@
 				C2B87C9921D012D700C91E35 /* logger.cpp in Sources */,
 				C2618F80217FDA6600FA9F43 /* color.cc in Sources */,
 				C20EDBC21CF277130074C47A /* self_similarity.cpp in Sources */,
-				C221D9171E4B043A00AF74CE /* directoryPlayer.cpp in Sources */,
 				C248DD2C1F64601A00FF72B1 /* TimeSeriesPlotUtils.cpp in Sources */,
 				C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */,
 				C2606DAF1CED3E2E0045FF57 /* matpixel.cpp in Sources */,
@@ -1892,6 +1903,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2398A5421DF224B00B180A0 /* sg_filter.cpp in Sources */,
 				C2398A3221DF224B00B180A0 /* core_support.cpp in Sources */,
 				C2398A3321DF224B00B180A0 /* gradient.cpp in Sources */,
 				C2398A3421DF224B00B180A0 /* gui_handler.cpp in Sources */,
@@ -1924,13 +1936,14 @@
 				C23CFBDC21E7D96800C1DF16 /* ImSequencer.cpp in Sources */,
 				C2398A4F21DF224B00B180A0 /* ip_utils.cpp in Sources */,
 				C2398A5021DF224B00B180A0 /* window.cc in Sources */,
+				C23CFBDF21E9422F00C1DF16 /* sequenceUtil.cpp in Sources */,
 				C2398A5121DF224B00B180A0 /* imgui_draw.cpp in Sources */,
 				C2398A8021DF227000B180A0 /* ut_gui_main.cpp in Sources */,
 				C2398A5221DF224B00B180A0 /* rowfunc.cpp in Sources */,
 				C2398A5321DF224B00B180A0 /* csv.cpp in Sources */,
-				C2398A5421DF224B00B180A0 /* sg_filter.cpp in Sources */,
 				C2398A5521DF224B00B180A0 /* tinyxml.cpp in Sources */,
 				C2398A5621DF224B00B180A0 /* AVReader.mm in Sources */,
+				C23CFBE121E9612400C1DF16 /* ImCurveEdit.cpp in Sources */,
 				C2398A5721DF224B00B180A0 /* figure.cc in Sources */,
 				C2398A5821DF224B00B180A0 /* AVReaderWrapper.mm in Sources */,
 				C2398A5921DF224B00B180A0 /* labelconnect.cpp in Sources */,
@@ -2089,7 +2102,6 @@
 				C26F5FD421B0AA6D00EAE156 /* DisplayObject.cpp in Sources */,
 				C26F5FD521B0AA6D00EAE156 /* color.cc in Sources */,
 				C26F5FD621B0AA6D00EAE156 /* self_similarity.cpp in Sources */,
-				C26F5FD721B0AA6D00EAE156 /* directoryPlayer.cpp in Sources */,
 				C26F5FD821B0AA6D00EAE156 /* TimeSeriesPlotUtils.cpp in Sources */,
 				C26F5FD921B0AA6D00EAE156 /* tinystr.cpp in Sources */,
 				C26F5FDA21B0AA6D00EAE156 /* matpixel.cpp in Sources */,
@@ -2105,7 +2117,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
@@ -2127,62 +2138,14 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = (
-					"$(LOCAL_BOOST)/include",
-					"$(LOCAL_IMGUI)",
-					/usr/local/include,
-					"$(LOCAL_CEREAL)",
-					"$(SRCROOT)/../projects/Visible/include/plistcpp",
-					"$(LOCAL_CINDER)/include",
-					"$(SRCROOT)/include",
-					"$(LOCAL_EIGEN)",
-					"$(LOCAL_TINYXML)",
-					"$(LOCAL_SPDLOG)/include",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = /Applications;
-				LIBRARY_SEARCH_PATHS = (
-					/usr/local/lib,
-					"$(LOCAL_BOOST)/lib",
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
-					/usr/local/Cellar/tbb/2018_U5/lib/,
-					"$(PROJECT_DIR)",
-					"/usr/local/opencv-3.4.3/build/3rdparty/lib/$(CONFIGURATION)",
-					"/usr/local/opencv-3.4.3/build/lib/$(CONFIGURATION)",
-					/usr/local/Cellar/libdc1394/2.2.2_1/lib,
-					/usr/local/Cellar/ffmpeg/4.0.2/lib,
-					/usr/local/Cellar/libconfig/1.7.2/lib,
-					/usr/local/Cellar/boost/1.67.0_1/lib,
-					/usr/local/Cellar/tbb/2018_U5/lib,
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
-					"$(LOCAL_BOOST)/lib/libboost_system.a",
-					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
-					"$(LOCAL_BOOST)/lib/libboost_regex-mt.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_highgui.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_features2d.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_video.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_objdetect.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videostab.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a",
-					"$(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libittnotify.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibpng.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libIlmImf.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibwebp.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjpeg-turbo.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libzlib.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjasper.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a",
-				);
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
 				PROVISIONING_PROFILE = "";
@@ -2200,7 +2163,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
@@ -2222,62 +2184,14 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = (
-					"$(LOCAL_BOOST)/include",
-					"$(LOCAL_IMGUI)",
-					/usr/local/include,
-					"$(LOCAL_CEREAL)",
-					"$(SRCROOT)/../projects/Visible/include/plistcpp",
-					"$(LOCAL_CINDER)/include",
-					"$(SRCROOT)/include",
-					"$(LOCAL_EIGEN)",
-					"$(LOCAL_TINYXML)",
-					"$(LOCAL_SPDLOG)/include",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = /Applications;
-				LIBRARY_SEARCH_PATHS = (
-					/usr/local/lib,
-					"$(LOCAL_BOOST)/lib",
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
-					/usr/local/Cellar/tbb/2018_U5/lib/,
-					"$(PROJECT_DIR)",
-					"/usr/local/opencv-3.4.3/build/3rdparty/lib/$(CONFIGURATION)",
-					"/usr/local/opencv-3.4.3/build/lib/$(CONFIGURATION)",
-					/usr/local/Cellar/libdc1394/2.2.2_1/lib,
-					/usr/local/Cellar/ffmpeg/4.0.2/lib,
-					/usr/local/Cellar/libconfig/1.7.2/lib,
-					/usr/local/Cellar/boost/1.67.0_1/lib,
-					/usr/local/Cellar/tbb/2018_U5/lib,
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
-					"$(LOCAL_BOOST)/lib/libboost_system.a",
-					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
-					"$(LOCAL_BOOST)/lib/libboost_regex-mt.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_highgui.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_features2d.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_video.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_objdetect.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videostab.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a",
-					"$(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libittnotify.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibpng.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libIlmImf.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibwebp.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjpeg-turbo.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libzlib.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjasper.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a",
-				);
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
 				PROVISIONING_PROFILE = "";
@@ -2295,14 +2209,15 @@
 			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				ASSET_PACK_MANIFEST_URL_PREFIX = assets;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_IDENTITY = "Developer ID Application";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = W4F7HL2GN5;
+				ENABLE_TESTABILITY = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -2311,6 +2226,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				MACH_O_TYPE = mh_bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "";
 				SDKROOT = macosx;
 				SHARED_PRECOMPS_DIR = "";
@@ -2323,8 +2239,8 @@
 			baseConfigurationReference = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				ASSET_PACK_MANIFEST_URL_PREFIX = assets;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_IDENTITY = "Developer ID Application";
@@ -2349,7 +2265,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -2374,18 +2289,7 @@
 				GCC_REUSE_STRINGS = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
-				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include",
-					"$(LOCAL_BOOST)/include",
-					"$(LOCAL_IMGUI)",
-					/usr/local/include,
-					"$(LOCAL_CEREAL)",
-					"$(SRCROOT)/../projects/Visible/include/plistcpp",
-					"$(LOCAL_CINDER)/include",
-					"$(LOCAL_EIGEN)",
-					"$(LOCAL_TINYXML)",
-					"$(LOCAL_SPDLOG)/include",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "VisibletestApp-Info.plist";
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = (
@@ -2436,7 +2340,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -2461,18 +2364,7 @@
 				GCC_REUSE_STRINGS = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
-				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include",
-					"$(LOCAL_BOOST)/include",
-					"$(LOCAL_IMGUI)",
-					/usr/local/include,
-					"$(LOCAL_CEREAL)",
-					"$(SRCROOT)/../projects/Visible/include/plistcpp",
-					"$(LOCAL_CINDER)/include",
-					"$(LOCAL_EIGEN)",
-					"$(LOCAL_TINYXML)",
-					"$(LOCAL_SPDLOG)/include",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "VisibletestApp-Info.plist";
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = (
@@ -2570,19 +2462,7 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(LOCAL_BOOST)/include",
-					/usr/local/include,
-					"$(LOCAL_IMGUI)",
-					"$(LOCAL_CEREAL)",
-					"$(LOCAL_gtest)/include",
-					"$(LOCAL_CINDER)/include",
-					"$(SRCROOT)/include",
-					"$(LOCAL_EIGEN)",
-					"$(LOCAL_TINYXML)",
-					"$(SRCROOT)/include/plistcpp",
-					"$(LOCAL_SPDLOG)/include",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS = (
 					"/usr/local/opencv-3.4.3/build/lib/Release",
 					"$(LOCAL_BOOST)/lib",
@@ -2664,19 +2544,7 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(LOCAL_BOOST)/include",
-					/usr/local/include,
-					"$(LOCAL_IMGUI)",
-					"$(LOCAL_CEREAL)",
-					"$(LOCAL_gtest)/include",
-					"$(LOCAL_CINDER)/include",
-					"$(SRCROOT)/include",
-					"$(LOCAL_EIGEN)",
-					"$(LOCAL_TINYXML)",
-					"$(SRCROOT)/include/plistcpp",
-					"$(LOCAL_SPDLOG)/include",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS = (
 					"/usr/local/opencv-3.4.3/build/lib/Release",
 					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
@@ -2880,7 +2748,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -2905,18 +2772,7 @@
 				GCC_REUSE_STRINGS = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
-				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include",
-					"$(LOCAL_BOOST)/include",
-					"$(LOCAL_IMGUI)",
-					/usr/local/include,
-					"$(LOCAL_CEREAL)",
-					"$(SRCROOT)/../projects/Visible/include/plistcpp",
-					"$(LOCAL_CINDER)/include",
-					"$(LOCAL_EIGEN)",
-					"$(LOCAL_TINYXML)",
-					"$(LOCAL_SPDLOG)/include",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "VisibleRunner-Info.plist";
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = (
@@ -2967,7 +2823,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -2992,18 +2847,7 @@
 				GCC_REUSE_STRINGS = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
-				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include",
-					"$(LOCAL_BOOST)/include",
-					"$(LOCAL_IMGUI)",
-					/usr/local/include,
-					"$(LOCAL_CEREAL)",
-					"$(SRCROOT)/../projects/Visible/include/plistcpp",
-					"$(LOCAL_CINDER)/include",
-					"$(LOCAL_EIGEN)",
-					"$(LOCAL_TINYXML)",
-					"$(LOCAL_SPDLOG)/include",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "VisibleRunner-Info.plist";
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = (
