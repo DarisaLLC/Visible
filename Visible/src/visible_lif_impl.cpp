@@ -884,61 +884,61 @@ void  lifContext::SetupGUIVariables() {}
 
 void  lifContext::DrawGUI(){
     
-    if(ui::MenuItem("Looping", "S")){
-        loop_no_loop_button();
-    }
+ //   if(ui::MenuItem("Looping", "S")){
+ //       loop_no_loop_button();
+ //   }
     
-    {
-        // If Plots are ready, set them up
-        // It is ready only for new data
-        if ( is_ready (m_async_luminance_tracks) )
-            m_trackWeakRef = m_async_luminance_tracks.get();
-        if ( is_ready (m_async_pci_tracks))
-            m_pci_trackWeakRef = m_async_pci_tracks.get();
-        
-        if (! m_trackWeakRef.expired())
-        {
-            assert(channel_count() >= 3);
-            auto tracksRef = m_trackWeakRef.lock();
-          
-            
-            m_plots[0]->load(tracksRef->at(0));
-            m_plots[1]->load(tracksRef->at(1));
-        }
-        if ( ! m_pci_trackWeakRef.expired())
-        {
-            auto tracksRef = m_pci_trackWeakRef.lock();
-            m_plots[channel_count()-1]->load(tracksRef->at(0));
-        }
-        
-    }
-    
-    
-    {
-        if (ImGui::Begin("Settings", &m_showGUI)) {
-         
-            if (ImGui::CollapsingHeader("Display")) {
-              //  ShowDisplaySettings(runner_);
-            }
-            
-            ImGui::Spacing();
-            
-            if (ImGui::CollapsingHeader("Style")) {
-             //   ShowStyleSettings();
-            }
-        }
-        ImGui::End();
-    }
-    
-
-    {
-        static bool animate = true;
-        ImGui::Checkbox("Animate", &animate);
-        
-        static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
-        ImGui::PlotLines("Frame Times", arr, IM_ARRAYSIZE(arr));
-    }
-  
+//    {
+//        // If Plots are ready, set them up
+//        // It is ready only for new data
+//        if ( is_ready (m_async_luminance_tracks) )
+//            m_trackWeakRef = m_async_luminance_tracks.get();
+//        if ( is_ready (m_async_pci_tracks))
+//            m_pci_trackWeakRef = m_async_pci_tracks.get();
+//
+//        if (! m_trackWeakRef.expired())
+//        {
+//            assert(channel_count() >= 3);
+//            auto tracksRef = m_trackWeakRef.lock();
+//
+//
+//            m_plots[0]->load(tracksRef->at(0));
+//            m_plots[1]->load(tracksRef->at(1));
+//        }
+//        if ( ! m_pci_trackWeakRef.expired())
+//        {
+//            auto tracksRef = m_pci_trackWeakRef.lock();
+//            m_plots[channel_count()-1]->load(tracksRef->at(0));
+//        }
+//
+//    }
+//
+//
+//    {
+//        if (ImGui::Begin("Settings", &m_showGUI)) {
+//
+//            if (ImGui::CollapsingHeader("Display")) {
+//              //  ShowDisplaySettings(runner_);
+//            }
+//
+//            ImGui::Spacing();
+//
+//            if (ImGui::CollapsingHeader("Style")) {
+//             //   ShowStyleSettings();
+//            }
+//        }
+//        ImGui::End();
+//    }
+//
+//
+//    {
+//        static bool animate = true;
+//        ImGui::Checkbox("Animate", &animate);
+//
+//        static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
+//        ImGui::PlotLines("Frame Times", arr, IM_ARRAYSIZE(arr));
+//    }
+//
     
     //Draw general settings window
     if(m_showGUI)

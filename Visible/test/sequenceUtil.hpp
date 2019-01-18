@@ -15,294 +15,8 @@
 #include <stdio.h>
 #include <string>
 
-struct UndoRedo
-{
-    UndoRedo();
-    virtual ~UndoRedo();
-    
-    virtual void Undo()
-    {
-        if (mSubUndoRedo.empty())
-            return;
-        for (int i = int(mSubUndoRedo.size()) - 1; i >= 0; i--)
-        {
-            mSubUndoRedo[i]->Undo();
-        }
-    }
-    virtual void Redo()
-    {
-        for (auto& undoRedo : mSubUndoRedo)
-        {
-            undoRedo->Redo();
-        }
-    }
-    template <typename T> void AddSubUndoRedo(const T& subUndoRedo)
-    {
-        mSubUndoRedo.push_back(std::make_shared<T>(subUndoRedo));
-    }
-    void Discard() { mbDiscarded = true; }
-    bool IsDiscarded() const { return mbDiscarded; }
-protected:
-    std::vector<std::shared_ptr<UndoRedo> > mSubUndoRedo;
-    bool mbDiscarded;
-};
 
-struct UndoRedoHandler
-{
-    UndoRedoHandler() : mbProcessing(false), mCurrent(NULL) {}
-    ~UndoRedoHandler()
-    {
-        Clear();
-    }
-    
-    void Undo()
-    {
-        if (mUndos.empty())
-            return;
-        mbProcessing = true;
-        mUndos.back()->Undo();
-        mRedos.push_back(mUndos.back());
-        mUndos.pop_back();
-        mbProcessing = false;
-    }
-    
-    void Redo()
-    {
-        if (mRedos.empty())
-            return;
-        mbProcessing = true;
-        mRedos.back()->Redo();
-        mUndos.push_back(mRedos.back());
-        mRedos.pop_back();
-        mbProcessing = false;
-    }
-    
-    template <typename T> void AddUndo(const T &undoRedo)
-    {
-        if (undoRedo.IsDiscarded())
-            return;
-        if (mCurrent && &undoRedo != mCurrent)
-            mCurrent->AddSubUndoRedo(undoRedo);
-        else
-            mUndos.push_back(std::make_shared<T>(undoRedo));
-        mbProcessing = true;
-        mRedos.clear();
-        mbProcessing = false;
-    }
-    
-    void Clear()
-    {
-        mbProcessing = true;
-        mUndos.clear();
-        mRedos.clear();
-        mbProcessing = false;
-    }
-    
-    bool mbProcessing;
-    UndoRedo* mCurrent;
-    //private:
-    
-    std::vector<std::shared_ptr<UndoRedo> > mUndos;
-    std::vector<std::shared_ptr<UndoRedo> > mRedos;
-};
-
-extern UndoRedoHandler gUndoRedoHandler;
-
-inline UndoRedo::UndoRedo() : mbDiscarded(false)
-{
-    if (!gUndoRedoHandler.mCurrent)
-    {
-        gUndoRedoHandler.mCurrent = this;
-    }
-}
-
-inline UndoRedo::~UndoRedo()
-{
-    if (gUndoRedoHandler.mCurrent == this)
-    {
-        gUndoRedoHandler.mCurrent = NULL;
-    }
-}
-
-template<typename T> struct URChange : public UndoRedo
-{
-    URChange(int index, T* (*GetElements)(int index), void(*Changed)(int index) = [](int index) {}) : GetElements(GetElements), mIndex(index), Changed(Changed)
-    {
-        if (gUndoRedoHandler.mbProcessing)
-            return;
-        
-        mPreDo = *GetElements(mIndex);
-    }
-    virtual ~URChange()
-    {
-        if (gUndoRedoHandler.mbProcessing || mbDiscarded)
-            return;
-        
-        if (*GetElements(mIndex) != mPreDo)
-        {
-            mPostDo = *GetElements(mIndex);
-            gUndoRedoHandler.AddUndo(*this);
-        }
-        else
-        {
-            // TODO: should not be here unless asking for too much useless undo
-        }
-    }
-    virtual void Undo()
-    {
-        *GetElements(mIndex) = mPreDo;
-        Changed(mIndex);
-        UndoRedo::Undo();
-    }
-    virtual void Redo()
-    {
-        UndoRedo::Redo();
-        *GetElements(mIndex) = mPostDo;
-        Changed(mIndex);
-    }
-    
-    T mPreDo;
-    T mPostDo;
-    int mIndex;
-    
-    T* (*GetElements)(int index);
-    void(*Changed)(int index);
-};
-
-
-struct URDummy : public UndoRedo
-{
-    URDummy() : UndoRedo()
-    {
-        if (gUndoRedoHandler.mbProcessing)
-            return;
-    }
-    virtual ~URDummy()
-    {
-        if (gUndoRedoHandler.mbProcessing)
-            return;
-        
-        gUndoRedoHandler.AddUndo(*this);
-    }
-    virtual void Undo()
-    {
-        UndoRedo::Undo();
-    }
-    virtual void Redo()
-    {
-        UndoRedo::Redo();
-    }
-};
-
-
-template<typename T> struct URDel : public UndoRedo
-{
-    URDel(int index, std::vector<T>* (*GetElements)(), void(*OnDelete)(int index) = [](int index) {}, void(*OnNew)(int index) = [](int index) {}) : GetElements(GetElements), mIndex(index), OnDelete(OnDelete), OnNew(OnNew)
-    {
-        if (gUndoRedoHandler.mbProcessing)
-            return;
-        
-        mDeletedElement = (*GetElements())[mIndex];
-    }
-    virtual ~URDel()
-    {
-        if (gUndoRedoHandler.mbProcessing || mbDiscarded)
-            return;
-        // add to handler
-        gUndoRedoHandler.AddUndo(*this);
-    }
-    virtual void Undo()
-    {
-        GetElements()->insert(GetElements()->begin() + mIndex, mDeletedElement);
-        OnNew(mIndex);
-        UndoRedo::Undo();
-    }
-    virtual void Redo()
-    {
-        UndoRedo::Redo();
-        OnDelete(mIndex);
-        GetElements()->erase(GetElements()->begin() + mIndex);
-    }
-    
-    T mDeletedElement;
-    int mIndex;
-    
-    std::vector<T>* (*GetElements)();
-    void(*OnDelete)(int index);
-    void(*OnNew)(int index);
-};
-
-template<typename T> struct URAdd : public UndoRedo
-{
-    URAdd(int index, std::vector<T>* (*GetElements)(), void(*OnDelete)(int index)  = [](int index) {}, void(*OnNew)(int index) = [](int index) {}) : GetElements(GetElements), mIndex(index), OnDelete(OnDelete), OnNew(OnNew)
-    {
-    }
-    virtual ~URAdd()
-    {
-        if (gUndoRedoHandler.mbProcessing || mbDiscarded)
-            return;
-        
-        mAddedElement = (*GetElements())[mIndex];
-        // add to handler
-        gUndoRedoHandler.AddUndo(*this);
-    }
-    virtual void Undo()
-    {
-        OnDelete(mIndex);
-        GetElements()->erase(GetElements()->begin() + mIndex);
-        UndoRedo::Undo();
-    }
-    virtual void Redo()
-    {
-        UndoRedo::Redo();
-        GetElements()->insert(GetElements()->begin() + mIndex, mAddedElement);
-        OnNew(mIndex);
-    }
-    
-    T mAddedElement;
-    int mIndex;
-    
-    std::vector<T>* (*GetElements)();
-    void(*OnDelete)(int index);
-    void(*OnNew)(int index);
-};
-
-struct NodeGraphDelegate
-{
-    NodeGraphDelegate() : mSelectedNodeIndex(-1), mCategoriesCount(0), mCategories(0)
-    {}
-    
-    int mSelectedNodeIndex;
-    int mCategoriesCount;
-    const char ** mCategories;
-    
 #if 0
-    virtual void UpdateEvaluationList(const std::vector<size_t> nodeOrderList) = 0;
-    virtual void AddLink(int InputIdx, int InputSlot, int OutputIdx, int OutputSlot) = 0;
-    virtual void DelLink(int index, int slot) = 0;
-    virtual unsigned int GetNodeTexture(size_t index) = 0;
-    // A new node has been added in the graph. Do a push_back on your node array
-    // add node for batch(loading graph)
-    virtual void AddSingleNode(size_t type) = 0;
-    // add  by user interface
-    virtual void UserAddNode(size_t type) = 0;
-    // node deleted
-    virtual void UserDeleteNode(size_t index) = 0;
-    virtual ImVec2 GetEvaluationSize(size_t index) = 0;
-    virtual void DoForce() = 0;
-    virtual void SetParamBlock(size_t index, const std::vector<unsigned char>& paramBlock) = 0;
-    virtual void SetTimeSlot(size_t index, int frameStart, int frameEnd) = 0;
-    virtual bool NodeHasUI(size_t nodeIndex) = 0;
-    virtual bool NodeIsProcesing(size_t nodeIndex) = 0;
-    virtual bool NodeIsCubemap(size_t nodeIndex) = 0;
-    // clipboard
-    virtual void CopyNodes(const std::vector<size_t> nodes) = 0;
-    virtual void CutNodes(const std::vector<size_t> nodes) = 0;
-    virtual void PasteNodes() = 0;
-#endif
-    
-};
-
 struct Node
 {
     int     mType;
@@ -315,14 +29,57 @@ struct Node
     ImVec2 GetInputSlotPos(int slot_no, float factor) const { return ImVec2(Pos.x*factor, Pos.y*factor + Size.y * ((float)slot_no + 1) / ((float)InputsCount + 1)); }
     ImVec2 GetOutputSlotPos(int slot_no, float factor) const { return ImVec2(Pos.x*factor + Size.x, Pos.y*factor + Size.y * ((float)slot_no + 1) / ((float)OutputsCount + 1)); }
 };
+#endif
+
+struct Evaluation
+{
+    Evaluation();
+    
+    void Init();
+    void Finish();
+    
+    
+    void AddSingleEvaluation(size_t nodeType);
+    void UserAddEvaluation(size_t nodeType);
+    void UserDeleteEvaluation(size_t target);
+    
+    //
+    size_t GetEvaluationImageDuration(size_t target);
+    
+    void SetEvaluationParameters(size_t target, const std::vector<unsigned char>& parameters);
+    void AddEvaluationInput(size_t target, int slot, int source);
+    void DelEvaluationInput(size_t target, int slot);
+    void SetMouse(int target, float rx, float ry, bool lButDown, bool rButDown);
+    void Clear();
+    
+    void SetStageLocalTime(size_t target, int localTime, bool updateDecoder);
+    
+private:
+    // mouse
+    float mRx;
+    float mRy;
+    bool mLButDown;
+    bool mRButDown;
+    
+protected:
+    std::map<std::string, unsigned int> mSynchronousTextureCache;
+
+    
+};
+
+
 
 class trackUIContainer //: public NodeGraphDelegate
 {
 public:
+    trackUIContainer():mFrameMin(0), mFrameMax(0),  mbMouseDragging(false), mIsSet(false) {}
     
- 
     
-    trackUIContainer(const duration_time_t& entire, const  std::shared_ptr<vectorOfnamedTrackOfdouble_t>& );
+    void set(const duration_time_t& entire, const  std::shared_ptr<vectorOfnamedTrackOfdouble_t>& );
+    void setTimeSlot(size_t index, int frameStart, int frameEnd);
+    void setTimeDuration(size_t index, int duration);
+    void setTime(int time, bool updateDecoder);
+    void clear ();
     
     struct UInode
     {
@@ -355,18 +112,19 @@ public:
     typedef trackUIContainer::UInode node_t;
     
     std::weak_ptr<vectorOfnamedTrackOfdouble_t> m_weakRef;
-    
+    int mSelectedNodeIndex;
     int mFrameMin, mFrameMax;
     bool mbMouseDragging;
     std::vector<node_t> mNodes;
+    bool mIsSet;
     
 protected:
-    void InitDefault(UInode& node);
+//    void InitDefault(UInode& node);
 };
 
 struct MySequence : public ImSequencer::SequenceInterface
 {
-    MySequence(trackUIContainer &nodeGraphDelegate) : mNodeGraphDelegate(nodeGraphDelegate), setKeyFrameOrValue(FLT_MAX, FLT_MAX){}
+    MySequence(trackUIContainer &nodeGraphDelegate) : m_uicontainer(nodeGraphDelegate), setKeyFrameOrValue(FLT_MAX, FLT_MAX){}
     
     void Clear()
     {
@@ -403,9 +161,9 @@ struct MySequence : public ImSequencer::SequenceInterface
         if (color)
             *color = 0xFFAAAAAA; //gMetaNodes[nodeType].mHeaderColor;
         if (start)
-            *start = &mNodeGraphDelegate.mNodes[index].mStartFrame;
+            *start = &m_uicontainer.mNodes[index].mStartFrame;
         if (end)
-            *end = &mNodeGraphDelegate.mNodes[index].mEndFrame;
+            *end = &m_uicontainer.mNodes[index].mEndFrame;
         if (type)
             *type = 0; //int(nodeType);
     }
@@ -436,7 +194,7 @@ struct MySequence : public ImSequencer::SequenceInterface
     virtual void CustomDraw(int index, ImDrawList* draw_list, const ImRect& rc, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect);
    
     
-    trackUIContainer &mNodeGraphDelegate;
+    trackUIContainer &m_uicontainer;
     std::vector<bool> mbExpansions;
     std::vector<bool> mbVisible;
     ImVector<ImCurveEdit::EditPoint> mSelectedCurvePoints;
@@ -444,8 +202,9 @@ struct MySequence : public ImSequencer::SequenceInterface
     ImVec2 setKeyFrameOrValue;
     ImVec2 getKeyFrameOrValue;
     float mCurveMin, mCurveMax;
-    URChange<trackUIContainer::UInode> *undoRedoChange;
+//    URChange<trackUIContainer::UInode> *undoRedoChange;
 };
+
 
 
 #endif /* sequenceUtil_hpp */

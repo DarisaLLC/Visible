@@ -16,6 +16,23 @@
 #include "imgui_internal.h"
 
 
+std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655, 39.0342,
+    38.8791, 38.8527, 39.0099, 38.8608, 38.9188, 38.8499, 38.6693,
+    38.2513, 37.9095, 37.3313, 36.765, 36.3621, 35.7261, 35.0656,
+    34.2602, 33.2523, 32.3183, 31.6464, 31.0073, 29.8166, 29.3423,
+    28.5223, 27.5152, 26.8191, 26.3114, 25.8164, 25.0818, 24.7631,
+    24.6277, 24.8184, 25.443, 26.2479, 27.8759, 29.2094, 30.7956,
+    32.3586, 33.6268, 35.1586, 35.9315, 36.808, 37.3002, 37.67, 37.9986,
+    38.2788, 38.465, 38.5513, 38.6818, 38.8076, 38.9388, 38.9592,
+    39.058, 39.1322, 39.0803, 39.1779, 39.1531, 39.1375, 39.1978,
+    39.0379, 39.1231, 39.202, 39.1581, 39.1777, 39.2971, 39.2366,
+    39.1555, 39.2822, 39.243, 39.1807, 39.1488, 39.2491, 39.265, 39.198,
+    39.2855, 39.2595, 39.4274, 39.3258, 39.3162, 39.4143, 39.3034,
+    39.2099, 39.2775, 39.5042, 39.1446, 39.188, 39.2006, 39.1799,
+    39.4077, 39.2694, 39.1967, 39.2828, 39.2438, 39.2093, 39.2167,
+    39.2749, 39.4703, 39.2846};
+
+
 #include "Resources.h"
 
 using namespace std;
@@ -55,13 +72,13 @@ void SetStyle()
     st.FramePadding = ImVec2(4.0f,2.0f);
     st.ItemSpacing = ImVec2(8.0f,2.0f);
     st.WindowBorderSize = 1.0f;
- //   st.TabBorderSize = 1.0f;
+    //   st.TabBorderSize = 1.0f;
     st.WindowRounding = 1.0f;
     st.ChildRounding = 1.0f;
     st.FrameRounding = 1.0f;
     st.ScrollbarRounding = 1.0f;
     st.GrabRounding = 1.0f;
-  //  st.TabRounding = 1.0f;
+    //  st.TabRounding = 1.0f;
     
     // Setup style
     ImVec4* colors = ImGui::GetStyle().Colors;
@@ -98,11 +115,11 @@ void SetStyle()
     colors[ImGuiCol_ResizeGrip] = ImVec4(0.87f, 0.87f, 0.87f, 0.53f);
     colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.87f, 0.87f, 0.87f, 0.74f);
     colors[ImGuiCol_ResizeGripActive] = ImVec4(0.87f, 0.87f, 0.87f, 0.74f);
- //   colors[ImGuiCol_Tab] = ImVec4(0.01f, 0.01f, 0.01f, 0.86f);
- //   colors[ImGuiCol_TabHovered] = ImVec4(0.29f, 0.29f, 0.79f, 1.00f);
- //   colors[ImGuiCol_TabActive] = ImVec4(0.31f, 0.31f, 0.91f, 1.00f);
- //   colors[ImGuiCol_TabUnfocused] = ImVec4(0.02f, 0.02f, 0.02f, 1.00f);
- //   colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
+    //   colors[ImGuiCol_Tab] = ImVec4(0.01f, 0.01f, 0.01f, 0.86f);
+    //   colors[ImGuiCol_TabHovered] = ImVec4(0.29f, 0.29f, 0.79f, 1.00f);
+    //   colors[ImGuiCol_TabActive] = ImVec4(0.31f, 0.31f, 0.91f, 1.00f);
+    //   colors[ImGuiCol_TabUnfocused] = ImVec4(0.02f, 0.02f, 0.02f, 1.00f);
+    //   colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
     //  colors[ImGuiCol_DockingPreview] = ImVec4(0.38f, 0.48f, 0.60f, 1.00f);
     //  colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
     colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
@@ -137,6 +154,7 @@ public:
     void prepareSettings( Settings *settings );
     
     void setup()override{
+#if 1
         ui::initialize(ui::Options()
                        .window(getWindow())
                        .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
@@ -145,16 +163,34 @@ public:
                        .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
                        //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
                        );
+#endif
+        
         SetStyle ();
         setFrameRate( 60 );
         setWindowPos(getWindowSize()/4);
         getWindow()->setAlwaysOnTop();
         
         
+        ntrack.first = " Length ";
+        timed_double_vec_t& data = ntrack.second;
+        data.resize(acid.size());
+        for (int tt = 0; tt < acid.size(); tt++){
+            data[tt].second = acid[tt];
+            data[tt].first.first = tt;
+            data[tt].first.second = time_spec_t(tt / 1000.0);
+        }
+        m_tracks_ref = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
+        m_tracks_ref->push_back(ntrack);
         
+        duration_time_t duration;
+        duration.first = ntrack.second.front().first;
+        duration.second = ntrack.second.back().first;
         
+        m_uiContainer.set(duration, m_tracks_ref);
+        m_sequence = std::make_shared<MySequence>(m_uiContainer);
         
     }
+    
     void mouseDown( MouseEvent event )override{
         cinder::app::App::mouseDown(event);
     }
@@ -184,7 +220,7 @@ public:
     }
     virtual void DrawGUI() override{
         ImGuiIO& io = ImGui::GetIO();
-    //    ImGui::ScopedMainMenuBar menubar;
+        //    ImGui::ScopedMainMenuBar menubar;
         ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
         
         ImVec2 rc = ImGui::GetItemRectSize();
@@ -194,8 +230,8 @@ public:
         ImGui::SetNextWindowSize(tmp);
         //  int mSelectedNodeIndex = 0;
         int gEvaluationTime = 0;
-     //   int mFrameMin = 0;
-     //   int mFrameMax = 0;
+        //   int mFrameMin = 0;
+        //   int mFrameMax = 0;
         
         if (ImGui::Begin("Visible", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
                          ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |ImGuiWindowFlags_NoScrollWithMouse |
@@ -203,17 +239,17 @@ public:
         {
             if (ImGui::Begin("Timeline"))
             {
-                int selectedEntry =  gNodeDelegate.mSelectedNodeIndex;
+                int selectedEntry =  0; //gNodeDelegate.mSelectedNodeIndex;
                 static int firstFrame = 0;
                 int currentTime = gEvaluationTime;
                 
                 ImGui::PushItemWidth(80);
                 ImGui::PushID(200);
-                ImGui::InputInt("", &gNodeDelegate.mFrameMin, 0, 0);
+                ImGui::InputInt("", &m_uiContainer.mFrameMin, 0, 0);
                 ImGui::PopID();
                 ImGui::SameLine();
                 if (ImGui::Button("|<"))
-                    currentTime = gNodeDelegate.mFrameMin;
+                    currentTime = m_uiContainer.mFrameMin;
                 ImGui::SameLine();
                 if (ImGui::Button("<"))
                     currentTime--;
@@ -230,97 +266,103 @@ public:
                     currentTime++;
                 ImGui::SameLine();
                 if (ImGui::Button(">|"))
-                    currentTime = gNodeDelegate.mFrameMax;
+                    currentTime = m_uiContainer.mFrameMax;
                 ImGui::SameLine();
                 extern bool gbIsPlaying;
                 if (ImGui::Button(gbIsPlaying ? "Stop" : "Play"))
                 {
                     if (!gbIsPlaying)
                     {
-                        currentTime = gNodeDelegate.mFrameMin;
+                        currentTime = m_uiContainer.mFrameMin;
                     }
                     gbIsPlaying = !gbIsPlaying;
                 }
-#if 1
-            extern bool gPlayLoop;
+
+                extern bool gPlayLoop;
                 if(mNoLoop == nullptr){
                     mNoLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PNLOOP  )));
                 }
                 if (mLoop == nullptr){
-                      mLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PLOOP )));
+                    mLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PLOOP )));
                 }
                 
-            unsigned int playNoLoopTextureId = mNoLoop->getId();//  evaluation.GetTexture("Stock/PlayNoLoop.png");
-            unsigned int playLoopTextureId = mLoop->getId(); //evaluation.GetTexture("Stock/PlayLoop.png");
-            
-            ImGui::SameLine();
-            if (ImGui::ImageButton((ImTextureID)(uint64_t)(gPlayLoop ? playLoopTextureId : playNoLoopTextureId), ImVec2(16.f, 16.f)))
-                gPlayLoop = !gPlayLoop;
-            
-            ImGui::SameLine();
-            ImGui::PushID(202);
-            ImGui::InputInt("", & gNodeDelegate.mFrameMax, 0, 0);
-            ImGui::PopID();
-            ImGui::SameLine();
-            currentTime = ImMax(currentTime, 0);
-            ImGui::SameLine(0, 40.f);
-            if (ImGui::Button("Make Key") && selectedEntry != -1)
-            {
-         //       nodeGraphDelegate.MakeKey(currentTime, uint32_t(selectedEntry), 0);
-            }
-            
-            ImGui::SameLine(0, 50.f);
-            
-            int setf = (mySequence.getKeyFrameOrValue.x<FLT_MAX)? int(mySequence.getKeyFrameOrValue.x):0;
-            ImGui::PushID(203);
-            if (ImGui::InputInt("", &setf, 0, 0))
-            {
-                mySequence.setKeyFrameOrValue.x = float(setf);
-            }
-            ImGui::SameLine();
-            float setv = (mySequence.getKeyFrameOrValue.y < FLT_MAX) ? mySequence.getKeyFrameOrValue.y : 0.f;
-            if (ImGui::InputFloat("Key", &setv))
-            {
-                mySequence.setKeyFrameOrValue.y = setv;
-            }
-            ImGui::PopID();
-            ImGui::SameLine();
-            int timeMask[2] = { 0,0 };
-            if (selectedEntry != -1)
-            {
-                timeMask[0] = gNodeDelegate.mNodes[selectedEntry].mStartFrame;
-                timeMask[1] = gNodeDelegate.mNodes[selectedEntry].mEndFrame;
-            }
-            ImGui::PushItemWidth(120);
-            if (ImGui::InputInt2("Time Mask", timeMask) && selectedEntry != -1)
-            {
-              //  URChange<TileNodeEditGraphDelegate::ImogenNode> undoRedoChange(selectedEntry, [](int index) { return &gNodeDelegate.mNodes[index]; });
-                timeMask[1] = ImMax(timeMask[1], timeMask[0]);
-                timeMask[0] = ImMin(timeMask[1], timeMask[0]);
-             //   gNodeDelegate.SetTimeSlot(selectedEntry, timeMask[0], timeMask[1]);
-            }
-            ImGui::PopItemWidth();
-            ImGui::PopItemWidth();
-            
-                ImSequencer::Sequencer(&mySequence, &currentTime, NULL, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_CHANGE_FRAME);
-            if (selectedEntry != -1)
-            {
-                gNodeDelegate.mSelectedNodeIndex = selectedEntry;
-               // NodeGraphSelectNode(selectedEntry);
-             //   auto& imoNode = gNodeDelegate.mNodes[selectedEntry];
-            //    gEvaluation.SetStageLocalTime(selectedEntry, ImClamp(currentTime - imoNode.mStartFrame, 0, imoNode.mEndFrame - imoNode.mStartFrame), true);
-            }
-            if (currentTime != gEvaluationTime)
-            {
-                gEvaluationTime = currentTime;
-           //     nodeGraphDelegate.SetTime(currentTime, true);
-            //    nodeGraphDelegate.ApplyAnimation(currentTime);
-            }
-        }
-            ImGui::End();
-
-            
+                unsigned int playNoLoopTextureId = mNoLoop->getId();//  evaluation.GetTexture("Stock/PlayNoLoop.png");
+                unsigned int playLoopTextureId = mLoop->getId(); //evaluation.GetTexture("Stock/PlayLoop.png");
+                
+                ImGui::SameLine();
+                if (ImGui::ImageButton((ImTextureID)(uint64_t)(gPlayLoop ? playLoopTextureId : playNoLoopTextureId), ImVec2(16.f, 16.f)))
+                    gPlayLoop = !gPlayLoop;
+                
+                ImGui::SameLine();
+                ImGui::PushID(202);
+                ImGui::InputInt("", & m_uiContainer.mFrameMax, 0, 0);
+                ImGui::PopID();
+                ImGui::SameLine();
+                currentTime = ImMax(currentTime, 0);
+                ImGui::SameLine(0, 40.f);
+                if (ImGui::Button("Make Key") && selectedEntry != -1)
+                {
+                    //       nodeGraphDelegate.MakeKey(currentTime, uint32_t(selectedEntry), 0);
+                }
+                
+                ImGui::SameLine(0, 50.f);
+                
+                int setf = (m_sequence->getKeyFrameOrValue.x<FLT_MAX)? int(m_sequence->getKeyFrameOrValue.x):0;
+                ImGui::PushID(203);
+                if (ImGui::InputInt("", &setf, 0, 0))
+                {
+                    m_sequence->setKeyFrameOrValue.x = float(setf);
+                }
+                ImGui::SameLine();
+                float setv = (m_sequence->getKeyFrameOrValue.y < FLT_MAX) ? m_sequence->getKeyFrameOrValue.y : 0.f;
+                if (ImGui::InputFloat("Key", &setv))
+                {
+                    m_sequence->setKeyFrameOrValue.y = setv;
+                }
+                ImGui::PopID();
+                ImGui::SameLine();
+                int timeMask[2] = { 0,0 };
+                if (selectedEntry != -1)
+                {
+                    timeMask[0] = m_uiContainer.mNodes[selectedEntry].mStartFrame;
+                    timeMask[1] = m_uiContainer.mNodes[selectedEntry].mEndFrame;
+                }
+                ImGui::PushItemWidth(120);
+                if (ImGui::InputInt2("Time Mask", timeMask) && selectedEntry != -1)
+                {
+                    //  URChange<TileNodeEditGraphDelegate::ImogenNode> undoRedoChange(selectedEntry, [](int index) { return &gNodeDelegate.mNodes[index]; });
+                    timeMask[1] = ImMax(timeMask[1], timeMask[0]);
+                    timeMask[0] = ImMin(timeMask[1], timeMask[0]);
+                    m_uiContainer.setTimeSlot(selectedEntry, timeMask[0], timeMask[1]);
+                }
+                ImGui::PopItemWidth();
+                ImGui::PopItemWidth();
+                
+                ImSequencer::Sequencer(m_sequence.get(), &currentTime, NULL, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_ALL |  ImSequencer::SEQUENCER_ADD |  ImSequencer::SEQUENCER_DEL);
+                std::cout << "T: " << currentTime << "  E: " << selectedEntry << "  FF: " << firstFrame << std::endl;
+                
+#if 1 //NEXT_TO_DETERMINE
+                if (selectedEntry != -1)
+                {
+                    m_uiContainer.mSelectedNodeIndex = selectedEntry;
+                    // NodeGraphSelectNode(selectedEntry);
+                    auto& imoNode = m_uiContainer.mNodes[selectedEntry];
+                    auto pt = ImClamp(currentTime - imoNode.mStartFrame, 0, imoNode.mEndFrame - imoNode.mStartFrame);
+                    std::cout << pt << std::endl;
+                    //    gEvaluation.SetStageLocalTime(selectedEntry, ImClamp(currentTime - imoNode.mStartFrame, 0, imoNode.mEndFrame - imoNode.mStartFrame), true);
+                }
+                if (currentTime != gEvaluationTime)
+                {
+                    gEvaluationTime = currentTime;
+                    m_uiContainer.setTime(currentTime, true);
+                    //    m_uiContainer.ApplyAnimation(currentTime);
+                }
 #endif
+            }
+            ImGui::End();
+            
+            
+
             if (ImGui::Begin("Nodes"))
             {
                 ImGui::PushItemWidth(150);
@@ -369,7 +411,7 @@ public:
         ImGui::End();
     }
     
-
+    
     
     void draw()override{
         gl::clear( Color::gray( 0.5f ) );
@@ -380,8 +422,10 @@ public:
     
 private:
     ci::gl::TextureRef    mNoLoop, mLoop;
-    trackUIContainer gNodeDelegate;
-    
+    trackUIContainer m_uiContainer;
+    namedTrackOfdouble_t ntrack;
+    std::shared_ptr<vectorOfnamedTrackOfdouble_t> m_tracks_ref;
+    std::shared_ptr<MySequence> m_sequence;
     
 };
 
