@@ -128,7 +128,6 @@
 		C2398A7721DF224B00B180A0 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
 		C2398A7821DF224B00B180A0 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0091D8F80E81B9330029341E /* OpenGL.framework */; };
 		C2398A7921DF224B00B180A0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		C2398A8021DF227000B180A0 /* ut_gui_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */; };
 		C2398A8121DF239700B180A0 /* VisibleRunApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946771CE4DC7100976025 /* VisibleRunApp.cpp */; };
 		C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
 		C23CFBDC21E7D96800C1DF16 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23CFBDB21E7D96800C1DF16 /* ImSequencer.cpp */; };
@@ -142,6 +141,7 @@
 		C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
 		C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
 		C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
+		C23E343521F14C2400221E68 /* ut_gui_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */; };
 		C240F9FB21E14C8900FBA228 /* sscli-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C240F9FA21E14C8900FBA228 /* sscli-Info.plist */; };
 		C240FA0121E15B0B00FBA228 /* imguivariouscontrols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C240F9FC21E15AC900FBA228 /* imguivariouscontrols.cpp */; };
 		C242CCC5217E76D8004F7867 /* contraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction.cpp */; };
@@ -499,6 +499,8 @@
 		C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../local/tinyxml/tinyxml.cpp; sourceTree = "<group>"; };
 		C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../local/tinyxml/tinyxmlerror.cpp; sourceTree = "<group>"; };
 		C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
+		C23E343221F142D200221E68 /* undoUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = undoUtils.h; path = ../test/undoUtils.h; sourceTree = "<group>"; };
+		C23E343421F1477D00221E68 /* imgui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imgui.h; path = "../../externals/docking-imgui/imgui/imgui.h"; sourceTree = "<group>"; };
 		C240F9FA21E14C8900FBA228 /* sscli-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "sscli-Info.plist"; sourceTree = "<group>"; };
 		C240F9FC21E15AC900FBA228 /* imguivariouscontrols.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imguivariouscontrols.cpp; path = ../src/imguivariouscontrols.cpp; sourceTree = "<group>"; };
 		C240F9FE21E15ADE00FBA228 /* imguivariouscontrols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imguivariouscontrols.h; path = ../include/imguivariouscontrols.h; sourceTree = "<group>"; };
@@ -1154,6 +1156,7 @@
 				C23CFBDB21E7D96800C1DF16 /* ImSequencer.cpp */,
 				C23CFBDD21E9422F00C1DF16 /* sequenceUtil.cpp */,
 				C23CFBDE21E9422F00C1DF16 /* sequenceUtil.hpp */,
+				C23E343221F142D200221E68 /* undoUtils.h */,
 				C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */,
 				C23CFBDA21E6C3D700C1DF16 /* ut_gui_plot.cpp */,
 			);
@@ -1584,6 +1587,7 @@
 		C29C726F216FC7340028AED1 /* imgui */ = {
 			isa = PBXGroup;
 			children = (
+				C23E343421F1477D00221E68 /* imgui.h */,
 				C2AFCF08216F0CF10080462D /* CinderImGui.cpp */,
 				C2AFCEFD216E79590080462D /* imgui_demo.cpp */,
 				C2AFCEFB216E79580080462D /* imgui_draw.cpp */,
@@ -1921,6 +1925,7 @@
 				C2398A4021DF224B00B180A0 /* Plist.cpp in Sources */,
 				C2398A4121DF224B00B180A0 /* tinyxmlparser.cpp in Sources */,
 				C2398A4221DF224B00B180A0 /* localvariance.cpp in Sources */,
+				C23E343521F14C2400221E68 /* ut_gui_main.cpp in Sources */,
 				C2398A4321DF224B00B180A0 /* ObjectContainer.cpp in Sources */,
 				C2398A4421DF224B00B180A0 /* pugixml.cpp in Sources */,
 				C2398A4521DF224B00B180A0 /* lineseg.cpp in Sources */,
@@ -1938,7 +1943,6 @@
 				C2398A5021DF224B00B180A0 /* window.cc in Sources */,
 				C23CFBDF21E9422F00C1DF16 /* sequenceUtil.cpp in Sources */,
 				C2398A5121DF224B00B180A0 /* imgui_draw.cpp in Sources */,
-				C2398A8021DF227000B180A0 /* ut_gui_main.cpp in Sources */,
 				C2398A5221DF224B00B180A0 /* rowfunc.cpp in Sources */,
 				C2398A5321DF224B00B180A0 /* csv.cpp in Sources */,
 				C2398A5521DF224B00B180A0 /* tinyxml.cpp in Sources */,

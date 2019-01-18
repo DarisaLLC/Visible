@@ -85,6 +85,7 @@ public:
     }
     
     void prepareSettings( Settings *settings );
+    
     void setup()override{
         ui::initialize(ui::Options()
                        .window(getWindow())
