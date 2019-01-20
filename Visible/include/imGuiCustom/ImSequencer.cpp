@@ -46,7 +46,7 @@ namespace ImSequencer
         int ItemHeight = 20;
 
         bool popupOpened = false;
-        int sequenceCount = sequence->GetItemCount();
+        auto sequenceCount = sequence->GetItemCount();
         if (!sequenceCount)
             return false;
         ImGui::BeginGroup();
@@ -58,7 +58,7 @@ namespace ImSequencer
         int firstFrameUsed = firstFrame ? *firstFrame : 0;
 
 
-        int controlHeight = sequenceCount * ItemHeight;
+        auto controlHeight = sequenceCount * ItemHeight;
         for (int i = 0; i < sequenceCount; i++)
             controlHeight += int(sequence->GetCustomHeight(i));
         int frameCount = ImMax(sequence->GetFrameMax() - sequence->GetFrameMin(), 1);
@@ -116,7 +116,7 @@ namespace ImSequencer
             ImGui::InvisibleButton("canvas", ImVec2(canvas_size.x - canvas_pos.x, (float)ItemHeight));
             draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_size.x + canvas_pos.x, canvas_pos.y + ItemHeight), 0xFF3D3837, 0);
             char tmps[512];
-            sprintf(tmps, "%d Frames / %d entries", frameCount, sequenceCount);
+            sprintf(tmps, "%d Frames / %d entries", frameCount, (int) sequenceCount);
             draw_list->AddText(ImVec2(canvas_pos.x + 26, canvas_pos.y + 2), 0xFFFFFFFF, tmps);
         }
         else
@@ -182,7 +182,7 @@ namespace ImSequencer
                         if (ImGui::Selectable(sequence->GetItemTypeName(i)))
                         {
                             sequence->Add(i);
-                            *selectedEntry = sequence->GetItemCount() - 1;
+                            *selectedEntry = (int) sequence->GetItemCount() - 1;
                         }
 
                     ImGui::EndPopup();

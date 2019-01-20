@@ -971,9 +971,6 @@
 		29B97314FDCFA39411CA2CEA /* QuickTimeIteration */ = {
 			isa = PBXGroup;
 			children = (
-				C23CFBE521E9785000C1DF16 /* PlayLoop.png */,
-				C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */,
-				C23CFBE321E96D6700C1DF16 /* Resources.h */,
 				C2175DD22150B779004315C0 /* Visible.entitlements */,
 				C260099A1CED3E010045FF57 /* svl */,
 				C21946B11CE4EA6100976025 /* include */,
@@ -1008,6 +1005,9 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C23CFBE521E9785000C1DF16 /* PlayLoop.png */,
+				C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */,
+				C23CFBE321E96D6700C1DF16 /* Resources.h */,
 				C294B11F2152D22C00C916B1 /* Media.xcassets */,
 				C2820F2D217527EE00DFA7A6 /* Config */,
 				C264F94B215F0B6D00AF3130 /* Visible.icns */,

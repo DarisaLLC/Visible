@@ -7,42 +7,61 @@
 #include <algorithm>
 #include "ImCurveEdit.h"
 #include "imgui_internal.h"
+#include "async_tracks.h"
 
 #include <cstddef>
 
-static const char* SequencerItemTypeNames[] = { "Lif","Contractions", "ManualLength", "Contraction90Pct", "Relaxation90Pct" };
+using namespace std;
+
+//static const char* SequencerItemTypeNames[] = { "Lif","Contractions", "ManualLength", "Contraction90Pct", "Relaxation90Pct" };
 
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
 
-struct RampEdit : public ImCurveEdit::Delegate
+class RampEdit : public ImCurveEdit::Delegate
 {
-    RampEdit()
+    std::vector<std::vector<ImVec2>> mPts; // [3][8];
+    std::vector<size_t> mPointCount;
+    std::vector<bool> mbVisible;
+    ImVec2 mMin;
+    ImVec2 mMax;
+    
+public:
+    RampEdit(size_t plot_count)
     {
-        mPts[0][0] = ImVec2(-10.f, 0);
-        mPts[0][1] = ImVec2(20.f, 0.6f);
-        mPts[0][2] = ImVec2(25.f, 0.2f);
-        mPts[0][3] = ImVec2(70.f, 0.4f);
-        mPts[0][4] = ImVec2(120.f, 1.f);
-        mPointCount[0] = 5;
-        
-        mPts[1][0] = ImVec2(-50.f, 0.2f);
-        mPts[1][1] = ImVec2(33.f, 0.7f);
-        mPts[1][2] = ImVec2(80.f, 0.2f);
-        mPts[1][3] = ImVec2(82.f, 0.8f);
-        mPointCount[1] = 4;
-        
-        
-        mPts[2][0] = ImVec2(40.f, 0);
-        mPts[2][1] = ImVec2(60.f, 0.1f);
-        mPts[2][2] = ImVec2(90.f, 0.82f);
-        mPts[2][3] = ImVec2(150.f, 0.24f);
-        mPts[2][4] = ImVec2(200.f, 0.34f);
-        mPts[2][5] = ImVec2(250.f, 0.12f);
-        mPointCount[2] = 6;
-        mbVisible[0] = mbVisible[1] = mbVisible[2] = true;
+        mPts.resize(plot_count);
+        mPointCount.resize(plot_count);
+        mbVisible.resize(plot_count);
+      
         mMax = ImVec2(1.f, 1.f);
         mMin = ImVec2(0.f, 0.f);
     }
+    
+    void load (const namedTrackOfdouble_t& track, int index)
+    {
+        const timed_double_vec_t& ds = track.second;
+        std::vector<float> mBuffer;
+        std::vector<timed_double_t>::const_iterator reader = ds.begin ();
+        while (reader++ != ds.end())mBuffer.push_back (reader->second);
+        svl::norm_min_max (mBuffer.begin(), mBuffer.end(), true);
+        
+        std::vector<ImVec2>& pts = mPts[index];
+        pts.clear();
+        reader = ds.begin ();
+        std::vector<float>::const_iterator bItr = mBuffer.begin();
+        while (reader++ != ds.end() && bItr++ != mBuffer.end() ){
+            pts.emplace_back(reader->first.first, *bItr);
+        }
+        mPointCount[index] = pts.size();
+        mbVisible[index] = true;
+        mMax = ImVec2(1.f, 1.f);
+        mMin = ImVec2(0.f, 0.f);
+    }
+    
+    const std::vector<size_t>& pointCount () { return mPointCount; }
+    const std::vector<std::vector<ImVec2>>& points () { return mPts; }
+    std::vector<bool>& visibles () { return mbVisible; }
+    
+    
     size_t GetCurveCount()
     {
         return 3;
@@ -62,7 +81,7 @@ struct RampEdit : public ImCurveEdit::Delegate
         uint32_t cols[] = { 0xFF0000FF, 0xFF00FF00, 0xFFFF0000 };
         return cols[curveIndex];
     }
-    ImVec2* GetPoints(size_t curveIndex)
+    const vector<ImVec2>& GetPoints(size_t curveIndex)
     {
         return mPts[curveIndex];
     }
@@ -87,12 +106,11 @@ struct RampEdit : public ImCurveEdit::Delegate
     }
     virtual ImVec2& GetMax() { return mMax; }
     virtual ImVec2& GetMin() { return mMin; }
+    virtual void SetMax(const ImVec2& maxv) { mMax = maxv; }
+    virtual void SetMin(const ImVec2& minv) { mMin = minv; }
+    
     virtual unsigned int GetBackgroundColor() { return 0; }
-    ImVec2 mPts[3][8];
-    size_t mPointCount[3];
-    bool mbVisible[3];
-    ImVec2 mMin;
-    ImVec2 mMax;
+ 
 private:
     void SortValues(size_t curveIndex)
     {
@@ -113,14 +131,14 @@ struct MySequence : public ImSequencer::SequenceInterface
     virtual int GetFrameMax() const {
         return mFrameMax;
     }
-    virtual int GetItemCount() const { return (int)myItems.size(); }
+    virtual size_t GetItemCount() const { return myItems.size(); }
     
-    virtual int GetItemTypeCount() const { return sizeof(SequencerItemTypeNames)/sizeof(char*); }
-    virtual const char *GetItemTypeName(int typeIndex) const { return SequencerItemTypeNames[typeIndex]; }
+    virtual size_t GetItemTypeCount() const { return mSequencerItemTypeNames.size(); }
+    virtual const char *GetItemTypeName(int typeIndex) const { return mSequencerItemTypeNames[typeIndex].c_str(); }
     virtual const char *GetItemLabel(int index) const
     {
         static char tmps[512];
-        sprintf(tmps, "[%02d] %s", index, SequencerItemTypeNames[myItems[index].mType]);
+        sprintf(tmps, "[%02d] %s", index, mSequencerItemTypeNames[myItems[index].mType].c_str());
         return tmps;
     }
     
@@ -143,8 +161,11 @@ struct MySequence : public ImSequencer::SequenceInterface
     virtual size_t GetCustomHeight(int index) { return myItems[index].mExpanded ? 300 : 0; }
     
     // my datas
-    MySequence() : mFrameMin(0), mFrameMax(0) {}
+    MySequence() : rampEdit(3), mFrameMin(0), mFrameMax(0) {}
+    
     int mFrameMin, mFrameMax;
+    std::vector<std::string> mSequencerItemTypeNames;
+    
     struct MySequenceItem
     {
         int mType;
@@ -169,16 +190,17 @@ struct MySequence : public ImSequencer::SequenceInterface
     {
         static const char *labels[] = {"Major Dimension", "Minor Dimension" };
         
-        rampEdit.mMax = ImVec2(float(mFrameMax), 1.f);
-        rampEdit.mMin = ImVec2(float(mFrameMin), 0.f);
+        rampEdit.SetMax(ImVec2(float(mFrameMax), 1.f));
+        rampEdit.SetMin(ImVec2(float(mFrameMin), 0.f));
+        
         draw_list->PushClipRect(legendClippingRect.Min, legendClippingRect.Max, true);
         for (int i = 0; i < 2; i++)
         {
             ImVec2 pta(legendRect.Min.x + 30, legendRect.Min.y + i * 14.f);
             ImVec2 ptb(legendRect.Max.x, legendRect.Min.y + (i+1) * 14.f);
-            draw_list->AddText(pta, rampEdit.mbVisible[i]?0xFFFFFFFF:0x80FFFFFF, labels[i]);
+            draw_list->AddText(pta, rampEdit.visibles()[i]?0xFFFFFFFF:0x80FFFFFF, labels[i]);
             if (ImRect(pta, ptb).Contains(ImGui::GetMousePos()) && ImGui::IsMouseClicked(0))
-                rampEdit.mbVisible[i] = !rampEdit.mbVisible[i];
+                rampEdit.visibles()[i] = !rampEdit.visibles()[i];
         }
         draw_list->PopClipRect();
         
@@ -188,14 +210,15 @@ struct MySequence : public ImSequencer::SequenceInterface
     
     virtual void CustomDrawCompact(int index, ImDrawList* draw_list, const ImRect& rc, const ImRect& clippingRect)
     {
-        rampEdit.mMax = ImVec2(float(mFrameMax), 1.f);
-        rampEdit.mMin = ImVec2(float(mFrameMin), 0.f);
+        rampEdit.SetMax(ImVec2(float(mFrameMax), 1.f));
+        rampEdit.SetMin(ImVec2(float(mFrameMin), 0.f));
+        
         draw_list->PushClipRect(clippingRect.Min, clippingRect.Max, true);
         for (int i = 0; i < 2; i++)
         {
-            for (int j = 0; j < rampEdit.mPointCount[i]; j++)
+            for (int j = 0; j < rampEdit.pointCount()[i]; j++)
             {
-                float p = rampEdit.mPts[i][j].x;
+                float p = rampEdit.points()[i][j].x;
                 if (p < myItems[index].mFrameStart || p > myItems[index].mFrameEnd)
                     continue;
                 float r = (p - mFrameMin) / float(mFrameMax - mFrameMin);
