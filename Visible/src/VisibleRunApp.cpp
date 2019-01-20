@@ -71,6 +71,8 @@ void VisibleRunApp::DrawGUI(){
         ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
     }
     
+  
+    
     //Draw general settings window
     if(showGUI)
     {
@@ -139,6 +141,8 @@ void VisibleRunApp::setup()
                    );
     
     const fs::path root_output_dir = vac::get_runner_app_directory();
+    
+   
     
     
     const fs::path& appPath = ci::app::getAppPath();

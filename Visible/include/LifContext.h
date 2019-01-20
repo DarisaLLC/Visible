@@ -6,6 +6,8 @@
 #include "clipManager.hpp"
 #include "visible_layout.hpp"
 
+#include "imGuiCustom/ImSequencer.h"
+#include "imGuiCustom/visibleSequencer.h"
 
 using namespace tinyUi;
 
@@ -232,6 +234,9 @@ private:
   
     // UI flags
     bool m_showLog, m_showGUI, m_showHelp;
+    
+    // imGui
+    MySequence mySequence;
     
 	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
 	{
