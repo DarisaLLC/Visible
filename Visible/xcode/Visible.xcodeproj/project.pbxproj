@@ -142,6 +142,10 @@
 		C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
 		C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
 		C23E343521F14C2400221E68 /* ut_gui_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */; };
+		C23E346021F2511D00221E68 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E345F21F2511D00221E68 /* ImSequencer.cpp */; };
+		C23E346121F2511D00221E68 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E345F21F2511D00221E68 /* ImSequencer.cpp */; };
+		C23E346321F254DE00221E68 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
+		C23E346421F254DE00221E68 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
 		C240F9FB21E14C8900FBA228 /* sscli-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C240F9FA21E14C8900FBA228 /* sscli-Info.plist */; };
 		C240FA0121E15B0B00FBA228 /* imguivariouscontrols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C240F9FC21E15AC900FBA228 /* imguivariouscontrols.cpp */; };
 		C242CCC5217E76D8004F7867 /* contraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction.cpp */; };
@@ -411,8 +415,12 @@
 		5323E6B10EAFCA74003A9687 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
 		5323E6B50EAFCA7E003A9687 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		53E3CDFB0E86099300238D2B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		5D97B5B65A13A8FC68236213 /* libPods-Visible.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Visible.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6849CD2B045E79D00F00EE9F /* libPods-sscli.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-sscli.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		894A8D73E295FF35472CD814 /* libPods-VisibleRun.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VisibleRun.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Visible.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Visible.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B54B0BEB390CE3D1CF143FFA /* libPods-VisibleGtest.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VisibleGtest.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C202D9721D18427800AA8951 /* bit_chrome.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = bit_chrome.hpp; sourceTree = "<group>"; };
 		C203D2E02171300B00B6B4A8 /* libtbb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtbb.a; path = ../../../../../../../../usr/local/Cellar/tbb/2018_U5/lib/libtbb.a; sourceTree = "<group>"; };
 		C203D2E221713E0B00B6B4A8 /* CoreMediaIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMediaIO.framework; path = System/Library/Frameworks/CoreMediaIO.framework; sourceTree = SDKROOT; };
@@ -501,6 +509,8 @@
 		C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
 		C23E343221F142D200221E68 /* undoUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = undoUtils.h; path = ../test/undoUtils.h; sourceTree = "<group>"; };
 		C23E343421F1477D00221E68 /* imgui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imgui.h; path = "../../externals/docking-imgui/imgui/imgui.h"; sourceTree = "<group>"; };
+		C23E345F21F2511D00221E68 /* ImSequencer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImSequencer.cpp; path = ../include/imGuiCustom/ImSequencer.cpp; sourceTree = "<group>"; };
+		C23E346221F254DE00221E68 /* ImCurveEdit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImCurveEdit.cpp; path = ../include/imGuiCustom/ImCurveEdit.cpp; sourceTree = "<group>"; };
 		C240F9FA21E14C8900FBA228 /* sscli-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "sscli-Info.plist"; sourceTree = "<group>"; };
 		C240F9FC21E15AC900FBA228 /* imguivariouscontrols.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imguivariouscontrols.cpp; path = ../src/imguivariouscontrols.cpp; sourceTree = "<group>"; };
 		C240F9FE21E15ADE00FBA228 /* imguivariouscontrols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imguivariouscontrols.h; path = ../include/imguivariouscontrols.h; sourceTree = "<group>"; };
@@ -720,6 +730,9 @@
 		C26F5FFE21B0AA6F00EAE156 /* VisibleRunner-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleRunner-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleRunner-Info.plist"; sourceTree = "<absolute>"; };
 		C276EC841C72988200242CDB /* cp-visible_release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "cp-visible_release.xcconfig"; path = "configs/cp-visible_release.xcconfig"; sourceTree = "<group>"; };
 		C276ECA81C72B5D900242CDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		C2819EAC21F4457800183E44 /* ImSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImSequencer.h; path = ../include/imGuiCustom/ImSequencer.h; sourceTree = "<group>"; };
+		C2819EAD21F4457800183E44 /* ImCurveEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImCurveEdit.h; path = ../include/imGuiCustom/ImCurveEdit.h; sourceTree = "<group>"; };
+		C2819EAE21F4457800183E44 /* visibleSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = visibleSequencer.h; path = ../include/imGuiCustom/visibleSequencer.h; sourceTree = "<group>"; };
 		C2820F23217523A700DFA7A6 /* configHandler.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = configHandler.hpp; path = ../include/configHandler.hpp; sourceTree = "<group>"; };
 		C2820F24217523CC00DFA7A6 /* configHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = configHandler.cpp; path = ../src/configHandler.cpp; sourceTree = "<group>"; };
 		C2820F272175249F00DFA7A6 /* libconfig.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libconfig.a; path = ../../../../../../../usr/local/Cellar/libconfig/1.7.2/lib/libconfig.a; sourceTree = "<group>"; };
@@ -772,6 +785,7 @@
 		C2EF8D1B214873E700A5D3D6 /* Item.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Item.h; path = ../include/Item.h; sourceTree = "<group>"; };
 		C2EF8D2021498C8D00A5D3D6 /* ut_lif.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ut_lif.hpp; sourceTree = "<group>"; };
 		C2F1B6211FB13FE600DDD7DB /* LifContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LifContext.h; path = ../include/LifContext.h; sourceTree = "<group>"; };
+		EEE1CF9E4CEE7C38320D5F8B /* libPods-VisibleTestApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VisibleTestApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -896,6 +910,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		00CF4793900D4D071C65C541 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		080E96DDFE201D6D7F000001 /* src */ = {
 			isa = PBXGroup;
 			children = (
@@ -968,6 +989,7 @@
 				C26F5FFE21B0AA6F00EAE156 /* VisibleRunner-Info.plist */,
 				C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */,
 				C240F9FA21E14C8900FBA228 /* sscli-Info.plist */,
+				00CF4793900D4D071C65C541 /* Pods */,
 			);
 			name = QuickTimeIteration;
 			sourceTree = "<group>";
@@ -975,6 +997,7 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				C23E346521F254F200221E68 /* imGuiCustom */,
 				C2820F26217523E200DFA7A6 /* Configuration */,
 				C29C726F216FC7340028AED1 /* imgui */,
 				32CA4F630368D1EE00C91783 /* Visible_Prefix.pch */,
@@ -1047,6 +1070,11 @@
 				00B995591B128DF400A5C623 /* IOSurface.framework */,
 				006D731819953389008149E2 /* AVFoundation.framework */,
 				006D731919953389008149E2 /* CoreMedia.framework */,
+				5D97B5B65A13A8FC68236213 /* libPods-Visible.a */,
+				B54B0BEB390CE3D1CF143FFA /* libPods-VisibleGtest.a */,
+				894A8D73E295FF35472CD814 /* libPods-VisibleRun.a */,
+				EEE1CF9E4CEE7C38320D5F8B /* libPods-VisibleTestApp.a */,
+				6849CD2B045E79D00F00EE9F /* libPods-sscli.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1147,6 +1175,18 @@
 				C23D0F481E2982690049ADDB /* lifFile.hpp */,
 			);
 			path = otherIO;
+			sourceTree = "<group>";
+		};
+		C23E346521F254F200221E68 /* imGuiCustom */ = {
+			isa = PBXGroup;
+			children = (
+				C2819EAD21F4457800183E44 /* ImCurveEdit.h */,
+				C2819EAC21F4457800183E44 /* ImSequencer.h */,
+				C2819EAE21F4457800183E44 /* visibleSequencer.h */,
+				C23E346221F254DE00221E68 /* ImCurveEdit.cpp */,
+				C23E345F21F2511D00221E68 /* ImSequencer.cpp */,
+			);
+			name = imGuiCustom;
 			sourceTree = "<group>";
 		};
 		C240F9F921E1466D00FBA228 /* VisibleTestApp */ = {
@@ -1742,6 +1782,7 @@
 				en,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* QuickTimeIteration */;
+			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -1881,6 +1922,7 @@
 				C2618F81217FDA6600FA9F43 /* figure.cc in Sources */,
 				C2606DAC1CED3E2E0045FF57 /* labelconnect.cpp in Sources */,
 				C2398A0F21DD8D3600B180A0 /* AVReader.mm in Sources */,
+				C23E346321F254DE00221E68 /* ImCurveEdit.cpp in Sources */,
 				C2606DB11CED3E2E0045FF57 /* registration.cpp in Sources */,
 				C2398A0D21DD8D3100B180A0 /* AVReaderWrapper.mm in Sources */,
 				C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */,
@@ -1891,6 +1933,7 @@
 				C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */,
 				C2AFCF00216E79590080462D /* imgui.cpp in Sources */,
 				C25261071F6611A10069F665 /* DisplayObject.cpp in Sources */,
+				C23E346021F2511D00221E68 /* ImSequencer.cpp in Sources */,
 				C2B87C9921D012D700C91E35 /* logger.cpp in Sources */,
 				C2618F80217FDA6600FA9F43 /* color.cc in Sources */,
 				C20EDBC21CF277130074C47A /* self_similarity.cpp in Sources */,
@@ -2092,6 +2135,7 @@
 				C26F5FC821B0AA6D00EAE156 /* sg_filter.cpp in Sources */,
 				C26F5FC921B0AA6D00EAE156 /* tinyxml.cpp in Sources */,
 				C2398A1021DD8D3600B180A0 /* AVReader.mm in Sources */,
+				C23E346421F254DE00221E68 /* ImCurveEdit.cpp in Sources */,
 				C26F5FCA21B0AA6D00EAE156 /* figure.cc in Sources */,
 				C2398A0E21DD8D3100B180A0 /* AVReaderWrapper.mm in Sources */,
 				C26F5FCB21B0AA6D00EAE156 /* labelconnect.cpp in Sources */,
@@ -2102,6 +2146,7 @@
 				C26F5FD021B0AA6D00EAE156 /* exception.cpp in Sources */,
 				C26F5FD121B0AA6D00EAE156 /* boost_literals.cpp in Sources */,
 				C26F5FD221B0AA6D00EAE156 /* PlistDate.cpp in Sources */,
+				C23E346121F2511D00221E68 /* ImSequencer.cpp in Sources */,
 				C26F5FD321B0AA6D00EAE156 /* imgui.cpp in Sources */,
 				C26F5FD421B0AA6D00EAE156 /* DisplayObject.cpp in Sources */,
 				C26F5FD521B0AA6D00EAE156 /* color.cc in Sources */,

@@ -43,7 +43,8 @@
 #include "gui_base.hpp"
 #include "imGuiLogger.hpp"
 #include "visible_logger_macro.h"
-
+#include "imGuiCustom/ImSequencer.h"
+#include "imGuiCustom/visibleSequencer.h"
 
 #define APP_WIDTH 1024
 #define APP_HEIGHT 768
@@ -190,6 +191,10 @@ private:
     bool m_isIdLabLif = false;
     
     imGuiLog visual_log;
+    
+
+  
+    
 };
 
 #endif /* VisibleApp_h */
