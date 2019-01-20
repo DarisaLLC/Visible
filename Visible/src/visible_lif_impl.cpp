@@ -768,6 +768,8 @@ void lifContext::add_plots ()
         m_plots[2]->strokeColor = ColorA(0.0,0.0,0.0,1.0);
     }
     
+
+    
 }
 
 void lifContext::add_timeline(){
@@ -823,7 +825,15 @@ void lifContext::loadCurrentSerie ()
         mFrameSet->channel_names (m_serie.channel_names());
         reset_entire_clip(mFrameSet->count());
         
+        // Initialize Sequencer
+        mySequence.mFrameMin = 0;
+        mySequence.mFrameMax = (int) mFrameSet->count();
+        mySequence.mSequencerItemTypeNames = m_serie.channel_names();
         
+        mySequence.myItems.push_back(MySequence::MySequenceItem{ 0,  10, 75, true});
+        mySequence.myItems.push_back(MySequence::MySequenceItem{ 1, 200, 275, true});
+        mySequence.myItems.push_back(MySequence::MySequenceItem{ 2, 400, 475, true});
+
         m_title = m_serie.name() + " @ " + mPath.filename().string();
         
         auto ww = get_windowRef();
@@ -840,14 +850,7 @@ void lifContext::loadCurrentSerie ()
    
         add_plots();
         add_timeline();
-        
-        mySequence.mFrameMin = -100;
-        mySequence.mFrameMax = 1000;
-        mySequence.myItems.push_back(MySequence::MySequenceItem{ 0, 10, 30, false });
-        mySequence.myItems.push_back(MySequence::MySequenceItem{ 1, 20, 30, true });
-        mySequence.myItems.push_back(MySequence::MySequenceItem{ 3, 12, 60, false });
-        mySequence.myItems.push_back(MySequence::MySequenceItem{ 2, 61, 90, false });
-        mySequence.myItems.push_back(MySequence::MySequenceItem{ 4, 90, 99, false });
+    
         
     }
     catch( const std::exception &ex ) {
@@ -892,9 +895,9 @@ void  lifContext::SetupGUIVariables() {}
 
 void  lifContext::DrawGUI(){
     
- //   if(ui::MenuItem("Looping", "S")){
- //       loop_no_loop_button();
- //   }
+//    if(ui::MenuItem("Looping", "S")){
+//        loop_no_loop_button();
+//    }
     
 //    {
 //        // If Plots are ready, set them up
@@ -937,7 +940,7 @@ void  lifContext::DrawGUI(){
 //        }
 //        ImGui::End();
 //    }
-//
+
 //
 //    {
 //        static bool animate = true;
@@ -946,7 +949,7 @@ void  lifContext::DrawGUI(){
 //        static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
 //        ImGui::PlotLines("Frame Times", arr, IM_ARRAYSIZE(arr));
 //    }
-//
+
     // let's create the sequencer
     static int selectedEntry = -1;
     static int firstFrame = 0;
@@ -964,12 +967,12 @@ void  lifContext::DrawGUI(){
     ImGui::SameLine();
     ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
     ImGui::PopItemWidth();
-    Sequencer(&mySequence, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
+    Sequencer(&mySequence, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
     // add a UI to edit that particular item
     if (selectedEntry != -1)
     {
         const MySequence::MySequenceItem &item = mySequence.myItems[selectedEntry];
-        ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
+        ImGui::Text("I am a %s, please edit me", mySequence.mSequencerItemTypeNames[item.mType].c_str());
         // switch (type) ....
     }
     
@@ -1050,6 +1053,8 @@ void lifContext::update ()
         auto tracksRef = m_trackWeakRef.lock();
         m_plots[0]->load(tracksRef->at(0));
         m_plots[1]->load(tracksRef->at(1));
+        mySequence.rampEdit.load(tracksRef->at(0), 0);
+        mySequence.rampEdit.load(tracksRef->at(1), 1);
     }
     if ( ! m_pci_trackWeakRef.expired())
     {
