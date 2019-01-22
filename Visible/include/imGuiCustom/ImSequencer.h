@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <stdint.h>
 
 struct ImDrawList;
 struct ImRect;
@@ -20,8 +21,8 @@ namespace ImSequencer
     struct SequenceInterface
     {
         bool focused = false;
-        virtual int GetFrameMin() const = 0;
-        virtual int GetFrameMax() const = 0;
+        virtual int64_t GetFrameMin() const = 0;
+        virtual int64_t GetFrameMax() const = 0;
         virtual size_t GetItemCount() const = 0;
 
         virtual void BeginEdit(int /*index*/) {}
@@ -46,6 +47,6 @@ namespace ImSequencer
 
 
     // return true if selection is made
-    bool Sequencer(SequenceInterface *sequence, int *currentFrame, bool *expanded, int *selectedEntry, int *firstFrame, int sequenceOptions);
+    bool Sequencer(SequenceInterface *sequence, int64_t *currentFrame, bool *expanded, int *selectedEntry, int64_t *firstFrame, int sequenceOptions);
 
 }

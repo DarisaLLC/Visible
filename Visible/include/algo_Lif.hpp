@@ -129,14 +129,15 @@ public:
     const lifIO::ContentType_t& content_type () const { return m_content_type; }
     
     const lif_serie_data get_serie_by_index (unsigned index);
-    void  get_series_info () const;
-    const std::vector<lif_serie_data>& get_all_series  () const; 
+    const std::vector<lif_serie_data>& get_all_series  () const;
     const std::string& path () const { return mFqfnPath; }
-    const std::vector<std::string>& names () const { return m_series_names; }
+    const std::vector<std::string>& names () const;
     const std::map<std::string,int>& name_to_index_map () const { return m_name_to_index; }
     const std::map<int,std::string>& index_to_name_map () const { return m_index_to_name; }
     
 private:
+    void  get_series_info () const;
+    void  internal_get_series_info () const;
     mutable lifIO::LifReader::ref m_lifRef;
     mutable std::vector<lif_serie_data> m_series_book;
     std::vector<cv::Mat> m_series_posters;
@@ -144,11 +145,10 @@ private:
     mutable std::map<std::string,int> m_name_to_index;
     mutable std::map<int,std::string> m_index_to_name;
     mutable std::mutex m_mutex;
+    mutable std::atomic<bool> m_data_ready;
     lifIO::ContentType_t m_content_type;
     std::string mFqfnPath;
     void get_first_frame (lif_serie_data& si,  const int frameCount, cv::Mat& out);
-  
-    
 };
 
 

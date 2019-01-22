@@ -910,13 +910,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		00CF4793900D4D071C65C541 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
 		080E96DDFE201D6D7F000001 /* src */ = {
 			isa = PBXGroup;
 			children = (
@@ -986,7 +979,6 @@
 				C26F5FFE21B0AA6F00EAE156 /* VisibleRunner-Info.plist */,
 				C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */,
 				C240F9FA21E14C8900FBA228 /* sscli-Info.plist */,
-				00CF4793900D4D071C65C541 /* Pods */,
 			);
 			name = QuickTimeIteration;
 			sourceTree = "<group>";

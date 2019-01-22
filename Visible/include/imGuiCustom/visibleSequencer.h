@@ -125,10 +125,10 @@ struct MySequence : public ImSequencer::SequenceInterface
 {
     // interface with sequencer
     
-    virtual int GetFrameMin() const {
+    virtual int64_t GetFrameMin() const {
         return mFrameMin;
     }
-    virtual int GetFrameMax() const {
+    virtual int64_t GetFrameMax() const {
         return mFrameMax;
     }
     virtual size_t GetItemCount() const { return myItems.size(); }
