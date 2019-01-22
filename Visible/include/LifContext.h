@@ -237,6 +237,8 @@ private:
     
     // imGui
     MySequence mySequence;
+    void draw_sequencer ();
+    
     
 	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
 	{

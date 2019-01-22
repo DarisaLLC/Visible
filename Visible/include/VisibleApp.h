@@ -67,6 +67,7 @@ namespace VisibleAppControl{
     fs::path get_runner_app_directory ();
     
     bool setup_loggers (const fs::path app_support_dir,  imGuiLog& visualLog, std::string id_name);
+    bool setup_text_loggers (const fs::path app_support_dir,  std::string id_name);
     
     static const std::string LIF_CUSTOM = "IDLab_0";
 }
@@ -189,6 +190,7 @@ private:
     std::string         mFileExtension;
     lifIO::ContentType_t mContentType; // "" denotes canonical LIF file
     bool m_isIdLabLif = false;
+    void setup_ui ();
     
     imGuiLog visual_log;
     

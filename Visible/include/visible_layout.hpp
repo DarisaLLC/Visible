@@ -82,24 +82,24 @@ public:
     }
     
     // Constructor
-    void init (const vec2& uiWinSize, const tiny_media_info& tmi, const int num_channels_plots = 3, const float scale = 0.75)
+    void init (const vec2& uiWinSize, const tiny_media_info& tmi, const int num_channels_plots = 3, const float scale = 1.0)
     
     {
         m_cc = num_channels_plots;
         m_scale = scale;
         // Load defaults
         // from config file ?
-        m_image_frame_size_norm = vec2(0.67, 0.75);
+        m_image_frame_size_norm = vec2( tmi.getWidth()/uiWinSize.x, tmi.getHeight()/uiWinSize.y);
         m_single_plot_size_norm = vec2(0.25, 0.15);
-        m_timeline_size_norm = vec2(0.67, 0.08);
+        m_timeline_size_norm = vec2( m_image_frame_size_norm.x, 0.08);
         m_log_size_norm = vec2(0.95, 0.08);
         
         *((tiny_media_info*)this) = tmi;
         m_canvas_size = uiWinSize;
-        m_canvas_size.x -= 100;
+//        m_canvas_size.x -= 100;
         Area wi (0, 0, m_canvas_size.x, m_canvas_size.y);
         m_window_rect = Rectf(wi);
-        Area ai (0, 0, tmi.getWidth() * m_scale, tmi.getHeight() * m_scale);
+        Area ai (20, 30, 20+tmi.getWidth() * m_scale, 30+tmi.getHeight() * m_scale);
         m_image_frame_size_norm.x *= m_scale;
         m_image_frame_size_norm.y *= m_scale;
         m_timeline_size_norm.x *= m_scale;
@@ -244,7 +244,8 @@ private:
     
     inline Rectf image_frame_rect ()
     {
-        vec2 np = vec2 (image_frame_position_norm().x * desired_window_size().x, image_frame_position_norm().y * desired_window_size().y);
+     //   vec2 np = vec2 (image_frame_position_norm().x * desired_window_size().x, image_frame_position_norm().y * desired_window_size().y);
+        vec2 np (20, 30);
         vec2 pp = image_frame_size_norm ();
         vec2 pn (np.x + pp.x * desired_window_size().x, np.y + pp.y * desired_window_size().y);
         return Rectf(np, pn);

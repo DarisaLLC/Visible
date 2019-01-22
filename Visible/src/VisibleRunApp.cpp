@@ -112,7 +112,16 @@ bool VisibleRunApp::shouldQuit()
     return true;
 }
 
-
+void VisibleRunApp::setup_ui(){
+    ui::initialize(ui::Options()
+                   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
+                   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
+                   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
+                   .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
+                   //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
+                   );
+    setWindowPos(getWindowSize()/3);
+}
 /*
  * Browse the LIF file and dispatch VisibleRun with the selected chapter
  * Setsp Up Loggers
@@ -132,19 +141,7 @@ VAPPLOG_INFO(sofar.c_str());
 
 void VisibleRunApp::setup()
 {
-    ui::initialize(ui::Options()
-                   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
-                   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
-                   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
-                   .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
-                   //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
-                   );
-    
     const fs::path root_output_dir = vac::get_runner_app_directory();
-    
-   
-    
-    
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "VisibleRun.app/Contents/Info.plist";
     if (exists (appPath)){
@@ -169,21 +166,25 @@ void VisibleRunApp::setup()
         mGlobalBounds.include(display->getBounds());
     }
     
-    setWindowPos(getWindowSize()/3);
-    WindowRef ww = getWindow ();
+  
     std::string bpath = m_args[1];
     auto cmds = m_args[1];
   
     
-    VisibleAppControl::setup_loggers(root_output_dir, visual_log, fs::path(bpath).filename().string());
     static std::string cok = "chapter_ok";
     static std::string ccok = "chapter_ok_custom_content_ok";
     static std::string cokcnk = "chapter_ok_custom_content_not_recognized";
     static std::string used_dialog = "selected_by_dialog_using first_chapter";
+    static std::string list_chapters = "listing chapters";
+    
+    std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
+    cmds = cmds + " Visible build: " + buildN;
+    
     // @todo enumerate args and implement in JSON
     // Custom Content for LIF files is only IDLab 
     if(exists(bpath)){
         
+        bool just_list_chapters = m_args.size() == 3 && m_args[2] == "list";
         bool selected_by_dialog_no_custom_content_no_chapter = m_args.size() == 2;
         bool chapter_ok =  m_args.size() == 3;
         bool custom_id_exists = m_args.size() == 4;
@@ -192,7 +193,16 @@ void VisibleRunApp::setup()
         std::string info;
         mContentType  = "";
         
-        if (selected_by_dialog_no_custom_content_no_chapter){
+        if (just_list_chapters)
+              VisibleAppControl::setup_text_loggers(root_output_dir, fs::path(bpath).filename().string());
+        else
+            VisibleAppControl::setup_loggers(root_output_dir, visual_log, fs::path(bpath).filename().string());
+        
+        if (just_list_chapters){
+            mBrowser =  lif_browser::create(bpath);
+            info = list_chapters;
+        }
+        else if (selected_by_dialog_no_custom_content_no_chapter){
             mBrowser =  lif_browser::create(bpath);
             info = selected_by_dialog_no_custom_content_no_chapter;
         }
@@ -214,69 +224,64 @@ void VisibleRunApp::setup()
         
         VAPPLOG_INFO(info.c_str());
         
-        if(mBrowser){
-            mBrowser->get_series_info();
-            if (! mBrowser->names().empty()){
-                auto chapter = mBrowser->names()[0];
-                if (selected_by_dialog_no_custom_content_no_chapter){ // Selected by File Dialog
-                    m_args.push_back(chapter);
-                }
-                auto indexItr = mBrowser->name_to_index_map().find(m_args[2]);
-                if (indexItr != mBrowser->name_to_index_map().end()){
-                    auto serie = mBrowser->get_serie_by_index(indexItr->second);
-                    
-                    mContext = std::unique_ptr<lifContext>(new lifContext (ww,serie));
-                    
-                    if (mContext->is_valid()){
-                        cmds += " [ " + m_args[2] + " ] ";
-                        cmds += "  Ok ";
-                    }
-                    VAPPLOG_INFO(cmds.c_str());
-                    update();
-                }
-            } else{
-            ADD_ERR_AND_RETURN(cmds, " No Chapters or Series ")
+        // browser set is allows other threads to work during its setup
+        bool browser_is_ready = mBrowser && ! mBrowser->names().empty();
+        
+        
+        if(! browser_is_ready){
+            ADD_ERR_AND_RETURN(cmds, " No Chapters or Series "){
+                quit();
             }
-     //        cmds += " No Chapters or Series ";
-        }else{
-         ADD_ERR_AND_RETURN(cmds, " Content type is not clear ")
         }
-    }else{
-     ADD_ERR_AND_RETURN(cmds,  " Does Not Exist ")
-    }
 
-    
-    
-    
-    
-    std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
-    ww->setTitle ( cmds + " Visible build: " + buildN);
-    mFont = Font( "Menlo", 18 );
-    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-    
-    // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
-    
-    
-    getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
-    
-#if 0
-    getWindow()->getSignalMove().connect( std::bind( &VisibleRunApp::windowMove, this ) );
-    getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
-    getWindow()->getSignalDraw().connect(std::bind( &VisibleRunApp::draw, this) );
-    getWindow()->getSignalClose().connect(std::bind( &VisibleRunApp::windowClose, this) );
-    getWindow()->getSignalResize().connect(std::bind( &VisibleRunApp::resize, this) );
-#endif
-    
-    getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
-    getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
-    
-    getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
-    
-    gl::enableVerticalSync();
-    
-    
-    
+        
+        if(just_list_chapters){
+           std::strstream msg;
+            for (auto & se : mBrowser->get_all_series  ()){
+                msg << se << std::endl;
+                std::cout << se << std::endl;
+            }
+            std::string tmp = msg.str();
+            VAPPLOG_INFO(tmp.c_str());
+            quit();
+        }
+
+        auto chapter = mBrowser->names()[0];
+        if (selected_by_dialog_no_custom_content_no_chapter){ // Selected by File Dialog
+            m_args.push_back(chapter);
+        }
+        auto indexItr = mBrowser->name_to_index_map().find(m_args[2]);
+        if (indexItr != mBrowser->name_to_index_map().end()){
+            auto serie = mBrowser->get_serie_by_index(indexItr->second);
+            WindowRef ww = getWindow ();
+            mContext = std::unique_ptr<lifContext>(new lifContext (ww,serie));
+            
+            if (mContext->is_valid()){
+                cmds += " [ " + m_args[2] + " ] ";
+                cmds += "  Ok ";
+            }
+            setup_ui();
+            
+            VAPPLOG_INFO(cmds.c_str());
+            update();
+
+            ww->setTitle ( cmds + " Visible build: " + buildN);
+            mFont = Font( "Menlo", 18 );
+            mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+            // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
+            getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
+            getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
+            getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
+            getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
+            gl::enableVerticalSync();
+
+        }else{
+            ADD_ERR_AND_RETURN(cmds, " No Chapters or Series ")
+        }
+    }
+    ADD_ERR_AND_RETURN(cmds, " Path not valid ");
 }
+    
 
 
 void VisibleRunApp::update_log (const std::string& msg)
@@ -336,10 +341,11 @@ void VisibleRunApp::update()
 void VisibleRunApp::draw ()
 {
     gl::clear( Color::gray( 0.5f ) );
-    if (mContext && mContext->is_valid()) mContext->draw ();
-    DrawGUI();
-//    ui::SliderInt( "Circles", &n, 0, 500 );
-//    ui::SliderFloat( "Min Radius", &minRadius, 1, 499 );
+    if (mContext && mContext->is_valid()){
+        mContext->draw ();
+        DrawGUI();
+    }
+
 }
 
 

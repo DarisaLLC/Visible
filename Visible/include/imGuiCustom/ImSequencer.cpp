@@ -2,6 +2,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include <cstdlib>
+#include <algorithm>
 
 namespace ImSequencer
 {
@@ -28,7 +29,7 @@ namespace ImSequencer
    // static int min(int a, int b) { return (a < b) ? a : b; }
   //  static int max(int a, int b) { return (a > b) ? a : b; }
 
-    bool Sequencer(SequenceInterface *sequence, int *currentFrame, bool *expanded, int *selectedEntry, int *firstFrame, int sequenceOptions)
+    bool Sequencer(SequenceInterface *sequence, int64_t *currentFrame, bool *expanded, int *selectedEntry, int64_t *firstFrame, int sequenceOptions)
     {
         bool ret = false;
         ImGuiIO& io = ImGui::GetIO();
@@ -55,13 +56,14 @@ namespace ImSequencer
         ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
         ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
         static const int scrollBarHeight = 14;
-        int firstFrameUsed = firstFrame ? *firstFrame : 0;
+        auto firstFrameUsed = firstFrame ? *firstFrame : 0;
 
 
         auto controlHeight = sequenceCount * ItemHeight;
         for (int i = 0; i < sequenceCount; i++)
             controlHeight += int(sequence->GetCustomHeight(i));
-        int frameCount = ImMax(sequence->GetFrameMax() - sequence->GetFrameMin(), 1);
+        int64_t frameCount = sequence->GetFrameMax() - sequence->GetFrameMin();
+        frameCount = frameCount < 1 ? 1 : frameCount;
 
         static bool MovingScrollBar = false;
         static bool MovingCurrentFrame = false;
@@ -85,7 +87,7 @@ namespace ImSequencer
         
         static bool panningView = false;
         static ImVec2 panningViewSource;
-        static int panningViewFrame;
+        static int64_t panningViewFrame;
         if (ImGui::IsWindowFocused() && io.KeyAlt && io.MouseDown[2])
         {
             if (!panningView)
@@ -116,7 +118,7 @@ namespace ImSequencer
             ImGui::InvisibleButton("canvas", ImVec2(canvas_size.x - canvas_pos.x, (float)ItemHeight));
             draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_size.x + canvas_pos.x, canvas_pos.y + ItemHeight), 0xFF3D3837, 0);
             char tmps[512];
-            sprintf(tmps, "%d Frames / %d entries", frameCount, (int) sequenceCount);
+            sprintf(tmps, "%d Frames / %d entries", (int) frameCount, (int) sequenceCount);
             draw_list->AddText(ImVec2(canvas_pos.x + 26, canvas_pos.y + 2), 0xFFFFFFFF, tmps);
         }
         else
@@ -200,7 +202,7 @@ namespace ImSequencer
             };
             int halfModFrameCount = modFrameCount / 2;
 
-            auto drawLine = [&](int i, int regionHeight) {
+            auto drawLine = [&](int64_t i, int regionHeight) {
                 bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence->GetFrameMax() || i == sequence->GetFrameMin());
                 bool halfIndex = (i % halfModFrameCount) == 0;
                 int px = (int)canvas_pos.x + int(i * framePixelWidth) + legendWidth - int(firstFrameUsed * framePixelWidth);
@@ -217,13 +219,13 @@ namespace ImSequencer
                 if (baseIndex && px > (canvas_pos.x + legendWidth))
                 {
                     char tmps[512];
-                    sprintf(tmps, "%d", i);
+                    sprintf(tmps, "%lld", i);
                     draw_list->AddText(ImVec2((float)px + 3.f, canvas_pos.y), 0xFFBBBBBB, tmps);
                 }
 
             };
 
-            auto drawLineContent = [&](int i, int regionHeight) {
+            auto drawLineContent = [&](int64_t i, int regionHeight) {
                 int px = (int)canvas_pos.x + int(i * framePixelWidth) + legendWidth - int(firstFrameUsed * framePixelWidth);
                 int tiretStart = int(contentMin.y);
                 int tiretEnd = int(contentMax.y);
@@ -235,7 +237,7 @@ namespace ImSequencer
                     draw_list->AddLine(ImVec2(float(px), float(tiretStart)), ImVec2(float(px), float(tiretEnd)), 0x30606060, 1);
                 }
             };
-            for (int i = sequence->GetFrameMin(); i <= sequence->GetFrameMax(); i += frameStep)
+            for (auto i = sequence->GetFrameMin(); i <= sequence->GetFrameMax(); i += frameStep)
             {
                 drawLine(i, ItemHeight);
             }
@@ -295,7 +297,7 @@ namespace ImSequencer
             draw_list->PushClipRect(childFramePos + ImVec2(float(legendWidth), 0.f), childFramePos + childFrameSize);
 
             // vertical frame lines in content area
-            for (int i = sequence->GetFrameMin(); i <= sequence->GetFrameMax(); i += frameStep)
+            for (auto i = sequence->GetFrameMin(); i <= sequence->GetFrameMax(); i += frameStep)
             {
                 drawLineContent(i, int(contentHeight));
             }
@@ -445,7 +447,7 @@ namespace ImSequencer
                 float cursorOffset = contentMin.x + legendWidth + (*currentFrame - firstFrameUsed) * framePixelWidth + framePixelWidth / 2 - cursorWidth * 0.5f;
                 draw_list->AddLine(ImVec2(cursorOffset, canvas_pos.y), ImVec2(cursorOffset, contentMax.y), 0xA02A2AFF, cursorWidth);
                 char tmps[512];
-                sprintf(tmps, "%d", *currentFrame);
+                sprintf(tmps, "%lld", *currentFrame);
                 draw_list->AddText(ImVec2(cursorOffset + 10, canvas_pos.y + 2), 0xFF2A2AFF, tmps);
             }
 
@@ -535,7 +537,7 @@ namespace ImSequencer
                       float barRatio = barNewWidth / barWidthInPixels;
                       framePixelWidthTarget = framePixelWidth = framePixelWidth / barRatio;
                       int newVisibleFrameCount = int((canvas_size.x - legendWidth) / framePixelWidthTarget);
-                      int lastFrame = *firstFrame + newVisibleFrameCount;
+                      auto lastFrame = *firstFrame + newVisibleFrameCount;
                       if (lastFrame > sequence->GetFrameMax())
                       {
                          framePixelWidthTarget = framePixelWidth = (canvas_size.x - legendWidth) / float(sequence->GetFrameMax() - *firstFrame);
@@ -557,7 +559,7 @@ namespace ImSequencer
                          float previousFramePixelWidthTarget = framePixelWidthTarget;
                          framePixelWidthTarget = framePixelWidth = framePixelWidth / barRatio;
                          int newVisibleFrameCount = int(visibleFrameCount / barRatio);
-                         int newFirstFrame = *firstFrame + newVisibleFrameCount - visibleFrameCount;
+                         auto newFirstFrame = *firstFrame + newVisibleFrameCount - visibleFrameCount;
                          newFirstFrame = ImClamp(newFirstFrame, sequence->GetFrameMin(), ImMax(sequence->GetFrameMax() - visibleFrameCount, sequence->GetFrameMin()));
                          if (newFirstFrame == *firstFrame)
                          {

@@ -70,12 +70,12 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd) :sequen
     m_valid = false;
         m_valid = sd.index() >= 0;
         if (m_valid){
-            m_layout = std::make_shared<layoutManager>  ( ivec2 (10, 10) );
+            m_layout = std::make_shared<layoutManager>  ( ivec2 (10, 30) );
             if (auto lifRef = m_serie.readerWeakRef().lock()){
                 m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&lifRef->getSerie(sd.index()), stl_utils::null_deleter());
                 setup();
                 ww->getRenderer()->makeCurrentContext(true);
-                ww->getSignalDraw().connect( [&]{ draw(); } );
+      //          ww->getSignalDraw().connect( [&]{ draw(); } );
             }
     }
 }
@@ -890,6 +890,38 @@ void lifContext::process_async (){
  *
  ************************/
 
+void  lifContext::draw_sequencer (){
+    
+    // let's create the sequencer
+    static int selectedEntry = -1;
+    static int64 firstFrame = 0;
+    static bool expanded = true;
+    
+    Rectf dr = get_image_display_rect();
+    auto tr = dr.getUpperRight();
+    ImGui::SetNextWindowPos(ImVec2(tr.x+10, tr.y));
+    ImGui::SetNextWindowSize(ImVec2(640, 480));
+    ImGui::Begin("Sequencer");
+    
+//    ImGui::PushItemWidth(130);
+//    ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
+//    ImGui::SameLine();
+//    ImGui::InputInt("Frame ", &currentFrame);
+//    ImGui::SameLine();
+//    ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
+//    ImGui::PopItemWidth();
+    Sequencer(&mySequence, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
+    // add a UI to edit that particular item
+    if (selectedEntry != -1)
+    {
+        const MySequence::MySequenceItem &item = mySequence.myItems[selectedEntry];
+        ImGui::Text("I am a %s, please edit me", mySequence.mSequencerItemTypeNames[item.mType].c_str());
+        // switch (type) ....
+    }
+    
+    ImGui::End();
+    
+}
 
 void  lifContext::SetupGUIVariables() {}
 
@@ -950,33 +982,7 @@ void  lifContext::DrawGUI(){
 //        ImGui::PlotLines("Frame Times", arr, IM_ARRAYSIZE(arr));
 //    }
 
-    // let's create the sequencer
-    static int selectedEntry = -1;
-    static int firstFrame = 0;
-    static bool expanded = true;
-    static int currentFrame = 100;
-    ImGui::SetNextWindowPos(ImVec2(10, 350));
-    
-    ImGui::SetNextWindowSize(ImVec2(940, 480));
-    ImGui::Begin("Sequencer");
-    
-    ImGui::PushItemWidth(130);
-    ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
-    ImGui::SameLine();
-    ImGui::InputInt("Frame ", &currentFrame);
-    ImGui::SameLine();
-    ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
-    ImGui::PopItemWidth();
-    Sequencer(&mySequence, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
-    // add a UI to edit that particular item
-    if (selectedEntry != -1)
-    {
-        const MySequence::MySequenceItem &item = mySequence.myItems[selectedEntry];
-        ImGui::Text("I am a %s, please edit me", mySequence.mSequencerItemTypeNames[item.mType].c_str());
-        // switch (type) ....
-    }
-    
-    ImGui::End();
+    draw_sequencer();
     
     //Draw general settings window
     if(m_showGUI)
