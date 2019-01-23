@@ -45,6 +45,7 @@
 #include "gui_handler.hpp"
 #include "gui_base.hpp"
 #include <boost/any.hpp>
+#include "Resources.h"
 
 
 using namespace ci;
@@ -53,6 +54,7 @@ using namespace std;
 using namespace svl;
 
 
+#define ONCE(x) { static int __once = 1; if (__once) {x;} __once = 0; }
 
 
                     /************************
@@ -824,6 +826,8 @@ void lifContext::loadCurrentSerie ()
         
         mFrameSet->channel_names (m_serie.channel_names());
         reset_entire_clip(mFrameSet->count());
+        m_minFrame = 0;
+        m_maxFrame =  mFrameSet->count();
         
         // Initialize Sequencer
         mySequence.mFrameMin = 0;
@@ -931,31 +935,61 @@ void  lifContext::DrawGUI(){
 //        loop_no_loop_button();
 //    }
     
-//    {
-//        // If Plots are ready, set them up
-//        // It is ready only for new data
-//        if ( is_ready (m_async_luminance_tracks) )
-//            m_trackWeakRef = m_async_luminance_tracks.get();
-//        if ( is_ready (m_async_pci_tracks))
-//            m_pci_trackWeakRef = m_async_pci_tracks.get();
-//
-//        if (! m_trackWeakRef.expired())
-//        {
-//            assert(channel_count() >= 3);
-//            auto tracksRef = m_trackWeakRef.lock();
-//
-//
-//            m_plots[0]->load(tracksRef->at(0));
-//            m_plots[1]->load(tracksRef->at(1));
-//        }
-//        if ( ! m_pci_trackWeakRef.expired())
-//        {
-//            auto tracksRef = m_pci_trackWeakRef.lock();
-//            m_plots[channel_count()-1]->load(tracksRef->at(0));
-//        }
-//
-//    }
-//
+   // bool yah = true;
+    int gScreenWidth = getWindowWidth();
+    int gScreenHeight = getWindowHeight();
+    float xp = gScreenWidth / 5;
+    ImGui::SetNextWindowPos({  gScreenWidth-xp-10, 30 });
+    ImGui::SetNextWindowSize({ xp, (float)gScreenHeight });
+  //  ImGui::Begin("Tree", &yah, ImVec2(0, 0), 0.2f, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+  //  ONCE(ui::SetNextTreeNodeOpen(1));
+    if (ImGui::Begin("Timeline"))
+    {
+        ImGui::PushItemWidth(80);
+        ImGui::PushID(200);
+        ImGui::InputInt("", &mySequence.mFrameMin, 0, 0);
+        ImGui::PopID();
+        ImGui::SameLine();
+        if (ImGui::Button("|<"))
+            seekToStart();
+        ImGui::SameLine();
+        if (ImGui::Button("<"))
+              seekToFrame (getCurrentFrame() - 1);
+        ImGui::SameLine();
+        if (ImGui::Button(">"))
+              seekToFrame (getCurrentFrame() + 1);
+        ImGui::SameLine();
+        if (ImGui::Button(">|"))
+            seekToEnd();
+        ImGui::SameLine();
+        if (ImGui::Button(m_is_playing ? "Stop" : "Play"))
+        {
+            play_pause_button();
+        }
+        
+        if(mNoLoop == nullptr){
+            mNoLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PNLOOP  )));
+        }
+        if (mLoop == nullptr){
+            mLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PLOOP )));
+        }
+        
+        unsigned int playNoLoopTextureId = mNoLoop->getId();//  evaluation.GetTexture("Stock/PlayNoLoop.png");
+        unsigned int playLoopTextureId = mLoop->getId(); //evaluation.GetTexture("Stock/PlayLoop.png");
+        
+        ImGui::SameLine();
+        if (ImGui::ImageButton((ImTextureID)(uint64_t)(m_is_looping ? playLoopTextureId : playNoLoopTextureId), ImVec2(16.f, 16.f)))
+            loop_no_loop_button();
+        
+        ImGui::SameLine();
+        ImGui::PushID(202);
+        ImGui::InputInt("",  &mySequence.mFrameMax, 0, 0);
+        ImGui::PopID();
+        ImGui::SameLine();
+    }
+    ImGui::End();
+    
+    
 //
 //    {
 //        if (ImGui::Begin("Settings", &m_showGUI)) {

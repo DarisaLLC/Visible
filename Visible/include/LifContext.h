@@ -178,6 +178,8 @@ private:
     // Content Info
     tiny_media_info      mMediaInfo;
     mutable uint32_t  mChannelCount;
+    int64_t m_minFrame;
+    int64_t m_maxFrame;
     
     // Instant information
     int64_t m_seek_position;
@@ -239,6 +241,8 @@ private:
     MySequence mySequence;
     void draw_sequencer ();
     
+    // Resource Icons
+    ci::gl::TextureRef    mNoLoop, mLoop;
     
 	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
 	{
