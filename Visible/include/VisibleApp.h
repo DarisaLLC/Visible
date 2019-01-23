@@ -45,6 +45,8 @@
 #include "visible_logger_macro.h"
 #include "imGuiCustom/ImSequencer.h"
 #include "imGuiCustom/visibleSequencer.h"
+#include "Resources.h"
+
 
 #define APP_WIDTH 1024
 #define APP_HEIGHT 768
