@@ -9,6 +9,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 #pragma GCC diagnostic ignored "-Wunused-private-field"
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wcomma"
 
 #include "opencv2/stitching.hpp"
@@ -257,6 +258,11 @@ void lifContext::signal_contraction_available (lif_processor::contractionContain
     m_clips.emplace_back(m_contractions[0].contraction_start.first,
                          m_contractions[0].relaxation_end.first,
                          m_contractions[0].contraction_peak.first);
+    
+    mySequence.myItems.push_back(MySequence::MySequenceItem{ 0,
+        (int) m_contractions[0].contraction_start.first,
+        (int) m_contractions[0].relaxation_end.first , true});
+   
     
     tinyUi::timepoint_marker_t tm;
     tm.first = m_contractions[0].contraction_peak.first/ ((float)mMediaInfo.count);
@@ -832,12 +838,8 @@ void lifContext::loadCurrentSerie ()
         // Initialize Sequencer
         mySequence.mFrameMin = 0;
         mySequence.mFrameMax = (int) mFrameSet->count();
-        mySequence.mSequencerItemTypeNames = m_serie.channel_names();
+        mySequence.mSequencerItemTypeNames = {"Fluorescent Channels", " PCI "};
         
-        mySequence.myItems.push_back(MySequence::MySequenceItem{ 0,  10, 75, true});
-        mySequence.myItems.push_back(MySequence::MySequenceItem{ 1, 200, 275, true});
-        mySequence.myItems.push_back(MySequence::MySequenceItem{ 2, 400, 475, true});
-
         m_title = m_serie.name() + " @ " + mPath.filename().string();
         
         auto ww = get_windowRef();
@@ -904,8 +906,8 @@ void  lifContext::draw_sequencer (){
     Rectf dr = get_image_display_rect();
     auto tr = dr.getUpperRight();
     ImGui::SetNextWindowPos(ImVec2(tr.x+10, tr.y));
-    ImGui::SetNextWindowSize(ImVec2(640, 480));
-    ImGui::Begin("Sequencer");
+    ImGui::SetNextWindowSize(ImVec2(512, 480));
+    ImGui::Begin(" Results ");
     
 //    ImGui::PushItemWidth(130);
 //    ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
@@ -985,27 +987,13 @@ void  lifContext::DrawGUI(){
         ImGui::PushID(202);
         ImGui::InputInt("",  &mySequence.mFrameMax, 0, 0);
         ImGui::PopID();
-        ImGui::SameLine();
+        int a = m_current_clip_index;
+        ImGui::SliderInt(" Contraction ", &a, 0, m_contraction_names.size());
+        
     }
     ImGui::End();
     
-    
-//
-//    {
-//        if (ImGui::Begin("Settings", &m_showGUI)) {
-//
-//            if (ImGui::CollapsingHeader("Display")) {
-//              //  ShowDisplaySettings(runner_);
-//            }
-//
-//            ImGui::Spacing();
-//
-//            if (ImGui::CollapsingHeader("Style")) {
-//             //   ShowStyleSettings();
-//            }
-//        }
-//        ImGui::End();
-//    }
+
 
 //
 //    {
@@ -1091,15 +1079,16 @@ void lifContext::update ()
     {
         assert(channel_count() >= 3);
         auto tracksRef = m_trackWeakRef.lock();
-        m_plots[0]->load(tracksRef->at(0));
-        m_plots[1]->load(tracksRef->at(1));
+     //   m_plots[0]->load(tracksRef->at(0));
+    //    m_plots[1]->load(tracksRef->at(1));
         mySequence.rampEdit.load(tracksRef->at(0), 0);
         mySequence.rampEdit.load(tracksRef->at(1), 1);
     }
     if ( ! m_pci_trackWeakRef.expired())
     {
         auto tracksRef = m_pci_trackWeakRef.lock();
-        m_plots[channel_count()-1]->load(tracksRef->at(0));
+        mySequence.rampEdit.load(tracksRef->at(0), 0);
+//        m_plots[channel_count()-1]->load(tracksRef->at(0));
     }
     
     if (have_lif_serie ()){
@@ -1252,7 +1241,7 @@ void lifContext::draw ()
             }
         }
         
-        
+#if 0
         if (channel_count() && channel_count() == m_plots.size())
         {
             for (int cc = 0; cc < m_plots.size(); cc++)
@@ -1261,7 +1250,7 @@ void lifContext::draw ()
                 m_plots[cc]->draw();
             }
         }
-        
+#endif
         mContainer.draw();
         draw_info ();
         mUIParams.draw();

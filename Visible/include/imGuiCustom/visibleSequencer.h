@@ -188,7 +188,7 @@ struct MySequence : public ImSequencer::SequenceInterface
     
     virtual void CustomDraw(int index, ImDrawList* draw_list, const ImRect& rc, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect)
     {
-        static const char *labels[] = {"Major Dimension", "Minor Dimension" };
+        static const char *labels[] = {"Green", "Red" };
         
         rampEdit.SetMax(ImVec2(float(mFrameMax), 1.f));
         rampEdit.SetMin(ImVec2(float(mFrameMin), 0.f));
