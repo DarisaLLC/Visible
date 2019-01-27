@@ -3,6 +3,8 @@
 #include "imgui_internal.h"
 #include <cstdlib>
 #include <algorithm>
+#include <iostream>
+
 
 namespace ImSequencer
 {
@@ -316,6 +318,7 @@ namespace ImSequencer
 
             // slots
             customHeight = 0;
+            
             for (int i = 0; i < sequenceCount; i++)
             {
                 int *start, *end;
@@ -454,6 +457,7 @@ namespace ImSequencer
             draw_list->PopClipRect();
             draw_list->PopClipRect();
 
+            // Draw Compact and regular Draws 
             for (auto& customDraw : customDraws)
                 sequence->CustomDraw(customDraw.index, draw_list, customDraw.customRect, customDraw.legendRect, customDraw.clippingRect, customDraw.legendClippingRect);
             for (auto& customDraw : compactCustomDraws)

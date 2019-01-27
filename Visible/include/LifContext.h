@@ -96,8 +96,8 @@ public:
 	
 	void setZoom (vec2);
 	vec2 getZoom ();
-	void setMedianCutOff (uint32_t newco);
-	uint32_t getMedianCutOff () const;
+	void setMedianCutOff (int32_t newco);
+	int32_t getMedianCutOff () const;
     void setCellLength (uint32_t newco);
     uint32_t getCellLength () const;
 
@@ -173,6 +173,7 @@ private:
     std::vector<std::string> m_contraction_none = {" Entire "};
     mutable std::vector<std::string> m_contraction_names;
     int32_t m_cell_length;
+    bool m_median_cover_pct_available; // 
     
     
     // Content Info
@@ -238,7 +239,7 @@ private:
     bool m_showLog, m_showGUI, m_showHelp;
     
     // imGui
-    MySequence mySequence;
+    timeLineSequence mySequence;
     void draw_sequencer ();
     
     // Resource Icons

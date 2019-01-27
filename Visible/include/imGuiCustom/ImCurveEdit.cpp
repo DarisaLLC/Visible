@@ -69,7 +69,7 @@ namespace ImCurveEdit
       return sqrtf(dx * dx + dy * dy);
    }
 
-   static int DrawPoint(ImDrawList* draw_list, ImVec2 pos, const ImVec2 size, const ImVec2 offset, bool edited)
+   static int DrawPoint(ImDrawList* draw_list, ImVec2 pos, const ImVec2 size, const ImVec2 offset, unsigned int color, bool edited)
    {
       int ret = 0;
       ImGuiIO& io = ImGui::GetIO();
@@ -97,7 +97,7 @@ namespace ImCurveEdit
           draw_list->AddCircleFilled(center, 2.5f, 0xFF80B0FF);
        //  draw_list->AddPolyline(offsets, 4, 0xFF80B0FF, true, 2.0f);
       else
-         draw_list->AddCircleFilled(center, 2.5f, 0xFF00B0FF);
+         draw_list->AddCircleFilled(center, 2.5f, color);
      //    draw_list->AddPolyline(offsets, 4, 0xFF0080FF, true, 2.0f);
       
       return ret;
@@ -253,7 +253,7 @@ namespace ImCurveEdit
 
          for (size_t p = 0; p < ptCount; p++)
          {
-            const int drawState = DrawPoint(draw_list, pointToRange(pts[p]), viewSize, offset, (selection.find({int(c), int(p)}) != selection.end() && movingCurve == -1 && !scrollingV));
+            const int drawState = DrawPoint(draw_list, pointToRange(pts[p]), viewSize, offset, curveColor, (selection.find({int(c), int(p)}) != selection.end() && movingCurve == -1 && !scrollingV));
             if (drawState && movingCurve == -1 && !selectingQuad)
             {
                overCurveOrPoint = true;

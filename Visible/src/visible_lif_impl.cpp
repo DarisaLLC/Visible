@@ -57,6 +57,14 @@ using namespace svl;
 
 #define ONCE(x) { static int __once = 1; if (__once) {x;} __once = 0; }
 
+namespace anonymous{
+    std::map<std::string, unsigned int> named_colors = {{"Red", 0xFFFF0000 }, {"red", 0xFFFF0000 },{"Green", 0xFF00FF00},
+        {"green", 0xFF00FF00},{ "PCI", 0xFF0000FF}, { "pci", 0xFF0000FF}};
+    
+    
+}
+
+
 
                     /************************
                      *
@@ -67,6 +75,8 @@ using namespace svl;
 
 
     /////////////  lifContext Implementation  ////////////////
+// @ todo setup default repository
+// default median cover pct is 5% (0.05)
 
 lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd) :sequencedImageContext(ww), m_serie(sd) {
     m_type = guiContext::Type::lif_file_viewer;
@@ -78,7 +88,6 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd) :sequen
                 m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&lifRef->getSerie(sd.index()), stl_utils::null_deleter());
                 setup();
                 ww->getRenderer()->makeCurrentContext(true);
-      //          ww->getSignalDraw().connect( [&]{ draw(); } );
             }
     }
 }
@@ -220,8 +229,10 @@ void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
     if (haveTracks())
     {
         auto tracksRef = m_pci_trackWeakRef.lock();
-        if (!tracksRef->at(0).second.empty())
+        if (!tracksRef->at(0).second.empty()){
             m_plots[channel_count()-1]->load(tracksRef->at(0));
+            mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
+        }
     }
     vlogger::instance().console()->info("self-similarity available: ");
 }
@@ -258,11 +269,12 @@ void lifContext::signal_contraction_available (lif_processor::contractionContain
     m_clips.emplace_back(m_contractions[0].contraction_start.first,
                          m_contractions[0].relaxation_end.first,
                          m_contractions[0].contraction_peak.first);
-    
-    mySequence.myItems.push_back(MySequence::MySequenceItem{ 0,
+   
+#if 0
+    mySequence.myItems.push_back(timeLineSequence::MySequenceItem{ 0,
         (int) m_contractions[0].contraction_start.first,
         (int) m_contractions[0].relaxation_end.first , true});
-   
+#endif
     
     tinyUi::timepoint_marker_t tm;
     tm.first = m_contractions[0].contraction_peak.first/ ((float)mMediaInfo.count);
@@ -695,7 +707,7 @@ void lifContext::keyDown( KeyEvent event )
  *
  ************************/
 
-void lifContext::setMedianCutOff (uint32_t newco)
+void lifContext::setMedianCutOff (int32_t newco)
 {
     if (! m_lifProcRef) return;
     // Get a shared_ptr from weak and check if it had not expired
@@ -708,7 +720,7 @@ void lifContext::setMedianCutOff (uint32_t newco)
     m_lifProcRef->update();
 }
 
-uint32_t lifContext::getMedianCutOff () const
+int32_t lifContext::getMedianCutOff () const
 {
     if (! m_cur_lif_serie_ref) return 0;
     
@@ -804,10 +816,8 @@ void lifContext::loadCurrentSerie ()
         return;
     
     try {
-        
         m_clips.clear();
         mWidgets.clear ();
-        setMedianCutOff(0);
         setCellLength(0);
         pause();
         
@@ -838,7 +848,9 @@ void lifContext::loadCurrentSerie ()
         // Initialize Sequencer
         mySequence.mFrameMin = 0;
         mySequence.mFrameMax = (int) mFrameSet->count();
-        mySequence.mSequencerItemTypeNames = {"Fluorescent Channels", " PCI "};
+        mySequence.mPlotNames = {"Green", "Red", " PCI "};
+        mySequence.mSequencerItemTypeNames = {"Time Line", "Length", "Force"};
+        mySequence.myItems.push_back(timeLineSequence::MySequenceItem{ 0, 0, (int) mFrameSet->count(), true});
         
         m_title = m_serie.name() + " @ " + mPath.filename().string();
         
@@ -855,7 +867,7 @@ void lifContext::loadCurrentSerie ()
         mAuxTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
    
         add_plots();
-        add_timeline();
+    //    add_timeline();
     
         
     }
@@ -916,11 +928,12 @@ void  lifContext::draw_sequencer (){
 //    ImGui::SameLine();
 //    ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
 //    ImGui::PopItemWidth();
+    
     Sequencer(&mySequence, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
     // add a UI to edit that particular item
     if (selectedEntry != -1)
     {
-        const MySequence::MySequenceItem &item = mySequence.myItems[selectedEntry];
+        const timeLineSequence::MySequenceItem &item = mySequence.myItems[selectedEntry];
         ImGui::Text("I am a %s, please edit me", mySequence.mSequencerItemTypeNames[item.mType].c_str());
         // switch (type) ....
     }
@@ -941,13 +954,12 @@ void  lifContext::DrawGUI(){
     int gScreenWidth = getWindowWidth();
     int gScreenHeight = getWindowHeight();
     float xp = gScreenWidth / 5;
-    ImGui::SetNextWindowPos({  gScreenWidth-xp-10, 30 });
-    ImGui::SetNextWindowSize({ xp, (float)gScreenHeight });
-  //  ImGui::Begin("Tree", &yah, ImVec2(0, 0), 0.2f, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-  //  ONCE(ui::SetNextTreeNodeOpen(1));
+    ImGui::SetNextWindowPos({  gScreenWidth-xp-30, 30 });
+    ImGui::SetNextWindowSize({ xp, (float)gScreenHeight / 2 });
+
     if (ImGui::Begin("Timeline"))
     {
-        ImGui::PushItemWidth(80);
+        ImGui::PushItemWidth(40);
         ImGui::PushID(200);
         ImGui::InputInt("", &mySequence.mFrameMin, 0, 0);
         ImGui::PopID();
@@ -990,32 +1002,23 @@ void  lifContext::DrawGUI(){
         int a = m_current_clip_index;
         ImGui::SliderInt(" Contraction ", &a, 0, m_contraction_names.size());
         
+        // @todo improve this logic. The moment we are able to set the median cover, set it to the default
+        // of 5 percent
+        // @todo move defaults in general setting
+        if(!m_pci_trackWeakRef.expired() && !m_median_cover_pct_available){
+            m_median_cover_pct_available = true;
+            setMedianCutOff(5);
+        }
+    //    if (m_median_cover_pct_available){
+    //        ui::DragInt("Median Cover Percent", this,  &lifContext::getMedianCutOff, &lifContext::setMedianCutOff, 0.1f, 0, 30);
+     //   }
+        
     }
     ImGui::End();
-    
-
-
-//
-//    {
-//        static bool animate = true;
-//        ImGui::Checkbox("Animate", &animate);
-//
-//        static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
-//        ImGui::PlotLines("Frame Times", arr, IM_ARRAYSIZE(arr));
-//    }
 
     draw_sequencer();
-    
-    //Draw general settings window
-    if(m_showGUI)
-    {
-        ui::Begin("General Settings", &m_showGUI, ImGuiWindowFlags_AlwaysAutoResize);
-        
-        ui::SliderInt("Cell Length", &m_cell_length, 0, 100);
-        
-        ui::End();
-    }
-    
+
+
  
 }
 
@@ -1061,7 +1064,7 @@ bool lifContext::haveTracks()
 void lifContext::update ()
 {
     ci::app::WindowRef ww = get_windowRef();
-
+    
     ww->getRenderer()->makeCurrentContext(true);
     if (! have_lif_serie() ) return;
     mContainer.update();
@@ -1079,16 +1082,16 @@ void lifContext::update ()
     {
         assert(channel_count() >= 3);
         auto tracksRef = m_trackWeakRef.lock();
-     //   m_plots[0]->load(tracksRef->at(0));
-    //    m_plots[1]->load(tracksRef->at(1));
-        mySequence.rampEdit.load(tracksRef->at(0), 0);
-        mySequence.rampEdit.load(tracksRef->at(1), 1);
+        m_plots[0]->load(tracksRef->at(0));
+        m_plots[1]->load(tracksRef->at(1));
+        mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors[tracksRef->at(0).first], 0);
+        mySequence.m_editable_plot_data.load(tracksRef->at(1), anonymous::named_colors[tracksRef->at(1).first], 1);
     }
     if ( ! m_pci_trackWeakRef.expired())
     {
         auto tracksRef = m_pci_trackWeakRef.lock();
-        mySequence.rampEdit.load(tracksRef->at(0), 0);
-//        m_plots[channel_count()-1]->load(tracksRef->at(0));
+        mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
+        m_plots[channel_count()-1]->load(tracksRef->at(0));
     }
     
     if (have_lif_serie ()){
@@ -1168,10 +1171,10 @@ void lifContext::draw_info ()
         gl::ScopedColor (getManualEditMode() ? ColorA( 0.25f, 0.5f, 1, 1 ) : ColorA::gray(1.0));
         gl::drawStrokedRect(get_image_display_rect(), 3.0f);
     }
-    {
-        gl::ScopedColor (ColorA::gray(0.0));
-        gl::drawStrokedRect(m_layout->display_timeline_rect(), 3.0f);
-    }
+//    {
+//        gl::ScopedColor (ColorA::gray(0.0));
+//        gl::drawStrokedRect(m_layout->display_timeline_rect(), 3.0f);
+//    }
     {
         gl::ScopedColor (ColorA::gray(0.1));
         gl::drawStrokedRect(m_layout->display_plots_rect(), 3.0f);
@@ -1241,7 +1244,7 @@ void lifContext::draw ()
             }
         }
         
-#if 0
+#if 1
         if (channel_count() && channel_count() == m_plots.size())
         {
             for (int cc = 0; cc < m_plots.size(); cc++)
