@@ -130,9 +130,6 @@
 		C2398A7921DF224B00B180A0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		C2398A8121DF239700B180A0 /* VisibleRunApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946771CE4DC7100976025 /* VisibleRunApp.cpp */; };
 		C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
-		C23CFBDC21E7D96800C1DF16 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23CFBDB21E7D96800C1DF16 /* ImSequencer.cpp */; };
-		C23CFBDF21E9422F00C1DF16 /* sequenceUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23CFBDD21E9422F00C1DF16 /* sequenceUtil.cpp */; };
-		C23CFBE121E9612400C1DF16 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23CFBE021E9612400C1DF16 /* ImCurveEdit.cpp */; };
 		C23CFBE721E9785000C1DF16 /* PlayLoop.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C23CFBE521E9785000C1DF16 /* PlayLoop.png */; };
 		C23CFBE821E9785000C1DF16 /* PlayNoLoop.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */; };
 		C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */; };
@@ -321,6 +318,11 @@
 		C276ECA91C72B5D900242CDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C276ECA81C72B5D900242CDB /* CoreGraphics.framework */; };
 		C2819EB021F7E98A00183E44 /* PlayLoop.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C23CFBE521E9785000C1DF16 /* PlayLoop.png */; };
 		C2819EB121F7E98A00183E44 /* PlayNoLoop.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */; };
+		C2819EC521FA62E900183E44 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
+		C2819EC621FA62EF00183E44 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E345F21F2511D00221E68 /* ImSequencer.cpp */; };
+		C2819EC821FA94F000183E44 /* imgui.ini in Resources */ = {isa = PBXBuildFile; fileRef = C2819EC721FA94F000183E44 /* imgui.ini */; };
+		C2819EC921FA94F000183E44 /* imgui.ini in Resources */ = {isa = PBXBuildFile; fileRef = C2819EC721FA94F000183E44 /* imgui.ini */; };
+		C2819ECA21FA94F000183E44 /* imgui.ini in Resources */ = {isa = PBXBuildFile; fileRef = C2819EC721FA94F000183E44 /* imgui.ini */; };
 		C2820F302175298F00DFA7A6 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
 		C2820F3521752CB000DFA7A6 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
 		C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
@@ -506,10 +508,6 @@
 		C2398A7E21DF224B00B180A0 /* VisibleTestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VisibleTestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleTestApp-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleTestApp-Info.plist"; sourceTree = "<absolute>"; };
 		C23CFBDA21E6C3D700C1DF16 /* ut_gui_plot.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ut_gui_plot.cpp; path = ../ut_gui_plot.cpp; sourceTree = "<group>"; };
-		C23CFBDB21E7D96800C1DF16 /* ImSequencer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImSequencer.cpp; path = ../test/ImSequencer.cpp; sourceTree = "<group>"; };
-		C23CFBDD21E9422F00C1DF16 /* sequenceUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sequenceUtil.cpp; path = ../test/sequenceUtil.cpp; sourceTree = "<group>"; };
-		C23CFBDE21E9422F00C1DF16 /* sequenceUtil.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = sequenceUtil.hpp; path = ../test/sequenceUtil.hpp; sourceTree = "<group>"; };
-		C23CFBE021E9612400C1DF16 /* ImCurveEdit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImCurveEdit.cpp; path = ../test/ImCurveEdit.cpp; sourceTree = "<group>"; };
 		C23CFBE321E96D6700C1DF16 /* Resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../test/Resources.h; sourceTree = "<group>"; };
 		C23CFBE521E9785000C1DF16 /* PlayLoop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PlayLoop.png; path = data/PlayLoop.png; sourceTree = "<group>"; };
 		C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PlayNoLoop.png; path = data/PlayNoLoop.png; sourceTree = "<group>"; };
@@ -746,6 +744,7 @@
 		C2819EAC21F4457800183E44 /* ImSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImSequencer.h; path = ../include/imGuiCustom/ImSequencer.h; sourceTree = "<group>"; };
 		C2819EAD21F4457800183E44 /* ImCurveEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImCurveEdit.h; path = ../include/imGuiCustom/ImCurveEdit.h; sourceTree = "<group>"; };
 		C2819EAE21F4457800183E44 /* visibleSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = visibleSequencer.h; path = ../include/imGuiCustom/visibleSequencer.h; sourceTree = "<group>"; };
+		C2819EC721FA94F000183E44 /* imgui.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = imgui.ini; path = ../assets/imgui.ini; sourceTree = "<group>"; };
 		C2820F23217523A700DFA7A6 /* configHandler.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = configHandler.hpp; path = ../include/configHandler.hpp; sourceTree = "<group>"; };
 		C2820F24217523CC00DFA7A6 /* configHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = configHandler.cpp; path = ../src/configHandler.cpp; sourceTree = "<group>"; };
 		C2820F272175249F00DFA7A6 /* libconfig.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libconfig.a; path = ../../../../../../../usr/local/Cellar/libconfig/1.7.2/lib/libconfig.a; sourceTree = "<group>"; };
@@ -1197,10 +1196,6 @@
 		C240F9F921E1466D00FBA228 /* VisibleTestApp */ = {
 			isa = PBXGroup;
 			children = (
-				C23CFBE021E9612400C1DF16 /* ImCurveEdit.cpp */,
-				C23CFBDB21E7D96800C1DF16 /* ImSequencer.cpp */,
-				C23CFBDD21E9422F00C1DF16 /* sequenceUtil.cpp */,
-				C23CFBDE21E9422F00C1DF16 /* sequenceUtil.hpp */,
 				C23E343221F142D200221E68 /* undoUtils.h */,
 				C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */,
 				C23CFBDA21E6C3D700C1DF16 /* ut_gui_plot.cpp */,
@@ -1632,6 +1627,7 @@
 		C29C726F216FC7340028AED1 /* imgui */ = {
 			isa = PBXGroup;
 			children = (
+				C2819EC721FA94F000183E44 /* imgui.ini */,
 				C23E343421F1477D00221E68 /* imgui.h */,
 				C2AFCF08216F0CF10080462D /* CinderImGui.cpp */,
 				C2AFCEFD216E79590080462D /* imgui_demo.cpp */,
@@ -1811,6 +1807,7 @@
 				C240F9FB21E14C8900FBA228 /* sscli-Info.plist in Resources */,
 				C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */,
 				C264F94C215F0B6D00AF3130 /* Visible.icns in Resources */,
+				C2819EC821FA94F000183E44 /* imgui.ini in Resources */,
 				C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1821,6 +1818,7 @@
 			files = (
 				C2398A2921DF224B00B180A0 /* Visible.cfg in Resources */,
 				C2398A2C21DF224B00B180A0 /* palette.png in Resources */,
+				C2819ECA21FA94F000183E44 /* imgui.ini in Resources */,
 				C2398A2E21DF224B00B180A0 /* swatchSmall.png in Resources */,
 				C2398A2F21DF224B00B180A0 /* Visible.icns in Resources */,
 				C2398A3021DF224B00B180A0 /* swatchLarge.png in Resources */,
@@ -1833,6 +1831,7 @@
 			files = (
 				C26F5F9921B0AA6D00EAE156 /* Visible.cfg in Resources */,
 				C26F5F9C21B0AA6D00EAE156 /* palette.png in Resources */,
+				C2819EC921FA94F000183E44 /* imgui.ini in Resources */,
 				C26F5F9E21B0AA6D00EAE156 /* swatchSmall.png in Resources */,
 				C26F5F9F21B0AA6D00EAE156 /* Visible.icns in Resources */,
 				C26F5FA021B0AA6D00EAE156 /* swatchLarge.png in Resources */,
@@ -1973,6 +1972,7 @@
 				C2398A3F21DF224B00B180A0 /* seq_frame_container.cpp in Sources */,
 				C2398A4021DF224B00B180A0 /* Plist.cpp in Sources */,
 				C2398A4121DF224B00B180A0 /* tinyxmlparser.cpp in Sources */,
+				C2819EC621FA62EF00183E44 /* ImSequencer.cpp in Sources */,
 				C2398A4221DF224B00B180A0 /* localvariance.cpp in Sources */,
 				C23E343521F14C2400221E68 /* ut_gui_main.cpp in Sources */,
 				C2398A4321DF224B00B180A0 /* ObjectContainer.cpp in Sources */,
@@ -1987,16 +1987,13 @@
 				C2398A4C21DF224B00B180A0 /* lifFile.cpp in Sources */,
 				C2398A4D21DF224B00B180A0 /* tinyxmlerror.cpp in Sources */,
 				C2398A4E21DF224B00B180A0 /* labelBlob.cpp in Sources */,
-				C23CFBDC21E7D96800C1DF16 /* ImSequencer.cpp in Sources */,
 				C2398A4F21DF224B00B180A0 /* ip_utils.cpp in Sources */,
 				C2398A5021DF224B00B180A0 /* window.cc in Sources */,
-				C23CFBDF21E9422F00C1DF16 /* sequenceUtil.cpp in Sources */,
 				C2398A5121DF224B00B180A0 /* imgui_draw.cpp in Sources */,
 				C2398A5221DF224B00B180A0 /* rowfunc.cpp in Sources */,
 				C2398A5321DF224B00B180A0 /* csv.cpp in Sources */,
 				C2398A5521DF224B00B180A0 /* tinyxml.cpp in Sources */,
 				C2398A5621DF224B00B180A0 /* AVReader.mm in Sources */,
-				C23CFBE121E9612400C1DF16 /* ImCurveEdit.cpp in Sources */,
 				C2398A5721DF224B00B180A0 /* figure.cc in Sources */,
 				C2398A5821DF224B00B180A0 /* AVReaderWrapper.mm in Sources */,
 				C2398A5921DF224B00B180A0 /* labelconnect.cpp in Sources */,
@@ -2017,6 +2014,7 @@
 				C2398A6921DF224B00B180A0 /* matpixel.cpp in Sources */,
 				C2398A6A21DF224B00B180A0 /* file_system.cpp in Sources */,
 				C2398A6B21DF224B00B180A0 /* highgui.cc in Sources */,
+				C2819EC521FA62E900183E44 /* ImCurveEdit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

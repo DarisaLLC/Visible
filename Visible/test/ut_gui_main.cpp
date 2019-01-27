@@ -12,9 +12,8 @@
 
 #include "VisibleApp.h"
 #include "imguivariouscontrols.h"
-#include "sequenceUtil.hpp"
 #include "imgui_internal.h"
-
+#include <algorithm>
 
 std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655, 39.0342,
     38.8791, 38.8527, 39.0099, 38.8608, 38.9188, 38.8499, 38.6693,
@@ -43,9 +42,6 @@ using namespace std;
 //    return ImVec2(a.x + b.x, a.y + b.y);
 //}
 
-static ImVec2 operator-(const ImVec2 &a, const ImVec2 &b) {
-    return ImVec2(a.x - b.x, a.y - b.y);
-}
 
 //static ImVec2 operator*(const ImVec2 &a, const ImVec2 &b) {
 //    return ImVec2(a.x * b.x, a.y * b.y);
@@ -185,9 +181,10 @@ public:
         duration_time_t duration;
         duration.first = ntrack.second.front().first;
         duration.second = ntrack.second.back().first;
-        
-        m_uiContainer.set(duration, m_tracks_ref);
-        m_sequence = std::make_shared<MySequence>(m_uiContainer);
+        mySequence.mFrameMin = 0;
+        mySequence.mFrameMax = (int) acid.size() - 1;
+        mySequence.mSequencerItemTypeNames = {" PCI "};
+        mySequence.editable_plot_data.load(m_tracks_ref->at(0), 0);
         
     }
     
@@ -229,9 +226,8 @@ public:
         auto tmp = io.DisplaySize - deltaHeight;
         ImGui::SetNextWindowSize(tmp);
         //  int mSelectedNodeIndex = 0;
-        int gEvaluationTime = 0;
-        //   int mFrameMin = 0;
-        //   int mFrameMax = 0;
+        int64_t firstFrame = mFrameMin;
+        int64_t currentFrame = 0;
         
         if (ImGui::Begin("Visible", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
                          ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |ImGuiWindowFlags_NoScrollWithMouse |
@@ -240,40 +236,31 @@ public:
             if (ImGui::Begin("Timeline"))
             {
                 int selectedEntry =  0; //gNodeDelegate.mSelectedNodeIndex;
-                static int firstFrame = 0;
-                int currentTime = gEvaluationTime;
                 
                 ImGui::PushItemWidth(80);
                 ImGui::PushID(200);
-                ImGui::InputInt("", &m_uiContainer.mFrameMin, 0, 0);
+                ImGui::InputInt("", &mFrameMin, 0, 0);
                 ImGui::PopID();
                 ImGui::SameLine();
                 if (ImGui::Button("|<"))
-                    currentTime = m_uiContainer.mFrameMin;
+                    currentFrame = mFrameMin;
                 ImGui::SameLine();
                 if (ImGui::Button("<"))
-                    currentTime--;
-                ImGui::SameLine();
-                
-                ImGui::PushID(201);
-                if (ImGui::InputInt("", &currentTime, 0, 0, 0))
-                {
-                }
-                ImGui::PopID();
+                    currentFrame--;
                 
                 ImGui::SameLine();
                 if (ImGui::Button(">"))
-                    currentTime++;
+                    currentFrame++;
                 ImGui::SameLine();
                 if (ImGui::Button(">|"))
-                    currentTime = m_uiContainer.mFrameMax;
+                    currentFrame = mFrameMax;
                 ImGui::SameLine();
                 extern bool gbIsPlaying;
                 if (ImGui::Button(gbIsPlaying ? "Stop" : "Play"))
                 {
                     if (!gbIsPlaying)
                     {
-                        currentTime = m_uiContainer.mFrameMin;
+                        currentFrame = mFrameMin;
                     }
                     gbIsPlaying = !gbIsPlaying;
                 }
@@ -293,76 +280,45 @@ public:
                 if (ImGui::ImageButton((ImTextureID)(uint64_t)(gPlayLoop ? playLoopTextureId : playNoLoopTextureId), ImVec2(16.f, 16.f)))
                     gPlayLoop = !gPlayLoop;
                 
-                ImGui::SameLine();
-                ImGui::PushID(202);
-                ImGui::InputInt("", & m_uiContainer.mFrameMax, 0, 0);
-                ImGui::PopID();
-                ImGui::SameLine();
-                currentTime = ImMax(currentTime, 0);
-                ImGui::SameLine(0, 40.f);
-                if (ImGui::Button("Make Key") && selectedEntry != -1)
-                {
-                    //       nodeGraphDelegate.MakeKey(currentTime, uint32_t(selectedEntry), 0);
-                }
-                
-                ImGui::SameLine(0, 50.f);
-                
-                int setf = (m_sequence->getKeyFrameOrValue.x<FLT_MAX)? int(m_sequence->getKeyFrameOrValue.x):0;
-                ImGui::PushID(203);
-                if (ImGui::InputInt("", &setf, 0, 0))
-                {
-                    m_sequence->setKeyFrameOrValue.x = float(setf);
-                }
-                ImGui::SameLine();
-                float setv = (m_sequence->getKeyFrameOrValue.y < FLT_MAX) ? m_sequence->getKeyFrameOrValue.y : 0.f;
-                if (ImGui::InputFloat("Key", &setv))
-                {
-                    m_sequence->setKeyFrameOrValue.y = setv;
-                }
-                ImGui::PopID();
-                ImGui::SameLine();
-                int timeMask[2] = { 0,0 };
-                if (selectedEntry != -1)
-                {
-                    timeMask[0] = m_uiContainer.mNodes[selectedEntry].mStartFrame;
-                    timeMask[1] = m_uiContainer.mNodes[selectedEntry].mEndFrame;
-                }
-                ImGui::PushItemWidth(120);
-                if (ImGui::InputInt2("Time Mask", timeMask) && selectedEntry != -1)
-                {
-                    //  URChange<TileNodeEditGraphDelegate::ImogenNode> undoRedoChange(selectedEntry, [](int index) { return &gNodeDelegate.mNodes[index]; });
-                    timeMask[1] = ImMax(timeMask[1], timeMask[0]);
-                    timeMask[0] = ImMin(timeMask[1], timeMask[0]);
-                    m_uiContainer.setTimeSlot(selectedEntry, timeMask[0], timeMask[1]);
-                }
-                ImGui::PopItemWidth();
-                ImGui::PopItemWidth();
-                
-                ImSequencer::Sequencer(m_sequence.get(), &currentTime, NULL, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_ALL |  ImSequencer::SEQUENCER_ADD |  ImSequencer::SEQUENCER_DEL);
-                std::cout << "T: " << currentTime << "  E: " << selectedEntry << "  FF: " << firstFrame << std::endl;
-                
-#if 1 //NEXT_TO_DETERMINE
-                if (selectedEntry != -1)
-                {
-                    m_uiContainer.mSelectedNodeIndex = selectedEntry;
-                    // NodeGraphSelectNode(selectedEntry);
-                    auto& imoNode = m_uiContainer.mNodes[selectedEntry];
-                    auto pt = ImClamp(currentTime - imoNode.mStartFrame, 0, imoNode.mEndFrame - imoNode.mStartFrame);
-                    std::cout << pt << std::endl;
-                    //    gEvaluation.SetStageLocalTime(selectedEntry, ImClamp(currentTime - imoNode.mStartFrame, 0, imoNode.mEndFrame - imoNode.mStartFrame), true);
-                }
-                if (currentTime != gEvaluationTime)
-                {
-                    gEvaluationTime = currentTime;
-                    m_uiContainer.setTime(currentTime, true);
-                    //    m_uiContainer.ApplyAnimation(currentTime);
-                }
-#endif
+               
+           
+            
+                ImSequencer::Sequencer(&mySequence, &currentFrame, NULL, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_ALL |  ImSequencer::SEQUENCER_ADD |  ImSequencer::SEQUENCER_DEL);
+                std::cout << "T: " << currentFrame << "  E: " << selectedEntry << "  FF: " << firstFrame << std::endl;
             }
+            ImGui::End();
+
+            // let's create the sequencer
+            static int selectedEntry = -1;
+            static int64 firstFrame = 0;
+            static bool expanded = true;
+            
+            ImGui::SetNextWindowPos(ImVec2(300, 300));
+            ImGui::SetNextWindowSize(ImVec2(512, 480));
+            ImGui::Begin(" Results ");
+            
+            //    ImGui::PushItemWidth(130);
+            //    ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
+            //    ImGui::SameLine();
+            //    ImGui::InputInt("Frame ", &currentFrame);
+            //    ImGui::SameLine();
+            //    ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
+            //    ImGui::PopItemWidth();
+            
+            Sequencer(&mySequence, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
+            // add a UI to edit that particular item
+            if (selectedEntry != -1)
+            {
+                const timeLineSequence::MySequenceItem &item = mySequence.myItems[selectedEntry];
+                ImGui::Text("I am a %s, please edit me", mySequence.mSequencerItemTypeNames[item.mType].c_str());
+                // switch (type) ....
+            }
+            
             ImGui::End();
             
             
-
+            
+#if 0
             if (ImGui::Begin("Nodes"))
             {
                 ImGui::PushItemWidth(150);
@@ -406,6 +362,8 @@ public:
             //   ImGui::SetWindowSize(ImVec2(300, 300));
             if (ImGui::Begin("Parameters")){}
             ImGui::End();
+#endif
+            
         }
         
         ImGui::End();
@@ -422,10 +380,11 @@ public:
     
 private:
     ci::gl::TextureRef    mNoLoop, mLoop;
-    trackUIContainer m_uiContainer;
     namedTrackOfdouble_t ntrack;
     std::shared_ptr<vectorOfnamedTrackOfdouble_t> m_tracks_ref;
-    std::shared_ptr<MySequence> m_sequence;
+    timeLineSequence mySequence;
+    int mFrameMin, mFrameMax;
+    
     
 };
 

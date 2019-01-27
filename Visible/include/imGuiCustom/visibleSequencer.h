@@ -13,15 +13,16 @@
 
 using namespace std;
 
-//static const char* SequencerItemTypeNames[] = { "Lif","Contractions", "ManualLength", "Contraction90Pct", "Relaxation90Pct" };
-
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
 
 class RampEdit : public ImCurveEdit::Delegate
 {
     std::vector<std::vector<ImVec2>> mPts; // [3][8];
     std::vector<size_t> mPointCount;
+    std::vector<std::string> mPlotNames;
+    std::vector<unsigned int> mPlotColors;
     std::vector<bool> mbVisible;
+    
     ImVec2 mMin;
     ImVec2 mMax;
     
@@ -31,35 +32,48 @@ public:
         mPts.resize(plot_count);
         mPointCount.resize(plot_count);
         mbVisible.resize(plot_count);
-      
+        mPlotNames.resize(plot_count);
+        mPlotColors.resize(plot_count);
+        
         mMax = ImVec2(1.f, 1.f);
         mMin = ImVec2(0.f, 0.f);
     }
-    
-    void load (const namedTrackOfdouble_t& track, int index)
+
+    // If at_index is -1, push_back, else if index is valid, load data at that index
+    int load (const namedTrackOfdouble_t& track, unsigned int color, int at_index,  bool visible = true)
     {
+        
         const timed_double_vec_t& ds = track.second;
         std::vector<float> mBuffer;
         std::vector<timed_double_t>::const_iterator reader = ds.begin ();
         while (reader++ != ds.end())mBuffer.push_back (reader->second);
         svl::norm_min_max (mBuffer.begin(), mBuffer.end(), true);
         
-        std::vector<ImVec2>& pts = mPts[index];
+        std::vector<ImVec2> pts;
         pts.clear();
         reader = ds.begin ();
         std::vector<float>::const_iterator bItr = mBuffer.begin();
         while (reader++ != ds.end() && bItr++ != mBuffer.end() ){
             pts.emplace_back(reader->first.first, *bItr);
         }
-        mPointCount[index] = pts.size();
-        mbVisible[index] = true;
-        mMax = ImVec2(1.f, 1.f);
-        mMin = ImVec2(0.f, 0.f);
+        
+        if (at_index >= 0 && at_index < mPts.size()){
+            mPts[at_index] = pts;
+            mbVisible[at_index] = visible;
+            mPlotNames[at_index] = track.first;
+            mPlotColors[at_index] = color;
+            mPointCount[at_index] = pts.size();
+            return at_index;
+        }
+        return -1;
     }
     
     const std::vector<size_t>& pointCount () { return mPointCount; }
     const std::vector<std::vector<ImVec2>>& points () { return mPts; }
     std::vector<bool>& visibles () { return mbVisible; }
+    const std::vector<std::string>& names () { return mPlotNames; }
+    const std::vector<unsigned int>& colors () { return mPlotColors; }
+    
     
     
     size_t GetCurveCount()
@@ -78,8 +92,7 @@ public:
     
     uint32_t GetCurveColor(size_t curveIndex)
     {
-        uint32_t cols[] = { 0xFF0000FF, 0xFF00FF00, 0xFFFF0000 };
-        return cols[curveIndex];
+        return mPlotColors[curveIndex];
     }
     const vector<ImVec2>& GetPoints(size_t curveIndex)
     {
@@ -121,7 +134,7 @@ private:
     }
 };
 
-struct MySequence : public ImSequencer::SequenceInterface
+struct timeLineSequence : public ImSequencer::SequenceInterface
 {
     // interface with sequencer
     
@@ -161,10 +174,11 @@ struct MySequence : public ImSequencer::SequenceInterface
     virtual size_t GetCustomHeight(int index) { return myItems[index].mExpanded ? 300 : 0; }
     
     // my datas
-    MySequence() : rampEdit(3), mFrameMin(0), mFrameMax(0) {}
+    timeLineSequence() : m_editable_plot_data(3), mFrameMin(0), mFrameMax(0) {}
     
     int mFrameMin, mFrameMax;
     std::vector<std::string> mSequencerItemTypeNames;
+    std::vector<std::string> mPlotNames;
     
     struct MySequenceItem
     {
@@ -173,7 +187,7 @@ struct MySequence : public ImSequencer::SequenceInterface
         bool mExpanded;
     };
     std::vector<MySequenceItem> myItems;
-    RampEdit rampEdit;
+    RampEdit m_editable_plot_data;
     
     virtual void DoubleClick(int index) {
         if (myItems[index].mExpanded)
@@ -188,37 +202,36 @@ struct MySequence : public ImSequencer::SequenceInterface
     
     virtual void CustomDraw(int index, ImDrawList* draw_list, const ImRect& rc, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect)
     {
-        static const char *labels[] = {"Green", "Red" };
-        
-        rampEdit.SetMax(ImVec2(float(mFrameMax), 1.f));
-        rampEdit.SetMin(ImVec2(float(mFrameMin), 0.f));
+       
+        m_editable_plot_data.SetMax(ImVec2(float(mFrameMax), 1.f));
+        m_editable_plot_data.SetMin(ImVec2(float(mFrameMin), 0.f));
         
         draw_list->PushClipRect(legendClippingRect.Min, legendClippingRect.Max, true);
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < mPlotNames.size(); i++)
         {
             ImVec2 pta(legendRect.Min.x + 30, legendRect.Min.y + i * 14.f);
             ImVec2 ptb(legendRect.Max.x, legendRect.Min.y + (i+1) * 14.f);
-            draw_list->AddText(pta, rampEdit.visibles()[i]?0xFFFFFFFF:0x80FFFFFF, labels[i]);
+            draw_list->AddText(pta, m_editable_plot_data.visibles()[i]?0xFFFFFFFF:0x80FFFFFF, mPlotNames[i].c_str());
             if (ImRect(pta, ptb).Contains(ImGui::GetMousePos()) && ImGui::IsMouseClicked(0))
-                rampEdit.visibles()[i] = !rampEdit.visibles()[i];
+                m_editable_plot_data.visibles()[i] = !m_editable_plot_data.visibles()[i];
         }
         draw_list->PopClipRect();
         
         ImGui::SetCursorScreenPos(rc.Min);
-        ImCurveEdit::Edit(rampEdit, rc.Max-rc.Min, 137 + index, &clippingRect);
+        ImCurveEdit::Edit(m_editable_plot_data, rc.Max-rc.Min, 137 + index, &clippingRect);
     }
     
     virtual void CustomDrawCompact(int index, ImDrawList* draw_list, const ImRect& rc, const ImRect& clippingRect)
     {
-        rampEdit.SetMax(ImVec2(float(mFrameMax), 1.f));
-        rampEdit.SetMin(ImVec2(float(mFrameMin), 0.f));
+        m_editable_plot_data.SetMax(ImVec2(float(mFrameMax), 1.f));
+        m_editable_plot_data.SetMin(ImVec2(float(mFrameMin), 0.f));
         
         draw_list->PushClipRect(clippingRect.Min, clippingRect.Max, true);
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < mPlotNames.size(); i++)
         {
-            for (int j = 0; j < rampEdit.pointCount()[i]; j++)
+            for (int j = 0; j < m_editable_plot_data.pointCount()[i]; j++)
             {
-                float p = rampEdit.points()[i][j].x;
+                float p = m_editable_plot_data.points()[i][j].x;
                 if (p < myItems[index].mFrameStart || p > myItems[index].mFrameEnd)
                     continue;
                 float r = (p - mFrameMin) / float(mFrameMax - mFrameMin);
