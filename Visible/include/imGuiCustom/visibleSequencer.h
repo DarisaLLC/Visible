@@ -40,7 +40,7 @@ public:
     }
 
     // If at_index is -1, push_back, else if index is valid, load data at that index
-    int load (const namedTrackOfdouble_t& track, unsigned int color, int at_index,  bool visible = true)
+    int load (const namedTrackOfdouble_t& track, unsigned int color, int at_index)
     {
         
         const timed_double_vec_t& ds = track.second;
@@ -56,10 +56,10 @@ public:
         while (reader++ != ds.end() && bItr++ != mBuffer.end() ){
             pts.emplace_back(reader->first.first, *bItr);
         }
-        
+
+        // Visibility state is set in the app.
         if (at_index >= 0 && at_index < mPts.size()){
             mPts[at_index] = pts;
-            mbVisible[at_index] = visible;
             mPlotNames[at_index] = track.first;
             mPlotColors[at_index] = color;
             mPointCount[at_index] = pts.size();
@@ -69,6 +69,7 @@ public:
     }
     
     const std::vector<size_t>& pointCount () { return mPointCount; }
+    const size_t plotCount () { return mPlotColors.size(); }
     const std::vector<std::vector<ImVec2>>& points () { return mPts; }
     std::vector<bool>& visibles () { return mbVisible; }
     const std::vector<std::string>& names () { return mPlotNames; }
@@ -84,6 +85,10 @@ public:
     bool IsVisible(size_t curveIndex)
     {
         return mbVisible[curveIndex];
+    }
+    void ToggleVisible(size_t curveIndex)
+    {
+        mbVisible[curveIndex] = ! mbVisible[curveIndex];
     }
     size_t GetPointCount(size_t curveIndex)
     {
@@ -136,6 +141,20 @@ private:
 
 struct timeLineSequence : public ImSequencer::SequenceInterface
 {
+    
+    int mFrameMin, mFrameMax;
+    std::vector<std::string> mSequencerItemTypeNames;
+    int mLastCustomDrawIndex;
+    
+    struct timeline_item
+    {
+        int mType;
+        int mFrameStart, mFrameEnd;
+        bool mExpanded;
+    };
+    std::vector<timeline_item> myItems;
+    RampEdit m_editable_plot_data;
+    
     // interface with sequencer
     
     virtual int64_t GetFrameMin() const {
@@ -157,7 +176,7 @@ struct timeLineSequence : public ImSequencer::SequenceInterface
     
     virtual void Get(int index, int** start, int** end, int *type, unsigned int *color)
     {
-        MySequenceItem &item = myItems[index];
+        timeline_item &item = myItems[index];
         if (color)
             *color = 0xFFAA8080; // same color for everyone, return color based on type
         if (start)
@@ -167,27 +186,16 @@ struct timeLineSequence : public ImSequencer::SequenceInterface
         if (type)
             *type = item.mType;
     }
-    virtual void Add(int type) { myItems.push_back(MySequenceItem{ type, 0, 10, false }); };
+    virtual void Add(int type) { myItems.push_back(timeline_item{ type, 0, 10, false }); };
     virtual void Del(int index) { myItems.erase(myItems.begin() + index); }
     virtual void Duplicate(int index) { myItems.push_back(myItems[index]); }
     
     virtual size_t GetCustomHeight(int index) { return myItems[index].mExpanded ? 300 : 0; }
     
     // my datas
+    // @todo remove hard-wired 3 standing for Red, Green and PCI
     timeLineSequence() : m_editable_plot_data(3), mFrameMin(0), mFrameMax(0) {}
-    
-    int mFrameMin, mFrameMax;
-    std::vector<std::string> mSequencerItemTypeNames;
-    std::vector<std::string> mPlotNames;
-    
-    struct MySequenceItem
-    {
-        int mType;
-        int mFrameStart, mFrameEnd;
-        bool mExpanded;
-    };
-    std::vector<MySequenceItem> myItems;
-    RampEdit m_editable_plot_data;
+
     
     virtual void DoubleClick(int index) {
         if (myItems[index].mExpanded)
@@ -202,18 +210,20 @@ struct timeLineSequence : public ImSequencer::SequenceInterface
     
     virtual void CustomDraw(int index, ImDrawList* draw_list, const ImRect& rc, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect)
     {
-       
+
         m_editable_plot_data.SetMax(ImVec2(float(mFrameMax), 1.f));
         m_editable_plot_data.SetMin(ImVec2(float(mFrameMin), 0.f));
         
         draw_list->PushClipRect(legendClippingRect.Min, legendClippingRect.Max, true);
-        for (int i = 0; i < mPlotNames.size(); i++)
+        for (int i = 0; i <  m_editable_plot_data.plotCount(); i++)
         {
             ImVec2 pta(legendRect.Min.x + 30, legendRect.Min.y + i * 14.f);
             ImVec2 ptb(legendRect.Max.x, legendRect.Min.y + (i+1) * 14.f);
-            draw_list->AddText(pta, m_editable_plot_data.visibles()[i]?0xFFFFFFFF:0x80FFFFFF, mPlotNames[i].c_str());
-            if (ImRect(pta, ptb).Contains(ImGui::GetMousePos()) && ImGui::IsMouseClicked(0))
-                m_editable_plot_data.visibles()[i] = !m_editable_plot_data.visibles()[i];
+            draw_list->AddText(pta, m_editable_plot_data.visibles()[i]?0xFFFFFFFF:0x80FFFFFF, m_editable_plot_data.names()[i].c_str());
+            if (ImRect(pta, ptb).Contains(ImGui::GetMousePos()) && ImGui::IsMouseClicked(0)){
+                bool tmp = m_editable_plot_data.visibles()[i];
+                m_editable_plot_data.visibles()[i] = !tmp;
+            }
         }
         draw_list->PopClipRect();
         
@@ -227,7 +237,7 @@ struct timeLineSequence : public ImSequencer::SequenceInterface
         m_editable_plot_data.SetMin(ImVec2(float(mFrameMin), 0.f));
         
         draw_list->PushClipRect(clippingRect.Min, clippingRect.Max, true);
-        for (int i = 0; i < mPlotNames.size(); i++)
+        for (int i = 0; i < m_editable_plot_data.plotCount(); i++)
         {
             for (int j = 0; j < m_editable_plot_data.pointCount()[i]; j++)
             {
