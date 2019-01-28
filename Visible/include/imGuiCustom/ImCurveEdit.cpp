@@ -83,8 +83,8 @@ namespace ImCurveEdit
       
       const ImVec2 center = pos * size + offset;
       const ImRect anchor(center - ImVec2(5, 5), center + ImVec2(5, 5));
-       draw_list->AddCircleFilled(center, 2, 0xFF000000);
-//      draw_list->AddConvexPolyFilled(offsets, 4, 0xFF000000);
+       draw_list->AddCircleFilled(center, 2, 0xFF000000); //      draw_list->AddConvexPolyFilled(offsets, 4, 0xFF000000);
+
       if (anchor.Contains(io.MousePos))
       {
          ret = 1;
@@ -94,12 +94,9 @@ namespace ImCurveEdit
       if (edited)
          draw_list->AddPolyline(offsets, 4, 0xFFFFFFFF, true, 3.0f);
       else if (ret)
-          draw_list->AddCircleFilled(center, 2.5f, 0xFF80B0FF);
-       //  draw_list->AddPolyline(offsets, 4, 0xFF80B0FF, true, 2.0f);
+          draw_list->AddCircleFilled(center, 2.5f, 0xFF80B0FF);        //  draw_list->AddPolyline(offsets, 4, 0xFF80B0FF, true, 2.0f);
       else
-         draw_list->AddCircleFilled(center, 2.5f, color);
-     //    draw_list->AddPolyline(offsets, 4, 0xFF0080FF, true, 2.0f);
-      
+         draw_list->AddCircleFilled(center, 2.5f, color);      //    draw_list->AddPolyline(offsets, 4, 0xFF0080FF, true, 2.0f);
       return ret;
    }
 

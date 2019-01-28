@@ -58,8 +58,8 @@ using namespace svl;
 #define ONCE(x) { static int __once = 1; if (__once) {x;} __once = 0; }
 
 namespace anonymous{
-    std::map<std::string, unsigned int> named_colors = {{"Red", 0xFFFF0000 }, {"red", 0xFFFF0000 },{"Green", 0xFF00FF00},
-        {"green", 0xFF00FF00},{ "PCI", 0xFF0000FF}, { "pci", 0xFF0000FF}};
+    std::map<std::string, unsigned int> named_colors = {{"Red", 0xFF0000FF }, {"red",0xFF0000FF },{"Green", 0xFF00FF00},
+        {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}};
     
     
 }
@@ -843,14 +843,13 @@ void lifContext::loadCurrentSerie ()
         mFrameSet->channel_names (m_serie.channel_names());
         reset_entire_clip(mFrameSet->count());
         m_minFrame = 0;
-        m_maxFrame =  mFrameSet->count();
+        m_maxFrame =  mFrameSet->count() - 1;
         
         // Initialize Sequencer
         mySequence.mFrameMin = 0;
         mySequence.mFrameMax = (int) mFrameSet->count();
-        mySequence.mPlotNames = {"Green", "Red", " PCI "};
         mySequence.mSequencerItemTypeNames = {"Time Line", "Length", "Force"};
-        mySequence.myItems.push_back(timeLineSequence::MySequenceItem{ 0, 0, (int) mFrameSet->count(), true});
+        mySequence.myItems.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         
         m_title = m_serie.name() + " @ " + mPath.filename().string();
         
@@ -933,7 +932,7 @@ void  lifContext::draw_sequencer (){
     // add a UI to edit that particular item
     if (selectedEntry != -1)
     {
-        const timeLineSequence::MySequenceItem &item = mySequence.myItems[selectedEntry];
+        const timeLineSequence::timeline_item &item = mySequence.myItems[selectedEntry];
         ImGui::Text("I am a %s, please edit me", mySequence.mSequencerItemTypeNames[item.mType].c_str());
         // switch (type) ....
     }
@@ -999,19 +998,19 @@ void  lifContext::DrawGUI(){
         ImGui::PushID(202);
         ImGui::InputInt("",  &mySequence.mFrameMax, 0, 0);
         ImGui::PopID();
-        int a = m_current_clip_index;
-        ImGui::SliderInt(" Contraction ", &a, 0, m_contraction_names.size());
+     //   int a = m_current_clip_index;
+     //   ImGui::SliderInt(" Contraction ", &a, 0, m_contraction_names.size());
         
         // @todo improve this logic. The moment we are able to set the median cover, set it to the default
         // of 5 percent
         // @todo move defaults in general setting
-        if(!m_pci_trackWeakRef.expired() && !m_median_cover_pct_available){
-            m_median_cover_pct_available = true;
-            setMedianCutOff(5);
+    
+        
+        if(!m_pci_trackWeakRef.expired()){
+            int default_median_cover_pct = getMedianCutOff();
+            ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, 0, 20);
+            setMedianCutOff(default_median_cover_pct);
         }
-    //    if (m_median_cover_pct_available){
-    //        ui::DragInt("Median Cover Percent", this,  &lifContext::getMedianCutOff, &lifContext::setMedianCutOff, 0.1f, 0, 30);
-     //   }
         
     }
     ImGui::End();

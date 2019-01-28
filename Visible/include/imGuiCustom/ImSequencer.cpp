@@ -37,8 +37,8 @@ namespace ImSequencer
         ImGuiIO& io = ImGui::GetIO();
         int cx = (int)(io.MousePos.x);
         int cy = (int)(io.MousePos.y);
-        static float framePixelWidth = 10.f;
-        static float framePixelWidthTarget = 10.f;
+        static float framePixelWidth = 5.f;
+        static float framePixelWidthTarget = 5.f;
         int legendWidth = 100;
 
         static int movingEntry = -1;
@@ -57,7 +57,7 @@ namespace ImSequencer
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
         ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
-        static const int scrollBarHeight = 14;
+        static const int scrollBarHeight = 24;
         auto firstFrameUsed = firstFrame ? *firstFrame : 0;
 
 
@@ -80,7 +80,7 @@ namespace ImSequencer
         ImVector<CustomDraw> customDraws;
         ImVector<CustomDraw> compactCustomDraws;
         // zoom in/out
-       // int frameOverCursor = 0;
+        int64_t frameOverCursor = 0;
         const int visibleFrameCount = (int)floorf((canvas_size.x - legendWidth) / framePixelWidth);
         const float barWidthRatio = ImMin(visibleFrameCount / (float)frameCount, 1.f);
         const float barWidthInPixels = barWidthRatio * (canvas_size.x - legendWidth);
@@ -313,7 +313,10 @@ namespace ImSequencer
                 customHeight = 0;
                 for (int i = 0; i < *selectedEntry; i++)
                     customHeight += sequence->GetCustomHeight(i);;
-                draw_list->AddRectFilled(ImVec2(contentMin.x, contentMin.y + ItemHeight * *selectedEntry + customHeight), ImVec2(contentMin.x + canvas_size.x, contentMin.y + ItemHeight * (*selectedEntry + 1) + customHeight), 0x801080FF, 1.f);
+                draw_list->AddRectFilled(ImVec2(contentMin.x, contentMin.y + ItemHeight * *selectedEntry + customHeight),
+                                         ImVec2(contentMin.x + canvas_size.x,
+                                                contentMin.y + ItemHeight * (*selectedEntry + 1) + customHeight),
+                                                0x801080FF, 1.f);
             }
 
             // slots
@@ -338,6 +341,8 @@ namespace ImSequencer
                     draw_list->AddRectFilled(slotP1, slotP3, slotColorHalf, 2);
                     draw_list->AddRectFilled(slotP1, slotP2, slotColor, 2);
                 }
+                
+                // Reduce & Back if double clicked 
                 if (ImRect(slotP1, slotP2).Contains(io.MousePos) && io.MouseDoubleClicked[0])
                 {
                     sequence->DoubleClick(i);
@@ -626,7 +631,7 @@ namespace ImSequencer
             }
             else
             {
-#if 0
+#if 1
                 frameOverCursor = *firstFrame + (int)(visibleFrameCount * ((io.MousePos.x - (float)legendWidth - canvas_pos.x) / (canvas_size.x - legendWidth)));
                 //frameOverCursor = max(min(*firstFrame - visibleFrameCount / 2, frameCount - visibleFrameCount), 0);
 

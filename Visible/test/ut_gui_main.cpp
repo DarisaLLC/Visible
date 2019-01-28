@@ -309,7 +309,7 @@ public:
             // add a UI to edit that particular item
             if (selectedEntry != -1)
             {
-                const timeLineSequence::MySequenceItem &item = mySequence.myItems[selectedEntry];
+                const timeLineSequence::timeline_item &item = mySequence.myItems[selectedEntry];
                 ImGui::Text("I am a %s, please edit me", mySequence.mSequencerItemTypeNames[item.mType].c_str());
                 // switch (type) ....
             }
