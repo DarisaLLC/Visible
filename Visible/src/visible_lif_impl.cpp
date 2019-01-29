@@ -46,6 +46,7 @@
 #include "gui_handler.hpp"
 #include "gui_base.hpp"
 #include <boost/any.hpp>
+#include "ImGuiExtensions.h"
 #include "Resources.h"
 
 
@@ -100,7 +101,7 @@ ci::app::WindowRef&  lifContext::get_windowRef(){
 void lifContext::setup_signals(){
 
     // Create a Processing Object to attach signals to
-    m_lifProcRef = std::make_shared<lif_processor> ();
+    m_lifProcRef = std::make_shared<lif_serie_processor> ();
     
     // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&lifContext::signal_content_loaded, shared_from_above(), _1);
@@ -119,7 +120,7 @@ void lifContext::setup_signals(){
     boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_available_cb);
     
     // Support lifProcessor::contraction results available
-    std::function<void (lif_processor::contractionContainer_t&)> contraction_available_cb = boost::bind (&lifContext::signal_contraction_available, shared_from_above(), _1);
+    std::function<void (lif_serie_processor::contractionContainer_t&)> contraction_available_cb = boost::bind (&lifContext::signal_contraction_available, shared_from_above(), _1);
     boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_available_cb);
     
     // Support lifProcessor::channel mats available
@@ -230,7 +231,7 @@ void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
     {
         auto tracksRef = m_pci_trackWeakRef.lock();
         if (!tracksRef->at(0).second.empty()){
-            m_plots[channel_count()-1]->load(tracksRef->at(0));
+         //   m_plots[channel_count()-1]->load(tracksRef->at(0));
             mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
         }
     }
@@ -250,7 +251,7 @@ void lifContext::signal_flu_stats_available ()
 
 }
 
-void lifContext::signal_contraction_available (lif_processor::contractionContainer_t& contras)
+void lifContext::signal_contraction_available (lif_serie_processor::contractionContainer_t& contras)
 {
     // Pauses playback if playing and restore it at scope's end
     scopedPause sp(std::shared_ptr<lifContext>(shared_from_above(), stl_utils::null_deleter () ));
@@ -269,13 +270,7 @@ void lifContext::signal_contraction_available (lif_processor::contractionContain
     m_clips.emplace_back(m_contractions[0].contraction_start.first,
                          m_contractions[0].relaxation_end.first,
                          m_contractions[0].contraction_peak.first);
-   
-#if 0
-    mySequence.myItems.push_back(timeLineSequence::MySequenceItem{ 0,
-        (int) m_contractions[0].contraction_start.first,
-        (int) m_contractions[0].relaxation_end.first , true});
-#endif
-    
+
     tinyUi::timepoint_marker_t tm;
     tm.first = m_contractions[0].contraction_peak.first/ ((float)mMediaInfo.count);
     tm.second = ColorA (0.9, 0.3, 0.1, 0.75);
@@ -761,49 +756,6 @@ uint32_t lifContext::getCellLength () const{
  *
  ************************/
 
-void lifContext::add_plots ()
-{
-
-    std::lock_guard<std::mutex> lock(m_track_mutex);
-    
-    assert (  m_layout->plot_rects().size() >= channel_count());
-    
-    m_plots.resize (0);
-    
-    for (int cc = 0; cc < channel_count(); cc++)
-    {
-        m_plots.push_back( graph1d::ref (new graph1d (m_cur_lif_serie_ref->getChannels()[cc].getName(),
-                                                    m_layout->plot_rects() [cc])));
-    }
-    
-    for (graph1d::ref gr : m_plots)
-    {
-        gr->backgroundColor = ColorA( 0.3, 0.3, 0.3, 0.3 );
-        gr->strokeColor = ColorA(0.2,0.8,0.1,1.0);
-        m_marker_signal.connect(std::bind(&graph1d::set_marker_position, gr, std::placeholders::_1));
-    }
-    if (m_plots.size() == 3)
-    {
-        m_plots[1]->strokeColor = ColorA(0.8,0.2,0.1,1.0);
-        m_plots[2]->strokeColor = ColorA(0.0,0.0,0.0,1.0);
-    }
-    
-
-    
-}
-
-void lifContext::add_timeline(){
-    
-    std::lock_guard<std::mutex> lock(m_track_mutex);
-    vlogger::instance().console()->info(tostr(m_layout->display_timeline_rect()));
-    auto rect = m_layout->display_timeline_rect();
-    mMainTimeLineSlider = tinyUi::TimeLineSlider(rect);
-    mMainTimeLineSlider.clear_timepoint_markers();
-    mMainTimeLineSlider.setTitle ("Time Line");
-    m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mMainTimeLineSlider, std::placeholders::_1));
-    mWidgets.push_back( &mMainTimeLineSlider );
-}
-
 // Set window size according to layout
 //  Channel             Data
 //  1
@@ -838,7 +790,7 @@ void lifContext::loadCurrentSerie ()
         m_layout->init (getWindowSize() , mFrameSet->media_info(), channel_count());
         
         // Start Loading Images on a different thread
-        auto future_res = std::async(std::launch::async, &lif_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names());
+        auto future_res = std::async(std::launch::async, &lif_serie_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names());
         
         mFrameSet->channel_names (m_serie.channel_names());
         reset_entire_clip(mFrameSet->count());
@@ -865,10 +817,6 @@ void lifContext::loadCurrentSerie ()
         mTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
         mAuxTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
    
-        add_plots();
-    //    add_timeline();
-    
-        
     }
     catch( const std::exception &ex ) {
         console() << ex.what() << endl;
@@ -881,9 +829,9 @@ void lifContext::process_async (){
     switch(channel_count()){
         case 3:
         {
-            m_async_luminance_tracks = std::async(std::launch::async,&lif_processor::run_flu_statistics,
+            m_async_luminance_tracks = std::async(std::launch::async,&lif_serie_processor::run_flu_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
-            m_async_pci_tracks = stl_utils::reallyAsync(&lif_processor::run_pci, m_lifProcRef.get(), 2);
+            m_async_pci_tracks = stl_utils::reallyAsync(&lif_serie_processor::run_pci, m_lifProcRef.get(), 2);
 //            m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci,m_lifProcRef.get(), 2);
             auto res = m_lifProcRef->run_volume_sum_sumsq_count (2);
             res.PrintTo(res,&std::cout);
@@ -891,7 +839,7 @@ void lifContext::process_async (){
         }
         case 1:
         {
-            m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci,
+            m_async_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_pci,
                                             m_lifProcRef.get(), 0);
             auto res = m_lifProcRef->run_volume_sum_sumsq_count (0);
             res.PrintTo(res,&std::cout);
@@ -909,6 +857,13 @@ void lifContext::process_async (){
 
 void  lifContext::draw_sequencer (){
     
+ 
+    
+}
+
+
+void lifContext::add_result_sequencer ()
+{
     // let's create the sequencer
     static int selectedEntry = -1;
     static int64 firstFrame = 0;
@@ -917,16 +872,24 @@ void  lifContext::draw_sequencer (){
     Rectf dr = get_image_display_rect();
     auto tr = dr.getUpperRight();
     ImGui::SetNextWindowPos(ImVec2(tr.x+10, tr.y));
-    ImGui::SetNextWindowSize(ImVec2(512, 480));
+    ImGui::SetNextWindowSize(dr.getSize());
+    
     ImGui::Begin(" Results ");
     
-//    ImGui::PushItemWidth(130);
-//    ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
-//    ImGui::SameLine();
-//    ImGui::InputInt("Frame ", &currentFrame);
-//    ImGui::SameLine();
-//    ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
-//    ImGui::PopItemWidth();
+    ImGui::PushItemWidth(130);
+    ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
+    ImGui::SameLine();
+    ImGui::InputInt64("Frame ", &m_seek_position);
+    ImGui::SameLine();
+    ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
+    ImGui::PopItemWidth();
+    
+    
+#if 0
+    mySequence.myItems.push_back(timeLineSequence::timeline_item{ 0,
+        (int) m_contractions[0].contraction_start.first,
+        (int) m_contractions[0].relaxation_end.first , true});
+#endif
     
     Sequencer(&mySequence, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
     // add a UI to edit that particular item
@@ -939,23 +902,17 @@ void  lifContext::draw_sequencer (){
     
     ImGui::End();
     
+    
 }
 
-void  lifContext::SetupGUIVariables() {}
-
-void  lifContext::DrawGUI(){
+void lifContext::add_timeline(){
     
-//    if(ui::MenuItem("Looping", "S")){
-//        loop_no_loop_button();
-//    }
-    
-   // bool yah = true;
     int gScreenWidth = getWindowWidth();
     int gScreenHeight = getWindowHeight();
     float xp = gScreenWidth / 5;
     ImGui::SetNextWindowPos({  gScreenWidth-xp-30, 30 });
     ImGui::SetNextWindowSize({ xp, (float)gScreenHeight / 2 });
-
+    
     if (ImGui::Begin("Timeline"))
     {
         ImGui::PushItemWidth(40);
@@ -967,10 +924,10 @@ void  lifContext::DrawGUI(){
             seekToStart();
         ImGui::SameLine();
         if (ImGui::Button("<"))
-              seekToFrame (getCurrentFrame() - 1);
+            seekToFrame (getCurrentFrame() - 1);
         ImGui::SameLine();
         if (ImGui::Button(">"))
-              seekToFrame (getCurrentFrame() + 1);
+            seekToFrame (getCurrentFrame() + 1);
         ImGui::SameLine();
         if (ImGui::Button(">|"))
             seekToEnd();
@@ -998,13 +955,13 @@ void  lifContext::DrawGUI(){
         ImGui::PushID(202);
         ImGui::InputInt("",  &mySequence.mFrameMax, 0, 0);
         ImGui::PopID();
-     //   int a = m_current_clip_index;
-     //   ImGui::SliderInt(" Contraction ", &a, 0, m_contraction_names.size());
+        //   int a = m_current_clip_index;
+        //   ImGui::SliderInt(" Contraction ", &a, 0, m_contraction_names.size());
         
         // @todo improve this logic. The moment we are able to set the median cover, set it to the default
         // of 5 percent
         // @todo move defaults in general setting
-    
+        
         
         if(!m_pci_trackWeakRef.expired()){
             int default_median_cover_pct = getMedianCutOff();
@@ -1015,10 +972,14 @@ void  lifContext::DrawGUI(){
     }
     ImGui::End();
 
-    draw_sequencer();
+}
 
+void  lifContext::SetupGUIVariables() {}
 
- 
+void  lifContext::DrawGUI(){
+    
+    add_timeline();
+    add_result_sequencer();
 }
 
 Rectf lifContext::get_image_display_rect ()
@@ -1046,13 +1007,9 @@ void lifContext::resize ()
     auto ws = ww->getSize();
     m_layout->update_window_size(ws);
     mSize = vec2(ws[0], ws[1] / 12);
-    mMainTimeLineSlider.setBounds (m_layout->display_timeline_rect());
-    if (m_plots.empty()) return;
-    
-    for (int cc = 0; cc < m_layout->plot_rects().size(); cc++)
-    {
-        m_plots[cc]->setRect (m_layout->plot_rects()[cc]);
-    }
+  //  mMainTimeLineSlider.setBounds (m_layout->display_timeline_rect());
+
+
 }
 
 bool lifContext::haveTracks()
@@ -1072,27 +1029,30 @@ void lifContext::update ()
     
     // If Plots are ready, set them up
     // It is ready only for new data
+    //@todo switch to using weak_ptr all together
     if ( is_ready (m_async_luminance_tracks) )
         m_trackWeakRef = m_async_luminance_tracks.get();
+    
     if ( is_ready (m_async_pci_tracks))
         m_pci_trackWeakRef = m_async_pci_tracks.get();
-    
+
+    // Update Fluorescence results if ready
     if (! m_trackWeakRef.expired())
     {
         assert(channel_count() >= 3);
         auto tracksRef = m_trackWeakRef.lock();
-        m_plots[0]->load(tracksRef->at(0));
-        m_plots[1]->load(tracksRef->at(1));
         mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors[tracksRef->at(0).first], 0);
         mySequence.m_editable_plot_data.load(tracksRef->at(1), anonymous::named_colors[tracksRef->at(1).first], 1);
     }
+
+    // Update PCI result if ready
     if ( ! m_pci_trackWeakRef.expired())
     {
         auto tracksRef = m_pci_trackWeakRef.lock();
         mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
-        m_plots[channel_count()-1]->load(tracksRef->at(0));
     }
-    
+
+    // Fetch Next Frame
     if (have_lif_serie ()){
         mSurface = mFrameSet->getFrame(getCurrentFrame());
         mCurrentIndexTime = mFrameSet->currentIndexTime();
@@ -1170,10 +1130,7 @@ void lifContext::draw_info ()
         gl::ScopedColor (getManualEditMode() ? ColorA( 0.25f, 0.5f, 1, 1 ) : ColorA::gray(1.0));
         gl::drawStrokedRect(get_image_display_rect(), 3.0f);
     }
-//    {
-//        gl::ScopedColor (ColorA::gray(0.0));
-//        gl::drawStrokedRect(m_layout->display_timeline_rect(), 3.0f);
-//    }
+
     {
         gl::ScopedColor (ColorA::gray(0.1));
         gl::drawStrokedRect(m_layout->display_plots_rect(), 3.0f);
@@ -1243,16 +1200,7 @@ void lifContext::draw ()
             }
         }
         
-#if 1
-        if (channel_count() && channel_count() == m_plots.size())
-        {
-            for (int cc = 0; cc < m_plots.size(); cc++)
-            {
-                m_plots[cc]->setRect (m_layout->plot_rects()[cc]);
-                m_plots[cc]->draw();
-            }
-        }
-#endif
+
         mContainer.draw();
         draw_info ();
         mUIParams.draw();

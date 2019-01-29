@@ -182,43 +182,39 @@ void  lif_browser::get_series_info () const
  
  ****/
 
-lif_processor::lif_processor ()
+lif_serie_processor::lif_serie_processor ()
 {
     // Signals we provide
-    signal_content_loaded = createSignal<lif_processor::sig_cb_content_loaded>();
-    signal_flu_available = createSignal<lif_processor::sig_cb_flu_stats_available>();
-    signal_frame_loaded = createSignal<lif_processor::sig_cb_frame_loaded>();
-    signal_sm1d_available = createSignal<lif_processor::sig_cb_sm1d_available>();
-    signal_sm1dmed_available = createSignal<lif_processor::sig_cb_sm1dmed_available>();
-    signal_contraction_available = createSignal<lif_processor::sig_cb_contraction_available>();
-    signal_3dstats_available = createSignal<lif_processor::sig_cb_3dstats_available>();
-    signal_channelmats_available = createSignal<lif_processor::sig_cb_channelmats_available>();
+    signal_content_loaded = createSignal<lif_serie_processor::sig_cb_content_loaded>();
+    signal_flu_available = createSignal<lif_serie_processor::sig_cb_flu_stats_available>();
+    signal_frame_loaded = createSignal<lif_serie_processor::sig_cb_frame_loaded>();
+    signal_sm1d_available = createSignal<lif_serie_processor::sig_cb_sm1d_available>();
+    signal_sm1dmed_available = createSignal<lif_serie_processor::sig_cb_sm1dmed_available>();
+    signal_contraction_available = createSignal<lif_serie_processor::sig_cb_contraction_available>();
+    signal_3dstats_available = createSignal<lif_serie_processor::sig_cb_3dstats_available>();
+    signal_channelmats_available = createSignal<lif_serie_processor::sig_cb_channelmats_available>();
     
     // semilarity producer
     m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
     
     // Signals we support
     // support Similarity::Content Loaded
-    std::function<void ()> sm_content_loaded_cb = boost::bind (&lif_processor::sm_content_loaded, this);
-    boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
+   // std::function<void ()> sm_content_loaded_cb = boost::bind (&lif_serie_processor::sm_content_loaded, this);
+   // boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
     
     // Create a contraction object
     m_caRef = contraction_analyzer::create ();
     
     // Suport lif_processor::Contraction Analyzed
-    std::function<void (contractionContainer_t&)>ca_analyzed_cb = boost::bind (&lif_processor::contraction_analyzed, this, _1);
+    std::function<void (contractionContainer_t&)>ca_analyzed_cb = boost::bind (&lif_serie_processor::contraction_analyzed, this, _1);
     boost::signals2::connection ca_connection = m_caRef->registerCallback(ca_analyzed_cb);
-    
-    // Support channel mats available
-    std::function<void (int&)>mats_available_cb = boost::bind(&lif_processor::channelmats_available, this, _1);
-    boost::signals2::connection mat_connection = registerCallback(mats_available_cb);
     
     // Signal us when we have pci mat channels are ready to run contraction analysis
     //std::function<void (int&)> sm1dmed_available_cb = boost::bind (&lif_processor::pci_done, this);
     //boost::signals2::connection nl_connection = registerCallback(sm1dmed_available_cb);
     
     // Signal us when 3d stats are ready
-    std::function<void ()>_3dstats_done_cb = boost::bind (&lif_processor::stats_3d_computed, this);
+    std::function<void ()>_3dstats_done_cb = boost::bind (&lif_serie_processor::stats_3d_computed, this);
     boost::signals2::connection _3d_stats_connection = registerCallback(_3dstats_done_cb);
     
 }
@@ -227,7 +223,7 @@ lif_processor::lif_processor ()
 // @note Specific to ID Lab Lif Files
 // 3 channels: 2 flu one visible
 // 1 channel: visible
-void lif_processor::create_named_tracks (const std::vector<std::string>& names)
+void lif_serie_processor::create_named_tracks (const std::vector<std::string>& names)
 {
     m_tracksRef = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
     m_pci_tracksRef = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
@@ -251,20 +247,20 @@ void lif_processor::create_named_tracks (const std::vector<std::string>& names)
 }
 
 
-const smProducerRef lif_processor::sm () const {
+const smProducerRef lif_serie_processor::sm () const {
     return m_sm;
     
 }
 
 // Check if the returned has expired
-std::weak_ptr<contraction_analyzer> lif_processor::contractionWeakRef ()
+std::weak_ptr<contraction_analyzer> lif_serie_processor::contractionWeakRef ()
 {
     std::weak_ptr<contraction_analyzer> wp (m_caRef);
     return wp;
 }
 
 
-int64_t lif_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names)
+int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names)
 {
     create_named_tracks(names);
     load_channels_from_images(frames);
@@ -279,7 +275,7 @@ int64_t lif_processor::load (const std::shared_ptr<seqFrameContainer>& frames,co
  * 1 monchrome channel. Compute volume stats of each on a thread
  */
 
-svl::stats<int64_t> lif_processor::run_volume_sum_sumsq_count (const int channel_index){
+svl::stats<int64_t> lif_serie_processor::run_volume_sum_sumsq_count (const int channel_index){
     m_3d_stats_done = false;
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
     std::vector<std::tuple<uint8_t,uint8_t>> rts;
@@ -297,14 +293,14 @@ svl::stats<int64_t> lif_processor::run_volume_sum_sumsq_count (const int channel
     
 }
 
-void lif_processor::stats_3d_computed(){
+void lif_serie_processor::stats_3d_computed(){
     
 }
 /*
  * 2 flu channels. Compute stats of each using its own threaD
  */
 
-std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_processor::run_flu_statistics (const std::vector<int>& channels)
+std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_serie_processor::run_flu_statistics (const std::vector<int>& channels)
 {
     std::vector<timed_double_vec_t> cts (channels.size());
     std::vector<std::thread> threads(channels.size());
@@ -327,7 +323,7 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_processor::run_flu_statistics 
 
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled 
-std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_processor::run_pci (const int channel_index)
+std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_serie_processor::run_pci (const int channel_index)
 {
     int channel_to_use = channel_index % m_channel_count;
     channel_images_t c2 = m_all_by_channel[channel_to_use];
@@ -359,17 +355,17 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_processor::run_pci (const int
 
 
 
-const std::vector<Rectf>& lif_processor::rois () const { return m_rois; }
+const std::vector<Rectf>& lif_serie_processor::rois () const { return m_rois; }
 
 // Update. Called also when cutoff offset has changed
-void lif_processor::update ()
+void lif_serie_processor::update ()
 {
     if(m_pci_tracksRef && !m_pci_tracksRef->empty() && m_caRef && m_caRef->isValid())
         entropiesToTracks(m_pci_tracksRef->at(0));
 }
 
 
-void lif_processor::contraction_analyzed (contractionContainer_t& contractions)
+void lif_serie_processor::contraction_analyzed (contractionContainer_t& contractions)
 {
     // Call the contraction available cb if any
     if (signal_contraction_available && signal_contraction_available->num_slots() > 0)
@@ -380,7 +376,7 @@ void lif_processor::contraction_analyzed (contractionContainer_t& contractions)
      vlogger::instance().console()->info(" Contractions Analyzed: ");
 }
 
-void lif_processor:: channelmats_available (int& channel_index){
+void lif_serie_processor:: channelmats_available (int& channel_index){
     
     if (m_all_by_channel[channel_index].size() == m_channel_mats[channel_index].size() &&
         signal_channelmats_available && signal_channelmats_available->num_slots() > 0){
@@ -389,56 +385,14 @@ void lif_processor:: channelmats_available (int& channel_index){
     }
      vlogger::instance().console()->info(" Channels Available: ");
 }
-void lif_processor::sm_content_loaded ()
-{
-    vlogger::instance().console()->info(" Similarity Image Data Loaded ");
-    int channel_to_use = m_channel_count - 1;
-    loadImagesToMats(channel_to_use);
-    vlogger::instance().console()->info(" cv::Mat generation dispatched ");
-}
 
 
 
-void lif_processor::loadImagesToMats (const int channel_index)
-{
-    int ci = channel_index;
-    if (ci < 0){
-        std::cout << " All channels is not implemented yet ";
-        return;
-    }
-    if (m_all_by_channel.empty() || ci > (m_all_by_channel.size() - 1) ){
-        std::cout << " Empty or channel does not exist ";
-        return;
-    }
-    channel_images_t c2 = m_all_by_channel[channel_index];
-    
-    m_channel_mats[channel_index].resize(0);
-    vector<roiWindow<P8U> >::const_iterator vitr = c2.begin();
-    do
-    {
-        m_channel_mats[channel_index].emplace_back(vitr->height(), vitr->width(), CV_8UC(1), vitr->pelPointer(0,0), size_t(vitr->rowUpdate()));
-    }
-    while (++vitr != c2.end());
 
-    channelmats_available(ci);
-
-}
-
-//  labelBlob::ref get_blobCachedObject (const index_time_t& ti)
-//{
-//    static std::mutex m;
-//    
-//    std::lock_guard<std::mutex> hold(m);
-//    auto sp = m_blob_cache [ti].lock();
-//    if(!sp)
-//    {
-//        m_blob_cache[ti] = sp = labelBlob::create(gray, tout, index);
-//    }
-//    return sp;
-//}
 // Assumes LIF data -- use multiple window.
 // @todo condider creating cv::Mats and convert to roiWindow when needed.
-void lif_processor::load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames)
+
+void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames)
 {
     
     m_frameCount = 0;
@@ -493,7 +447,7 @@ void lif_processor::load_channels_from_images (const std::shared_ptr<seqFrameCon
 
 // Note tracks contained timed data.
 // Each call to find_best can be with different median cut-off
-void lif_processor::entropiesToTracks (namedTrackOfdouble_t& track)
+void lif_serie_processor::entropiesToTracks (namedTrackOfdouble_t& track)
 {
     try{
         std::weak_ptr<contraction_analyzer> weakCaPtr (m_caRef);
@@ -523,7 +477,7 @@ void lif_processor::entropiesToTracks (namedTrackOfdouble_t& track)
 }
 
 
-const int64_t& lif_processor::frame_count () const
+const int64_t& lif_serie_processor::frame_count () const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     static int64_t inconsistent (0);
@@ -538,7 +492,7 @@ const int64_t& lif_processor::frame_count () const
     return m_frameCount;
 }
 
-const int64_t lif_processor::channel_count () const
+const int64_t lif_serie_processor::channel_count () const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     return m_channel_count;

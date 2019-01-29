@@ -56,7 +56,9 @@
 #include "async_tracks.h"
 #include "CinderImGui.h"
 #include "logger.hpp"
-
+#include "vision/opencv_utils.hpp"
+#include "algo_Lif.hpp"
+#include <boost/foreach.hpp>
 
 // @FIXME Logger has to come before these
 #include "ut_units.hpp"
@@ -133,6 +135,45 @@ void done_callback (void)
     std::cout << "Done"  << std::endl;
 }
 
+
+#if NOT_YET_Jan_29_2019
+
+TEST (ut_liffile, voxel_energy)
+{
+    std::string filename ("Sample1.lif");
+    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
+    EXPECT_TRUE(res.second);
+    lifIO::LifReader lif(res.first.string(), "");
+    cout << "LIF version "<<lif.getVersion() << endl;
+    EXPECT_EQ(14, lif.getNbSeries() );
+
+    // @todo enable getting sequential frame container from a browser
+    auto lb_ref = lif_browser::create(res.first.string());
+    auto lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&lif.getSerie(0), stl_utils::null_deleter());
+    auto seq_frames =  seqFrameContainer::create (*lif_serie_ref);
+    
+    // Testing cv::mat conversion call back
+    // Create a Processing Object to attach signals to
+    auto lifProcRef = std::make_shared<lif_serie_processor> ();
+    
+    std::function<void (int64_t&)> content_loaded_cb = ([&lrp = lifProcRef](int64_t& frame_counted){std::cout << frame_counted; lrp->loadImagesToMats(2);  });
+    // Connect the callback to lif processor
+    std::function<void (int&)> channelmats_available_cb = ([](int& channel_index){ std::cout << " got mats for " << channel_index << std::endl; });
+    
+    boost::signals2::connection channelmats_connection = lifProcRef->registerCallback(channelmats_available_cb);
+    boost::signals2::connection content_loaded_connection = lifProcRef->registerCallback(content_loaded_cb);
+    
+    std::vector<std::string> names {"red", "green", "grey"};
+    
+    lifProcRef->load(seq_frames, names);
+  
+    std::this_thread::sleep_for(std::chrono::duration<double, std::milli> (2000));
+    auto frames = lifProcRef->channelMats();
+    std::cout << frames[2].size() << std::endl;
+    
+}
+
+#endif
 
 TEST (UT_AVReaderBasic, run)
 {
