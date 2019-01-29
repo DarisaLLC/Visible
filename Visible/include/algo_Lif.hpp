@@ -159,7 +159,7 @@ class LifSignaler : public base_signaler
 };
 
 
-class lif_processor : public LifSignaler
+class lif_serie_processor : public LifSignaler
 {
 public:
     using contractionContainer_t = contraction_analyzer::contractionContainer_t;
@@ -177,7 +177,7 @@ public:
     typedef std::vector<channel_images_t> channel_vec_t;
     typedef std::array<std::vector<cv::Mat>,4> channelMats_t;
     
-    lif_processor ();
+    lif_serie_processor ();
     
     const smProducerRef sm () const;
     const int64_t& frame_count () const;
@@ -204,22 +204,18 @@ public:
     
     const  std::deque<double>& medianSet () const;
     
-    // Loads from all channels. -1 implies create a multichannel cv::Mat. 0,1,2 imply specific channel.
-    // Returns false if channel(s) requested do not exist. Or in case of any error
-    void loadImagesToMats (const int channel_index);
-    
     // Update. Called also when cutoff offset has changed
     void update ();
     
 protected:
-    boost::signals2::signal<lif_processor::sig_cb_content_loaded>* signal_content_loaded;
-    boost::signals2::signal<lif_processor::sig_cb_flu_stats_available>* signal_flu_available;
-    boost::signals2::signal<lif_processor::sig_cb_frame_loaded>* signal_frame_loaded;
-    boost::signals2::signal<lif_processor::sig_cb_sm1d_available>* signal_sm1d_available;
-    boost::signals2::signal<lif_processor::sig_cb_sm1dmed_available>* signal_sm1dmed_available;
-    boost::signals2::signal<lif_processor::sig_cb_contraction_available>* signal_contraction_available;
-    boost::signals2::signal<lif_processor::sig_cb_3dstats_available>* signal_3dstats_available;
-    boost::signals2::signal<lif_processor::sig_cb_channelmats_available>* signal_channelmats_available;
+    boost::signals2::signal<lif_serie_processor::sig_cb_content_loaded>* signal_content_loaded;
+    boost::signals2::signal<lif_serie_processor::sig_cb_flu_stats_available>* signal_flu_available;
+    boost::signals2::signal<lif_serie_processor::sig_cb_frame_loaded>* signal_frame_loaded;
+    boost::signals2::signal<lif_serie_processor::sig_cb_sm1d_available>* signal_sm1d_available;
+    boost::signals2::signal<lif_serie_processor::sig_cb_sm1dmed_available>* signal_sm1dmed_available;
+    boost::signals2::signal<lif_serie_processor::sig_cb_contraction_available>* signal_contraction_available;
+    boost::signals2::signal<lif_serie_processor::sig_cb_3dstats_available>* signal_3dstats_available;
+    boost::signals2::signal<lif_serie_processor::sig_cb_channelmats_available>* signal_channelmats_available;
     
 private:
     

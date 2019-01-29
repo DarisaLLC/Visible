@@ -323,6 +323,10 @@
 		C2819EC821FA94F000183E44 /* imgui.ini in Resources */ = {isa = PBXBuildFile; fileRef = C2819EC721FA94F000183E44 /* imgui.ini */; };
 		C2819EC921FA94F000183E44 /* imgui.ini in Resources */ = {isa = PBXBuildFile; fileRef = C2819EC721FA94F000183E44 /* imgui.ini */; };
 		C2819ECA21FA94F000183E44 /* imgui.ini in Resources */ = {isa = PBXBuildFile; fileRef = C2819EC721FA94F000183E44 /* imgui.ini */; };
+		C2819ECD2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
+		C2819ECE2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
+		C2819ECF2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
+		C2819ED02200D60A00183E44 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
 		C2820F302175298F00DFA7A6 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
 		C2820F3521752CB000DFA7A6 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
 		C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
@@ -745,6 +749,8 @@
 		C2819EAD21F4457800183E44 /* ImCurveEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImCurveEdit.h; path = ../include/imGuiCustom/ImCurveEdit.h; sourceTree = "<group>"; };
 		C2819EAE21F4457800183E44 /* visibleSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = visibleSequencer.h; path = ../include/imGuiCustom/visibleSequencer.h; sourceTree = "<group>"; };
 		C2819EC721FA94F000183E44 /* imgui.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = imgui.ini; path = ../assets/imgui.ini; sourceTree = "<group>"; };
+		C2819ECB2200D3F300183E44 /* ImGuiExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImGuiExtensions.h; path = ../include/imGuiCustom/ImGuiExtensions.h; sourceTree = "<group>"; };
+		C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImGuiExtensions.cpp; path = ../include/imGuiCustom/ImGuiExtensions.cpp; sourceTree = "<group>"; };
 		C2820F23217523A700DFA7A6 /* configHandler.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = configHandler.hpp; path = ../include/configHandler.hpp; sourceTree = "<group>"; };
 		C2820F24217523CC00DFA7A6 /* configHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = configHandler.cpp; path = ../src/configHandler.cpp; sourceTree = "<group>"; };
 		C2820F272175249F00DFA7A6 /* libconfig.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libconfig.a; path = ../../../../../../../usr/local/Cellar/libconfig/1.7.2/lib/libconfig.a; sourceTree = "<group>"; };
@@ -1185,6 +1191,8 @@
 			isa = PBXGroup;
 			children = (
 				C2819EAD21F4457800183E44 /* ImCurveEdit.h */,
+				C2819ECB2200D3F300183E44 /* ImGuiExtensions.h */,
+				C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */,
 				C2819EAC21F4457800183E44 /* ImSequencer.h */,
 				C2819EAE21F4457800183E44 /* visibleSequencer.h */,
 				C23E346221F254DE00221E68 /* ImCurveEdit.cpp */,
@@ -1939,6 +1947,7 @@
 				C2AFCF00216E79590080462D /* imgui.cpp in Sources */,
 				C25261071F6611A10069F665 /* DisplayObject.cpp in Sources */,
 				C23E346021F2511D00221E68 /* ImSequencer.cpp in Sources */,
+				C2819ECD2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C2B87C9921D012D700C91E35 /* logger.cpp in Sources */,
 				C2618F80217FDA6600FA9F43 /* color.cc in Sources */,
 				C20EDBC21CF277130074C47A /* self_similarity.cpp in Sources */,
@@ -1986,6 +1995,7 @@
 				C2398A4B21DF224B00B180A0 /* rand_support.cpp in Sources */,
 				C2398A4C21DF224B00B180A0 /* lifFile.cpp in Sources */,
 				C2398A4D21DF224B00B180A0 /* tinyxmlerror.cpp in Sources */,
+				C2819ED02200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C2398A4E21DF224B00B180A0 /* labelBlob.cpp in Sources */,
 				C2398A4F21DF224B00B180A0 /* ip_utils.cpp in Sources */,
 				C2398A5021DF224B00B180A0 /* window.cc in Sources */,
@@ -2061,6 +2071,7 @@
 				C2618F84217FDA8400FA9F43 /* color.cc in Sources */,
 				C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */,
 				C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */,
+				C2819ECF2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C2618F85217FDA8F00FA9F43 /* highgui.cc in Sources */,
 				C20BBC031E4E33CE002C7D68 /* tinystr.cpp in Sources */,
 				C2BDEFF021C8237B00A8CB94 /* core_support.cpp in Sources */,
@@ -2151,6 +2162,7 @@
 				C26F5FD121B0AA6D00EAE156 /* boost_literals.cpp in Sources */,
 				C26F5FD221B0AA6D00EAE156 /* PlistDate.cpp in Sources */,
 				C23E346121F2511D00221E68 /* ImSequencer.cpp in Sources */,
+				C2819ECE2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C26F5FD321B0AA6D00EAE156 /* imgui.cpp in Sources */,
 				C26F5FD421B0AA6D00EAE156 /* DisplayObject.cpp in Sources */,
 				C26F5FD521B0AA6D00EAE156 /* color.cc in Sources */,

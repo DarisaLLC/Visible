@@ -30,7 +30,7 @@ class lifContext : public sequencedImageContext
 {
 public:
     
-    using contractionContainer_t = lif_processor::contractionContainer_t;
+    using contractionContainer_t = lif_serie_processor::contractionContainer_t;
     
   
     enum Side_t : uint32_t
@@ -131,7 +131,7 @@ private:
     ci::app::WindowRef& get_windowRef();
     
     // LIF Support
-    std::shared_ptr<lif_processor> m_lifProcRef;
+    std::shared_ptr<lif_serie_processor> m_lifProcRef;
 	void loadCurrentSerie ();
 	bool have_lif_serie ();
     std::shared_ptr<lifIO::LifSerie> m_cur_lif_serie_ref;
@@ -169,7 +169,7 @@ private:
     std::weak_ptr<vectorOfnamedTrackOfdouble_t> m_pci_trackWeakRef;
 
     // Contraction
-    lif_processor::contractionContainer_t m_contractions;
+    lif_serie_processor::contractionContainer_t m_contractions;
     std::vector<std::string> m_contraction_none = {" Entire "};
     mutable std::vector<std::string> m_contraction_names;
     int32_t m_cell_length;
@@ -213,7 +213,7 @@ private:
     void update_with_mouse_position ( MouseEvent event );
     Rectf get_image_display_rect () override;
     vec2 texture_to_display_zoom ();
-    void add_plots ();
+    void add_result_sequencer ();
     void add_timeline ();
     
     // Navigation
