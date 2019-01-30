@@ -138,7 +138,6 @@
 		C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
 		C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
 		C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
-		C23E343521F14C2400221E68 /* ut_gui_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */; };
 		C23E346021F2511D00221E68 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E345F21F2511D00221E68 /* ImSequencer.cpp */; };
 		C23E346121F2511D00221E68 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E345F21F2511D00221E68 /* ImSequencer.cpp */; };
 		C23E346321F254DE00221E68 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
@@ -327,6 +326,9 @@
 		C2819ECE2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
 		C2819ECF2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
 		C2819ED02200D60A00183E44 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
+		C2819ED52201287900183E44 /* visible_scope.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2819ED42201287900183E44 /* visible_scope.png */; };
+		C2819EDC22015BA800183E44 /* particle_test_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819EDA22015BA800183E44 /* particle_test_main.cpp */; };
+		C2819EDD22015BA800183E44 /* FieldController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819EDB22015BA800183E44 /* FieldController.cpp */; };
 		C2820F302175298F00DFA7A6 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
 		C2820F3521752CB000DFA7A6 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
 		C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
@@ -410,6 +412,16 @@
 			files = (
 				C2819EB021F7E98A00183E44 /* PlayLoop.png in CopyFiles */,
 				C2819EB121F7E98A00183E44 /* PlayNoLoop.png in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C2819ED12201271A00183E44 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				C2819ED52201287900183E44 /* visible_scope.png in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -751,6 +763,12 @@
 		C2819EC721FA94F000183E44 /* imgui.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = imgui.ini; path = ../assets/imgui.ini; sourceTree = "<group>"; };
 		C2819ECB2200D3F300183E44 /* ImGuiExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImGuiExtensions.h; path = ../include/imGuiCustom/ImGuiExtensions.h; sourceTree = "<group>"; };
 		C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImGuiExtensions.cpp; path = ../include/imGuiCustom/ImGuiExtensions.cpp; sourceTree = "<group>"; };
+		C2819ED42201287900183E44 /* visible_scope.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = visible_scope.png; path = data/visible_scope.png; sourceTree = "<group>"; };
+		C2819ED622012DE800183E44 /* Resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../include/Resources.h; sourceTree = "<group>"; };
+		C2819ED722015B5700183E44 /* FieldController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FieldController.h; sourceTree = "<group>"; };
+		C2819ED922015B5700183E44 /* ParticleSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParticleSystem.h; sourceTree = "<group>"; };
+		C2819EDA22015BA800183E44 /* particle_test_main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = particle_test_main.cpp; path = ../test/particle_test_main.cpp; sourceTree = "<group>"; };
+		C2819EDB22015BA800183E44 /* FieldController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FieldController.cpp; path = ../test/FieldController.cpp; sourceTree = "<group>"; };
 		C2820F23217523A700DFA7A6 /* configHandler.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = configHandler.hpp; path = ../include/configHandler.hpp; sourceTree = "<group>"; };
 		C2820F24217523CC00DFA7A6 /* configHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = configHandler.cpp; path = ../src/configHandler.cpp; sourceTree = "<group>"; };
 		C2820F272175249F00DFA7A6 /* libconfig.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libconfig.a; path = ../../../../../../../usr/local/Cellar/libconfig/1.7.2/lib/libconfig.a; sourceTree = "<group>"; };
@@ -1015,6 +1033,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C2819ED42201287900183E44 /* visible_scope.png */,
 				C23CFBE521E9785000C1DF16 /* PlayLoop.png */,
 				C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */,
 				C23CFBE321E96D6700C1DF16 /* Resources.h */,
@@ -1129,6 +1148,7 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C2819ED622012DE800183E44 /* Resources.h */,
 				C260AFCF21ED076F003B0FF0 /* sg_filter.h */,
 				C240F9FE21E15ADE00FBA228 /* imguivariouscontrols.h */,
 				C2B87C9721CEE27500C91E35 /* visible_cli.hpp */,
@@ -1204,6 +1224,10 @@
 		C240F9F921E1466D00FBA228 /* VisibleTestApp */ = {
 			isa = PBXGroup;
 			children = (
+				C2819ED722015B5700183E44 /* FieldController.h */,
+				C2819ED922015B5700183E44 /* ParticleSystem.h */,
+				C2819EDB22015BA800183E44 /* FieldController.cpp */,
+				C2819EDA22015BA800183E44 /* particle_test_main.cpp */,
 				C23E343221F142D200221E68 /* undoUtils.h */,
 				C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */,
 				C23CFBDA21E6C3D700C1DF16 /* ut_gui_plot.cpp */,
@@ -1657,6 +1681,7 @@
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
 				C273E5C621B5D6360045969C /* CopyFiles */,
+				C2819ED12201271A00183E44 /* CopyFiles */,
 				C25261131F66D7BF0069F665 /* Build Number */,
 			);
 			buildRules = (
@@ -1983,7 +2008,6 @@
 				C2398A4121DF224B00B180A0 /* tinyxmlparser.cpp in Sources */,
 				C2819EC621FA62EF00183E44 /* ImSequencer.cpp in Sources */,
 				C2398A4221DF224B00B180A0 /* localvariance.cpp in Sources */,
-				C23E343521F14C2400221E68 /* ut_gui_main.cpp in Sources */,
 				C2398A4321DF224B00B180A0 /* ObjectContainer.cpp in Sources */,
 				C2398A4421DF224B00B180A0 /* pugixml.cpp in Sources */,
 				C2398A4521DF224B00B180A0 /* lineseg.cpp in Sources */,
@@ -1996,6 +2020,7 @@
 				C2398A4C21DF224B00B180A0 /* lifFile.cpp in Sources */,
 				C2398A4D21DF224B00B180A0 /* tinyxmlerror.cpp in Sources */,
 				C2819ED02200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
+				C2819EDD22015BA800183E44 /* FieldController.cpp in Sources */,
 				C2398A4E21DF224B00B180A0 /* labelBlob.cpp in Sources */,
 				C2398A4F21DF224B00B180A0 /* ip_utils.cpp in Sources */,
 				C2398A5021DF224B00B180A0 /* window.cc in Sources */,
@@ -2008,6 +2033,7 @@
 				C2398A5821DF224B00B180A0 /* AVReaderWrapper.mm in Sources */,
 				C2398A5921DF224B00B180A0 /* labelconnect.cpp in Sources */,
 				C2398A5A21DF224B00B180A0 /* registration.cpp in Sources */,
+				C2819EDC22015BA800183E44 /* particle_test_main.cpp in Sources */,
 				C2398A5B21DF224B00B180A0 /* sm_producer.cpp in Sources */,
 				C2398A5C21DF224B00B180A0 /* CinderImGui.cpp in Sources */,
 				C2398A5D21DF224B00B180A0 /* bitvector.cpp in Sources */,
@@ -2211,7 +2237,7 @@
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_LDFLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Browser;
 				PRODUCT_NAME = Visible;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2257,7 +2283,7 @@
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_LDFLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Browser;
 				PRODUCT_NAME = Visible;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2871,7 +2897,7 @@
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a",
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libittnotify.a",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.VisibleRun;
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Runner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2958,7 +2984,7 @@
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a",
 					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.VisibleRun;
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Runner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
