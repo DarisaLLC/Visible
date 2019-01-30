@@ -120,6 +120,7 @@ private:
     float mTopBorder;
     float mItemSpacing;
     
+    gl::Texture2dRef mVisibleScope;
     gl::Texture2dRef mTitleTex;
     gl::Texture2dRef mBgImage;
     gl::Texture2dRef mFgImage;

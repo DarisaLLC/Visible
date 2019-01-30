@@ -340,7 +340,7 @@ void VisibleRunApp::update()
 //static float minRadius = 1;
 void VisibleRunApp::draw ()
 {
-    gl::clear( Color::gray( 0.5f ) );
+    gl::clear( Color::gray( 0.67f ) );
     if (mContext && mContext->is_valid()){
         mContext->draw ();
         DrawGUI();

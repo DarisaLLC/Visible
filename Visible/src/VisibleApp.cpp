@@ -10,6 +10,8 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 
 #include "VisibleApp.h"
+using namespace cinder;
+
 
 
 namespace VisibleAppControl{
@@ -102,7 +104,9 @@ void VisibleApp::setup()
     const fs::path plist = appPath / "Visible.app/Contents/Info.plist";
     std::ifstream stream(plist.c_str(), std::ios::binary);
     Plist::readPlist(stream, mPlist);
-    
+    if(mVisibleScope== nullptr){
+        mVisibleScope = gl::Texture::create( loadImage( loadResource(VISIBLE_SCOPE  )));
+    }
     
     for( auto display : Display::getDisplays() )
     {
@@ -113,6 +117,10 @@ void VisibleApp::setup()
     setWindowPos(getWindowSize()/4);
     getWindow()->setAlwaysOnTop();
     WindowRef ww = getWindow ();
+    if( mVisibleScope ){
+        gl::draw( mVisibleScope, getWindowBounds() );
+    }
+    
     ww->getRenderer()->makeCurrentContext(true);
     std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
     ww->setTitle ("Visible ( build: " + buildN + " ) ");
@@ -145,12 +153,12 @@ void VisibleApp::setup()
     
     auto home_path = platform->getHomeDirectory();
     vlogger::instance().console()->info(home_path.string());
+    
+ 
     auto some_path = getOpenFilePath(); //"", extensions);
     mFileExtension = some_path.extension().string();
     mFileName = some_path.filename().string();
-    
- 
-    
+
  //   boost::filesystem::path some_path = "/Users/arman/Pictures/lif/3channels.lif";
     if (! some_path.empty() || exists(some_path))
         initData(some_path);
@@ -294,6 +302,9 @@ void VisibleApp::initData( const fs::path &path )
 
 	for( vector<lif_serie_data>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt )
 		createItem( *serieIt, int(serieIt - series.begin()) );
+    
+    //@todo For now Assume IDLab Format,
+    m_isIdLabLif = true;
 }
 
 void VisibleApp::createItem( const lif_serie_data &serie, int index )
@@ -396,7 +407,11 @@ void VisibleApp::draw()
 
     
     // clear out the window with black
-    gl::clear( Color( 0, 0, 0 ) );
+//    gl::clear( Color( 0, 0, 0 ) );
+    if( mVisibleScope ){
+         gl::draw( mVisibleScope, getWindowBounds() );
+       }
+    
     gl::enableAlphaBlending();
     
     gl::setMatricesWindowPersp( getWindowSize() );
