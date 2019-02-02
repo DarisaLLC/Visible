@@ -9,3 +9,4 @@
 
 #define IMAGE_PNLOOP            CINDER_RESOURCE( ../../../data/, PlayNoLoop.png, 128, IMAGE )
 #define IMAGE_PLOOP            CINDER_RESOURCE( ../../../data/, PlayLoop.png, 129, IMAGE )
+

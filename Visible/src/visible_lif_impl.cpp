@@ -790,6 +790,8 @@ void lifContext::loadCurrentSerie ()
         m_layout->init (getWindowSize() , mFrameSet->media_info(), channel_count());
         
         // Start Loading Images on a different thread
+        // Loading also produces voxel images.
+        cv::Mat result;
         auto future_res = std::async(std::launch::async, &lif_serie_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names());
         
         mFrameSet->channel_names (m_serie.channel_names());
@@ -832,17 +834,13 @@ void lifContext::process_async (){
             m_async_luminance_tracks = std::async(std::launch::async,&lif_serie_processor::run_flu_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
             m_async_pci_tracks = stl_utils::reallyAsync(&lif_serie_processor::run_pci, m_lifProcRef.get(), 2);
-//            m_async_pci_tracks = std::async(std::launch::async, &lif_processor::run_pci,m_lifProcRef.get(), 2);
-            auto res = m_lifProcRef->run_volume_sum_sumsq_count (2);
-            res.PrintTo(res,&std::cout);
+       
             break;
         }
         case 1:
         {
             m_async_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_pci,
                                             m_lifProcRef.get(), 0);
-            auto res = m_lifProcRef->run_volume_sum_sumsq_count (0);
-            res.PrintTo(res,&std::cout);
             break;
         }
     }

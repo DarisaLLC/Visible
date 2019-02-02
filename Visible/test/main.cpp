@@ -30,7 +30,7 @@
 #include "vision/colorhistogram.hpp"
 #include "cinder_opencv.h"
 #include "ut_util.hpp"
-#include "getLuminanceAlgo.hpp"
+#include "algo_cardiac.hpp"
 #include "core/csv.hpp"
 #include "core/kmeans1d.hpp"
 #include "core/stl_utils.hpp"

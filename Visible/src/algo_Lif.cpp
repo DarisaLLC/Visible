@@ -21,19 +21,18 @@
 #include <typeindex>
 #include <map>
 #include <future>
-//#include "core/singleton.hpp"
 #include "async_tracks.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
 #include "cinder_xchg.hpp"
 #include "vision/histo.h"
 #include "vision/opencv_utils.hpp"
-#include "getLuminanceAlgo.hpp"
+#include "algo_cardiac.hpp"
 #include "contraction.hpp"
 #include "vision/localvariance.h"
 #include "algo_Lif.hpp"
 #include "logger.hpp"
-
+#include "cpp-perf.hpp"
 
 /****
  
@@ -265,10 +264,33 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
     create_named_tracks(names);
     load_channels_from_images(frames);
     int channel_to_use = m_channel_count - 1;
-    run_volume_sum_sumsq_count(channel_to_use);
+    run_volume_3d_stdev (channel_to_use);
+    m_std_display_image.create(m_std_image.rows, m_std_image.cols, CV_8UC1);
+    cv::normalize(m_std_image, m_std_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
     return m_frameCount;
 }
 
+
+/*
+ * 1 monchrome channel. Compute 3D Standard Dev. per pixel
+ */
+
+void lif_serie_processor::run_volume_3d_stdev (const int channel_index){
+    m_3d_stats_done = false;
+    cv::Mat m_sum, m_sqsum;
+    int image_count = 0;
+    std::vector<std::thread> threads(1);
+    threads[0] = std::thread(SequenceAccumulator(),std::ref(m_all_by_channel[channel_index]),
+                             std::ref(m_sum), std::ref(m_sqsum), std::ref(image_count));
+    
+    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+    SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_std_image);
+  
+    
+    // Signal to listeners
+    if (signal_3dstats_available && signal_3dstats_available->num_slots() > 0)
+        signal_3dstats_available->operator()();
+}
 
 
 /*

@@ -13,7 +13,7 @@
 #include "async_tracks.h"
 #include "core/signaler.h"
 #include "vision/opencv_utils.hpp"
-#include "getLuminanceAlgo.hpp"
+#include "algo_cardiac.hpp"
 #include "sm_producer.h"
 #include "contraction.hpp"
 #include "vision/labelBlob.hpp"
@@ -197,6 +197,9 @@ public:
     // Run accumulator of 3d stats on a channel at index
     svl::stats<int64_t> run_volume_sum_sumsq_count (const int channel_index);
     
+    // Run per pixel stdev accumulator a channel at index
+    void run_volume_3d_stdev (const int channel_index);
+    
     // Run to get Entropies and Median Level Set
     std::shared_ptr<vectorOfnamedTrackOfdouble_t> run_pci (const int channel_index);
     
@@ -248,6 +251,10 @@ private:
     // Channels by channel as cv::Mats
     mutable std::array<std::vector<cv::Mat>,4> m_channel_mats;
     std::vector<double> m_medianLevel;
+    
+    // Std Dev Image
+    cv::Mat m_std_image;
+    cv::Mat m_std_display_image;
     
     channel_images_t m_images;
     channel_vec_t m_all_by_channel;

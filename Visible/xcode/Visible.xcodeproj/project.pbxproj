@@ -523,6 +523,7 @@
 		C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ut_gui_main.cpp; path = ../test/ut_gui_main.cpp; sourceTree = "<group>"; };
 		C2398A7E21DF224B00B180A0 /* VisibleTestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VisibleTestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleTestApp-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleTestApp-Info.plist"; sourceTree = "<absolute>"; };
+		C23B7CC6220553E1005DE02C /* cpp-perf.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = "cpp-perf.hpp"; path = "../include/cpp-perf.hpp"; sourceTree = "<group>"; };
 		C23CFBDA21E6C3D700C1DF16 /* ut_gui_plot.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ut_gui_plot.cpp; path = ../ut_gui_plot.cpp; sourceTree = "<group>"; };
 		C23CFBE321E96D6700C1DF16 /* Resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../test/Resources.h; sourceTree = "<group>"; };
 		C23CFBE521E9785000C1DF16 /* PlayLoop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PlayLoop.png; path = data/PlayLoop.png; sourceTree = "<group>"; };
@@ -661,7 +662,6 @@
 		C26009FA1CED3E010045FF57 /* static.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = static.hpp; sourceTree = "<group>"; };
 		C26009FB1CED3E010045FF57 /* stats.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = stats.hpp; sourceTree = "<group>"; };
 		C26009FC1CED3E010045FF57 /* stl_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = stl_utils.hpp; sourceTree = "<group>"; };
-		C26009FD1CED3E010045FF57 /* timing.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = timing.hpp; sourceTree = "<group>"; };
 		C26009FE1CED3E010045FF57 /* vector2d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vector2d.hpp; sourceTree = "<group>"; };
 		C2600A001CED3E010045FF57 /* colorhistogram.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = colorhistogram.hpp; sourceTree = "<group>"; };
 		C2600A011CED3E010045FF57 /* corners.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = corners.hpp; sourceTree = "<group>"; };
@@ -689,7 +689,7 @@
 		C2601BB71E690409004415A3 /* bitvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bitvector.cpp; sourceTree = "<group>"; };
 		C2601BBA1E6B41F4004415A3 /* ut_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_util.hpp; sourceTree = "<group>"; };
 		C2601BBB1E6B446A004415A3 /* make_function.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = make_function.hpp; sourceTree = "<group>"; };
-		C2601BBE1E6B5C78004415A3 /* getLuminanceAlgo.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = getLuminanceAlgo.hpp; path = ../include/getLuminanceAlgo.hpp; sourceTree = "<group>"; };
+		C2601BBE1E6B5C78004415A3 /* algo_cardiac.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = algo_cardiac.hpp; path = ../include/algo_cardiac.hpp; sourceTree = "<group>"; };
 		C26069211CED3E2B0045FF57 /* gtest-death-test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-death-test.h"; sourceTree = "<group>"; };
 		C26069221CED3E2B0045FF57 /* gtest-message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-message.h"; sourceTree = "<group>"; };
 		C26069231CED3E2B0045FF57 /* gtest-param-test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-param-test.h"; sourceTree = "<group>"; };
@@ -1148,6 +1148,7 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C23B7CC6220553E1005DE02C /* cpp-perf.hpp */,
 				C2819ED622012DE800183E44 /* Resources.h */,
 				C260AFCF21ED076F003B0FF0 /* sg_filter.h */,
 				C240F9FE21E15ADE00FBA228 /* imguivariouscontrols.h */,
@@ -1193,7 +1194,7 @@
 				C2601BB41E674F88004415A3 /* visible_layout.hpp */,
 				C21946AC1CE4EA4900976025 /* seq_frame_container.hpp */,
 				C2E322001D05B90C006DFE5E /* time_index.h */,
-				C2601BBE1E6B5C78004415A3 /* getLuminanceAlgo.hpp */,
+				C2601BBE1E6B5C78004415A3 /* algo_cardiac.hpp */,
 				C2820F3621752E5100DFA7A6 /* VisibleApp.h */,
 			);
 			name = include;
@@ -1450,7 +1451,6 @@
 				C26009FB1CED3E010045FF57 /* stats.hpp */,
 				C2DA19591E8091FA00062DBC /* kmeans1d.hpp */,
 				C26009FC1CED3E010045FF57 /* stl_utils.hpp */,
-				C26009FD1CED3E010045FF57 /* timing.hpp */,
 				C26009FE1CED3E010045FF57 /* vector2d.hpp */,
 			);
 			path = core;
