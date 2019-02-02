@@ -15,6 +15,7 @@
 #include <chrono>
 #include "gtest/gtest.h"
 #include <memory>
+#include <thread>
 #include "boost/filesystem.hpp"
 #include "boost/algorithm/string.hpp"
 #include "opencv2/highgui.hpp"
@@ -134,6 +135,46 @@ void done_callback (void)
 {
     std::cout << "Done"  << std::endl;
 }
+
+
+TEST (ut_3d_per_element, standard_dev)
+{
+  
+    roiWindow<P8U> pels0(5, 4); pels0.set(0);
+    roiWindow<P8U> pels1(5, 4); pels1.set(1);
+    roiWindow<P8U> pels2(5, 4); pels2.set(2);
+    
+   
+    vector<roiWindow<P8U>> frames {pels0, pels1, pels2};
+  
+    auto test_allpels = [] (cv::Mat& img, float val, bool show_failure){
+        for(int i=0; i<img.rows; i++)
+            for(int j=0; j<img.cols; j++)
+                if (! svl::equal(img.at<float>(i,j), val, 0.0001f )){
+                    if(show_failure)
+                        std::cout << " rejected value: " << img.at<float>(i,j) << std::endl;
+                    return false;
+                }
+        return true;
+    };
+    
+    cv::Mat m_sum, m_sqsum;
+    int image_count = 0;
+    std::vector<std::thread> threads(1);
+    threads[0] = std::thread(SequenceAccumulator(),std::ref(frames),
+                             std::ref(m_sum), std::ref(m_sqsum), std::ref(image_count));
+    
+    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+    EXPECT_EQ(3, image_count);
+    EXPECT_TRUE(test_allpels(m_sum, 3.0f, true));
+    EXPECT_TRUE(test_allpels(m_sqsum, 5.0f, true));
+
+    
+    cv::Mat m_var_image;
+    SequenceAccumulator::computeVariance(m_sum, m_sqsum, image_count, m_var_image);
+    EXPECT_TRUE(test_allpels(m_var_image, 0.666667f, true));
+}
+
 
 
 #if NOT_YET_Jan_29_2019
