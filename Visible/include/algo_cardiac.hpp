@@ -33,6 +33,48 @@ struct IntensityStatisticsRunner
     }
 };
 
+
+struct SequenceAccumulator
+{
+
+    typedef std::vector<roiWindow<P8U>> channel_images_t;
+    
+    void operator()(channel_images_t& channel, cv::Mat& m_sum, cv::Mat& m_sqsum, int& image_count)
+    {
+        for (const roiWindow<P8U>& ir : channel){
+            cv::Mat im (ir.height(), ir.width(), CV_8UC(1), ir.pelPointer(0,0), size_t(ir.rowUpdate()));
+            
+            if( m_sum.empty() ) {
+                m_sum = cv::Mat::zeros( im.size(), CV_32FC(im.channels()) );
+                m_sqsum = cv::Mat::zeros( im.size(), CV_32FC(im.channels()) );
+                image_count = 0;
+            }
+            cv::accumulate( im, m_sum );
+            cv::accumulateSquare( im, m_sqsum );
+            image_count++;
+        }
+    }
+    
+
+    static void computeVariance(cv::Mat& m_sum, cv::Mat& m_sqsum, int image_count, cv::Mat& variance) {
+        double one_by_N = 1.0 / image_count;
+        variance = (one_by_N * m_sqsum) - ((one_by_N * one_by_N) * m_sum.mul(m_sum));
+    }
+    
+    //Same as above function, but compute standard deviation
+    static void computeStdev(cv::Mat& m_sum, cv::Mat& m_sqsum, int image_count, cv::Mat& std__) {
+        double one_by_N = 1.0 / image_count;
+        cv::sqrt(((one_by_N * m_sqsum) -((one_by_N * one_by_N) * m_sum.mul(m_sum))), std__);
+    }
+    
+    //And avg images
+    static void computeAvg(cv::Mat& m_sum, int image_count, cv::Mat& av) {
+        double one_by_N = 1.0 / image_count;
+        av = one_by_N * m_sum;
+    }
+
+};
+
 struct IntensityStatisticsPartialRunner
 {
     typedef std::vector<roiWindow<P8U>> channel_images_t;
@@ -55,6 +97,10 @@ struct IntensityStatisticsPartialRunner
         }
     }
 };
+
+
+
+
 
 class OCVImageWriter
 {
