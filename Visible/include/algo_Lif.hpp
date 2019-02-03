@@ -172,7 +172,7 @@ public:
     typedef void (sig_cb_sm1d_available) (int&);
     typedef void (sig_cb_sm1dmed_available) (int&,int&);
     typedef void (sig_cb_3dstats_available) ();
-    typedef void (sig_cb_channelmats_available) (int& );
+    typedef void (sig_cb_volume_var_available) ();
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     typedef std::vector<channel_images_t> channel_vec_t;
     typedef std::array<std::vector<cv::Mat>,4> channelMats_t;
@@ -183,7 +183,9 @@ public:
     const int64_t& frame_count () const;
     const int64_t channel_count () const;
     const svl::stats<int64_t> stats3D () const;
-    const channelMats_t & channelMats () const { return m_channel_mats; }
+    const cv::Mat & volume_variances () const { return m_var_image;  }
+    cv::Mat & display_volume_variances () const { return m_var_display_image;  }
+    
     // Check if the returned has expired
     std::weak_ptr<contraction_analyzer> contractionWeakRef ();
     
@@ -198,7 +200,7 @@ public:
     svl::stats<int64_t> run_volume_sum_sumsq_count (const int channel_index);
     
     // Run per pixel stdev accumulator a channel at index
-    void run_volume_3d_stdev (const int channel_index);
+    void run_volume_variances (const int channel_index);
     
     // Run to get Entropies and Median Level Set
     std::shared_ptr<vectorOfnamedTrackOfdouble_t> run_pci (const int channel_index);
@@ -218,13 +220,12 @@ protected:
     boost::signals2::signal<lif_serie_processor::sig_cb_sm1dmed_available>* signal_sm1dmed_available;
     boost::signals2::signal<lif_serie_processor::sig_cb_contraction_available>* signal_contraction_available;
     boost::signals2::signal<lif_serie_processor::sig_cb_3dstats_available>* signal_3dstats_available;
-    boost::signals2::signal<lif_serie_processor::sig_cb_channelmats_available>* signal_channelmats_available;
+    boost::signals2::signal<lif_serie_processor::sig_cb_volume_var_available>* signal_volume_var_available;
     
 private:
     
     void contraction_analyzed (contractionContainer_t&);
     void stats_3d_computed ();
-    void channelmats_available (int&);
     void pci_done ();
     void sm_content_loaded ();
     
@@ -248,13 +249,12 @@ private:
     vector<double> m_entropies;
     vector<vector<double>> m_smat;
     
-    // Channels by channel as cv::Mats
-    mutable std::array<std::vector<cv::Mat>,4> m_channel_mats;
+    // Median Levels
     std::vector<double> m_medianLevel;
     
     // Std Dev Image
-    cv::Mat m_std_image;
-    cv::Mat m_std_display_image;
+    cv::Mat m_var_image;
+    mutable cv::Mat m_var_display_image;
     
     channel_images_t m_images;
     channel_vec_t m_all_by_channel;

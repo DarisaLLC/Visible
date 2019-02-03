@@ -41,13 +41,13 @@ struct SequenceAccumulator
     
     void operator()(channel_images_t& channel, cv::Mat& m_sum, cv::Mat& m_sqsum, int& image_count)
     {
+        image_count = 0;
         for (const roiWindow<P8U>& ir : channel){
             cv::Mat im (ir.height(), ir.width(), CV_8UC(1), ir.pelPointer(0,0), size_t(ir.rowUpdate()));
             
-            if( m_sum.empty() ) {
+            if( image_count == 0 ) {
                 m_sum = cv::Mat::zeros( im.size(), CV_32FC(im.channels()) );
                 m_sqsum = cv::Mat::zeros( im.size(), CV_32FC(im.channels()) );
-                image_count = 0;
             }
             cv::accumulate( im, m_sum );
             cv::accumulateSquare( im, m_sqsum );

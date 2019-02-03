@@ -145,7 +145,7 @@ private:
     void signal_sm1dmed_available (int&,int&);
     void signal_contraction_available (contractionContainer_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
-    void signal_channelmats_available (int&);
+    void signal_volume_var_available ();
     
 
     // Clip Processing
@@ -164,6 +164,9 @@ private:
     std::shared_ptr<seqFrameContainer> mFrameSet;
     SurfaceRef  mSurface;
   
+    // Variance Image Texture
+    ci::gl::TextureRef m_var_texture;
+    
     // Tracks of frame associated results
     std::weak_ptr<vectorOfnamedTrackOfdouble_t> m_trackWeakRef;
     std::weak_ptr<vectorOfnamedTrackOfdouble_t> m_pci_trackWeakRef;
@@ -215,6 +218,7 @@ private:
     vec2 texture_to_display_zoom ();
     void add_result_sequencer ();
     void add_timeline ();
+    void add_motion_profile ();
     
     // Navigation
     void update_log (const std::string& meg = "") override;
