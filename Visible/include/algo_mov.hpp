@@ -19,7 +19,7 @@
 #include "vision/histo.h"
 #include "vision/opencv_utils.hpp"
 #include "opencv2/video/tracking.hpp"
-#include "getLuminanceAlgo.hpp"
+#include "algo_cardiac.hpp"
 using namespace cv;
 
 // For base classing

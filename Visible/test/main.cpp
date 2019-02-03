@@ -196,21 +196,15 @@ TEST (ut_liffile, voxel_energy)
     // Testing cv::mat conversion call back
     // Create a Processing Object to attach signals to
     auto lifProcRef = std::make_shared<lif_serie_processor> ();
-    
-    std::function<void (int64_t&)> content_loaded_cb = ([&lrp = lifProcRef](int64_t& frame_counted){std::cout << frame_counted; lrp->loadImagesToMats(2);  });
+    static bool s_loaded = false;
+    std::function<void (int64_t&)> content_loaded_cb = ([&lrp = lifProcRef](int64_t& frame_counted){std::cout << frame_counted; s_loaded = true; });
     // Connect the callback to lif processor
-    std::function<void (int&)> channelmats_available_cb = ([](int& channel_index){ std::cout << " got mats for " << channel_index << std::endl; });
     
-    boost::signals2::connection channelmats_connection = lifProcRef->registerCallback(channelmats_available_cb);
     boost::signals2::connection content_loaded_connection = lifProcRef->registerCallback(content_loaded_cb);
-    
     std::vector<std::string> names {"red", "green", "grey"};
-    
     lifProcRef->load(seq_frames, names);
-  
-    std::this_thread::sleep_for(std::chrono::duration<double, std::milli> (2000));
-    auto frames = lifProcRef->channelMats();
-    std::cout << frames[2].size() << std::endl;
+    std::this_thread::sleep_for(std::chrono::duration<double, std::milli> (30));
+    EXPECT_TRUE(s_loaded);
     
 }
 

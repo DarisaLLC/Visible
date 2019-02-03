@@ -172,7 +172,7 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
         return out;
     }
     
-    void output(cv::Mat mat, int prec, float base = 1.0f, char be = '{', char en = '}');
+    void output(cv::Mat mat, int prec = 0, char be = '{', char en = '}');
     
     void outputU8 (const cv::Mat& mat, char be = '{', char en = '}');
 }

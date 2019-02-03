@@ -191,7 +191,7 @@ lif_serie_processor::lif_serie_processor ()
     signal_sm1dmed_available = createSignal<lif_serie_processor::sig_cb_sm1dmed_available>();
     signal_contraction_available = createSignal<lif_serie_processor::sig_cb_contraction_available>();
     signal_3dstats_available = createSignal<lif_serie_processor::sig_cb_3dstats_available>();
-    signal_channelmats_available = createSignal<lif_serie_processor::sig_cb_channelmats_available>();
+    signal_volume_var_available = createSignal<lif_serie_processor::sig_cb_volume_var_available>();
     
     // semilarity producer
     m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
@@ -264,9 +264,7 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
     create_named_tracks(names);
     load_channels_from_images(frames);
     int channel_to_use = m_channel_count - 1;
-    run_volume_3d_stdev (channel_to_use);
-    m_std_display_image.create(m_std_image.rows, m_std_image.cols, CV_8UC1);
-    cv::normalize(m_std_image, m_std_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
+    run_volume_variances (channel_to_use);
     return m_frameCount;
 }
 
@@ -275,7 +273,7 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
  * 1 monchrome channel. Compute 3D Standard Dev. per pixel
  */
 
-void lif_serie_processor::run_volume_3d_stdev (const int channel_index){
+void lif_serie_processor::run_volume_variances (const int channel_index){
     m_3d_stats_done = false;
     cv::Mat m_sum, m_sqsum;
     int image_count = 0;
@@ -284,12 +282,13 @@ void lif_serie_processor::run_volume_3d_stdev (const int channel_index){
                              std::ref(m_sum), std::ref(m_sqsum), std::ref(image_count));
     
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
-    SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_std_image);
-  
+    SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_var_image);
+    m_var_display_image.create(m_var_image.rows, m_var_image.cols, CV_8UC1);
+    cv::normalize(m_var_image, m_var_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
     
     // Signal to listeners
-    if (signal_3dstats_available && signal_3dstats_available->num_slots() > 0)
-        signal_3dstats_available->operator()();
+    if (signal_volume_var_available && signal_volume_var_available->num_slots() > 0)
+        signal_volume_var_available->operator()();
 }
 
 
@@ -398,15 +397,6 @@ void lif_serie_processor::contraction_analyzed (contractionContainer_t& contract
      vlogger::instance().console()->info(" Contractions Analyzed: ");
 }
 
-void lif_serie_processor:: channelmats_available (int& channel_index){
-    
-    if (m_all_by_channel[channel_index].size() == m_channel_mats[channel_index].size() &&
-        signal_channelmats_available && signal_channelmats_available->num_slots() > 0){
-        int ci = channel_index;
-        signal_channelmats_available->operator()(ci);
-    }
-     vlogger::instance().console()->info(" Channels Available: ");
-}
 
 
 

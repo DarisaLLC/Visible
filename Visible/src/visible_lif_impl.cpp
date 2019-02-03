@@ -48,6 +48,8 @@
 #include <boost/any.hpp>
 #include "ImGuiExtensions.h"
 #include "Resources.h"
+#include "cinder_opencv.h"
+
 
 
 using namespace ci;
@@ -123,9 +125,9 @@ void lifContext::setup_signals(){
     std::function<void (lif_serie_processor::contractionContainer_t&)> contraction_available_cb = boost::bind (&lifContext::signal_contraction_available, shared_from_above(), _1);
     boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_available_cb);
     
-    // Support lifProcessor::channel mats available
-    std::function<void (int&)> channelmats_available_cb = boost::bind (&lifContext::signal_channelmats_available, shared_from_above(), _1);
-    boost::signals2::connection channelmats_connection = m_lifProcRef->registerCallback(channelmats_available_cb);
+    // Support lifProcessor::volume_var_available
+    std::function<void ()> volume_var_available_cb = boost::bind (&lifContext::signal_volume_var_available, shared_from_above());
+    boost::signals2::connection volume_var_connection = m_lifProcRef->registerCallback(volume_var_available_cb);
     
 }
 
@@ -281,12 +283,19 @@ void lifContext::signal_contraction_available (lif_serie_processor::contractionC
 }
 
 
-void lifContext::signal_channelmats_available(int& channel_index)
+void lifContext::signal_volume_var_available()
 {
-    vlogger::instance().console()->info(" cv::Mats are available ");
-    //    frame_indices.push_back (findex);
-    //    frame_times.push_back (timestamp);
-    //     std::cout << frame_indices.size() << std::endl;
+    vlogger::instance().console()->info(" Volume Variance are available ");
+    if (! m_lifProcRef){
+        vlogger::instance().console()->error("Lif Processor Object does not exist ");
+        return;
+    }
+    
+    // Create a texcture for display
+  //  const cv::Mat& dvar = m_lifProcRef->display_volume_variances();
+    Surface8uRef sur = Surface8u::create( cinder::fromOcv(m_lifProcRef->display_volume_variances()) );
+    m_var_texture = gl::Texture::create(*sur);
+    
 }
 
 
@@ -792,8 +801,9 @@ void lifContext::loadCurrentSerie ()
         // Start Loading Images on a different thread
         // Loading also produces voxel images.
         cv::Mat result;
+
+        // note launch mode is std::launch::async
         auto future_res = std::async(std::launch::async, &lif_serie_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names());
-        
         mFrameSet->channel_names (m_serie.channel_names());
         reset_entire_clip(mFrameSet->count());
         m_minFrame = 0;
@@ -831,8 +841,10 @@ void lifContext::process_async (){
     switch(channel_count()){
         case 3:
         {
+            // note launch mode is std::launch::async
             m_async_luminance_tracks = std::async(std::launch::async,&lif_serie_processor::run_flu_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
+             // Using scott meyer's wrapper that uses launch mode is std::launch::async
             m_async_pci_tracks = stl_utils::reallyAsync(&lif_serie_processor::run_pci, m_lifProcRef.get(), 2);
        
             break;
@@ -906,7 +918,6 @@ void lifContext::add_result_sequencer ()
 void lifContext::add_timeline(){
    
     int gScreenWidth = getWindowWidth();
-  //  int gScreenHeight = getWindowHeight();
     Rectf dr = get_image_display_rect();
     auto tr = dr.getUpperRight();
     auto pos = ImVec2(tr.x+10+dr.getWidth()+10, tr.y);
@@ -969,11 +980,33 @@ void lifContext::add_timeline(){
         // @todo improve this logic. The moment we are able to set the median cover, set it to the default
         // of 5 percent
         // @todo move defaults in general setting
-  
-        
+     
     }
     ImGui::End();
 
+}
+
+
+void lifContext::add_motion_profile (){
+    
+    int gScreenWidth = getWindowWidth();
+    Rectf dr = get_image_display_rect();
+    auto tr = dr.getUpperRight();
+    auto pos = ImVec2(tr.x+10+dr.getWidth()+10, tr.y + 100 + 10);
+    ImGui::SetNextWindowPos(pos);
+    ImVec2 size (gScreenWidth-30-pos.x, 128);
+    ImGui::SetNextWindowSize(size);
+    
+    if (ImGui::Begin("Motion Profile"))
+    {
+        if(m_var_texture){
+            ImVec2 sz(m_var_texture->getWidth(),m_var_texture->getHeight());
+            ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz, ImVec2(0, 1), ImVec2(1, 0), ImVec4(1,1,1,1),ImVec4(255,255,255,0));
+        }
+        
+    }
+    ImGui::End();
+    
 }
 
 void  lifContext::SetupGUIVariables(){
@@ -1051,6 +1084,7 @@ void  lifContext::DrawGUI(){
     
     add_timeline();
     add_result_sequencer();
+    add_motion_profile ();
 }
 
 Rectf lifContext::get_image_display_rect ()

@@ -733,16 +733,15 @@ namespace svl
     }
     
     
-    void output(Mat mat, int prec, float base, char be, char en)
+    void output(Mat mat, int prec, char be, char en)
     {
-        auto mulp = std::pow(10.0, prec);
         cout << be;
         for(int i=0; i<mat.size().height; i++)
         {
             cout << be;
             for(int j=0; j<mat.size().width; j++)
             {
-                cout << setprecision(prec) << static_cast<int32_t>(mulp * (base - mat.at<float>(i,j)));
+                cout << setprecision(prec) << static_cast<int32_t>(prec * mat.at<float>(i,j));
                 if(j != mat.size().width-1)
                     cout << ", ";
                 else
