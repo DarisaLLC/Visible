@@ -113,6 +113,90 @@ void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
 }
 
 
+void PeakDetect(const cv::Mat& space, std::vector<Point2f>& peaks, uint8_t accept)
+{
+    
+    // Make sure it is empty
+    peaks.resize(0);
+    
+    int height = space.rows - 2;
+    int width = space.cols - 2;
+    auto rowUpdate = space.ptr(1) - space.ptr(0);
+    
+    for (int row = 1; row < height; row++)
+    {
+        const uint8_t* row_ptr = space.ptr(row);
+        const uint8_t* pel = row_ptr;
+        for (int col = 1; col < width; col++, pel++)
+        {
+            if (*pel >= accept &&
+                *pel > *(pel - 1) &&
+                *pel > *(pel - rowUpdate - 1) &&
+                *pel > *(pel - rowUpdate) &&
+                *pel > *(pel - rowUpdate + 1) &&
+                *pel > *(pel + 1) &&
+                *pel > *(pel + rowUpdate + 1) &&
+                *pel > *(pel + rowUpdate) &&
+                *pel > *(pel + rowUpdate - 1))
+            {
+                Point2f dp(col+0.5, row+0.5);
+                peaks.push_back(dp);
+            }
+        }
+    }
+}
+
+std::vector<Point2f> ellipse_test = {
+    {666.895422,372.895287},
+    {683.128254,374.338401},
+    {698.197455,379.324060},
+    {735.650898,381.410000},
+    {726.754550,377.262089},
+    {778.094505,381.039470},
+    {778.129881,381.776216},
+    {839.415543,384.804510}};
+
+
+
+TEST (ut_fit_ellipse, local_maxima){
+   
+    auto same_point = [] (const Point2f& a, const Point2f& b, float eps){return svl::equal(a.x, b.x, eps) && svl::equal(a.y, b.y, eps);};
+    Point2f ellipse_gold (841.376, 386.055);
+    RotatedRect box0 = fitEllipse(ellipse_test);
+    EXPECT_TRUE(same_point(box0.center, ellipse_gold, 0.05));
+    
+    std::vector<Point2f> gold = {{5.5f,2.5f},{7.5f,2.5f},{9.5f,2.5f},{12.5f,4.5f},{13.5f,6.5f}};
+    Point2f center_gold (11.5,2.5);
+    
+    const char * frame[] =
+    {
+        "00000000000000000000",
+        "00000000000000000000",
+        "00001020300000000000",
+        "00000000000000000000",
+        "00000000012300000000",
+        "00000000000000000000",
+        "00000000000054100000",
+        "00000000000000000000",
+        "00000000000000000000",
+        0};
+    
+    roiWindow<P8U> pels(20, 5);
+    DrawShape(pels, frame);
+    cv::Mat im (pels.height(), pels.width(), CV_8UC(1), pels.pelPointer(0,0), size_t(pels.rowUpdate()));
+    
+    std::vector<Point2f> peaks;
+    PeakDetect(im, peaks, 0);
+    EXPECT_EQ(peaks.size(),gold.size());
+    for (auto cc = 0; cc < peaks.size(); cc++)
+        EXPECT_TRUE(same_point(peaks[cc], gold[cc],0.05));
+    
+    
+    RotatedRect box = fitEllipse(peaks);
+    EXPECT_TRUE(same_point(box.center, center_gold, 0.05));
+    EXPECT_TRUE(svl::equal(box.angle, 60.85f, 1.0f));
+    
+}
 
 
 std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655, 39.0342,
@@ -130,6 +214,7 @@ std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655,
     39.2099, 39.2775, 39.5042, 39.1446, 39.188, 39.2006, 39.1799,
     39.4077, 39.2694, 39.1967, 39.2828, 39.2438, 39.2093, 39.2167,
     39.2749, 39.4703, 39.2846};
+
 
 void done_callback (void)
 {
