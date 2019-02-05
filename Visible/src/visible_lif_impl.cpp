@@ -49,7 +49,7 @@
 #include "ImGuiExtensions.h"
 #include "Resources.h"
 #include "cinder_opencv.h"
-
+#include "imguivariouscontrols.h"
 
 
 using namespace ci;
@@ -292,9 +292,12 @@ void lifContext::signal_volume_var_available()
     }
     
     // Create a texcture for display
+    // Set format to topDown through to get free flip
   //  const cv::Mat& dvar = m_lifProcRef->display_volume_variances();
     Surface8uRef sur = Surface8u::create( cinder::fromOcv(m_lifProcRef->display_volume_variances()) );
-    m_var_texture = gl::Texture::create(*sur);
+    auto texFormat = gl::Texture2d::Format().loadTopDown();
+    m_var_texture = gl::Texture::create(*sur, texFormat);
+//    m_var_texture->setTopDown(false);
     
 }
 
@@ -989,19 +992,22 @@ void lifContext::add_timeline(){
 
 void lifContext::add_motion_profile (){
     
-    int gScreenWidth = getWindowWidth();
     Rectf dr = get_image_display_rect();
-    auto tr = dr.getUpperRight();
-    auto pos = ImVec2(tr.x+10+dr.getWidth()+10, tr.y + 100 + 10);
+    auto tr = dr.getLowerLeft();
+    auto pos = ImVec2(tr.x, tr.y + 10);
     ImGui::SetNextWindowPos(pos);
-    ImVec2 size (gScreenWidth-30-pos.x, 128);
+    ImVec2 size (dr.getWidth(), dr.getHeight()/3.0f);
     ImGui::SetNextWindowSize(size);
     
     if (ImGui::Begin("Motion Profile"))
     {
         if(m_var_texture){
             ImVec2 sz(m_var_texture->getWidth(),m_var_texture->getHeight());
-            ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz, ImVec2(0, 1), ImVec2(1, 0), ImVec4(1,1,1,1),ImVec4(255,255,255,0));
+           // ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz, ImVec2(0, 1), ImVec2(1, 0), ImVec4(1,1,1,1),ImVec4(255,255,255,0));
+       
+            static float zoom = 0.5f;
+            static ImVec2 zoom_center;
+            ImGui::ImageZoomAndPan( (void*)(intptr_t) m_var_texture->getId(),sz,m_var_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
         }
         
     }

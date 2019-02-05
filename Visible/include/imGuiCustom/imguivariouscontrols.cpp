@@ -1,3 +1,8 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
+
+
 //- Common Code For All Addons needed just to ease inclusion as separate files in user code ----------------------
 #include <imgui.h>
 #undef IMGUI_DEFINE_MATH_OPERATORS
@@ -31,8 +36,207 @@ static float GetWindowFontScale() {
     return window->FontWindowScale;
 }
 
-#endif
 
+
+    
+    
+    void ImDrawListAddImageCircleFilled(ImDrawList* dl,ImTextureID user_texture_id,const ImVec2& uv0, const ImVec2& uv1,const ImVec2& centre, float radius, ImU32 col, int num_segments)   {
+        if ((col & IM_COL32_A_MASK) == 0) return;
+        
+        const bool push_texture_id = dl->_TextureIdStack.empty() || user_texture_id != dl->_TextureIdStack.back();
+        if (push_texture_id) dl->PushTextureID(user_texture_id);
+        
+        const float amin=0.f;
+        const float amax = IM_PI*2.0f * ((float)num_segments - 1.0f) / (float)num_segments;
+        dl->PathArcTo(centre, radius, amin, amax, num_segments);
+        
+        const ImVec2 uvh = (uv0+uv1)*0.5f;
+        const ImVec2 uvd = (uv1-uv0)*0.5f;
+        
+        // dl->PathFill(col);  // { AddConvexPolyFilled(_Path.Data, _Path.Size, col, true); PathClear(); }
+        // Wrapping of AddConvexPolyFilled(...) for Non Anti-aliased Fill here ---------------
+        {
+            const ImVec2* points = dl->_Path.Data;
+            const int points_count = dl->_Path.Size;
+            const int idx_count = (points_count-2)*3;
+            const int vtx_count = points_count;
+            dl->PrimReserve(idx_count, vtx_count);
+            //IM_ASSERT(vtx_count==1+num_segments);
+            for (int i = 0; i < vtx_count; i++)
+            {
+                dl->_VtxWritePtr[0].pos = points[i];
+                dl->_VtxWritePtr[0].uv = ImVec2(uvh.x+uvd.x*(points[i].x-centre.x)/radius,uvh.y+uvd.y*(points[i].y-centre.y)/radius);
+                dl->_VtxWritePtr[0].col = col;
+                dl->_VtxWritePtr++;
+            }
+            for (int i = 2; i < points_count; i++)
+            {
+                dl->_IdxWritePtr[0] = (ImDrawIdx)(dl->_VtxCurrentIdx);
+                dl->_IdxWritePtr[1] = (ImDrawIdx)(dl->_VtxCurrentIdx+i-1);
+                dl->_IdxWritePtr[2] = (ImDrawIdx)(dl->_VtxCurrentIdx+i);
+                dl->_IdxWritePtr += 3;
+            }
+            dl->_VtxCurrentIdx += (ImDrawIdx)vtx_count;
+        }
+        //-----------------------------------------------------------------------------------
+        dl->PathClear();
+        
+        if (push_texture_id) dl->PopTextureID();
+    }
+#endif
+    
+    // Cloned from imguivariouscontrols.cpp [but modified slightly]
+    bool ImageZoomAndPan(ImTextureID user_texture_id, const ImVec2& size,float aspectRatio,ImTextureID checkersTexID,float* pzoom,ImVec2* pzoomCenter,int panMouseButtonDrag,int resetZoomAndPanMouseButton,const ImVec2& zoomMaxAndZoomStep)
+    {
+        float zoom = pzoom ? *pzoom : 1.f;
+        ImVec2 zoomCenter = pzoomCenter ? *pzoomCenter : ImVec2(0.5f,0.5f);
+        
+        bool rv = false;
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        if (!window || window->SkipItems) return rv;
+        ImVec2 curPos = ImGui::GetCursorPos();
+        const ImVec2 wndSz(size.x>0 ? size.x : ImGui::GetWindowSize().x-curPos.x,size.y>0 ? size.y : ImGui::GetWindowSize().y-curPos.y);
+        
+        IM_ASSERT(wndSz.x!=0 && wndSz.y!=0 && zoom!=0);
+        
+        // Here we use the whole size (although it can be partially empty)
+        ImRect bb(window->DC.CursorPos, ImVec2(window->DC.CursorPos.x + wndSz.x,window->DC.CursorPos.y + wndSz.y));
+        ImGui::ItemSize(bb);
+        if (!ImGui::ItemAdd(bb, 0, NULL)) return rv;
+        
+        ImVec2 imageSz = wndSz;
+        ImVec2 remainingWndSize(0,0);
+        if (aspectRatio!=0) {
+            const float wndAspectRatio = wndSz.x/wndSz.y;
+            if (aspectRatio >= wndAspectRatio) {imageSz.y = imageSz.x/aspectRatio;remainingWndSize.y = wndSz.y - imageSz.y;}
+            else {imageSz.x = imageSz.y*aspectRatio;remainingWndSize.x = wndSz.x - imageSz.x;}
+        }
+        
+        if (ImGui::IsItemHovered()) {
+            const ImGuiIO& io = ImGui::GetIO();
+            if (io.MouseWheel!=0) {
+                if (!io.KeyCtrl && !io.KeyShift)
+                {
+                    const float zoomStep = zoomMaxAndZoomStep.y;
+                    const float zoomMin = 1.f;
+                    const float zoomMax = zoomMaxAndZoomStep.x;
+                    if (io.MouseWheel < 0) {zoom/=zoomStep;if (zoom<zoomMin) zoom=zoomMin;}
+                    else {zoom*=zoomStep;if (zoom>zoomMax) zoom=zoomMax;}
+                    rv = true;
+                }
+                else if (io.KeyCtrl) {
+                    const bool scrollDown = io.MouseWheel <= 0;
+                    const float zoomFactor = .5/zoom;
+                    if ((!scrollDown && zoomCenter.y > zoomFactor) || (scrollDown && zoomCenter.y <  1.f - zoomFactor))  {
+                        const float slideFactor = zoomMaxAndZoomStep.y*0.1f*zoomFactor;
+                        if (scrollDown) {
+                            zoomCenter.y+=slideFactor;///(imageSz.y*zoom);
+                            if (zoomCenter.y >  1.f - zoomFactor) zoomCenter.y =  1.f - zoomFactor;
+                        }
+                        else {
+                            zoomCenter.y-=slideFactor;///(imageSz.y*zoom);
+                            if (zoomCenter.y < zoomFactor) zoomCenter.y = zoomFactor;
+                        }
+                        rv = true;
+                    }
+                }
+                else if (io.KeyShift) {
+                    const bool scrollRight = io.MouseWheel <= 0;
+                    const float zoomFactor = .5/zoom;
+                    if ((!scrollRight && zoomCenter.x > zoomFactor) || (scrollRight && zoomCenter.x <  1.f - zoomFactor))  {
+                        const float slideFactor = zoomMaxAndZoomStep.y*0.1f*zoomFactor;
+                        if (scrollRight) {
+                            zoomCenter.x+=slideFactor;///(imageSz.x*zoom);
+                            if (zoomCenter.x >  1.f - zoomFactor) zoomCenter.x =  1.f - zoomFactor;
+                        }
+                        else {
+                            zoomCenter.x-=slideFactor;///(imageSz.x*zoom);
+                            if (zoomCenter.x < zoomFactor) zoomCenter.x = zoomFactor;
+                        }
+                        rv = true;
+                    }
+                }
+            }
+            if (io.MouseClicked[resetZoomAndPanMouseButton]) {zoom=1.f;zoomCenter.x=zoomCenter.y=.5f;rv = true;}
+            if (ImGui::IsMouseDragging(panMouseButtonDrag,1.f))   {
+                zoomCenter.x-=io.MouseDelta.x/(imageSz.x*zoom);
+                zoomCenter.y-=io.MouseDelta.y/(imageSz.y*zoom);
+                rv = true;
+                ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+            }
+        }
+        
+        const float zoomFactor = .5/zoom;
+        if (rv) {
+            if (zoomCenter.x < zoomFactor) zoomCenter.x = zoomFactor;
+            else if (zoomCenter.x > 1.f - zoomFactor) zoomCenter.x = 1.f - zoomFactor;
+            if (zoomCenter.y < zoomFactor) zoomCenter.y = zoomFactor;
+            else if (zoomCenter.y > 1.f - zoomFactor) zoomCenter.y = 1.f - zoomFactor;
+        }
+        
+        ImVec2 uvExtension(2.f*zoomFactor,2.f*zoomFactor);
+        if (remainingWndSize.x > 0) {
+            const float remainingSizeInUVSpace = 2.f*zoomFactor*(remainingWndSize.x/imageSz.x);
+            const float deltaUV = uvExtension.x;
+            const float remainingUV = 1.f-deltaUV;
+            if (deltaUV<1) {
+                float adder = (remainingUV < remainingSizeInUVSpace ? remainingUV : remainingSizeInUVSpace);
+                uvExtension.x+=adder;
+                remainingWndSize.x-= adder * zoom * imageSz.x;
+                imageSz.x+=adder * zoom * imageSz.x;
+                
+                if (zoomCenter.x < uvExtension.x*.5f) zoomCenter.x = uvExtension.x*.5f;
+                else if (zoomCenter.x > 1.f - uvExtension.x*.5f) zoomCenter.x = 1.f - uvExtension.x*.5f;
+            }
+        }
+        if (remainingWndSize.y > 0) {
+            const float remainingSizeInUVSpace = 2.f*zoomFactor*(remainingWndSize.y/imageSz.y);
+            const float deltaUV = uvExtension.y;
+            const float remainingUV = 1.f-deltaUV;
+            if (deltaUV<1) {
+                float adder = (remainingUV < remainingSizeInUVSpace ? remainingUV : remainingSizeInUVSpace);
+                uvExtension.y+=adder;
+                remainingWndSize.y-= adder * zoom * imageSz.y;
+                imageSz.y+=adder * zoom * imageSz.y;
+                
+                if (zoomCenter.y < uvExtension.y*.5f) zoomCenter.y = uvExtension.y*.5f;
+                else if (zoomCenter.y > 1.f - uvExtension.y*.5f) zoomCenter.y = 1.f - uvExtension.y*.5f;
+            }
+        }
+        
+        ImVec2 uv0((zoomCenter.x-uvExtension.x*.5f),(zoomCenter.y-uvExtension.y*.5f));
+        ImVec2 uv1((zoomCenter.x+uvExtension.x*.5f),(zoomCenter.y+uvExtension.y*.5f));
+        
+        
+        ImVec2 startPos=bb.Min,endPos=bb.Max;
+        startPos.x+= remainingWndSize.x*.5f;
+        startPos.y+= remainingWndSize.y*.5f;
+        endPos.x = startPos.x + imageSz.x;
+        endPos.y = startPos.y + imageSz.y;
+        
+        if (checkersTexID) {
+            const float m = 24.f;
+            //window->DrawList->AddImage(checkersTexID, startPos, endPos, uv0*m, uv1*m);
+            window->DrawList->AddImage(checkersTexID, startPos, endPos, ImVec2(0,0), ImVec2(m,m));
+        }
+        window->DrawList->AddImage(user_texture_id, startPos, endPos, uv0, uv1);
+        
+        if (pzoom)  *pzoom = zoom;
+        if (pzoomCenter) *pzoomCenter = zoomCenter;
+        
+        
+        return rv;
+    }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
 // Start PlotHistogram(...) implementation -------------------------------
 struct ImGuiPlotMultiArrayGetterData    {
     const float** Values;int Stride;
@@ -669,4 +873,6 @@ void PlotMultiHistograms(
 // End PlotMultiLines(...) and PlotMultiHistograms(...)--------------------------
 
 }
+
+#pragma GCC diagnostic pop
 
