@@ -285,6 +285,7 @@ void lif_serie_processor::run_volume_variances (const int channel_index){
     SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_var_image);
     m_var_display_image.create(m_var_image.rows, m_var_image.cols, CV_8UC1);
     cv::normalize(m_var_image, m_var_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
+   // cv::imwrite("/Users/arman/tmp/var.png", m_var_display_image);
     
     // Signal to listeners
     if (signal_volume_var_available && signal_volume_var_available->num_slots() > 0)
