@@ -18,112 +18,41 @@ using namespace svl;
 namespace svl
 {
     
-    
-    roiVP8UC NewFromOCV (const cv::Mat& mat)
+
+
+    void PeakDetect(const cv::Mat& space, std::vector<Point2f>& peaks, uint8_t accept)
     {
-        switch (mat.channels())
+        
+        // Make sure it is empty
+        peaks.resize(0);
+        
+        int height = space.rows - 2;
+        int width = space.cols - 2;
+        auto rowUpdate = space.ptr(1) - space.ptr(0);
+        
+        for (int row = 1; row < height; row++)
         {
-            case 1:
+            const uint8_t* row_ptr = space.ptr(row);
+            const uint8_t* pel = row_ptr;
+            for (int col = 1; col < width; col++, pel++)
             {
-                roiWindow_P8U_t win (mat.cols, mat.rows);
-                for (uint32_t row = 0; row < mat.rows; row++)
-                    std::memmove(win.rowPointer(row), mat.ptr(row), mat.cols * win.bytes());
-                return (roiVP8UC(win));
+                if (*pel >= accept &&
+                    *pel > *(pel - 1) &&
+                    *pel > *(pel - rowUpdate - 1) &&
+                    *pel > *(pel - rowUpdate) &&
+                    *pel > *(pel - rowUpdate + 1) &&
+                    *pel > *(pel + 1) &&
+                    *pel > *(pel + rowUpdate + 1) &&
+                    *pel > *(pel + rowUpdate) &&
+                    *pel > *(pel + rowUpdate - 1))
+                {
+                    Point2f dp(col+0.5, row+0.5);
+                    peaks.push_back(dp);
+                }
             }
-            case 3:
-            {
-                roiWindow_P8UC3_t win (mat.cols, mat.rows);
-                for (uint32_t row = 0; row < mat.rows; row++)
-                    std::memmove(win.rowPointer(row), mat.ptr(row), mat.cols * win.bytes());
-                return (roiVP8UC(win));
-            }
-            case 4:
-            {
-                roiWindow_P8UC4_t win (mat.cols, mat.rows);
-                for (uint32_t row = 0; row < mat.rows; row++)
-                    std::memmove(win.rowPointer(row), mat.ptr(row), mat.cols * win.bytes());
-                return (roiVP8UC(win));
-            }
-            default:
-                assert(false);
         }
-        return roiVP8UC ();
     }
-    
-    std::shared_ptr<roiWindow<P8U>> NewRefFromOCV (const cv::Mat& mat)
-    {
-        std::shared_ptr<root<P8U>> rootref (new root<P8U> (mat.cols, mat.rows));
-        
-        for (uint32_t row = 0; row < mat.rows; row++)
-            std::memmove(rootref->rowPointer(row), mat.ptr(row), mat.cols);
-        
-        return std::shared_ptr<roiWindow<P8U>> (new roiWindow<P8U>(rootref, 0, 0, mat.cols, mat.rows));
-        
-    }
-    template<>
-    void CopyFromSVL<roiWindow<P8U>> (const roiWindow<P8U>& roi, cv::Mat& mat)
-    {
-        assert (!mat.empty() && mat.cols == roi.width() && mat.rows == roi.height());
-        for (uint32_t row = 0; row < mat.rows; row++)
-            std::memmove(mat.ptr(row), roi.rowPointer(row), mat.cols);
-    }
-    
-    template<>
-    void CopyFromSVL<roiWindow<P8UC3>> (const roiWindow<P8UC3>& roi, cv::Mat& mat)
-    {
-        assert (!mat.empty() && mat.cols == roi.width() && mat.rows == roi.height());
-        for (uint32_t row = 0; row < mat.rows; row++)
-            std::memmove(mat.ptr(row), roi.rowPointer(row), mat.cols * 3);
-    }
-    
-    template<>
-    void CopyFromSVL<roiWindow<P8UC4>> (const roiWindow<P8UC4>& roi, cv::Mat& mat)
-    {
-        assert (!mat.empty() && mat.cols == roi.width() && mat.rows == roi.height());
-        for (uint32_t row = 0; row < mat.rows; row++)
-            std::memmove(mat.ptr(row), roi.rowPointer(row), mat.cols * 4);
-    }
-    
-    
-    template<>
-    void NewFromSVL<roiWindow<P8U>> (const roiWindow<P8U>& roi, cv::Mat& mat)
-    {
-        mat.create(roi.height(), roi.width(), CV_8U);
-        CopyFromSVL(roi, mat);
-    }
-    
-    template <>
-    void NewFromSVL<roiWindow<P8UC3>> (const roiWindow<P8UC3>& roi, cv::Mat& mat)
-    {
-        mat.create(roi.height(), roi.width(), CV_8UC3);
-        CopyFromSVL(roi, mat);
-    }
-    
-    template <>
-    void NewFromSVL<roiWindow<P8UC4>> (const roiWindow<P8UC4>& roi, cv::Mat& mat)
-    {
-        mat.create(roi.height(), roi.width(), CV_8UC4);
-        CopyFromSVL(roi, mat);
-    }
-    
-  
-    
-    // P is roiWindow<>
-    template<typename P>
-    void cvResize (const P& roi, P& dst, float col_sample, float row_sample)
-    {
-        cv::Mat m4;
-        NewFromSVL(roi, m4);
-        cv::Size ds (round(col_sample*m4.cols), round(row_sample*m4.rows));
-        cv::resize(m4, m4, ds);
-        auto roivar = NewFromOCV(m4);
-        dst = boost::get<P>(roivar);
-    }
-    
-    template void cvResize (const roiWindow<P8U>&, roiWindow<P8U>&, float, float);
-    template void cvResize (const roiWindow<P8UC3>&, roiWindow<P8UC3>&, float, float);
-    template void cvResize (const roiWindow<P8UC4>&, roiWindow<P8UC4>&, float, float);
-    
+
     
     double getPSNR(const Mat& I1, const Mat& I2)
     {

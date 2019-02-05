@@ -71,7 +71,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "Series027"
+            argument = "Series014"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

@@ -113,39 +113,6 @@ void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
 }
 
 
-void PeakDetect(const cv::Mat& space, std::vector<Point2f>& peaks, uint8_t accept)
-{
-    
-    // Make sure it is empty
-    peaks.resize(0);
-    
-    int height = space.rows - 2;
-    int width = space.cols - 2;
-    auto rowUpdate = space.ptr(1) - space.ptr(0);
-    
-    for (int row = 1; row < height; row++)
-    {
-        const uint8_t* row_ptr = space.ptr(row);
-        const uint8_t* pel = row_ptr;
-        for (int col = 1; col < width; col++, pel++)
-        {
-            if (*pel >= accept &&
-                *pel > *(pel - 1) &&
-                *pel > *(pel - rowUpdate - 1) &&
-                *pel > *(pel - rowUpdate) &&
-                *pel > *(pel - rowUpdate + 1) &&
-                *pel > *(pel + 1) &&
-                *pel > *(pel + rowUpdate + 1) &&
-                *pel > *(pel + rowUpdate) &&
-                *pel > *(pel + rowUpdate - 1))
-            {
-                Point2f dp(col+0.5, row+0.5);
-                peaks.push_back(dp);
-            }
-        }
-    }
-}
-
 std::vector<Point2f> ellipse_test = {
     {666.895422,372.895287},
     {683.128254,374.338401},

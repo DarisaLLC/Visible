@@ -285,7 +285,18 @@ void lif_serie_processor::run_volume_variances (const int channel_index){
     SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_var_image);
     m_var_display_image.create(m_var_image.rows, m_var_image.cols, CV_8UC1);
     cv::normalize(m_var_image, m_var_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
-   // cv::imwrite("/Users/arman/tmp/var.png", m_var_display_image);
+    cv::Scalar mean, stdev;
+    cv::meanStdDev(m_var_display_image, mean, stdev);
+    std::cout << mean[0] << "  "  << stdev[0] << std::endl;
+    std::vector<Point2f> peaks;
+    PeakDetect(m_var_display_image, peaks, mean[0]+3*stdev[0]);
+    if(peaks.size() > 5){
+        RotatedRect box = fitEllipse(peaks);
+        auto dims = box.size;
+        float minor_dim = std::min(dims.width, dims.height);
+        float major_dim = std::max(dims.width, dims.height);
+        std::cout << minor_dim << "  "  << major_dim << " angle: " << box.angle << std::endl;
+    }
     
     // Signal to listeners
     if (signal_volume_var_available && signal_volume_var_available->num_slots() > 0)

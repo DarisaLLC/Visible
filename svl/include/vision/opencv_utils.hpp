@@ -22,31 +22,9 @@ namespace svl
 {
 
     double correlation_ocv(const roiWindow<P8U>& i, const roiWindow<P8U>& m);
-    
-
-    
     void cumani_opencv (const cv::Mat& input_bgr, cv::Mat& gradAbs, cv::Mat& orientation, float& maxVal);
+    void PeakDetect(const cv::Mat& space, std::vector<Point2f>& peaks, uint8_t accept);
     
-    template<typename P>
-    void NewFromSVL (const P& roi, cv::Mat& mat);
-    template<typename P>
-    void CopyFromSVL (const P& roi, cv::Mat& mat);
-
-    
-    template<> void NewFromSVL (const roiWindow<P8UC3>&, cv::Mat&);
-    template<> void NewFromSVL (const roiWindow<P8UC4>&, cv::Mat&);
-    template<> void NewFromSVL (const roiWindow<P8U>&, cv::Mat&);
-    
-    template<> void CopyFromSVL (const roiWindow<P8UC3>&, cv::Mat&);
-    template<> void CopyFromSVL (const roiWindow<P8UC4>&, cv::Mat&);
-    template<> void CopyFromSVL (const roiWindow<P8U>&, cv::Mat&);
-    
-    roiVP8UC NewFromOCV (const cv::Mat& mat);
-    std::shared_ptr<roiWindow<P8U>> NewRefFromOCV (const cv::Mat& mat);
-    
-    // P is roiWindow<>
-    template<typename P>
-    void cvResize (const P& roi, P& dst, float col_sample, float row_sample);
     double getPSNR(const cv::Mat& I1, const cv::Mat& I2);
     
 #define cv_drawCross( img, center, color, d )\
