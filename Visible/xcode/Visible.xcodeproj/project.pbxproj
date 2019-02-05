@@ -17,6 +17,10 @@
 		C20BBC091E4E34F0002C7D68 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
 		C20BBC0B1E4E39E6002C7D68 /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
 		C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
+		C20D4DE52208BD34004D9405 /* ellipse_fit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20D4DE32208BD34004D9405 /* ellipse_fit.cpp */; };
+		C20D4DE62208BD34004D9405 /* ellipse_fit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20D4DE32208BD34004D9405 /* ellipse_fit.cpp */; };
+		C20D4DE72208BD34004D9405 /* ellipse_fit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20D4DE32208BD34004D9405 /* ellipse_fit.cpp */; };
+		C20D4DE82208BD34004D9405 /* ellipse_fit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20D4DE32208BD34004D9405 /* ellipse_fit.cpp */; };
 		C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696D1CED3E2C0045FF57 /* matpixel.cpp */; };
 		C20EDBB61CEFC2D20074C47A /* registration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696F1CED3E2C0045FF57 /* registration.cpp */; };
 		C20EDBB71CEFC2E70074C47A /* rowfunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069701CED3E2C0045FF57 /* rowfunc.cpp */; };
@@ -470,6 +474,8 @@
 		C20BBC0E1E4E3C7B002C7D68 /* GLMmath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLMmath.h; sourceTree = "<group>"; };
 		C20BBC0F1E4E3CB5002C7D68 /* rand_support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rand_support.h; sourceTree = "<group>"; };
 		C20BBC181E5271C5002C7D68 /* opencv_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = opencv_utils.hpp; sourceTree = "<group>"; };
+		C20D4DE32208BD34004D9405 /* ellipse_fit.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ellipse_fit.cpp; sourceTree = "<group>"; };
+		C20D4DE42208BD34004D9405 /* ellipse_fit.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ellipse_fit.hpp; sourceTree = "<group>"; };
 		C20EDBBE1CF277130074C47A /* exception.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = exception.cpp; sourceTree = "<group>"; };
 		C20EDBBF1CF277130074C47A /* self_similarity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = self_similarity.cpp; sourceTree = "<group>"; };
 		C20EDBC01CF277130074C47A /* time_spec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = time_spec.cpp; sourceTree = "<group>"; };
@@ -1459,6 +1465,7 @@
 		C26009FF1CED3E010045FF57 /* vision */ = {
 			isa = PBXGroup;
 			children = (
+				C20D4DE42208BD34004D9405 /* ellipse_fit.hpp */,
 				C2E3F560213D9483007B1088 /* labelBlob.hpp */,
 				C24FC84D1E5E56960071AA1A /* roiMultiWindow.h */,
 				C20BBC181E5271C5002C7D68 /* opencv_utils.hpp */,
@@ -1614,6 +1621,7 @@
 				C260696C1CED3E2C0045FF57 /* localvariance.cpp */,
 				C260696D1CED3E2C0045FF57 /* matpixel.cpp */,
 				C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */,
+				C20D4DE32208BD34004D9405 /* ellipse_fit.cpp */,
 				C2E3F55C213D9408007B1088 /* labelBlob.cpp */,
 				C260696F1CED3E2C0045FF57 /* registration.cpp */,
 				C26069701CED3E2C0045FF57 /* rowfunc.cpp */,
@@ -1939,6 +1947,7 @@
 				C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */,
 				C2606DAE1CED3E2E0045FF57 /* localvariance.cpp in Sources */,
 				C25261081F6611A10069F665 /* ObjectContainer.cpp in Sources */,
+				C20D4DE52208BD34004D9405 /* ellipse_fit.cpp in Sources */,
 				C25261211F66EA910069F665 /* pugixml.cpp in Sources */,
 				C2606DAD1CED3E2E0045FF57 /* lineseg.cpp in Sources */,
 				C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */,
@@ -2014,6 +2023,7 @@
 				C2398A4621DF224B00B180A0 /* cinder_support.cpp in Sources */,
 				C2398A4721DF224B00B180A0 /* visible_lif_impl.cpp in Sources */,
 				C2398A4821DF224B00B180A0 /* visible_impl.cpp in Sources */,
+				C20D4DE82208BD34004D9405 /* ellipse_fit.cpp in Sources */,
 				C2398A4921DF224B00B180A0 /* histo.cpp in Sources */,
 				C2398A4A21DF224B00B180A0 /* Item.cpp in Sources */,
 				C2398A4B21DF224B00B180A0 /* rand_support.cpp in Sources */,
@@ -2074,6 +2084,7 @@
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,
 				C2618F86217FDA9900FA9F43 /* window.cc in Sources */,
+				C20D4DE72208BD34004D9405 /* ellipse_fit.cpp in Sources */,
 				C24CD87F1CEA5B1B0008C72B /* main.cpp in Sources */,
 				C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */,
 				C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */,
@@ -2155,6 +2166,7 @@
 				C26F5FB221B0AA6D00EAE156 /* Plist.cpp in Sources */,
 				C26F5FB321B0AA6D00EAE156 /* tinyxmlparser.cpp in Sources */,
 				C26F5FB421B0AA6D00EAE156 /* localvariance.cpp in Sources */,
+				C20D4DE62208BD34004D9405 /* ellipse_fit.cpp in Sources */,
 				C26F5FB521B0AA6D00EAE156 /* ObjectContainer.cpp in Sources */,
 				C26F5FB621B0AA6D00EAE156 /* pugixml.cpp in Sources */,
 				C26F5FB821B0AA6D00EAE156 /* lineseg.cpp in Sources */,
