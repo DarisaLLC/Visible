@@ -1010,16 +1010,15 @@ void lifContext::add_motion_profile (){
     {
         if(m_var_texture){
             ImVec2 sz(m_var_texture->getWidth(),m_var_texture->getHeight());
-         
-           // ImGui::Text("Main A");
+            ImVec2  frame (m_var_texture->getWidth()+ 20,m_var_texture->getHeight()+20);
+            static float zoom = 0.5f;
+            static ImVec2 zoom_center;
             ImGui::BeginChild("Test", sz, true);
             ImVec2 pp = ImGui::GetCursorScreenPos();
-            ImVec2 p (pp.x + sz.x / 2.0f, pp.y + sz.y / 2.0f); //ImGui::GetCursorScreenPos();
-
-            ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz);
-//            ImGui::Image(ImGui::GetIO().Fonts->TexID, ImVec2(100,100));
+            ImVec2 p (pp.x + 10 + + sz.x / 2.0f, pp.y + 10 + + sz.y / 2.0f); //ImGui::GetCursorScreenPos();
+            ImGui::ImageZoomAndPan( (void*)(intptr_t) m_var_texture->getId(),sz,m_var_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
+          //  ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz);
             ImGui::EndChild();
-            ImGui::Text("Main B");
             ImGui::BeginChild("Test");
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
