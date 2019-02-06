@@ -33,9 +33,25 @@ ImGui::TestPopupMenuSimple();
 
 
 namespace ImGui {
-   // static void ImDrawListAddImageCircleFilled(ImDrawList* dl,ImTextureID user_texture_id,const ImVec2& uv0, const ImVec2& uv1,const ImVec2& centre, float radius, ImU32 col, int num_segments=8);
-
-    bool ImageZoomAndPan(ImTextureID user_texture_id, const ImVec2& size,float aspectRatio,ImTextureID checkersTexID = NULL,float* pzoom=NULL,ImVec2* pzoomCenter=NULL,int panMouseButtonDrag=1,int resetZoomAndPanMouseButton=2,const ImVec2& zoomMaxAndZoomStep=ImVec2(16.f,1.025f));
+   void ImDrawListAddImageCircleFilled(ImDrawList* dl,ImTextureID user_texture_id,const ImVec2& uv0, const ImVec2& uv1,const ImVec2& centre, float radius, ImU32 col, int num_segments=8);
+    
+    int DrawPoint(ImDrawList* draw_list, ImVec2 pos, const ImVec2 size, const ImVec2 offset, unsigned int color, bool edited);
+   
+    
+    struct pan_zoom_xform {
+        bool result;
+        ImVec2 imageSz;
+        ImRect bbox;
+        ImVec2 uv0;
+        ImVec2 uv1;
+        ImVec2 uvExtension;
+        float zoom;
+        ImVec2 zoom_center;
+        ImVec2 start_pos;
+        ImVec2 end_pos;
+    };
+    
+    pan_zoom_xform ImageZoomAndPan(ImTextureID user_texture_id, const ImVec2& size,float aspectRatio,ImTextureID checkersTexID = NULL,float* pzoom=NULL,ImVec2* pzoomCenter=NULL,int panMouseButtonDrag=1,int resetZoomAndPanMouseButton=2,const ImVec2& zoomMaxAndZoomStep=ImVec2(16.f,1.025f));
     
 // Returns the hovered value index WITH 'values_offset' ( (hovered_index+values_offset)%values_offset or -1). The index of the hovered histogram can be retrieved through 'pOptionalHoveredHistogramIndexOut'.
 IMGUI_API int PlotHistogram(const char* label, const float** values,int num_histograms,int values_count, int values_offset = 0, const char* overlay_text = NULL, float scale_min = FLT_MAX, float scale_max = FLT_MAX, ImVec2 graph_size = ImVec2(0,0), int stride = sizeof(float),float histogramGroupSpacingInPixels=0.f,int* pOptionalHoveredHistogramIndexOut=NULL,float fillColorGradientDeltaIn0_05=0.05f,const ImU32* pColorsOverride=NULL,int numColorsOverride=0);
