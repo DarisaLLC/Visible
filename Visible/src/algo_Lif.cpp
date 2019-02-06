@@ -33,6 +33,7 @@
 #include "algo_Lif.hpp"
 #include "logger.hpp"
 #include "cpp-perf.hpp"
+#include "vision/gradient.h"
 
 /****
  
@@ -289,7 +290,7 @@ void lif_serie_processor::run_volume_variances (const int channel_index){
     cv::meanStdDev(m_var_display_image, mean, stdev);
     std::cout << mean[0] << "  "  << stdev[0] << std::endl;
     std::vector<Point2f> peaks;
-    PeakDetect(m_var_display_image, peaks, mean[0]+3*stdev[0]);
+    PeakDetect(m_var_display_image, peaks, 128);
     if(peaks.size() > 5){
         RotatedRect box = fitEllipse(peaks);
         auto dims = box.size;

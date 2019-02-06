@@ -36,8 +36,96 @@ static float GetWindowFontScale() {
     return window->FontWindowScale;
 }
 
+    
 
+    inline ImVec2 mouseToImageCoords(const ImVec2& mousePos,pan_zoom_xform& res, bool checkVisibility=false) {
+        ImVec2 pos(-1,-1);
+        if (res.imageSz.x>0 && res.imageSz.y>0 && (!checkVisibility || (mousePos.x>=res.start_pos.x && mousePos.x<end_pos.x && mousePos.y>=res.start_pos.y && mousePos.y<res.end_pos.y))) {
+            // MouseToImage here:-------------------------------
+            pos = mousePos-res.start_pos;
+            pos.x/=res.imageSz.x;pos.y/=res.imageSz.y;  // Note that imageSz is the size of the displayed image in screen coords
+            pos.x*=res.uvExtension.x;pos.y*=res.uvExtension.y;
+            pos.x+=res.uv0.x;pos.y+=res.uv0.y;
+            pos.x*=;pos.y*=h;
+            // it should be:
+            // 0 <= (int)pos.x < w
+            // 0 <= (int)pos.y < h
+        }
+        return pos;
+    }
+    
+    inline ImVec2 imageToMouseCoords(const ImVec2& imagePos,bool* pIsOutputValidOut=NULL) const {
+        ImVec2 pos(-1,-1);
+        //if (pIsOutputValidOut) {*pIsOutputValidOut = (imagePos.x>=0 && imagePos.x<w && imagePos.y>=0 && imagePos.y<h) ? true : false;}
+        if (pIsOutputValidOut) *pIsOutputValidOut = false;
+        if (w>0 && h>0) {
+            pos = imagePos;
+            pos.x/=w;pos.y/=h;
+            pos.x-=uv0.x;pos.y-=uv0.y;
+            pos.x/=uvExtension.x;pos.y/=uvExtension.y;
+            pos.x*=imageSz.x;pos.y*=imageSz.y;
+            pos+=startPos;
+            if (pIsOutputValidOut && pos.x>=startPos.x && pos.x<endPos.x &&
+                pos.y>=startPos.y && pos.y<endPos.y)    *pIsOutputValidOut = true;
+        }
+        return pos;
+    }
+    
+    inline float getImageToMouseCoordsRatio() const {return imageSz.x/(uvExtension.x*w);}
+    
+    inline bool getImageColorAtPixel(int x, int y,ImVec4& cOut) {
+        if (!image || x<0 || x>=w || y<0 || y>=h || c<=0 || c==2 || c>4) return false;
+        cOut.x=cOut.y=cOut.z=0.f;cOut.w=1.f;
+        const unsigned char* pim = &image[(y*w+x)*c];
+        if (c==1) cOut.w= (float)(*pim)/255.f;
+        else if (c==3) {cOut.x=(float)(*pim++)/255.f;cOut.y=(float)(*pim++)/255.f;cOut.z=(float)(*pim)/255.f;}
+        else if (c==4) {cOut.x=(float)(*pim++)/255.f;cOut.y=(float)(*pim++)/255.f;cOut.z=(float)(*pim++)/255.f;cOut.w=(float)(*pim)/255.f;}
+        return true;
+    }
+    inline bool getImageColorAtPixel(const ImVec2& pxl,ImVec4& cOut) {
+        const int x = (int) pxl.x; const int y = (int) pxl.y;
+        return getImageColorAtPixel(x,y,cOut);
+    }
+    inline bool getImageColorAtMousePosition(const ImVec2& mousePos,ImVec4& cOut) {
+        const ImVec2 pxl = mouseToImageCoords(mousePos);
+        return getImageColorAtPixel(pxl,cOut);
+    }
+    
 
+#endif
+    
+    int DrawPoint(ImDrawList* draw_list, ImVec2 pos, const ImVec2 size, const ImVec2 offset, unsigned int color, bool edited)
+    {
+        int ret = 0;
+        ImGuiIO& io = ImGui::GetIO();
+        
+        static const ImVec2 localOffsets[4] = { ImVec2(1,0), ImVec2(0,1), ImVec2(-1,0), ImVec2(0,-1) };
+        ImVec2 offsets[4];
+        for (int i = 0; i < 4; i++)
+        {
+            offsets[i] = pos * size + localOffsets[i]*4.5f + offset;
+        }
+        
+        const ImVec2 center = pos * size + offset;
+        const ImRect anchor(center - ImVec2(5, 5), center + ImVec2(5, 5));
+        draw_list->AddCircleFilled(center, 2, 0xFF000000); //      draw_list->AddConvexPolyFilled(offsets, 4, 0xFF000000);
+        
+        if (anchor.Contains(io.MousePos))
+        {
+            ret = 1;
+            if (io.MouseDown[0])
+                ret = 2;
+        }
+        if (edited)
+            draw_list->AddPolyline(offsets, 4, 0xFFFFFFFF, true, 3.0f);
+        else if (ret)
+            draw_list->AddCircleFilled(center, 2.5f, 0xFF80B0FF);        //  draw_list->AddPolyline(offsets, 4, 0xFF80B0FF, true, 2.0f);
+        else
+            draw_list->AddCircleFilled(center, 2.5f, color);      //    draw_list->AddPolyline(offsets, 4, 0xFF0080FF, true, 2.0f);
+        return ret;
+    }
+    
+    
     
     
     void ImDrawListAddImageCircleFilled(ImDrawList* dl,ImTextureID user_texture_id,const ImVec2& uv0, const ImVec2& uv1,const ImVec2& centre, float radius, ImU32 col, int num_segments)   {
@@ -83,155 +171,165 @@ static float GetWindowFontScale() {
         
         if (push_texture_id) dl->PopTextureID();
     }
-#endif
     
-    // Cloned from imguivariouscontrols.cpp [but modified slightly]
-    bool ImageZoomAndPan(ImTextureID user_texture_id, const ImVec2& size,float aspectRatio,ImTextureID checkersTexID,float* pzoom,ImVec2* pzoomCenter,int panMouseButtonDrag,int resetZoomAndPanMouseButton,const ImVec2& zoomMaxAndZoomStep)
-    {
-        float zoom = pzoom ? *pzoom : 1.f;
-        ImVec2 zoomCenter = pzoomCenter ? *pzoomCenter : ImVec2(0.5f,0.5f);
-        
-        bool rv = false;
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
-        if (!window || window->SkipItems) return rv;
-        ImVec2 curPos = ImGui::GetCursorPos();
-        const ImVec2 wndSz(size.x>0 ? size.x : ImGui::GetWindowSize().x-curPos.x,size.y>0 ? size.y : ImGui::GetWindowSize().y-curPos.y);
-        
-        IM_ASSERT(wndSz.x!=0 && wndSz.y!=0 && zoom!=0);
-        
-        // Here we use the whole size (although it can be partially empty)
-        ImRect bb(window->DC.CursorPos, ImVec2(window->DC.CursorPos.x + wndSz.x,window->DC.CursorPos.y + wndSz.y));
-        ImGui::ItemSize(bb);
-        if (!ImGui::ItemAdd(bb, 0, NULL)) return rv;
-        
-        ImVec2 imageSz = wndSz;
-        ImVec2 remainingWndSize(0,0);
-        if (aspectRatio!=0) {
-            const float wndAspectRatio = wndSz.x/wndSz.y;
-            if (aspectRatio >= wndAspectRatio) {imageSz.y = imageSz.x/aspectRatio;remainingWndSize.y = wndSz.y - imageSz.y;}
-            else {imageSz.x = imageSz.y*aspectRatio;remainingWndSize.x = wndSz.x - imageSz.x;}
-        }
-        
-        if (ImGui::IsItemHovered()) {
-            const ImGuiIO& io = ImGui::GetIO();
-            if (io.MouseWheel!=0) {
-                if (!io.KeyCtrl && !io.KeyShift)
-                {
-                    const float zoomStep = zoomMaxAndZoomStep.y;
-                    const float zoomMin = 1.f;
-                    const float zoomMax = zoomMaxAndZoomStep.x;
-                    if (io.MouseWheel < 0) {zoom/=zoomStep;if (zoom<zoomMin) zoom=zoomMin;}
-                    else {zoom*=zoomStep;if (zoom>zoomMax) zoom=zoomMax;}
-                    rv = true;
-                }
-                else if (io.KeyCtrl) {
-                    const bool scrollDown = io.MouseWheel <= 0;
-                    const float zoomFactor = .5/zoom;
-                    if ((!scrollDown && zoomCenter.y > zoomFactor) || (scrollDown && zoomCenter.y <  1.f - zoomFactor))  {
-                        const float slideFactor = zoomMaxAndZoomStep.y*0.1f*zoomFactor;
-                        if (scrollDown) {
-                            zoomCenter.y+=slideFactor;///(imageSz.y*zoom);
-                            if (zoomCenter.y >  1.f - zoomFactor) zoomCenter.y =  1.f - zoomFactor;
-                        }
-                        else {
-                            zoomCenter.y-=slideFactor;///(imageSz.y*zoom);
-                            if (zoomCenter.y < zoomFactor) zoomCenter.y = zoomFactor;
-                        }
-                        rv = true;
-                    }
-                }
-                else if (io.KeyShift) {
-                    const bool scrollRight = io.MouseWheel <= 0;
-                    const float zoomFactor = .5/zoom;
-                    if ((!scrollRight && zoomCenter.x > zoomFactor) || (scrollRight && zoomCenter.x <  1.f - zoomFactor))  {
-                        const float slideFactor = zoomMaxAndZoomStep.y*0.1f*zoomFactor;
-                        if (scrollRight) {
-                            zoomCenter.x+=slideFactor;///(imageSz.x*zoom);
-                            if (zoomCenter.x >  1.f - zoomFactor) zoomCenter.x =  1.f - zoomFactor;
-                        }
-                        else {
-                            zoomCenter.x-=slideFactor;///(imageSz.x*zoom);
-                            if (zoomCenter.x < zoomFactor) zoomCenter.x = zoomFactor;
-                        }
-                        rv = true;
-                    }
-                }
-            }
-            if (io.MouseClicked[resetZoomAndPanMouseButton]) {zoom=1.f;zoomCenter.x=zoomCenter.y=.5f;rv = true;}
-            if (ImGui::IsMouseDragging(panMouseButtonDrag,1.f))   {
-                zoomCenter.x-=io.MouseDelta.x/(imageSz.x*zoom);
-                zoomCenter.y-=io.MouseDelta.y/(imageSz.y*zoom);
-                rv = true;
-                ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-            }
-        }
-        
-        const float zoomFactor = .5/zoom;
-        if (rv) {
-            if (zoomCenter.x < zoomFactor) zoomCenter.x = zoomFactor;
-            else if (zoomCenter.x > 1.f - zoomFactor) zoomCenter.x = 1.f - zoomFactor;
-            if (zoomCenter.y < zoomFactor) zoomCenter.y = zoomFactor;
-            else if (zoomCenter.y > 1.f - zoomFactor) zoomCenter.y = 1.f - zoomFactor;
-        }
-        
-        ImVec2 uvExtension(2.f*zoomFactor,2.f*zoomFactor);
-        if (remainingWndSize.x > 0) {
-            const float remainingSizeInUVSpace = 2.f*zoomFactor*(remainingWndSize.x/imageSz.x);
-            const float deltaUV = uvExtension.x;
-            const float remainingUV = 1.f-deltaUV;
-            if (deltaUV<1) {
-                float adder = (remainingUV < remainingSizeInUVSpace ? remainingUV : remainingSizeInUVSpace);
-                uvExtension.x+=adder;
-                remainingWndSize.x-= adder * zoom * imageSz.x;
-                imageSz.x+=adder * zoom * imageSz.x;
-                
-                if (zoomCenter.x < uvExtension.x*.5f) zoomCenter.x = uvExtension.x*.5f;
-                else if (zoomCenter.x > 1.f - uvExtension.x*.5f) zoomCenter.x = 1.f - uvExtension.x*.5f;
-            }
-        }
-        if (remainingWndSize.y > 0) {
-            const float remainingSizeInUVSpace = 2.f*zoomFactor*(remainingWndSize.y/imageSz.y);
-            const float deltaUV = uvExtension.y;
-            const float remainingUV = 1.f-deltaUV;
-            if (deltaUV<1) {
-                float adder = (remainingUV < remainingSizeInUVSpace ? remainingUV : remainingSizeInUVSpace);
-                uvExtension.y+=adder;
-                remainingWndSize.y-= adder * zoom * imageSz.y;
-                imageSz.y+=adder * zoom * imageSz.y;
-                
-                if (zoomCenter.y < uvExtension.y*.5f) zoomCenter.y = uvExtension.y*.5f;
-                else if (zoomCenter.y > 1.f - uvExtension.y*.5f) zoomCenter.y = 1.f - uvExtension.y*.5f;
-            }
-        }
-        
-        ImVec2 uv0((zoomCenter.x-uvExtension.x*.5f),(zoomCenter.y-uvExtension.y*.5f));
-        ImVec2 uv1((zoomCenter.x+uvExtension.x*.5f),(zoomCenter.y+uvExtension.y*.5f));
-        
-        
-        ImVec2 startPos=bb.Min,endPos=bb.Max;
-        startPos.x+= remainingWndSize.x*.5f;
-        startPos.y+= remainingWndSize.y*.5f;
-        endPos.x = startPos.x + imageSz.x;
-        endPos.y = startPos.y + imageSz.y;
-        
-        if (checkersTexID) {
-            const float m = 24.f;
-            //window->DrawList->AddImage(checkersTexID, startPos, endPos, uv0*m, uv1*m);
-            window->DrawList->AddImage(checkersTexID, startPos, endPos, ImVec2(0,0), ImVec2(m,m));
-        }
-        window->DrawList->AddImage(user_texture_id, startPos, endPos, uv0, uv1);
-        
-        if (pzoom)  *pzoom = zoom;
-        if (pzoomCenter) *pzoomCenter = zoomCenter;
-        
-        
-        return rv;
+    
+// Cloned from imguivariouscontrols.cpp [but modified slightly]
+  pan_zoom_xform  ImageZoomAndPan(ImTextureID user_texture_id, const ImVec2& size,float aspectRatio,ImTextureID checkersTexID,float* pzoom,ImVec2* pzoomCenter,int panMouseButtonDrag,int resetZoomAndPanMouseButton,const ImVec2& zoomMaxAndZoomStep)
+{
+    float zoom = pzoom ? *pzoom : 1.f;
+    ImVec2 zoomCenter = pzoomCenter ? *pzoomCenter : ImVec2(0.5f,0.5f);
+    pan_zoom_xform res;
+    res.result = false;
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    if (!window || window->SkipItems) return res;
+    ImVec2 curPos = ImGui::GetCursorPos();
+    const ImVec2 wndSz(size.x>0 ? size.x : ImGui::GetWindowSize().x-curPos.x,size.y>0 ? size.y : ImGui::GetWindowSize().y-curPos.y);
+    
+    IM_ASSERT(wndSz.x!=0 && wndSz.y!=0 && zoom!=0);
+    
+    // Here we use the whole size (although it can be partially empty)
+    ImRect bb(window->DC.CursorPos, ImVec2(window->DC.CursorPos.x + wndSz.x,window->DC.CursorPos.y + wndSz.y));
+    ImGui::ItemSize(bb);
+    if (!ImGui::ItemAdd(bb, 0, NULL)) return res;
+    
+    ImVec2 imageSz = wndSz;
+    ImVec2 remainingWndSize(0,0);
+    if (aspectRatio!=0) {
+        const float wndAspectRatio = wndSz.x/wndSz.y;
+        if (aspectRatio >= wndAspectRatio) {imageSz.y = imageSz.x/aspectRatio;remainingWndSize.y = wndSz.y - imageSz.y;}
+        else {imageSz.x = imageSz.y*aspectRatio;remainingWndSize.x = wndSz.x - imageSz.x;}
     }
+    
+    if (ImGui::IsItemHovered()) {
+        const ImGuiIO& io = ImGui::GetIO();
+        if (io.MouseWheel!=0) {
+            if (!io.KeyCtrl && !io.KeyShift)
+            {
+                const float zoomStep = zoomMaxAndZoomStep.y;
+                const float zoomMin = 1.f;
+                const float zoomMax = zoomMaxAndZoomStep.x;
+                if (io.MouseWheel < 0) {zoom/=zoomStep;if (zoom<zoomMin) zoom=zoomMin;}
+                else {zoom*=zoomStep;if (zoom>zoomMax) zoom=zoomMax;}
+                res.result = true;
+            }
+            else if (io.KeyCtrl) {
+                const bool scrollDown = io.MouseWheel <= 0;
+                const float zoomFactor = .5/zoom;
+                if ((!scrollDown && zoomCenter.y > zoomFactor) || (scrollDown && zoomCenter.y <  1.f - zoomFactor))  {
+                    const float slideFactor = zoomMaxAndZoomStep.y*0.1f*zoomFactor;
+                    if (scrollDown) {
+                        zoomCenter.y+=slideFactor;///(imageSz.y*zoom);
+                        if (zoomCenter.y >  1.f - zoomFactor) zoomCenter.y =  1.f - zoomFactor;
+                    }
+                    else {
+                        zoomCenter.y-=slideFactor;///(imageSz.y*zoom);
+                        if (zoomCenter.y < zoomFactor) zoomCenter.y = zoomFactor;
+                    }
+                    res.result = true;
+                }
+            }
+            else if (io.KeyShift) {
+                const bool scrollRight = io.MouseWheel <= 0;
+                const float zoomFactor = .5/zoom;
+                if ((!scrollRight && zoomCenter.x > zoomFactor) || (scrollRight && zoomCenter.x <  1.f - zoomFactor))  {
+                    const float slideFactor = zoomMaxAndZoomStep.y*0.1f*zoomFactor;
+                    if (scrollRight) {
+                        zoomCenter.x+=slideFactor;///(imageSz.x*zoom);
+                        if (zoomCenter.x >  1.f - zoomFactor) zoomCenter.x =  1.f - zoomFactor;
+                    }
+                    else {
+                        zoomCenter.x-=slideFactor;///(imageSz.x*zoom);
+                        if (zoomCenter.x < zoomFactor) zoomCenter.x = zoomFactor;
+                    }
+                    res.result = true;
+                }
+            }
+        }
+        if (io.MouseClicked[resetZoomAndPanMouseButton]) {zoom=1.f;zoomCenter.x=zoomCenter.y=.5f;res.result = true;}
+        if (ImGui::IsMouseDragging(panMouseButtonDrag,1.f))   {
+            zoomCenter.x-=io.MouseDelta.x/(imageSz.x*zoom);
+            zoomCenter.y-=io.MouseDelta.y/(imageSz.y*zoom);
+            res.result = true;
+            ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+        }
+    }
+    
+    const float zoomFactor = .5/zoom;
+    if (res.result) {
+        if (zoomCenter.x < zoomFactor) zoomCenter.x = zoomFactor;
+        else if (zoomCenter.x > 1.f - zoomFactor) zoomCenter.x = 1.f - zoomFactor;
+        if (zoomCenter.y < zoomFactor) zoomCenter.y = zoomFactor;
+        else if (zoomCenter.y > 1.f - zoomFactor) zoomCenter.y = 1.f - zoomFactor;
+    }
+    
+    ImVec2 uvExtension(2.f*zoomFactor,2.f*zoomFactor);
+    if (remainingWndSize.x > 0) {
+        const float remainingSizeInUVSpace = 2.f*zoomFactor*(remainingWndSize.x/imageSz.x);
+        const float deltaUV = uvExtension.x;
+        const float remainingUV = 1.f-deltaUV;
+        if (deltaUV<1) {
+            float adder = (remainingUV < remainingSizeInUVSpace ? remainingUV : remainingSizeInUVSpace);
+            uvExtension.x+=adder;
+            remainingWndSize.x-= adder * zoom * imageSz.x;
+            imageSz.x+=adder * zoom * imageSz.x;
+            
+            if (zoomCenter.x < uvExtension.x*.5f) zoomCenter.x = uvExtension.x*.5f;
+            else if (zoomCenter.x > 1.f - uvExtension.x*.5f) zoomCenter.x = 1.f - uvExtension.x*.5f;
+        }
+    }
+    if (remainingWndSize.y > 0) {
+        const float remainingSizeInUVSpace = 2.f*zoomFactor*(remainingWndSize.y/imageSz.y);
+        const float deltaUV = uvExtension.y;
+        const float remainingUV = 1.f-deltaUV;
+        if (deltaUV<1) {
+            float adder = (remainingUV < remainingSizeInUVSpace ? remainingUV : remainingSizeInUVSpace);
+            uvExtension.y+=adder;
+            remainingWndSize.y-= adder * zoom * imageSz.y;
+            imageSz.y+=adder * zoom * imageSz.y;
+            
+            if (zoomCenter.y < uvExtension.y*.5f) zoomCenter.y = uvExtension.y*.5f;
+            else if (zoomCenter.y > 1.f - uvExtension.y*.5f) zoomCenter.y = 1.f - uvExtension.y*.5f;
+        }
+    }
+    
+    ImVec2 uv0((zoomCenter.x-uvExtension.x*.5f),(zoomCenter.y-uvExtension.y*.5f));
+    ImVec2 uv1((zoomCenter.x+uvExtension.x*.5f),(zoomCenter.y+uvExtension.y*.5f));
+    
+    
+    ImVec2 startPos=bb.Min,endPos=bb.Max;
+    startPos.x+= remainingWndSize.x*.5f;
+    startPos.y+= remainingWndSize.y*.5f;
+    endPos.x = startPos.x + imageSz.x;
+    endPos.y = startPos.y + imageSz.y;
+    
+    if (checkersTexID) {
+        const float m = 24.f;
+        //window->DrawList->AddImage(checkersTexID, startPos, endPos, uv0*m, uv1*m);
+        window->DrawList->AddImage(checkersTexID, startPos, endPos, ImVec2(0,0), ImVec2(m,m));
+    }
+    window->DrawList->AddImage(user_texture_id, startPos, endPos, uv0, uv1);
+    
+    ImDrawListAddImageCircleFilled(window->DrawList,user_texture_id,uv0,uv1,*pzoomCenter,3,IM_COL32(150,75,225,255),8);
+    
+    if (pzoom)  *pzoom = zoom;
+    if (pzoomCenter) *pzoomCenter = zoomCenter;
 
-    
-    
-    
-    
+    res.imageSz = imageSz;
+    res.start_pos = startPos;
+    res.end_pos = endPos;
+    res.bbox = bb;
+    res.uv0 = uv0;
+    res.uv1 = uv1;
+    res.uvExtension = uvExtension;
+    res.zoom = zoom;
+    res.zoom_center = zoomCenter;
+    return res;
+}
+
+
+
+
+
     
     
     

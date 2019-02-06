@@ -290,6 +290,14 @@ void lifContext::signal_volume_var_available()
         vlogger::instance().console()->error("Lif Processor Object does not exist ");
         return;
     }
+
+    auto save_motion_profile = [im = m_lifProcRef->volume_variances()] () {
+        std::string filename ("/Users/arman/tmp/disp1.png");
+        cv::imwrite(filename, im);
+    };
+    
+    stl_utils::reallyAsync(save_motion_profile);
+    
     
     // Create a texcture for display
     // Set format to topDown through to get free flip
@@ -297,7 +305,6 @@ void lifContext::signal_volume_var_available()
     Surface8uRef sur = Surface8u::create( cinder::fromOcv(m_lifProcRef->display_volume_variances()) );
     auto texFormat = gl::Texture2d::Format().loadTopDown();
     m_var_texture = gl::Texture::create(*sur, texFormat);
-//    m_var_texture->setTopDown(false);
     
 }
 
@@ -1003,16 +1010,37 @@ void lifContext::add_motion_profile (){
     {
         if(m_var_texture){
             ImVec2 sz(m_var_texture->getWidth(),m_var_texture->getHeight());
-           // ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz, ImVec2(0, 1), ImVec2(1, 0), ImVec4(1,1,1,1),ImVec4(255,255,255,0));
-       
-            static float zoom = 0.5f;
-            static ImVec2 zoom_center;
-            ImGui::ImageZoomAndPan( (void*)(intptr_t) m_var_texture->getId(),sz,m_var_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
+         
+           // ImGui::Text("Main A");
+            ImGui::BeginChild("Test", sz, true);
+            ImVec2 pp = ImGui::GetCursorScreenPos();
+            ImVec2 p (pp.x + sz.x / 2.0f, pp.y + sz.y / 2.0f); //ImGui::GetCursorScreenPos();
+
+            ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz);
+//            ImGui::Image(ImGui::GetIO().Fonts->TexID, ImVec2(100,100));
+            ImGui::EndChild();
+            ImGui::Text("Main B");
+            ImGui::BeginChild("Test");
+            ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
+            ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
+            ImGui::EndChild();
+            
+           // static float zoom = 0.5f;
+           // static ImVec2 zoom_center;
+          //  ImGui::BeginChild("Motion Profile");
+      //      ImGui::ImageZoomAndPan( (void*)(intptr_t) m_var_texture->getId(),sz,m_var_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
+         //   ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz);
+         
+
+      //      ImGui::BeginChild("Zoom Center");
+      //      ImGui::DrawPoint(ImGui::GetCurrentWindow()->DrawList, zoom_center, ImVec2(5,5), ImVec2(0,0), IM_COL32(255,0,0,0),false);
+       //     ImGui::EndChild();
+
+            
         }
-        
+
+        ImGui::End();
     }
-    ImGui::End();
-    
 }
 
 void  lifContext::SetupGUIVariables(){

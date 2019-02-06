@@ -1,7 +1,6 @@
 //
 //  Created by Arman Garakani on 11/5/15.
 //
-//
 //  @inherited reflects these in the UI
 
 #include "include/macos.xcconfig"
@@ -14,6 +13,7 @@ ALL_ROOT = $(PROJECT_DIR)/../..
 SVL_ROOT = $(PROJECT_DIR)/../../svl
 EXTERNALS = $(PROJECT_DIR)/../../externals
 VISIBLE_ROOT = $(PROJECT_DIR)/../../Visible
+
 
 
 

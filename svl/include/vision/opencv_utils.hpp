@@ -24,6 +24,7 @@ namespace svl
     double correlation_ocv(const roiWindow<P8U>& i, const roiWindow<P8U>& m);
     void cumani_opencv (const cv::Mat& input_bgr, cv::Mat& gradAbs, cv::Mat& orientation, float& maxVal);
     void PeakDetect(const cv::Mat& space, std::vector<Point2f>& peaks, uint8_t accept);
+    void PeakMapDetect(const cv::Mat& space, std::unordered_map<uint8_t,std::vector<Point2f>>& peaks, uint8_t accept);
     
     double getPSNR(const cv::Mat& I1, const cv::Mat& I2);
     

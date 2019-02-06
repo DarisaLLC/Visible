@@ -52,7 +52,43 @@ namespace svl
             }
         }
     }
-
+    
+    void PeakMapDetect(const cv::Mat& space, std::unordered_map<uint8_t,std::vector<Point2f>>& peak_map, uint8_t accept){
+        
+        peak_map.clear();
+        for (uint8_t ii = 0; ii <= 255; ii++){
+            peak_map[ii].clear();
+        }
+        
+        int height = space.rows - 2;
+        int width = space.cols - 2;
+        auto rowUpdate = space.ptr(1) - space.ptr(0);
+        
+        for (int row = 1; row < height; row++)
+        {
+            const uint8_t* row_ptr = space.ptr(row);
+            const uint8_t* pel = row_ptr;
+            for (int col = 1; col < width; col++, pel++)
+            {
+                uint8_t pval = *pel;
+                int s = 0;
+                s += (pval > *(pel - 1)) ? 1 : 0;
+                s += (pval > *(pel - rowUpdate - 1) ) ? 1 : 0;
+                s += (pval > *(pel - rowUpdate) ) ? 1 : 0;
+                s += (pval > *(pel - rowUpdate + 1) ) ? 1 : 0;
+                s += (pval > *(pel + 1) ) ? 1 : 0;
+                s += (pval > *(pel + rowUpdate + 1) ) ? 1 : 0;
+                s += (pval > *(pel + rowUpdate) ) ? 1 : 0;
+                s += (pval > *(pel + rowUpdate - 1) ) ? 1 : 0;
+                if (pval > accept && s > 5)
+                {
+                    peak_map[pval].emplace_back(col+0.5, row+0.5);
+                }
+            }
+        }
+        
+        
+    }
     
     double getPSNR(const Mat& I1, const Mat& I2)
     {
