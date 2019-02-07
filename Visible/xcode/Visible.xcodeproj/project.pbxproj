@@ -318,6 +318,9 @@
 		C276ECA21C72B26F00242CDB /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731819953389008149E2 /* AVFoundation.framework */; };
 		C276ECA31C72B26F00242CDB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731919953389008149E2 /* CoreMedia.framework */; };
 		C276ECA91C72B5D900242CDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C276ECA81C72B5D900242CDB /* CoreGraphics.framework */; };
+		C27ED0A2220BB71D00B55D65 /* InterfaceUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27ED0A0220BB71D00B55D65 /* InterfaceUtilities.cpp */; };
+		C27ED0A3220BB73800B55D65 /* InterfaceUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27ED0A0220BB71D00B55D65 /* InterfaceUtilities.cpp */; };
+		C27ED0A4220BB73900B55D65 /* InterfaceUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27ED0A0220BB71D00B55D65 /* InterfaceUtilities.cpp */; };
 		C2819EB021F7E98A00183E44 /* PlayLoop.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C23CFBE521E9785000C1DF16 /* PlayLoop.png */; };
 		C2819EB121F7E98A00183E44 /* PlayNoLoop.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */; };
 		C2819EC521FA62E900183E44 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
@@ -764,6 +767,8 @@
 		C26F5FFE21B0AA6F00EAE156 /* VisibleRunner-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleRunner-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleRunner-Info.plist"; sourceTree = "<absolute>"; };
 		C276EC841C72988200242CDB /* cp-visible_release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "cp-visible_release.xcconfig"; path = "configs/cp-visible_release.xcconfig"; sourceTree = "<group>"; };
 		C276ECA81C72B5D900242CDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		C27ED0A0220BB71D00B55D65 /* InterfaceUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InterfaceUtilities.cpp; path = ../include/imGuiCustom/InterfaceUtilities.cpp; sourceTree = "<group>"; };
+		C27ED0A1220BB71D00B55D65 /* InterfaceUtilities.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = InterfaceUtilities.hpp; path = ../include/imGuiCustom/InterfaceUtilities.hpp; sourceTree = "<group>"; };
 		C2819EAC21F4457800183E44 /* ImSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImSequencer.h; path = ../include/imGuiCustom/ImSequencer.h; sourceTree = "<group>"; };
 		C2819EAD21F4457800183E44 /* ImCurveEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImCurveEdit.h; path = ../include/imGuiCustom/ImCurveEdit.h; sourceTree = "<group>"; };
 		C2819EAE21F4457800183E44 /* visibleSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = visibleSequencer.h; path = ../include/imGuiCustom/visibleSequencer.h; sourceTree = "<group>"; };
@@ -1216,6 +1221,8 @@
 		C23E346521F254F200221E68 /* imGuiCustom */ = {
 			isa = PBXGroup;
 			children = (
+				C27ED0A0220BB71D00B55D65 /* InterfaceUtilities.cpp */,
+				C27ED0A1220BB71D00B55D65 /* InterfaceUtilities.hpp */,
 				C240F9FE21E15ADE00FBA228 /* imguivariouscontrols.h */,
 				C2820F3721754C3100DFA7A6 /* imGuiLogger.hpp */,
 				C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */,
@@ -1949,6 +1956,7 @@
 				C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */,
 				C2606DAE1CED3E2E0045FF57 /* localvariance.cpp in Sources */,
 				C25261081F6611A10069F665 /* ObjectContainer.cpp in Sources */,
+				C27ED0A2220BB71D00B55D65 /* InterfaceUtilities.cpp in Sources */,
 				C20D4DE52208BD34004D9405 /* ellipse_fit.cpp in Sources */,
 				C25261211F66EA910069F665 /* pugixml.cpp in Sources */,
 				C2606DAD1CED3E2E0045FF57 /* lineseg.cpp in Sources */,
@@ -2021,6 +2029,7 @@
 				C2819EC621FA62EF00183E44 /* ImSequencer.cpp in Sources */,
 				C2398A4221DF224B00B180A0 /* localvariance.cpp in Sources */,
 				C2398A4321DF224B00B180A0 /* ObjectContainer.cpp in Sources */,
+				C27ED0A4220BB73900B55D65 /* InterfaceUtilities.cpp in Sources */,
 				C2398A4421DF224B00B180A0 /* pugixml.cpp in Sources */,
 				C2398A4521DF224B00B180A0 /* lineseg.cpp in Sources */,
 				C2398A4621DF224B00B180A0 /* cinder_support.cpp in Sources */,
@@ -2169,6 +2178,7 @@
 				C26F5FB221B0AA6D00EAE156 /* Plist.cpp in Sources */,
 				C26F5FB321B0AA6D00EAE156 /* tinyxmlparser.cpp in Sources */,
 				C26F5FB421B0AA6D00EAE156 /* localvariance.cpp in Sources */,
+				C27ED0A3220BB73800B55D65 /* InterfaceUtilities.cpp in Sources */,
 				C20D4DE62208BD34004D9405 /* ellipse_fit.cpp in Sources */,
 				C26F5FB521B0AA6D00EAE156 /* ObjectContainer.cpp in Sources */,
 				C26F5FB621B0AA6D00EAE156 /* pugixml.cpp in Sources */,
@@ -2899,20 +2909,7 @@
 				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_highgui.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_features2d.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_video.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_objdetect.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videostab.a",
-					"$(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libittnotify.a",
-				);
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Runner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -2974,32 +2971,7 @@
 				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
-					"$(LOCAL_BOOST)/lib/libboost_system.a",
-					"$(LOCAL_BOOST)/lib/libboost_filesystem.a",
-					"$(LOCAL_BOOST)/lib/libboost_date_time.a",
-					"$(LOCAL_BOOST)/lib/libboost_regex-mt.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_highgui.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_features2d.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_video.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_objdetect.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videostab.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a",
-					"$(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libittnotify.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibpng.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libIlmImf.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibwebp.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjpeg-turbo.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libzlib.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjasper.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a",
-				);
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Runner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
