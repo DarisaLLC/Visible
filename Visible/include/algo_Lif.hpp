@@ -175,7 +175,6 @@ public:
     typedef void (sig_cb_volume_var_available) ();
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     typedef std::vector<channel_images_t> channel_vec_t;
-    typedef std::array<std::vector<cv::Mat>,4> channelMats_t;
     
     lif_serie_processor ();
     
@@ -211,6 +210,10 @@ public:
     
     // Update. Called also when cutoff offset has changed
     void update ();
+    
+    std::shared_ptr<OCVImageWriter>& get_image_writer ();
+    void save_channel_images (int channel_index, std::string& dir_fqfn);
+    
     
 protected:
     boost::signals2::signal<lif_serie_processor::sig_cb_content_loaded>* signal_content_loaded;
@@ -275,6 +278,9 @@ private:
     std::atomic<bool> m_3d_stats_done;
     
     std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;
+    
+    std::shared_ptr<OCVImageWriter> m_writer;
+    
 };
 
 #if 0

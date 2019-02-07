@@ -523,6 +523,16 @@ const int64_t lif_serie_processor::channel_count () const
     return m_channel_count;
 }
 
+std::shared_ptr<OCVImageWriter>& lif_serie_processor::get_image_writer (){
+    return m_writer;
+}
+
+void lif_serie_processor::save_channel_images (int channel_index, std::string& dir_fqfn){
+    int channel_to_use = channel_index % m_channel_count;
+    channel_images_t c2 = m_all_by_channel[channel_to_use];
+    m_writer->operator()(dir_fqfn, c2);
+    
+}
 #pragma GCC diagnostic pop
 
 
