@@ -262,10 +262,17 @@ std::weak_ptr<contraction_analyzer> lif_serie_processor::contractionWeakRef ()
 
 int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names)
 {
+    std::unique_lock<std::mutex> lock(m_mutex);
     create_named_tracks(names);
     load_channels_from_images(frames);
+    lock.unlock();
     int channel_to_use = m_channel_count - 1;
     run_volume_variances (channel_to_use);
+    
+    // Call the content loaded cb if any
+    if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+        signal_content_loaded->operator()(m_frameCount);
+    
     return m_frameCount;
 }
 
@@ -275,6 +282,7 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
  */
 
 void lif_serie_processor::run_volume_variances (const int channel_index){
+      std::lock_guard<std::mutex> lock(m_mutex);
     m_3d_stats_done = false;
     cv::Mat m_sum, m_sqsum;
     int image_count = 0;
@@ -310,6 +318,7 @@ void lif_serie_processor::run_volume_variances (const int channel_index){
  */
 
 svl::stats<int64_t> lif_serie_processor::run_volume_sum_sumsq_count (const int channel_index){
+      std::lock_guard<std::mutex> lock(m_mutex);
     m_3d_stats_done = false;
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
     std::vector<std::tuple<uint8_t,uint8_t>> rts;
@@ -401,6 +410,7 @@ void lif_serie_processor::update ()
 
 void lif_serie_processor::contraction_analyzed (contractionContainer_t& contractions)
 {
+      std::lock_guard<std::mutex> lock(m_mutex);
     // Call the contraction available cb if any
     if (signal_contraction_available && signal_contraction_available->num_slots() > 0)
     {
@@ -419,7 +429,6 @@ void lif_serie_processor::contraction_analyzed (contractionContainer_t& contract
 
 void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames)
 {
-    
     m_frameCount = 0;
     m_all_by_channel.clear();
     m_channel_count = frames->media_info().getNumChannels();
@@ -463,10 +472,7 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
         }
         m_frameCount++;
     }
-    
-    // Call the content loaded cb if any
-    if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
-        signal_content_loaded->operator()(m_frameCount);
+ 
     
 }
 
@@ -474,6 +480,8 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
 // Each call to find_best can be with different median cut-off
 void lif_serie_processor::entropiesToTracks (namedTrackOfdouble_t& track)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    
     try{
         std::weak_ptr<contraction_analyzer> weakCaPtr (m_caRef);
         if (weakCaPtr.expired())
@@ -528,6 +536,7 @@ std::shared_ptr<OCVImageWriter>& lif_serie_processor::get_image_writer (){
 }
 
 void lif_serie_processor::save_channel_images (int channel_index, std::string& dir_fqfn){
+    std::lock_guard<std::mutex> lock(m_mutex);
     int channel_to_use = channel_index % m_channel_count;
     channel_images_t c2 = m_all_by_channel[channel_to_use];
     m_writer->operator()(dir_fqfn, c2);

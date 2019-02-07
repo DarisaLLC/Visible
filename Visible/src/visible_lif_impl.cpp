@@ -813,7 +813,10 @@ void lifContext::loadCurrentSerie ()
         cv::Mat result;
 
         // note launch mode is std::launch::async
-        auto future_res = std::async(std::launch::async, &lif_serie_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names());
+        std::vector<std::thread> threads(1);
+        threads[0] = std::thread(&lif_serie_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names());
+        std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+//        auto future_res = std::async(std::launch::async, &lif_serie_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names());
         mFrameSet->channel_names (m_serie.channel_names());
         reset_entire_clip(mFrameSet->count());
         m_minFrame = 0;
@@ -875,11 +878,6 @@ void lifContext::process_async (){
  *
  ************************/
 
-void  lifContext::draw_sequencer (){
-    
- 
-    
-}
 
 
 void lifContext::add_result_sequencer ()
