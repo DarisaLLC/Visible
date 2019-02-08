@@ -291,7 +291,7 @@ void lifContext::signal_volume_var_available()
         return;
     }
 
-    auto save_motion_profile = [im = m_lifProcRef->volume_variances()] () {
+    auto save_motion_profile = [im = m_lifProcRef->display_volume_variances()] () {
         std::string filename ("/Users/arman/tmp/disp1.png");
         cv::imwrite(filename, im);
     };
@@ -999,9 +999,10 @@ void lifContext::add_motion_profile (){
     
     Rectf dr = get_image_display_rect();
     auto tr = dr.getLowerLeft();
-    auto pos = ImVec2(tr.x, tr.y + 10);
+    ImVec2 margins (10.0f,30.0f);
+    auto pos = ImVec2(tr.x, tr.y + margins.x);
     ImGui::SetNextWindowPos(pos);
-    ImVec2 size (dr.getWidth(), dr.getHeight()/3.0f);
+    ImVec2 size (dr.getWidth(), dr.getHeight()/3.0f + margins.y);
     ImGui::SetNextWindowSize(size);
     
     if (ImGui::Begin("Motion Profile"))
@@ -1011,16 +1012,16 @@ void lifContext::add_motion_profile (){
             ImVec2  frame (m_var_texture->getWidth()+ 20,m_var_texture->getHeight()+20);
             static float zoom = 0.5f;
             static ImVec2 zoom_center;
-            ImGui::BeginChild("Test", sz, true);
+            ImGui::BeginChildFrame(ImGui::GetID("one"), sz, true);
             ImVec2 pp = ImGui::GetCursorScreenPos();
-            ImVec2 p (pp.x + 10 + + sz.x / 2.0f, pp.y + 10 + + sz.y / 2.0f); //ImGui::GetCursorScreenPos();
             ImGui::ImageZoomAndPan( (void*)(intptr_t) m_var_texture->getId(),sz,m_var_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
+            ImVec2 p (pp.x + margins.x + zoom_center.x, pp.y + margins.y + zoom_center.y); //ImGui::GetCursorScreenPos();
           //  ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz);
-            ImGui::EndChild();
-            ImGui::BeginChild("Test");
+            ImGui::EndChildFrame();
+            ImGui::BeginChildFrame(ImGui::GetID("two"), sz, true);
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
-            ImGui::EndChild();
+            ImGui::EndChildFrame();
             
            // static float zoom = 0.5f;
            // static ImVec2 zoom_center;
