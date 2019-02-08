@@ -132,7 +132,8 @@ namespace svl
                 
             }
         }
-        result = m_var(cv::Rect(half_k_w,half_k_h,processed_w,processed_h));
+//        result = m_var(cv::Rect(half_k_w,half_k_h,processed_w,processed_h));
+        result = m_var(cv::Rect(0,0,m_isize.width,m_isize.height));
         return true;
     }
     

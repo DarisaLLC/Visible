@@ -164,7 +164,7 @@ class lif_serie_processor : public LifSignaler
 public:
     using contractionContainer_t = contraction_analyzer::contractionContainer_t;
     
-    
+    typedef std::unordered_map<uint8_t,std::vector<Point2f>> mapU8PeaksToPointfs_t;
     typedef void (sig_cb_content_loaded) (int64_t&);
     typedef void (sig_cb_flu_stats_available) ();
     typedef void (sig_cb_contraction_available) (contractionContainer_t &);
@@ -258,6 +258,7 @@ private:
     // Std Dev Image
     cv::Mat m_var_image;
     mutable cv::Mat m_var_display_image;
+    mutable mapU8PeaksToPointfs_t m_map_peaks_to_points;
     
     channel_images_t m_images;
     channel_vec_t m_all_by_channel;

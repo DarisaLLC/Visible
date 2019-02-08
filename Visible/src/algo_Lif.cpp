@@ -33,7 +33,8 @@
 #include "algo_Lif.hpp"
 #include "logger.hpp"
 #include "cpp-perf.hpp"
-#include "vision/gradient.h"
+#include "vision/localvariance.h"
+#include "vision/labelBlob.hpp"
 
 /****
  
@@ -294,18 +295,42 @@ void lif_serie_processor::run_volume_variances (const int channel_index){
     SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_var_image);
     m_var_display_image.create(m_var_image.rows, m_var_image.cols, CV_8UC1);
     cv::normalize(m_var_image, m_var_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
-    cv::Scalar mean, stdev;
-    cv::meanStdDev(m_var_display_image, mean, stdev);
-    std::cout << mean[0] << "  "  << stdev[0] << std::endl;
-    std::vector<Point2f> peaks;
-    PeakDetect(m_var_display_image, peaks, 128);
-    if(peaks.size() > 5){
-        RotatedRect box = fitEllipse(peaks);
-        auto dims = box.size;
-        float minor_dim = std::min(dims.width, dims.height);
-        float major_dim = std::max(dims.width, dims.height);
-        std::cout << minor_dim << "  "  << major_dim << " angle: " << box.angle << std::endl;
+    cv::Mat result;
+    static cv::Size ap (7,7);
+    svl::localVAR tv (ap);
+    tv.process (m_var_display_image,  result);
+    cv::normalize(result, m_var_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
+   
+    
+#if 0
+
+    cv::Scalar lmean, lstd;
+    Mat threshold_output;
+    vector<vector<cv::Point> > contours;
+    vector<Vec4i> hierarchy;
+
+    cv::meanStdDev(m_var_display_image, lmean, lstd);
+    threshold(m_var_display_image, threshold_output, lmean[0], 255, THRESH_BINARY );
+    cv::findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+    
+    /// Find the rotated rectangles and ellipses for each contour
+    vector<RotatedRect> minRect( contours.size() );
+    vector<RotatedRect> minEllipse( contours.size() );
+    
+    for( int i = 0; i < contours.size(); i++ )
+    { minRect[i] = minAreaRect( Mat(contours[i]) );
+        if( contours[i].size() > 5 )
+        {
+            minEllipse[i] = fitEllipse( Mat(contours[i]) );
+            const RotatedRect& box = minEllipse[i];
+            auto dims = box.size;
+            float minor_dim = std::min(dims.width, dims.height);
+            float major_dim = std::max(dims.width, dims.height);
+            std::cout << minor_dim << "  "  << major_dim << " angle: " << box.angle << std::endl;
+            
+        }
     }
+#endif
     
     // Signal to listeners
     if (signal_volume_var_available && signal_volume_var_available->num_slots() > 0)
@@ -480,7 +505,7 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
 // Each call to find_best can be with different median cut-off
 void lif_serie_processor::entropiesToTracks (namedTrackOfdouble_t& track)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+  //  std::lock_guard<std::mutex> lock(m_mutex);
     
     try{
         std::weak_ptr<contraction_analyzer> weakCaPtr (m_caRef);
