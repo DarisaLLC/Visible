@@ -81,7 +81,7 @@ namespace anonymous{
 // @ todo setup default repository
 // default median cover pct is 5% (0.05)
 
-lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd) :sequencedImageContext(ww), m_serie(sd) {
+lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd) :sequencedImageContext(ww), m_serie(sd), m_volume_var_available(false) {
     m_type = guiContext::Type::lif_file_viewer;
     m_valid = false;
         m_valid = sd.index() >= 0;
@@ -305,6 +305,8 @@ void lifContext::signal_volume_var_available()
     Surface8uRef sur = Surface8u::create( cinder::fromOcv(m_lifProcRef->display_volume_variances()) );
     auto texFormat = gl::Texture2d::Format().loadTopDown();
     m_var_texture = gl::Texture::create(*sur, texFormat);
+    
+    m_volume_var_available = true;
     
 }
 
@@ -997,43 +999,49 @@ void lifContext::add_timeline(){
 
 void lifContext::add_motion_profile (){
     
+    if (! m_volume_var_available) return;
+    
     Rectf dr = get_image_display_rect();
     auto tr = dr.getLowerLeft();
     ImVec2 margins (10.0f,30.0f);
-    auto pos = ImVec2(tr.x, tr.y + margins.x);
+    auto pos = ImVec2(tr.x, tr.y + margins.y);
     ImGui::SetNextWindowPos(pos);
-    ImVec2 size (dr.getWidth(), dr.getHeight()/3.0f + margins.y);
+    ImVec2 size (dr.getWidth(), dr.getHeight()/3.0f + 2 * margins.y);
     ImGui::SetNextWindowSize(size);
+    const RotatedRect& mt = m_lifProcRef->motion_surface();
+    cv::Point2f points[4];
+    mt.points(&points[0]);
     
-    if (ImGui::Begin("Motion Profile"))
+    if (ImGui::Begin("Motion Profile", nullptr,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar ))
     {
         if(m_var_texture){
             ImVec2 sz(m_var_texture->getWidth(),m_var_texture->getHeight());
             ImVec2  frame (m_var_texture->getWidth()+ 20,m_var_texture->getHeight()+20);
-            static float zoom = 0.5f;
-            static ImVec2 zoom_center;
-            ImGui::BeginChildFrame(ImGui::GetID("one"), sz, true);
+            //static float zoom = 0.5f;
+            //static ImVec2 zoom_center;
+            ImGui::BeginChild(" ", sz, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
             ImVec2 pp = ImGui::GetCursorScreenPos();
-            ImGui::ImageZoomAndPan( (void*)(intptr_t) m_var_texture->getId(),sz,m_var_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
-            ImVec2 p (pp.x + margins.x + zoom_center.x, pp.y + margins.y + zoom_center.y); //ImGui::GetCursorScreenPos();
-          //  ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz);
-            ImGui::EndChildFrame();
-            ImGui::BeginChildFrame(ImGui::GetID("two"), sz, true);
+          //  ImGui::ImageZoomAndPan( (void*)(intptr_t) m_var_texture->getId(),sz,m_var_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
+            ImVec2 p (pp.x + mt.center.x, pp.y  + mt.center.y); //ImGui::GetCursorScreenPos();
+            ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz);
+            ImGui::EndChild();
+            ImGui::BeginChild(" ", sz, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
-            ImGui::EndChildFrame();
+
+            for (int ii = 0; ii < 4; ii++){
+                cv::Point2f pt = points[ii];
+                pt.x += (pp.x );
+                pt.y += (pp.y );
+                if (pt.x >=5 && pt.y >=5){
+                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), IM_COL32(255, 255, 0, 255), 3.0f);
+                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), IM_COL32(255, 255, 0, 255), 3.0f);
+                }
+            }
             
-           // static float zoom = 0.5f;
-           // static ImVec2 zoom_center;
-          //  ImGui::BeginChild("Motion Profile");
-      //      ImGui::ImageZoomAndPan( (void*)(intptr_t) m_var_texture->getId(),sz,m_var_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
-         //   ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz);
-         
-
-      //      ImGui::BeginChild("Zoom Center");
-      //      ImGui::DrawPoint(ImGui::GetCurrentWindow()->DrawList, zoom_center, ImVec2(5,5), ImVec2(0,0), IM_COL32(255,0,0,0),false);
-       //     ImGui::EndChild();
-
+            ImGui::EndChild();
+            
+       
             
         }
 

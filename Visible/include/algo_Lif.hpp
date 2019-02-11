@@ -206,6 +206,8 @@ public:
     
     const std::vector<Rectf>& rois () const;
     
+    const cv::RotatedRect& motion_surface () const;
+    
     const  std::deque<double>& medianSet () const;
     
     // Update. Called also when cutoff offset has changed
@@ -277,6 +279,7 @@ private:
     
     mutable svl::stats<int64_t> m_3d_stats;
     std::atomic<bool> m_3d_stats_done;
+    cv::RotatedRect m_motion_mass;
     
     std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;
     
