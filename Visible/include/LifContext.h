@@ -5,6 +5,7 @@
 #include "algo_Lif.hpp"
 #include "clipManager.hpp"
 #include "visible_layout.hpp"
+#include <atomic>
 
 #include "imGuiCustom/ImSequencer.h"
 #include "imGuiCustom/visibleSequencer.h"
@@ -147,6 +148,8 @@ private:
     void signal_frame_loaded (int& findex, double& timestamp);
     void signal_volume_var_available ();
     
+    // Availability
+    std::atomic<bool> m_volume_var_available;
 
     // Clip Processing
     int get_current_clip_index () const;

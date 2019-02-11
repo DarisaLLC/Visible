@@ -302,34 +302,33 @@ void lif_serie_processor::run_volume_variances (const int channel_index){
     cv::normalize(result, m_var_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
    
     
-#if 0
+#if 1
 
     cv::Scalar lmean, lstd;
     Mat threshold_output;
     vector<vector<cv::Point> > contours;
+    vector<cv::Point> all_contours;
     vector<Vec4i> hierarchy;
 
     cv::meanStdDev(m_var_display_image, lmean, lstd);
-    threshold(m_var_display_image, threshold_output, lmean[0], 255, THRESH_BINARY );
+    threshold(m_var_display_image, threshold_output, 10, 255, THRESH_BINARY );
     cv::findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
-    
-    /// Find the rotated rectangles and ellipses for each contour
-    vector<RotatedRect> minRect( contours.size() );
-    vector<RotatedRect> minEllipse( contours.size() );
-    
+
     for( int i = 0; i < contours.size(); i++ )
-    { minRect[i] = minAreaRect( Mat(contours[i]) );
-        if( contours[i].size() > 5 )
-        {
-            minEllipse[i] = fitEllipse( Mat(contours[i]) );
-            const RotatedRect& box = minEllipse[i];
-            auto dims = box.size;
-            float minor_dim = std::min(dims.width, dims.height);
-            float major_dim = std::max(dims.width, dims.height);
-            std::cout << minor_dim << "  "  << major_dim << " angle: " << box.angle << std::endl;
-            
-        }
+    {
+        const vector<cv::Point>& cc = contours[i];
+        for (const cv::Point& point : cc)
+            all_contours.push_back(point);
     }
+    RotatedRect box = fitEllipse(all_contours);
+    m_motion_mass = box;
+    
+    auto dims = box.size;
+    float minor_dim = std::min(dims.width, dims.height);
+    float major_dim = std::max(dims.width, dims.height);
+    std::cout << "Center @ " << box.center.x << "," << box.center.y << "   ";
+    std::cout << minor_dim << "  "  << major_dim << " angle: " << box.angle << std::endl;
+    
 #endif
     
     // Signal to listeners
@@ -424,6 +423,9 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_serie_processor::run_pci (con
 
 
 const std::vector<Rectf>& lif_serie_processor::rois () const { return m_rois; }
+
+
+const cv::RotatedRect& lif_serie_processor::motion_surface() const { return m_motion_mass; }
 
 // Update. Called also when cutoff offset has changed
 void lif_serie_processor::update ()
