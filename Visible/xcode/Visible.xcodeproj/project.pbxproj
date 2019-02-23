@@ -40,11 +40,6 @@
 		C21FFE731CFE0E1D00C97013 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
 		C2239AB4218B6270007558AB /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
 		C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
-		C22F1DEA21790CD400E9A35B /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C203D2F121714B7500B6B4A8 /* libavutil.a */; };
-		C22F1DEB21790CD700E9A35B /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C203D2EF21714B5F00B6B4A8 /* libavformat.a */; };
-		C22F1DEC21790CDA00E9A35B /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C203D2ED21714B4700B6B4A8 /* libavcodec.a */; };
-		C22F1DED21790CDD00E9A35B /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C203D2EB21714B0F00B6B4A8 /* libswscale.a */; };
-		C22F1DEE21790CFC00E9A35B /* libdc1394.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C203D2E421714A4600B6B4A8 /* libdc1394.a */; };
 		C2398A0921DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
 		C2398A0A21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
 		C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
@@ -150,10 +145,6 @@
 		C242CCC5217E76D8004F7867 /* contraction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction.cpp */; };
 		C248DD2C1F64601A00FF72B1 /* TimeSeriesPlotUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* TimeSeriesPlotUtils.cpp */; };
 		C24C0958214B2F4D004C8002 /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */; };
-		C24CD87F1CEA5B1B0008C72B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
-		C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
-		C24CD8891CEA916E0008C72B /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8841CEA916E0008C72B /* libboost_filesystem.a */; };
-		C24CD88A1CEA916E0008C72B /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8851CEA916E0008C72B /* libboost_system.a */; };
 		C24CD8AA1CEB840C0008C72B /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784AF0FF439BC000DE1D7 /* Accelerate.framework */; };
 		C24CD8AB1CEB840C0008C72B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */; };
 		C24CD8AC1CEB840C0008C72B /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B10FF439BC000DE1D7 /* AudioUnit.framework */; };
@@ -341,6 +332,12 @@
 		C29DB077212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
 		C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611E1F66EA910069F665 /* PlistDate.cpp */; };
 		C2A5DBAD207A003F001C6608 /* Plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611B1F66E95B0069F665 /* Plist.cpp */; };
+		C2AABC1C2221D88E00339675 /* kalman_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AABC1A2221D88E00339675 /* kalman_test.cpp */; };
+		C2AABC202221F89A00339675 /* libavutil.56.22.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC1F2221F89A00339675 /* libavutil.56.22.100.dylib */; };
+		C2AABC222221F8F500339675 /* libavformat.58.20.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC212221F8F500339675 /* libavformat.58.20.100.dylib */; };
+		C2AABC242221F92100339675 /* libavcodec.58.35.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC232221F92000339675 /* libavcodec.58.35.100.dylib */; };
+		C2AABC262221F94F00339675 /* libdc1394.22.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC252221F94F00339675 /* libdc1394.22.dylib */; };
+		C2AABC2A2221F9E000339675 /* libswscale.5.3.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC292221F9E000339675 /* libswscale.5.3.100.dylib */; };
 		C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
 		C2AFCEFE216E79590080462D /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
 		C2AFCEFF216E79590080462D /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
@@ -793,6 +790,14 @@
 		C2820F3721754C3100DFA7A6 /* imGuiLogger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = imGuiLogger.hpp; path = ../include/imGuiLogger.hpp; sourceTree = "<group>"; };
 		C294B11F2152D22C00C916B1 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		C29DB075212B351200930CBD /* algo_Lif.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = algo_Lif.cpp; path = ../src/algo_Lif.cpp; sourceTree = "<group>"; };
+		C2AABC1A2221D88E00339675 /* kalman_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = kalman_test.cpp; sourceTree = "<group>"; };
+		C2AABC1E2221E82200339675 /* gtest.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = gtest.xcconfig; path = configs/gtest.xcconfig; sourceTree = "<group>"; };
+		C2AABC1F2221F89A00339675 /* libavutil.56.22.100.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavutil.56.22.100.dylib; path = ../../../../../../usr/local/Cellar/ffmpeg/4.1_1/lib/libavutil.56.22.100.dylib; sourceTree = "<group>"; };
+		C2AABC212221F8F500339675 /* libavformat.58.20.100.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavformat.58.20.100.dylib; path = ../../../../../../usr/local/Cellar/ffmpeg/4.1_1/lib/libavformat.58.20.100.dylib; sourceTree = "<group>"; };
+		C2AABC232221F92000339675 /* libavcodec.58.35.100.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavcodec.58.35.100.dylib; path = ../../../../../../usr/local/Cellar/ffmpeg/4.1_1/lib/libavcodec.58.35.100.dylib; sourceTree = "<group>"; };
+		C2AABC252221F94F00339675 /* libdc1394.22.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libdc1394.22.dylib; path = ../../../../../../usr/local/Cellar/libdc1394/2.2.2_1/lib/libdc1394.22.dylib; sourceTree = "<group>"; };
+		C2AABC272221F97F00339675 /* libavresample.4.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavresample.4.0.0.dylib; path = ../../../../../../usr/local/Cellar/ffmpeg/4.1_1/lib/libavresample.4.0.0.dylib; sourceTree = "<group>"; };
+		C2AABC292221F9E000339675 /* libswscale.5.3.100.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswscale.5.3.100.dylib; path = ../../../../../../usr/local/Cellar/ffmpeg/4.1_1/lib/libswscale.5.3.100.dylib; sourceTree = "<group>"; };
 		C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "cp-visible-debug.xcconfig"; path = "configs/cp-visible-debug.xcconfig"; sourceTree = "<group>"; };
 		C2AFCEFA216E79570080462D /* imgui_widgets.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_widgets.cpp; path = "../../externals/docking-imgui/imgui/imgui_widgets.cpp"; sourceTree = "<group>"; };
 		C2AFCEFB216E79580080462D /* imgui_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_draw.cpp; path = "../../externals/docking-imgui/imgui/imgui_draw.cpp"; sourceTree = "<group>"; };
@@ -884,11 +889,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C22F1DEA21790CD400E9A35B /* libavutil.a in Frameworks */,
-				C22F1DEB21790CD700E9A35B /* libavformat.a in Frameworks */,
-				C22F1DEC21790CDA00E9A35B /* libavcodec.a in Frameworks */,
-				C22F1DED21790CDD00E9A35B /* libswscale.a in Frameworks */,
-				C22F1DEE21790CFC00E9A35B /* libdc1394.a in Frameworks */,
+				C2AABC2A2221F9E000339675 /* libswscale.5.3.100.dylib in Frameworks */,
+				C2AABC262221F94F00339675 /* libdc1394.22.dylib in Frameworks */,
+				C2AABC242221F92100339675 /* libavcodec.58.35.100.dylib in Frameworks */,
+				C2AABC222221F8F500339675 /* libavformat.58.20.100.dylib in Frameworks */,
+				C2AABC202221F89A00339675 /* libavutil.56.22.100.dylib in Frameworks */,
 				C21FFE731CFE0E1D00C97013 /* OpenCL.framework in Frameworks */,
 				C24CD8AA1CEB840C0008C72B /* Accelerate.framework in Frameworks */,
 				C24CD8AB1CEB840C0008C72B /* AudioToolbox.framework in Frameworks */,
@@ -907,9 +912,6 @@
 				C24CD8B91CEB841E0008C72B /* CoreMedia.framework in Frameworks */,
 				C2E0EE631F7B079600D32697 /* libgtest_main.a in Frameworks */,
 				C2E0EE621F7B079300D32697 /* libgtest.a in Frameworks */,
-				C24CD8881CEA916E0008C72B /* libboost_date_time.a in Frameworks */,
-				C24CD8891CEA916E0008C72B /* libboost_filesystem.a in Frameworks */,
-				C24CD88A1CEA916E0008C72B /* libboost_system.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1063,6 +1065,12 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C2AABC292221F9E000339675 /* libswscale.5.3.100.dylib */,
+				C2AABC272221F97F00339675 /* libavresample.4.0.0.dylib */,
+				C2AABC252221F94F00339675 /* libdc1394.22.dylib */,
+				C2AABC232221F92000339675 /* libavcodec.58.35.100.dylib */,
+				C2AABC212221F8F500339675 /* libavformat.58.20.100.dylib */,
+				C2AABC1F2221F89A00339675 /* libavutil.56.22.100.dylib */,
 				C2D23FCA219B9B3E00F4A49E /* libboost_thread-mt.a */,
 				C2820F2E217528CF00DFA7A6 /* libconfig++.a */,
 				C2820F272175249F00DFA7A6 /* libconfig.a */,
@@ -1153,6 +1161,7 @@
 				C276EC841C72988200242CDB /* cp-visible_release.xcconfig */,
 				C210F148215AA720002A82A3 /* macos.xcconfig */,
 				C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */,
+				C2AABC1E2221E82200339675 /* gtest.xcconfig */,
 			);
 			name = "\U0004xconfs";
 			sourceTree = "<group>";
@@ -1263,6 +1272,7 @@
 		C24CD87D1CEA5B1B0008C72B /* VisibleGtest */ = {
 			isa = PBXGroup;
 			children = (
+				C2AABC1A2221D88E00339675 /* kalman_test.cpp */,
 				C242CCC6217E93FC004F7867 /* ut_cardio.hpp */,
 				C242CCC4217BD30A004F7867 /* ut_units.hpp */,
 				C2BB4DED21384F970002AECE /* ut_localvar.hpp */,
@@ -2097,7 +2107,6 @@
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,
 				C2618F86217FDA9900FA9F43 /* window.cc in Sources */,
 				C20D4DE72208BD34004D9405 /* ellipse_fit.cpp in Sources */,
-				C24CD87F1CEA5B1B0008C72B /* main.cpp in Sources */,
 				C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */,
 				C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */,
 				C2618F87217FDA9E00FA9F43 /* figure.cc in Sources */,
@@ -2105,6 +2114,7 @@
 				C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */,
 				C2398A1821DE980C00B180A0 /* imgui_widgets.cpp in Sources */,
+				C2AABC1C2221D88E00339675 /* kalman_test.cpp in Sources */,
 				C20EDBB61CEFC2D20074C47A /* registration.cpp in Sources */,
 				C2398A1521DE980C00B180A0 /* CinderImGui.cpp in Sources */,
 				C2398A1721DE980C00B180A0 /* imgui_draw.cpp in Sources */,
@@ -2541,7 +2551,7 @@
 		};
 		C24CD8801CEA5B1B0008C72B /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
+			baseConfigurationReference = C2AABC1E2221E82200339675 /* gtest.xcconfig */;
 			buildSettings = {
 				ASSETS_DATA = "$(SRCROOT)/Assets/checker";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -2581,14 +2591,8 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS = (
-					"/usr/local/opencv-3.4.3/build/lib/Release",
-					"$(LOCAL_BOOST)/lib",
-					"$(LOCAL_gtest)/lib/Debug",
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
-					"$(PROJECT_DIR)",
-					/usr/local/Cellar/tbb/2018_U5/lib,
-					"/usr/local/opencv-3.4.3/build/3rdparty/lib/Release",
-					/usr/local/Cellar/ffmpeg/4.0.2/lib,
+					"$(inherited)",
+					/usr/local/Cellar/ffmpeg/4.1_1/lib,
 					/usr/local/Cellar/libdc1394/2.2.2_1/lib,
 				);
 				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
@@ -2596,30 +2600,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_highgui.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_features2d.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_video.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videoio.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_objdetect.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videostab.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a",
-					"$(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libittnotify.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibpng.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libIlmImf.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibwebp.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjpeg-turbo.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libzlib.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjasper.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a",
-					"$(LOCAL_BOOST)/lib/libboost_regex-mt.a",
-				);
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
@@ -2629,7 +2610,7 @@
 		};
 		C24CD8811CEA5B1B0008C72B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */;
+			baseConfigurationReference = C2AABC1E2221E82200339675 /* gtest.xcconfig */;
 			buildSettings = {
 				ASSETS_DATA = "$(SRCROOT)/Assets/checker";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -2663,15 +2644,8 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS = (
-					"/usr/local/opencv-3.4.3/build/lib/Release",
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
-					"$(LOCAL_BOOST)/lib",
-					"$(LOCAL_gtest)/lib/Debug",
-					"$(PROJECT_DIR)",
-					/usr/local/lib,
-					/usr/local/Cellar/tbb/2018_U5/lib,
-					"/usr/local/opencv-3.4.3/build/3rdparty/lib/Release",
-					/usr/local/Cellar/ffmpeg/4.0.2/lib,
+					"$(inherited)",
+					/usr/local/Cellar/ffmpeg/4.1_1/lib,
 					/usr/local/Cellar/libdc1394/2.2.2_1/lib,
 				);
 				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
@@ -2679,30 +2653,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(LOCAL_BOOST)/lib/libboost_regex-mt.a",
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_highgui.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_features2d.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_video.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videoio.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_objdetect.a",
-					"$(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videostab.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a",
-					"$(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libittnotify.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibpng.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libIlmImf.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibwebp.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjpeg-turbo.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libzlib.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjasper.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a",
-					"$(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a",
-				);
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;

@@ -1,0 +1,14 @@
+//
+//  gtest.xcconfig
+//  VisibleGtest
+//
+//  Created by arman on 2/23/19.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+#include "cp-visible-debug.xcconfig"
+
+LOCAL_GTEST = $(LOCAL_3rdParty)/gtest
+LIBRARY_SEARCH_PATHS = $(LIBRARY_SEARCH_PATHS) $(LOCAL_GTEST)/lib/$(CONFIGURATION)
+
