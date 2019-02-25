@@ -30,6 +30,8 @@
 // Vector
 #include <vector>
 
+#include <thread>
+
 using namespace std;
 
 // >>>>> Color to be tracked
@@ -41,7 +43,7 @@ using namespace std;
 int main ()
 {
     // Camera frame
-    cv::Mat frame;
+//    cv::Mat frame;
     
     // >>>> Kalman Filter
     int stateSize = 6;
@@ -96,21 +98,17 @@ int main ()
     cv::setIdentity(kf.measurementNoiseCov, cv::Scalar(1e-1));
     // <<<< Kalman Filter
     
-    // Camera Index
-    int idx = 0;
+    cv::Point origin (512, 384);
+    cv::Point position[2];
+    int radius = 15.f;
+    float freq = 1.0f;
     
-    // Camera Capture
-    cv::VideoCapture cap;
+    cv::Mat frame (768, 1024, CV_8UC3);
+    cv::Scalar bc (128,128,128);
+    cv::Scalar ball (230,10,10);
     
-    // >>>>> Camera Settings
-    if (!cap.open(idx))
-    {
-        cout << "Webcam not connected.\n" << "Please verify\n";
-        return EXIT_FAILURE;
-    }
-    
-    cap.set(CV_CAP_PROP_FRAME_WIDTH, 1024);
-    cap.set(CV_CAP_PROP_FRAME_HEIGHT, 768);
+  //  cap.set(CV_CAP_PROP_FRAME_WIDTH, 1024);
+    //cap.set(CV_CAP_PROP_FRAME_HEIGHT, 768);
     // <<<<< Camera Settings
     
     cout << "\nHit 'q' to exit...\n";
@@ -121,17 +119,26 @@ int main ()
     bool found = false;
     
     int notFoundCount = 0;
+    auto t0 = (double) cv::getTickCount();
     
     // >>>>> Main loop
+    position[0] = origin;
+    position[1] = origin;
+  
+    
     while (ch != 'q' && ch != 'Q')
     {
-        double precTick = ticks;
         ticks = (double) cv::getTickCount();
         
-        double dT = (ticks - precTick) / cv::getTickFrequency(); //seconds
+        double dT = (ticks - t0) / cv::getTickFrequency(); //seconds
         
         // Frame acquisition
-        cap >> frame;
+        std::this_thread::sleep_for(chrono::milliseconds(170));
+          frame.setTo(bc);
+        
+        cv::circle(frame, position[0], radius, ball, -1);
+        position[0].x = origin.x + 150 * sin(6.28 * freq * dT);
+
         
         cv::Mat res;
         frame.copyTo( res );
