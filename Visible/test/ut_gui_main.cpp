@@ -168,14 +168,14 @@ public:
         
         
         ntrack.first = " Length ";
-        timed_double_vec_t& data = ntrack.second;
+       timedVecOfVals_t& data = ntrack.second;
         data.resize(acid.size());
         for (int tt = 0; tt < acid.size(); tt++){
             data[tt].second = acid[tt];
             data[tt].first.first = tt;
             data[tt].first.second = time_spec_t(tt / 1000.0);
         }
-        m_tracks_ref = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
+        m_tracks_ref = std::make_shared<vecOfNamedTrack_t> ();
         m_tracks_ref->push_back(ntrack);
         
         duration_time_t duration;
@@ -380,8 +380,8 @@ public:
     
 private:
     ci::gl::TextureRef    mNoLoop, mLoop;
-    namedTrackOfdouble_t ntrack;
-    std::shared_ptr<vectorOfnamedTrackOfdouble_t> m_tracks_ref;
+    namedTrack ntrack;
+    std::shared_ptr<vecOfNamedTrack_t> m_tracks_ref;
     timeLineSequence mySequence;
     int mFrameMin, mFrameMax;
     

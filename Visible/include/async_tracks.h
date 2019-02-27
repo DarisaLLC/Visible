@@ -27,37 +27,48 @@
 
 typedef std::vector<index_time_t>  index_time_vec_t; // vector of pair of [ index, time_spec ]
 
-// track of timed result type of double
-typedef std::pair<index_time_t, double> timed_double_t;  // Timed value
-typedef std::vector<timed_double_t>  timed_double_vec_t;  // Vector of timed value
-typedef std::pair<std::string, timed_double_vec_t> namedTrackOfdouble_t; // pair [ name, vector of timed values ]
-typedef std::vector<namedTrackOfdouble_t>  vectorOfnamedTrackOfdouble_t; // vector of pairs of  [ name, vector of timed values ]
-typedef std::vector<vectorOfnamedTrackOfdouble_t>  vectorOfVectorOfnamedTrackOfdouble_t;
+// Timed value
+template<class T>
+using timed_t = std::pair<index_time_t, T>;
 
+// Vector of timed value
+template<class T>
+using timed_vec_t = std::vector<timed_t<T>>;
+
+// pair [ name, vector of timed values ]
+template<class T>
+using track_t = std::pair<std::string, timed_vec_t<T>>;
+
+template<class T>
+using tracks_vec_t = std::vector<track_t<T>>;
+
+template<class T>
+using tracks_array_t = std::vector<tracks_vec_t<T>>;
 
 // track of timed result type of float
-typedef std::pair<index_time_t, float> timed_float_t;
-typedef std::vector<timed_float_t>  timed_float_vec_t;
-typedef std::pair<std::string, timed_float_vec_t> namedTrackOffloat_t;
-typedef std::vector<namedTrackOffloat_t>  vectorOfnamedTrackOffloat_t;
-typedef std::vector<vectorOfnamedTrackOffloat_t>  vectorOfVectorOfnamedTrackOffloat_t;
+typedef timed_t<float> timedVal_t;  // Timed value
+typedef timed_vec_t<float> timedVecOfVals_t;  // Vector of timed value
+typedef track_t<float> namedTrack; // pair [ name, vector of timed values ]
+typedef tracks_vec_t<float>  vecOfNamedTrack_t; // vector of pairs of  [ name, vector of timed values ]
+typedef tracks_array_t<float>  arrayOfNamedTracks_t;
+
 
 // track of timed result type of cv::Mat
 typedef std::pair<index_time_t, cv::Mat> timed_mat_t;
 typedef std::vector<timed_mat_t>  timed_mat_vec_t;
 typedef std::pair<std::string, timed_mat_vec_t> namedTrackOfmat_t;
-typedef std::vector<namedTrackOfmat_t>  vectorOfnamedTrackOfmat_t;
-typedef std::vector<vectorOfnamedTrackOfmat_t>  vectorOfVectorOfnamedTrackOfmat_t;
+typedef std::vector<namedTrackOfmat_t>  vecOfNamedTrack_tOfmat_t;
+typedef std::vector<vecOfNamedTrack_tOfmat_t>  arrayOfNamedTracks_tOfmat_t;
 
 
 /*
- namedTrackOfdouble_t : first name, second a vector of pair: timed_double_t (index_t, double)
+ namedTrack : first name, second a vector of pair: timedVal_t (index_t, double)
  index_t is int64_t and time_spec_t
  */
 template<typename T>
-void domainFromPairedTracks_D (const namedTrackOfdouble_t& src, std::vector<T>& times, std::vector<T>& values){
+void domainFromPairedTracks_D (const namedTrack& src, std::vector<T>& times, std::vector<T>& values){
     
-    const timed_double_vec_t& data = src.second;
+    const timedVecOfVals_t& data = src.second;
     
     const auto get_second = [](auto const& pair) -> auto const& { return pair.second; };
     
@@ -91,10 +102,7 @@ void domainFromPairedTracks_D (const namedTrackOfdouble_t& src, std::vector<T>& 
 // template<typename R>
 // bool is_ready(std::future<R> const& f)
 
-typedef std::future<std::shared_ptr<std::vector<namedTrackOfdouble_t>>> async_vectorOfnamedTrackOfdouble_t;
-typedef std::future<std::shared_ptr<std::vector<namedTrackOffloat_t>>> async_vectorOfnamedTrackOffloat_t;
-
-typedef std::future<std::shared_ptr<std::vector<namedTrackOfmat_t>>> async_vectorOfnamedTrackOfmat_t;
+typedef std::future<std::shared_ptr<std::vector<namedTrack>>> async_vecOfNamedTrack_t;
 
 template<typename R>
 bool is_ready(std::future<R> const& f)

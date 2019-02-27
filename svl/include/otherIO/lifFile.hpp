@@ -123,13 +123,14 @@ namespace lifIO
         std::streampos tellg(){return fileRef->tellg();}
         unsigned long long getOffset(size_t t=0) const;
         const ContentType_t& content_type() const { return m_content_type; }
+        void set_content_type(ContentType_t ct) const { m_content_type = ct; }
         
     private:
         unsigned long long offset;
         unsigned long long memorySize;
         std::shared_ptr<std::ifstream> fileRef;
         std::streampos fileSize;
-        ContentType_t m_content_type;
+        mutable ContentType_t m_content_type;
         
     };
     

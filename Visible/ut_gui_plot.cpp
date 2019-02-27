@@ -102,7 +102,7 @@ public:
         run_cardiac();
         
         ntrack.first = " Length ";
-        timed_double_vec_t& data = ntrack.second;
+       timedVecOfVals_t& data = ntrack.second;
         data.resize(acid.size());
         for (int tt = 0; tt < acid.size(); tt++){
             data[tt].second = acid[tt];
@@ -114,7 +114,7 @@ public:
         
         
         ntrack.first = " First Derivative ";
-        timed_double_vec_t& ddata = ntrack.second;
+       timedVecOfVals_t& ddata = ntrack.second;
         ddata.resize(fder2.size());
         for (int tt = 0; tt < fder2.size(); tt++){
             ddata[tt].second = fder2[tt];
@@ -154,8 +154,8 @@ public:
     
 private:
     
-    namedTrackOfdouble_t ntrack;
-    vectorOfnamedTrackOfdouble_t tracks, diffs_;
+    namedTrack ntrack;
+    vecOfNamedTrack_t tracks, diffs_;
     bool closed = false;
     bool showLog = false;
     bool showHelp = false;
@@ -213,7 +213,7 @@ private:
         
     }
     
-    void imGuiPlotLineTracks (const char* label, ImVec2 canvasSize,const vectorOfnamedTrackOfdouble_t& tracks){
+    void imGuiPlotLineTracks (const char* label, ImVec2 canvasSize,const vecOfNamedTrack_t& tracks){
         static std::vector<ImColor> palette = {
             ImColor{ 218, 124, 48 },
             ImColor{ 62, 150, 81 },
