@@ -32,41 +32,41 @@ template<class T>
 using timed_t = std::pair<index_time_t, T>;
 
 // Vector of timed value
-template<class T>
-using timed_vec_t = std::vector<timed_t<T>>;
+template<class T, template<typename ELEM, typename ALLOC = std::allocator<ELEM>> class CONT = std::vector >
+using timed_vec_t = CONT<timed_t<T>>;
 
 // pair [ name, vector of timed values ]
 template<class T>
 using track_t = std::pair<std::string, timed_vec_t<T>>;
 
-template<class T>
-using tracks_vec_t = std::vector<track_t<T>>;
+template<class T,template<typename ELEM, typename ALLOC = std::allocator<ELEM>> class CONT = std::vector >
+using tracks_vec_t = CONT<track_t<T>>;
 
-template<class T>
-using tracks_array_t = std::vector<tracks_vec_t<T>>;
+template<class T, template<typename ELEM, typename ALLOC = std::allocator<ELEM>> class CONT = std::vector >
+using tracks_array_t = CONT<tracks_vec_t<T>>;
 
 // track of timed result type of float
 typedef timed_t<float> timedVal_t;  // Timed value
 typedef timed_vec_t<float> timedVecOfVals_t;  // Vector of timed value
-typedef track_t<float> namedTrack; // pair [ name, vector of timed values ]
+typedef track_t<float> namedTrack_t; // pair [ name, vector of timed values ]
 typedef tracks_vec_t<float>  vecOfNamedTrack_t; // vector of pairs of  [ name, vector of timed values ]
 typedef tracks_array_t<float>  arrayOfNamedTracks_t;
 
-
-// track of timed result type of cv::Mat
-typedef std::pair<index_time_t, cv::Mat> timed_mat_t;
-typedef std::vector<timed_mat_t>  timed_mat_vec_t;
-typedef std::pair<std::string, timed_mat_vec_t> namedTrackOfmat_t;
-typedef std::vector<namedTrackOfmat_t>  vecOfNamedTrack_tOfmat_t;
-typedef std::vector<vecOfNamedTrack_tOfmat_t>  arrayOfNamedTracks_tOfmat_t;
+//
+//// track of timed result type of cv::Mat
+//typedef std::pair<index_time_t, cv::Mat> timed_mat_t;
+//typedef std::vector<timed_mat_t>  timed_mat_vec_t;
+//typedef std::pair<std::string, timed_mat_vec_t> namedTrack_Ofmat_t;
+//typedef std::vector<namedTrack_Ofmat_t>  vecOfNamedTrack_Ofmat_t;
+//typedef std::vector<vecOfNamedTrack_Ofmat_t>  arrayOfNamedTracks_Ofmat_t;
 
 
 /*
- namedTrack : first name, second a vector of pair: timedVal_t (index_t, double)
+ namedTrack_t : first name, second a vector of pair: timedVal_t (index_t, double)
  index_t is int64_t and time_spec_t
  */
 template<typename T>
-void domainFromPairedTracks_D (const namedTrack& src, std::vector<T>& times, std::vector<T>& values){
+void domainFromPairedTracks_D (const namedTrack_t& src, std::vector<T>& times, std::vector<T>& values){
     
     const timedVecOfVals_t& data = src.second;
     
@@ -102,7 +102,7 @@ void domainFromPairedTracks_D (const namedTrack& src, std::vector<T>& times, std
 // template<typename R>
 // bool is_ready(std::future<R> const& f)
 
-typedef std::future<std::shared_ptr<std::vector<namedTrack>>> async_vecOfNamedTrack_t;
+typedef std::future<std::shared_ptr<std::vector<namedTrack_t>>> async_vecOfNamedTrack_t;
 
 template<typename R>
 bool is_ready(std::future<R> const& f)

@@ -180,7 +180,7 @@ private:
 };
 
 
-
+#ifdef NOT_YET
 struct fbFlowRunner
 {
     typedef std::vector<roiWindow<P8U>> channel_images_t;
@@ -230,6 +230,7 @@ struct fbFlowRunner
     
 
 };
+#endif
 
 
 

@@ -85,7 +85,7 @@ public:
     }
     
     // load the data and bind a function to access it
-    void load (const namedTrack& track)
+    void load (const namedTrack_t& track)
     {
         try
         {
