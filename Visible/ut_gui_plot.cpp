@@ -154,7 +154,7 @@ public:
     
 private:
     
-    namedTrack ntrack;
+    namedTrack_t ntrack;
     vecOfNamedTrack_t tracks, diffs_;
     bool closed = false;
     bool showLog = false;

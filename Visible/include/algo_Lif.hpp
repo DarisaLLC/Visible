@@ -268,7 +268,7 @@ private:
     
     
     // Note tracks contained timed data.
-    void entropiesToTracks (namedTrack& track);
+    void entropiesToTracks (namedTrack_t& track);
     
     // @note Specific to ID Lab Lif Files
     void create_named_tracks (const std::vector<std::string>& names);

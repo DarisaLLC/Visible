@@ -40,12 +40,12 @@ public:
     }
 
     // If at_index is -1, push_back, else if index is valid, load data at that index
-    int load (const namedTrackOfdouble_t& track, unsigned int color, int at_index)
+    int load (const namedTrack_t& track, unsigned int color, int at_index)
     {
         
-        const timed_double_vec_t& ds = track.second;
+        const timedVecOfVals_t& ds = track.second;
         std::vector<float> mBuffer;
-        std::vector<timed_double_t>::const_iterator reader = ds.begin ();
+        timedVecOfVals_t::const_iterator reader = ds.begin();
         while (reader++ != ds.end())mBuffer.push_back (reader->second);
         svl::norm_min_max (mBuffer.begin(), mBuffer.end(), true);
         

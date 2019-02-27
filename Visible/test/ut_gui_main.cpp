@@ -380,7 +380,7 @@ public:
     
 private:
     ci::gl::TextureRef    mNoLoop, mLoop;
-    namedTrack ntrack;
+    namedTrack_t ntrack;
     std::shared_ptr<vecOfNamedTrack_t> m_tracks_ref;
     timeLineSequence mySequence;
     int mFrameMin, mFrameMax;

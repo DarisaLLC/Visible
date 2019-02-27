@@ -342,7 +342,7 @@ TEST(SimpleGUITest, basic)
 TEST(tracks, basic){
     
     // Generate test data
-    namedTrack ntrack;
+    namedTrack_t ntrack;
    timedVecOfVals_t& data = ntrack.second;
     data.resize(acid.size());
     for (int tt = 0; tt < acid.size(); tt++){

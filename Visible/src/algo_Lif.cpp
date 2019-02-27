@@ -501,7 +501,7 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
 
 // Note tracks contained timed data.
 // Each call to find_best can be with different median cut-off
-void lif_serie_processor::entropiesToTracks (namedTrack& track)
+void lif_serie_processor::entropiesToTracks (namedTrack_t& track)
 {
   //  std::lock_guard<std::mutex> lock(m_mutex);
     
