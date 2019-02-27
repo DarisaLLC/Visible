@@ -523,7 +523,7 @@ void movContext::resize ()
 void movContext::update ()
 {
     if (! have_movie () ) return;
-    mContainer.update();
+//    mContainer.update();
     vl.update_window_size(getWindowSize ());
  
 #if 0

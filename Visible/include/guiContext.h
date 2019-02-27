@@ -242,7 +242,6 @@ protected:
 	vec2				mSize;
 	Font				mFont;
 	std::string			mLog;
-	rph::DisplayObjectContainer mContainer;
 	index_time_t    mCurrentIndexTime;
 	
 	
