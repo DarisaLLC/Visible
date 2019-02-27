@@ -146,6 +146,9 @@ private:
     bool showOverlay = false;
     
     imGuiLog app_log;
+    
+  
+    
 };
 
 class VisibleRunApp : public App, public gui_base

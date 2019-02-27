@@ -1167,6 +1167,10 @@ void lifContext::update ()
 {
     ci::app::WindowRef ww = get_windowRef();
     
+    std::vector<float> test = {0.0,0.1,0.2,1.0,0.2,0.1,0.0};
+    m_tsPlotter.update(test);
+    
+    
     ww->getRenderer()->makeCurrentContext(true);
     if (! have_lif_serie() ) return;
     auto ws = ww->getSize();
@@ -1268,8 +1272,13 @@ void lifContext::draw_info ()
     auto ww = get_windowRef();
     auto ws = ww->getSize();
     gl::setMatricesWindow( ws );
+
+    m_tsPlotter.drawAll(get_image_display_rect());
     
+   
     gl::ScopedBlendAlpha blend_;
+    
+
     
     {
         gl::ScopedColor (getManualEditMode() ? ColorA( 0.25f, 0.5f, 1, 1 ) : ColorA::gray(1.0));
@@ -1325,6 +1334,7 @@ void lifContext::draw ()
                 break;
         }
         
+    
         
         if (isEditing() && mCellEnds.size() == 2)
         {
