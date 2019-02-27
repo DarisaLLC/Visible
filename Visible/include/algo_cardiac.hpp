@@ -18,16 +18,16 @@ using namespace stl_utils;
 struct IntensityStatisticsRunner
 {
     typedef std::vector<roiWindow<P8U>> channel_images_t;
-    void operator()(channel_images_t& channel, timed_double_vec_t& results)
+    void operator()(channel_images_t& channel,timedVecOfVals_t& results)
     {
         results.clear();
         for (auto ii = 0; ii < channel.size(); ii++)
         {
-            timed_double_t res;
+            timedVal_t res;
             index_time_t ti;
             ti.first = ii;
             res.first = ti;
-            res.second = histoStats::mean(channel[ii]) / 256.0;
+            res.second = static_cast<float>(histoStats::mean(channel[ii]) / 256.0);
             results.emplace_back(res);
         }
     }
@@ -127,7 +127,7 @@ public:
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     void operator()(const std::string& dir_fqfn, channel_images_t& channel)
     {
-        m_fqfn = std::move(dir_fqfn);
+        m_fqfn = dir_fqfn;
         m_valid = boost::filesystem::exists( m_fqfn );
         m_valid = m_valid && boost::filesystem::is_directory( m_fqfn );
         if(!m_valid){

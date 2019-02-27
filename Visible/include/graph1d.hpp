@@ -85,13 +85,13 @@ public:
     }
     
     // load the data and bind a function to access it
-    void load (const namedTrackOfdouble_t& track)
+    void load (const namedTrack& track)
     {
         try
         {
-            const timed_double_vec_t& ds = track.second;
+            const auto& ds = track.second;
             mBuffer.clear ();
-            std::vector<timed_double_t>::const_iterator reader = ds.begin ();
+            std::vector<timedVal_t>::const_iterator reader = ds.begin ();
             while (reader++ != ds.end())mBuffer.push_back (reader->second);
             
             mRawBuffer = mBuffer;

@@ -215,12 +215,12 @@ protected:
 	std::vector<graph1d::ref> m_plots;
 	std::mutex m_track_mutex;
 	
-	vectorOfVectorOfnamedTrackOfdouble_t m_luminance_tracks;
-	async_vectorOfnamedTrackOfdouble_t m_async_luminance_tracks;
-	vectorOfVectorOfnamedTrackOfmat_t m_oflow_tracks;
-	async_vectorOfnamedTrackOfmat_t m_async_oflow_tracks;
-	vectorOfVectorOfnamedTrackOfdouble_t m_pci_tracks;
-	async_vectorOfnamedTrackOfdouble_t m_async_pci_tracks;
+	arrayOfNamedTracks_t m_luminance_tracks;
+	async_vecOfNamedTrack_t m_async_luminance_tracks;
+	arrayOfNamedTracks_tOfmat_t m_oflow_tracks;
+	//async_vecOfNamedTrack_tOfmat_t m_async_oflow_tracks;
+	arrayOfNamedTracks_t m_pci_tracks;
+	async_vecOfNamedTrack_t m_async_pci_tracks;
 	
 	
 	bool m_have_tracks;

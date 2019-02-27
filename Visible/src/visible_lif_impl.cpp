@@ -826,7 +826,7 @@ void lifContext::loadCurrentSerie ()
         
         // Initialize Sequencer
         mySequence.mFrameMin = 0;
-        mySequence.mFrameMax = (int) mFrameSet->count();
+        mySequence.mFrameMax = (int) mFrameSet->count() - 1;
         mySequence.mSequencerItemTypeNames = {"Time Line", "Length", "Force"};
         mySequence.myItems.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         

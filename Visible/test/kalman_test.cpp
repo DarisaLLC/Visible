@@ -120,6 +120,7 @@ int main ()
     
     int notFoundCount = 0;
     auto t0 = (double) cv::getTickCount();
+    double last_t = -1.0;
     
     // >>>>> Main loop
     position[0] = origin;
@@ -129,8 +130,18 @@ int main ()
     while (ch != 'q' && ch != 'Q')
     {
         ticks = (double) cv::getTickCount();
-        
+        double frame_time;
         double dT = (ticks - t0) / cv::getTickFrequency(); //seconds
+        if (last_t < 0) {
+            last_t = dT;
+            frame_time = dT;
+        }
+        else{
+            frame_time = dT - last_t;
+            last_t = dT;
+        }
+        
+        cout << "dt:" << endl << frame_time << endl;
         
         // Frame acquisition
         std::this_thread::sleep_for(chrono::milliseconds(170));
@@ -257,7 +268,6 @@ int main ()
         else
         {
             notFoundCount = 0;
-            
             meas.at<float>(0) = ballsBox[0].x + ballsBox[0].width / 2;
             meas.at<float>(1) = ballsBox[0].y + ballsBox[0].height / 2;
             meas.at<float>(2) = (float)ballsBox[0].width;

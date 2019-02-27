@@ -26,7 +26,7 @@ struct algo_func_t {
 // Derived representing a callback with its associated argument(s)
 template<typename ...A>
 struct algo_cb_t : public algo_func_t {
-    using cb = std::function<timed_double_t(A...)>;
+    using cb = std::function<timedVal_t(A...)>;
     cb callback;
     algo_cb_t(cb p_callback) : callback(p_callback) {}
 };

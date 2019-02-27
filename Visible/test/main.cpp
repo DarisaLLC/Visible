@@ -342,8 +342,8 @@ TEST(SimpleGUITest, basic)
 TEST(tracks, basic){
     
     // Generate test data
-    namedTrackOfdouble_t ntrack;
-    timed_double_vec_t& data = ntrack.second;
+    namedTrack ntrack;
+   timedVecOfVals_t& data = ntrack.second;
     data.resize(acid.size());
     for (int tt = 0; tt < acid.size(); tt++){
         data[tt].second = acid[tt];

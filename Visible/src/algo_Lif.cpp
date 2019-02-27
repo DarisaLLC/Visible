@@ -226,8 +226,8 @@ lif_serie_processor::lif_serie_processor ()
 // 1 channel: visible
 void lif_serie_processor::create_named_tracks (const std::vector<std::string>& names)
 {
-    m_tracksRef = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
-    m_pci_tracksRef = std::make_shared<vectorOfnamedTrackOfdouble_t> ();
+    m_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
+    m_pci_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
     
     switch(names.size()){
         case 3:
@@ -367,19 +367,15 @@ void lif_serie_processor::stats_3d_computed(){
  * 2 flu channels. Compute stats of each using its own threaD
  */
 
-std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_serie_processor::run_flu_statistics (const std::vector<int>& channels)
+std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::run_flu_statistics (const std::vector<int>& channels)
 {
-    std::vector<timed_double_vec_t> cts (channels.size());
     std::vector<std::thread> threads(channels.size());
     for (auto tt = 0; tt < channels.size(); tt++)
     {
         threads[tt] = std::thread(IntensityStatisticsRunner(),
-                                  std::ref(m_all_by_channel[tt]), std::ref(cts[tt]));
+                                  std::ref(m_all_by_channel[tt]), std::ref(m_tracksRef->at(tt).second));
     }
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
-    
-    for (auto tt = 0; tt < channels.size(); tt++)
-        m_tracksRef->at(tt).second = cts[tt];
     
     // Call the content loaded cb if any
     if (signal_flu_available && signal_flu_available->num_slots() > 0)
@@ -390,7 +386,7 @@ std::shared_ptr<vectorOfnamedTrackOfdouble_t> lif_serie_processor::run_flu_stati
 
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled 
-std::shared_ptr<vectorOfnamedTrackOfdouble_t>  lif_serie_processor::run_pci (const int channel_index)
+std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_pci (const int channel_index)
 {
     int channel_to_use = channel_index % m_channel_count;
     channel_images_t c2 = m_all_by_channel[channel_to_use];
@@ -505,7 +501,7 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
 
 // Note tracks contained timed data.
 // Each call to find_best can be with different median cut-off
-void lif_serie_processor::entropiesToTracks (namedTrackOfdouble_t& track)
+void lif_serie_processor::entropiesToTracks (namedTrack& track)
 {
   //  std::lock_guard<std::mutex> lock(m_mutex);
     
@@ -518,11 +514,11 @@ void lif_serie_processor::entropiesToTracks (namedTrackOfdouble_t& track)
         m_medianLevel = m_caRef->leveled();
         track.second.clear();
         auto mee = m_caRef->leveled().begin();
-        for (auto ss = 0; mee != m_caRef->leveled().end() && ss < frame_count(); ss++, mee++)
+        for (auto ss = 0; mee != m_caRef->leveled().end() || ss < frame_count(); ss++, mee++)
         {
             index_time_t ti;
             ti.first = ss;
-            timed_double_t res;
+            timedVal_t res;
             track.second.emplace_back(ti,*mee);
         }
     }
@@ -559,6 +555,9 @@ const int64_t lif_serie_processor::channel_count () const
 }
 
 std::shared_ptr<OCVImageWriter>& lif_serie_processor::get_image_writer (){
+    if (! m_writer){
+        m_writer = std::make_shared<OCVImageWriter>();
+    }
     return m_writer;
 }
 
@@ -566,7 +565,9 @@ void lif_serie_processor::save_channel_images (int channel_index, std::string& d
     std::lock_guard<std::mutex> lock(m_mutex);
     int channel_to_use = channel_index % m_channel_count;
     channel_images_t c2 = m_all_by_channel[channel_to_use];
-    m_writer->operator()(dir_fqfn, c2);
+    auto writer = get_image_writer();
+    if (writer)
+        writer->operator()(dir_fqfn, c2);
     
 }
 #pragma GCC diagnostic pop

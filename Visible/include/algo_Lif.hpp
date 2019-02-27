@@ -158,6 +158,36 @@ class LifSignaler : public base_signaler
     virtual std::string getName () const { return "LifSignaler"; }
 };
 
+/*
+ 
+ Example of how to write out channel images
+ 
+ TEST (ut_lifFile, save_channel_image)
+ {
+     std::string filename ("3channels.lif");
+     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
+     EXPECT_TRUE(res.second);
+     lifIO::LifReader lif(res.first.string(), "");
+     cout << "LIF version "<<lif.getVersion() << endl;
+     EXPECT_EQ(13, lif.getNbSeries() );
+     size_t serie = 4;
+     lifIO::LifSerie& se4 = lif.getSerie(serie);
+     se4.set_content_type("IDLab_0");
+ 
+     std::vector<std::string> names { "green", "red", "gray" };
+ 
+     // Create the frameset and assign the channel names
+     // Fetch the media info
+     auto mFrameSet = seqFrameContainer::create (se4);
+     lif_serie_processor lp;
+     lp.load(mFrameSet, names);
+     std::string dir = "/Users/arman/tmp/c2";
+     lp.save_channel_images(2,dir);
+ 
+ }
+ 
+ 
+ */
 
 class lif_serie_processor : public LifSignaler
 {
@@ -192,8 +222,8 @@ public:
     int64_t load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names);
     
     // Run Luminance info on a vector of channel indices
-    async_vectorOfnamedTrackOfdouble_t get_luminance_info (const std::vector<int>& channels);
-    std::shared_ptr<vectorOfnamedTrackOfdouble_t> run_flu_statistics (const std::vector<int>& channels);
+    async_vecOfNamedTrack_t get_luminance_info (const std::vector<int>& channels);
+    std::shared_ptr<vecOfNamedTrack_t> run_flu_statistics (const std::vector<int>& channels);
     
     // Run accumulator of 3d stats on a channel at index
     svl::stats<int64_t> run_volume_sum_sumsq_count (const int channel_index);
@@ -202,7 +232,7 @@ public:
     void run_volume_variances (const int channel_index);
     
     // Run to get Entropies and Median Level Set
-    std::shared_ptr<vectorOfnamedTrackOfdouble_t> run_pci (const int channel_index);
+    std::shared_ptr<vecOfNamedTrack_t> run_pci (const int channel_index);
     
     const std::vector<Rectf>& rois () const;
     
@@ -215,7 +245,6 @@ public:
     
     std::shared_ptr<OCVImageWriter>& get_image_writer ();
     void save_channel_images (int channel_index, std::string& dir_fqfn);
-    
     
 protected:
     boost::signals2::signal<lif_serie_processor::sig_cb_content_loaded>* signal_content_loaded;
@@ -239,7 +268,7 @@ private:
     
     
     // Note tracks contained timed data.
-    void entropiesToTracks (namedTrackOfdouble_t& track);
+    void entropiesToTracks (namedTrack& track);
     
     // @note Specific to ID Lab Lif Files
     void create_named_tracks (const std::vector<std::string>& names);
@@ -273,8 +302,8 @@ private:
     // 3 channels: 2 flu one visible
     // 1 channel: visible
     // Note create_named_tracks
-    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  m_tracksRef;
-    std::shared_ptr<vectorOfnamedTrackOfdouble_t>  m_pci_tracksRef;
+    std::shared_ptr<vecOfNamedTrack_t>  m_tracksRef;
+    std::shared_ptr<vecOfNamedTrack_t>  m_pci_tracksRef;
     std::shared_ptr<contraction_analyzer> m_caRef;
     
     mutable svl::stats<int64_t> m_3d_stats;
@@ -286,6 +315,7 @@ private:
     std::shared_ptr<OCVImageWriter> m_writer;
     
 };
+
 
 
 
