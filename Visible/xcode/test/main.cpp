@@ -38,7 +38,7 @@
 #include "core/core.hpp"
 #include "contraction.hpp"
 #include "sm_producer.h"
-#include "algo_mov.hpp"
+//#include "algo_mov.hpp"
 #include "sg_filter.h"
 #include "vision/drawUtils.hpp"
 #include "ut_localvar.hpp"

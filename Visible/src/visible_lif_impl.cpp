@@ -456,29 +456,30 @@ lifContext::Side_t lifContext::getManualNextEditMode ()
 
 void lifContext::edit_no_edit_button ()
 {
-    if (! have_lif_serie () ) return;
-    m_is_editing = ! m_is_editing;
-    if (! m_is_editing) return;
     
-    looping(false);
-
-    // If we are in Edit mode. Stop and Go to the end as detected
-    setManualEditMode(getManualNextEditMode());
-    const std::string& ename = mEditNames[getManualEditMode()];
-    const clip& clip = m_clips[get_current_clip_index()];
-    switch(getManualEditMode()){
-        case Side_t::minor:
-            seekToFrame(clip.first());
-            break;
-        case Side_t::major:
-            seekToFrame(clip.last());
-            break;
-        default:
-            break;
-    }
-    mUIParams.setOptions( "mode", ename);
-    if (mContainer.getNumChildren())
-        mContainer.removeChildren();
+//    if (! have_lif_serie () ) return;
+//    m_is_editing = ! m_is_editing;
+//    if (! m_is_editing) return;
+//    
+//    looping(false);
+//
+//    // If we are in Edit mode. Stop and Go to the end as detected
+//    setManualEditMode(getManualNextEditMode());
+//    const std::string& ename = mEditNames[getManualEditMode()];
+//    const clip& clip = m_clips[get_current_clip_index()];
+//    switch(getManualEditMode()){
+//        case Side_t::minor:
+//            seekToFrame(clip.first());
+//            break;
+//        case Side_t::major:
+//            seekToFrame(clip.last());
+//            break;
+//        default:
+//            break;
+//    }
+//    mUIParams.setOptions( "mode", ename);
+//    if (mContainer.getNumChildren())
+//        mContainer.removeChildren();
 }
 
 
@@ -1168,7 +1169,6 @@ void lifContext::update ()
     
     ww->getRenderer()->makeCurrentContext(true);
     if (! have_lif_serie() ) return;
-    mContainer.update();
     auto ws = ww->getSize();
     m_layout->update_window_size(ws);
     
@@ -1346,7 +1346,6 @@ void lifContext::draw ()
         }
         
 
-        mContainer.draw();
         draw_info ();
       //  mUIParams.draw();
       
