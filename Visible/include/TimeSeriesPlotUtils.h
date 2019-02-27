@@ -4,15 +4,19 @@
 #include "cinder/Vector.h"
 #include "cinder/PolyLine.h"
 #include "cinder/gl/VboMesh.h"
+#include "cinder/gl/Batch.h"
 #include <iterator>
 #include <vector>
 
+using namespace ci;
 
 class TimeSeriesPlot {
   public:
     typedef std::vector<float>::const_iterator pIter_t;
     
-    TimeSeriesPlot(const std::vector<float> &, const ci::Rectf &bounds);
+    TimeSeriesPlot();
+    
+    void update(const std::vector<float> &);
     
 	void setBounds( const ci::Rectf &bounds )	{ mBounds = bounds; }
 	const ci::Rectf& getBounds() const			{ return mBounds; }
@@ -23,8 +27,12 @@ class TimeSeriesPlot {
 	void setBorderColor( const ci::ColorA &color )	{ mBorderColor = color; }
 	const ci::ColorA& getBorderColor() const		{ return mBorderColor; }
 
-    void draw( const pIter_t& start, const pIter_t& past_last);
+    const std::vector<float>& data () const { return m_copy; }
+    
+    void draw(const ci::Rectf &bounds, const pIter_t& start, const pIter_t& past_last);
 
+    void drawAll(const ci::Rectf &bounds);
+    
   private:
     std::vector<float>      m_copy;
 	ci::Rectf				mBounds;

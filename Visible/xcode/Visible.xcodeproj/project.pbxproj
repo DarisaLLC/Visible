@@ -565,12 +565,6 @@
 		C24EA2D2207F07EF00555D16 /* sg_filter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sg_filter.cpp; path = ../src/sg_filter.cpp; sourceTree = "<group>"; };
 		C24FC84C1E5E40130071AA1A /* async_tracks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = async_tracks.h; path = ../include/async_tracks.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		C24FC84D1E5E56960071AA1A /* roiMultiWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = roiMultiWindow.h; sourceTree = "<group>"; };
-		C25261021F6611A10069F665 /* DisplayObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DisplayObject.cpp; path = ../src/rph/DisplayObject.cpp; sourceTree = "<group>"; };
-		C25261031F6611A10069F665 /* ObjectContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ObjectContainer.cpp; path = ../src/rph/ObjectContainer.cpp; sourceTree = "<group>"; };
-		C252610B1F6613320069F665 /* DisplayObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DisplayObject.h; path = ../include/DisplayObject.h; sourceTree = "<group>"; };
-		C252610C1F6613320069F665 /* DisplayObjectContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DisplayObjectContainer.h; path = ../include/DisplayObjectContainer.h; sourceTree = "<group>"; };
-		C252610E1F6613A30069F665 /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Object.h; path = ../include/Object.h; sourceTree = "<group>"; };
-		C252610F1F6613A30069F665 /* ObjectContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ObjectContainer.h; path = ../include/ObjectContainer.h; sourceTree = "<group>"; };
 		C25261191F66E8F40069F665 /* Plist.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Plist.hpp; path = ../include/Plist.hpp; sourceTree = "<group>"; };
 		C252611A1F66E8F40069F665 /* PlistDate.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PlistDate.hpp; path = ../include/PlistDate.hpp; sourceTree = "<group>"; };
 		C252611B1F66E95B0069F665 /* Plist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Plist.cpp; path = ../src/Plist.cpp; sourceTree = "<group>"; };
@@ -985,8 +979,6 @@
 				C252611E1F66EA910069F665 /* PlistDate.cpp */,
 				C252611F1F66EA910069F665 /* pugixml.cpp */,
 				C252611B1F66E95B0069F665 /* Plist.cpp */,
-				C25261021F6611A10069F665 /* DisplayObject.cpp */,
-				C25261031F6611A10069F665 /* ObjectContainer.cpp */,
 				C254BE851F4FAF5C00977307 /* OcvVideo.cpp */,
 				C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */,
 				C2B38A4F1D022D2A00C70872 /* AVReader.mm */,
@@ -1183,10 +1175,6 @@
 				C259145E214492A400F80D5F /* logger.hpp */,
 				C25261191F66E8F40069F665 /* Plist.hpp */,
 				C252611A1F66E8F40069F665 /* PlistDate.hpp */,
-				C252610E1F6613A30069F665 /* Object.h */,
-				C252610F1F6613A30069F665 /* ObjectContainer.h */,
-				C252610B1F6613320069F665 /* DisplayObject.h */,
-				C252610C1F6613320069F665 /* DisplayObjectContainer.h */,
 				C254BE871F4FAF7100977307 /* OcvVideo.h */,
 				C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */,
 				C2B38A541D022E9D00C70872 /* AVReader.h */,
@@ -2844,21 +2832,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "VisibleRunner-Info.plist";
 				INSTALL_PATH = /Applications;
-				LIBRARY_SEARCH_PATHS = (
-					/usr/local/lib,
-					"$(LOCAL_BOOST)/lib",
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
-					/usr/local/Cellar/tbb/2018_U5/lib/,
-					"$(PROJECT_DIR)",
-					"/usr/local/opencv-3.4.3/build/3rdparty/lib/$(CONFIGURATION)",
-					"/usr/local/opencv-3.4.3/build/lib/$(CONFIGURATION)",
-					/usr/local/Cellar/libdc1394/2.2.2_1/lib,
-					/usr/local/Cellar/ffmpeg/4.0.2/lib,
-					/usr/local/Cellar/libconfig/1.7.2/lib,
-					/usr/local/Cellar/boost/1.67.0_1/lib,
-					/usr/local/Cellar/tbb/2018_U5/lib,
-					/usr/local/Cellar/ffmpeg/4.1.1/lib,
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
@@ -2907,21 +2881,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "VisibleRunner-Info.plist";
 				INSTALL_PATH = /Applications;
-				LIBRARY_SEARCH_PATHS = (
-					/usr/local/lib,
-					"$(LOCAL_BOOST)/lib",
-					"$(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)",
-					/usr/local/Cellar/tbb/2018_U5/lib/,
-					"$(PROJECT_DIR)",
-					"/usr/local/opencv-3.4.3/build/3rdparty/lib/$(CONFIGURATION)",
-					"/usr/local/opencv-3.4.3/build/lib/$(CONFIGURATION)",
-					/usr/local/Cellar/libdc1394/2.2.2_1/lib,
-					/usr/local/Cellar/ffmpeg/4.0.2/lib,
-					/usr/local/Cellar/libconfig/1.7.2/lib,
-					/usr/local/Cellar/boost/1.67.0_1/lib,
-					/usr/local/Cellar/tbb/2018_U5/lib,
-					/usr/local/Cellar/ffmpeg/4.1.1/lib,
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
