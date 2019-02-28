@@ -1,5 +1,5 @@
 
-#include "TimeSeriesPlotUtils.h"
+#include "OnImagePlotUtils.h"
 
 #include "cinder/CinderMath.h"
 #include "cinder/Triangulate.h"
@@ -12,30 +12,15 @@ using namespace ci;
 
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - TimeSeriesPlot
+// MARK: - OnImagePlot
 // ----------------------------------------------------------------------------------------------------
 
-TimeSeriesPlot::TimeSeriesPlot(): mBorderEnabled( false )
+OnImagePlot::OnImagePlot(): mBorderEnabled( false )
 {}
 
-void TimeSeriesPlot::update(const std::vector<float> & data)
-{
-    m_copy = data;
-    mBorderEnabled = true;
-    mBorderColor = ColorA( 0.5f, 0.5f, 0.5f, 1 );
-}
 
-
-void TimeSeriesPlot::drawAll(const ci::Rectf &bounds)
+void OnImagePlot::draw( const vector<float> &m_copy )
 {
-    draw(bounds, data().begin(), data().end());
-}
-
-void TimeSeriesPlot::draw( const ci::Rectf &bounds, const pIter_t& start, const pIter_t& past_last )
-{
-    mBounds = bounds;
-    if( m_copy.empty() )
-    return;
     
     gl::ScopedGlslProg glslScope( getStockShader( gl::ShaderDef().color() ) );
     
@@ -43,8 +28,7 @@ void TimeSeriesPlot::draw( const ci::Rectf &bounds, const pIter_t& start, const 
     
     float width = mBounds.getWidth();
     float height = mBounds.getHeight();
-    
-    size_t numBins = past_last - start;
+    size_t numBins = m_copy.size();
     float padding = 0;
     float binWidth = ( width - padding * ( numBins - 1 ) ) / (float)numBins;
     
@@ -53,19 +37,19 @@ void TimeSeriesPlot::draw( const ci::Rectf &bounds, const pIter_t& start, const 
     size_t currVertex = 0;
     float m;
     Rectf bin( mBounds.x1, mBounds.y1, mBounds.x1 + binWidth, mBounds.y2 );
-    for (auto be = start; be < past_last; be++)
-        for( size_t i = 0; i < numBins; i++ ) {
-            m = *be;
-            bin.y1 = bin.y2 - m * height;
-            
-            batch.color( bottomColor );
-            batch.vertex( bin.getLowerLeft() );
-            batch.color( 0, m, 0.7f );
-            batch.vertex( bin.getUpperLeft() );
-            
-            bin += vec2( binWidth + padding, 0 );
-            currVertex += 2;
-        }
+    for( size_t i = 0; i < numBins; i++ ) {
+        m = m_copy[i];
+        
+        bin.y1 = bin.y2 - m * height;
+        
+        batch.color( bottomColor );
+        batch.vertex( bin.getLowerLeft() );
+        batch.color( 0, m, 0.7f );
+        batch.vertex( bin.getUpperLeft() );
+        
+        bin += vec2( binWidth + padding, 0 );
+        currVertex += 2;
+    }
     
     batch.color( bottomColor );
     batch.vertex( bin.getLowerLeft() );

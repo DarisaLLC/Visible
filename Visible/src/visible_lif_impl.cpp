@@ -1167,9 +1167,7 @@ void lifContext::update ()
 {
     ci::app::WindowRef ww = get_windowRef();
     
-    std::vector<float> test = {0.0,0.1,0.2,1.0,0.2,0.1,0.0};
-    m_tsPlotter.update(test);
-    
+
     
     ww->getRenderer()->makeCurrentContext(true);
     if (! have_lif_serie() ) return;
@@ -1273,22 +1271,9 @@ void lifContext::draw_info ()
     auto ws = ww->getSize();
     gl::setMatricesWindow( ws );
 
-    m_tsPlotter.drawAll(get_image_display_rect());
-    
-   
+
     gl::ScopedBlendAlpha blend_;
-    
 
-    
-    {
-        gl::ScopedColor (getManualEditMode() ? ColorA( 0.25f, 0.5f, 1, 1 ) : ColorA::gray(1.0));
-        gl::drawStrokedRect(get_image_display_rect(), 3.0f);
-    }
-
-    {
-        gl::ScopedColor (ColorA::gray(0.1));
-        gl::drawStrokedRect(m_layout->display_plots_rect(), 3.0f);
-    }
     
     if (m_show_probe)
     {
@@ -1318,7 +1303,13 @@ void lifContext::draw ()
     if( have_lif_serie()  && mSurface )
     {
         Rectf dr = get_image_display_rect();
+        ivec2 tl = dr.getUpperLeft();
+        tl.y += (2*dr.getHeight())/3.0;
+        Rectf gdr (tl, dr.getLowerRight());
+        
         assert(dr.getWidth() > 0 && dr.getHeight() > 0);
+
+        gl::ScopedBlendAlpha blend_;
         
         switch(channel_count())
         {
@@ -1334,7 +1325,36 @@ void lifContext::draw ()
                 break;
         }
         
-    
+        {
+            gl::ScopedColor (getManualEditMode() ? ColorA( 0.25f, 0.5f, 1, 1 ) : ColorA::gray(1.0));
+            gl::drawStrokedRect(get_image_display_rect(), 3.0f);
+        }
+
+       // std::vector<float> test = {0.0,0.1,0.2,1.0,0.2,0.1,0.0};
+       // m_tsPlotter.setBounds(gdr);
+       // m_tsPlotter.draw(test);
+        
+        if (m_volume_var_available)
+        {
+            const cv::RotatedRect& ellipse = m_lifProcRef->motion_surface();
+            cinder::gl::ScopedLineWidth( 10.0f );
+            {
+                cinder::gl::ScopedColor col (ColorA( 1, 0.1, 0.1, 0.8f ) );
+                {
+                    cinder::gl::ScopedModelMatrix _mdl;
+                    uDegree da(ellipse.angle);
+                    uRadian dra (da);
+                    vec2 ctr (ellipse.center.x, ellipse.center.y);
+                    ctr = ctr + gdr.getUpperLeft();
+                    gl::translate(ctr);
+                    gl::rotate(dra.Double());
+                    ctr = vec2(0,0);
+                    gl::drawLine(ctr-vec2(0,5), ctr+vec2(0,5));
+                    gl::drawLine(ctr-vec2(5,0), ctr+vec2(5,0));
+                    gl::drawStrokedEllipse(ctr, ellipse.boundingRect().width, ellipse.boundingRect().height);
+                }
+            }
+        }
         
         if (isEditing() && mCellEnds.size() == 2)
         {
@@ -1356,9 +1376,6 @@ void lifContext::draw ()
         }
         
 
-        draw_info ();
-      //  mUIParams.draw();
-      
         if(m_showGUI)
             DrawGUI();
         
