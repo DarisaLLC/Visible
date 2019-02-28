@@ -10,13 +10,11 @@
 
 using namespace ci;
 
-class TimeSeriesPlot {
+class OnImagePlot {
   public:
     typedef std::vector<float>::const_iterator pIter_t;
     
-    TimeSeriesPlot();
-    
-    void update(const std::vector<float> &);
+    OnImagePlot();
     
 	void setBounds( const ci::Rectf &bounds )	{ mBounds = bounds; }
 	const ci::Rectf& getBounds() const			{ return mBounds; }
@@ -29,9 +27,8 @@ class TimeSeriesPlot {
 
     const std::vector<float>& data () const { return m_copy; }
     
-    void draw(const ci::Rectf &bounds, const pIter_t& start, const pIter_t& past_last);
+    void draw(const std::vector<float>& data);
 
-    void drawAll(const ci::Rectf &bounds);
     
   private:
     std::vector<float>      m_copy;

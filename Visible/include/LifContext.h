@@ -6,7 +6,7 @@
 #include "clipManager.hpp"
 #include "visible_layout.hpp"
 #include <atomic>
-#include "TimeSeriesPlotUtils.h"
+#include "OnImagePlotUtils.h"
 #include "imGuiCustom/ImSequencer.h"
 #include "imGuiCustom/visibleSequencer.h"
 
@@ -248,7 +248,7 @@ private:
     timeLineSequence mySequence;
     void draw_sequencer ();
 
-    TimeSeriesPlot m_tsPlotter;
+    OnImagePlot m_tsPlotter;
     
     // Resource Icons
     ci::gl::TextureRef    mNoLoop, mLoop;
