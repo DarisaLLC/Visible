@@ -38,7 +38,6 @@
 #include "core/core.hpp"
 #include "contraction.hpp"
 #include "sm_producer.h"
-//#include "algo_mov.hpp"
 #include "sg_filter.h"
 #include "vision/drawUtils.hpp"
 #include "ut_localvar.hpp"
@@ -58,6 +57,8 @@
 #include "CinderImGui.h"
 #include "logger.hpp"
 #include "vision/opencv_utils.hpp"
+#include "vision/gauss.hpp"
+#include "vision/dense_motion.hpp"
 #include "algo_Lif.hpp"
 #include <boost/foreach.hpp>
 
@@ -124,7 +125,62 @@ std::vector<Point2f> ellipse_test = {
     {839.415543,384.804510}};
 
 
+TEST (ut_dm, basic){
+    roiWindow<P8U> p0 (320, 240);
+    roiWindow<P8U> pw(p0, 80, 60, 160, 120);
+    p0.set(123.0);
+    pw.set(233.0);
+    auto p1 = p0.clone();
+    p1.set(123.0);
+    roiWindow<P8U> pw1(p1, 81, 61, 160, 120);
+    pw1.set(233.0);
+    auto p2 = p1.clone();
+    Gauss3by3 (p2, p1);
+    
+    cv::Mat im0 (p0.height(), p0.width(), CV_8UC(1), p0.pelPointer(0,0), size_t(p0.rowUpdate()));
+    cv::Mat im1 (p1.height(), p1.width(), CV_8UC(1), p1.pelPointer(0,0), size_t(p1.rowUpdate()));
+    
+    uiPair frame_size (p0.width(),p0.height());
+    uiPair fixed_half_size(16,16);
+    uiPair moving_half_size(24,24);
+    dmf ff(frame_size, fixed_half_size, moving_half_size);
+    uiPair fixed = ff.fixed();
+    uiPair moving = ff.moving();
+    
+    EXPECT_TRUE(fixed == uiPair(2*fixed_half_size.first+1,2*fixed_half_size.second+1));
+    EXPECT_TRUE(moving == uiPair(2*moving_half_size.first+1,2*moving_half_size.second+1));
+  
+    ff.update(im0);
+    ff.update(im0);
+    uiPair fixed_tl (65, 45);
+    auto r = ff.normalizedCorrelation(fixed_tl, fixed_tl);
+    EXPECT_TRUE(svl::equal(r,1.0));
+    ff.update(im1);
+    std::cout << std::endl;
+    for (int j = -1; j < 4; j++){
+        for (int i = -1; i < 4; i++){
+            uiPair tmp(fixed_tl.first+i, fixed_tl.second+j);
+            auto r = ff.normalizedCorrelation(fixed_tl, tmp);
+            std::cout << setw(4) << int(r*1000) << '\t';
+        }
+        std::cout << std::endl;
+    }
+    
+    {
+        auto name = "Motion";
+        namedWindow(name, CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+        cv::Point p0 (fixed_tl.first,fixed_tl.second);
+        cv::Point p1 (p0.x+fixed.first, p0.y+fixed.second);
+        rectangle(im0,p0,p1, CV_RGB(20,150,20));
+        imshow( "im0", im0);
+        cv::waitKey(-1);
+        imshow( "im1", im1);
+        cv::waitKey(-1);
+    }
 
+    
+    
+}
 TEST (ut_fit_ellipse, local_maxima){
    
     auto same_point = [] (const Point2f& a, const Point2f& b, float eps){return svl::equal(a.x, b.x, eps) && svl::equal(a.y, b.y, eps);};

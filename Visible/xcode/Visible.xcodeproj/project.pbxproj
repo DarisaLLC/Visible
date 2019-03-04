@@ -335,6 +335,7 @@
 		C2819EDD22015BA800183E44 /* FieldController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819EDB22015BA800183E44 /* FieldController.cpp */; };
 		C2820F302175298F00DFA7A6 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
 		C2820F3521752CB000DFA7A6 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
+		C29C53C1222B58D900D17385 /* dense_motion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29C53BF222B58D900D17385 /* dense_motion.cpp */; };
 		C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
 		C29DB077212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
 		C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611E1F66EA910069F665 /* PlistDate.cpp */; };
@@ -781,6 +782,8 @@
 		C2820F3621752E5100DFA7A6 /* VisibleApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VisibleApp.h; path = ../include/VisibleApp.h; sourceTree = "<group>"; };
 		C2820F3721754C3100DFA7A6 /* imGuiLogger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = imGuiLogger.hpp; path = ../include/imGuiLogger.hpp; sourceTree = "<group>"; };
 		C294B11F2152D22C00C916B1 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
+		C29C53BF222B58D900D17385 /* dense_motion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dense_motion.cpp; sourceTree = "<group>"; };
+		C29C53C0222B58D900D17385 /* dense_motion.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = dense_motion.hpp; sourceTree = "<group>"; };
 		C29DB075212B351200930CBD /* algo_Lif.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = algo_Lif.cpp; path = ../src/algo_Lif.cpp; sourceTree = "<group>"; };
 		C2AABC1A2221D88E00339675 /* kalman_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = kalman_test.cpp; sourceTree = "<group>"; };
 		C2AABC1E2221E82200339675 /* gtest.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = gtest.xcconfig; path = configs/gtest.xcconfig; sourceTree = "<group>"; };
@@ -1489,6 +1492,7 @@
 				C2600A0B1CED3E010045FF57 /* ipUtils.h */,
 				C2600A0C1CED3E010045FF57 /* labelconnect.hpp */,
 				C2600A0D1CED3E010045FF57 /* localvariance.h */,
+				C29C53C0222B58D900D17385 /* dense_motion.hpp */,
 				C2600A0E1CED3E010045FF57 /* median_t.hpp */,
 				C2600A0F1CED3E010045FF57 /* pixel_traits.h */,
 				C2600A101CED3E010045FF57 /* registration.h */,
@@ -1599,6 +1603,7 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C29C53BF222B58D900D17385 /* dense_motion.cpp */,
 				C2398A0821DD8A0A00B180A0 /* file_system.cpp */,
 				C2239AB3218B6270007558AB /* boost_literals.cpp */,
 				C2618F7B217FDA6600FA9F43 /* color.cc */,
@@ -2099,6 +2104,7 @@
 				C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */,
 				C2398A1821DE980C00B180A0 /* imgui_widgets.cpp in Sources */,
 				C20EDBB61CEFC2D20074C47A /* registration.cpp in Sources */,
+				C29C53C1222B58D900D17385 /* dense_motion.cpp in Sources */,
 				C2398A1521DE980C00B180A0 /* CinderImGui.cpp in Sources */,
 				C2398A1721DE980C00B180A0 /* imgui_draw.cpp in Sources */,
 				C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */,
