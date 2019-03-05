@@ -854,20 +854,20 @@ void lifContext::loadCurrentSerie ()
 
 void lifContext::process_async (){
     
+    // @note: ID_LAB  specific. @todo general LIF / TIFF support
     switch(channel_count()){
         case 3:
         {
             // note launch mode is std::launch::async
             m_async_luminance_tracks = std::async(std::launch::async,&lif_serie_processor::run_flu_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
-             // Using scott meyer's wrapper that uses launch mode is std::launch::async
-            m_async_pci_tracks = stl_utils::reallyAsync(&lif_serie_processor::run_pci, m_lifProcRef.get(), 2);
+            m_async_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_pci_on_channel, m_lifProcRef.get(), 2);
        
             break;
         }
         case 1:
         {
-            m_async_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_pci,
+            m_async_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_pci_on_channel,
                                             m_lifProcRef.get(), 0);
             break;
         }

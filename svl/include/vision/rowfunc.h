@@ -49,7 +49,7 @@ public:
 
         mCosine = ((mN * mSim) - (mSi * mSm));
 
-        // Avoid divide by zero. Singular will indicate 0 standard deviation in both
+        // Avoid divide by zero. Singular will indicate 0 standard deviation in one or both
         if (Eim != 0.0)
             mR = (mCosine * mCosine) / Eim;
         return mR;
@@ -116,12 +116,13 @@ public:
     inline bool operator!=(const CorrelationParts & o) const { return !(this->operator==(o)); }
 
     friend ostream & operator<<(ostream & os, const CorrelationParts & corr);
+    void clear ();
 
 private:
     double mR;
-    sumproduct_t mSi, mSm, mCosine, mEi, mEm;
-    sumproduct_t mSii, mSmm, mSim;
-    int mN;
+    mutable sumproduct_t mSi, mSm, mCosine, mEi, mEm;
+    mutable sumproduct_t mSii, mSmm, mSim;
+    mutable int mN;
     bool mRp;
 };
 

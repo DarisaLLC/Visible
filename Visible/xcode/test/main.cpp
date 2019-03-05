@@ -150,33 +150,61 @@ TEST (ut_dm, basic){
     EXPECT_TRUE(fixed == uiPair(2*fixed_half_size.first+1,2*fixed_half_size.second+1));
     EXPECT_TRUE(moving == uiPair(2*moving_half_size.first+1,2*moving_half_size.second+1));
   
+    CorrelationParts cp;
     ff.update(im0);
     ff.update(im0);
     uiPair fixed_tl (65, 45);
-    auto r = ff.normalizedCorrelation(fixed_tl, fixed_tl);
+    auto r = ff.normalizedCorrelation(fixed_tl, fixed_tl, cp);
     EXPECT_TRUE(svl::equal(r,1.0));
     ff.update(im1);
-    std::cout << std::endl;
+    std::vector<std::vector<int>> space;
     for (int j = -1; j < 4; j++){
+        std::vector<int> rs;
         for (int i = -1; i < 4; i++){
             uiPair tmp(fixed_tl.first+i, fixed_tl.second+j);
-            auto r = ff.normalizedCorrelation(fixed_tl, tmp);
-            std::cout << setw(4) << int(r*1000) << '\t';
+            auto r = ff.normalizedCorrelation(fixed_tl, tmp,cp);
+            int score = int(r*1000);
+            rs.push_back(score);
+        }
+        space.push_back(rs);
+    }
+
+    EXPECT_TRUE(space[1][1] == 933);
+    EXPECT_TRUE(space[1][3] == 930);
+    EXPECT_TRUE(space[3][1] == 930);
+    EXPECT_TRUE(space[3][3] == 930);
+    
+    EXPECT_TRUE(space[2][1] == 958);
+    EXPECT_TRUE(space[2][2] == 985);
+    EXPECT_TRUE(space[2][3] == 958);
+    EXPECT_TRUE(space[1][2] == 958);
+    EXPECT_TRUE(space[3][2] == 958);
+    
+    // Cheap Parabolic Interpolation
+    auto x = ((space[2][3]-space[2][1])/2.0) / (space[2][3]+space[2][1]-space[2][2]);
+    auto y = ((space[1][2]-space[3][2])/2.0) / (space[1][2]+space[3][2]-space[2][2]);
+    cv::Point loc(x,y);
+    
+    std::cout << std::endl;
+    for(std::vector<int>& row : space){
+        for (const int& score : row){
+           std::cout << setw(4) << score << '\t';
         }
         std::cout << std::endl;
     }
     
-    {
-        auto name = "Motion";
-        namedWindow(name, CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
-        cv::Point p0 (fixed_tl.first,fixed_tl.second);
-        cv::Point p1 (p0.x+fixed.first, p0.y+fixed.second);
-        rectangle(im0,p0,p1, CV_RGB(20,150,20));
-        imshow( "im0", im0);
-        cv::waitKey(-1);
-        imshow( "im1", im1);
-        cv::waitKey(-1);
-    }
+//    {
+//        auto name = "Motion";
+//        namedWindow(name, CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+//        cv::Point p0 (fixed_tl.first,fixed_tl.second);
+//        cv::Point p1 (p0.x+fixed.first, p0.y+fixed.second);
+//        rectangle(im1,p0,p1, CV_RGB(20,150,20));
+//        circle(im1,loc+p0, 5, CV_RGB(255,255,255));
+//        imshow( "im0", im0);
+//        cv::waitKey(-1);
+//        imshow( "im1", im1);
+//        cv::waitKey(-1);
+//    }
 
     
     

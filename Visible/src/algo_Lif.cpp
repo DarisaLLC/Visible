@@ -10,17 +10,12 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 
 #include <stdio.h>
-
-#include <mutex>
 #include <iostream>
 #include <string>
-#include <typeinfo>
 #include <vector>
 #include <deque>
 #include <sstream>
-#include <typeindex>
 #include <map>
-#include <future>
 #include "async_tracks.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
@@ -282,13 +277,13 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
  * 1 monchrome channel. Compute 3D Standard Dev. per pixel
  */
 
-void lif_serie_processor::run_volume_variances (const int channel_index){
+void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
       std::lock_guard<std::mutex> lock(m_mutex);
     m_3d_stats_done = false;
     cv::Mat m_sum, m_sqsum;
     int image_count = 0;
     std::vector<std::thread> threads(1);
-    threads[0] = std::thread(SequenceAccumulator(),std::ref(m_all_by_channel[channel_index]),
+    threads[0] = std::thread(SequenceAccumulator(),std::ref(images),
                              std::ref(m_sum), std::ref(m_sqsum), std::ref(image_count));
     
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
@@ -336,18 +331,21 @@ void lif_serie_processor::run_volume_variances (const int channel_index){
         signal_volume_var_available->operator()();
 }
 
+void lif_serie_processor::run_volume_variances (const int channel_index){
+    return run_volume_variances(m_all_by_channel[channel_index]);
+}
 
 /*
  * 1 monchrome channel. Compute volume stats of each on a thread
  */
 
-svl::stats<int64_t> lif_serie_processor::run_volume_sum_sumsq_count (const int channel_index){
+svl::stats<int64_t> lif_serie_processor::run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>& images){
       std::lock_guard<std::mutex> lock(m_mutex);
     m_3d_stats_done = false;
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
     std::vector<std::tuple<uint8_t,uint8_t>> rts;
     std::vector<std::thread> threads(1);
-    threads[0] = std::thread(IntensityStatisticsPartialRunner(),std::ref(m_all_by_channel[channel_index]), std::ref(cts), std::ref(rts));
+    threads[0] = std::thread(IntensityStatisticsPartialRunner(),std::ref(images), std::ref(cts), std::ref(rts));
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     auto res = std::accumulate(cts.begin(), cts.end(), std::make_tuple(int64_t(0),int64_t(0), uint32_t(0)), stl_utils::tuple_sum<int64_t,uint32_t>());
     auto mes = std::accumulate(rts.begin(), rts.end(), std::make_tuple(uint8_t(255),uint8_t(0)), stl_utils::tuple_minmax<uint8_t, uint8_t>());
@@ -359,6 +357,12 @@ svl::stats<int64_t> lif_serie_processor::run_volume_sum_sumsq_count (const int c
     return m_3d_stats;
     
 }
+
+
+svl::stats<int64_t> lif_serie_processor::run_volume_sum_sumsq_count (const int channel_index){
+    return run_volume_sum_sumsq_count(m_all_by_channel[channel_index]);
+}
+
 
 void lif_serie_processor::stats_3d_computed(){
     
@@ -386,12 +390,10 @@ std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::run_flu_statistics (cons
 
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled 
-std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_pci (const int channel_index)
+std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_pci (const std::vector<roiWindow<P8U>>& images)
 {
-    int channel_to_use = channel_index % m_channel_count;
-    channel_images_t c2 = m_all_by_channel[channel_to_use];
     auto sp =  sm();
-    sp->load_images (c2);
+    sp->load_images (images);
     std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
     std::future<bool>  future_ss = task.get_future();  // get a future
     std::thread(std::move(task)).join(); // Finish on a thread
@@ -416,6 +418,10 @@ std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_pci (const int chan
     return m_pci_tracksRef;
 }
 
+std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_pci_on_channel (const int channel_index)
+{
+    return run_pci(std::move(m_all_by_channel[channel_index]));
+}
 
 
 const std::vector<Rectf>& lif_serie_processor::rois () const { return m_rois; }

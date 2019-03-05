@@ -1,4 +1,5 @@
 #if defined( __cplusplus ) && 0
+#include "opencv2/opencv.hpp"
 #include "cinder/Cinder.h"
 #include "cinder/CinderMath.h"
 #include "cinder/Matrix.h"
@@ -6,4 +7,5 @@
 #include "cinder/Quaternion.h"
 #include "imgui.h"
 #include "lifContext.h"
+#include "vision/roiWindow.h"
 #endif

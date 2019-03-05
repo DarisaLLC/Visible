@@ -225,19 +225,22 @@ public:
     async_vecOfNamedTrack_t get_luminance_info (const std::vector<int>& channels);
     std::shared_ptr<vecOfNamedTrack_t> run_flu_statistics (const std::vector<int>& channels);
     
+    // Channel Index API for IDLab custom organization
     // Run accumulator of 3d stats on a channel at index
     svl::stats<int64_t> run_volume_sum_sumsq_count (const int channel_index);
-    
     // Run per pixel stdev accumulator a channel at index
     void run_volume_variances (const int channel_index);
-    
     // Run to get Entropies and Median Level Set
-    std::shared_ptr<vecOfNamedTrack_t> run_pci (const int channel_index);
+    std::shared_ptr<vecOfNamedTrack_t> run_pci_on_channel (const int channel_index);
+    
+    // Vector of 8bit roiWindows API for IDLab custom organization
+    svl::stats<int64_t> run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>&);
+    void run_volume_variances (std::vector<roiWindow<P8U>>& );
+    std::shared_ptr<vecOfNamedTrack_t> run_pci (const std::vector<roiWindow<P8U>>&);
+
     
     const std::vector<Rectf>& rois () const;
-    
     const cv::RotatedRect& motion_surface () const;
-    
     const  std::deque<double>& medianSet () const;
     
     // Update. Called also when cutoff offset has changed
