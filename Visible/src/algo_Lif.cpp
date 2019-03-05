@@ -290,11 +290,11 @@ void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& ima
     SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_var_image);
     m_var_display_image.create(m_var_image.rows, m_var_image.cols, CV_8UC1);
     cv::normalize(m_var_image, m_var_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
-    cv::Mat result;
-    static cv::Size ap (7,7);
-    svl::localVAR tv (ap);
-    tv.process (m_var_display_image,  result);
-    cv::normalize(result, m_var_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
+//    cv::Mat result;
+//    static cv::Size ap (7,7);
+//    svl::localVAR tv (ap);
+//    tv.process (m_var_display_image,  result);
+//    cv::normalize(result, m_var_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
    
     
 #if 1
@@ -306,7 +306,8 @@ void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& ima
     vector<Vec4i> hierarchy;
 
     cv::meanStdDev(m_var_display_image, lmean, lstd);
-    threshold(m_var_display_image, threshold_output, 10, 255, THRESH_BINARY );
+    auto thr = leftTailPost (m_var_display_image, 0.95);
+    threshold(m_var_display_image, threshold_output, thr, 255, THRESH_BINARY );
     cv::findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 
     for( int i = 0; i < contours.size(); i++ )
