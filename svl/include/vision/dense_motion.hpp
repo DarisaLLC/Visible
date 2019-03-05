@@ -66,14 +66,14 @@ namespace svl
 
         
         // Compute ncc at tl location row_0,col_0 in fixed and row_1,col_1 moving using integral images
-        double normalizedCorrelation(const uiPair& fixed, const uiPair& moving)
+        double normalizedCorrelation(const uiPair& fixed, const uiPair& moving, CorrelationParts& cp)
         {
             const uint32_t& col_0 = fixed.first;
             const uint32_t& row_0 = fixed.second;
             const uint32_t& col_1 = moving.first;
             const uint32_t& row_1 = moving.second;
             
-            CorrelationParts cp;
+            cp.clear();
             double ab = 0.0;
             const unsigned int height_tpl = m_msize.second, width_tpl = m_msize.first;
             const int nP = height_tpl * width_tpl;

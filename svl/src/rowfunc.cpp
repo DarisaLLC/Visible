@@ -14,8 +14,14 @@ ostream & operator<<(ostream & os, const CorrelationParts & corr)
 
 // public
 
-CorrelationParts::CorrelationParts ()
-    : mR(0.0),  mSi(0),mSm(0),  mCosine(0), mEi(0),mEm(0),mSii(0), mSmm(0),mSim(0),  mN(0), mRp(0) {}
+CorrelationParts::CorrelationParts (){
+    clear();
+}
+
+
+void CorrelationParts::clear (){
+    mR=0.0,  mSi=0,mSm=0,  mCosine=0, mEi=0,mEm=0,mSii=0, mSmm=0,mSim=0,  mN=0, mRp=0;
+}
 
 
 template <class T>
