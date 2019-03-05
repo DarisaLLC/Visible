@@ -76,15 +76,35 @@ namespace svl
 
     }
 
+    bool localVAR::process_using_precomputed_buffers (const cv::Mat& _image, cv::Mat& results ,
+                                                      cv::Mat& sum_buffer, cv::Mat& sumsq_buffer ){
+        
+        // Allocate intergral image: 1 bigger in each dimension
+        m_ss = sumsq_buffer;
+        m_s = sum_buffer;
+        m_var = cv::Mat(cv::Size(_image.size().width + 1, _image.size().height + 1), CV_32FC1);
+        m_var.setTo(0.0f);
+        m_single = cv::Mat(_image.size(),CV_8UC1);
+        m_isize = _image.size ();
+        return internal_process(_image, results);
+        
+        return true;
+    }
+    
+    
     bool localVAR::process(const cv::Mat& _image, cv::Mat& result) const
     {
         if (m_fsize.width < 2 || m_fsize.height < 2) return false;
         
-            // Allocate intergral image: 1 bigger in each dimension
+        // Allocate intergral image: 1 bigger in each dimension
         allocate_images (_image);
         convert_or_not (_image);
         cv::integral (m_single, m_s, m_ss);
-
+        return internal_process(_image, result);
+    }
+    
+    bool localVAR::internal_process(const cv::Mat& _image, cv::Mat& result) const
+    {
         int w = m_fsize.width; int h = m_fsize.height;
         int n = w * h;
         int n_n_1 = n > 1 ? n * (n - 1) : 1; // handle the 1x1 case for completeness

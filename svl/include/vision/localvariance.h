@@ -20,12 +20,17 @@ namespace svl
     class localVAR
     {
     public:
-        CV_WRAP explicit localVAR( cv::Size filter_size );
+        CV_WRAP explicit localVAR( cv::Size filter_size);
 
+        //! Produces local variance image for this image using kernel size
+        // if filter size is less than 2 in either side, returns false
         bool process (const cv::Mat& image, cv::Mat& results ) const;
-            //! Produces local variance image for this image using kernel size
-            // if filter size is less than 2 in either side, returns false
-        
+     
+        //! Produces local variance image for this image using kernel size
+        // Using precomputed sum and sumsq buffers. 1 bigger in each dimension
+        // if filter size is less than 2 in either side, returns false
+        bool process_using_precomputed_buffers (const cv::Mat& image, cv::Mat& results ,
+                                             cv::Mat& sum_buffer, cv::Mat& sumsq_buffer );
 
         const cv::Mat& VarianceImageRef () const { return m_var; }
         float min_variance () const { return m_minVar; }
@@ -42,6 +47,7 @@ namespace svl
         mutable cv::Size m_isize;
 
     private:
+        bool internal_process (const cv::Mat& image, cv::Mat& results ) const;
         bool use_cached_images (const cv::Mat&) const;
         void allocate_images (const cv::Mat&) const;
         void convert_or_not (const cv::Mat&) const;

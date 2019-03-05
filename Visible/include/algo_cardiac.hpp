@@ -39,15 +39,21 @@ struct SequenceAccumulator
 
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     
-    void operator()(channel_images_t& channel, cv::Mat& m_sum, cv::Mat& m_sqsum, int& image_count)
+    void operator()(channel_images_t& channel, cv::Mat& m_sum, cv::Mat& m_sqsum, int& image_count,
+                    uint8_t spatial_x = 0, uint8_t spatial_y = 0 )
     {
         image_count = 0;
         for (const roiWindow<P8U>& ir : channel){
             cv::Mat im (ir.height(), ir.width(), CV_8UC(1), ir.pelPointer(0,0), size_t(ir.rowUpdate()));
-            
             if( image_count == 0 ) {
                 m_sum = cv::Mat::zeros( im.size(), CV_32FC(im.channels()) );
                 m_sqsum = cv::Mat::zeros( im.size(), CV_32FC(im.channels()) );
+            }
+            if (spatial_x > 0 && spatial_y > 0){
+                cv::Mat result;
+                localVAR lv(cv::Size(spatial_x, spatial_y));
+                lv.process (im, result);
+                cv::normalize(result, im, 0, 255, NORM_MINMAX, CV_8UC1);
             }
             cv::accumulate( im, m_sum );
             cv::accumulateSquare( im, m_sqsum );
