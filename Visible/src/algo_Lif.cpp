@@ -578,6 +578,24 @@ void lif_serie_processor::save_channel_images (int channel_index, std::string& d
     
 }
 
+
+// Return 2D latice of pixels over time
+void lif_serie_processor::generateVoxels_on_channel (const int channel_index, std::vector<std::vector<roiWindow<P8U>>>& rvs){
+    std::lock_guard<std::mutex> lock(m_mutex);
+    generateVoxels(m_all_by_channel[channel_index], rvs);
+}
+
+
+// Return 2D latice of voxel self-similarity
+
+void lif_serie_processor::generateVoxelSelfSimilarities_on_channel (const int channel_index, std::vector<std::vector<float>>&){
+    std::vector<std::vector<roiWindow<P8U>>> rvs;
+    generateVoxels(m_all_by_channel[channel_index], rvs);
+    generateVoxelSelfSimilarities(rvs, m_temporal_ss_raw);
+}
+
+
+
 void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& images,
                                                 std::vector<std::vector<roiWindow<P8U>>>& output){
     output.resize(0);
