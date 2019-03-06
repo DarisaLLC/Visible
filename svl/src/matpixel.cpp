@@ -68,6 +68,16 @@ iPair svl::vroiSize (roiVP8UC& vr)
     return boost::apply_visitor(sv, vr);
 }
 
+
+template<typename P>
+roiWindow<P>::roiWindow(std::vector<typename roiWindow<P>::pixel_t>& src){
+    int width = static_cast<int>(src.size());
+    m_frame_buf = sharedRoot_t (new root<P>(width, 1, image_memory_alignment_policy::align_first_row));
+    m_bounds = iRect(width,1);
+    pixel_ptr_t our_row = rowPointer(0);
+    std::memcpy(src.data(), our_row, width);
+}
+
 template <typename P>
 void roiWindow<P>::randomFill( uint32_t seed )
 {

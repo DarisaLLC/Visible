@@ -527,7 +527,6 @@
 		C2239AB721922F72007558AB /* cardiomyocyte_model_detail.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model_detail.hpp; sourceTree = "<group>"; };
 		C2309DC61F6B4D6500A0E908 /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../externals/Cinder/lib/macosx/Release/libcinder.a; sourceTree = SOURCE_ROOT; };
 		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
-		C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ut_gui_main.cpp; path = ../test/ut_gui_main.cpp; sourceTree = "<group>"; };
 		C2398A7E21DF224B00B180A0 /* VisibleTestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VisibleTestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleTestApp-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleTestApp-Info.plist"; sourceTree = "<absolute>"; };
 		C23B7CC6220553E1005DE02C /* cpp-perf.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = "cpp-perf.hpp"; path = "../include/cpp-perf.hpp"; sourceTree = "<group>"; };
@@ -542,7 +541,6 @@
 		C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../local/tinyxml/tinyxml.cpp; sourceTree = "<group>"; };
 		C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../local/tinyxml/tinyxmlerror.cpp; sourceTree = "<group>"; };
 		C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
-		C23E343221F142D200221E68 /* undoUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = undoUtils.h; path = ../test/undoUtils.h; sourceTree = "<group>"; };
 		C23E343421F1477D00221E68 /* imgui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imgui.h; path = "../../externals/docking-imgui/imgui/imgui.h"; sourceTree = "<group>"; };
 		C23E345F21F2511D00221E68 /* ImSequencer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImSequencer.cpp; path = ../include/imGuiCustom/ImSequencer.cpp; sourceTree = "<group>"; };
 		C23E346221F254DE00221E68 /* ImCurveEdit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImCurveEdit.cpp; path = ../include/imGuiCustom/ImCurveEdit.cpp; sourceTree = "<group>"; };
@@ -1244,8 +1242,6 @@
 				C2819ED922015B5700183E44 /* ParticleSystem.h */,
 				C2819EDB22015BA800183E44 /* FieldController.cpp */,
 				C2819EDA22015BA800183E44 /* particle_test_main.cpp */,
-				C23E343221F142D200221E68 /* undoUtils.h */,
-				C2398A1B21DF218800B180A0 /* ut_gui_main.cpp */,
 				C23CFBDA21E6C3D700C1DF16 /* ut_gui_plot.cpp */,
 			);
 			name = VisibleTestApp;

@@ -73,6 +73,12 @@ public:
 
 
     /*
+     * Create a roiWindow with an underlying 1d vector
+     * rect is vector_size by 1
+     */
+    roiWindow(std::vector<pixel_t>&);
+
+    /*
          * Create a roiWindow with an underlying frame using location and size of the
          * supplied rectangle
          */

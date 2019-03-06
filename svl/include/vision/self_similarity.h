@@ -107,9 +107,6 @@ class self_similarity_producer
   bool fill(vector<image_t >& firstImages);
   bool fill(deque<image_t >& firstImages);
     
-  bool fill(vector<double>& firstData);
-  bool fill(deque<double>& firstData);
-
   /* update - Input the next image in a video stream. If a full
    * temporal window's worth of images are available, a new entropy
    * signal is generated.
@@ -129,7 +126,6 @@ class self_similarity_producer
    */
   bool update(image_t nextImage);
     
-  bool update(double& nextData);
   std::pair<int32_t,int32_t> fillImageSize () const;
 
   void setMask(const roiWindow<P8U>& mask);
