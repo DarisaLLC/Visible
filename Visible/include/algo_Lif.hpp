@@ -239,11 +239,14 @@ public:
     std::shared_ptr<vecOfNamedTrack_t> run_pci (const std::vector<roiWindow<P8U>>&);
 
     // Return 2D latice of pixels over time
+    void generateVoxels_on_channel (const int channel_index, std::vector<std::vector<roiWindow<P8U>>>&);
     void generateVoxels (const std::vector<roiWindow<P8U>>&, std::vector<std::vector<roiWindow<P8U>>>&);
     
     // Return 2D latice of voxel self-similarity
     void generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>&,
                                          std::vector<std::vector<float>>&);
+    void generateVoxelSelfSimilarities_on_channel (const int channel_index, std::vector<std::vector<float>>&);
+    cv::Mat& temporal_selfSimilarity () const { return m_temporal_ss; }
     
     const std::vector<Rectf>& rois () const;
     const cv::RotatedRect& motion_surface () const;
@@ -318,7 +321,8 @@ private:
     mutable svl::stats<int64_t> m_3d_stats;
     std::atomic<bool> m_3d_stats_done;
     cv::RotatedRect m_motion_mass;
-    cv::Mat m_temporal_ss;
+    mutable cv::Mat m_temporal_ss;
+    mutable std::vector<std::vector<float>> m_temporal_ss_raw;
     
     std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;
     
