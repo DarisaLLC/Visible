@@ -503,7 +503,7 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
         m_frameCount++;
     }
  
-    
+     
 }
 
 // Note tracks contained timed data.
@@ -577,6 +577,79 @@ void lif_serie_processor::save_channel_images (int channel_index, std::string& d
         writer->operator()(dir_fqfn, c2);
     
 }
+
+void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& images,
+                                                std::vector<std::vector<roiWindow<P8U>>>& output){
+    output.resize(0);
+    size_t t_d = images.size();
+    uint32_t width = images[0].width();
+    uint32_t height = images[0].height();
+
+    for (auto row = 0; row < height; row++){
+        std::vector<roiWindow<P8U>> row_bufs;
+        for (auto col = 0; col < width; col++){
+            std::vector<uint8_t> voxel(t_d);
+            for (auto tt = 0; tt < t_d; tt++){
+                voxel[tt] = images[tt].getPixel(col, row);
+            }
+            row_bufs.emplace_back(voxel);
+        }
+        output.emplace_back(row_bufs);
+    }
+}
+
+void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels,
+                                                             std::vector<std::vector<float>>& ss){
+
+    int height = static_cast<int>(voxels.size());
+    int width = static_cast<int>(voxels[0].size());
+    
+    // Create a single vector of all roi windows
+    std::vector<roiWindow<P8U>> all;
+    auto sp =  sm();
+    for(std::vector<roiWindow<P8U>>& row: voxels){
+        for(roiWindow<P8U>& voxel : row){
+                all.emplace_back(voxel.frameBuf(), voxel.bound());
+            }
+        }
+
+    sp->load_images (all);
+    std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
+    std::future<bool>  future_ss = task.get_future();  // get a future
+    std::thread(std::move(task)).join(); // Finish on a thread
+    if (future_ss.get())
+    {
+        m_temporal_ss = cv::Mat (height,width, CV_32FC1);
+        const deque<double>& entropies = sp->shannonProjection ();
+        ss.resize(0);
+        m_entropies.insert(m_entropies.end(), entropies.begin(), entropies.end());
+        vector<double>::const_iterator start = m_entropies.begin();
+        for (auto row =0; row < height; row++){
+            vector<float> rowv;
+            auto end = start + width + 1; // point to one after
+            rowv.insert(rowv.end(), start, end);
+            ss.push_back(rowv);
+            start = end;
+        }
+        
+        auto getMat = [] (std::vector< std::vector<float> > &inVec){
+            int rows = static_cast<int>(inVec.size());
+            int cols = static_cast<int>(inVec[0].size());
+            
+            cv::Mat_<float> resmat(rows, cols);
+            for (int i = 0; i < rows; i++)
+            {
+                resmat.row(i) = cv::Mat(inVec[i]).t();
+            }
+            return resmat;
+        };
+        
+        m_temporal_ss = getMat(ss);
+    }
+
+}
+
+
 #pragma GCC diagnostic pop
 
 
