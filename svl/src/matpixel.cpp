@@ -75,7 +75,7 @@ roiWindow<P>::roiWindow(std::vector<typename roiWindow<P>::pixel_t>& src){
     m_frame_buf = sharedRoot_t (new root<P>(width, 1, image_memory_alignment_policy::align_first_row));
     m_bounds = iRect(width,1);
     pixel_ptr_t our_row = rowPointer(0);
-    std::memcpy(src.data(), our_row, width);
+    std::memcpy( our_row, src.data(), width);
 }
 
 template <typename P>
