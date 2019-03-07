@@ -50,6 +50,7 @@
 #include <cereal/archives/binary.hpp>
 #include <fstream>
 #include "vision/opencv_utils.hpp"
+#include <boost/range/irange.hpp>
 
 #include "cvplot/cvplot.h"
 #include "time_series/persistence1d.hpp"
@@ -77,6 +78,98 @@ using namespace std;
 using namespace svl;
 
 namespace fs = boost::filesystem;
+
+
+std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr)
+{
+    return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
+}
+
+std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename)
+{
+    return make_shared_ofstream(new std::ofstream(filename, std::ofstream::out));
+}
+
+void output_array (const std::vector<std::vector<float>>& data, const std::string& output_file){
+    std::string delim (",");
+    fs::path opath (output_file);
+    auto papa = opath.parent_path ();
+    if (fs::exists(papa))
+    {
+        std::shared_ptr<std::ofstream> myfile = make_shared_ofstream(output_file);
+        for (const vector<float>& row : data)
+        {
+            auto cnt = 0;
+            auto cols = row.size() - 1;
+            for (const float & col : row)
+            {
+                *myfile << col;
+                if (cnt++ < cols)
+                    *myfile << delim;
+            }
+            *myfile << std::endl;
+        }
+    }
+}
+
+
+cv::Mat generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels,
+                                                         std::vector<std::vector<float>>& ss){
+    
+    int height = static_cast<int>(voxels.size());
+    int width = static_cast<int>(voxels[0].size());
+ 
+    
+    // Create a single vector of all roi windows
+    std::vector<roiWindow<P8U>> all;
+    // semilarity producer
+    auto sp = std::shared_ptr<sm_producer> ( new sm_producer () );
+    for(std::vector<roiWindow<P8U>>& row: voxels){
+        for(roiWindow<P8U>& voxel : row){
+            all.emplace_back(voxel.frameBuf(), voxel.bound());
+        }
+    }
+    
+    sp->load_images (all);
+    std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
+    std::future<bool>  future_ss = task.get_future();  // get a future
+    std::thread(std::move(task)).join(); // Finish on a thread
+    if (future_ss.get())
+    {
+        cv::Mat m_temporal_ss (height,width, CV_32FC1);
+        m_temporal_ss.setTo(0.0f);
+        
+        const deque<double>& entropies = sp->shannonProjection ();
+        vector<float> m_entropies;
+        ss.resize(0);
+        m_entropies.insert(m_entropies.end(), entropies.begin(), entropies.end());
+        vector<float>::const_iterator start = m_entropies.begin();
+        for (auto row =0; row < height; row++){
+            vector<float> rowv;
+            auto end = start + width + 1; // point to one after
+            rowv.insert(rowv.end(), start, end);
+            ss.push_back(rowv);
+            start = end;
+        }
+        
+        auto getMat = [] (std::vector< std::vector<float> > &inVec){
+            int rows = static_cast<int>(inVec.size());
+            int cols = static_cast<int>(inVec[0].size());
+            
+            cv::Mat_<float> resmat(rows, cols);
+            for (int i = 0; i < rows; i++)
+            {
+                resmat.row(i) = cv::Mat(inVec[i]).t();
+            }
+            return resmat;
+        };
+        
+        m_temporal_ss = getMat(ss);
+        return m_temporal_ss;
+    }
+    return cv::Mat ();
+    
+}
 
 
 std::shared_ptr<test_utils::genv> dgenv_ptr;
@@ -312,7 +405,91 @@ TEST (ut_3d_per_element, standard_dev)
 }
 
 
+TEST (ut_ss_voxel, basic){
+    
+    // Create N X M 1 dimentional roiWindows sized 1 x 64. Containing sin s
+    
+    // Create sin signals
+    auto sinvec = [](float step, uint32_t size){
+        std::vector<float> base(size);
+        
+        for (auto i : irange(0u, size)) {
+           // base[i] = ((i % 256) / 256.0f - 0.5f) * 0.8;
+            base[i] = (sin(i * 3.14159 *  step) + 1.0)*127.0f;
+        }
+        
+        return base;
+    };
+    
+//    auto cvDrawPlot = [](std::vector<float>& tmp, std::string& title){
+//
+//        auto name = title;
+//        cvplot::setWindowTitle(name, title + "  " + svl::toString(tmp.size()));
+//        cvplot::moveWindow(name, 0, 256);
+//        cvplot::resizeWindow(name, 512, 256);
+//        cvplot::figure(name).series(title).addValue(tmp).type(cvplot::Line).color(cvplot::Red);
+//        cvplot::figure(name).show();
+//    };
+//
 
+    double endtime;
+    std::clock_t start;
+
+    std::vector<std::vector<roiWindow<P8U>>> voxels;
+    
+    int rows = 64;
+    int cols = 64;
+    cv::Point2f ctr (cols/2.0f, rows/2.0f);
+    
+//    auto d2ctr = [](int r, int c, cv::Point2f& center){
+//        return sqrt(svl::Sqr(c-center.x)+svl::Sqr(r-center.y));
+//    };
+    start = std::clock();
+    for (auto row = 0; row < rows; row++){
+        std::vector<roiWindow<P8U>> rrs;
+        for (auto col = 0; col < cols; col++){
+            float r = (row+col)/2.0;
+            r = std::max(1.0f,r);
+            std::vector<float> signal = sinvec(1.0f/r, 64);
+            std::vector<uint8_t> tmp;
+            tmp.insert(tmp.end(), signal.begin(),signal.end());
+            rrs.emplace_back(tmp);
+            
+          //  std::string title = svl::toString(std::clock());
+          //  cvDrawPlot(signal, title);
+        }
+        voxels.push_back(rrs);
+    }
+
+    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    std::cout << " Generating Synthetic Data " << endtime  << " Seconds " << std::endl;
+    
+
+    std::vector<std::vector<float>> results;
+    
+    
+    std::string filename = svl::toString(std::clock()) + ".csv";
+    std::string imagename = svl::toString(std::clock()) + ".png";
+    std::string file_path = "/Users/arman/tmp/" + filename;
+    std::string image_path = "/Users/arman/tmp/" + imagename;
+    start = std::clock();
+    auto cm = generateVoxelSelfSimilarities(voxels, results);
+    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    cv::imwrite(image_path, cm);
+    std::cout << " Running Synthetic Data " << endtime  << " Seconds " << std::endl;
+
+    
+    
+    
+    
+    output_array(results, file_path);
+    
+    /// Show in a window
+    namedWindow( " ss voxel ", CV_WINDOW_KEEPRATIO  | WINDOW_OPENGL);
+    imshow( " ss voxel ", cm);
+    cv::waitKey(-1);
+    
+}
 
 TEST (ut_liffile, voxel_energy)
 {
