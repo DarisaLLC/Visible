@@ -80,6 +80,17 @@ using namespace svl;
 namespace fs = boost::filesystem;
 
 
+void cvDrawPlot (std::vector<float>& tmp){
+    
+    std::string name = svl::toString(std::clock());
+    cvplot::setWindowTitle(name, svl::toString(tmp.size()));
+    cvplot::moveWindow(name, 0, 256);
+    cvplot::resizeWindow(name, 512, 256);
+    cvplot::figure(name).series(name).addValue(tmp).type(cvplot::Line).color(cvplot::Red);
+    cvplot::figure(name).show();
+}
+
+
 std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr)
 {
     return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
@@ -146,7 +157,7 @@ cv::Mat generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>&
         vector<float>::const_iterator start = m_entropies.begin();
         for (auto row =0; row < height; row++){
             vector<float> rowv;
-            auto end = start + width + 1; // point to one after
+            auto end = start + width; // point to one after
             rowv.insert(rowv.end(), start, end);
             ss.push_back(rowv);
             start = end;
@@ -410,35 +421,36 @@ TEST (ut_ss_voxel, basic){
     // Create N X M 1 dimentional roiWindows sized 1 x 64. Containing sin s
     
     // Create sin signals
-    auto sinvec = [](float step, uint32_t size){
-        std::vector<float> base(size);
-        
+    auto sinvec8 = [](float step, uint32_t size){
+        std::vector<uint8_t> base(size);
+
         for (auto i : irange(0u, size)) {
-           // base[i] = ((i % 256) / 256.0f - 0.5f) * 0.8;
-            base[i] = (sin(i * 3.14159 *  step) + 1.0)*127.0f;
+            float v = (sin(i * 3.14159 *  step) + 1.0)*127.0f;
+            base[i] = static_cast<uint8_t>(v);
         }
-        
+
         return base;
     };
-    
-//    auto cvDrawPlot = [](std::vector<float>& tmp, std::string& title){
+ 
+    // Create random signals
+//    auto randvec8 = []( uint32_t size){
+//        std::vector<uint8_t> base(size);
 //
-//        auto name = title;
-//        cvplot::setWindowTitle(name, title + "  " + svl::toString(tmp.size()));
-//        cvplot::moveWindow(name, 0, 256);
-//        cvplot::resizeWindow(name, 512, 256);
-//        cvplot::figure(name).series(title).addValue(tmp).type(cvplot::Line).color(cvplot::Red);
-//        cvplot::figure(name).show();
+//        for (auto i : irange(0u, size)) {
+//            // base[i] = ((i % 256) / 256.0f - 0.5f) * 0.8;
+//            base[i] = rand() % 255;
+//        }
+//
+//        return base;
 //    };
-//
-
+    
     double endtime;
     std::clock_t start;
 
     std::vector<std::vector<roiWindow<P8U>>> voxels;
     
-    int rows = 64;
-    int cols = 64;
+    int rows = 32;
+    int cols = 32;
     cv::Point2f ctr (cols/2.0f, rows/2.0f);
     
 //    auto d2ctr = [](int r, int c, cv::Point2f& center){
@@ -450,13 +462,13 @@ TEST (ut_ss_voxel, basic){
         for (auto col = 0; col < cols; col++){
             float r = (row+col)/2.0;
             r = std::max(1.0f,r);
-            std::vector<float> signal = sinvec(1.0f/r, 64);
-            std::vector<uint8_t> tmp;
-            tmp.insert(tmp.end(), signal.begin(),signal.end());
+
+            std::vector<uint8_t> tmp = sinvec8(1.0/r, 64);
+
             rrs.emplace_back(tmp);
             
-          //  std::string title = svl::toString(std::clock());
-          //  cvDrawPlot(signal, title);
+        
+     //       cvDrawPlot(signal, title);
         }
         voxels.push_back(rrs);
     }
