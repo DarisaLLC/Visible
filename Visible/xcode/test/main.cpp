@@ -248,8 +248,8 @@ TEST (ut_dm, basic){
     uiPair fixed_half_size(16,16);
     uiPair moving_half_size(24,24);
     dmf ff(frame_size, fixed_half_size, moving_half_size);
-    uiPair fixed = ff.fixed();
-    uiPair moving = ff.moving();
+    uiPair fixed = ff.fixed_size();
+    uiPair moving = ff.moving_size();
     
     EXPECT_TRUE(fixed == uiPair(2*fixed_half_size.first+1,2*fixed_half_size.second+1));
     EXPECT_TRUE(moving == uiPair(2*moving_half_size.first+1,2*moving_half_size.second+1));
