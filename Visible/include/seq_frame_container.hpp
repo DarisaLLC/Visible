@@ -33,6 +33,7 @@ class seqFrameContainer : public tiny_media_info, public std::enable_shared_from
 {
 public:
     typedef std::shared_ptr<seqFrameContainer> ref;
+    typedef std::weak_ptr<seqFrameContainer> weak_ref;
     typedef std::map<time_spec_t, int64_t> timeToIndex;
     typedef std::map<int64_t, time_spec_t> indexToTime;
     typedef std::vector<SurTiIndexRef_t> container_t;
@@ -109,7 +110,17 @@ private:
 };
 
 
-
+class sequenceSample
+{
+public:
+    sequenceSample (const seqFrameContainer::ref&, int x, int y);
+    
+private:
+    seqFrameContainer::weak_ref m_weak_root;
+    
+    
+    
+};
 
 
 #endif // __QTIME_VC_IMPL__
