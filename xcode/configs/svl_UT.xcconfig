@@ -6,10 +6,11 @@
 //  Copyright © 2015 Arman Garakani. All rights reserved.
 //
 
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
 #include "svl.xcconfig"
 
 
-HEADER_SEARCH_PATHS =  $(inherited) $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_PUGIXML)/include $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG) $(SVL_X11_ROOT)/include
+LOCAL_GTEST = $(LOCAL_3rdParty)/gtest
+LIBRARY_SEARCH_PATHS = $(LIBRARY_SEARCH_PATHS) $(LOCAL_GTEST)/lib/$(CONFIGURATION)
 
-
-LIBRARY_SEARCH_PATHS = $(inherited) $(LOCAL_CINDER)/lib $(LOCAL_BOOST)/lib $(LOCAL_gtest)/lib/Release $(LOCAL_OCV)/lib/osx  $(SVL_X11_ROOT)/lib

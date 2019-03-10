@@ -2,10 +2,7 @@
 #define __OPENCV_UTILS__
 
 
-//#include <cstdint>
-//#include <algorithm>
-//#include <iostream>
-//#include <typeinfo>
+#include <unordered_map>
 #include <deque>
 #include "opencv2/opencv.hpp"
 #include "vision/roiWindow.h"
@@ -20,7 +17,11 @@ using namespace svl;
 /*! Functions related to affine transformations. */
 namespace svl
 {
-
+    // Use view roiWindow memory as cv::Mat.
+    // Requires cvType to be appropriate
+    // Use within scope. As roiWindow is ref counted. 
+    #define cvMatOfroiWindow(a,b,cvType) cv::Mat b ((a).height(),(a).width(), cvType,(a).pelPointer(0,0), size_t((a).rowUpdate()))
+    
     double correlation_ocv(const roiWindow<P8U>& i, const roiWindow<P8U>& m);
     void cumani_opencv (const cv::Mat& input_bgr, cv::Mat& gradAbs, cv::Mat& orientation, float& maxVal);
     void PeakDetect(const cv::Mat& space, std::vector<Point2f>& peaks, uint8_t accept);

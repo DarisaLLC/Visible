@@ -291,7 +291,6 @@
 		C26F5FF521B0AA6D00EAE156 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0091D8F80E81B9330029341E /* OpenGL.framework */; };
 		C26F5FF721B0AA6D00EAE156 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		C27221161D1C912E008EF8B2 /* histo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069681CED3E2C0045FF57 /* histo.cpp */; };
-		C273E3602225BC37003DA335 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
 		C273E3612226FE77003DA335 /* libswscale.5.3.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC292221F9E000339675 /* libswscale.5.3.100.dylib */; };
 		C273E3622226FE7A003DA335 /* libavresample.4.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC272221F97F00339675 /* libavresample.4.0.0.dylib */; };
 		C273E3632226FE7C003DA335 /* libdc1394.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC252221F94F00339675 /* libdc1394.dylib */; };
@@ -335,6 +334,7 @@
 		C2819EDD22015BA800183E44 /* FieldController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819EDB22015BA800183E44 /* FieldController.cpp */; };
 		C2820F302175298F00DFA7A6 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
 		C2820F3521752CB000DFA7A6 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
+		C28F74322234880B0040890C /* processor_cli.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28F74312234880B0040890C /* processor_cli.cpp */; };
 		C29C53C1222B58D900D17385 /* dense_motion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29C53BF222B58D900D17385 /* dense_motion.cpp */; };
 		C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
 		C29DB077212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
@@ -779,6 +779,7 @@
 		C2820F3421752C1100DFA7A6 /* gui_handler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = gui_handler.hpp; path = ../include/gui_handler.hpp; sourceTree = "<group>"; };
 		C2820F3621752E5100DFA7A6 /* VisibleApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VisibleApp.h; path = ../include/VisibleApp.h; sourceTree = "<group>"; };
 		C2820F3721754C3100DFA7A6 /* imGuiLogger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = imGuiLogger.hpp; path = ../include/imGuiLogger.hpp; sourceTree = "<group>"; };
+		C28F74312234880B0040890C /* processor_cli.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = processor_cli.cpp; sourceTree = "<group>"; };
 		C294B11F2152D22C00C916B1 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		C29C53BF222B58D900D17385 /* dense_motion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dense_motion.cpp; sourceTree = "<group>"; };
 		C29C53C0222B58D900D17385 /* dense_motion.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = dense_motion.hpp; sourceTree = "<group>"; };
@@ -1260,6 +1261,7 @@
 			isa = PBXGroup;
 			children = (
 				C2AABC1A2221D88E00339675 /* kalman_test.cpp */,
+				C28F74312234880B0040890C /* processor_cli.cpp */,
 				C242CCC6217E93FC004F7867 /* ut_cardio.hpp */,
 				C242CCC4217BD30A004F7867 /* ut_units.hpp */,
 				C2BB4DED21384F970002AECE /* ut_localvar.hpp */,
@@ -2079,6 +2081,7 @@
 				C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */,
 				C20BBC041E4E33D3002C7D68 /* tinyxml.cpp in Sources */,
 				C20BBC091E4E34F0002C7D68 /* InteractiveObject.cpp in Sources */,
+				C28F74322234880B0040890C /* processor_cli.cpp in Sources */,
 				C24EA2D4207F081000555D16 /* sg_filter.cpp in Sources */,
 				C2398A1921DE980C00B180A0 /* imgui.cpp in Sources */,
 				C27221161D1C912E008EF8B2 /* histo.cpp in Sources */,
@@ -2114,7 +2117,6 @@
 				C20EDBC61CF2776D0074C47A /* self_similarity.cpp in Sources */,
 				C2618F84217FDA8400FA9F43 /* color.cc in Sources */,
 				C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */,
-				C273E3602225BC37003DA335 /* main.cpp in Sources */,
 				C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */,
 				C2819ECF2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C2618F85217FDA8F00FA9F43 /* highgui.cc in Sources */,

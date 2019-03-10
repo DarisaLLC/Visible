@@ -12,12 +12,20 @@
 #pragma GCC diagnostic ignored "-Wunused-private-field"
 
 #include <iostream>
+#include <fstream>
 #include <chrono>
 #include "gtest/gtest.h"
 #include <memory>
 #include <thread>
+
+
+#include <boost/foreach.hpp>
+#include "boost/algorithm/string.hpp"
+#include <boost/range/irange.hpp>
 #include "boost/filesystem.hpp"
 #include "boost/algorithm/string.hpp"
+
+
 #include "opencv2/highgui.hpp"
 #include "vision/roiWindow.h"
 #include "vision/self_similarity.h"
@@ -48,9 +56,8 @@
 #include <cereal/types/utility.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/archives/binary.hpp>
-#include <fstream>
 #include "vision/opencv_utils.hpp"
-#include <boost/range/irange.hpp>
+
 
 #include "cvplot/cvplot.h"
 #include "time_series/persistence1d.hpp"
@@ -61,7 +68,6 @@
 #include "vision/gauss.hpp"
 #include "vision/dense_motion.hpp"
 #include "algo_Lif.hpp"
-#include <boost/foreach.hpp>
 
 // @FIXME Logger has to come before these
 #include "ut_units.hpp"
@@ -1288,13 +1294,6 @@ TEST (UT_cm_timer, run)
     EXPECT_TRUE(c1.isNumeric());
     
 }
-
-
-
-
-
-
-
 
 
 TEST (UT_QtimeCache, run)

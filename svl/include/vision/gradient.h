@@ -6,9 +6,11 @@
 #include <iostream>
 #include "roiWindow.h"
 #include "core/pair.hpp"
+#include "vision/edgel.h"
 
 
 unsigned int SpatialEdge(const roiWindow<P8U> & magImage, const roiWindow<P8U> & angleImage, roiWindow<P8U> & peaks, uint8_t threshold, bool angleLabeled = false);
+unsigned int SpatialEdge(const roiWindow<P8U> & magImage, const roiWindow<P8U> & angleImage, std::vector<feature>& features, uint8_t threshold);
 void Gradient(const roiWindow<P8U> & image, roiWindow<P8U> & magnitudes, roiWindow<P8U> & angles);
 
 class EdgeTables
@@ -50,6 +52,7 @@ private:
 
 
 bool GetMotionCenter(const roiWindow<P8U> & peaks, const roiWindow<P8U> & ang, fPair & center);
+bool GetMotionCenter(const std::vector<svl::feature>& , fPair & center);
 bool GetMotionCenter(const roiWindow<P8U> & image, fPair & center, uint8_t threshold = 1);
 
 
@@ -58,6 +61,19 @@ class MotionCenter
 public:
     MotionCenter()
         : mSumUU(0), mSumVV(0), mSumUV(0), mSumUR(0), mSumVR(0), mValid(false) {}
+
+    void add(const fVector_2d & pos, const fVector_2d & motion)
+    {
+        mValid = false;
+        double u = motion.x();
+        double v = motion.y();
+        double r = pos.x() * u + pos.y() * v;
+        mSumUU += u * u;
+        mSumVV += v * v;
+        mSumUV += u * v;
+        mSumUR += u * r;
+        mSumVR += v * r;
+    }
 
     void add(fPair & pos, fPair & motion)
     {
