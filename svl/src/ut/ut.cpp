@@ -268,7 +268,7 @@ TEST (ut_lifFile, triple_channel)
     
     {
         lifIO::LifSerie& lls = lif.getSerie(0);
-        roiMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[0]);
+        roiFixedMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[0]);
         lls.fill2DBuffer(oneBy3.rowPointer(0), 0);
         
         EXPECT_EQ(oneBy3.timestamp(),lls.getTimestamps()[0] );
@@ -282,7 +282,7 @@ TEST (ut_lifFile, triple_channel)
     
     {
         lifIO::LifSerie& lls = lif.getSerie(0);
-        roiMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[30]);
+        roiFixedMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[30]);
         lif.getSerie(0).fill2DBuffer(oneBy3.rowPointer(0), 30);
         EXPECT_EQ(oneBy3.timestamp(),lls.getTimestamps()[30] );
         
@@ -374,6 +374,11 @@ TEST(timing8, gradient)
     endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
     double scale = 1000.0;
     std::cout << " Edge: Mag, Ang, NonMax: 1920 * 1080 * 8 bit " << endtime * scale << " millieseconds per " << std::endl;
+    
+    std::vector<svl::feature> features;
+    auto pks_2 = SpatialEdge(mag, ang, features, 1);
+    EXPECT_EQ(pks, pks_2);
+    
 }
 
 
@@ -400,9 +405,8 @@ TEST(basicU8, motioncenter)
     fPair correct(3.52f, 3.52f);
     EXPECT_EQ(true, fabs(center.first - correct.first) < 0.1f);
     EXPECT_EQ(true, fabs(center.second - correct.second) < 0.1f);
+  
     
-    edgels::directed_features_t lines;
-    extract(mag, ang, peaks, lines, 0);
 }
 
 void fillramp (roiWindow<P8U>& img)
@@ -481,16 +485,8 @@ TEST (ut_mi, basic)
 TEST (ut_roiMultiWindow, basic)
 {
     std::vector<std::string> names { "green", "red", "gray" };
-    roiMultiWindow<P8UP3> wide3 (names);
+    roiFixedMultiWindow<P8UP3> wide3 (names);
     EXPECT_EQ(3*128, wide3.height());
-}
-
-TEST (ut_units, basic)
-{
-    eigen_ut::run();
-    units_ut::run();
-    cardio_ut::run();
-    
 }
 
 

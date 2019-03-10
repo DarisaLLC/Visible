@@ -1,6 +1,7 @@
 
 #include "core/angle_units.h"
 #include "vision/gradient.h"
+#include "vision/edgel.h"
 #include "core/pair.hpp"
 #include "vision/rowfunc.h"
 #include <assert.h>
@@ -205,6 +206,78 @@ static inline int _getAxis(uint8_t val)
 }
 
 
+unsigned int SpatialEdge(const roiWindow<P8U> & magImage, const roiWindow<P8U> & angleImage, std::vector<feature>& features, uint8_t threshold)
+{
+    assert(magImage.width() > 0);
+    assert(angleImage.height() > 0);
+    assert(magImage.width() == angleImage.width());
+    assert(magImage.height() == angleImage.height());
+    
+    iPair kernel_5(5, 5);
+    iPair halfK = kernel_5 / 2;
+    int magUpdate(magImage.rowUpdate());
+    
+    for (int y = halfK.y(); y < magImage.height() - halfK.y(); y++)
+    {
+        const uint8_t * mag = magImage.pelPointer(halfK.x(), y);
+        const uint8_t * ang = angleImage.pelPointer(halfK.x(), y);
+        
+        for (int x = halfK.x(); x < magImage.width() - halfK.x(); x++, mag++, ang++)
+        {
+            uint8_t ctr = *mag;
+            if (ctr < threshold)
+                continue;
+            
+            uint8_t m1, m2;
+            int angle = _getAxis(*ang);
+            
+            switch (angle)
+            {
+                case 0:
+                case 4:
+                    m1 = *(mag - 1);
+                    m2 = *(mag + 1);
+                    break;
+                    
+                case 1:
+                case 5:
+                    m1 = *(mag - 1 - magUpdate);
+                    m2 = *(mag + 1 + magUpdate);
+                    break;
+                    
+                case 2:
+                case 6:
+                    m1 = *(mag - magUpdate);
+                    m2 = *(mag + magUpdate);
+                    break;
+                    
+                case 3:
+                case 7:
+                    m1 = *(mag + 1 - magUpdate);
+                    m2 = *(mag - 1 + magUpdate);
+                    break;
+                    
+                default:
+                    m1 = m2 = 0;
+                    assert(false);
+            }
+            
+//            feature (const int& x, const int& y, uint8_t magnitude, uAngle8 angle,
+//                     uint8_t posNeighborMag, uint8_t negNeighborMag,
+//                     bool doInterpSubPixel = false,
+//                     double weight = 1,
+//                     bool isMod180 = false) :
+            
+            if ((ctr > m1 && ctr >= m2) || (ctr >= m1 && ctr > m2))
+                features.emplace_back(x, y, ctr, uAngle8(*ang), angle, m2, m1, false, 1, false);
+
+        }
+    }
+    return static_cast<int>(features.size());
+
+}
+
+
 /*
  * mag / ang are |pad| ==> peaks are |pad|pad|
  * Sobel is 3x3. Peak Detection is also 3x3 ==> 5x5 operation
@@ -299,6 +372,7 @@ void Gradient(const roiWindow<P8U> & image, roiWindow<P8U> & magnitudes, roiWind
     angles.setBorder(halfK.x());
 }
 
+
 bool GetMotionCenter(const roiWindow<P8U> & peaks, const roiWindow<P8U> & ang, fPair & center)
 {
     MotionCenter mc;
@@ -339,6 +413,17 @@ bool GetMotionCenter(const roiWindow<P8U> & image, fPair & center, uint8_t thres
     Gradient(image, mag, ang);
     SpatialEdge(mag, ang, peaks, threshold);
     return GetMotionCenter(peaks, ang, center);
+}
+
+bool GetMotionCenter(const std::vector<svl::feature>& features, fPair & center){
+    
+    MotionCenter mc;
+    for (const auto feature : features){
+        fVector_2d uv = feature.uv();
+        const fVector_2d& pos = feature.position();
+        mc.add(pos, uv);
+    }
+    return mc.center(center);
 }
 
 

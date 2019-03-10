@@ -9,6 +9,3 @@
 #include "svl.xcconfig"
 
 
-HEADER_SEARCH_PATHS = /usr/local/include $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_PUGIXML)/include $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG) $(SVL_X11_ROOT)/include
-
-

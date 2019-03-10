@@ -10,7 +10,7 @@
 #include <ostream>
 #include <vector>
 #include "core/core.hpp"
-#include "cinder/ImageIo.h"
+#include <cinder/ImageIo.h>
 
 
 using namespace std;

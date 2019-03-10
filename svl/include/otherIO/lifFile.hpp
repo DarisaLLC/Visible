@@ -171,7 +171,7 @@ namespace lifIO
         typedef std::weak_ptr<LifReader> weak_ref;
         
         // @todo move ctor to private
-        LifReader(const std::string &filename, const std::string& ct );
+        LifReader(const std::string &filename, const std::string& ct = "");
         
         static LifReader::ref create (const std::string&  fqfn_path, const std::string& ct = ""){
             return LifReader::ref ( new LifReader (fqfn_path, ct));
