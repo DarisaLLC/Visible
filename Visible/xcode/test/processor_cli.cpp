@@ -29,6 +29,7 @@
 #include "vision/gradient.h"
 #include "core/angle_units.h"
 
+
 using namespace boost;
 
 using namespace std;

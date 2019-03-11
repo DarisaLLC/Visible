@@ -28,6 +28,7 @@ public:
     void position(const fVector_2d &position) {position_ = position;}
     // effect Get/set the position to the given position
     
+    const uint8_t& axis () const { return axis_; }
     const uAngle8& angle() const { return angle_;}
     const uAngle8& tangent () const { return tangent_;}
     // effect Get/set the angle
