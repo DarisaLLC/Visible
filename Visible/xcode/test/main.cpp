@@ -235,6 +235,8 @@ std::vector<Point2f> ellipse_test = {
     {839.415543,384.804510}};
 
 
+
+
 TEST (ut_dm, basic){
     roiWindow<P8U> p0 (320, 240);
     roiWindow<P8U> pw(p0, 80, 60, 160, 120);
@@ -1153,7 +1155,126 @@ TEST (UT_algo, AVReader)
 
 
 
-TEST(ut_similarity, run)
+
+TEST(ut_similarity, short_term)
+{
+   
+    self_similarity_producer<P8U> sm(3,0);
+    
+    EXPECT_EQ(sm.depth() , D_8U);
+    EXPECT_EQ(sm.matrixSz() , 3);
+    EXPECT_EQ(sm.cacheSz() , 0);
+    EXPECT_EQ(sm.aborted() , false);
+
+    vector<roiWindow<P8U>> fill_images(3);
+
+    
+    auto cpToRoiWindow = [](cv::Mat& m, roiWindow<P8U>& r){
+        auto rowPointer = [] (void* data, size_t step, int32_t row ) { return reinterpret_cast<void*>( reinterpret_cast<uint8_t*>(data) + row * step ); };
+        unsigned cols = m.cols;
+        unsigned rows = m.rows;
+        roiWindow<P8U> rw(cols,rows);
+        for (auto row = 0; row < rows; row++) {
+            std::memcpy(rw.rowPointer(row), rowPointer(m.data, m.step, row), cols);
+        }
+        r = rw;
+    };
+    
+//     cv::Mat gaussianTemplate(const std::pair<uint32_t,uint32_t>& dims, const vec2& sigma = vec2(1.0, 1.0), const vec2& center = vec2(0.5,0.5));
+    std::pair<uint32_t,uint32_t> dims (32,32);
+    
+    for (uint32_t i = 0; i < fill_images.size(); i++) {
+        float sigma = 0.5 + i * 0.5;
+        cv::Mat gm = gaussianTemplate(dims,vec2(sigma,sigma));
+        cpToRoiWindow(gm,fill_images[i]);
+    }
+    roiWindow<P8U> tmp (dims.first, dims.second);
+    tmp.randomFill(1066);
+    
+/*
+            Expected Update Output
+ 
+    Fill     9.86492e-06            gaussian sigma 0.5
+             6.21764e-06            gaussian sigma 1.0
+             1.1948e-05             gaussian sigma 1.5
+    Update   0.367755           update with random filled
+             0.367793
+             0.994818
+    Update   0.367801           update with sigma 0.5
+             0.994391
+             0.367548
+    Update   0.994314           update with sigma 1.0
+             0.367543
+             0.367757
+    Update   9.86492e-06        update with sigma 1.5
+             6.21764e-06
+             1.1948e-05
+
+ */
+    deque<double> ent;
+    bool fRet = sm.fill(fill_images);
+    EXPECT_EQ(fRet, true);
+    bool eRet = sm.entropies(ent);
+    EXPECT_EQ(eRet, true);
+    EXPECT_EQ(ent.size() , fill_images.size());
+    EXPECT_EQ(std::distance(ent.begin(), std::max_element(ent.begin(), ent.end())), 2);
+    
+    // Now feed the set of one random followed by 3 gaussins few times
+    {
+            bool u1 = sm.update(tmp);
+            EXPECT_EQ(u1, true);
+
+        bool eRet = sm.entropies(ent);
+        EXPECT_EQ(eRet, true);
+        EXPECT_EQ(ent.size() , fill_images.size());
+        EXPECT_EQ(svl::equal(ent[0], ent[1] , 1.e-3), true);
+        EXPECT_EQ(std::distance(ent.begin(), std::max_element(ent.begin(), ent.end())), 2);
+        
+    }
+
+    {
+        bool u1 = sm.update(fill_images[0]);
+        EXPECT_EQ(u1, true);
+        
+        bool eRet = sm.entropies(ent);
+        EXPECT_EQ(eRet, true);
+        EXPECT_EQ(ent.size() , fill_images.size());
+        EXPECT_EQ(svl::equal(ent[0], ent[2] , 1.e-3), true);
+        EXPECT_EQ(std::distance(ent.begin(), std::max_element(ent.begin(), ent.end())), 1);
+    }
+
+    {
+        bool u1 = sm.update(fill_images[1]);
+        EXPECT_EQ(u1, true);
+        
+        bool eRet = sm.entropies(ent);
+        EXPECT_EQ(eRet, true);
+        EXPECT_EQ(ent.size() , fill_images.size());
+        EXPECT_EQ(svl::equal(ent[1], ent[2] , 1.e-3), true);
+        EXPECT_EQ(std::distance(ent.begin(), std::max_element(ent.begin(), ent.end())), 0);
+    }
+    
+    {
+        bool u1 = sm.update(fill_images[2]);
+        EXPECT_EQ(u1, true);
+        
+        bool eRet = sm.entropies(ent);
+        EXPECT_EQ(eRet, true);
+        EXPECT_EQ(ent.size() , fill_images.size());
+        EXPECT_EQ(std::distance(ent.begin(), std::max_element(ent.begin(), ent.end())), 2);
+    }
+    
+    // Test RefSimilarator
+    self_similarity_producerRef simi (new self_similarity_producer<P8U> (7, 0));
+    EXPECT_EQ (simi.use_count() , 1);
+    self_similarity_producerRef simi2 (simi);
+    EXPECT_EQ (simi.use_count() , 2);
+    
+}
+
+
+
+TEST(ut_similarity, long_term)
 {
     vector<roiWindow<P8U>> images(4);
     
@@ -1218,56 +1339,6 @@ TEST(ut_similarity, run)
     // simi->filter (signal);
 }
 
-
-#if 0 // Not Yet
-TEST (UT_mov_processor, basic)
-{
-    boost::filesystem::path test_filepath;
-    
-    // vf does not support QuickTime natively. The ut expectes and checks for failure
-    
-    auto res = dgenv_ptr->asset_path("box-move.m4v");
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    
-    test_filepath = res.first;
-    
-    std::vector<std::string> names = {  "blue", "green", "red"};
-    auto movProcRef = std::make_shared<mov_processor> ();
-    auto m_movie = ocvPlayerRef ( new OcvVideoPlayer );
-    if (m_movie->load (test_filepath.string())) {
-        std::cout <<  m_movie->getFilePath() << " loaded successfully: " << std::endl;
-        
-        std::cout <<  " > Codec: "        << m_movie->getCodec() << std::endl;
-        std::cout <<  " > Duration: "    << m_movie->getDuration() << std::endl;
-        std::cout <<  " > FPS: "        << m_movie->getFrameRate() << std::endl;
-        std::cout <<  " > Num frames: "    << m_movie->getNumFrames() << std::endl;
-        std::cout <<  " > Size: "        << m_movie->getSize() << std::endl;
-    }
-    
-    EXPECT_TRUE(m_movie->isLoaded());
-        
-    auto mFrameSet = seqFrameContainer::create (m_movie);
-    std::vector<mov_processor::channel_images_t> channels;
-    mov_processor::load_channels_from_images(mFrameSet, channels);
-    
-
-    auto sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
-    sp->load_images(channels[0]);
-    sp->operator()(0, 0);
-        
-        EXPECT_EQ(57, sp->frames_in_content());
-        EXPECT_EQ(57, sp->shannonProjection().size () );
-        EXPECT_EQ(false, svl::contains_nan(sp->shannonProjection().begin(),sp->shannonProjection().end()));
-        
-        std::ofstream f("/Users/arman/tmp/test.txt");
-        for(auto i = sp->shannonProjection().begin(); i != sp->shannonProjection().end(); ++i) {
-            f << *i << '\n';
-        }
-
-    
-}
-#endif
 
 
 TEST (UT_cm_timer, run)
