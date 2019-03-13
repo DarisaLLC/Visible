@@ -1138,6 +1138,22 @@ namespace stl_utils
     
 }
 
+
+template<int LENGTH = 8>
+std::string get_random_string ()
+{
+    std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::uniform_int_distribution<> index_dist(97,122); //interval between 97 ('a') and 65+57=122 ('z')
+    std::vector<char> str_c;
+    str_c.resize (LENGTH);
+    for(int i = 0; i < LENGTH; ++i){
+        str_c[i] = (char)index_dist(rd);
+    }
+    return std::string (&str_c[0]);
+    
+}
+
 #if defined(USED)
 
 namespace gen_filename
@@ -1156,22 +1172,6 @@ namespace gen_filename
 }
 
 
-
-static std::string get_random_string (int length)
-{
-    static std::string chars(
-                             "abcdefghijklmnopqrstuvwxyz"
-                             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                             "1234567890");
-    
-    std::random::random_device rng;
-    boost::random::uniform_int_distribution<> index_dist(0, chars.size() - 1);
-    std::vector<char> str_c;
-    str_c.resize (length);
-    for(int i = 0; i < length; ++i) str_c[i] = chars[index_dist(rng)];
-    return std::string (&str_c[0]);
-    
-}
 #endif
 
 #endif

@@ -171,8 +171,9 @@ private:
     ci::gl::TextureRef m_var_texture;
     
     // Tracks of frame associated results
-    std::weak_ptr<vecOfNamedTrack_t> m_trackWeakRef;
-    std::weak_ptr<vecOfNamedTrack_t> m_pci_trackWeakRef;
+    std::weak_ptr<vecOfNamedTrack_t> m_flurescence_trackWeakRef;
+    std::weak_ptr<vecOfNamedTrack_t> m_contraction_pci_trackWeakRef;
+    std::weak_ptr<vecOfNamedTrack_t> m_shortterm_pci_trackWeakRef;
 
     // Contraction
     lif_serie_processor::contractionContainer_t m_contractions;

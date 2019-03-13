@@ -40,7 +40,7 @@ namespace anonymous
         string extension = pp.extension().string();
         return extension.length() == 0 && pp.filename().string().length() == check_size;
     }
-
+    
     struct greaterScore {
         bool operator () (const sm_producer::outuple_t& left, const sm_producer::outuple_t& right)
         { // Score is at Index 1
@@ -52,7 +52,7 @@ namespace anonymous
         template <typename Tuple>
         bool operator () (const Tuple& left, const Tuple& right) const {
             return std::get<index>(left) > std::get<index>(right); }
-};
+    };
     
     bool smatrix_ok(const sm_producer::sMatrix_t& sm, size_t d1)
     {
@@ -92,7 +92,7 @@ bool sm_producer::load_image_directory (const std::string& dir_fqfn, sm_producer
 std::future<bool> sm_producer::launch_async (int frames)const {
     assert(has_content());
     
-    auto fcnt = (frames == 0) ? _impl-> _frameCount : frames;
+    auto fcnt = (frames == 0) ? _impl-> m_frameCount : frames;
     return std::async(std::launch::async, &sm_producer::spImpl::generate_ssm, _impl, fcnt);
 }
 
@@ -134,7 +134,12 @@ const sm_producer::sMatrixProjection_t& sm_producer::meanProjection (outputOrder
 
 const sm_producer::sMatrixProjection_t& sm_producer::shannonProjection (outputOrderOption ooo) const { return _impl->m_entropies; }
 
-
+const sm_producer::sMatrixProjection_t& sm_producer::shortterm (const uint32_t tWinSz, outputOrderOption ooo) const{
+    static auto empty_result = sm_producer::sMatrixProjection_t ();
+    if (! _impl->ssMatrixDone()) return empty_result;
+    if (tWinSz >= _impl->m_frameCount) return empty_result;
+    return _impl->shortterm(tWinSz);
+}
 
 
 const sm_producer::sMatrixProjection_t& sm_producer::medianLeveledProjection () const
@@ -191,6 +196,55 @@ void sm_producer::spImpl::asset_reader_done_cb ()
     std::cout << " asset reader Done" << std::endl;
 }
 
+const sm_producer::sMatrixProjection_t& sm_producer::spImpl::shortterm (const uint32_t halfWinSz) const{
+    
+    uint32_t tWinSz = 2 * halfWinSz + 1;
+    
+    auto shannon = [](double r) { return (-1.0 * r * log2 (r)); };
+    double _log2MSz = log2(tWinSz);
+    
+    m_shortterms.resize(m_frameCount, -1.0);
+    
+    for (uint32_t diag = halfWinSz; diag < (m_frameCount - halfWinSz); diag++) {
+        // tWinSz x tWinSz centered at diag,diag putting out a readount at diag
+        // top left at row, col
+        auto tl_row = diag - halfWinSz; auto tr_row = tl_row + tWinSz;
+        auto tl_col = diag - halfWinSz; auto tr_col = tl_col + tWinSz;
+        // Sum rows in to _sums @note possible optimization by constant time implementation
+        std::vector<double> _sums (tWinSz, 0);
+        std::vector<double> _entropies (tWinSz, 0);
+        for (auto row = tl_row; row < tr_row; row++) _sums[row] = m_SMatrix[row][row];
+        
+        for (auto row = tl_row; row < tr_row; row++)
+            for (auto col = (row+1); col < tr_col; col++){
+                _sums[row - halfWinSz] += m_SMatrix[row][col];
+                _sums[col - halfWinSz] += m_SMatrix[row][col];
+            }
+        
+        
+        for (auto row = tl_row; row < tr_row; row++)
+            for (auto col = row; col < tr_col; col++){
+                double rr =
+                m_SMatrix[row][col]/_sums[row - halfWinSz]; // Normalize for total energy in samples
+                _entropies[row - halfWinSz] += shannon(rr);
+                
+                if (row != col) {
+                    rr = m_SMatrix[row][col]/_sums[col - halfWinSz];//Normalize for total energy in samples
+                    _entropies[col - halfWinSz] += shannon(rr);
+                }
+                _entropies[row - halfWinSz] = _entropies[row - halfWinSz]/_log2MSz;// Normalize for cnt of samples
+            }
+        
+        m_shortterms[diag] = 1.0 - _entropies[halfWinSz];
+    }
+    for (auto pad = 0; pad < halfWinSz; pad++){
+        m_shortterms[pad] = m_entropies[halfWinSz];
+        m_shortterms[m_frameCount - 1 - pad] =  m_entropies[m_frameCount - 1 - halfWinSz];
+    }
+    return m_shortterms;
+}
+
+
 
 /*
  * Load all the frames
@@ -198,7 +252,7 @@ void sm_producer::spImpl::asset_reader_done_cb ()
  */
 int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_producer::sizeMappingOption szmap, const std::vector<std::string>& supported_extensions)
 {
-
+    
     m_source_type = imageFileDirectory;
     
     paths_vector_t tmp_framePaths;
@@ -319,15 +373,15 @@ int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_pr
     
     if (m_loaded_ref.empty()) return -1;
     
-    _frameCount = m_loaded_ref.size ();
-
+    m_frameCount = m_loaded_ref.size ();
+    
     // Call the content loaded cb if any
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
         signal_content_loaded->operator()();
     
-
     
-    return (int) _frameCount;
+    
+    return (int) m_frameCount;
 }
 
 /*
@@ -357,9 +411,9 @@ int sm_producer::spImpl::loadMovie( const std::string& movieFile )
             ScopeTimer timeit("convertTo");
             m_qtime_cache_ref->convertTo (m_loaded_ref);
         }
-        _frameCount = m_loaded_ref.size ();
-
-        return (int) _frameCount;
+        m_frameCount = m_loaded_ref.size ();
+        
+        return (int) m_frameCount;
         
     }
     return -1;
@@ -368,6 +422,8 @@ int sm_producer::spImpl::loadMovie( const std::string& movieFile )
 
 void sm_producer::spImpl::loadImages (const images_vector_t& images)
 {
+    std::unique_lock <std::mutex> lock(m_mutex);
+    
     m_source_type = imageInMemory;
     m_loaded_ref.resize(0);
     vector<roiWindow<P8U> >::const_iterator vitr = images.begin();
@@ -381,12 +437,12 @@ void sm_producer::spImpl::loadImages (const images_vector_t& images)
             signal_frame_loaded->operator()(count, done_pc);
     }
     while (vitr != images.end());
-    _frameCount = m_loaded_ref.size ();
+    m_frameCount = m_loaded_ref.size ();
     
     // Call the content loaded cb if any
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
         signal_content_loaded->operator()();
-
+    
 }
 
 bool sm_producer::spImpl::done_grabbing () const
@@ -394,13 +450,13 @@ bool sm_producer::spImpl::done_grabbing () const
     // unique lock. forces new shared locks to wait untill this lock is release
     std::unique_lock<std::mutex> lock( m_mutex, std::try_to_lock );
     
-    return _frameCount != 0 && m_qtime_cache_ref->count() == _frameCount;
+    return m_frameCount != 0 && m_qtime_cache_ref->count() == m_frameCount;
 }
 
 bool  sm_producer::spImpl::image_file_entropy_result_ok () const
 {
     assert (type() == imageFileDirectory);
-    bool ok = _frameCount != 0 && !m_entropies.empty();
+    bool ok = m_frameCount != 0 && !m_entropies.empty();
     ok = m_loaded_ref.size() == m_framePaths.size();
     ok &= m_entropies.size() == m_loaded_ref.size();
     return ok;
@@ -422,6 +478,7 @@ bool sm_producer::spImpl::setup_image_directory_result_repo () const
     
 }
 // @todo add sampling and offset
+// @todo direct shortterm generation. 
 bool sm_producer::spImpl::generate_ssm ( int frames)
 {
     std::unique_lock<std::mutex> lock( m_mutex, std::try_to_lock );
@@ -446,10 +503,11 @@ bool sm_producer::spImpl::generate_ssm ( int frames)
     // Call the sm 1d ready cb if any
     if (ok && signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
         signal_sm1d_available->operator()();
-
+    
     // Fetch the SS matrix and verify
     simi->selfSimilarityMatrix(m_SMatrix);
     bool smOk = anonymous::smatrix_ok(m_SMatrix, m_entropies.size());
+    m_sm_is_ok = smOk;
     
     // Call the sm 2d ready cb if any
     if (smOk && signal_sm2d_available && signal_sm2d_available->num_slots() > 0)
