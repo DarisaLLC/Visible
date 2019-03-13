@@ -231,7 +231,7 @@ void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
     
     if (haveTracks())
     {
-        auto tracksRef = m_pci_trackWeakRef.lock();
+        auto tracksRef = m_contraction_pci_trackWeakRef.lock();
         if (!tracksRef->at(0).second.empty()){
          //   m_plots[channel_count()-1]->load(tracksRef->at(0));
             mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
@@ -859,16 +859,14 @@ void lifContext::process_async (){
         case 3:
         {
             // note launch mode is std::launch::async
-            m_async_luminance_tracks = std::async(std::launch::async,&lif_serie_processor::run_flu_statistics,
+            m_fluorescense_tracks = std::async(std::launch::async,&lif_serie_processor::run_flu_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
-            m_async_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_pci_on_channel, m_lifProcRef.get(), 2);
-       
+            m_contraction_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 2);
             break;
         }
         case 1:
         {
-            m_async_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_pci_on_channel,
-                                            m_lifProcRef.get(), 0);
+            m_contraction_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel,m_lifProcRef.get(), 0);
             break;
         }
     }
@@ -913,13 +911,13 @@ void lifContext::add_result_sequencer ()
 #endif
     
     Sequencer(&mySequence, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
-    // add a UI to edit that particular item
-    if (selectedEntry != -1)
-    {
-        const timeLineSequence::timeline_item &item = mySequence.myItems[selectedEntry];
-        ImGui::Text("I am a %s, please edit me", mySequence.mSequencerItemTypeNames[item.mType].c_str());
-        // switch (type) ....
-    }
+//    // add a UI to edit that particular item
+//    if (selectedEntry != -1)
+//    {
+//        const timeLineSequence::timeline_item &item = mySequence.myItems[selectedEntry];
+//        ImGui::Text("I am a %s, please edit me", mySequence.mSequencerItemTypeNames[item.mType].c_str());
+//        // switch (type) ....
+//    }
     
     ImGui::End();
     
@@ -979,7 +977,7 @@ void lifContext::add_timeline(){
         ImGui::InputInt("",  &mySequence.mFrameMax, 0, 0);
         ImGui::PopID();
         
-        if(!m_pci_trackWeakRef.expired()){
+        if(!m_contraction_pci_trackWeakRef.expired()){
             int default_median_cover_pct = getMedianCutOff();
             ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, 0, 20);
             setMedianCutOff(default_median_cover_pct);
@@ -1160,7 +1158,7 @@ void lifContext::resize ()
 
 bool lifContext::haveTracks()
 {
-    return ! m_trackWeakRef.expired() && ! m_pci_trackWeakRef.expired();
+    return ! m_flurescence_trackWeakRef.expired() && ! m_contraction_pci_trackWeakRef.expired();
 }
 
 void lifContext::update ()
@@ -1174,29 +1172,37 @@ void lifContext::update ()
     auto ws = ww->getSize();
     m_layout->update_window_size(ws);
     
-    // If Plots are ready, set them up
-    // It is ready only for new data
+    // If Plots are ready, set them up It is ready only for new data
+    // @todo replace with signal
     //@todo switch to using weak_ptr all together
-    if ( is_ready (m_async_luminance_tracks) )
-        m_trackWeakRef = m_async_luminance_tracks.get();
+    if ( is_ready (m_fluorescense_tracks) )
+        m_flurescence_trackWeakRef = m_fluorescense_tracks.get();
     
-    if ( is_ready (m_async_pci_tracks))
-        m_pci_trackWeakRef = m_async_pci_tracks.get();
+    if ( is_ready (m_contraction_pci_tracks))
+        m_contraction_pci_trackWeakRef = m_contraction_pci_tracks.get();
+    
 
     // Update Fluorescence results if ready
-    if (! m_trackWeakRef.expired())
+    if (! m_flurescence_trackWeakRef.expired())
     {
         assert(channel_count() >= 3);
-        auto tracksRef = m_trackWeakRef.lock();
+        auto tracksRef = m_flurescence_trackWeakRef.lock();
         mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors[tracksRef->at(0).first], 0);
         mySequence.m_editable_plot_data.load(tracksRef->at(1), anonymous::named_colors[tracksRef->at(1).first], 1);
     }
 
     // Update PCI result if ready
-    if ( ! m_pci_trackWeakRef.expired())
+    if ( ! m_contraction_pci_trackWeakRef.expired())
     {
-        auto tracksRef = m_pci_trackWeakRef.lock();
+        auto tracksRef = m_contraction_pci_trackWeakRef.lock();
         mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
+    }
+
+    // Update shortterm PCI result if ready
+    if ( ! m_shortterm_pci_trackWeakRef.expired())
+    {
+        auto tracksRef = m_shortterm_pci_trackWeakRef.lock();
+        mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["Short"], 2);
     }
 
     // Fetch Next Frame

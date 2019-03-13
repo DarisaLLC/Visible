@@ -79,6 +79,8 @@ public:
     const sMatrixProjection_t& shannonProjection (outputOrderOption ooo = input) const;
     
     const sMatrixProjection_t& medianLeveledProjection () const;
+
+    const sMatrixProjection_t& shortterm (const uint32_t temporal_window, outputOrderOption ooo = input) const;
     
     /**
      *  Image Directory Output & Options

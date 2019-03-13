@@ -76,10 +76,10 @@ public:
     const std::vector<unsigned int>& colors () { return mPlotColors; }
     
     
-    
+    //@todo document this
     size_t GetCurveCount()
     {
-        return 3;
+        return 4;
     }
     
     bool IsVisible(size_t curveIndex)

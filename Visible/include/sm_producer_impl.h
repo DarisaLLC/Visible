@@ -31,7 +31,7 @@ class sm_signaler : public base_signaler
 };
 
 
-SINGLETON_FCN(stl_utils::random_name,get_name_generator);
+
 
 class sm_producer::spImpl : public sm_signaler
 {
@@ -44,9 +44,9 @@ public:
 
  
     
-    spImpl ()
+    spImpl (): m_sm_is_ok (false)
     {
-        m_name = get_name_generator().get_anew();
+        m_name = get_random_string();
         signal_content_loaded = createSignal<sm_producer::sig_cb_content_loaded>();
         signal_frame_loaded = createSignal<sm_producer::sig_cb_frame_loaded>();
         signal_sm1d_available = createSignal<sm_producer::sig_cb_sm1d_available> ();
@@ -60,12 +60,13 @@ public:
                             const std::vector<std::string>& supported_extensions = { ".jpg", ".png", ".JPG", ".jpeg"});
     
     void loadImages ( const images_vector_t& );
+    const bool ssMatrixDone () const { return m_sm_is_ok; }
     
     const source_type type () const { return m_source_type; }
     
     bool done_grabbing () const;
     bool generate_ssm (int frames);
-    int64_t frame_count () { return _frameCount; }
+    int64_t frame_count () { return m_frameCount; }
     bool image_file_entropy_result_ok () const;
     
     void asset_reader_done_cb ();
@@ -74,6 +75,8 @@ public:
     images_vector_t& images () const { return m_loaded_ref; }
     const std::vector<fs::path >& frame_paths () const { return m_framePaths; }
     const ordered_outuple_t& ordered_input_output (const outputOrderOption) const;
+    
+    const sm_producer::sMatrixProjection_t& shortterm (const uint32_t tWinSz) const;
     
   
 private:
@@ -98,13 +101,15 @@ private:
 
     mutable mutex_t   m_mutex;
     mutable std::condition_variable m_frame_ready;
+    mutable std::atomic<bool> m_sm_is_ok;
     
-    time_spec_t       _currentTime, _startTime;
+    
+    time_spec_t       m_currentTime, m_startTime;
     mutable images_vector_t                 m_loaded_ref;
-    int64_t                         _frameRate;
-    int64_t                          _frameCount;
-    int64_t                          _elapasedFrames;
-    int64_t                          _fcm1;
+    int64_t                         m_frameRate;
+    int64_t                          m_frameCount;
+    int64_t                          m_elapasedFrames;
+    int64_t                          m_fcm1;
     
     mutable long m_index, m_must_stop, m_frame;
     
@@ -115,12 +120,13 @@ private:
     paths_vector_t m_framePaths;
     mutable std::map<outputOrderOption, ordered_outuple_t> m_output_repo;
     
-    deque<deque<double> >        m_SMatrix;   // Used in eExhaustive and
-    deque<double>                m_entropies; // Final entropy signal
-    deque<double>                m_means; // Final entropy signal
-    deque<double>                m_median_leveled; // Final entropy signal
-    int                          m_depth;
-    std::string                  m_name;
+    sMatrix_t                                       m_SMatrix;   // Used in eExhaustive and
+    sm_producer::sMatrixProjection_t               m_entropies; // Final entropy signal
+    sm_producer::sMatrixProjection_t               m_means; // Final entropy signal
+    sm_producer::sMatrixProjection_t                m_median_leveled; // Final entropy signal
+    int                                      m_depth;
+    std::string                               m_name;
+    mutable sm_producer::sMatrixProjection_t        m_shortterms;
     
 };
 

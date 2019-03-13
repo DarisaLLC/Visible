@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include <math.h>
-
+#include <iterator>
 #include <vector>
 #include <deque>
 #include <memory>
@@ -104,6 +104,9 @@ class self_similarity_producer
    * an entropy signal is generated and true will be returned.
    * Otherwise, no calculations are done and false is returned.
    */
+  template <class Iterator>
+  bool fill(Iterator Ib, Iterator Ie);
+    
   bool fill(vector<image_t >& firstImages);
   bool fill(deque<image_t >& firstImages);
     

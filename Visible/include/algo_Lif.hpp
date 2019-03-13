@@ -222,7 +222,6 @@ public:
     int64_t load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names);
     
     // Run Luminance info on a vector of channel indices
-    async_vecOfNamedTrack_t get_luminance_info (const std::vector<int>& channels);
     std::shared_ptr<vecOfNamedTrack_t> run_flu_statistics (const std::vector<int>& channels);
     
     // Channel Index API for IDLab custom organization
@@ -230,13 +229,20 @@ public:
     svl::stats<int64_t> run_volume_sum_sumsq_count (const int channel_index);
     // Run per pixel stdev accumulator a channel at index
     void run_volume_variances (const int channel_index);
-    // Run to get Entropies and Median Level Set
-    std::shared_ptr<vecOfNamedTrack_t> run_pci_on_channel (const int channel_index);
+  
     
     // Vector of 8bit roiWindows API for IDLab custom organization
     svl::stats<int64_t> run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>&);
     void run_volume_variances (std::vector<roiWindow<P8U>>& );
-    std::shared_ptr<vecOfNamedTrack_t> run_pci (const std::vector<roiWindow<P8U>>&);
+
+    // Run to get Entropies and Median Level Set. Both short term and long term pic
+    // @todo event though index is an argument, only room for one channel is kept.
+    // Short term is specifically run on the channel contraction pci was run on
+    // duplictes will be removed from indices for short term pci.
+    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci_on_channel (const int channel_index);
+    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci (const std::vector<roiWindow<P8U>>&);
+    std::vector<float> shortterm_pci (const std::vector<uint32_t>& indices);
+    std::shared_ptr<vecOfNamedTrack_t> shortterm_pci (const uint32_t& temporal_window);
 
     // Return 2D latice of pixels over time
     void generateVoxels_on_channel (const int channel_index, std::vector<std::vector<roiWindow<P8U>>>&);
@@ -257,6 +263,10 @@ public:
     
     std::shared_ptr<OCVImageWriter>& get_image_writer ();
     void save_channel_images (int channel_index, std::string& dir_fqfn);
+    
+    const vector<vector<double>>& ssMatrix () const { return m_smat; }
+    const vector<double>& entropies () const { return m_entropies; }
+    
     
 protected:
     boost::signals2::signal<lif_serie_processor::sig_cb_content_loaded>* signal_content_loaded;
@@ -280,7 +290,7 @@ private:
     
     
     // Note tracks contained timed data.
-    void entropiesToTracks (namedTrack_t& track);
+    void median_leveled_pci (namedTrack_t& track);
     
     // @note Specific to ID Lab Lif Files
     void create_named_tracks (const std::vector<std::string>& names);
@@ -293,7 +303,7 @@ private:
     // One similarity engine
     mutable smProducerRef m_sm;
     vector<double> m_entropies;
-    vector<vector<double>> m_smat;
+    mutable vector<vector<double>> m_smat;
     
     // Median Levels
     std::vector<double> m_medianLevel;
@@ -314,8 +324,10 @@ private:
     // 3 channels: 2 flu one visible
     // 1 channel: visible
     // Note create_named_tracks
-    std::shared_ptr<vecOfNamedTrack_t>  m_tracksRef;
-    std::shared_ptr<vecOfNamedTrack_t>  m_pci_tracksRef;
+    std::shared_ptr<vecOfNamedTrack_t>  m_flurescence_tracksRef;
+    std::shared_ptr<vecOfNamedTrack_t>  m_contraction_pci_tracksRef;
+    std::shared_ptr<vecOfNamedTrack_t>  m_shortterm_pci_tracksRef;
+    
     std::shared_ptr<contraction_analyzer> m_caRef;
     
     mutable svl::stats<int64_t> m_3d_stats;

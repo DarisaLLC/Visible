@@ -221,20 +221,25 @@ lif_serie_processor::lif_serie_processor ()
 // 1 channel: visible
 void lif_serie_processor::create_named_tracks (const std::vector<std::string>& names)
 {
-    m_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
-    m_pci_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
+    m_flurescence_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
+    m_contraction_pci_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
+    m_shortterm_pci_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
     
     switch(names.size()){
         case 3:
-            m_tracksRef->resize (2);
-            m_pci_tracksRef->resize (1);
+            m_flurescence_tracksRef->resize (2);
+            m_contraction_pci_tracksRef->resize (1);
+            m_shortterm_pci_tracksRef->resize (1);
             for (auto tt = 0; tt < names.size()-1; tt++)
-                m_tracksRef->at(tt).first = names[tt];
-            m_pci_tracksRef->at(0).first = names[2];
+                m_flurescence_tracksRef->at(tt).first = names[tt];
+            m_contraction_pci_tracksRef->at(0).first = names[2];
+            m_shortterm_pci_tracksRef->at(0).first = names[2];
             break;
         case 1:
-            m_pci_tracksRef->resize (1);
-            m_pci_tracksRef->at(0).first = names[0];
+            m_contraction_pci_tracksRef->resize (1);
+            m_shortterm_pci_tracksRef->resize (1);
+            m_contraction_pci_tracksRef->at(0).first = names[0];
+            m_shortterm_pci_tracksRef->at(0).first = names[0];
             break;
         default:
             assert(false);
@@ -378,7 +383,7 @@ std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::run_flu_statistics (cons
     for (auto tt = 0; tt < channels.size(); tt++)
     {
         threads[tt] = std::thread(IntensityStatisticsRunner(),
-                                  std::ref(m_all_by_channel[tt]), std::ref(m_tracksRef->at(tt).second));
+                                  std::ref(m_all_by_channel[tt]), std::ref(m_flurescence_tracksRef->at(tt).second));
     }
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     
@@ -386,12 +391,51 @@ std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::run_flu_statistics (cons
     if (signal_flu_available && signal_flu_available->num_slots() > 0)
         signal_flu_available->operator()();
     
-    return m_tracksRef;
+    return m_flurescence_tracksRef;
 }
 
+#if 0
+std::vector<float> lif_serie_processor::shortterm_pci (const std::vector<uint32_t>& indices){
+    // Only map the unique ones
+    std::map<uint32_t, bool> hist;
+    for (auto idx : indices){
+        if (hist.find(idx) == hist.end()){
+            hist[idx] = true;
+        }
+    }
+    std::vector<uint32_t> cpy = stl_utils::keys_as_vector(hist);
+
+}
+#endif
+
+std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::shortterm_pci (const uint32_t& half_temporal_window){
+    // Check if full sm has been done
+    auto sp =  sm();
+    bool ok = sp && sp->similarityMatrix().size() == ssMatrix().size();
+    ok = ok && sp->similarityMatrix()[0].size() == ssMatrix()[0].size();
+    ok = ok && entropies().size() == ssMatrix().size();
+    
+    if (!ok) return std::shared_ptr<vecOfNamedTrack_t> ();
+    m_shortterm_pci_tracksRef->clear();
+    const sm_producer::sMatrixProjection_t& shortterm = sp->shortterm(half_temporal_window);
+    
+    for (auto ii = 0; ii < shortterm.size(); ii++)
+    {
+        timedVal_t res;
+        index_time_t ti;
+        ti.first = ii;
+        res.first = ti;
+        res.second = static_cast<float>(shortterm[ii]);
+        m_shortterm_pci_tracksRef->at(0).second.emplace_back(res);
+    }
+    return m_shortterm_pci_tracksRef;
+}
+
+
+
 // Run to get Entropies and Median Level Set
-// PCI track is being used for initial emtropy and median leveled 
-std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_pci (const std::vector<roiWindow<P8U>>& images)
+// PCI track is being used for initial emtropy and median leveled
+std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci (const std::vector<roiWindow<P8U>>& images)
 {
     auto sp =  sm();
     sp->load_images (images);
@@ -416,12 +460,14 @@ std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_pci (const std::vec
         if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
             signal_sm1d_available->operator()(dummy);
     }
-    return m_pci_tracksRef;
+    return m_contraction_pci_tracksRef;
 }
 
-std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_pci_on_channel (const int channel_index)
+// @todo even though channel index is an argument, but only results for one channel is kept in lif_processor.
+// 
+std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci_on_channel (const int channel_index)
 {
-    return run_pci(std::move(m_all_by_channel[channel_index]));
+    return run_contraction_pci(std::move(m_all_by_channel[channel_index]));
 }
 
 
@@ -433,8 +479,8 @@ const cv::RotatedRect& lif_serie_processor::motion_surface() const { return m_mo
 // Update. Called also when cutoff offset has changed
 void lif_serie_processor::update ()
 {
-    if(m_pci_tracksRef && !m_pci_tracksRef->empty() && m_caRef && m_caRef->isValid())
-        entropiesToTracks(m_pci_tracksRef->at(0));
+    if(m_contraction_pci_tracksRef && !m_contraction_pci_tracksRef->empty() && m_caRef && m_caRef->isValid())
+        median_leveled_pci(m_contraction_pci_tracksRef->at(0));
 }
 
 
@@ -508,7 +554,7 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
 
 // Note tracks contained timed data.
 // Each call to find_best can be with different median cut-off
-void lif_serie_processor::entropiesToTracks (namedTrack_t& track)
+void lif_serie_processor::median_leveled_pci (namedTrack_t& track)
 {
   //  std::lock_guard<std::mutex> lock(m_mutex);
     
