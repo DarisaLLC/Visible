@@ -336,36 +336,36 @@ void movContext::loadMovieFile()
                 setWindowSize(window_size);
                 
                 // Setup Plot area
-                {
-                    std::lock_guard<std::mutex> lock(m_track_mutex);
-                    
-                    m_plots.resize (0);
-                    
-                    for (graph1d::ref gr : m_plots)
-                    {
-                        m_marker_signal.connect(std::bind(&graph1d::set_marker_position, gr, std::placeholders::_1));
-                    }
-                    
-                    for (int cc = 0; cc < names.size() ; cc++)
-                    {
-                        m_plots.push_back( graph1d::ref (new graph1d (names[cc], vl.plot_rects() [cc])));
-                    }
-                
-                    
-                    for (graph1d::ref gr : m_plots)
-                    {
-                        m_marker_signal.connect(std::bind(&graph1d::set_marker_position, gr, std::placeholders::_1));
-                    }
-                    
-                    mMainTimeLineSlider.setBounds (vl.display_timeline_rect());
-                    mMainTimeLineSlider.setTitle ("Time Line");
-                    m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mMainTimeLineSlider, std::placeholders::_1));
-                    mWidgets.push_back( &mMainTimeLineSlider );
-                    
-                    getWindow()->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
-                    
-                    play ();
-                }
+//                {
+//                    std::lock_guard<std::mutex> lock(m_track_mutex);
+//
+//                    m_plots.resize (0);
+//
+//                    for (graph1d::ref gr : m_plots)
+//                    {
+//                        m_marker_signal.connect(std::bind(&graph1d::set_marker_position, gr, std::placeholders::_1));
+//                    }
+//
+//                    for (int cc = 0; cc < names.size() ; cc++)
+//                    {
+//                        m_plots.push_back( graph1d::ref (new graph1d (names[cc], vl.plot_rects() [cc])));
+//                    }
+//
+//
+//                    for (graph1d::ref gr : m_plots)
+//                    {
+//                        m_marker_signal.connect(std::bind(&graph1d::set_marker_position, gr, std::placeholders::_1));
+//                    }
+//
+//                    mMainTimeLineSlider.setBounds (vl.display_timeline_rect());
+//                    mMainTimeLineSlider.setTitle ("Time Line");
+//                    m_marker_signal.connect(std::bind(&tinyUi::TimeLineSlider::set_marker_position, mMainTimeLineSlider, std::placeholders::_1));
+//                    mWidgets.push_back( &mMainTimeLineSlider );
+//
+//                    getWindow()->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
+//
+//                    play ();
+//                }
 
                 
                 // Launch Average Luminance Computation
@@ -415,20 +415,13 @@ void movContext::mouseMove( MouseEvent event )
 void movContext::mouseDrag( MouseEvent event )
 {
     mMouseIsDragging = true;
-    for (graph1d::ref graphRef : m_plots)
-        graphRef->mouseDrag( event );
 }
 
 
 void movContext::mouseDown( MouseEvent event )
 {
     mMouseIsDown = true;
-    for (graph1d::ref graphRef : m_plots )
-    {
-        graphRef->mouseDown( event );
-        graphRef->get_marker_position(mTimeMarker);
-        signalMarker.emit(mTimeMarker);
-    }
+   
 }
 
 
@@ -436,8 +429,7 @@ void movContext::mouseUp( MouseEvent event )
 {
     mMouseIsDown = false;
     mMouseIsDragging = false;
-    for (graph1d::ref graphRef : m_plots)
-        graphRef->mouseUp( event );
+
 }
 
 
@@ -566,8 +558,6 @@ void movContext::draw ()
     mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
     gl::draw (mImage, dr);
     draw_info ();
-    for(graph1d::ref gg : m_plots)
-        gg->draw ();
     }
     mUIParams.draw();
 }

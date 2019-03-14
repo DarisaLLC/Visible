@@ -28,7 +28,6 @@
 #include "timestamp.h"
 #include "seq_frame_container.hpp"
 
-#include "graph1d.hpp"
 #include "roiWindow.h"
 #include "otherIO/lifFile.hpp"
 #include "core/stl_utils.hpp"
@@ -36,14 +35,13 @@
 #include "directoryPlayer.h"
 #include "hockey_etc_cocoa_wrappers.h"
 #include "timeMarker.h"
-#include "TinyUi.h"
 #include "OcvVideo.h"
 #include <sstream>
 
 #include "DisplayObjectContainer.h"
 
 
-using namespace tinyUi;
+
 
 using namespace boost;
 using namespace boost::filesystem;
@@ -115,9 +113,6 @@ public:
     bool m_valid;
     ci::app::WindowRef				mWindow;
 	std::string mName;
-	marker_info mTimeMarker;
-	marker_info mAuxTimeMarker;
-	
 };
 
 class mainContext : public guiContext
@@ -176,8 +171,6 @@ class sequencedImageContext : public guiContext, public gui_base
 public:
 	
 	typedef	 signals::Signal<void( marker_info_t & )>		MarkerSignalInfo_t;
-	MarkerSignalInfo_t&	getMarkerSignal () { return m_marker_signal; }
-	MarkerSignalInfo_t&	getAuxMarkerSignal () { return m_aux_marker_signal; }
 	
 	sequencedImageContext(ci::app::WindowRef& ww)
 	: guiContext (ww)
@@ -197,22 +190,20 @@ public:
 	virtual Rectf get_image_display_rect () = 0;
 	virtual void processDrag( ivec2 pos ) = 0;
 	
-	MarkerSignalInfo_t& markerSignal () const { return m_marker_signal; }
-	
 	virtual bool have_tracks () const { return m_have_tracks; }
 
 	// App default startup params
 	static ivec2 startup_display_size () { return ivec2( 848, 564 ); }
 	
 protected:
-	int mMainTimeLineSliderIndex;
-	TimeLineSlider                    mMainTimeLineSlider;
-	vector<Widget *>	mWidgets;
-	vector<bool> mMouseInWidgets;
+//	int mMainTimeLineSliderIndex;
+//	TimeLineSlider                    mMainTimeLineSlider;
+//	vector<Widget *>	mWidgets;
+//	vector<bool> mMouseInWidgets;
 
 	
 	
-	std::vector<graph1d::ref> m_plots;
+//	std::vector<graph1d::ref> m_plots;
 	std::mutex m_track_mutex;
 	
 	arrayOfNamedTracks_t m_luminance_tracks;
@@ -228,8 +219,8 @@ protected:
 	std::vector<std::string> m_perform_names;
 	int  m_selected_perform_index;
 
-	mutable MarkerSignalInfo_t m_marker_signal;
-	mutable MarkerSignalInfo_t m_aux_marker_signal;
+//	mutable MarkerSignalInfo_t m_marker_signal;
+//	mutable MarkerSignalInfo_t m_aux_marker_signal;
 	
 	ivec2 m_instant_mouse_image_pos;
 	uint32_t m_instant_channel;

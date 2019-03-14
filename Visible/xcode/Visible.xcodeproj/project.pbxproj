@@ -14,7 +14,6 @@
 		C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
 		C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
 		C20BBC071E4E34C3002C7D68 /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
-		C20BBC091E4E34F0002C7D68 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
 		C20BBC0B1E4E39E6002C7D68 /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
 		C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
 		C20D4DE52208BD34004D9405 /* ellipse_fit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20D4DE32208BD34004D9405 /* ellipse_fit.cpp */; };
@@ -30,10 +29,13 @@
 		C20EDBC61CF2776D0074C47A /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBF1CF277130074C47A /* self_similarity.cpp */; };
 		C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C20EDBC81CF277740074C47A /* exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBE1CF277130074C47A /* exception.cpp */; };
+		C21094672239D1C8004E88EE /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
+		C21094682239D1C8004E88EE /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
+		C21094692239D1C8004E88EE /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
+		C210946A2239D1C8004E88EE /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
 		C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
 		C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
 		C2175DDC215154EA004315C0 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
-		C219467E1CE4DC7100976025 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
 		C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
 		C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
 		C21FFE721CFE0AA300C97013 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
@@ -65,7 +67,6 @@
 		C2398A3621DF224B00B180A0 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
 		C2398A3721DF224B00B180A0 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
 		C2398A3821DF224B00B180A0 /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
-		C2398A3921DF224B00B180A0 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
 		C2398A3A21DF224B00B180A0 /* Swatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */; };
 		C2398A3B21DF224B00B180A0 /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C2398A3C21DF224B00B180A0 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
@@ -235,7 +236,6 @@
 		C26F5FA721B0AA6D00EAE156 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
 		C26F5FA821B0AA6D00EAE156 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
 		C26F5FA921B0AA6D00EAE156 /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
-		C26F5FAA21B0AA6D00EAE156 /* InteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C219466D1CE4DC7100976025 /* InteractiveObject.cpp */; };
 		C26F5FAB21B0AA6D00EAE156 /* Swatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */; };
 		C26F5FAD21B0AA6D00EAE156 /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C26F5FAF21B0AA6D00EAE156 /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
@@ -485,6 +485,8 @@
 		C20EDBC01CF277130074C47A /* time_spec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = time_spec.cpp; sourceTree = "<group>"; };
 		C20EDBC41CF277480074C47A /* simple_timing.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = simple_timing.hpp; sourceTree = "<group>"; };
 		C20EDBC51CF277480074C47A /* timestamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timestamp.h; sourceTree = "<group>"; };
+		C21094662239D1C8004E88EE /* permutation_entropy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = permutation_entropy.cpp; path = ../src/permutation_entropy.cpp; sourceTree = "<group>"; };
+		C210946B2239D1F3004E88EE /* permutation_entropy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = permutation_entropy.h; path = ../include/permutation_entropy.h; sourceTree = "<group>"; };
 		C210F1132159A826002A82A3 /* libzlib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libzlib.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/libzlib.a"; sourceTree = "<group>"; };
 		C210F1142159A827002A82A3 /* libippiw.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libippiw.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/libippiw.a"; sourceTree = "<group>"; };
 		C210F1152159A828002A82A3 /* liblibpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibpng.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/liblibpng.a"; sourceTree = "<group>"; };
@@ -505,14 +507,10 @@
 		C21946611CE4D95E00976025 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		C21946651CE4DC7100976025 /* onImagePlotUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = onImagePlotUtils.cpp; path = ../src/onImagePlotUtils.cpp; sourceTree = "<group>"; };
 		C21946691CE4DC7100976025 /* directoryPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = directoryPlayer.cpp; path = ../src/directoryPlayer.cpp; sourceTree = "<group>"; };
-		C219466D1CE4DC7100976025 /* InteractiveObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InteractiveObject.cpp; path = ../src/InteractiveObject.cpp; sourceTree = "<group>"; };
 		C21946741CE4DC7100976025 /* seq_frame_container.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = seq_frame_container.cpp; path = ../src/seq_frame_container.cpp; sourceTree = "<group>"; };
 		C21946761CE4DC7100976025 /* visible_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_impl.cpp; path = ../src/visible_impl.cpp; sourceTree = "<group>"; };
 		C21946771CE4DC7100976025 /* VisibleRunApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VisibleRunApp.cpp; path = ../src/VisibleRunApp.cpp; sourceTree = "<group>"; };
 		C219468A1CE4EA4900976025 /* OnImagePlotUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OnImagePlotUtils.h; path = ../include/OnImagePlotUtils.h; sourceTree = "<group>"; };
-		C219468B1CE4EA4900976025 /* TinyUi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TinyUi.h; path = ../include/TinyUi.h; sourceTree = "<group>"; };
-		C21946941CE4EA4900976025 /* graph1d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = graph1d.hpp; path = ../include/graph1d.hpp; sourceTree = "<group>"; };
-		C21946961CE4EA4900976025 /* InteractiveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InteractiveObject.h; path = ../include/InteractiveObject.h; sourceTree = "<group>"; };
 		C219469E1CE4EA4900976025 /* simple_pair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = simple_pair.h; path = ../include/simple_pair.h; sourceTree = "<group>"; };
 		C219469F1CE4EA4900976025 /* sshist.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sshist.hpp; path = ../include/sshist.hpp; sourceTree = "<group>"; };
 		C21946A31CE4EA4900976025 /* guiContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = guiContext.h; path = ../include/guiContext.h; sourceTree = "<group>"; usesTabs = 1; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -972,6 +970,7 @@
 		080E96DDFE201D6D7F000001 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C21094662239D1C8004E88EE /* permutation_entropy.cpp */,
 				C260AFCE21ED0691003B0FF0 /* sg_filter.cpp */,
 				C2203D6421CAFFD9003F2F33 /* logger.cpp */,
 				C2820F3121752BF600DFA7A6 /* gui_handler.cpp */,
@@ -993,7 +992,6 @@
 				C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */,
 				C21946651CE4DC7100976025 /* onImagePlotUtils.cpp */,
 				C21946691CE4DC7100976025 /* directoryPlayer.cpp */,
-				C219466D1CE4DC7100976025 /* InteractiveObject.cpp */,
 				C21946741CE4DC7100976025 /* seq_frame_container.cpp */,
 				C21946761CE4DC7100976025 /* visible_impl.cpp */,
 				C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */,
@@ -1166,6 +1164,7 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C210946B2239D1F3004E88EE /* permutation_entropy.h */,
 				C23B7CC6220553E1005DE02C /* cpp-perf.hpp */,
 				C2819ED622012DE800183E44 /* Resources.h */,
 				C260AFCF21ED076F003B0FF0 /* sg_filter.h */,
@@ -1189,9 +1188,6 @@
 				C219076A1F7D4FB500CC4780 /* contraction.hpp */,
 				C259145F2145BA7500F80D5F /* clipManager.hpp */,
 				C219468A1CE4EA4900976025 /* OnImagePlotUtils.h */,
-				C219468B1CE4EA4900976025 /* TinyUi.h */,
-				C21946941CE4EA4900976025 /* graph1d.hpp */,
-				C21946961CE4EA4900976025 /* InteractiveObject.h */,
 				C24FC84C1E5E40130071AA1A /* async_tracks.h */,
 				C213607821647E4A00F794AB /* cached_results.hpp */,
 				C241BBAA1FB11B51000DE36E /* algo_Lif.hpp */,
@@ -1948,9 +1944,9 @@
 				C2820F3521752CB000DFA7A6 /* gui_handler.cpp in Sources */,
 				C242CCC5217E76D8004F7867 /* contraction.cpp in Sources */,
 				C2B005821CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm in Sources */,
+				C21094672239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
 				C2606DB01CED3E2E0045FF57 /* opencv_utils.cpp in Sources */,
 				C2AFCEFE216E79590080462D /* imgui_widgets.cpp in Sources */,
-				C219467E1CE4DC7100976025 /* InteractiveObject.cpp in Sources */,
 				C2EF8D1F2148768D00A5D3D6 /* Swatch.cpp in Sources */,
 				C20EDBC31CF277130074C47A /* time_spec.cpp in Sources */,
 				C24C0958214B2F4D004C8002 /* VisibleApp.cpp in Sources */,
@@ -2021,7 +2017,6 @@
 				C2398A3621DF224B00B180A0 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C2398A3721DF224B00B180A0 /* opencv_utils.cpp in Sources */,
 				C2398A3821DF224B00B180A0 /* imgui_widgets.cpp in Sources */,
-				C2398A3921DF224B00B180A0 /* InteractiveObject.cpp in Sources */,
 				C2398A3A21DF224B00B180A0 /* Swatch.cpp in Sources */,
 				C2398A3B21DF224B00B180A0 /* time_spec.cpp in Sources */,
 				C2398A3C21DF224B00B180A0 /* logger.cpp in Sources */,
@@ -2081,10 +2076,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C21094692239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
 				C20BBC071E4E34C3002C7D68 /* lifFile.cpp in Sources */,
 				C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */,
 				C20BBC041E4E33D3002C7D68 /* tinyxml.cpp in Sources */,
-				C20BBC091E4E34F0002C7D68 /* InteractiveObject.cpp in Sources */,
 				C24EA2D4207F081000555D16 /* sg_filter.cpp in Sources */,
 				C2398A1921DE980C00B180A0 /* imgui.cpp in Sources */,
 				C27221161D1C912E008EF8B2 /* histo.cpp in Sources */,
@@ -2135,6 +2130,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C210946A2239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
 				C2398A0C21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C26A057C1E7785C300BDC954 /* cinder_support.cpp in Sources */,
 				C26A05681E777E2100BDC954 /* tinyxmlerror.cpp in Sources */,
@@ -2169,10 +2165,10 @@
 				C26F5FA221B0AA6D00EAE156 /* gradient.cpp in Sources */,
 				C26F5FA521B0AA6D00EAE156 /* gui_handler.cpp in Sources */,
 				C26F5FA621B0AA6D00EAE156 /* contraction.cpp in Sources */,
+				C21094682239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
 				C26F5FA721B0AA6D00EAE156 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C26F5FA821B0AA6D00EAE156 /* opencv_utils.cpp in Sources */,
 				C26F5FA921B0AA6D00EAE156 /* imgui_widgets.cpp in Sources */,
-				C26F5FAA21B0AA6D00EAE156 /* InteractiveObject.cpp in Sources */,
 				C26F5FAB21B0AA6D00EAE156 /* Swatch.cpp in Sources */,
 				C26F5FAD21B0AA6D00EAE156 /* time_spec.cpp in Sources */,
 				C2B87C9A21D012DA00C91E35 /* logger.cpp in Sources */,

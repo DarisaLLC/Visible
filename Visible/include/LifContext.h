@@ -10,7 +10,7 @@
 #include "imGuiCustom/ImSequencer.h"
 #include "imGuiCustom/visibleSequencer.h"
 
-using namespace tinyUi;
+
 
 using namespace boost;
 using namespace boost::filesystem;
@@ -108,8 +108,6 @@ public:
 	void loop_no_loop_button ();
     void edit_no_edit_button ();
     void update_contraction_selection ();
-	
-	void receivedEvent ( InteractiveObjectEvent event );
 	
 	const tiny_media_info& media () const { return mMediaInfo; }
     const uint32_t& channel_count () const { return mChannelCount; }

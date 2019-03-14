@@ -394,19 +394,7 @@ std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::run_flu_statistics (cons
     return m_flurescence_tracksRef;
 }
 
-#if 0
-std::vector<float> lif_serie_processor::shortterm_pci (const std::vector<uint32_t>& indices){
-    // Only map the unique ones
-    std::map<uint32_t, bool> hist;
-    for (auto idx : indices){
-        if (hist.find(idx) == hist.end()){
-            hist[idx] = true;
-        }
-    }
-    std::vector<uint32_t> cpy = stl_utils::keys_as_vector(hist);
 
-}
-#endif
 
 std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::shortterm_pci (const uint32_t& half_temporal_window){
     // Check if full sm has been done
