@@ -57,7 +57,7 @@
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/archives/binary.hpp>
 #include "vision/opencv_utils.hpp"
-
+#include "permutation_entropy.h"
 
 #include "cvplot/cvplot.h"
 #include "time_series/persistence1d.hpp"
@@ -234,7 +234,21 @@ std::vector<Point2f> ellipse_test = {
     {778.129881,381.776216},
     {839.415543,384.804510}};
 
-
+TEST(ut_permutation_entropy, n_2){
+    std::vector<double> times_series = {4/12.0,7/12.0,9/12.0,10/12.0,6/12.0,11/12.0,3/12.0};
+    {
+        auto pe_array_stats = permutation_entropy::permutation_entropy_array_stats(times_series, 2);
+        auto pe_dict_stats = permutation_entropy::permutation_entropy_dictionary_stats(times_series, 2);
+        std::cout << pe_array_stats << std::endl;
+        std::cout << pe_dict_stats << std::endl;
+    }
+    {
+        auto pe_array_stats = permutation_entropy::permutation_entropy_array_stats(times_series, 3);
+        auto pe_dict_stats = permutation_entropy::permutation_entropy_dictionary_stats(times_series, 3);
+        std::cout << pe_array_stats << std::endl;
+        std::cout << pe_dict_stats << std::endl;
+    }
+}
 
 
 TEST (ut_dm, basic){

@@ -260,8 +260,6 @@ void lifContext::signal_contraction_available (lif_serie_processor::contractionC
     
     if (contras.empty()) return;
     
-    // TimeLine Markers
-    mMainTimeLineSlider.clear_timepoint_markers();
     
     // @note: We are handling one contraction for now.
     m_contractions = contras;
@@ -273,11 +271,6 @@ void lifContext::signal_contraction_available (lif_serie_processor::contractionC
                          m_contractions[0].relaxation_end.first,
                          m_contractions[0].contraction_peak.first);
 
-    tinyUi::timepoint_marker_t tm;
-    tm.first = m_contractions[0].contraction_peak.first/ ((float)mMediaInfo.count);
-    tm.second = ColorA (0.9, 0.3, 0.1, 0.75);
-    mMainTimeLineSlider.add_timepoint_marker(tm);
-    
     update_contraction_selection();
     
 }
@@ -548,10 +541,6 @@ void lifContext::seekToFrame (int mark)
         mark = looping() ? curr.first() : curr.last();
     
     m_seek_position = mark;
-    mTimeMarker.from_count (m_seek_position);
-    m_marker_signal.emit(mTimeMarker);
-    mAuxTimeMarker.from_count (m_seek_position);
-    m_aux_marker_signal.emit(mTimeMarker);
 }
 
 
@@ -580,13 +569,13 @@ void lifContext::setZoom (vec2 zoom)
 
 void lifContext::processDrag( ivec2 pos )
 {
-    for (Widget* wPtr : mWidgets)
-    {
-        if( wPtr->hitTest( pos ) ) {
-            mTimeMarker.from_norm(wPtr->valueScaled());
-            seekToFrame((int) mTimeMarker.current_frame());
-        }
-    }
+//    for (Widget* wPtr : mWidgets)
+//    {
+//        if( wPtr->hitTest( pos ) ) {
+//            mTimeMarker.from_norm(wPtr->valueScaled());
+//            seekToFrame((int) mTimeMarker.current_frame());
+//        }
+//    }
 }
 
 void  lifContext::mouseWheel( MouseEvent event )
@@ -634,20 +623,12 @@ void lifContext::update_with_mouse_position ( MouseEvent event )
         mMouseInGraphs = int(min_iter - dds.begin());
     }
     
-    mMouseInWidgets.resize(0);
-    for (Widget* wPtr : mWidgets)
-    {
-        bool inside = wPtr->contains(event.getPos());
-        mMouseInWidgets.push_back(inside);
-    }
+  
 }
 
 
 void lifContext::mouseDrag( MouseEvent event )
 {
-    for (graph1d::ref graphRef : m_plots)
-        graphRef->mouseDrag( event );
-    
     if (isEditing () && mMouseInImage && channelIndex() == 2)
     {
         sides_length_t& which = mCellEnds[getManualEditMode()];
@@ -658,13 +639,6 @@ void lifContext::mouseDrag( MouseEvent event )
 
 void lifContext::mouseDown( MouseEvent event )
 {
-    for (graph1d::ref graphRef : m_plots )
-    {
-        graphRef->mouseDown( event );
-        graphRef->get_marker_position(mTimeMarker);
-        graphRef->get_marker_position(mAuxTimeMarker);
-    }
-    
     if (isEditing() && mMouseInImage && channelIndex() == 2)
     {
         sides_length_t& which = mCellEnds[getManualEditMode()];
@@ -675,8 +649,7 @@ void lifContext::mouseDown( MouseEvent event )
 
 void lifContext::mouseUp( MouseEvent event )
 {
-    for (graph1d::ref graphRef : m_plots)
-        graphRef->mouseUp( event );
+
 }
 
 
@@ -790,15 +763,18 @@ void lifContext::loadCurrentSerie ()
         return;
     
     try {
+        /*
+         * Clear and pause if we are playing back
+         */
         m_clips.clear();
-        mWidgets.clear ();
         setCellLength(0);
         pause();
         
-        // Create the frameset and assign the channel names
-        // Fetch the media info
+        /*
+         * Create the frameset and assign the channel names
+         * Fetch the media info
+         */
         mFrameSet = seqFrameContainer::create (*m_cur_lif_serie_ref);
-        
         if (! mFrameSet || ! mFrameSet->isValid())
         {
             vlogger::instance().console()->debug("Serie had 1 or no frames ");
@@ -806,20 +782,25 @@ void lifContext::loadCurrentSerie ()
         }
         mMediaInfo = mFrameSet->media_info();
         mChannelCount = (uint32_t) mMediaInfo.getNumChannels();
-        assert(mChannelCount > 0 && mChannelCount < 4);
-        // @todo output media info to console log
-     //   vlogger::instance().console()->info(" ", mMediaInfo);
-        m_layout->init (getWindowSize() , mFrameSet->media_info(), channel_count());
-        
-        // Start Loading Images on a different thread
-        // Loading also produces voxel images.
-        cv::Mat result;
+        if (!(mChannelCount > 0 && mChannelCount < 4)){
+            vlogger::instance().console()->debug("Expected 1 or 2 or 3 channels ");
+            return;
+        }
 
-        // note launch mode is std::launch::async
+        m_layout->init (getWindowSize() , mFrameSet->media_info(), channel_count());
+
+        /*
+         * Create the frameset and assign the channel namesStart Loading Images on async on a different thread
+         * Loading also produces voxel images.
+         */
+        cv::Mat result;
         std::vector<std::thread> threads(1);
         threads[0] = std::thread(&lif_serie_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names());
         std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
-//        auto future_res = std::async(std::launch::async, &lif_serie_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names());
+
+        /*
+         * Fetch length and channel names
+         */
         mFrameSet->channel_names (m_serie.channel_names());
         reset_entire_clip(mFrameSet->count());
         m_minFrame = 0;
@@ -841,10 +822,6 @@ void lifContext::loadCurrentSerie ()
         mScreenSize = mMediaInfo.getSize();
         
         mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
-        
-        mTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
-        mAuxTimeMarker = marker_info (mMediaInfo.getNumFrames (),mMediaInfo.getDuration());
-   
     }
     catch( const std::exception &ex ) {
         console() << ex.what() << endl;
@@ -1178,8 +1155,9 @@ void lifContext::update ()
     if ( is_ready (m_fluorescense_tracks) )
         m_flurescence_trackWeakRef = m_fluorescense_tracks.get();
     
-    if ( is_ready (m_contraction_pci_tracks))
+    if ( is_ready (m_contraction_pci_tracks)){
         m_contraction_pci_trackWeakRef = m_contraction_pci_tracks.get();
+    }
     
 
     // Update Fluorescence results if ready
@@ -1297,9 +1275,6 @@ void lifContext::draw_info ()
         Rectf textrect (0.0, ws[1] - mTextTexture->getHeight(), ws[0],ws[1]);
         gl::draw(mTextTexture, textrect);
     }
-    
-    //    if (haveTracks())
-    tinyUi::drawWidgets(mWidgets);
     
 }
 
