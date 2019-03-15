@@ -17,7 +17,7 @@ static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return Im
 
 class RampEdit : public ImCurveEdit::Delegate
 {
-    std::vector<std::vector<ImVec2>> mPts; // [3][8];
+    std::vector<std::vector<ImVec2>> mPts; // [editable plot data][8];
     std::vector<size_t> mPointCount;
     std::vector<std::string> mPlotNames;
     std::vector<unsigned int> mPlotColors;
@@ -193,8 +193,9 @@ struct timeLineSequence : public ImSequencer::SequenceInterface
     virtual size_t GetCustomHeight(int index) { return myItems[index].mExpanded ? 300 : 0; }
     
     // my datas
-    // @todo remove hard-wired 3 standing for Red, Green and PCI
-    timeLineSequence() : m_editable_plot_data(3), mFrameMin(0), mFrameMax(0) {}
+    // @todo remove hard-wired 4 standing for Red, Green and PCI
+    // @note where adding to the plots needs to accounted
+    timeLineSequence() : m_editable_plot_data(4), mFrameMin(0), mFrameMax(0) {}
 
     
     virtual void DoubleClick(int index) {

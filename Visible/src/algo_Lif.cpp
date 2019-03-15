@@ -191,7 +191,7 @@ lif_serie_processor::lif_serie_processor ()
     signal_volume_var_available = createSignal<lif_serie_processor::sig_cb_volume_var_available>();
     
     // semilarity producer
-    m_sm = std::shared_ptr<sm_producer> ( new sm_producer () );
+    m_sm_producer = std::shared_ptr<sm_producer> ( new sm_producer () );
     
     // Signals we support
     // support Similarity::Content Loaded
@@ -219,27 +219,26 @@ lif_serie_processor::lif_serie_processor ()
 // @note Specific to ID Lab Lif Files
 // 3 channels: 2 flu one visible
 // 1 channel: visible
-void lif_serie_processor::create_named_tracks (const std::vector<std::string>& names)
+void lif_serie_processor::create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
 {
     m_flurescence_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
     m_contraction_pci_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
-    m_shortterm_pci_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
     
     switch(names.size()){
         case 3:
             m_flurescence_tracksRef->resize (2);
             m_contraction_pci_tracksRef->resize (1);
-            m_shortterm_pci_tracksRef->resize (1);
+            m_shortterm_pci_tracks.resize (1);
             for (auto tt = 0; tt < names.size()-1; tt++)
                 m_flurescence_tracksRef->at(tt).first = names[tt];
             m_contraction_pci_tracksRef->at(0).first = names[2];
-            m_shortterm_pci_tracksRef->at(0).first = names[2];
+            m_shortterm_pci_tracks.at(0).first = plot_names[3];
             break;
         case 1:
             m_contraction_pci_tracksRef->resize (1);
-            m_shortterm_pci_tracksRef->resize (1);
+            m_shortterm_pci_tracks.resize (1);
             m_contraction_pci_tracksRef->at(0).first = names[0];
-            m_shortterm_pci_tracksRef->at(0).first = names[0];
+            m_shortterm_pci_tracks.at(0).first = plot_names[1];
             break;
         default:
             assert(false);
@@ -248,8 +247,8 @@ void lif_serie_processor::create_named_tracks (const std::vector<std::string>& n
 }
 
 
-const smProducerRef lif_serie_processor::sm () const {
-    return m_sm;
+const smProducerRef lif_serie_processor::similarity_producer () const {
+    return m_sm_producer;
     
 }
 
@@ -261,10 +260,10 @@ std::weak_ptr<contraction_analyzer> lif_serie_processor::contractionWeakRef ()
 }
 
 
-int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names)
+int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
-    create_named_tracks(names);
+    create_named_tracks(names, plot_names);
     load_channels_from_images(frames);
     lock.unlock();
     int channel_to_use = m_channel_count - 1;
@@ -396,27 +395,103 @@ std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::run_flu_statistics (cons
 
 
 
-std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::shortterm_pci (const uint32_t& half_temporal_window){
+void lif_serie_processor::compute_shortterm (const uint32_t halfWinSz) const{
+    
+     uint32_t tWinSz = 2 * halfWinSz + 1;
+    
+    auto shannon = [](double r) { return (-1.0 * r * log2 (r)); };
+    double _log2MSz = log2(tWinSz);
+    
+    
+    for (uint32_t diag = halfWinSz; diag < (m_frameCount - halfWinSz); diag++) {
+        // tWinSz x tWinSz centered at diag,diag putting out a readount at diag
+        // top left at row, col
+        auto tl_row = diag - halfWinSz; auto br_row = tl_row + tWinSz;
+        auto tl_col = diag - halfWinSz; auto br_col = tl_col + tWinSz;
+        
+        // Sum rows in to _sums @note possible optimization by constant time implementation
+        std::vector<double> _sums (tWinSz, 0);
+        std::vector<double> _entropies (tWinSz, 0);
+        for (auto row = tl_row; row < br_row; row++){
+            auto proj_row = row - tl_row;
+            _sums[proj_row] = m_smat[row][row];
+        }
+        
+        for (auto row = tl_row; row < br_row; row++)
+            for (auto col = (row+1); col < br_col; col++){
+                auto proj_row = row - tl_row;
+                auto proj_col = col - tl_col;
+                _sums[proj_row] += m_smat[row][col];
+                _sums[proj_col] += m_smat[row][col];
+            }
+        
+        
+        for (auto row = tl_row; row < br_row; row++)
+            for (auto col = row; col < br_col; col++){
+                auto proj_row = row - tl_row;
+                auto proj_col = col - tl_col;
+                double rr = m_smat[row][col]/_sums[proj_row]; // Normalize for total energy in samples
+                _entropies[proj_row] += shannon(rr);
+                
+                if ((proj_row) != (proj_col)) {
+                    rr = m_smat[row][col]/_sums[proj_col];//Normalize for total energy in samples
+                    _entropies[proj_col] += shannon(rr);
+                }
+                _entropies[proj_row] = _entropies[proj_row]/_log2MSz;// Normalize for cnt of samples
+            }
+
+        std::lock_guard<std::mutex> lk(m_shortterms_mutex);
+        m_shortterms.push(1.0f - _entropies[halfWinSz]);
+        m_shortterm_cv.notify_one();
+    }
+}
+
+
+
+void lif_serie_processor::shortterm_pci (const uint32_t& halfWinSz) {
+    
+ 
     // Check if full sm has been done
-    auto sp =  sm();
-    bool ok = sp && sp->similarityMatrix().size() == ssMatrix().size();
-    ok = ok && sp->similarityMatrix()[0].size() == ssMatrix()[0].size();
-    ok = ok && entropies().size() == ssMatrix().size();
-    
-    if (!ok) return std::shared_ptr<vecOfNamedTrack_t> ();
-    m_shortterm_pci_tracksRef->clear();
-    const sm_producer::sMatrixProjection_t& shortterm = sp->shortterm(half_temporal_window);
-    
-    for (auto ii = 0; ii < shortterm.size(); ii++)
-    {
+    m_shortterm_pci_tracks.at(0).second.clear();
+    for (auto pp = 0; pp < halfWinSz; pp++){
         timedVal_t res;
         index_time_t ti;
-        ti.first = ii;
+        ti.first = pp;
         res.first = ti;
-        res.second = static_cast<float>(shortterm[ii]);
-        m_shortterm_pci_tracksRef->at(0).second.emplace_back(res);
+        res.second = -1.0f;
+        m_shortterm_pci_tracks.at(0).second.emplace_back(res);
     }
-    return m_shortterm_pci_tracksRef;
+        
+    compute_shortterm(halfWinSz);
+//    auto twinSz = 2 * halfWinSz + 1;
+    auto ii = halfWinSz;
+    auto last = m_frameCount - halfWinSz;
+    while(true){
+        std::unique_lock<std::mutex> lock( m_shortterms_mutex);
+        m_shortterm_cv.wait(lock,[this]{return !m_shortterms.empty(); });
+        float val = m_shortterms.front();
+        timedVal_t res;
+        m_shortterms.pop();
+        lock.unlock();
+        index_time_t ti;
+        ti.first = ii++;
+        res.first = ti;
+        res.second = static_cast<float>(val);
+        m_shortterm_pci_tracks.at(0).second.emplace_back(res);
+//        std::cout << m_shortterm_pci_tracks.at(0).second.size() << "," << m_shortterms.size() << std::endl;
+        
+        if(ii == last)
+            break;
+    }
+    // Fill the pad in front with first valid read
+    for (auto pp = 0; pp < halfWinSz; pp++){
+        m_shortterm_pci_tracks.at(0).second.at(pp) = m_shortterm_pci_tracks.at(0).second.at(halfWinSz);
+    }
+    // Fill the pad in the back with the last valid read
+    for (auto pp = 0; pp < halfWinSz; pp++){
+        m_shortterm_pci_tracks.at(0).second.emplace_back (m_shortterm_pci_tracks.at(0).second.back());
+    }
+    
 }
 
 
@@ -425,7 +500,7 @@ std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::shortterm_pci (const uin
 // PCI track is being used for initial emtropy and median leveled
 std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci (const std::vector<roiWindow<P8U>>& images)
 {
-    auto sp =  sm();
+    auto sp =  similarity_producer();
     sp->load_images (images);
     std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
     std::future<bool>  future_ss = task.get_future();  // get a future
@@ -658,7 +733,7 @@ void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector
     
     // Create a single vector of all roi windows
     std::vector<roiWindow<P8U>> all;
-    auto sp =  sm();
+    auto sp =  similarity_producer();
     for(std::vector<roiWindow<P8U>>& row: voxels){
         for(roiWindow<P8U>& voxel : row){
                 all.emplace_back(voxel.frameBuf(), voxel.bound());

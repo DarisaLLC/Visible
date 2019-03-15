@@ -62,7 +62,7 @@ using namespace svl;
 
 namespace anonymous{
     std::map<std::string, unsigned int> named_colors = {{"Red", 0xFF0000FF }, {"red",0xFF0000FF },{"Green", 0xFF00FF00},
-        {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}};
+        {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFD66D3E}};
     
     
 }
@@ -133,48 +133,8 @@ void lifContext::setup_signals(){
 
 void lifContext::setup_params () {
     
-    mUIParams = params::InterfaceGl( " Control ", toPixels( ivec2(getWindowWidth(), 100 )));
-    mUIParams.setOptions("", "movable=false sizeable=false");
-    mUIParams.setOptions( "TW_HELP", "visible=false" );
-    mUIParams.setPosition(vec2(0,getWindowHeight()-250));
-    
-    
-    mUIParams.addSeparator();
-    m_perform_names.clear ();
-    m_perform_names.push_back("Manual Cell End Tracing");
-    
-    {
-        const std::function<void (int)> setter = std::bind(&lifContext::seekToFrame, this, std::placeholders::_1);
-        const std::function<int ()> getter = std::bind(&lifContext::getCurrentFrame, this);
-        mUIParams.addParam ("Current Time Step", setter, getter);
-    }
-    
-    mUIParams.addParam( "Looping", &m_is_looping ).keyIncr( "l" );
-    mUIParams.addSeparator();
-    mUIParams.addParam("Play / Pause ", &m_is_playing).keyIncr(" ");
-    mUIParams.addSeparator();
-    mUIParams.addParam("Show Pixel Probe ", &m_show_probe).keyIncr("s");
-    mUIParams.addSeparator();
-    mUIParams.addButton("Edit ", bind( &lifContext::edit_no_edit_button, this ) );
-    mUIParams.addSeparator();
-    mUIParams.addText( "mode", "label=`Browse`" );
-    mUIParams.addSeparator();
-    {
-        // Add a param with no target, but instead provide setter and getter functions.
-        const std::function<void(uint32_t)> setter    = std::bind(&lifContext::setMedianCutOff, this, std::placeholders::_1 );
-        const std::function<uint32_t()> getter    = std::bind( &lifContext::getMedianCutOff, this);
-        
-        // Attach a callback that is fired after a target is updated.
-        mUIParams.addParam( "CutOff Pct", setter, getter );
-    }
-    {
-        // Add a param with no target, but instead provide setter and getter functions.
-        const std::function<void(uint32_t)> setter    = std::bind(&lifContext::setCellLength, this, std::placeholders::_1 );
-        const std::function<uint32_t()> getter    = std::bind( &lifContext::getCellLength, this);
-        
-        // Attach a callback that is fired after a target is updated.
-        mUIParams.addParam( "Cell Length ", setter, getter );
-    }
+//    gl::enableVerticalSync();
+ 
     
 }
 
@@ -182,7 +142,6 @@ void lifContext::setup_params () {
 void lifContext::setup()
 {
     ci::app::WindowRef ww = get_windowRef();
-    gl::enableVerticalSync();
     ui::initialize(ui::Options()
                    .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
                    .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
@@ -205,7 +164,6 @@ void lifContext::setup()
     mSize = vec2( ws[0], ws[1] / 12);
     m_contraction_names = m_contraction_none;
     clear_playback_params();
-    setup_params ();
     loadCurrentSerie();
     shared_from_above()->update();
     
@@ -293,12 +251,9 @@ void lifContext::signal_volume_var_available()
     
     
     // Create a texcture for display
-    // Set format to topDown through to get free flip
-  //  const cv::Mat& dvar = m_lifProcRef->display_volume_variances();
     Surface8uRef sur = Surface8u::create( cinder::fromOcv(m_lifProcRef->display_volume_variances()) );
     auto texFormat = gl::Texture2d::Format().loadTopDown();
     m_var_texture = gl::Texture::create(*sur, texFormat);
-    
     m_volume_var_available = true;
     
 }
@@ -390,8 +345,6 @@ void lifContext::loop_no_loop_button ()
 void lifContext::looping (bool what)
 {
     m_is_looping = what;
-//    static std::vector<std::string> loopstrings {"label=` Looping`", "label=` Not Looping`"};
-//    mUIParams.setOptions( "mode", m_is_looping ? loopstrings[0] : loopstrings[1]);
 }
 
 
@@ -404,14 +357,12 @@ void lifContext::play ()
 {
     if (! have_lif_serie() || m_is_playing ) return;
     m_is_playing = true;
-    mUIParams.setOptions( "mode", "label=` Playing`" );
 }
 
 void lifContext::pause ()
 {
     if (! have_lif_serie() || ! m_is_playing ) return;
     m_is_playing = false;
-    mUIParams.setOptions( "mode", "label=` Pause`" );
 }
 
 // For use with RAII scoped pause pattern
@@ -793,9 +744,12 @@ void lifContext::loadCurrentSerie ()
          * Create the frameset and assign the channel namesStart Loading Images on async on a different thread
          * Loading also produces voxel images.
          */
+        m_plot_names.clear();
+        m_plot_names = m_serie.channel_names();
+        m_plot_names.push_back("MisRegister");
         cv::Mat result;
         std::vector<std::thread> threads(1);
-        threads[0] = std::thread(&lif_serie_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names());
+        threads[0] = std::thread(&lif_serie_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names(), m_plot_names);
         std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 
         /*
@@ -857,6 +811,11 @@ void lifContext::process_async (){
  ************************/
 
 
+/*
+ * Result Window, to the right of image display + pad
+ * Size width: remainder to the edge of app window in x ( minus a pad )
+ * Size height: app window height / 2
+ */
 
 void lifContext::add_result_sequencer ()
 {
@@ -867,9 +826,13 @@ void lifContext::add_result_sequencer ()
     
     Rectf dr = get_image_display_rect();
     auto tr = dr.getUpperRight();
-    ImGui::SetNextWindowPos(ImVec2(tr.x+10, tr.y));
-    ImGui::SetNextWindowSize(dr.getSize());
+    auto pos = ImVec2(tr.x+10, tr.y);
+    ImVec2 size (getWindowWidth()-30-pos.x, getWindowHeight() / 2);
     
+    m_results_browser_display = Rectf(pos,size);
+    ImGui::SetNextWindowPos(pos);
+    ImGui::SetNextWindowSize(size);
+
     ImGui::Begin(" Results ");
     
     ImGui::PushItemWidth(130);
@@ -880,7 +843,7 @@ void lifContext::add_result_sequencer ()
     ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
     ImGui::PopItemWidth();
     
-    
+    // @todo: add contraction periods
 #if 0
     mySequence.myItems.push_back(timeLineSequence::timeline_item{ 0,
         (int) m_contractions[0].contraction_start.first,
@@ -888,6 +851,8 @@ void lifContext::add_result_sequencer ()
 #endif
     
     Sequencer(&mySequence, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
+    ImGui::End();
+    
 //    // add a UI to edit that particular item
 //    if (selectedEntry != -1)
 //    {
@@ -896,20 +861,20 @@ void lifContext::add_result_sequencer ()
 //        // switch (type) ....
 //    }
     
-    ImGui::End();
+
     
     
 }
 
 void lifContext::add_timeline(){
    
-    int gScreenWidth = getWindowWidth();
     Rectf dr = get_image_display_rect();
-    auto tr = dr.getUpperRight();
-    auto pos = ImVec2(tr.x+10+dr.getWidth()+10, tr.y);
+    auto pos = ImVec2(dr.getLowerLeft().x, dr.getLowerLeft().y + 30);
+    ImVec2  size (dr.getWidth(), dr.getHeight()/2.0);
+    m_navigator_display = Rectf(pos,size);
     ImGui::SetNextWindowPos(pos);
-    ImVec2 size (gScreenWidth-30-pos.x, 100);
     ImGui::SetNextWindowSize(size);
+    
     
     if (ImGui::Begin("Timeline"))
     {
@@ -975,15 +940,15 @@ void lifContext::add_timeline(){
 
 void lifContext::add_motion_profile (){
     
-    if (! m_volume_var_available) return;
+    if (! m_volume_var_available || ! m_var_texture ) return;
     
-    Rectf dr = get_image_display_rect();
-    auto tr = dr.getLowerLeft();
-    ImVec2 margins (10.0f,30.0f);
-    auto pos = ImVec2(tr.x, tr.y + margins.y);
+    ImVec2  frame (m_var_texture->getWidth(),m_var_texture->getHeight());
+    Rectf dr = m_results_browser_display;
+    auto pos = ImVec2(dr.getLowerLeft().x, dr.getLowerLeft().y + 30);
+    m_motion_profile_display = Rectf(pos,frame);
     ImGui::SetNextWindowPos(pos);
-    ImVec2 size (dr.getWidth(), dr.getHeight()/3.0f + 2 * margins.y);
-    ImGui::SetNextWindowSize(size);
+    ImGui::SetNextWindowSize(frame);
+    
     const RotatedRect& mt = m_lifProcRef->motion_surface();
     cv::Point2f points[4];
     mt.points(&points[0]);
@@ -991,17 +956,15 @@ void lifContext::add_motion_profile (){
     if (ImGui::Begin("Motion Profile", nullptr,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar ))
     {
         if(m_var_texture){
-            ImVec2 sz(m_var_texture->getWidth(),m_var_texture->getHeight());
-            ImVec2  frame (m_var_texture->getWidth()+ 20,m_var_texture->getHeight()+20);
             //static float zoom = 0.5f;
             //static ImVec2 zoom_center;
-            ImGui::BeginChild(" ", sz, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
+            ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
             ImVec2 pp = ImGui::GetCursorScreenPos();
           //  ImGui::ImageZoomAndPan( (void*)(intptr_t) m_var_texture->getId(),sz,m_var_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
             ImVec2 p (pp.x + mt.center.x, pp.y  + mt.center.y); //ImGui::GetCursorScreenPos();
-            ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), sz);
+            ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), frame);
             ImGui::EndChild();
-            ImGui::BeginChild(" ", sz, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
+            ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
 
@@ -1172,17 +1135,20 @@ void lifContext::update ()
     // Update PCI result if ready
     if ( ! m_contraction_pci_trackWeakRef.expired())
     {
+     //  if (m_lifProcRef->shortterm_pci().at(0).second.empty())
+      //      m_lifProcRef->shortterm_pci(1);
         auto tracksRef = m_contraction_pci_trackWeakRef.lock();
         mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
-    }
 
-    // Update shortterm PCI result if ready
-    if ( ! m_shortterm_pci_trackWeakRef.expired())
-    {
-        auto tracksRef = m_shortterm_pci_trackWeakRef.lock();
-        mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["Short"], 2);
-    }
 
+        // Update shortterm PCI result if ready
+        if ( ! m_lifProcRef->shortterm_pci().at(0).second.empty() )
+        {
+            auto tracksRef = m_lifProcRef->shortterm_pci();
+            mySequence.m_editable_plot_data.load(tracksRef.at(0), anonymous::named_colors["Short"], 3);
+        }
+    }
+    
     // Fetch Next Frame
     if (have_lif_serie ()){
         mSurface = mFrameSet->getFrame(getCurrentFrame());
