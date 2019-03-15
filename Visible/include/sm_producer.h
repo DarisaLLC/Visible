@@ -80,8 +80,6 @@ public:
     
     const sMatrixProjection_t& medianLeveledProjection () const;
 
-    const sMatrixProjection_t& shortterm (const uint32_t temporal_window, outputOrderOption ooo = input) const;
-    
     /**
      *  Image Directory Output & Options
      *  The first two functions return the natural order ( i.e. input order )

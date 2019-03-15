@@ -136,6 +136,7 @@ private:
     std::shared_ptr<lifIO::LifSerie> m_cur_lif_serie_ref;
     lif_serie_data m_serie;
     boost::filesystem::path mPath;
+    std::vector<std::string> m_plot_names;
     
     // Callbacks
     void signal_content_loaded (int64_t&);
@@ -171,7 +172,6 @@ private:
     // Tracks of frame associated results
     std::weak_ptr<vecOfNamedTrack_t> m_flurescence_trackWeakRef;
     std::weak_ptr<vecOfNamedTrack_t> m_contraction_pci_trackWeakRef;
-    std::weak_ptr<vecOfNamedTrack_t> m_shortterm_pci_trackWeakRef;
 
     // Contraction
     lif_serie_processor::contractionContainer_t m_contractions;
@@ -246,6 +246,12 @@ private:
     // imGui
     timeLineSequence mySequence;
     void draw_sequencer ();
+    
+    // UI instant sub-window rects
+    Rectf m_results_browser_display;
+    Rectf m_motion_profile_display;
+    Rectf m_navigator_display;
+    
 
     OnImagePlot m_tsPlotter;
     

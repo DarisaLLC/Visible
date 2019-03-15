@@ -208,7 +208,7 @@ public:
     
     lif_serie_processor ();
     
-    const smProducerRef sm () const;
+    const smProducerRef similarity_producer () const;
     const int64_t& frame_count () const;
     const int64_t channel_count () const;
     const svl::stats<int64_t> stats3D () const;
@@ -219,7 +219,7 @@ public:
     std::weak_ptr<contraction_analyzer> contractionWeakRef ();
     
     // Load frames from cache
-    int64_t load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names);
+    int64_t load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names, const std::vector<std::string>& plot_names);
     
     // Run Luminance info on a vector of channel indices
     std::shared_ptr<vecOfNamedTrack_t> run_flu_statistics (const std::vector<int>& channels);
@@ -242,8 +242,9 @@ public:
     std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci_on_channel (const int channel_index);
     std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci (const std::vector<roiWindow<P8U>>&);
     std::vector<float> shortterm_pci (const std::vector<uint32_t>& indices);
-    std::shared_ptr<vecOfNamedTrack_t> shortterm_pci (const uint32_t& temporal_window);
-
+    void shortterm_pci (const uint32_t& temporal_window);
+    const vecOfNamedTrack_t& shortterm_pci () const { return m_shortterm_pci_tracks; }
+    
     // Return 2D latice of pixels over time
     void generateVoxels_on_channel (const int channel_index, std::vector<std::vector<roiWindow<P8U>>>&);
     void generateVoxels (const std::vector<roiWindow<P8U>>&, std::vector<std::vector<roiWindow<P8U>>>&);
@@ -279,6 +280,7 @@ protected:
     boost::signals2::signal<lif_serie_processor::sig_cb_volume_var_available>* signal_volume_var_available;
     
 private:
+    void compute_shortterm (const uint32_t halfWinSz) const;
     
     void contraction_analyzed (contractionContainer_t&);
     void stats_3d_computed ();
@@ -293,15 +295,17 @@ private:
     void median_leveled_pci (namedTrack_t& track);
     
     // @note Specific to ID Lab Lif Files
-    void create_named_tracks (const std::vector<std::string>& names);
+    void create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names);
     
     labelBlob::ref get_blobCachedObject (const index_time_t& ti);
     
     mutable std::mutex m_mutex;
+    mutable std::mutex m_shortterms_mutex;
     uint32_t m_channel_count;
+    mutable std::condition_variable m_shortterm_cv;
     
     // One similarity engine
-    mutable smProducerRef m_sm;
+    mutable smProducerRef m_sm_producer;
     vector<double> m_entropies;
     mutable vector<vector<double>> m_smat;
     
@@ -326,7 +330,8 @@ private:
     // Note create_named_tracks
     std::shared_ptr<vecOfNamedTrack_t>  m_flurescence_tracksRef;
     std::shared_ptr<vecOfNamedTrack_t>  m_contraction_pci_tracksRef;
-    std::shared_ptr<vecOfNamedTrack_t>  m_shortterm_pci_tracksRef;
+    mutable vecOfNamedTrack_t                   m_shortterm_pci_tracks;
+    mutable std::queue<float>               m_shortterms;
     
     std::shared_ptr<contraction_analyzer> m_caRef;
     

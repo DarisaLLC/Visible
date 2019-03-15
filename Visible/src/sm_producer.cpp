@@ -134,19 +134,6 @@ const sm_producer::sMatrixProjection_t& sm_producer::meanProjection (outputOrder
 
 const sm_producer::sMatrixProjection_t& sm_producer::shannonProjection (outputOrderOption ooo) const { return _impl->m_entropies; }
 
-const sm_producer::sMatrixProjection_t& sm_producer::shortterm (const uint32_t tWinSz, outputOrderOption ooo) const{
-    static auto empty_result = sm_producer::sMatrixProjection_t ();
-    if (! _impl->ssMatrixDone()) return empty_result;
-    if (tWinSz >= _impl->m_frameCount) return empty_result;
-    return _impl->shortterm(tWinSz);
-}
-
-
-const sm_producer::sMatrixProjection_t& sm_producer::medianLeveledProjection () const
-{
-    return _impl->m_median_leveled;
-}
-
 std::vector<roiWindow<P8U>>& sm_producer::images () const
 {
     return _impl->images ();
@@ -195,56 +182,6 @@ void sm_producer::spImpl::asset_reader_done_cb ()
 {
     std::cout << " asset reader Done" << std::endl;
 }
-
-const sm_producer::sMatrixProjection_t& sm_producer::spImpl::shortterm (const uint32_t halfWinSz) const{
-    
-    uint32_t tWinSz = 2 * halfWinSz + 1;
-    
-    auto shannon = [](double r) { return (-1.0 * r * log2 (r)); };
-    double _log2MSz = log2(tWinSz);
-    
-    m_shortterms.resize(m_frameCount, -1.0);
-    
-    for (uint32_t diag = halfWinSz; diag < (m_frameCount - halfWinSz); diag++) {
-        // tWinSz x tWinSz centered at diag,diag putting out a readount at diag
-        // top left at row, col
-        auto tl_row = diag - halfWinSz; auto tr_row = tl_row + tWinSz;
-        auto tl_col = diag - halfWinSz; auto tr_col = tl_col + tWinSz;
-        // Sum rows in to _sums @note possible optimization by constant time implementation
-        std::vector<double> _sums (tWinSz, 0);
-        std::vector<double> _entropies (tWinSz, 0);
-        for (auto row = tl_row; row < tr_row; row++) _sums[row] = m_SMatrix[row][row];
-        
-        for (auto row = tl_row; row < tr_row; row++)
-            for (auto col = (row+1); col < tr_col; col++){
-                _sums[row - halfWinSz] += m_SMatrix[row][col];
-                _sums[col - halfWinSz] += m_SMatrix[row][col];
-            }
-        
-        
-        for (auto row = tl_row; row < tr_row; row++)
-            for (auto col = row; col < tr_col; col++){
-                double rr =
-                m_SMatrix[row][col]/_sums[row - halfWinSz]; // Normalize for total energy in samples
-                _entropies[row - halfWinSz] += shannon(rr);
-                
-                if (row != col) {
-                    rr = m_SMatrix[row][col]/_sums[col - halfWinSz];//Normalize for total energy in samples
-                    _entropies[col - halfWinSz] += shannon(rr);
-                }
-                _entropies[row - halfWinSz] = _entropies[row - halfWinSz]/_log2MSz;// Normalize for cnt of samples
-            }
-        
-        m_shortterms[diag] = 1.0 - _entropies[halfWinSz];
-    }
-    for (auto pad = 0; pad < halfWinSz; pad++){
-        m_shortterms[pad] = m_entropies[halfWinSz];
-        m_shortterms[m_frameCount - 1 - pad] =  m_entropies[m_frameCount - 1 - halfWinSz];
-    }
-    return m_shortterms;
-}
-
-
 
 /*
  * Load all the frames
@@ -477,6 +414,8 @@ bool sm_producer::spImpl::setup_image_directory_result_repo () const
     return true;
     
 }
+
+
 // @todo add sampling and offset
 // @todo direct shortterm generation. 
 bool sm_producer::spImpl::generate_ssm ( int frames)
@@ -491,9 +430,16 @@ bool sm_producer::spImpl::generate_ssm ( int frames)
     m_output_repo.clear();
     
     simi->fill(m_loaded_ref);
+    
     m_entropies.resize (0);
     m_SMatrix.resize (0);
+    
+    // This is a blocking call
     bool ok = simi->entropies (m_entropies);
+    // Fetch the SS matrix and verify
+    simi->selfSimilarityMatrix(m_SMatrix);
+    ok = ok && anonymous::smatrix_ok(m_SMatrix, m_entropies.size());
+    
     
     if (!ok){
         std::cout << " ERR OR " << std::endl;
@@ -504,17 +450,12 @@ bool sm_producer::spImpl::generate_ssm ( int frames)
     if (ok && signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
         signal_sm1d_available->operator()();
     
-    // Fetch the SS matrix and verify
-    simi->selfSimilarityMatrix(m_SMatrix);
-    bool smOk = anonymous::smatrix_ok(m_SMatrix, m_entropies.size());
-    m_sm_is_ok = smOk;
-    
     // Call the sm 2d ready cb if any
-    if (smOk && signal_sm2d_available && signal_sm2d_available->num_slots() > 0)
+    if (ok && signal_sm2d_available && signal_sm2d_available->num_slots() > 0)
         signal_sm2d_available->operator()();
     
     if (type() == imageFileDirectory)
-        ok = setup_image_directory_result_repo();
+        ok &= setup_image_directory_result_repo();
     
     return ok;
 }

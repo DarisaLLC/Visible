@@ -52,13 +52,6 @@ typedef track_t<float> namedTrack_t; // pair [ name, vector of timed values ]
 typedef tracks_vec_t<float>  vecOfNamedTrack_t; // vector of pairs of  [ name, vector of timed values ]
 typedef tracks_array_t<float>  arrayOfNamedTracks_t;
 
-//
-//// track of timed result type of cv::Mat
-//typedef std::pair<index_time_t, cv::Mat> timed_mat_t;
-//typedef std::vector<timed_mat_t>  timed_mat_vec_t;
-//typedef std::pair<std::string, timed_mat_vec_t> namedTrack_Ofmat_t;
-//typedef std::vector<namedTrack_Ofmat_t>  vecOfNamedTrack_Ofmat_t;
-//typedef std::vector<vecOfNamedTrack_Ofmat_t>  arrayOfNamedTracks_Ofmat_t;
 
 
 /*

@@ -44,7 +44,7 @@ public:
 
  
     
-    spImpl (): m_sm_is_ok (false)
+    spImpl ()
     {
         m_name = get_random_string();
         signal_content_loaded = createSignal<sm_producer::sig_cb_content_loaded>();
@@ -60,8 +60,6 @@ public:
                             const std::vector<std::string>& supported_extensions = { ".jpg", ".png", ".JPG", ".jpeg"});
     
     void loadImages ( const images_vector_t& );
-    const bool ssMatrixDone () const { return m_sm_is_ok; }
-    
     const source_type type () const { return m_source_type; }
     
     bool done_grabbing () const;
@@ -100,9 +98,6 @@ private:
     std::chrono::milliseconds m_frame_time;
 
     mutable mutex_t   m_mutex;
-    mutable std::condition_variable m_frame_ready;
-    mutable std::atomic<bool> m_sm_is_ok;
-    
     
     time_spec_t       m_currentTime, m_startTime;
     mutable images_vector_t                 m_loaded_ref;
@@ -123,10 +118,8 @@ private:
     sMatrix_t                                       m_SMatrix;   // Used in eExhaustive and
     sm_producer::sMatrixProjection_t               m_entropies; // Final entropy signal
     sm_producer::sMatrixProjection_t               m_means; // Final entropy signal
-    sm_producer::sMatrixProjection_t                m_median_leveled; // Final entropy signal
     int                                      m_depth;
     std::string                               m_name;
-    mutable sm_producer::sMatrixProjection_t        m_shortterms;
     
 };
 

@@ -207,9 +207,9 @@ protected:
 	std::mutex m_track_mutex;
 	
 	arrayOfNamedTracks_t m_luminance_tracks;
+	vecOfNamedTrack_t m_shortterm_tracks;
 	
 	async_vecOfNamedTrack_t m_fluorescense_tracks;
-	async_vecOfNamedTrack_t m_shortterm_pci_tracks;
 	async_vecOfNamedTrack_t m_contraction_pci_tracks;
 	
 	
