@@ -18,6 +18,201 @@ using namespace svl;
 namespace svl
 {
     
+    //Function used to perform the complex DFT of a grayscale image
+    //Input:  image
+    //Output: DFT (complex numbers)
+    void Complex_Gray_DFT(const cv::Mat &src, cv::Mat &dst)
+    {
+        //Convert the original grayscale image into a normalised floating point image with only 1 channel
+        cv::Mat src_float;
+        src.convertTo(src_float, CV_32FC1);
+        cv::normalize(src_float, src_float, 0, 1, cv::NORM_MINMAX);
+        
+        //Run the DFT
+        cv::dft(src_float, dst, cv::DFT_COMPLEX_OUTPUT);
+    }
+    
+    //Function used to obtain a magnitude image from a complex DFT
+    //Input:  Complex DFT
+    //Output: Magnitude Image
+    void DFT_Magnitude(const cv::Mat &dft_src, cv::Mat &dft_magnitude)
+    {
+        //The dft_src mat is split into 2 separate channels, one for the real and the other for the imaginary
+        cv::Mat channels[2] = { cv::Mat::zeros(dft_src.size(),CV_32F), cv::Mat::zeros(dft_src.size(), CV_32F) };
+        cv::split(dft_src, channels);
+        
+        //Compute the Magnitude
+        cv::magnitude(channels[0], channels[1], dft_magnitude);
+        
+        //Obtain the log and normalise it between 0 and 1. +1 since log(0) is undefined.
+        cv::log(dft_magnitude + cv::Scalar::all(1), dft_magnitude);
+        cv::normalize(dft_magnitude, dft_magnitude, 0, 1, CV_MINMAX);
+    }
+    
+    //Function used to re-centre the Magnitude of the DFT, such that the centre shows the low frequencies
+    //Input/Output: Magnitude image
+    void Recentre(cv::Mat &dft_magnitude)
+    {
+        //define the centre points. These will be used when selecting the quadrants
+        int centre_x = dft_magnitude.cols / 2;
+        int centre_y = dft_magnitude.rows / 2;
+        
+        //create the quadrant objects and a temporary object that will be used in the swapping process
+        cv::Mat temp;
+        //NB: The way the quadrants are created means that they all reference the same matrix. (shallow copy!)
+        //    A change in the quadrants results in a change in the source
+        cv::Mat quad_1(dft_magnitude, cv::Rect(0, 0, centre_x, centre_y));
+        cv::Mat quad_2(dft_magnitude, cv::Rect(centre_x, 0, centre_x, centre_y));
+        cv::Mat quad_3(dft_magnitude, cv::Rect(0, centre_y, centre_x, centre_y));
+        cv::Mat quad_4(dft_magnitude, cv::Rect(centre_x, centre_y, centre_x, centre_y));
+        
+        //swapping process
+        quad_1.copyTo(temp);
+        quad_4.copyTo(quad_1);
+        temp.copyTo(quad_4);
+        
+        quad_2.copyTo(temp);
+        quad_3.copyTo(quad_2);
+        temp.copyTo(quad_3);
+    }
+    
+    //Function to perform the inverse DFT of a Gray Scale image and obtain an image.
+    //Note that the values will be real, not complex
+    //Input:  DFT of an image
+    //Output: Image in spatial domain
+    void Real_Gray_IDFT(const cv::Mat &src, cv::Mat &dst)
+    {
+        //Perform the inverse dft. Note that, by the flags passed, it will return a
+        //real output (since an image is made out of real components) and will also
+        //scale the values so that information can be visualised.
+        cv::idft(src, dst, cv::DFT_REAL_OUTPUT | cv::DFT_SCALE);
+        
+        //Note that for consistency purpose, it is recomended to convert the dst to the original image's type and normalise it
+        //Here, it is assumed that the image is 8 bits and unsigned
+        dst.convertTo(dst, CV_8U, 255);
+        cv::normalize(dst, dst, 0, 255, CV_MINMAX);
+    }
+    
+    //Function used to perform bilateral Filtering
+    //Input: src image, neighbourhood size, standard dev for colour and space
+    //Output: filtered image
+    void Bilateral_Filtering(const cv::Mat&  src, cv::Mat& dst, int neighbourhood, double sigma_colour, double sigma_space)
+    {
+        cv::bilateralFilter(src, dst, neighbourhood, sigma_colour, sigma_space);
+    }
+    
+    //Function used to perform Wiener Denoising. Note that this function does not reverse the blur
+    //Input: src image, constant to multiply with (inverse of PSNR)
+    //Output: filtered image
+    void Wiener_Denoising(const cv::Mat &src, cv::Mat &dst, double PSNR_inverse)
+    {
+        cv::Mat src_dft;
+        
+        //Obtain the DFT of the src image
+        Complex_Gray_DFT(src, src_dft);
+        
+        //Multiply it by the constant
+        cv::Mat output_dft;
+        output_dft = (PSNR_inverse)*src_dft;
+        
+        //Perform the inverse PSNR to get the filtered output
+        Real_Gray_IDFT(output_dft, dst);
+    }
+    
+    //Function used to perform anisotropic diffusion
+    //Input: src image, lambda (used for converance), number of iterations that should run,
+    //         k values to define what is an edge and what is not (x2: one for north/south, one for east/west)
+    //Output: filtered image
+    void Anisotrpic_Diffusion(const cv::Mat& src, cv::Mat& dst, double lambda, int iterations, float k_ns, float k_we)
+    {
+        //copy the src to dst as initilisation and convert dst to a 32 bit float mat, for accuracy when processing
+        dst = src.clone();
+        dst.convertTo(dst, CV_32F);
+        
+        //Create the kernels to be used to calculate edges in North, South, East and West directions
+        //These are similar to Laplacian kernels
+        cv::Mat_<int> kernel_n = cv::Mat::zeros(3, 3, CV_8U);
+        kernel_n(1, 1) = -1;
+        cv::Mat_<int> kernel_s, kernel_w, kernel_e;
+        kernel_s = kernel_n.clone();
+        kernel_w = kernel_n.clone();
+        kernel_e = kernel_n.clone();
+        
+        kernel_n(0, 1) = 1;
+        kernel_s(2, 1) = 1;
+        kernel_w(1, 0) = 1;
+        kernel_e(1, 2) = 1;
+        
+        //Create the parameters that will be used in the loop:
+        
+        // grad_x = gradient obtained by using the directional edge detection kernel defined above
+        
+        // param_x = mat which containes the parameter to be fed to the exp function, used when calculating the conduction coefficient value (c_x)
+        
+        // c_x = conduction coefficient values which help to control the amount of diffusion
+        
+        // k_ns and k_we are gradient magnitude parameters - they serve as thresholds to define what is a gradient and what is noise.
+        // therefore, they are used in the function to define the c_x values (one for north and south directions, the other fo west and east)
+        
+        cv::Mat_<float> grad_n, grad_s, grad_w, grad_e;
+        cv::Mat_<float> param_n, param_s, param_w, param_e;
+        cv::Mat_<float> c_n, c_s, c_w, c_e;
+        
+        //perform the number of iterations requested
+        for (int time = 0; time < iterations; time++)
+        {
+            //perform the filtering
+            cv::filter2D(dst, grad_n, -1, kernel_n);
+            cv::filter2D(dst, grad_s, -1, kernel_s);
+            cv::filter2D(dst, grad_w, -1, kernel_w);
+            cv::filter2D(dst, grad_e, -1, kernel_e);
+            
+            //obtain the iteration values as per the conduction function used
+            //in this case, the conduction function is found in [52], eq 11
+            param_n = (std::sqrt(5) / k_ns) * grad_n;
+            cv::pow(param_n, 2, param_n);
+            cv::exp(-(param_n), c_n);
+            
+            param_s = (std::sqrt(5) / k_ns) * grad_s;
+            cv::pow(param_s, 2, param_s);
+            cv::exp(-(param_s), c_s);
+            
+            param_w = (std::sqrt(5) / k_we) * grad_w;
+            cv::pow(param_w, 2, param_w);
+            cv::exp(-(param_w), c_w);
+            
+            param_e = (std::sqrt(5) / k_we) * grad_e;
+            cv::pow(param_e, 2, param_e);
+            cv::exp(-(param_e), c_e);
+            
+            //update the image
+            dst = dst + lambda*(c_n.mul(grad_n) + c_s.mul(grad_s) + c_w.mul(grad_w) + c_e.mul(grad_e));
+        }
+        //convert the output to 8 bits
+        dst.convertTo(dst, CV_8U);
+    }
+    
+    //Function used to perform Gamma correction
+    //Input:  NORMALISED src image, gamma
+    //Output: Modified image
+    void Gamma_Correction(const cv::Mat&  src, cv::Mat& dst, double gamma)
+    {
+        //Obtain the inverse of the gamma provided
+        double inverse_gamma = 1.0 / gamma;
+        
+        //Create a lookup table, to reduce processing time
+        cv::Mat Lookup(1, 256, CV_8U);            //Lookup table having values from 0 to 255
+        uchar* ptr = Lookup.ptr<uchar>(0);        //pointer access is fast in opencv, since it does not perform a range check for each call
+                                                  //uchar since 1 byte unsigned integer, in the range 0 - 255
+        for (int i = 0; i < 256; i++)
+        {
+            ptr[i] = (int)(std::pow((double)i / 255.0, inverse_gamma) * 255.0);
+            
+        }
+        //Apply the lookup table to the source image
+        cv::LUT(src, Lookup, dst);
+        
+    }
 
 
     void PeakDetect(const cv::Mat& space, std::vector<Point2f>& peaks, uint8_t accept)

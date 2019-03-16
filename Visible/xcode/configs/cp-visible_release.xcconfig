@@ -34,7 +34,7 @@ LOCAL_CEREAL = $(LOCAL_3rdParty)/cereal-1.1.1/include
 LOCAL_TINYXML = $(LOCAL_3rdParty)/tinyxml
 
 
-HEADER_SEARCH_PATHS = $(VISIBLE_ROOT)/include $(VISIBLE_ROOT)/include/plistcpp $(SVL_ROOT)/include /usr/local/include $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_TINYXML) $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG)  $(LOCAL_SPDLOG)/include $(LOCAL_IMGUI)
+HEADER_SEARCH_PATHS = $(VISIBLE_ROOT)/include $(VISIBLE_ROOT)/include/plistcpp $(SVL_ROOT)/include /usr/local/include $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_TINYXML) $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG) $(LOCAL_CIMG)/plugins $(LOCAL_SPDLOG)/include $(LOCAL_IMGUI)
 
 LIBRARY_SEARCH_PATHS = /usr/local/lib $(LOCAL_BOOST)/lib $(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION) $(PROJECT_DIR) /usr/local/opencv-3.4.3/build/3rdparty/lib/$(CONFIGURATION) /usr/local/opencv-3.4.3/build/lib/$(CONFIGURATION)  /usr/local/Cellar/libconfig/1.7.2/lib /usr/local/Cellar/boost/1.67.0_1/lib /usr/local/Cellar/libdc1394/2.2.2_1/lib
 
