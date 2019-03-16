@@ -78,6 +78,9 @@
 #include "CImg.h"
 using namespace cimg_library;
 
+
+//#define INTERACTIVE
+
 using namespace boost;
 
 using namespace ci;
@@ -404,6 +407,9 @@ void done_callback (void)
 }
 
 TEST (ut_opencvutils, anistropic_diffusion){
+   
+    double endtime;
+    std::clock_t start;
     
     auto res0 = dgenv_ptr->asset_path("c2-cImg-aniso.png");
     EXPECT_TRUE(res0.second);
@@ -420,23 +426,32 @@ TEST (ut_opencvutils, anistropic_diffusion){
     EXPECT_EQ(image.cols , 512);
     EXPECT_EQ(image.rows , 128);
     cv::Mat image_anisotropic;
+    start = std::clock();
     Anisotrpic_Diffusion(image, image_anisotropic, 0.25, 10, 45, 45);
+    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    std::cout << " Anisotrpic Diffusion " << endtime  << " Seconds " << std::endl;
+    
+#ifdef INTERACTIVE
     std::string file_path = "/Users/arman/tmp/c2/simple_aniso.png";
     cv::imwrite(file_path, image_anisotropic);
     cv::imshow("Anistorpic", image_anisotropic);
     cv::waitKey();
+#endif
     
     CImg<unsigned char> testCImg1(image);
     CImg<unsigned char> output(image.clone());
-//                     const float amplitude=60, const float dl=0.8f, const float da=30,
-//                     const float gauss_prec=2, const unsigned int interpolation_type=0,
-//                     const bool is_fast_approx=1)
+   
+
+    start = std::clock();
     auto anImg = testCImg1.blur_anisotropic(*output);
-    
+    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    std::cout << " CImg blur_anisotropic " << endtime  << " Seconds " << std::endl;
     auto mout = anImg.get_MAT();
-    
+
+#ifdef INTERACTIVE
     cv::imshow("CImg Anistorpic", mout);
     cv::waitKey();
+#endif
     
 }
 
@@ -542,27 +557,27 @@ TEST (ut_ss_voxel, basic){
 
     std::vector<std::vector<float>> results;
     
-    
+#ifdef INTERACTIVE
     std::string filename = svl::toString(std::clock()) + ".csv";
     std::string imagename = svl::toString(std::clock()) + ".png";
     std::string file_path = "/Users/arman/tmp/" + filename;
     std::string image_path = "/Users/arman/tmp/" + imagename;
+#endif
+    
     start = std::clock();
     auto cm = generateVoxelSelfSimilarities(voxels, results);
+#ifdef INTERACTIVE
     endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
     cv::imwrite(image_path, cm);
     std::cout << " Running Synthetic Data " << endtime  << " Seconds " << std::endl;
-
-    
-    
-    
-    
     output_array(results, file_path);
+ 
     
     /// Show in a window
     namedWindow( " ss voxel ", CV_WINDOW_KEEPRATIO  | WINDOW_OPENGL);
     imshow( " ss voxel ", cm);
     cv::waitKey(-1);
+#endif
     
 }
 
@@ -1101,6 +1116,7 @@ TEST(ut_labelBlob, basic)
     const std::vector<blob> blobs = lbr->results();
     EXPECT_EQ(59, blobs.size());
     
+#ifdef INTERACTIVE
     lbr->drawOutput();
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     EXPECT_EQ(true, s_graphics_ready);
@@ -1108,6 +1124,8 @@ TEST(ut_labelBlob, basic)
     namedWindow( "LabelBlob ", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
     imshow( "LabelBlob", lbr->graphicOutput());
     cv::waitKey(60.0);
+#endif
+    
 }
 
 TEST(ut_stl_utils, accOverTuple)
