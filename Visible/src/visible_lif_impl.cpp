@@ -57,6 +57,7 @@ using namespace ci::app;
 using namespace std;
 using namespace svl;
 
+#define SHORTTERM_ON
 
 #define ONCE(x) { static int __once = 1; if (__once) {x;} __once = 0; }
 
@@ -1135,8 +1136,10 @@ void lifContext::update ()
     // Update PCI result if ready
     if ( ! m_contraction_pci_trackWeakRef.expired())
     {
+#ifdef SHORTTERM_ON
      //  if (m_lifProcRef->shortterm_pci().at(0).second.empty())
       //      m_lifProcRef->shortterm_pci(1);
+#endif
         auto tracksRef = m_contraction_pci_trackWeakRef.lock();
         mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
 

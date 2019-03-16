@@ -46,15 +46,20 @@ public:
         const timedVecOfVals_t& ds = track.second;
         std::vector<float> mBuffer;
         timedVecOfVals_t::const_iterator reader = ds.begin();
-        while (reader++ != ds.end())mBuffer.push_back (reader->second);
+        while (reader != ds.end()){
+            mBuffer.push_back (reader->second);
+            reader++;
+        }
         svl::norm_min_max (mBuffer.begin(), mBuffer.end(), true);
         
         std::vector<ImVec2> pts;
         pts.clear();
         reader = ds.begin ();
         std::vector<float>::const_iterator bItr = mBuffer.begin();
-        while (reader++ != ds.end() && bItr++ != mBuffer.end() ){
+        while (reader != ds.end() && bItr != mBuffer.end() ){
             pts.emplace_back(reader->first.first, *bItr);
+            reader++;
+            bItr++;
         }
 
         // Visibility state is set in the app.
