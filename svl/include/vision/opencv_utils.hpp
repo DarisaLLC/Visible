@@ -155,32 +155,58 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     void output(cv::Mat mat, int prec = 0, char be = '{', char en = '}');
     
     void outputU8 (const cv::Mat& mat, char be = '{', char en = '}');
+    
+    //Function used to perform the complex DFT of a grayscale image
+    //Input:  image
+    //Output: DFT (complex numbers)
+    void Complex_Gray_DFT(const cv::Mat &src, cv::Mat &dst);
+  
+    
+    //Function used to obtain a magnitude image from a complex DFT
+    //Input:  Complex DFT
+    //Output: Magnitude Image
+    void DFT_Magnitude(const cv::Mat &dft_src, cv::Mat &dft_magnitude);
+  
+    
+    //Function used to re-centre the Magnitude of the DFT, such that the centre shows the low frequencies
+    //Input/Output: Magnitude image
+    void Recentre(cv::Mat &dft_magnitude);
+  
+    
+    //Function to perform the inverse DFT of a Gray Scale image and obtain an image.
+    //Note that the values will be real, not complex
+    //Input:  DFT of an image
+    //Output: Image in spatial domain
+    void Real_Gray_IDFT(const cv::Mat &src, cv::Mat &dst);
+   
+    
+    //Function used to perform bilateral Filtering
+    //Input: src image, neighbourhood size, standard dev for colour and space
+    //Output: filtered image
+    void Bilateral_Filtering(const cv::Mat&  src, cv::Mat& dst, int neighbourhood, double sigma_colour, double sigma_space);
+   
+    
+    //Function used to perform Wiener Denoising. Note that this function does not reverse the blur
+    //Input: src image, constant to multiply with (inverse of PSNR)
+    //Output: filtered image
+    void Wiener_Denoising(const cv::Mat &src, cv::Mat &dst, double PSNR_inverse);
+  
+    
+    //Function used to perform anisotropic diffusion
+    //Input: src image, lambda (used for converance), number of iterations that should run,
+    //         k values to define what is an edge and what is not (x2: one for north/south, one for east/west)
+    //Output: filtered image
+    void Anisotrpic_Diffusion(const cv::Mat& src, cv::Mat& dst, double lambda, int iterations, float k_ns, float k_we);
+ 
+    
+    //Function used to perform Gamma correction
+    //Input:  NORMALISED src image, gamma
+    //Output: Modified image
+    void Gamma_Correction(const cv::Mat&  src, cv::Mat& dst, double gamma);
+   
 }
 
-#if NotYet
-static void drawBlob (const blobRecordRef&, InputOutputArray image, const Scalar& color, int thickness = 1, int lineType = LINE_8);
-size_t detectContourBlobs(const cv::Mat& grayImage, const cv::Mat&binary, std::vector<blobRecordRef>& blobs, cv::Mat& graphics);
 
-class blob_record_t {
-public:
-    size_t id;
-    Point2d location;
-    double radius;
-    double inertia;
-    double area;
-    double perimeter;
-    double circularity;
-    cv::Rect bounding;
-    std::vector<cv::Point> hull;
-    std::vector<cv::Point> poly;
-    double contourArea;
-    double hullArea;
-    double convexity;
-    double equalRadius;
-    cv::Moments moms;
-};
-typedef std::shared_ptr<blob_record_t> blobRecordRef;
-#endif
 
 #endif
 

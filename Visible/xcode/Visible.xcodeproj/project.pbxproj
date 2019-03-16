@@ -492,6 +492,7 @@
 		C210946B2239D1F3004E88EE /* permutation_entropy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = permutation_entropy.h; path = ../include/permutation_entropy.h; sourceTree = "<group>"; };
 		C210946C223AEC19004E88EE /* imgui_wrapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_wrapper.cpp; path = ../include/imGuiCustom/imgui_wrapper.cpp; sourceTree = "<group>"; };
 		C210946D223AEC19004E88EE /* imgui_wrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = imgui_wrapper.h; path = ../include/imGuiCustom/imgui_wrapper.h; sourceTree = "<group>"; };
+		C2109474223C7D63004E88EE /* CImg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CImg.h; path = ../../externals/CImg/CImg.h; sourceTree = "<group>"; };
 		C210F1132159A826002A82A3 /* libzlib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libzlib.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/libzlib.a"; sourceTree = "<group>"; };
 		C210F1142159A827002A82A3 /* libippiw.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libippiw.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/libippiw.a"; sourceTree = "<group>"; };
 		C210F1152159A828002A82A3 /* liblibpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibpng.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/liblibpng.a"; sourceTree = "<group>"; };
@@ -1045,6 +1046,7 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				C2109473223C7D61004E88EE /* CImg */,
 				C23E346521F254F200221E68 /* imGuiCustom */,
 				C2820F26217523E200DFA7A6 /* Configuration */,
 				C29C726F216FC7340028AED1 /* imgui */,
@@ -1126,6 +1128,14 @@
 				006D731919953389008149E2 /* CoreMedia.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C2109473223C7D61004E88EE /* CImg */ = {
+			isa = PBXGroup;
+			children = (
+				C2109474223C7D63004E88EE /* CImg.h */,
+			);
+			name = CImg;
 			sourceTree = "<group>";
 		};
 		C210F0F72159A325002A82A3 /* OpenCV */ = {

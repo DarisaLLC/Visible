@@ -73,6 +73,11 @@
 #include "ut_units.hpp"
 #include "ut_cardio.hpp"
 
+#define cimg_plugin1 "plugins/cvMat.h"
+#define cimg_display 0
+#include "CImg.h"
+using namespace cimg_library;
+
 using namespace boost;
 
 using namespace ci;
@@ -398,6 +403,42 @@ void done_callback (void)
     std::cout << "Done"  << std::endl;
 }
 
+TEST (ut_opencvutils, anistropic_diffusion){
+    
+    auto res0 = dgenv_ptr->asset_path("c2-cImg-aniso.png");
+    EXPECT_TRUE(res0.second);
+    EXPECT_TRUE(boost::filesystem::exists(res0.first));
+    cv::Mat image_cimg = cv::imread(res0.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    EXPECT_EQ(image_cimg.channels() , 1);
+    EXPECT_EQ(image_cimg.cols , 512);
+    EXPECT_EQ(image_cimg.rows , 128);
+    auto res = dgenv_ptr->asset_path("image230.png");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    cv::Mat image = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    EXPECT_EQ(image.channels() , 1);
+    EXPECT_EQ(image.cols , 512);
+    EXPECT_EQ(image.rows , 128);
+    cv::Mat image_anisotropic;
+    Anisotrpic_Diffusion(image, image_anisotropic, 0.25, 10, 45, 45);
+    std::string file_path = "/Users/arman/tmp/c2/simple_aniso.png";
+    cv::imwrite(file_path, image_anisotropic);
+    cv::imshow("Anistorpic", image_anisotropic);
+    cv::waitKey();
+    
+    CImg<unsigned char> testCImg1(image);
+    CImg<unsigned char> output(image.clone());
+//                     const float amplitude=60, const float dl=0.8f, const float da=30,
+//                     const float gauss_prec=2, const unsigned int interpolation_type=0,
+//                     const bool is_fast_approx=1)
+    auto anImg = testCImg1.blur_anisotropic(*output);
+    
+    auto mout = anImg.get_MAT();
+    
+    cv::imshow("CImg Anistorpic", mout);
+    cv::waitKey();
+    
+}
 
 TEST (ut_3d_per_element, standard_dev)
 {
@@ -548,7 +589,7 @@ TEST (ut_liffile, voxel_energy)
     
   //  boost::signals2::connection content_loaded_connection = lifProcRef->registerCallback(content_loaded_cb);
     std::vector<std::string> names { "grey"};
-    lifProcRef->load(seq_frames, names);
+    lifProcRef->load(seq_frames, names, names);
   //  std::this_thread::sleep_for(std::chrono::duration<double, std::milli> (30));
   //  EXPECT_TRUE(s_loaded);
     
