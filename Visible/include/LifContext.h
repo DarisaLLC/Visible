@@ -80,11 +80,6 @@ public:
     
     bool haveTracks();
 	
-	const params::InterfaceGl& ui_params ()
-	{
-		return mUIParams;
-	}
-	
 	const ivec2& imagePos () const { return m_instant_mouse_image_pos; }
 	const uint32_t& channelIndex () const { return m_instant_channel; }
 	
@@ -219,9 +214,9 @@ private:
     Rectf get_image_display_rect () override;
     vec2 texture_to_display_zoom ();
     void add_result_sequencer ();
-    void add_timeline ();
+    void add_navigation ();
     void add_motion_profile ();
-    
+    void add_contractions (bool* p_open);
     // Navigation
     void update_log (const std::string& meg = "") override;
     bool looping () override;
@@ -230,7 +225,6 @@ private:
 
 	
     // UI Params Menu
-    params::InterfaceGl         mUIParams;
     std::vector<std::string> mEditNames = {"label=`Cell Length`", "label=`Cell Width`", "label=`None`"};
     std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
     std::vector<std::string>  mProcessOrProcessing = {"Process", "Processing"};
@@ -242,9 +236,11 @@ private:
   
     // UI flags
     bool m_showLog, m_showGUI, m_showHelp;
+    bool m_show_contractions, m_show_playback;
+    
     
     // imGui
-    timeLineSequence mySequence;
+    timeLineSequence m_result_seq;
     void draw_sequencer ();
     
     // UI instant sub-window rects

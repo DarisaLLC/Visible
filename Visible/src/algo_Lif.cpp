@@ -230,14 +230,14 @@ void lif_serie_processor::create_named_tracks (const std::vector<std::string>& n
             m_contraction_pci_tracksRef->resize (1);
             m_shortterm_pci_tracks.resize (1);
             for (auto tt = 0; tt < names.size()-1; tt++)
-                m_flurescence_tracksRef->at(tt).first = names[tt];
-            m_contraction_pci_tracksRef->at(0).first = names[2];
+                m_flurescence_tracksRef->at(tt).first = plot_names[tt];
+            m_contraction_pci_tracksRef->at(0).first = plot_names[2];
             m_shortterm_pci_tracks.at(0).first = plot_names[3];
             break;
         case 1:
             m_contraction_pci_tracksRef->resize (1);
             m_shortterm_pci_tracks.resize (1);
-            m_contraction_pci_tracksRef->at(0).first = names[0];
+            m_contraction_pci_tracksRef->at(0).first = plot_names[0];
             m_shortterm_pci_tracks.at(0).first = plot_names[1];
             break;
         default:

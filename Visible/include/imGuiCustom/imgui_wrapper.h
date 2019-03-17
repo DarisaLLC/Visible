@@ -10,6 +10,9 @@
 // In a namespace so that user can add extra functions in a separate file (e.g. Value() helpers for your vector or common types)
 namespace ImGui
 {
+    
+     IMGUI_API void        StyleColorsLightGreen(ImGuiStyle* dst);
+    
     IMGUI_API void        GetContentRegionMax(ImVec2& result);                                              // current content boundaries (typically window boundaries including scrolling, or current column boundaries), in windows coordinates
     IMGUI_API void        GetContentRegionAvail(ImVec2& result);                                            // == GetContentRegionMax() - GetCursorPos()
     IMGUI_API void        GetWindowContentRegionMin(ImVec2& result);                                        // content boundaries min (roughly (0,0)-Scroll), in window coordinates

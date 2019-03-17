@@ -76,11 +76,8 @@ void VisibleRunApp::DrawGUI(){
     //Draw general settings window
     if(showGUI)
     {
-        ui::Begin("General Settings", &showGUI, ImGuiWindowFlags_AlwaysAutoResize);
-        
-//        ui::SliderInt("Cover Percent", &convergence, 0, 100);
-        
-        ui::End();
+//        ui::Begin("General Settings", &showGUI, ImGuiWindowFlags_AlwaysAutoResize);
+//        ui::End();
     }
     
     //Draw the log if desired
@@ -120,6 +117,9 @@ void VisibleRunApp::setup_ui(){
                    .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
                    //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
                    );
+    ImGuiStyle* st = &ImGui::GetStyle();
+    ImGui::StyleColorsLightGreen(st);
+    
     setWindowPos(getWindowSize()/3);
 }
 /*

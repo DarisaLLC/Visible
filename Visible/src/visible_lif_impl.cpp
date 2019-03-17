@@ -50,6 +50,7 @@
 #include "Resources.h"
 #include "cinder_opencv.h"
 #include "imguivariouscontrols.h"
+#include "imgui_wrapper.h"
 
 
 using namespace ci;
@@ -84,6 +85,7 @@ namespace anonymous{
 
 lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd) :sequencedImageContext(ww), m_serie(sd), m_volume_var_available(false) {
     m_type = guiContext::Type::lif_file_viewer;
+    m_show_contractions = false;
     m_valid = false;
         m_valid = sd.index() >= 0;
         if (m_valid){
@@ -193,7 +195,7 @@ void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
         auto tracksRef = m_contraction_pci_trackWeakRef.lock();
         if (!tracksRef->at(0).second.empty()){
          //   m_plots[channel_count()-1]->load(tracksRef->at(0));
-            mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
+            m_result_seq.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
         }
     }
     vlogger::instance().console()->info("self-similarity available: ");
@@ -430,21 +432,74 @@ void lifContext::edit_no_edit_button ()
 
 void lifContext::update_contraction_selection()
 {
-    mUIParams.removeParam("Select ");
-    static int selected_index = 0;
-    mUIParams.addParam( "Select ", m_contraction_names, &selected_index )
-    .updateFn( [this]
-              {
-                  if ( selected_index >= 0 && selected_index < m_contraction_names.size() )
-                  {
-                      set_current_clip_index(selected_index);
-                      const clip& clip = m_clips[get_current_clip_index()];
-                      std::string msg = " Current Clip " + m_contraction_names[get_current_clip_index()] + " " + clip.to_string();
-                      vlogger::instance().console()->info(msg);
-                  }
-              });
+    m_show_contractions = true;
+    m_result_seq.myItems.resize(1);
+    m_result_seq.myItems.push_back(timeLineSequence::timeline_item{ 0,
+        (int) m_contractions[0].contraction_start.first,
+        (int) m_contractions[0].relaxation_end.first , true});
+
+
 }
 
+void lifContext::add_contractions (bool* p_open)
+{
+    Rectf dr = get_image_display_rect();
+    auto pos = ImVec2(dr.getLowerLeft().x, 150 + getWindowHeight()/2.0);
+    ImGui::SetNextWindowPos(pos);
+    ImGui::SetNextWindowSize(ImVec2(dr.getWidth(), 340), ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("Contractions", p_open, ImGuiWindowFlags_MenuBar))
+    {
+        if (ImGui::BeginMenuBar())
+        {
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("Close")) *p_open = false;
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+        }
+        
+        // left
+        static int selected = 0;
+        ImGui::BeginChild("left pane", ImVec2(150, 0), true);
+        for (int i = 0; i < m_contraction_names.size(); i++)
+        {
+            char label[128];
+            sprintf(label, "Contraction %d", i);
+            if (ImGui::Selectable(label, selected == i))
+                selected = i;
+        }
+        ImGui::EndChild();
+        ImGui::SameLine();
+        
+        // right
+        ImGui::BeginGroup();
+        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+        ImGui::Text("Contraction: %d", selected);
+        ImGui::Separator();
+        if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
+        {
+            if (ImGui::BeginTabItem("Description"))
+            {
+                set_current_clip_index(selected);
+                const clip& clip = m_clips[get_current_clip_index()];
+                std::string msg = " Current Clip " + m_contraction_names[get_current_clip_index()] + " " + clip.to_string();
+                ImGui::TextWrapped("%s", msg.c_str());
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Details"))
+            {
+                ImGui::Text("ID: 0123456789");
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+        ImGui::EndChild();
+        if (ImGui::Button("Save")) {}
+        ImGui::EndGroup();
+    }
+    ImGui::End();
+}
 /************************
  *
  *  Seek Processing
@@ -551,9 +606,6 @@ void lifContext::mouseMove( MouseEvent event )
 
 void lifContext::update_with_mouse_position ( MouseEvent event )
 {
-    Rectf pb(mUIParams.getPosition(), mUIParams.getSize());
-    m_is_in_params = pb.contains(event.getPos());
-    
     mMouseInImage = false;
     mMouseInGraphs  = -1;
     
@@ -762,10 +814,10 @@ void lifContext::loadCurrentSerie ()
         m_maxFrame =  mFrameSet->count() - 1;
         
         // Initialize Sequencer
-        mySequence.mFrameMin = 0;
-        mySequence.mFrameMax = (int) mFrameSet->count() - 1;
-        mySequence.mSequencerItemTypeNames = {"Time Line", "Length", "Force"};
-        mySequence.myItems.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
+        m_result_seq.mFrameMin = 0;
+        m_result_seq.mFrameMax = (int) mFrameSet->count() - 1;
+        m_result_seq.mSequencerItemTypeNames = {"All", "Contraction", "Force"};
+        m_result_seq.myItems.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         
         m_title = m_serie.name() + " @ " + mPath.filename().string();
         
@@ -828,30 +880,24 @@ void lifContext::add_result_sequencer ()
     Rectf dr = get_image_display_rect();
     auto tr = dr.getUpperRight();
     auto pos = ImVec2(tr.x+10, tr.y);
-    ImVec2 size (getWindowWidth()-30-pos.x, getWindowHeight() / 2);
+    ImVec2 size (getWindowWidth()-30-pos.x, (3*getWindowHeight()) / 4);
     
     m_results_browser_display = Rectf(pos,size);
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(size);
 
-    ImGui::Begin(" Results ");
+    ImGui::Begin(" Results ", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     
     ImGui::PushItemWidth(130);
-    ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
+    ImGui::InputInt("Frame Min", &m_result_seq.mFrameMin);
     ImGui::SameLine();
     ImGui::InputInt64("Frame ", &m_seek_position);
     ImGui::SameLine();
-    ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
+    ImGui::InputInt("Frame Max", &m_result_seq.mFrameMax);
     ImGui::PopItemWidth();
     
-    // @todo: add contraction periods
-#if 0
-    mySequence.myItems.push_back(timeLineSequence::timeline_item{ 0,
-        (int) m_contractions[0].contraction_start.first,
-        (int) m_contractions[0].relaxation_end.first , true});
-#endif
-    
-    Sequencer(&mySequence, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
+
+    Sequencer(&m_result_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
     ImGui::End();
     
 //    // add a UI to edit that particular item
@@ -867,21 +913,21 @@ void lifContext::add_result_sequencer ()
     
 }
 
-void lifContext::add_timeline(){
+void lifContext::add_navigation(){
    
     Rectf dr = get_image_display_rect();
     auto pos = ImVec2(dr.getLowerLeft().x, dr.getLowerLeft().y + 30);
-    ImVec2  size (dr.getWidth(), dr.getHeight()/2.0);
+    ImVec2  size (dr.getWidth(), std::min(128.0, dr.getHeight()/2.0));
     m_navigator_display = Rectf(pos,size);
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(size);
     
     
-    if (ImGui::Begin("Timeline"))
+    if (ImGui::Begin("Navigation", &m_show_playback, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::PushItemWidth(40);
         ImGui::PushID(200);
-        ImGui::InputInt("", &mySequence.mFrameMin, 0, 0);
+        ImGui::InputInt("", &m_result_seq.mFrameMin, 0, 0);
         ImGui::PopID();
         ImGui::SameLine();
         if (ImGui::Button("|<"))
@@ -917,7 +963,7 @@ void lifContext::add_timeline(){
         
         ImGui::SameLine();
         ImGui::PushID(202);
-        ImGui::InputInt("",  &mySequence.mFrameMax, 0, 0);
+        ImGui::InputInt("",  &m_result_seq.mFrameMax, 0, 0);
         ImGui::PopID();
         
         if(!m_contraction_pci_trackWeakRef.expired()){
@@ -954,7 +1000,7 @@ void lifContext::add_motion_profile (){
     cv::Point2f points[4];
     mt.points(&points[0]);
     
-    if (ImGui::Begin("Motion Profile", nullptr,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar ))
+    if (ImGui::Begin("Motion Profile", nullptr,ImGuiWindowFlags_AlwaysAutoResize ))
     {
         if(m_var_texture){
             //static float zoom = 0.5f;
@@ -991,80 +1037,18 @@ void lifContext::add_motion_profile (){
 
 void  lifContext::SetupGUIVariables(){
 
-        ImGuiStyle &st = ImGui::GetStyle();
-        st.FrameBorderSize = 1.0f;
-        st.FramePadding = ImVec2(4.0f,2.0f);
-        st.ItemSpacing = ImVec2(8.0f,2.0f);
-        st.WindowBorderSize = 1.0f;
-        //   st.TabBorderSize = 1.0f;
-        st.WindowRounding = 1.0f;
-        st.ChildRounding = 1.0f;
-        st.FrameRounding = 1.0f;
-        st.ScrollbarRounding = 1.0f;
-        st.GrabRounding = 1.0f;
-        //  st.TabRounding = 1.0f;
-        
-        // Setup style
-        ImVec4* colors = ImGui::GetStyle().Colors;
-        colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 0.95f);
-        colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-        colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.12f, 0.12f, 1.00f);
-        colors[ImGuiCol_ChildBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.00f);
-        colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.94f);
-        colors[ImGuiCol_Border] = ImVec4(0.53f, 0.53f, 0.53f, 0.46f);
-        colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-        colors[ImGuiCol_FrameBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.85f);
-        colors[ImGuiCol_FrameBgHovered] = ImVec4(0.22f, 0.22f, 0.22f, 0.40f);
-        colors[ImGuiCol_FrameBgActive] = ImVec4(0.16f, 0.16f, 0.16f, 0.53f);
-        colors[ImGuiCol_TitleBg] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-        colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-        colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
-        colors[ImGuiCol_MenuBarBg] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
-        colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
-        colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
-        colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
-        colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.48f, 0.48f, 0.48f, 1.00f);
-        colors[ImGuiCol_CheckMark] = ImVec4(0.79f, 0.79f, 0.79f, 1.00f);
-        colors[ImGuiCol_SliderGrab] = ImVec4(0.48f, 0.47f, 0.47f, 0.91f);
-        colors[ImGuiCol_SliderGrabActive] = ImVec4(0.56f, 0.55f, 0.55f, 0.62f);
-        colors[ImGuiCol_Button] = ImVec4(0.50f, 0.50f, 0.50f, 0.63f);
-        colors[ImGuiCol_ButtonHovered] = ImVec4(0.67f, 0.67f, 0.68f, 0.63f);
-        colors[ImGuiCol_ButtonActive] = ImVec4(0.26f, 0.26f, 0.26f, 0.63f);
-        colors[ImGuiCol_Header] = ImVec4(0.54f, 0.54f, 0.54f, 0.58f);
-        colors[ImGuiCol_HeaderHovered] = ImVec4(0.64f, 0.65f, 0.65f, 0.80f);
-        colors[ImGuiCol_HeaderActive] = ImVec4(0.25f, 0.25f, 0.25f, 0.80f);
-        colors[ImGuiCol_Separator] = ImVec4(0.58f, 0.58f, 0.58f, 0.50f);
-        colors[ImGuiCol_SeparatorHovered] = ImVec4(0.81f, 0.81f, 0.81f, 0.64f);
-        colors[ImGuiCol_SeparatorActive] = ImVec4(0.81f, 0.81f, 0.81f, 0.64f);
-        colors[ImGuiCol_ResizeGrip] = ImVec4(0.87f, 0.87f, 0.87f, 0.53f);
-        colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.87f, 0.87f, 0.87f, 0.74f);
-        colors[ImGuiCol_ResizeGripActive] = ImVec4(0.87f, 0.87f, 0.87f, 0.74f);
-        //   colors[ImGuiCol_Tab] = ImVec4(0.01f, 0.01f, 0.01f, 0.86f);
-        //   colors[ImGuiCol_TabHovered] = ImVec4(0.29f, 0.29f, 0.79f, 1.00f);
-        //   colors[ImGuiCol_TabActive] = ImVec4(0.31f, 0.31f, 0.91f, 1.00f);
-        //   colors[ImGuiCol_TabUnfocused] = ImVec4(0.02f, 0.02f, 0.02f, 1.00f);
-        //   colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
-        //  colors[ImGuiCol_DockingPreview] = ImVec4(0.38f, 0.48f, 0.60f, 1.00f);
-        //  colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
-        colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
-        colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.68f, 0.68f, 0.68f, 1.00f);
-        colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.77f, 0.33f, 1.00f);
-        colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.87f, 0.55f, 0.08f, 1.00f);
-        colors[ImGuiCol_TextSelectedBg] = ImVec4(0.47f, 0.60f, 0.76f, 0.47f);
-        colors[ImGuiCol_DragDropTarget] = ImVec4(0.58f, 0.58f, 0.58f, 0.90f);
-        colors[ImGuiCol_NavHighlight] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-        colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
-        colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-        colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+  //      ImGuiStyle* st = &ImGui::GetStyle();
+  //      ImGui::StyleColorsLightGreen(st);
 
 }
 
 
 void  lifContext::DrawGUI(){
     
-    add_timeline();
+    add_navigation();
     add_result_sequencer();
     add_motion_profile ();
+    add_contractions(&m_show_contractions);
 }
 
 Rectf lifContext::get_image_display_rect ()
@@ -1129,8 +1113,8 @@ void lifContext::update ()
     {
         assert(channel_count() >= 3);
         auto tracksRef = m_flurescence_trackWeakRef.lock();
-        mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors[tracksRef->at(0).first], 0);
-        mySequence.m_editable_plot_data.load(tracksRef->at(1), anonymous::named_colors[tracksRef->at(1).first], 1);
+        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors[tracksRef->at(0).first], 0);
+        m_result_seq.m_editable_plot_data.load(tracksRef->at(1), anonymous::named_colors[tracksRef->at(1).first], 1);
     }
 
     // Update PCI result if ready
@@ -1141,14 +1125,14 @@ void lifContext::update ()
       //      m_lifProcRef->shortterm_pci(1);
 #endif
         auto tracksRef = m_contraction_pci_trackWeakRef.lock();
-        mySequence.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
+        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
 
 
         // Update shortterm PCI result if ready
         if ( ! m_lifProcRef->shortterm_pci().at(0).second.empty() )
         {
             auto tracksRef = m_lifProcRef->shortterm_pci();
-            mySequence.m_editable_plot_data.load(tracksRef.at(0), anonymous::named_colors["Short"], 3);
+            m_result_seq.m_editable_plot_data.load(tracksRef.at(0), anonymous::named_colors["Short"], 3);
         }
     }
     
