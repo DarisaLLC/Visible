@@ -102,13 +102,13 @@ namespace ImCurveEdit
 
    int Edit(Delegate &delegate, const ImVec2& size, unsigned int id, const ImRect *clippingRect, ImVector<EditPoint> *selectedPoints)
    {
-      static bool selectingQuad = false;
+       static bool selectingQuad = false;
       static ImVec2 quadSelection;
       static int overCurve = -1;
       static int movingCurve = -1;
-      static bool scrollingV = false;
+      static bool scrollingV = true;
       static std::set<EditPoint> selection;
-      static bool overSelectedPoint = false;
+       static bool overSelectedPoint = false;
 
       ImGuiIO& io = ImGui::GetIO();
       ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));

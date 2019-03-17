@@ -290,7 +290,6 @@ private:
 	
 	mutable boost::filesystem::path mPath;
 	
-	params::InterfaceGl         mUIParams;	
 	bool mMoviePlay;
 	bool mMovieLoop;
 	void play_pause_button ();

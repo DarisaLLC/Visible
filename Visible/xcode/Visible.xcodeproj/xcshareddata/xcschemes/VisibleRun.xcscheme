@@ -63,11 +63,11 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Volumes/nobokovHD/Users/arman/Pictures/lif/Sample1.lif"
+            argument = "/Volumes/nobokovHD/Users/arman/Pictures/lif/3channels.lif"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "Series007"
+            argument = "Series014"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -75,15 +75,15 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/nobokovHD/Users/arman/Pictures/lif/3channels.lif"
+            argument = "/Volumes/nobokovHD/Users/arman/Pictures/lif/Sample1.lif"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "Series007"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "list"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "Series014"
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
