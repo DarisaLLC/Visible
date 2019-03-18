@@ -36,6 +36,10 @@
 		C210946E223AEC19004E88EE /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
 		C210946F223AEC19004E88EE /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
 		C2109470223AEC19004E88EE /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
+		C2109476223F4CFE004E88EE /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
+		C2109477223F4CFE004E88EE /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
+		C2109478223F4CFE004E88EE /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
+		C2109479223F4CFE004E88EE /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
 		C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
 		C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
 		C2175DDC215154EA004315C0 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
@@ -493,6 +497,7 @@
 		C210946C223AEC19004E88EE /* imgui_wrapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_wrapper.cpp; path = ../include/imGuiCustom/imgui_wrapper.cpp; sourceTree = "<group>"; };
 		C210946D223AEC19004E88EE /* imgui_wrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = imgui_wrapper.h; path = ../include/imGuiCustom/imgui_wrapper.h; sourceTree = "<group>"; };
 		C2109474223C7D63004E88EE /* CImg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CImg.h; path = ../../externals/CImg/CImg.h; sourceTree = "<group>"; };
+		C2109475223F4CFE004E88EE /* opencv_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = opencv_draw.cpp; sourceTree = "<group>"; };
 		C210F1132159A826002A82A3 /* libzlib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libzlib.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/libzlib.a"; sourceTree = "<group>"; };
 		C210F1142159A827002A82A3 /* libippiw.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libippiw.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/libippiw.a"; sourceTree = "<group>"; };
 		C210F1152159A828002A82A3 /* liblibpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibpng.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/liblibpng.a"; sourceTree = "<group>"; };
@@ -1617,6 +1622,7 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C2109475223F4CFE004E88EE /* opencv_draw.cpp */,
 				C29C53BF222B58D900D17385 /* dense_motion.cpp */,
 				C2398A0821DD8A0A00B180A0 /* file_system.cpp */,
 				C2239AB3218B6270007558AB /* boost_literals.cpp */,
@@ -2016,6 +2022,7 @@
 				C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */,
 				C2606DAF1CED3E2E0045FF57 /* matpixel.cpp in Sources */,
 				C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */,
+				C2109476223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
 				C2398A0921DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C2618F83217FDA6600FA9F43 /* highgui.cc in Sources */,
 				C28F743A2236DD6F0040890C /* edgel.cpp in Sources */,
@@ -2132,6 +2139,7 @@
 				C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */,
 				C2398A1621DE980C00B180A0 /* imgui_demo.cpp in Sources */,
 				C29DB077212B351200930CBD /* algo_Lif.cpp in Sources */,
+				C2109478223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
 				C20EDBC61CF2776D0074C47A /* self_similarity.cpp in Sources */,
 				C2618F84217FDA8400FA9F43 /* color.cc in Sources */,
 				C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */,
@@ -2155,6 +2163,7 @@
 				C26A05681E777E2100BDC954 /* tinyxmlerror.cpp in Sources */,
 				C26A055C1E77750C00BDC954 /* self_similarity.cpp in Sources */,
 				C26A056E1E777E9100BDC954 /* opencv_utils.cpp in Sources */,
+				C2109479223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
 				C26A056C1E777E5600BDC954 /* rand_support.cpp in Sources */,
 				C26A053D1E771CCF00BDC954 /* main.cpp in Sources */,
 				C26A056A1E777E3600BDC954 /* matpixel.cpp in Sources */,
@@ -2239,6 +2248,7 @@
 				C26F5FD821B0AA6D00EAE156 /* onImagePlotUtils.cpp in Sources */,
 				C26F5FD921B0AA6D00EAE156 /* tinystr.cpp in Sources */,
 				C26F5FDA21B0AA6D00EAE156 /* matpixel.cpp in Sources */,
+				C2109477223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
 				C2398A0A21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C26F5FDB21B0AA6D00EAE156 /* highgui.cc in Sources */,
 				C28F74392236DD6E0040890C /* edgel.cpp in Sources */,

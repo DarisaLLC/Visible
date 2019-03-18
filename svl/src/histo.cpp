@@ -414,7 +414,17 @@ double histoStats::mean(const roiWindow<P> & src)
 }
 
 
+template <typename P>
+double histoStats::median(const roiWindow<P> & src)
+{
+    histoStats h;
+    h.from_image(src);
+    return h.median();
+}
+
+
 template void histoStats::from_image<P8U>(const roiWindow<P8U> & src);
 template void histoStats::init <P8U>(const std::array<uint32_t, PixelBinSize<P8U>::bins>&);
 template double histoStats::mean<P8U> (const roiWindow<P8U> & src);
+template double histoStats::median<P8U> (const roiWindow<P8U> & src);
 

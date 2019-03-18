@@ -892,6 +892,24 @@ namespace svl
         return std::max(1,left_tail_value);
     }
     
+    int rightTailPost (const cv::Mat1b& image, float right_tail_fraction)
+    {
+        auto hist = getHistogram (image);
+        float right_fraction_n = right_tail_fraction * image.rows * image.cols;
+        float ncount = 0;
+        int right_tail_value = 0;
+        for (int i=255; i >= 0 ;i--)
+        {
+            ncount += hist.at<float>(i);
+            if (ncount > right_fraction_n)
+            {
+                right_tail_value = i;
+                break;
+            }
+        }
+        return std::min(255,right_tail_value);
+    }
+    
     
     void output(Mat mat, int prec, char be, char en)
     {
