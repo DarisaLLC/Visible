@@ -17,6 +17,38 @@ using namespace svl;
 /*! Functions related to affine transformations. */
 namespace svl
 {
+    
+    // Draw Utils
+    
+    void drawArrow(cv::Mat& dst,
+                   const cv::Point& p1, const cv::Point& p2,
+                   const cv::Scalar & color, const int rad);
+    
+    
+    void drawCrossOR(cv::Mat& dst,
+                     const cv::Point& p, const cv::Scalar & color, const int siz,
+                     const int rad, const float ori);
+    
+    
+    void drawCross(cv::Mat& dst,
+                   const cv::Point& p, const cv::Scalar & color, int siz,  int rad);
+    
+    void drawRectOR(cv::Mat& dst,
+                    const cv::Rect& r, const cv::Scalar & color, const int rad,
+                    const float ori);
+    
+    void drawRect(cv::Mat& dst,
+                  const cv::Rect& r, const cv::Scalar & color, const int rad);
+    
+    
+    void drawLine(cv::Mat& dst,
+                  const cv::Point& pos, float ori, float len, const cv::Scalar & color,
+                  const int rad);
+    
+    void drawLine(cv::Mat& dst, const cv::Point& p1, const cv::Point& p2,
+                  const cv::Scalar & color, const int rad);
+
+    
     // Use view roiWindow memory as cv::Mat.
     // Requires cvType to be appropriate
     // Use within scope. As roiWindow is ref counted. 
@@ -126,6 +158,8 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
    
     // Return -1 or 0-255 for left_tail
     int leftTailPost (const cv::Mat1b& image, float left_tail_fraction);
+    int rightTailPost (const cv::Mat1b& image, float right_tail_fraction);
+    
     void toHistVector (const cv::Mat& hist, std::vector<float>& vh);
     void generate_mask (const cv::Mat& rg, cv::Mat& mask, float left_tail_post, bool debug_output = false);
    

@@ -67,6 +67,7 @@
 #include "vision/opencv_utils.hpp"
 #include "vision/gauss.hpp"
 #include "vision/dense_motion.hpp"
+#include "vision/gradient.h"
 #include "algo_Lif.hpp"
 
 // @FIXME Logger has to come before these
@@ -79,7 +80,7 @@
 using namespace cimg_library;
 
 
-//#define INTERACTIVE
+#define INTERACTIVE
 
 using namespace boost;
 
@@ -411,13 +412,7 @@ TEST (ut_opencvutils, anistropic_diffusion){
     double endtime;
     std::clock_t start;
     
-    auto res0 = dgenv_ptr->asset_path("c2-cImg-aniso.png");
-    EXPECT_TRUE(res0.second);
-    EXPECT_TRUE(boost::filesystem::exists(res0.first));
-    cv::Mat image_cimg = cv::imread(res0.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
-    EXPECT_EQ(image_cimg.channels() , 1);
-    EXPECT_EQ(image_cimg.cols , 512);
-    EXPECT_EQ(image_cimg.rows , 128);
+   
     auto res = dgenv_ptr->asset_path("image230.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
@@ -441,16 +436,69 @@ TEST (ut_opencvutils, anistropic_diffusion){
     CImg<unsigned char> testCImg1(image);
     CImg<unsigned char> output(image.clone());
    
-
     start = std::clock();
     auto anImg = testCImg1.blur_anisotropic(*output);
     endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
     std::cout << " CImg blur_anisotropic " << endtime  << " Seconds " << std::endl;
     auto mout = anImg.get_MAT();
-
+    
+    
+    auto cpToRoiWindow = [](cv::Mat& m, roiWindow<P8U>& r){
+        auto rowPointer = [] (void* data, size_t step, int32_t row ) { return reinterpret_cast<void*>( reinterpret_cast<uint8_t*>(data) + row * step ); };
+        unsigned cols = m.cols;
+        unsigned rows = m.rows;
+        roiWindow<P8U> rw(cols,rows);
+        for (auto row = 0; row < rows; row++) {
+            std::memcpy(rw.rowPointer(row), rowPointer(m.data, m.step, row), cols);
+        }
+        r = rw;
+    };
+    
+    roiWindow<P8U> r8(mout.cols, mout.rows);
+    cpToRoiWindow(mout, r8);
+    
+    roiWindow<P8U> mag = r8.clone();
+    roiWindow<P8U> ang = r8.clone();
+    roiWindow<P8U> peaks = r8.clone();
+    
+    start = std::clock();
+    Gradient(r8, mag, ang);
+    unsigned int pks = SpatialEdge(mag, ang, peaks, 5, false);
+    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    double scale = 1000.0;
+    std::cout << " Edge: Mag, Ang, NonMax: 1920 * 1080 * 8 bit " << endtime * scale << " millieseconds per " << std::endl;
+    
+    std::vector<svl::feature> features;
+    auto pks_2 = SpatialEdge(mag, ang, features, 5);
+    EXPECT_EQ(pks, pks_2);
+  
+    
+    cvMatOfroiWindow(peaks, mim, CV_8UC1);
+    cvMatOfroiWindow(ang, aim, CV_8UC1);
+    
+    
+    auto rt = rightTailPost(mim, 0.01f);
+    std::cout << rt << std::endl;
+    
+    auto vec2point = [] (const fVector_2d& v, cv::Point& p) {p.x = v.x(); p.y = v.y();};
+    
+    for (auto fea : features){
+        cv::Point pt;
+        vec2point(fea.position(),pt);
+        uRadian uu (fea.angle());
+        float ang_rad = static_cast<float>(uu.Double());
+        auto color = Scalar::all(255);
+        svl::drawCrossOR(mout, pt, color , 3,3,ang_rad);
+    }
+    
 #ifdef INTERACTIVE
+    namedWindow("CImg Anistorpic", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
     cv::imshow("CImg Anistorpic", mout);
     cv::waitKey();
+    cv::imshow("Normalized Mag", mim);
+    cv::waitKey();
+    cv::imshow("ang", aim);
+    
 #endif
     
 }
@@ -578,35 +626,6 @@ TEST (ut_ss_voxel, basic){
     imshow( " ss voxel ", cm);
     cv::waitKey(-1);
 #endif
-    
-}
-
-TEST (ut_liffile, voxel_energy)
-{
-    std::string filename ("Sample1.lif");
-    std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
-    EXPECT_TRUE(res.second);
-    lifIO::LifReader lif(res.first.string(), "");
-    cout << "LIF version "<<lif.getVersion() << endl;
-    EXPECT_EQ(14, lif.getNbSeries() );
-
-    // @todo enable getting sequential frame container from a browser
-    auto lb_ref = lif_browser::create(res.first.string());
-    auto lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&lif.getSerie(0), stl_utils::null_deleter());
-    auto seq_frames =  seqFrameContainer::create (*lif_serie_ref);
-    
-    // Testing cv::mat conversion call back
-    // Create a Processing Object to attach signals to
-    auto lifProcRef = std::make_shared<lif_serie_processor> ();
-   // static bool s_loaded = false;
-  //  std::function<void (int64_t&)> content_loaded_cb = ([&lrp = lifProcRef](int64_t& frame_counted){std::cout << frame_counted; s_loaded = true; });
-    // Connect the callback to lif processor
-    
-  //  boost::signals2::connection content_loaded_connection = lifProcRef->registerCallback(content_loaded_cb);
-    std::vector<std::string> names { "grey"};
-    lifProcRef->load(seq_frames, names, names);
-  //  std::this_thread::sleep_for(std::chrono::duration<double, std::milli> (30));
-  //  EXPECT_TRUE(s_loaded);
     
 }
 

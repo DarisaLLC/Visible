@@ -75,6 +75,143 @@ private:
     
  
 };
+    
+    class  featureSet
+    {
+    public:
+        featureSet() { setUnbound();}
+        
+        featureSet(const std::vector< feature>& newedges, const iRect& span, const fVector_2d origin = fVector_2d () )
+        {
+            setUnbound();
+            m_edges = newedges;
+            set_xform_origin( origin);
+            m_pel_rect = span;
+        }
+        
+    //    static featureSet create (cv::Mat& image,  qEdgeHelper& params = qEdgeHelper ());
+    //    static void draw (cv::Mat& image, featureSet& features, qEdgeHelper& params = qEdgeHelper () );
+    
+        
+        // default copy, assign, dtor okay
+        
+        void setUnbound()
+        {
+            m_edges.clear (); m_isBound = false;m_com_cached = false; m_cop_cached = false;m_bbox_cached = false;
+        }
+        
+        bool isBound() const { return m_isBound; }
+        
+        size_t nEdges() const {return m_edges.size();}
+        
+        double magScale() const {return m_magScale;}
+        
+        const std::vector< feature>& edges() const {return m_edges;}
+        
+        void edges(const std::vector< feature>&newedges)
+        {
+         //   m_edges.resize(newedges.size());
+         //   std::copy (newedges.begin(), newedges.end(), m_edges.begin());
+          //  m_cop_cached = m_com_cached = m_bbox_cached = false;
+        }
+        
+        fRect boundingBox() const
+        {
+            if (! m_bbox_cached ) m_compute_bbox();
+            return m_bbox;
+        }
+        
+        fVector_2d centerOfMass_2d() const
+        {
+            if (! m_com_cached) m_compute_com();
+            return m_com;
+        }
+        
+        fVector_2d centerOfMass_1d() const
+        {
+            if (! m_cop_cached ) m_compute_cop();
+            return m_cop;
+        }
+        bool centerOfMass_1d_exists () const
+        {
+            return m_cop_exists;
+        }
+        
+        
+        
+        // required for STL
+        bool operator<  (const featureSet& rhs) const;
+        bool operator== (const featureSet& rhs) const;
+        
+    private:
+        fVector_2d m_xform_origin;
+        mutable bool m_com_cached, m_cop_cached, m_bbox_cached;
+        double m_magScale;
+        std::vector< feature> m_edges;
+        bool m_isBound;
+        mutable bool m_cop_exists;
+        mutable fVector_2d m_com;
+        mutable fVector_2d m_cop;
+        mutable fRect m_bbox;
+        mutable iRect m_pel_rect;
+        svl::xform m_xform;
+        
+        void set_xform_origin (const fVector_2d& ctr)
+        {
+            m_xform_origin = ctr;
+        }
+        
+        
+        void m_compute_bbox () const
+        {
+            float minx = boost::numeric::bounds<float>::highest(), miny = boost::numeric::bounds<float>::highest(),
+            maxx = boost::numeric::bounds<float>::lowest(), maxy = boost::numeric::bounds<float>::lowest();
+            
+            std::vector< feature>::const_iterator fItr = m_edges.begin();
+            for (; fItr != m_edges.end(); fItr++)
+            {
+                const fVector_2d& p = fItr->position ();
+                minx = std::min (p.x(), minx);
+                miny = std::min (p.y(), miny);
+                maxx = std::max (p.x(), maxx);
+                maxy = std::max (p.y(), maxy);
+            }
+            
+            m_bbox = fRect (minx, miny, maxx, maxy);
+            m_bbox_cached = true;
+        }
+        
+        void m_compute_com () const
+        {
+//            float sx = 0, sy = 0;
+//            std::vector< feature>::const_iterator f = m_edges.begin();
+//            for (; f != m_edges.end(); f++)
+//            {
+//                sx += f->directX();
+//                sy += f->directY();
+//            }
+//            m_com = fVector_2d (sx / m_edges.size(), sy / m_edges.size());
+//            m_com_cached = true;
+        }
+        void m_compute_cop () const
+        {
+//            motionCenter mc;
+//            std::vector< feature>::const_iterator f = m_edges.begin();
+//            for (; f != m_edges.end(); f++)
+//            {
+//                mc.add (f->directX(), f->directY(), f->angle());
+//            }
+//            m_cop_exists = mc.center(m_cop)    ;
+//            m_cop_cached = true;
+        }
+        
+
+        
+        
+    };
+    
+
+    
 }
 
 #endif // _FEHF_H
