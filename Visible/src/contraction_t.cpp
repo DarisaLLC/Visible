@@ -70,6 +70,7 @@ contraction_analyzer::contraction_analyzer() :
 m_cached(false),  mValidInput (false), m_median_levelset_frac (0.0)
 {
     m_peaks.resize(0);
+    m_capRef = contraction_profile_analyzer::create ();
     
     // Signals we provide
     signal_contraction_analyzed = createSignal<contraction_analyzer::sig_cb_contraction_analyzed> ();
@@ -92,6 +93,7 @@ void contraction_analyzer::load(const vector<double>& entropies, const vector<ve
     }
     m_peaks.resize(0);
     mValidInput = verify_input ();
+    m_capRef->load(entropies);
 }
 
 void contraction_analyzer::regenerate() const{
@@ -131,9 +133,10 @@ bool contraction_analyzer::find_best () const
         clear_outputs ();
         if (lowest.first < invalid)
         {
+            
             m_peaks.emplace_back(lowest.first, m_signal[lowest.first]);
-            contraction one;
-            contraction::fill(m_peaks.back(), std::pair<size_t,size_t>(-20,30), one);
+            m_capRef->measure_contraction_at_point(lowest.first);
+            const contraction_t& one = m_capRef->contraction();
             m_contractions.emplace_back(one);
             if (signal_contraction_analyzed && signal_contraction_analyzed->num_slots() > 0)
                 signal_contraction_analyzed->operator()(m_contractions);

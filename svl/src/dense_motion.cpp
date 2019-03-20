@@ -10,14 +10,14 @@
 using namespace svl;
 
 
-dmf::dmf(const uiPair& frame, const uiPair& fixed_half_size, const uiPair& moving_half_size, const fPair& phase ):
+dmf::dmf(const iPair& frame, const iPair& fixed_half_size, const iPair& moving_half_size, const fPair& phase ):
    m_isize(frame), m_fsize(fixed_half_size * 2 + 1), m_msize(moving_half_size * 2 + 1)
 {
     allocate_buffers();
 }
 
-const uiPair& dmf::fixed_size () const { return m_fsize; }
-const uiPair& dmf::moving_size () const { return m_msize; }
+const iPair& dmf::fixed_size () const { return m_fsize; }
+const iPair& dmf::moving_size () const { return m_msize; }
 
 const std::vector<svl::dmf::buffers>::const_iterator dmf::fixed_buffers () const{
     auto bi = m_links.begin();
@@ -76,19 +76,20 @@ bool dmf::allocate_buffers ()
     m_minus_index = 1;
     return true;
 }
-
-void dmf::block_match(const uiPair& fixed, const uiPair& moving, direction dir, match& result){
-    fRect ff(fixed.first,fixed.second, fixed_size().first, fixed_size().second);
-    fRect mm(moving.first,moving.second, moving_size().first, moving_size().second);
-    assert(mm.contains(ff));
-    
-}
+//
+//void dmf::block_match(const iPair& fixed, const iPair& moving, direction dir, match& result){
+//    fRect ff(fixed.first,fixed.second, fixed_size().first, fixed_size().second);
+//    fRect mm(moving.first,moving.second, moving_size().first, moving_size().second);
+//
+//    assert(mm.contains(ff));
+//
+//}
 
 // For fixed and moving sizes and centered at location, compute
 // forward and backward motions and validate them
 // forward is prev to cur
 // backward is cur to prev
-// void block_bi_motion(const uiPair& location);
+// void block_bi_motion(const iPair& location);
 
 // Assume moving is larger or equal to fixed.
 // return position of the best match
@@ -100,7 +101,7 @@ void dmf::block_match(const uiPair& fixed, const uiPair& moving, direction dir, 
 
 // Point match
 // Compute ncc at tl location row_0,col_0 in fixed and row_1,col_1 moving using integral images
-double dmf::normalizedCorrelation(const uiPair& fixed, const uiPair& moving, CorrelationParts& cp, direction dir)
+double dmf::point_ncc_match(const iPair& fixed, const iPair& moving, CorrelationParts& cp, direction dir)
 {
     const uint32_t& col_0 = fixed.first;
     const uint32_t& row_0 = fixed.second;
@@ -112,11 +113,11 @@ double dmf::normalizedCorrelation(const uiPair& fixed, const uiPair& moving, Cor
     
     cp.clear();
     double ab = 0.0;
-    const unsigned int height_tpl = m_msize.second, width_tpl = m_msize.first;
+    const unsigned int height_tpl = fixed_size().second, width_tpl = fixed_size().first;
     const int nP = height_tpl * width_tpl;
     if (true) {
-        for (unsigned int i = 0; i < m_msize.second; i++) {
-            for (unsigned int j = 0; j < m_msize.first; j++) {
+        for (unsigned int i = 0; i <  height_tpl; i++) {
+            for (unsigned int j = 0; j < width_tpl; j++) {
                 ab += (f_link->m_i->ptr(row_0 + i)[col_0 + j]) * m_link->m_i->ptr(row_1 + i)[col_1 + j];
                 
             }

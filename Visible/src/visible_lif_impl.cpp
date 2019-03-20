@@ -482,8 +482,12 @@ void lifContext::add_contractions (bool* p_open)
             if (ImGui::BeginTabItem("Description"))
             {
                 set_current_clip_index(selected);
-                const clip& clip = m_clips[get_current_clip_index()];
-                std::string msg = " Current Clip " + m_contraction_names[get_current_clip_index()] + " " + clip.to_string();
+                std::string msg = " Entire ";
+                if (selected != 0){
+                const contraction_analyzer::contraction_t& se = m_contractions[get_current_clip_index() - 1];
+                auto ctr_info = " Contraction: [" + to_string(se.contraction_start.first) + "," + to_string(se.relaxation_end.first) + "]";
+                msg = " Current Clip " + m_contraction_names[get_current_clip_index()] + " " + ctr_info;
+                }
                 ImGui::TextWrapped("%s", msg.c_str());
                 ImGui::EndTabItem();
             }

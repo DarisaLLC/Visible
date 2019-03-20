@@ -163,7 +163,7 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     void toHistVector (const cv::Mat& hist, std::vector<float>& vh);
     void generate_mask (const cv::Mat& rg, cv::Mat& mask, float left_tail_post, bool debug_output = false);
    
-    void sobel_opencv (const cv::Mat& input_gray, cv::Mat& mag, cv::Mat& ang);
+    void sobel_opencv (const cv::Mat& input_gray, cv::Mat& mag, cv::Mat& ang, uint32_t square_size = 3);
     void getRangeC (const cv::Mat& onec, vec2& range);
     double median( cv::Mat channel );
     

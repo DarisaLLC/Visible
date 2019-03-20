@@ -94,6 +94,14 @@ using namespace svl;
 
 namespace fs = boost::filesystem;
 
+static const auto CVCOLOR_RED = cv::Vec3b(0, 0, 255);
+static const auto CVCOLOR_YELLOW = cv::Vec3b(0, 255, 255);
+static const auto CVCOLOR_GREEN = cv::Vec3b(0, 255, 0);
+static const auto CVCOLOR_BLUE = cv::Vec3b(255, 0, 0);
+static const auto CVCOLOR_GRAY = cv::Vec3b(127, 127, 127);
+static const auto CVCOLOR_BLACK = cv::Vec3b(0, 0, 0);
+static const auto CVCOLOR_WHITE = cv::Vec3b(255, 255, 255);
+static const auto CVCOLOR_VIOLET = cv::Vec3b(127, 0, 255);
 
 void cvDrawPlot (std::vector<float>& tmp){
     
@@ -275,45 +283,45 @@ TEST (ut_dm, basic){
     cv::Mat im0 (p0.height(), p0.width(), CV_8UC(1), p0.pelPointer(0,0), size_t(p0.rowUpdate()));
     cv::Mat im1 (p1.height(), p1.width(), CV_8UC(1), p1.pelPointer(0,0), size_t(p1.rowUpdate()));
     
-    uiPair frame_size (p0.width(),p0.height());
-    uiPair fixed_half_size(16,16);
-    uiPair moving_half_size(24,24);
+    iPair frame_size (p0.width(),p0.height());
+    iPair fixed_half_size(16,16);
+    iPair moving_half_size(24,24);
     dmf ff(frame_size, fixed_half_size, moving_half_size);
-    uiPair fixed = ff.fixed_size();
-    uiPair moving = ff.moving_size();
+    iPair fixed = ff.fixed_size();
+    iPair moving = ff.moving_size();
     
-    EXPECT_TRUE(fixed == uiPair(2*fixed_half_size.first+1,2*fixed_half_size.second+1));
-    EXPECT_TRUE(moving == uiPair(2*moving_half_size.first+1,2*moving_half_size.second+1));
+    EXPECT_TRUE(fixed == iPair(2*fixed_half_size.first+1,2*fixed_half_size.second+1));
+    EXPECT_TRUE(moving == iPair(2*moving_half_size.first+1,2*moving_half_size.second+1));
   
     CorrelationParts cp;
     ff.update(im0);
     ff.update(im0);
-    uiPair fixed_tl (65, 45);
-    auto r = ff.normalizedCorrelation(fixed_tl, fixed_tl, cp);
+    iPair fixed_tl (65, 45);
+    auto r = ff.point_ncc_match(fixed_tl, fixed_tl, cp);
     EXPECT_TRUE(svl::equal(r,1.0));
     ff.update(im1);
     std::vector<std::vector<int>> space;
     for (int j = -1; j < 4; j++){
         std::vector<int> rs;
         for (int i = -1; i < 4; i++){
-            uiPair tmp(fixed_tl.first+i, fixed_tl.second+j);
-            auto r = ff.normalizedCorrelation(fixed_tl, tmp,cp);
+            iPair tmp(fixed_tl.first+i, fixed_tl.second+j);
+            auto r = ff.point_ncc_match(fixed_tl, tmp,cp);
             int score = int(r*1000);
             rs.push_back(score);
         }
         space.push_back(rs);
     }
 
-    EXPECT_TRUE(space[1][1] == 933);
-    EXPECT_TRUE(space[1][3] == 930);
-    EXPECT_TRUE(space[3][1] == 930);
-    EXPECT_TRUE(space[3][3] == 930);
+    EXPECT_TRUE(space[1][1] == 908);
+    EXPECT_TRUE(space[1][3] == 905);
+    EXPECT_TRUE(space[3][1] == 905);
+    EXPECT_TRUE(space[3][3] == 905);
     
-    EXPECT_TRUE(space[2][1] == 958);
-    EXPECT_TRUE(space[2][2] == 985);
-    EXPECT_TRUE(space[2][3] == 958);
-    EXPECT_TRUE(space[1][2] == 958);
-    EXPECT_TRUE(space[3][2] == 958);
+    EXPECT_TRUE(space[2][1] == 942);
+    EXPECT_TRUE(space[2][2] == 980);
+    EXPECT_TRUE(space[2][3] == 942);
+    EXPECT_TRUE(space[1][2] == 942);
+    EXPECT_TRUE(space[3][2] == 942);
     
     // Cheap Parabolic Interpolation
     auto x = ((space[2][3]-space[2][1])/2.0) / (space[2][3]+space[2][1]-space[2][2]);
@@ -401,6 +409,12 @@ std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655,
     39.4077, 39.2694, 39.1967, 39.2828, 39.2438, 39.2093, 39.2167,
     39.2749, 39.4703, 39.2846};
 
+TEST(ut_median, basic){
+    std::vector<double> dst;
+    bool ok = rolling_median_3(acid.begin(), acid.end(), dst);
+    EXPECT_TRUE(ok);
+    
+}
 
 void done_callback (void)
 {
@@ -427,23 +441,31 @@ TEST (ut_opencvutils, anistropic_diffusion){
     std::cout << " Anisotrpic Diffusion " << endtime  << " Seconds " << std::endl;
     
 #ifdef INTERACTIVE
-    std::string file_path = "/Users/arman/tmp/c2/simple_aniso.png";
+    std::string file_path = "/Users/arman/tmp/simple_aniso.png";
     cv::imwrite(file_path, image_anisotropic);
     cv::imshow("Anistorpic", image_anisotropic);
     cv::waitKey();
 #endif
+}
+
+cv::Mat show_cv_angle (const cv::Mat& src, const std::string& name){
+    cv::Mat mag, ang;
+    svl::sobel_opencv(src, mag, ang, 7);
     
-    CImg<unsigned char> testCImg1(image);
-    CImg<unsigned char> output(image.clone());
-   
-    start = std::clock();
-    auto anImg = testCImg1.blur_anisotropic(*output);
-    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
-    std::cout << " CImg blur_anisotropic " << endtime  << " Seconds " << std::endl;
-    auto mout = anImg.get_MAT();
+#ifdef INTERACTIVE
+    namedWindow(name.c_str(), CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+    cv::imshow(name.c_str(), ang);
+    cv::waitKey();
+#endif
+    return ang;
     
+}
+
+
+void show_gradient (const cv::Mat& src, const std::string& name){
+    cv::Mat disp3c(src.size(), CV_8UC3, Scalar(255,255,255));
     
-    auto cpToRoiWindow = [](cv::Mat& m, roiWindow<P8U>& r){
+    auto cpToRoiWindow = [](const cv::Mat& m, roiWindow<P8U>& r){
         auto rowPointer = [] (void* data, size_t step, int32_t row ) { return reinterpret_cast<void*>( reinterpret_cast<uint8_t*>(data) + row * step ); };
         unsigned cols = m.cols;
         unsigned rows = m.rows;
@@ -454,54 +476,80 @@ TEST (ut_opencvutils, anistropic_diffusion){
         r = rw;
     };
     
-    roiWindow<P8U> r8(mout.cols, mout.rows);
-    cpToRoiWindow(mout, r8);
-    
+    roiWindow<P8U> r8(src.cols, src.rows);
+    cpToRoiWindow(src, r8);
     roiWindow<P8U> mag = r8.clone();
     roiWindow<P8U> ang = r8.clone();
     roiWindow<P8U> peaks = r8.clone();
-    
-    start = std::clock();
-    Gradient(r8, mag, ang);
-    unsigned int pks = SpatialEdge(mag, ang, peaks, 5, false);
-    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
-    double scale = 1000.0;
-    std::cout << " Edge: Mag, Ang, NonMax: 1920 * 1080 * 8 bit " << endtime * scale << " millieseconds per " << std::endl;
-    
     std::vector<svl::feature> features;
-    auto pks_2 = SpatialEdge(mag, ang, features, 5);
-    EXPECT_EQ(pks, pks_2);
-  
+    Gradient(r8,mag, ang);
+    auto pks = SpatialEdge(mag, ang, features, 2);
     
     cvMatOfroiWindow(peaks, mim, CV_8UC1);
     cvMatOfroiWindow(ang, aim, CV_8UC1);
     
     
-    auto rt = rightTailPost(mim, 0.01f);
-    std::cout << rt << std::endl;
+    auto rt = rightTailPost(mim, 0.005f);
+    std::cout << pks << "    " << rt << std::endl;
     
     auto vec2point = [] (const fVector_2d& v, cv::Point& p) {p.x = v.x(); p.y = v.y();};
     
     for (auto fea : features){
         cv::Point pt;
         vec2point(fea.position(),pt);
-        uRadian uu (fea.angle());
-        float ang_rad = static_cast<float>(uu.Double());
-        auto color = Scalar::all(255);
-        svl::drawCrossOR(mout, pt, color , 3,3,ang_rad);
+        svl::drawCross(disp3c, pt,cv::Scalar(CVCOLOR_RED), 3, 1);
     }
     
 #ifdef INTERACTIVE
-    namedWindow("CImg Anistorpic", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
-    cv::imshow("CImg Anistorpic", mout);
+    namedWindow(name.c_str(), CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+    cv::imshow(name.c_str(), disp3c);
     cv::waitKey();
-    cv::imshow("Normalized Mag", mim);
-    cv::waitKey();
-    cv::imshow("ang", aim);
-    
 #endif
     
 }
+
+TEST (ut_opencvutils, difference){
+    auto res = dgenv_ptr->asset_path("image230.png");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    cv::Mat fixed = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    EXPECT_EQ(fixed.channels() , 1);
+    EXPECT_EQ(fixed.cols , 512);
+    EXPECT_EQ(fixed.rows , 128);
+    
+    auto res2 = dgenv_ptr->asset_path("image262.png");
+    EXPECT_TRUE(res2.second);
+    EXPECT_TRUE(boost::filesystem::exists(res2.first));
+    cv::Mat moving = cv::imread(res2.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    EXPECT_EQ(moving.channels() , 1);
+    EXPECT_EQ(moving.cols , 512);
+    EXPECT_EQ(moving.rows , 128);
+    
+    CImg<unsigned char> cFixed (fixed);
+    CImg<unsigned char> cFixedPast(fixed.clone());
+    CImg<unsigned char> cMoving (moving);
+    CImg<unsigned char> cMovingPast(moving.clone());
+    
+//    const float sharpness=0.33f;
+//    const float anisotropy=0.6f;
+//    const float alpha=30.0f;
+//    const float sigma=1.1f;
+//    const float dl=0.8f;
+//    const float da=3;
+    auto mImg = cMoving.blur_anisotropic( 10, 0.8, 3);
+    auto mout = mImg.get_MAT();
+    auto fImg = cFixed.blur_anisotropic( 10, 0.8, 3);
+    auto fout = fImg.get_MAT();
+    
+  //  show_gradient(fout, " Fixed ");
+  //  show_gradient(mout, " Moving ");
+    
+    auto fang = show_cv_angle(fout, " Fixed ");
+    auto mang = show_cv_angle(mout, " Moving ");
+    
+}
+
+
 
 TEST (ut_3d_per_element, standard_dev)
 {
@@ -926,7 +974,7 @@ TEST(cardiac_ut, locate_contractions)
 
 TEST(UT_contraction_profiler, basic)
 {
-    contraction_analyzer::contraction ctr;
+    contraction_analyzer::contraction_t ctr;
     typedef vector<double>::iterator dItr_t;
     
     std::vector<double> fder, fder2;
@@ -973,7 +1021,7 @@ TEST(UT_contraction_profiler, basic)
     
     contraction_profile_analyzer ca;
     ca.run(acid);
-        bool test = contraction_analyzer::contraction::equal(ca.contraction(), ctr);
+        bool test = contraction_analyzer::contraction_t::equal(ca.contraction(), ctr);
        EXPECT_TRUE(test);
 //    {
 //        cvplot::figure("myplot").series("myline").addValue(ca.first_derivative_filtered());
@@ -1491,6 +1539,7 @@ TEST (UT_QtimeCache, run)
     EXPECT_FALSE(sm->loadFrame(s8, t0)); // second time at same stamp, uses cache return true
     
 }
+
 
 
 

@@ -7,6 +7,7 @@
 #include "core/core.hpp"
 #include "core/svl_exception.hpp"
 
+using namespace svl;
 
 class fLineSegment2d
 {
