@@ -15,19 +15,29 @@
 using namespace std;
 using namespace stl_utils;
 
+
 struct IntensityStatisticsRunner
 {
     typedef std::vector<roiWindow<P8U>> channel_images_t;
-    void operator()(channel_images_t& channel,timedVecOfVals_t& results)
+    void operator()(channel_images_t& channel_images,timedVecOfVals_t& results)
     {
+        std::vector<float> src, dst;
+        for (auto ii = 0; ii < channel_images.size(); ii++)
+        {
+            auto res = static_cast<float>(histoStats::mean(channel_images[ii]) / 256.0);
+            src.emplace_back(res);
+        }
+        
+        rolling_median_3(src.begin(), src.end(), dst);
+        
         results.clear();
-        for (auto ii = 0; ii < channel.size(); ii++)
+        for (auto ii = 0; ii < channel_images.size(); ii++)
         {
             timedVal_t res;
             index_time_t ti;
             ti.first = ii;
             res.first = ti;
-            res.second = static_cast<float>(histoStats::mean(channel[ii]) / 256.0);
+            res.second = dst[ii];
             results.emplace_back(res);
         }
     }
@@ -39,11 +49,11 @@ struct SequenceAccumulator
 
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     
-    void operator()(channel_images_t& channel, cv::Mat& m_sum, cv::Mat& m_sqsum, int& image_count,
+    void operator()(channel_images_t& channel_images, cv::Mat& m_sum, cv::Mat& m_sqsum, int& image_count,
                     uint8_t spatial_x = 0, uint8_t spatial_y = 0 )
     {
         image_count = 0;
-        for (const roiWindow<P8U>& ir : channel){
+        for (const roiWindow<P8U>& ir : channel_images){
             cv::Mat im (ir.height(), ir.width(), CV_8UC(1), ir.pelPointer(0,0), size_t(ir.rowUpdate()));
             if( image_count == 0 ) {
                 m_sum = cv::Mat::zeros( im.size(), CV_32FC(im.channels()) );

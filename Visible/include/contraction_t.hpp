@@ -59,6 +59,11 @@ struct contractionMesh
         fillthis.relaxation_end.first = peak.first + start_end.second;
     }
 
+    static std::string to_string (contractionMesh& se)
+    {
+        return  " Contraction: [" + svl::to_string(se.contraction_start.first) + "," + svl::to_string(se.contraction_end.first) + "]";
+    }
+    
 };
 
 class ca_signaler : public base_signaler

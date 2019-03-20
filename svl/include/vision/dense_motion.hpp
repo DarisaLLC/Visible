@@ -50,7 +50,7 @@ namespace svl
     public:
         struct match{
             float r;
-            uiPair peak;
+            iPair peak;
             fVector_2d motion;
         };
         struct buffers {
@@ -60,10 +60,10 @@ namespace svl
         };
         enum direction { forward = 0, backward = 1};
         
-        dmf(const uiPair& frame, const uiPair& fixed_half_size, const uiPair& moving_half_size, const fPair& = fPair(1.0f,1.0f));
+        dmf(const iPair& frame, const iPair& fixed_half_size, const iPair& moving_half_size, const fPair& = fPair(1.0f,1.0f));
 
-        const uiPair& fixed_size () const;
-        const uiPair& moving_size () const;
+        const iPair& fixed_size () const;
+        const iPair& moving_size () const;
         
         void update(const cv::Mat& image);
         const std::vector<buffers>::const_iterator fixed_buffers () const;
@@ -73,28 +73,64 @@ namespace svl
         // forward and backward motions and validate them
         // forward is prev to cur
         // backward is cur to prev
-       // void block_bi_motion(const uiPair& location);
+       // void block_bi_motion(const iPair& location);
         
         // Assume moving is larger or equal to fixed.
         // return position of the best match
         // Requires fixed rect at fixed location to be in the moving rect at moving location
         
-        void block_match(const uiPair& fixed, const uiPair& moving, direction dir, match& result);
+        //  void block_match(const iRect& fixed, const iRect& moving, direction dir, match& result){
+        // Calculate a range of point correlations to compute
+        // from dir get which image to use
+        //
+        bool block_match(const iPair& fixed, const iPair& moving, direction dir, match& result){
+            iRect mr (moving.first, moving.second, moving_size().first, moving_size().second);
+            iRect fr (fixed.first, fixed.second, fixed_size().first, fixed_size().second);
+            iRect cr (0,0, moving_size().first - fixed_size().first + 1, moving_size().second - fixed_size().second + 1);
+            vector<vector<int>> space;
+            CorrelationParts cp;
+            
+            iPair max_loc(-1,-1);
+            int max_score = 0;
+            for (int j = 0; j < cr.height(); j++){ // rows
+                std::vector<int> rs;
+                for (int i = 0; i < cr.width(); i++){ // cols
+               
+                    iPair tmp(moving.first+j, moving.second+i);
+                    auto r = point_ncc_match(fixed, tmp,cp);
+                    int score = int(r*1000);
+                    if (score > max_score){
+                        max_loc.first = j;
+                        max_loc.second = i;
+                        max_score = score;
+                    }
+                    rs.push_back(score);
+                }
+                space.push_back(rs);
+            }
+            bool valid = max_loc.first >= 0 && max_loc.second >= 0 && max_loc.first < cr.height() && max_loc.second < cr.width();
+            if (! valid ) return valid;
+            valid = valid && space[max_loc.first][max_loc.second] == max_score;
+            return valid;
+            
+        }
         
-      //  void block_match(const iRect& fixed, const iRect& moving, direction dir, match& result){
-            // Calculate a range of point correlations to compute
-            // from dir get which image to use
-            //}
-        // Point match
+     
+        // Point match both fixed size
         // Compute ncc at tl location row_0,col_0 in fixed and row_1,col_1 moving using integral images
-        double normalizedCorrelation(const uiPair& fixed, const uiPair& moving, CorrelationParts& cp, direction dir = forward );
+        double point_ncc_match(const iPair& fixed, const iPair& moving, CorrelationParts& cp, direction dir = forward );
       
             
         static uint32_t ring_size () { return 2; }
             
     private:
+        void measure_space (const vector<vector<int>>& space, match& res){
+
+            
+            
+        }
         bool allocate_buffers ();
-        uiPair m_msize, m_fsize, m_isize;
+        iPair m_msize, m_fsize, m_isize;
         std::vector<std::vector<cv::Mat>> m_data;
         std::vector<buffers> m_links;
         

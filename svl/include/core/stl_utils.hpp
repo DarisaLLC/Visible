@@ -585,6 +585,26 @@ namespace stl_utils
     };
     
     /*
+     * Quick rolling window 1d median of size 3
+     */
+    template <typename Iter, typename T = typename std::iterator_traits<Iter>::value_type>
+    static bool rolling_median_3 (Iter begin, Iter endd, std::vector<T>& dst)
+    {
+        dst.push_back(*begin++);
+        Iter one = begin;
+        Iter last = endd - 1;
+        for (auto ctr = one; ctr < last; ctr++){
+            T m = *(ctr-1);
+            T c = *(ctr);
+            T p = *(ctr+1);
+            T val = median_of_3(m,c,p);
+            dst.push_back(val);
+        }
+        dst.push_back(*last);
+        return true;
+    }
+
+    /*
         Simple 1D filter interface and median filtering derivation
      
      */
