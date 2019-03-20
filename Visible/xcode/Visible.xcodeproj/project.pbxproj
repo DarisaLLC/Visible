@@ -40,6 +40,10 @@
 		C2109477223F4CFE004E88EE /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
 		C2109478223F4CFE004E88EE /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
 		C2109479223F4CFE004E88EE /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
+		C210947B2242FF8C004E88EE /* voxel_frequency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210947A2242FF8C004E88EE /* voxel_frequency.cpp */; };
+		C210947C2242FF8C004E88EE /* voxel_frequency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210947A2242FF8C004E88EE /* voxel_frequency.cpp */; };
+		C210947D2242FF8C004E88EE /* voxel_frequency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210947A2242FF8C004E88EE /* voxel_frequency.cpp */; };
+		C210947E2242FF8C004E88EE /* voxel_frequency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210947A2242FF8C004E88EE /* voxel_frequency.cpp */; };
 		C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
 		C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
 		C2175DDC215154EA004315C0 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
@@ -498,6 +502,8 @@
 		C210946D223AEC19004E88EE /* imgui_wrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = imgui_wrapper.h; path = ../include/imGuiCustom/imgui_wrapper.h; sourceTree = "<group>"; };
 		C2109474223C7D63004E88EE /* CImg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CImg.h; path = ../../externals/CImg/CImg.h; sourceTree = "<group>"; };
 		C2109475223F4CFE004E88EE /* opencv_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = opencv_draw.cpp; sourceTree = "<group>"; };
+		C210947A2242FF8C004E88EE /* voxel_frequency.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = voxel_frequency.cpp; sourceTree = "<group>"; };
+		C210947F2243039A004E88EE /* voxel_frequency.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = voxel_frequency.h; sourceTree = "<group>"; };
 		C210F1132159A826002A82A3 /* libzlib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libzlib.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/libzlib.a"; sourceTree = "<group>"; };
 		C210F1142159A827002A82A3 /* libippiw.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libippiw.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/libippiw.a"; sourceTree = "<group>"; };
 		C210F1152159A828002A82A3 /* liblibpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibpng.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/liblibpng.a"; sourceTree = "<group>"; };
@@ -1494,6 +1500,7 @@
 		C26009FF1CED3E010045FF57 /* vision */ = {
 			isa = PBXGroup;
 			children = (
+				C210947F2243039A004E88EE /* voxel_frequency.h */,
 				C20D4DE42208BD34004D9405 /* ellipse_fit.hpp */,
 				C2E3F560213D9483007B1088 /* labelBlob.hpp */,
 				C24FC84D1E5E56960071AA1A /* roiMultiWindow.h */,
@@ -1622,6 +1629,7 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C210947A2242FF8C004E88EE /* voxel_frequency.cpp */,
 				C2109475223F4CFE004E88EE /* opencv_draw.cpp */,
 				C29C53BF222B58D900D17385 /* dense_motion.cpp */,
 				C2398A0821DD8A0A00B180A0 /* file_system.cpp */,
@@ -1998,6 +2006,7 @@
 				C2AFCEFF216E79590080462D /* imgui_draw.cpp in Sources */,
 				C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */,
 				C254BE841F4F912E00977307 /* csv.cpp in Sources */,
+				C210947B2242FF8C004E88EE /* voxel_frequency.cpp in Sources */,
 				C24EA2D3207F07EF00555D16 /* sg_filter.cpp in Sources */,
 				C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */,
 				C2618F81217FDA6600FA9F43 /* figure.cc in Sources */,
@@ -2106,6 +2115,7 @@
 				C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */,
 				C20BBC041E4E33D3002C7D68 /* tinyxml.cpp in Sources */,
 				C24EA2D4207F081000555D16 /* sg_filter.cpp in Sources */,
+				C210947D2242FF8C004E88EE /* voxel_frequency.cpp in Sources */,
 				C2398A1921DE980C00B180A0 /* imgui.cpp in Sources */,
 				C27221161D1C912E008EF8B2 /* histo.cpp in Sources */,
 				C20EDBB71CEFC2E70074C47A /* rowfunc.cpp in Sources */,
@@ -2166,6 +2176,7 @@
 				C2109479223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
 				C26A056C1E777E5600BDC954 /* rand_support.cpp in Sources */,
 				C26A053D1E771CCF00BDC954 /* main.cpp in Sources */,
+				C210947E2242FF8C004E88EE /* voxel_frequency.cpp in Sources */,
 				C26A056A1E777E3600BDC954 /* matpixel.cpp in Sources */,
 				C26A055F1E7775A700BDC954 /* AVReaderWrapper.mm in Sources */,
 				C26A05661E777E1000BDC954 /* time_spec.cpp in Sources */,
@@ -2224,6 +2235,7 @@
 				C26F5FC321B0AA6D00EAE156 /* ip_utils.cpp in Sources */,
 				C26F5FC421B0AA6D00EAE156 /* window.cc in Sources */,
 				C26F5FC521B0AA6D00EAE156 /* imgui_draw.cpp in Sources */,
+				C210947C2242FF8C004E88EE /* voxel_frequency.cpp in Sources */,
 				C26F5FC621B0AA6D00EAE156 /* rowfunc.cpp in Sources */,
 				C26F5FC721B0AA6D00EAE156 /* csv.cpp in Sources */,
 				C26F5FC821B0AA6D00EAE156 /* sg_filter.cpp in Sources */,
