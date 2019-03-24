@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <Accelerate/Accelerate.h>
 using namespace std;
-const int LOG_N = 4; // Typically this would be at least 10 (i.e. 1024pt FFTs)
+const int LOG_N = 9; // Typically this would be at least 10 (i.e. 1024pt FFTs)
 const int N = 1 << LOG_N;
 const float PI = 4*atan(1);
 
@@ -159,6 +159,8 @@ int main(int argc, const char * argv[])
             if (vf < vmin) vmin = vf;
         }
         float vrange = vmax - vmin;
+        vmin = 0.0f;
+        vrange = 255.0f;
         for (auto intv : v1){
             float vf = (float)intv;
             vf = (vf - vmin)/vrange;
