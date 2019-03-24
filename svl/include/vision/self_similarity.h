@@ -150,10 +150,7 @@ class self_similarity_producer
    bool median_levelset_similarities (deque<double>& signal, float use_pct) const;
     
 
-  /* sequential correlations - 
-   *
-   */
-  bool sequentialCorrelations (deque<double>& slist) const;
+
   /* selfSimilarityMatrix - If an entropy signal has been calculated,
    * and its self-similarity matrix has been saved, save a copy of it
    * in matrix. Otherwise, return false.
@@ -205,10 +202,6 @@ class self_similarity_producer
    * info is available, generate the entropy signal.
    */
   bool ssMatrixFill(deque<image_t >& tWin);
-  bool ssMatrixApproxFill(deque<image_t >& tWin);
-  bool ssListFill(deque<image_t >& tWin);
-
-  bool ssMatrixFill(deque<double>& data);
 
   /* internalUpdate - Called by update() fct to perform pixel size
    * specific update() functionality.
@@ -217,7 +210,6 @@ class self_similarity_producer
 
   /* shiftS* - Fcts that shift self-similarity results by one image.
    */
-  void shiftSList();
   void shiftSMatrix();
 
   /* s*Update - Perform correlations between the last image in the
@@ -226,9 +218,6 @@ class self_similarity_producer
    * self-similarity info is available, generate the entropy signal.
    */
     bool ssMatrixUpdate(deque<image_t >& tWin);
-    bool ssMatrixApproxUpdate(deque<image_t >& tWin);
-    bool ssListUpdate(deque<image_t >& tWin);
-
     
   /* correlate - Perform correlation on the given two images and
    * return the correlation score.
@@ -250,21 +239,6 @@ class self_similarity_producer
    * Otherwise, just return false.
    */
   bool genMatrixEntropy(size_t tWinSz);
-
-  /* genListEntropy - If a full list worth of self-similarity info
-   * is available, generate an entropy signal and return true.
-   * Otherwise, just return false.
-   */
-  bool genListEntropy(size_t tWinSz);
-
-  /*
-   * Filtering operation on output signal
-   */
-  template <class T>
-    bool filterOp (vector<T>&);
-
-  template <class T>
-    double genPeriodicity (const vector<T>& signal, const vector<T>& absc, std::pair<double,double>& freq);
 
   /* unity - Initialize self-similarity matrix to have identity
    * value along the identity diagonal.
@@ -308,7 +282,6 @@ class self_similarity_producer
    */
   deque<deque<double> >        _SMatrix;   // Used in eExhaustive and
                                            // eApproximate cases
-  deque<double>                _SList;     // Used in approximate cases
   deque<double>                m_entropies; // Final entropy signal
   std::vector<int>               m_median_ranked;
   mutable deque<double>                _sums;     // Final mean signal

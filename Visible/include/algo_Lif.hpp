@@ -246,14 +246,16 @@ public:
     const vecOfNamedTrack_t& shortterm_pci () const { return m_shortterm_pci_tracks; }
     
     // Return 2D latice of pixels over time
-    void generateVoxels_on_channel (const int channel_index, std::vector<std::vector<roiWindow<P8U>>>&);
-    void generateVoxels (const std::vector<roiWindow<P8U>>&, std::vector<std::vector<roiWindow<P8U>>>&);
+    void generateVoxels_on_channel (const int channel_index, std::vector<std::vector<roiWindow<P8U>>>&,
+                                    uint32_t sample_x = 1, uint32_t sample_y = 1);
+    void generateVoxels (const std::vector<roiWindow<P8U>>&, std::vector<std::vector<roiWindow<P8U>>>&,
+                         uint32_t sample_x = 1, uint32_t sample_y = 1);
     
     // Return 2D latice of voxel self-similarity
-    void generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>&,
-                                         std::vector<std::vector<float>>&);
-    void generateVoxelSelfSimilarities_on_channel (const int channel_index, std::vector<std::vector<float>>&);
+    void generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>&);
+    void generateVoxelSelfSimilarities_on_channel (const int channel_index, uint32_t sample_x = 1, uint32_t sample_y = 1);
     cv::Mat& temporal_selfSimilarity () const { return m_temporal_ss; }
+    
     
     const std::vector<Rectf>& rois () const;
     const cv::RotatedRect& motion_surface () const;
@@ -340,7 +342,7 @@ private:
     cv::RotatedRect m_motion_mass;
     mutable cv::Mat m_temporal_ss;
     mutable std::vector<std::vector<float>> m_temporal_ss_raw;
-    
+    uiPair m_voxel_xy;
     std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;
     
     std::shared_ptr<OCVImageWriter> m_writer;

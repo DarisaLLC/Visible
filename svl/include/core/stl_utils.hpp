@@ -587,6 +587,14 @@ namespace stl_utils
     /*
      * Quick rolling window 1d median of size 3
      */
+#ifndef median_of_3
+    
+#define median_of_3(a, b, c)                                       \
+((a) > (b) ? ((a) < (c) ? (a) : ((b) < (c) ? (c) : (b))) :    \
+((a) > (c) ? (a) : ((b) < (c) ? (b) : (c))))
+
+#endif
+    
     template <typename Iter, typename T = typename std::iterator_traits<Iter>::value_type>
     static bool rolling_median_3 (Iter begin, Iter endd, std::vector<T>& dst)
     {

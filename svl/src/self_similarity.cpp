@@ -255,19 +255,6 @@ bool self_similarity_producer<P>::selfSimilarityMatrix(deque<deque<double> >& ma
     return false;
 }
 
-template<typename P>
-bool self_similarity_producer<P>::sequentialCorrelations (deque<double>& slist) const
-{
-    assert(_matrixSz);
-    
-    if (_finished && !_SList.empty()) {
-        slist = _SList;
-        return true;
-    }
-    
-    return false;
-}  
-
 
 
 template<typename P>
@@ -459,30 +446,6 @@ bool self_similarity_producer<P>::ssMatrixFill(deque<image_t >& tWin)
 }
 
 
-template <typename P>
-bool self_similarity_producer<P>::ssListFill(deque<image_t >& tWin)
-{
-    if (tWin.size() < 2)
-        return true;
-    
-    assert(_SList.size() >= (tWin.size()-1));
-    
-    for (uint32_t i = 1; i < tWin.size(); i++) {
-        _SList[i-1] = _corr_fn(tWin[i-1], tWin[i]);
-        //  tWin[i-1].frameBuf().unlock();
-        //    if (progress && progress->update()) {
-        //      tWin[i].frameBuf().unlock();
-        //      delete progress;
-        //      return false;
-        //    }
-    }
-    
-    // tWin[tWin.size()-1].frameBuf().unlock();
-    return true;
-}
-
-
-
 
 template <typename P>
 bool self_similarity_producer<P>::internalUpdate(image_t& nextImage, deque<image_t >& tWin)
@@ -518,13 +481,7 @@ bool self_similarity_producer<P>::internalUpdate(image_t& nextImage, deque<image
     return rtn;
 }
 
-template<typename P>
-void self_similarity_producer<P>::shiftSList()
-{
-    assert(!_SList.empty());
-    _SList.pop_front();
-    _SList.push_back(-1.0);
-}
+
 
 template<typename P>
 void self_similarity_producer<P>::shiftSMatrix()
@@ -665,37 +622,6 @@ ostream& operator<< (ostream& ous, const self_similarity_producer<P>& rc)
     }
     return ous;
 }
-
-
-
-
-
-// 1D Distance Histogram
-//
-void rf1DdistanceHistogram (const vector<double>& signal, vector<double>& dHist)
-{
-    auto n = signal.size();
-    assert(n);
-    dHist.resize (n);
-    
-    // Get container value type
-    vector<double>::const_iterator ip, jp;
-    
-    for (ip = signal.begin(); ip < signal.end(); ip++)
-        for (jp = ip + 1; jp < signal.end(); jp++)
-        {
-            double iv (*ip);
-            double jv (*jp);
-            auto dj = jp - signal.begin();
-            auto di = ip - signal.begin();
-            dj = dj - di;
-            assert(dj >= 0 && dj < n);
-            iv = iv - jv;
-            dHist[dj] += iv*iv;
-        }
-    
-}
-
 
 
 template class self_similarity_producer<P8U>;

@@ -294,14 +294,6 @@ void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& ima
     SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_var_image);
     m_var_display_image.create(m_var_image.rows, m_var_image.cols, CV_8UC1);
     cv::normalize(m_var_image, m_var_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
-//    cv::Mat result;
-//    static cv::Size ap (7,7);
-//    svl::localVAR tv (ap);
-//    tv.process (m_var_display_image,  result);
-//    cv::normalize(result, m_var_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
-   
-    
-#if 1
 
     cv::Scalar lmean, lstd;
     Mat threshold_output;
@@ -329,11 +321,15 @@ void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& ima
     std::cout << "Center @ " << box.center.x << "," << box.center.y << "   ";
     std::cout << minor_dim << "  "  << major_dim << " angle: " << box.angle << std::endl;
     
-#endif
     
     // Signal to listeners
     if (signal_volume_var_available && signal_volume_var_available->num_slots() > 0)
         signal_volume_var_available->operator()();
+    
+    // Now generate voxels at 1/3 resolution and generate temporal ss
+    generateVoxelSelfSimilarities_on_channel(2, 3, 3);
+    
+    
 }
 
 void lif_serie_processor::run_volume_variances (const int channel_index){
@@ -689,32 +685,39 @@ void lif_serie_processor::save_channel_images (int channel_index, std::string& d
 
 
 // Return 2D latice of pixels over time
-void lif_serie_processor::generateVoxels_on_channel (const int channel_index, std::vector<std::vector<roiWindow<P8U>>>& rvs){
+void lif_serie_processor::generateVoxels_on_channel (const int channel_index, std::vector<std::vector<roiWindow<P8U>>>& rvs,
+                                                     uint32_t sample_x, uint32_t sample_y){
     std::lock_guard<std::mutex> lock(m_mutex);
-    generateVoxels(m_all_by_channel[channel_index], rvs);
+    generateVoxels(m_all_by_channel[channel_index], rvs, sample_x, sample_y);
 }
 
 
 // Return 2D latice of voxel self-similarity
 
-void lif_serie_processor::generateVoxelSelfSimilarities_on_channel (const int channel_index, std::vector<std::vector<float>>&){
+void lif_serie_processor::generateVoxelSelfSimilarities_on_channel (const int channel_index, uint32_t sample_x, uint32_t sample_y){
     std::vector<std::vector<roiWindow<P8U>>> rvs;
-    generateVoxels(m_all_by_channel[channel_index], rvs);
-    generateVoxelSelfSimilarities(rvs, m_temporal_ss_raw);
+    std::string msg = " Generating Voxels @ (" + to_string(sample_x) + "," + to_string(sample_y) + ")";
+    vlogger::instance().console()->info("starting " + msg);
+    generateVoxels(m_all_by_channel[channel_index], rvs, sample_x, sample_y);
+    vlogger::instance().console()->info("finished " + msg);
+    generateVoxelSelfSimilarities(rvs);
+    m_voxel_xy.first = sample_x;
+    m_voxel_xy.second = sample_y;
 }
 
 
 
 void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& images,
-                                                std::vector<std::vector<roiWindow<P8U>>>& output){
+                                          std::vector<std::vector<roiWindow<P8U>>>& output,
+                                            uint32_t sample_x, uint32_t sample_y){
     output.resize(0);
     size_t t_d = images.size();
     uint32_t width = images[0].width();
     uint32_t height = images[0].height();
 
-    for (auto row = 0; row < height; row++){
+    for (auto row = 0; row < height; row+=sample_y){
         std::vector<roiWindow<P8U>> row_bufs;
-        for (auto col = 0; col < width; col++){
+        for (auto col = 0; col < width; col+=sample_x){
             std::vector<uint8_t> voxel(t_d);
             for (auto tt = 0; tt < t_d; tt++){
                 voxel[tt] = images[tt].getPixel(col, row);
@@ -725,12 +728,13 @@ void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& ima
     }
 }
 
-void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels,
-                                                             std::vector<std::vector<float>>& ss){
 
+
+void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels){
     int height = static_cast<int>(voxels.size());
     int width = static_cast<int>(voxels[0].size());
     
+    vlogger::instance().console()->info("starting generating voxel self-similarity");
     // Create a single vector of all roi windows
     std::vector<roiWindow<P8U>> all;
     auto sp =  similarity_producer();
@@ -744,34 +748,35 @@ void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector
     std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
     std::future<bool>  future_ss = task.get_future();  // get a future
     std::thread(std::move(task)).join(); // Finish on a thread
+    vlogger::instance().console()->info("dispatched voxel self-similarity");
     if (future_ss.get())
     {
-        m_temporal_ss = cv::Mat (height,width, CV_32FC1);
+        vlogger::instance().console()->info("copying results of voxel self-similarity");
+        //@todo remove extra copy here
+        cv::Mat m_temporal_ss (height,width, CV_8UC1);
+        m_temporal_ss.setTo(0);
+        
         const deque<double>& entropies = sp->shannonProjection ();
-        ss.resize(0);
+        vector<float> m_entropies;
         m_entropies.insert(m_entropies.end(), entropies.begin(), entropies.end());
-        vector<double>::const_iterator start = m_entropies.begin();
+        vector<float>::const_iterator start = m_entropies.begin();
         for (auto row =0; row < height; row++){
-            vector<float> rowv;
-            auto end = start + width + 1; // point to one after
-            rowv.insert(rowv.end(), start, end);
-            ss.push_back(rowv);
+            uint8_t* row_ptr = m_temporal_ss.ptr<uint8_t>(row);
+            auto end = start + width; // point to one after
+            for (; start < end; start++, row_ptr++){
+                if(std::isnan(*start)) continue; // nan is set to 1, the pre-set value
+                *row_ptr = uint8_t((*start)*255);
+            }
             start = end;
         }
+        cv::medianBlur(m_temporal_ss, m_temporal_ss, 5);
         
-        auto getMat = [] (std::vector< std::vector<float> > &inVec){
-            int rows = static_cast<int>(inVec.size());
-            int cols = static_cast<int>(inVec[0].size());
-            
-            cv::Mat_<float> resmat(rows, cols);
-            for (int i = 0; i < rows; i++)
-            {
-                resmat.row(i) = cv::Mat(inVec[i]).t();
-            }
-            return resmat;
-        };
-        
-        m_temporal_ss = getMat(ss);
+        vlogger::instance().console()->info("finished voxel self-similarity");
+#if 1
+        std::string imagename = svl::toString(std::clock()) + ".png";
+        std::string image_path = "/Users/arman/tmp/" + imagename;
+        cv::imwrite(image_path, m_temporal_ss);
+#endif
     }
 
 }
