@@ -40,8 +40,8 @@ namespace svl // protection from unintended ADL
 #define _LARGE              1e+49
     
 #define median_of_3(a, b, c)                                       \
-    ((a) > (b) ? ((a) < (c) ? (a) : ((b) < (c) ? (c) : (b))) :    \
-     ((a) > (c) ? (a) : ((b) < (c) ? (b) : (c))))
+((a) > (b) ? ((a) < (c) ? (a) : ((b) < (c) ? (c) : (b))) :    \
+((a) > (c) ? (a) : ((b) < (c) ? (b) : (c))))
     
 #define max_of_3(a, b, c) (std::max(std::max(a, b), c))
     
@@ -62,7 +62,7 @@ namespace svl // protection from unintended ADL
     template <class T> inline T squareOf(const T& x)
     { return (x * x); }
     
-  
+    
     
     namespace io{
         std::pair<bool,uint64_t> check_file (const std::string &filename);
@@ -96,14 +96,6 @@ namespace svl // protection from unintended ADL
         return (a_value >= 0 ? a_value : -a_value);
     }
     
-    
-#define MedOf3(a, b, c)                                       \
-((a) > (b) ? ((a) < (c) ? (a) : ((b) < (c) ? (c) : (b))) :    \
-((a) > (c) ? (a) : ((b) < (c) ? (b) : (c))))
-    
-#define MaxOf3(a, b, c) (std::max(std::max(a, b), c))
-    
-#define MinOf3(a, b, c) (std::min(std::min(a, b), c))
     
     template<class T> inline void Swap(T &a_value1, T &a_value2)
     {
@@ -165,14 +157,6 @@ namespace svl // protection from unintended ADL
     }
     
     
-    template<class Ch, class Tr, class... Args>
-    auto operator<<(std::basic_ostream<Ch, Tr>& os, std::tuple<Args...> const& t)-> std::basic_ostream<Ch, Tr>&{
-        os << "(";
-        svl::print_tuple(os, t, svl::gen_seq<sizeof...(Args)>());
-        return os << ")";
-        }
-        
-        
         
         // Need this useless class for explicitly instatiating template constructor
         template <typename T>
@@ -180,33 +164,6 @@ namespace svl // protection from unintended ADL
             typedef T type;
         };
         
-#if defined(IS_NUMBER_USED)
-        // c++11
-        static bool is_number(const std::string& s)
-        {
-            return !s.empty() && std::find_if(s.begin(),
-                                              s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
-        }
-#endif
-        
-#if have_boost_random
-        static std::string default_random_string_char_set ("abcdefghijklmnopqrstuvwxyz"
-                                                           "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                                           "1234567890"
-                                                           "!@#$%^&*()"
-                                                           "`~-_=+[{]}\\|;:'\",<.>/? ");
-        
-        std::string random_string (unsigned size = 8, const std::string chars = default_random_string_char_set)
-        {
-            boost::random::random_device rng;
-            boost::random::uniform_int_distribution<> index_dist(0, chars.size() - 1);
-            std::stringstream sstream;
-            for(int i = 0; i < size; ++i) {
-                sstream << chars[index_dist(rng)];
-            }
-            return sstream.str();
-        }
-#endif
         
         template<typename T> T
         randomT ()
@@ -380,78 +337,6 @@ namespace svl // protection from unintended ADL
         };
         
         
-        // verify that types are complete for increased safety
-        
-        template<class T> inline void checked_delete(T * x)
-        {
-            // intentionally complex - simplification causes regressions
-            typedef char type_must_be_complete[sizeof(T) ? 1 : -1];
-            (void) sizeof(type_must_be_complete);
-            delete x;
-        }
-        
-        template<class T> inline void checked_array_delete(T * x)
-        {
-            typedef char type_must_be_complete[sizeof(T) ? 1 : -1];
-            (void) sizeof(type_must_be_complete);
-            delete[] x;
-        }
-        
-        template<class T> struct checked_deleter
-        {
-            typedef void result_type;
-            typedef T * argument_type;
-            
-            void operator()(T * x) const
-            {
-                // ds4boost:: disables ADL
-                checked_delete(x);
-            }
-        };
-        
-        template<class T> struct checked_array_deleter
-        {
-            typedef void result_type;
-            typedef T * argument_type;
-            
-            void operator()(T * x) const
-            {
-                checked_array_delete(x);
-            }
-        };
-        
-        
-        
-        template<typename T>
-        struct refcounted_ptr
-        {
-            typedef refcounted_ptr<T> this_type;
-            
-            refcounted_ptr() : m_refs(0) {}
-            refcounted_ptr(const refcounted_ptr&) : m_refs(0) {}
-            refcounted_ptr& operator=(const refcounted_ptr&) { return *this; }
-            
-            friend void intrusive_ptr_add_ref(this_type const* s)
-            {
-                assert(s != 0);
-                assert(s->m_refs >= 0);
-                ++s->m_refs;
-            }
-            
-            friend void intrusive_ptr_release(this_type const* s)
-            {
-                assert(s != 0);
-                assert(s->m_refs > 0);
-                
-                if (--s->m_refs == 0)
-                    checked_array_delete  (static_cast<const T*>(s));
-            }
-            
-            int64_t refcount() const { return m_refs; }
-            
-            // reference counter for intrusive_ptr
-            mutable std::atomic_uintmax_t m_refs;
-        };
         
         
         //! Returns the number closest to \a val and between \a bound1 and \a bound2.
@@ -527,6 +412,34 @@ namespace svl // protection from unintended ADL
             return false;
         }
         
+        
+#if defined(IS_NUMBER_USED)
+        // c++11
+        static bool is_number(const std::string& s)
+        {
+            return !s.empty() && std::find_if(s.begin(),
+                                              s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
+        }
+#endif
+        
+#if have_boost_random
+        static std::string default_random_string_char_set ("abcdefghijklmnopqrstuvwxyz"
+                                                           "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                                           "1234567890"
+                                                           "!@#$%^&*()"
+                                                           "`~-_=+[{]}\\|;:'\",<.>/? ");
+        
+        std::string random_string (unsigned size = 8, const std::string chars = default_random_string_char_set)
+        {
+            boost::random::random_device rng;
+            boost::random::uniform_int_distribution<> index_dist(0, chars.size() - 1);
+            std::stringstream sstream;
+            for(int i = 0; i < size; ++i) {
+                sstream << chars[index_dist(rng)];
+            }
+            return sstream.str();
+        }
+#endif
         }
         
         
