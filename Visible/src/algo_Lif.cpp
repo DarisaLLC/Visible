@@ -284,26 +284,19 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
 void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
       std::lock_guard<std::mutex> lock(m_mutex);
     m_3d_stats_done = false;
-    cv::Mat m_sum, m_sqsum;
-    int image_count = 0;
-    std::vector<std::thread> threads(1);
-    threads[0] = std::thread(SequenceAccumulator(),std::ref(images),
-                             std::ref(m_sum), std::ref(m_sqsum), std::ref(image_count));
-    
-    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
-    SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_var_image);
-    m_var_display_image.create(m_var_image.rows, m_var_image.cols, CV_8UC1);
-    cv::normalize(m_var_image, m_var_display_image, 0, 255, NORM_MINMAX, CV_8UC1);
 
-    cv::Scalar lmean, lstd;
+    // Now generate voxels at 1/3 resolution and generate temporal ss
+    generateVoxelSelfSimilarities_on_channel(2, 3, 3);
+    
+    std::vector<std::thread> threads(1);
+    threads[0] = std::thread(&lif_serie_processor::generateVoxelSelfSimilarities_on_channel, this, 2, 3, 3);
+    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     Mat threshold_output;
     vector<vector<cv::Point> > contours;
     vector<cv::Point> all_contours;
     vector<Vec4i> hierarchy;
 
-    cv::meanStdDev(m_var_display_image, lmean, lstd);
-    auto thr = leftTailPost (m_var_display_image, 0.95);
-    threshold(m_var_display_image, threshold_output, thr, 255, THRESH_BINARY );
+    threshold(m_temporal_ss, threshold_output, 0, 255, THRESH_OTSU);
     cv::findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 
     for( int i = 0; i < contours.size(); i++ )
@@ -326,8 +319,6 @@ void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& ima
     if (signal_volume_var_available && signal_volume_var_available->num_slots() > 0)
         signal_volume_var_available->operator()();
     
-    // Now generate voxels at 1/3 resolution and generate temporal ss
-    generateVoxelSelfSimilarities_on_channel(2, 3, 3);
     
     
 }
