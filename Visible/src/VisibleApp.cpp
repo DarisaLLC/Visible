@@ -41,14 +41,14 @@ void VisibleApp::dispatch_lif_viewer (const int serie_index)
     {
         const std::string& name = name_index_itr->second;
         auto command = ci::app::getAppPath().string() + sep + "Visible.app" + sep + "Contents" + sep + "MacOS" + sep + "VisibleRun.app" + sep  + " --args " +
-            mCurrentLifFilePath.string() + space + name;
+        mCurrentLifFilePath.string() + space + name;
         if (m_isIdLabLif) command += space + vac::LIF_CUSTOM;
         
         command = "open -n -F -a " + command;
         std::cout << command << std::endl;
         
         std::system(command.c_str());
-
+        
     }
 }
 
@@ -67,7 +67,7 @@ void VisibleApp::fileDrop( FileDropEvent event )
     
     if (! exists(file) ) return;
     
- 
+    
     if (file.has_extension())
     {
         std::string ext = file.extension().string ();
@@ -84,6 +84,21 @@ bool VisibleApp::shouldQuit()
     return true;
 }
 
+void VisibleApp::fileOpen (){
+    
+    auto some_path = getOpenFilePath(); //"", extensions);
+    mFileExtension = some_path.extension().string();
+    mFileName = some_path.filename().string();
+    
+    //   boost::filesystem::path some_path = "/Users/arman/Pictures/lif/3channels.lif";
+    if (! some_path.empty() || exists(some_path))
+        initData(some_path);
+    else{
+        std::string msg = some_path.string() + " is not a valid path to a file ";
+        vlogger::instance().console()->info(msg);
+    }
+    
+}
 //
 void VisibleApp::setup()
 {
@@ -95,8 +110,11 @@ void VisibleApp::setup()
                    .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
                    .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
                    .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
-                 //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
+                   //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
                    );
+    
+    ImGuiStyle* st = &ImGui::GetStyle();
+    ImGui::StyleColorsLightGreen(st);
     
     fs::path root_output_dir = VisibleAppControl::get_visible_app_directory();
     
@@ -108,14 +126,10 @@ void VisibleApp::setup()
         mVisibleScope = gl::Texture::create( loadImage( loadResource(VISIBLE_SCOPE  )));
     }
     
-    for( auto display : Display::getDisplays() )
-    {
-    }
-    
     setWindowSize(APP_WIDTH/2,APP_HEIGHT/2);
     setFrameRate( 60 );
     setWindowPos(getWindowSize()/4);
-    getWindow()->setAlwaysOnTop();
+//    getWindow()->setAlwaysOnTop();
     WindowRef ww = getWindow ();
     if( mVisibleScope ){
         gl::draw( mVisibleScope, getWindowBounds() );
@@ -127,66 +141,67 @@ void VisibleApp::setup()
     mFont = Font( "Menlo", 18 );
     mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     
-	// fonts
-	Font smallFont = Font( "TrebuchetMS-Bold", 16 );
-	Font bigFont   = Font( "TrebuchetMS-Bold", 72 );
-	Item::setFonts( smallFont, bigFont );
-	
-	// title text
-	TextLayout layout;
-	layout.clear( ColorA( 1, 1, 1, 0 ) );
-	layout.setFont( bigFont );
-	layout.setColor( Color::white() );
-	layout.addLine( "Icelandic Colors" );
-	mTitleTex		= gl::Texture2d::create( layout.render( true ) );
-	
-	// positioning
-	mLeftBorder		= 50.0f;
-	mTopBorder		= 375.0f;
-	mItemSpacing	= 22.0f;
-	
+    // fonts
+    Font smallFont = Font( "TrebuchetMS-Bold", 16 );
+    Font medFont = Font( "TrebuchetMS-Bold", 32 );
+    Font bigFont   = Font( "TrebuchetMS-Bold", 72 );
+    Item::setFonts( smallFont, bigFont );
+    {
+        TextLayout layout;
+        layout.clear( ColorA( 1, 1, 1, 0 ) );
+        layout.setFont( medFont );
+        Color  color_choice ( 166/255.,17/255.,177/255. );
+        layout.setColor( color_choice );
+        layout.addCenteredLine("Drag & Drop");
+        layout.addCenteredLine("a LIF File");
+        mDropFileTextTexture = gl::Texture::create( layout.render( true ) );
+    }
+    
+    // title text
+    TextLayout layout;
+    layout.clear( ColorA( 1, 1, 1, 0 ) );
+    layout.setFont( bigFont );
+    layout.setColor( Color::white() );
+    layout.addLine( "Icelandic Colors" );
+    mTitleTex		= gl::Texture2d::create( layout.render( true ) );
+    
+    // positioning
+    mLeftBorder		= 50.0f;
+    mTopBorder		= 375.0f;
+    mItemSpacing	= 22.0f;
+    
     VisibleAppControl::setup_loggers( root_output_dir, app_log, mFileName);
     
-	// create items
+    // create items
     std::vector<std::string> extensions = {"lif"};
     auto platform = ci::app::Platform::get();
     
     auto home_path = platform->getHomeDirectory();
     vlogger::instance().console()->info(home_path.string());
     
- 
-    auto some_path = getOpenFilePath(); //"", extensions);
-    mFileExtension = some_path.extension().string();
-    mFileName = some_path.filename().string();
-
- //   boost::filesystem::path some_path = "/Users/arman/Pictures/lif/3channels.lif";
-    if (! some_path.empty() || exists(some_path))
-        initData(some_path);
-    else{
-            std::string msg = some_path.string() + " is not a valid path to a file ";
-            vlogger::instance().console()->info(msg);
-    }
-	
-	// textures and colors
-	mFgImage		= gl::Texture2d::create( APP_WIDTH / 2, APP_HEIGHT / 2 );
-	mBgImage		= gl::Texture2d::create( APP_WIDTH / 2, APP_HEIGHT / 2 );
-	mFgAlpha		= 1.0f;
-	mBgColor		= Color::white();
-	
-	// swatch graphics (square and blurry square)
+    
+    // textures and colors
+    mFgImage		= gl::Texture2d::create( APP_WIDTH / 2, APP_HEIGHT / 2 );
+    mBgImage		= gl::Texture2d::create( APP_WIDTH / 2, APP_HEIGHT / 2 );
+    mFgAlpha		= 1.0f;
+    mBgColor		= Color::white();
+    
+    // swatch graphics (square and blurry square)
     auto palette_path = platform->getResourceDirectory();
     std::string small =  "swatchSmall.png";
     std::string large =  "swatchLarge.png";
     auto small_path = palette_path / small ;
-	mSwatchSmallTex	= gl::Texture2d::create( loadImage( small_path ) );
+    mSwatchSmallTex	= gl::Texture2d::create( loadImage( small_path ) );
     auto large_path = palette_path / large ;
-	mSwatchLargeTex	= gl::Texture2d::create( loadImage( large_path ) );
-	
-	// state
-	mMouseOverItem		= mItems.end();
-	mNewMouseOverItem	= mItems.end();
-	mSelectedItem		= mItems.begin();
-	mSelectedItem->select( timeline(), mLeftBorder );
+    mSwatchLargeTex	= gl::Texture2d::create( loadImage( large_path ) );
+    
+    // state
+    if(! mItems.empty()){
+        mMouseOverItem		= mItems.end();
+        mNewMouseOverItem	= mItems.end();
+        mSelectedItem		= mItems.begin();
+        mSelectedItem->select( timeline(), mLeftBorder );
+    }
     
     getSignalShouldQuit().connect( std::bind( &VisibleApp::shouldQuit, this ) );
     
@@ -201,8 +216,7 @@ void VisibleApp::setup()
     
     getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
     
-    gl::enableVerticalSync();
-    
+ 
     // Setup APP LOG
     //auto logging_container = logging::get_mutable_logging_container();
     //logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
@@ -212,8 +226,8 @@ void VisibleApp::setup()
 }
 
 void VisibleApp::QuitApp(){
-      ImGui::DestroyContext();
-   // fg::ThreadsShouldStop = true;
+    ImGui::DestroyContext();
+    // fg::ThreadsShouldStop = true;
     quit();
 }
 
@@ -235,8 +249,10 @@ void VisibleApp::DrawGUI(){
             ui::MenuItem("Help", nullptr, &showHelp);
             if(ui::MenuItem("Quit", "ESC")){
                 QuitApp();
+                return;
             }
-            ui::EndMenu();
+            else
+                ui::EndMenu();
         }
         
         if( ui::BeginMenu( "View" ) ){
@@ -254,11 +270,10 @@ void VisibleApp::DrawGUI(){
     {
         ui::Begin("General Settings", &showGUI, ImGuiWindowFlags_AlwaysAutoResize);
         
-        ui::SliderInt("Stereo Convergence", &convergence, 0, 100);
-        
+
         ui::End();
     }
- 
+    
     //Draw the log if desired
     if(showLog){
         app_log.Draw("Log", &showLog);
@@ -273,7 +288,7 @@ void VisibleApp::DrawGUI(){
         ui::Text("Arman Garakani, Darisa LLC");
         if(ui::Button("Copy")) ui::LogToClipboard();
         ui::SameLine();
-      //  ui::Text("github.com/");
+        //  ui::Text("github.com/");
         ui::LogFinish();
         ui::Text("");
         ui::Text("Mouse over any"); ShowHelpMarker("We did it!"); ui::SameLine(); ui::Text("to show help.");
@@ -282,6 +297,7 @@ void VisibleApp::DrawGUI(){
     }
     
 }
+
 
 void VisibleApp::windowMove()
 {
@@ -299,20 +315,29 @@ void VisibleApp::initData( const fs::path &path )
     mLifRef = lif_browser::create(path.string());
     
     auto series = mLifRef->get_all_series ();
-
-	for( vector<lif_serie_data>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt )
-		createItem( *serieIt, int(serieIt - series.begin()) );
+    
+    for( vector<lif_serie_data>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt )
+        createItem( *serieIt, int(serieIt - series.begin()) );
     
     //@todo For now Assume IDLab Format,
     m_isIdLabLif = true;
+    
+    // state
+    if(! mItems.empty()){
+        mMouseOverItem        = mItems.end();
+        mNewMouseOverItem    = mItems.end();
+        mSelectedItem        = mItems.begin();
+        mSelectedItem->select( timeline(), mLeftBorder );
+    }
+    
 }
 
 void VisibleApp::createItem( const lif_serie_data &serie, int index )
 {
     string title				= serie.name();
     string desc					= " Channels: " + to_string(serie.channelCount()) +
-                                  "   width: " + to_string(serie.dimensions()[0]) +
-                                  "   height: " + to_string(serie.dimensions()[1]);
+    "   width: " + to_string(serie.dimensions()[0]) +
+    "   height: " + to_string(serie.dimensions()[1]);
     
     auto platform = ci::app::Platform::get();
     auto palette_path = platform->getResourceDirectory();
@@ -320,22 +345,22 @@ void VisibleApp::createItem( const lif_serie_data &serie, int index )
     palette_path = palette_path / paletteFilename;
     Surface palette = Surface( loadImage(  palette_path ) ) ;
     gl::Texture2dRef image = gl::Texture::create(Surface( ImageSourceRef( new ImageSourceCvMat( serie.poster() ))));
-	vec2 pos( mLeftBorder, mTopBorder + index * mItemSpacing );
-	Item item = Item(index, pos, title, desc, palette );
-	mItems.push_back( item );
-	mImages.push_back( image );
-   
+    vec2 pos( mLeftBorder, mTopBorder + index * mItemSpacing );
+    Item item = Item(index, pos, title, desc, palette );
+    mItems.push_back( item );
+    mImages.push_back( image );
+    
 }
 
 void VisibleApp::mouseMove( MouseEvent event )
 {
-
+    
     mNewMouseOverItem = mItems.end();
-
+    
     for( vector<Item>::iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
         if( itemIt->isPointIn( event.getPos() ) && !itemIt->getSelected() ) {
             mNewMouseOverItem = itemIt;
-
+            
             break;
         }
     }
@@ -346,7 +371,7 @@ void VisibleApp::mouseMove( MouseEvent event )
             mMouseOverItem = mItems.end();
         }
     } else {
-    
+        
         if( mNewMouseOverItem != mMouseOverItem && !mNewMouseOverItem->getSelected() ){
             if( mMouseOverItem != mItems.end() && mMouseOverItem != mSelectedItem )
                 mMouseOverItem->mouseOff( timeline() );
@@ -357,8 +382,8 @@ void VisibleApp::mouseMove( MouseEvent event )
     
     if( mMouseOverItem != mItems.end() && mMouseOverItem != mSelectedItem ){
         mFgImage = mImages[mMouseOverItem->mIndex];
-  //      mFgAlpha = 0.0f;
-   //     timeline().apply( &mFgAlpha, 1.0f, 0.4f, EaseInQuad() );
+        //      mFgAlpha = 0.0f;
+        //     timeline().apply( &mFgAlpha, 1.0f, 0.4f, EaseInQuad() );
     }
 }
 
@@ -385,17 +410,17 @@ void VisibleApp::mouseDown( MouseEvent event )
         mNewMouseOverItem = mItems.end();
         
         // Open a LIF Context for this serie
-       dispatch_lif_viewer(mSelectedItem->mIndex);
+        dispatch_lif_viewer(mSelectedItem->mIndex);
     }
 }
 
 void VisibleApp::update()
 {
-
+    
     for( vector<Item>::iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
         itemIt->update();
     }
-
+    
 }
 
 void VisibleApp::draw()
@@ -403,59 +428,66 @@ void VisibleApp::draw()
     
     // Note: this function is called once per frame for EACH WINDOW
     gl::ScopedViewport scpViewport( ivec2( 0 ), getWindowSize() );
-
-
+    
     
     // clear out the window with black
-//    gl::clear( Color( 0, 0, 0 ) );
+    //    gl::clear( Color( 0, 0, 0 ) );
     if( mVisibleScope ){
-         gl::draw( mVisibleScope, getWindowBounds() );
-       }
-    
-    gl::enableAlphaBlending();
-    
-    gl::setMatricesWindowPersp( getWindowSize() );
-    
-    // draw background image
-    if( mBgImage ){
-        gl::color( mBgColor );
-        gl::draw( mBgImage, getWindowBounds() );
+        gl::draw( mVisibleScope, getWindowBounds() );
     }
     
-    // draw foreground image
-    if( mFgImage ){
-        Rectf bounds (mFgImage->getBounds());
-        bounds = bounds.getCenteredFit(getWindowBounds(), false);
-        gl::color( ColorA( 1.0f, 1.0f, 1.0f, mFgAlpha ) );
-        gl::draw( mFgImage, bounds );
-    }
-    
-    // draw swatches
-    gl::context()->pushTextureBinding( mSwatchLargeTex->getTarget(), mSwatchLargeTex->getId(), 0 );
-    if( mSelectedItem != mItems.end() )
-        mSelectedItem->drawSwatches();
-    
-    gl::context()->bindTexture( mSwatchLargeTex->getTarget(), mSwatchLargeTex->getId(), 0 );
-    for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
-      //  if( ! itemIt->getSelected() )
+    if (! mItems.empty()){
+        
+        gl::enableAlphaBlending();
+        
+        gl::setMatricesWindowPersp( getWindowSize() );
+        
+        // draw background image
+        if( mBgImage ){
+            gl::color( mBgColor );
+            gl::draw( mBgImage, getWindowBounds() );
+        }
+        
+        // draw foreground image
+        if( mFgImage ){
+            Rectf bounds (mFgImage->getBounds());
+            bounds = bounds.getCenteredFit(getWindowBounds(), false);
+            gl::color( ColorA( 1.0f, 1.0f, 1.0f, mFgAlpha ) );
+            gl::draw( mFgImage, bounds );
+        }
+        
+        // draw swatches
+        gl::context()->pushTextureBinding( mSwatchLargeTex->getTarget(), mSwatchLargeTex->getId(), 0 );
+        if( mSelectedItem != mItems.end() )
+            mSelectedItem->drawSwatches();
+        
+        gl::context()->bindTexture( mSwatchLargeTex->getTarget(), mSwatchLargeTex->getId(), 0 );
+        for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+            //  if( ! itemIt->getSelected() )
             itemIt->drawSwatches();
+        }
+        gl::context()->popTextureBinding( mSwatchLargeTex->getTarget(), 0 );
+        
+        // turn off textures and draw bgBar
+        for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+            itemIt->drawBgBar();
+        }
+        
+        // turn on textures and draw text
+        gl::color( Color( 1.0f, 1.0f, 1.0f ) );
+        for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
+            itemIt->drawText();
+        }
     }
-    gl::context()->popTextureBinding( mSwatchLargeTex->getTarget(), 0 );
-    
-    // turn off textures and draw bgBar
-    for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
-        itemIt->drawBgBar();
-    }
-    
-    // turn on textures and draw text
-    gl::color( Color( 1.0f, 1.0f, 1.0f ) );
-    for( vector<Item>::const_iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
-        itemIt->drawText();
+    else{
+        auto ctr = getWindowCenter();
+        ctr.x /= 2;
+        gl::draw(mDropFileTextTexture, ctr);
     }
     
     DrawGUI();
-
-
+    
+    
 }
 
 
@@ -467,9 +499,9 @@ void VisibleApp::update_log (const std::string& msg)
 
 void VisibleApp::displayChange()
 {
- //   update_log ( "window display changed: " + toString(getWindow()->getDisplay()->getBounds()));
- //   console() << "ContentScale = " << getWindowContentScale() << endl;
- //   console() << "getWindowCenter() = " << getWindowCenter() << endl;
+    //   update_log ( "window display changed: " + toString(getWindow()->getDisplay()->getBounds()));
+    //   console() << "ContentScale = " << getWindowContentScale() << endl;
+    //   console() << "getWindowCenter() = " << getWindowCenter() << endl;
 }
 
 
@@ -482,8 +514,8 @@ void VisibleApp::windowClose()
 
 void VisibleApp::mouseDrag( MouseEvent event )
 {
-  
-        cinder::app::App::mouseDrag(event);
+    
+    cinder::app::App::mouseDrag(event);
 }
 
 
@@ -491,14 +523,14 @@ void VisibleApp::mouseDrag( MouseEvent event )
 
 void VisibleApp::mouseUp( MouseEvent event )
 {
- 
-        cinder::app::App::mouseUp(event);
+    
+    cinder::app::App::mouseUp(event);
 }
 
 
 void VisibleApp::keyDown( KeyEvent event )
 {
- 
+    
     if( event.getChar() == 'f' ) {
         // Toggle full screen when the user presses the 'f' key.
         setFullScreen( ! isFullScreen() );
@@ -517,12 +549,12 @@ void VisibleApp::keyDown( KeyEvent event )
 
 void VisibleApp::resize ()
 {
-  
+    
     
 }
 
 CINDER_APP( VisibleApp, RendererGl( RendererGl::Options().msaa( 4 ) ), []( App::Settings *settings ) {
-	settings->setWindowSize( APP_WIDTH, APP_HEIGHT );
+    settings->setWindowSize( APP_WIDTH, APP_HEIGHT );
 } )
 
 

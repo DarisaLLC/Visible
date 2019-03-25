@@ -97,7 +97,7 @@ public:
     void windowMouseDown( MouseEvent &mouseEvt );
     void displayChange();
     void resize() override;
-    
+    void fileOpen ();
 private:
     fs::path getLoggingDirectory ();
     void initData( const fs::path &path );
@@ -126,6 +126,7 @@ private:
     gl::Texture2dRef mBgImage;
     gl::Texture2dRef mFgImage;
     gl::Texture2dRef mSwatchSmallTex, mSwatchLargeTex;
+    gl::Texture2dRef mDropFileTextTexture;
     
     Anim<float> mFgAlpha;
     Anim<Color> mBgColor;
