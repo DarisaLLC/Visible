@@ -189,6 +189,7 @@ lif_serie_processor::lif_serie_processor ()
     signal_contraction_available = createSignal<lif_serie_processor::sig_cb_contraction_available>();
     signal_3dstats_available = createSignal<lif_serie_processor::sig_cb_3dstats_available>();
     signal_volume_var_available = createSignal<lif_serie_processor::sig_cb_volume_var_available>();
+    signal_ss_image_available = createSignal<lif_serie_processor::sig_cb_ss_image_available>();
     
     // semilarity producer
     m_sm_producer = std::shared_ptr<sm_producer> ( new sm_producer () );
@@ -212,6 +213,10 @@ lif_serie_processor::lif_serie_processor ()
     // Signal us when 3d stats are ready
     std::function<void ()>_3dstats_done_cb = boost::bind (&lif_serie_processor::stats_3d_computed, this);
     boost::signals2::connection _3d_stats_connection = registerCallback(_3dstats_done_cb);
+    
+    // Signal us when ss segmentation is ready
+    std::function<void (cv::Mat&)>_ss_image_done_cb = boost::bind (&lif_serie_processor::finalize_segmentation, this, _1);
+    boost::signals2::connection _ss_image_connection = registerCallback(_ss_image_done_cb);
     
 }
 
@@ -284,19 +289,32 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
 void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
       std::lock_guard<std::mutex> lock(m_mutex);
     m_3d_stats_done = false;
-
-    // Now generate voxels at 1/3 resolution and generate temporal ss
-    generateVoxelSelfSimilarities_on_channel(2, 3, 3);
     
     std::vector<std::thread> threads(1);
     threads[0] = std::thread(&lif_serie_processor::generateVoxelSelfSimilarities_on_channel, this, 2, 3, 3);
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+}
+
+void lif_serie_processor::finalize_segmentation (cv::Mat& space){
+
+    std::lock_guard<std::mutex> lock(m_segmentation_mutex);
+    
     Mat threshold_output;
     vector<vector<cv::Point> > contours;
     vector<cv::Point> all_contours;
     vector<Vec4i> hierarchy;
-
-    threshold(m_temporal_ss, threshold_output, 0, 255, THRESH_OTSU);
+#if 0
+    namedWindow("Debug", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+    cv::imshow("Debug", space);
+    cv::waitKey();
+#endif
+    auto thr = threshold(space, threshold_output, 125, 255, THRESH_BINARY | THRESH_OTSU);
+    std::cout << thr << std::endl;
+#if 0
+    namedWindow("Debug", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+    cv::imshow("Debug", threshold_output);
+    cv::waitKey();
+#endif
     cv::findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 
     for( int i = 0; i < contours.size(); i++ )
@@ -314,11 +332,9 @@ void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& ima
     std::cout << "Center @ " << box.center.x << "," << box.center.y << "   ";
     std::cout << minor_dim << "  "  << major_dim << " angle: " << box.angle << std::endl;
     
-    
     // Signal to listeners
     if (signal_volume_var_available && signal_volume_var_available->num_slots() > 0)
         signal_volume_var_available->operator()();
-    
     
     
 }
@@ -768,6 +784,12 @@ void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector
         std::string image_path = "/Users/arman/tmp/" + imagename;
         cv::imwrite(image_path, m_temporal_ss);
 #endif
+        
+        // Call the content loaded cb if any
+        if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0)
+            signal_ss_image_available->operator()(m_temporal_ss);
+   
+        
     }
 
 }
