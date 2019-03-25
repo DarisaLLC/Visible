@@ -41,7 +41,9 @@ class Item {
 	int mIndex;
 
 	static void	setFonts( const ci::Font &smallFont, const ci::Font &bigFont );
-	
+    static const ci::Font& small_font ();
+    static const ci::Font& big_font ();
+    
   private:
 	// title
 	std::string				mTitle;

@@ -270,3 +270,7 @@ void Item::setFonts( const Font &smallFont, const Font &bigFont )
 	sSmallFont	= smallFont;
 	sBigFont	= bigFont;
 }
+
+const ci::Font& Item::small_font () { return sSmallFont; }
+const ci::Font& Item::big_font () { return sBigFont; }
+
