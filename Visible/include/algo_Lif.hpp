@@ -203,6 +203,7 @@ public:
     typedef void (sig_cb_sm1dmed_available) (int&,int&);
     typedef void (sig_cb_3dstats_available) ();
     typedef void (sig_cb_volume_var_available) ();
+    typedef void (sig_cb_ss_image_available) (cv::Mat &);
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     typedef std::vector<channel_images_t> channel_vec_t;
     
@@ -256,7 +257,7 @@ public:
     void generateVoxelSelfSimilarities_on_channel (const int channel_index, uint32_t sample_x = 1, uint32_t sample_y = 1);
     cv::Mat& temporal_selfSimilarity () const { return m_temporal_ss; }
     
-    
+    void finalize_segmentation (cv::Mat&);
     const std::vector<Rectf>& rois () const;
     const cv::RotatedRect& motion_surface () const;
     const  std::deque<double>& medianSet () const;
@@ -280,6 +281,7 @@ protected:
     boost::signals2::signal<lif_serie_processor::sig_cb_contraction_available>* signal_contraction_available;
     boost::signals2::signal<lif_serie_processor::sig_cb_3dstats_available>* signal_3dstats_available;
     boost::signals2::signal<lif_serie_processor::sig_cb_volume_var_available>* signal_volume_var_available;
+    boost::signals2::signal<lif_serie_processor::sig_cb_ss_image_available>* signal_ss_image_available;
     
 private:
     void compute_shortterm (const uint32_t halfWinSz) const;
@@ -303,6 +305,7 @@ private:
     
     mutable std::mutex m_mutex;
     mutable std::mutex m_shortterms_mutex;
+    mutable std::mutex m_segmentation_mutex;
     uint32_t m_channel_count;
     mutable std::condition_variable m_shortterm_cv;
     
