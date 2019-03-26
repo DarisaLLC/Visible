@@ -41,7 +41,7 @@ namespace {
         if (success) return app_support;
         return fs::path ();
     }
-
+    
 }
 bool VisibleAppControl::check_input (const string &filename){
     
@@ -59,7 +59,39 @@ bool VisibleAppControl::check_input (const string &filename){
 
 fs::path  VisibleAppControl::get_visible_app_directory () { return get_app_directory_exists (fs::path(c_visible_app_support));}
 fs::path  VisibleAppControl::get_runner_app_directory () { return get_app_directory_exists (fs::path(c_visible_runner_app_support));}
+fs::path VisibleAppControl::get_visible_cache_directory () {
+    // Create an invisible folder for storage
+    auto visiblePath = getHomeDirectory()/c_visible_cache_folder_name;
+    if (!fs::exists( visiblePath)) fs::create_directories(visiblePath);
+    return visiblePath;
+}
 
+bool  VisibleAppControl::make_result_cache_if_needed (const lif_browser::ref& lif_ref, const boost::filesystem::path& path){
+    
+    if(! exists(path) || ! lif_ref) return false;
+    
+    try{
+        auto visiblePath = get_visible_cache_directory();
+        
+        // Create a directory for this lif file if it does not exist
+        std::string filestem = path.stem().string();
+        auto cachePath = visiblePath/filestem;
+        if (!fs::exists( cachePath)) fs::create_directories(cachePath);
+        
+        auto series = lif_ref->get_all_series ();
+        
+        for( vector<lif_serie_data>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt ){
+            auto serie_cache_path = cachePath/serieIt->name();
+            if (!fs::exists( serie_cache_path)) fs::create_directories(serie_cache_path);
+        }
+    }
+    catch (const std::exception & ex)
+    {
+        std::cout << "Creating cache directories failed: " << ex.what() << std::endl;
+        return false;
+    }
+    return true;
+}
 
 bool VisibleAppControl::setup_text_loggers (const fs::path app_support_dir, std::string id_name){
     
@@ -97,11 +129,11 @@ bool VisibleAppControl::setup_text_loggers (const fs::path app_support_dir, std:
 
 bool VisibleAppControl::setup_loggers (const fs::path app_support_dir,  imGuiLog& visualLog, std::string id_name){
     using imgui_sink_mt = spdlog::sinks::imGuiLogSink<std::mutex> ;
-
+    
     // Check app support directory
     bool app_support_ok = exists(app_support_dir);
     if (! app_support_ok ) return app_support_ok;
-
+    
     try{
         // get a temporary file name
         std::string logname =  logging::reserve_unique_file_name(app_support_dir.string(),
@@ -143,7 +175,7 @@ guiContext::guiContext (ci::app::WindowRef& ww)
 
 guiContext::~guiContext ()
 {
-   // std::cout << " guiContext Dtor called " << std::endl;
+    // std::cout << " guiContext Dtor called " << std::endl;
 }
 
 // u implementation does nothing

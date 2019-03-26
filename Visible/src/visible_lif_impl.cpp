@@ -83,9 +83,16 @@ namespace anonymous{
 // @ todo setup default repository
 // default median cover pct is 5% (0.05)
 
-lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd) :sequencedImageContext(ww), m_serie(sd), m_volume_var_available(false) {
+lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const fs::path& cache_path) :sequencedImageContext(ww), m_serie(sd), m_volume_var_available(false), mUserStorageDirPath (cache_path) {
     m_type = guiContext::Type::lif_file_viewer;
     m_show_contractions = false;
+    // Create an invisible folder for storage
+    mCurrentSerieCachePath = mUserStorageDirPath / m_serie.name();
+    bool folder_exists = fs::exists(mCurrentSerieCachePath);
+    std::string msg = folder_exists ? " exists " : " does not exist ";
+    msg = " folder for " + m_serie.name() + msg;
+    vlogger::instance().console()->info(msg);
+    
     m_valid = false;
         m_valid = sd.index() >= 0;
         if (m_valid){
