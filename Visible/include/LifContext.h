@@ -43,7 +43,7 @@ public:
     typedef std::pair<vec2,vec2> sides_length_t;
     
     // From a lif_serie_data
-    lifContext(ci::app::WindowRef& ww, const lif_serie_data& );
+    lifContext(ci::app::WindowRef& ww, const lif_serie_data&, const fs::path&  );
     
     // shared_from_this() through base class
     lifContext* shared_from_above () {
@@ -174,7 +174,12 @@ private:
     mutable std::vector<std::string> m_contraction_names;
     int32_t m_cell_length;
     
+    // Folder for Per user result / content caching
+    boost::filesystem::path mUserStorageDirPath;
+    boost::filesystem::path mCurrentSerieCachePath;
     
+  
+        
     // Content Info
     tiny_media_info      mMediaInfo;
     mutable uint32_t  mChannelCount;

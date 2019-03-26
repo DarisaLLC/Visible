@@ -37,6 +37,7 @@
  
  ****/
 
+static std::string s_image_cache_name = "voxel_ss_.png";
 
 lif_serie_data:: lif_serie_data () : m_index (-1) {}
 
@@ -178,7 +179,8 @@ void  lif_browser::get_series_info () const
  
  ****/
 
-lif_serie_processor::lif_serie_processor ()
+lif_serie_processor::lif_serie_processor (const fs::path& serie_cache_folder):
+  mCurrentSerieCachePath(serie_cache_folder)
 {
     // Signals we provide
     signal_content_loaded = createSignal<lif_serie_processor::sig_cb_content_loaded>();
@@ -702,14 +704,43 @@ void lif_serie_processor::generateVoxels_on_channel (const int channel_index, st
 // Return 2D latice of voxel self-similarity
 
 void lif_serie_processor::generateVoxelSelfSimilarities_on_channel (const int channel_index, uint32_t sample_x, uint32_t sample_y){
-    std::vector<std::vector<roiWindow<P8U>>> rvs;
-    std::string msg = " Generating Voxels @ (" + to_string(sample_x) + "," + to_string(sample_y) + ")";
-    vlogger::instance().console()->info("starting " + msg);
-    generateVoxels(m_all_by_channel[channel_index], rvs, sample_x, sample_y);
-    vlogger::instance().console()->info("finished " + msg);
-    generateVoxelSelfSimilarities(rvs);
-    m_voxel_xy.first = sample_x;
-    m_voxel_xy.second = sample_y;
+
+    bool cache_ok = false;
+    
+    //@todo add width and height so we do not have to do this
+    auto images = m_all_by_channel[channel_index];
+    assert(!images.empty());
+    auto expected_width = images[0].width() / sample_x;
+    auto expected_height = images[0].height() / sample_y;
+    if(fs::exists(mCurrentSerieCachePath)){
+        auto image_path = mCurrentSerieCachePath / s_image_cache_name;
+        if(fs::exists(image_path)){
+        try{
+            m_temporal_ss = imread(image_path.string(), IMREAD_GRAYSCALE);
+            } catch( std::exception& ex){
+                auto msg = s_image_cache_name + " Exists but could not be read ";
+                vlogger::instance().console()->info(msg);
+            }
+        }
+        cache_ok = expected_width == m_temporal_ss.cols;
+        cache_ok = cache_ok && expected_height == m_temporal_ss.rows;
+    }
+    if ( cache_ok ){
+        // Call the content loaded cb if any
+        if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0)
+            signal_ss_image_available->operator()(m_temporal_ss);
+    }
+    else {
+        std::vector<std::vector<roiWindow<P8U>>> rvs;
+        std::string msg = " Generating Voxels @ (" + to_string(sample_x) + "," + to_string(sample_y) + ")";
+        vlogger::instance().console()->info("starting " + msg);
+        generateVoxels(m_all_by_channel[channel_index], rvs, sample_x, sample_y);
+        vlogger::instance().console()->info("finished " + msg);
+        generateVoxelSelfSimilarities(rvs);
+        m_voxel_xy.first = sample_x;
+        m_voxel_xy.second = sample_y;
+    }
+    
 }
 
 
@@ -740,6 +771,7 @@ void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& ima
 void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels){
     int height = static_cast<int>(voxels.size());
     int width = static_cast<int>(voxels[0].size());
+
     
     vlogger::instance().console()->info("starting generating voxel self-similarity");
     // Create a single vector of all roi windows
@@ -779,11 +811,11 @@ void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector
         cv::medianBlur(m_temporal_ss, m_temporal_ss, 5);
         
         vlogger::instance().console()->info("finished voxel self-similarity");
-#if 1
-        std::string imagename = svl::toString(std::clock()) + ".png";
-        std::string image_path = "/Users/arman/tmp/" + imagename;
-        cv::imwrite(image_path, m_temporal_ss);
-#endif
+        if(fs::exists(mCurrentSerieCachePath)){
+            std::string imagename = "voxel_ss_.png";
+            auto image_path = mCurrentSerieCachePath / imagename;
+            cv::imwrite(image_path.string(), m_temporal_ss);
+        }
         
         // Call the content loaded cb if any
         if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0)

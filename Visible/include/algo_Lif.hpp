@@ -19,9 +19,13 @@
 #include "vision/labelBlob.hpp"
 #include <boost/foreach.hpp>
 #include "seq_frame_container.hpp"
+#include <boost/filesystem.hpp>
 
 using namespace cv;
 using namespace std;
+using namespace boost;
+using namespace boost::filesystem;
+namespace fs = boost::filesystem;
 
 #if 0
 // Default logger factory-  creates synchronous loggers
@@ -207,7 +211,7 @@ public:
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     typedef std::vector<channel_images_t> channel_vec_t;
     
-    lif_serie_processor ();
+    lif_serie_processor (const fs::path& = fs::path());
     
     const smProducerRef similarity_producer () const;
     const int64_t& frame_count () const;
@@ -290,6 +294,9 @@ private:
     void stats_3d_computed ();
     void pci_done ();
     void sm_content_loaded ();
+    
+    // path to cache folder for this serie
+    fs::path mCurrentSerieCachePath;
     
     // Assumes LIF data -- use multiple window.
     void load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames);

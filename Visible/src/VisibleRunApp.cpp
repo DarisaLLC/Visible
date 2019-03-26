@@ -246,6 +246,12 @@ void VisibleRunApp::setup()
             quit();
         }
 
+        auto bpath_path = fs::path(bpath);
+        VisibleAppControl::make_result_cache_if_needed (mBrowser, bpath_path);
+        auto cache_path = VisibleAppControl::get_visible_cache_directory();
+        auto stem = bpath_path.stem();
+        cache_path = cache_path / stem;
+        
         auto chapter = mBrowser->names()[0];
         if (selected_by_dialog_no_custom_content_no_chapter){ // Selected by File Dialog
             m_args.push_back(chapter);
@@ -254,7 +260,7 @@ void VisibleRunApp::setup()
         if (indexItr != mBrowser->name_to_index_map().end()){
             auto serie = mBrowser->get_serie_by_index(indexItr->second);
             WindowRef ww = getWindow ();
-            mContext = std::unique_ptr<lifContext>(new lifContext (ww,serie));
+            mContext = std::unique_ptr<lifContext>(new lifContext (ww,serie, cache_path));
             
             if (mContext->is_valid()){
                 cmds += " [ " + m_args[2] + " ] ";

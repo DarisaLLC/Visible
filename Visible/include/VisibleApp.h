@@ -63,14 +63,17 @@ namespace VisibleAppControl{
     extern bool ThreadsShouldStop;
     static constexpr const char c_visible_app_support[] = "Library/Application Support/net.darisallc.Visible";
     static constexpr const char c_visible_runner_app_support[] = "Library/Application Support/net.darisallc.VisibleRun";
-    
+    static constexpr const char c_visible_cache_folder_name [] = ".Visible";
     bool check_input (const string &filename);
     
     fs::path get_visible_app_directory ();
     fs::path get_runner_app_directory ();
+    fs::path get_visible_cache_directory ();
     
     bool setup_loggers (const fs::path app_support_dir,  imGuiLog& visualLog, std::string id_name);
     bool setup_text_loggers (const fs::path app_support_dir,  std::string id_name);
+    
+    bool make_result_cache_if_needed (const lif_browser::ref& lif_ref, const boost::filesystem::path& path);
     
     static const std::string LIF_CUSTOM = "IDLab_0";
 }
@@ -138,6 +141,7 @@ private:
     std::string            mLog;
     vec2                mSize;
     fs::path            mCurrentLifFilePath;
+    fs::path            mUserStorageDirPath;
     std::string         mFileName;
     std::string         mFileExtension;
     

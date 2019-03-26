@@ -216,13 +216,9 @@ void VisibleApp::setup()
     
     getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
     
- 
-    // Setup APP LOG
-    //auto logging_container = logging::get_mutable_logging_container();
-    //logging_container->add_sink(std::make_shared<logging::sinks::platform_sink_mt>());
-    //logging_container->add_sink(std::make_shared<logging::sinks::daily_file_sink_mt>("VLog", 23, 59));
-    //auto logger = std::make_shared<spdlog::logger>(VAPPLOG, logging_container);
-    
+    // Create an invisible folder for storage
+    mUserStorageDirPath = getHomeDirectory()/".Visible";
+    if (!fs::exists( mUserStorageDirPath)) fs::create_directories(mUserStorageDirPath);
 }
 
 void VisibleApp::QuitApp(){
@@ -321,6 +317,12 @@ void VisibleApp::initData( const fs::path &path )
     
     //@todo For now Assume IDLab Format,
     m_isIdLabLif = true;
+    
+    // create if needed cache directories for this lif file
+    bool ok = VisibleAppControl::make_result_cache_if_needed(mLifRef, path);
+    std::string msg = (ok) ? "Cache directories existed or were created" : "Cache directories could not be created";
+    vlogger::instance().console()->info(msg);
+
     
     // state
     if(! mItems.empty()){
