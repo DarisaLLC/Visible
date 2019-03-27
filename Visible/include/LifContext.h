@@ -140,10 +140,11 @@ private:
     void signal_sm1dmed_available (int&,int&);
     void signal_contraction_available (contractionContainer_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
-    void signal_volume_var_available ();
+    void signal_geometry_available ();
+    void signal_ss_image_available (cv::Mat&);
     
     // Availability
-    std::atomic<bool> m_volume_var_available;
+    std::atomic<bool> m_geometry_available;
 
     // Clip Processing
     int get_current_clip_index () const;
@@ -161,8 +162,10 @@ private:
     std::shared_ptr<seqFrameContainer> mFrameSet;
     SurfaceRef  mSurface;
   
-    // Variance Image Texture
-    ci::gl::TextureRef m_var_texture;
+    
+    // Variance Image & Texture
+    cv::Mat m_segmented_image;
+    ci::gl::TextureRef m_segmented_texture;
     
     // Tracks of frame associated results
     std::weak_ptr<vecOfNamedTrack_t> m_flurescence_trackWeakRef;

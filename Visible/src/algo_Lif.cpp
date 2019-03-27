@@ -190,7 +190,7 @@ lif_serie_processor::lif_serie_processor (const fs::path& serie_cache_folder):
     signal_sm1dmed_available = createSignal<lif_serie_processor::sig_cb_sm1dmed_available>();
     signal_contraction_available = createSignal<lif_serie_processor::sig_cb_contraction_available>();
     signal_3dstats_available = createSignal<lif_serie_processor::sig_cb_3dstats_available>();
-    signal_volume_var_available = createSignal<lif_serie_processor::sig_cb_volume_var_available>();
+    signal_geometry_available = createSignal<lif_serie_processor::sig_cb_geometry_available>();
     signal_ss_image_available = createSignal<lif_serie_processor::sig_cb_ss_image_available>();
     
     // semilarity producer
@@ -274,7 +274,7 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
     load_channels_from_images(frames);
     lock.unlock();
     int channel_to_use = m_channel_count - 1;
-    run_volume_variances (channel_to_use);
+    run_detect_geometry (channel_to_use);
     
     // Call the content loaded cb if any
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
@@ -288,7 +288,7 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
  * 1 monchrome channel. Compute 3D Standard Dev. per pixel
  */
 
-void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
+void lif_serie_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& images){
       std::lock_guard<std::mutex> lock(m_mutex);
     m_3d_stats_done = false;
     
@@ -297,52 +297,91 @@ void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& ima
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 }
 
+
 void lif_serie_processor::finalize_segmentation (cv::Mat& space){
 
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
+    
+    auto createRegion = [](const std::vector<cv::Point> &external)
+    {
+        region blob;
+        blob.isValid = false;
+        blob.area = cv::contourArea( external );
+        blob.realArea = blob.area;
+        
+        if(blob.area<25){
+            return blob;
+        }
+        
+        std::vector<cv::Point> hull;
+        cv::convexHull(external,hull);
+        
+        if( hull.size() > 5 ){
+            cv::RotatedRect ellipse = cv::fitEllipse( hull );
+            
+            if(ellipse.size.width<=0 || ellipse.size.height<=0){
+                std::cerr << "Bad ellipse" << std::endl;
+                return blob;
+            }
+            
+            blob.ellipse = ellipse;
+            blob.center = ellipse.center;
+            blob.orientation = ellipse.angle;
+            blob.majorAxis =  std::max(ellipse.size.width,ellipse.size.height) / 2.0;
+            blob.minorAxis =  std::min(ellipse.size.width,ellipse.size.height) / 2.0;
+            
+            //Ellipse axis ratio too important
+            if(blob.majorAxis>100.0*blob.minorAxis || blob.majorAxis<1.0){
+                return blob;
+            }
+            
+            blob.isValid = true;
+        }
+        return blob;
+    };
     
     Mat threshold_output;
     vector<vector<cv::Point> > contours;
     vector<cv::Point> all_contours;
     vector<Vec4i> hierarchy;
-#if 0
-    namedWindow("Debug", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
-    cv::imshow("Debug", space);
-    cv::waitKey();
-#endif
+
     auto thr = threshold(space, threshold_output, 125, 255, THRESH_BINARY | THRESH_OTSU);
     std::cout << thr << std::endl;
-#if 0
-    namedWindow("Debug", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
-    cv::imshow("Debug", threshold_output);
-    cv::waitKey();
-#endif
-    cv::findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 
-    for( int i = 0; i < contours.size(); i++ )
-    {
-        const vector<cv::Point>& cc = contours[i];
-        for (const cv::Point& point : cc)
-            all_contours.push_back(point);
+    cv::findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+    vector< region > regions;
+    
+    // find convex hull for each contour
+    for(int i = 0; i < contours.size(); i++){
+        auto rgn = createRegion(contours[i]);
+        if(rgn.isValid){
+            regions.push_back(rgn);
+            std::cout << rgn;
+        }
     }
-    RotatedRect box = fitEllipse(all_contours);
-    m_motion_mass = box;
     
-    auto dims = box.size;
-    float minor_dim = std::min(dims.width, dims.height);
-    float major_dim = std::max(dims.width, dims.height);
-    std::cout << "Center @ " << box.center.x << "," << box.center.y << "   ";
-    std::cout << minor_dim << "  "  << major_dim << " angle: " << box.angle << std::endl;
-    
-    // Signal to listeners
-    if (signal_volume_var_available && signal_volume_var_available->num_slots() > 0)
-        signal_volume_var_available->operator()();
-    
+    if (! regions.empty()){
+        RotatedRect box = regions[0].ellipse;
+        cv::Point2f points[4];
+        box.points(points);
+        for (auto ii = 0; ii < 4; ii++){
+            points[ii].x *= 3;
+            points[ii].y *= 3;
+        }
+        
+        m_motion_mass = RotatedRect(points[0], points[1], points[2]);
+        
+        auto dims = box.size;
+
+        // Signal to listeners
+        if (signal_geometry_available && signal_geometry_available->num_slots() > 0)
+            signal_geometry_available->operator()();
+    }
     
 }
 
-void lif_serie_processor::run_volume_variances (const int channel_index){
-    return run_volume_variances(m_all_by_channel[channel_index]);
+void lif_serie_processor::run_detect_geometry (const int channel_index){
+    return run_detect_geometry(m_all_by_channel[channel_index]);
 }
 
 /*
@@ -710,8 +749,8 @@ void lif_serie_processor::generateVoxelSelfSimilarities_on_channel (const int ch
     //@todo add width and height so we do not have to do this
     auto images = m_all_by_channel[channel_index];
     assert(!images.empty());
-    auto expected_width = images[0].width() / sample_x;
-    auto expected_height = images[0].height() / sample_y;
+    auto expected_width = sample_x / 2 + images[0].width() / sample_x;
+    auto expected_height = sample_y / 2 + images[0].height() / sample_y;
     if(fs::exists(mCurrentSerieCachePath)){
         auto image_path = mCurrentSerieCachePath / s_image_cache_name;
         if(fs::exists(image_path)){

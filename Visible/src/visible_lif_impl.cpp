@@ -83,7 +83,7 @@ namespace anonymous{
 // @ todo setup default repository
 // default median cover pct is 5% (0.05)
 
-lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const fs::path& cache_path) :sequencedImageContext(ww), m_serie(sd), m_volume_var_available(false), mUserStorageDirPath (cache_path) {
+lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const fs::path& cache_path) :sequencedImageContext(ww), m_serie(sd), m_geometry_available(false), mUserStorageDirPath (cache_path) {
     m_type = guiContext::Type::lif_file_viewer;
     m_show_contractions = false;
     // Create an invisible folder for storage
@@ -113,7 +113,7 @@ ci::app::WindowRef&  lifContext::get_windowRef(){
 void lifContext::setup_signals(){
 
     // Create a Processing Object to attach signals to
-    m_lifProcRef = std::make_shared<lif_serie_processor> ();
+    m_lifProcRef = std::make_shared<lif_serie_processor> (mCurrentSerieCachePath);
     
     // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&lifContext::signal_content_loaded, shared_from_above(), _1);
@@ -135,9 +135,13 @@ void lifContext::setup_signals(){
     std::function<void (lif_serie_processor::contractionContainer_t&)> contraction_available_cb = boost::bind (&lifContext::signal_contraction_available, shared_from_above(), _1);
     boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_available_cb);
     
-    // Support lifProcessor::volume_var_available
-    std::function<void ()> volume_var_available_cb = boost::bind (&lifContext::signal_volume_var_available, shared_from_above());
-    boost::signals2::connection volume_var_connection = m_lifProcRef->registerCallback(volume_var_available_cb);
+    // Support lifProcessor::geometry_available
+    std::function<void ()> geometry_available_cb = boost::bind (&lifContext::signal_geometry_available, shared_from_above());
+    boost::signals2::connection geometry_connection = m_lifProcRef->registerCallback(geometry_available_cb);
+    
+    // Support lifProcessor::temporal_image_available
+    std::function<void (cv::Mat&)> ss_image_available_cb = boost::bind (&lifContext::signal_ss_image_available, shared_from_above(), _1);
+    boost::signals2::connection ss_image_connection = m_lifProcRef->registerCallback(ss_image_available_cb);
     
 }
 
@@ -244,29 +248,28 @@ void lifContext::signal_contraction_available (lif_serie_processor::contractionC
 }
 
 
-void lifContext::signal_volume_var_available()
+void lifContext::signal_geometry_available()
 {
     vlogger::instance().console()->info(" Volume Variance are available ");
     if (! m_lifProcRef){
         vlogger::instance().console()->error("Lif Processor Object does not exist ");
         return;
     }
+  
+}
 
-    auto save_motion_profile = [im = m_lifProcRef->display_volume_variances()] () {
-        std::string filename ("/Users/arman/tmp/disp1.png");
-        cv::imwrite(filename, im);
-    };
-    
-    stl_utils::reallyAsync(save_motion_profile);
-    
-    
-    // Create a texcture for display
-    Surface8uRef sur = Surface8u::create( cinder::fromOcv(m_lifProcRef->display_volume_variances()) );
-    auto texFormat = gl::Texture2d::Format().loadTopDown();
-    m_var_texture = gl::Texture::create(*sur, texFormat);
-    m_volume_var_available = true;
+void lifContext::signal_ss_image_available(cv::Mat& image)
+{
+    vlogger::instance().console()->info(" SS Image Available  ");
+    if (! m_lifProcRef){
+        vlogger::instance().console()->error("Lif Processor Object does not exist ");
+        return;
+    }
+    m_segmented_image = image.clone();
+    m_geometry_available = true;
     
 }
+
 
 
 void lifContext::signal_frame_loaded (int& findex, double& timestamp)
@@ -998,9 +1001,16 @@ void lifContext::add_navigation(){
 
 void lifContext::add_motion_profile (){
     
-    if (! m_volume_var_available || ! m_var_texture ) return;
+    if (! m_geometry_available ) return;
+    if (! m_segmented_texture ){
+        // Create a texcture for display
+        Surface8uRef sur = Surface8u::create(cinder::fromOcv(m_segmented_image));
+        auto texFormat = gl::Texture2d::Format().loadTopDown();
+        m_segmented_texture = gl::Texture::create(*sur, texFormat);
+    }
     
-    ImVec2  frame (m_var_texture->getWidth(),m_var_texture->getHeight());
+    ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
+    ImVec2  frame (m_segmented_texture->getWidth()*3.0f,m_segmented_texture->getHeight()*3.0f);
     Rectf dr = m_results_browser_display;
     auto pos = ImVec2(dr.getLowerLeft().x, dr.getLowerLeft().y + 30);
     m_motion_profile_display = Rectf(pos,frame);
@@ -1010,18 +1020,21 @@ void lifContext::add_motion_profile (){
     const RotatedRect& mt = m_lifProcRef->motion_surface();
     cv::Point2f points[4];
     mt.points(&points[0]);
-    
+
     if (ImGui::Begin("Motion Profile", nullptr,ImGuiWindowFlags_AlwaysAutoResize ))
     {
-        if(m_var_texture){
-            //static float zoom = 0.5f;
-            //static ImVec2 zoom_center;
+        if(m_segmented_texture){
+            static ImVec2 zoom_center;
+            // First Child
             ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
             ImVec2 pp = ImGui::GetCursorScreenPos();
-          //  ImGui::ImageZoomAndPan( (void*)(intptr_t) m_var_texture->getId(),sz,m_var_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
-            ImVec2 p (pp.x + mt.center.x, pp.y  + mt.center.y); //ImGui::GetCursorScreenPos();
-            ImGui::Image( (void*)(intptr_t) m_var_texture->getId(), frame);
+       //     ImGui::ImageZoomAndPan( (void*)(intptr_t)  m_segmented_texture->getId(),sz,
+        //                            m_segmented_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
+            ImVec2 p (pp.x + mt.center.x, pp.y  + mt.center.y);
+            ImGui::Image( (void*)(intptr_t) m_segmented_texture->getId(), frame);
             ImGui::EndChild();
+            
+            // Second Child
             ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
@@ -1031,19 +1044,14 @@ void lifContext::add_motion_profile (){
                 pt.x += (pp.x );
                 pt.y += (pp.y );
                 if (pt.x >=5 && pt.y >=5){
-                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), IM_COL32(255, 255, 0, 255), 3.0f);
-                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), IM_COL32(255, 255, 0, 255), 3.0f);
+                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), IM_COL32(255, 128, 0, 255), 3.0f);
+                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), IM_COL32(255, 128, 0, 255), 3.0f);
                 }
             }
-            
             ImGui::EndChild();
-            
-       
-            
         }
-
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 void  lifContext::SetupGUIVariables(){
@@ -1279,7 +1287,7 @@ void lifContext::draw ()
        // m_tsPlotter.setBounds(gdr);
        // m_tsPlotter.draw(test);
         
-        if (m_volume_var_available)
+        if (m_geometry_available)
         {
             const cv::RotatedRect& ellipse = m_lifProcRef->motion_surface();
             cinder::gl::ScopedLineWidth( 10.0f );
@@ -1289,14 +1297,15 @@ void lifContext::draw ()
                     cinder::gl::ScopedModelMatrix _mdl;
                     uDegree da(ellipse.angle);
                     uRadian dra (da);
-                    vec2 ctr (ellipse.center.x, ellipse.center.y);
+                    vec2 ctr ((ellipse.center.x * gdr.getWidth()) / 512, (ellipse.center.y * gdr.getHeight()) / 128 );
                     ctr = ctr + gdr.getUpperLeft();
                     gl::translate(ctr);
                     gl::rotate(dra.Double());
                     ctr = vec2(0,0);
                     gl::drawLine(ctr-vec2(0,5), ctr+vec2(0,5));
                     gl::drawLine(ctr-vec2(5,0), ctr+vec2(5,0));
-                    gl::drawStrokedEllipse(ctr, ellipse.boundingRect().width, ellipse.boundingRect().height);
+                    gl::drawStrokedEllipse(ctr, (ellipse.boundingRect().width * gdr.getWidth()) / 512,
+                                           (ellipse.boundingRect().height * gdr.getHeight()) / 128);
                 }
             }
         }
