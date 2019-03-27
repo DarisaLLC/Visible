@@ -30,6 +30,7 @@
 #include "cpp-perf.hpp"
 #include "vision/localvariance.h"
 #include "vision/labelBlob.hpp"
+#include "result_serialization.h"
 
 /****
  
@@ -38,6 +39,7 @@
  ****/
 
 static std::string s_image_cache_name = "voxel_ss_.png";
+static std::string s_result_container_cache_name = "container_ss_";
 
 lif_serie_data:: lif_serie_data () : m_index (-1) {}
 
@@ -75,7 +77,7 @@ m_index(-1), m_contentType(ct) {
     cv::Mat dst ( static_cast<uint32_t>(rows),static_cast<uint32_t>(cols), CV_8U);
     serie_ref->fill2DBuffer(dst.ptr(0), 0);
     m_poster = dst;
-
+    
     m_lifWeakRef = m_lifRef;
     
 }
@@ -95,7 +97,7 @@ const lifIO::LifReader::weak_ref& lif_serie_data::readerWeakRef () const{
 
 
 lif_browser::lif_browser (const std::string&  fqfn_path, const lifIO::ContentType_t& ct) :
-    mFqfnPath(fqfn_path), m_content_type(ct), m_data_ready(false) {
+mFqfnPath(fqfn_path), m_content_type(ct), m_data_ready(false) {
     if ( boost::filesystem::exists(boost::filesystem::path(mFqfnPath)) )
     {
         std::string msg = " Loaded Series Info for " + mFqfnPath ;
@@ -124,7 +126,7 @@ const std::vector<std::string>& lif_browser::names () const{
     
 }
 /*
- * LIF files are plane organized. 3 Channel LIF file is 3 * rows by cols by ONE byte. 
+ * LIF files are plane organized. 3 Channel LIF file is 3 * rows by cols by ONE byte.
  */
 
 void lif_browser::get_first_frame (lif_serie_data& si,  const int frameCount, cv::Mat& out)
@@ -175,12 +177,12 @@ void  lif_browser::get_series_info () const
 
 /****
  
-    lif_processor implementation
+ lif_processor implementation
  
  ****/
 
 lif_serie_processor::lif_serie_processor (const fs::path& serie_cache_folder):
-  mCurrentSerieCachePath(serie_cache_folder)
+mCurrentSerieCachePath(serie_cache_folder)
 {
     // Signals we provide
     signal_content_loaded = createSignal<lif_serie_processor::sig_cb_content_loaded>();
@@ -198,8 +200,8 @@ lif_serie_processor::lif_serie_processor (const fs::path& serie_cache_folder):
     
     // Signals we support
     // support Similarity::Content Loaded
-   // std::function<void ()> sm_content_loaded_cb = boost::bind (&lif_serie_processor::sm_content_loaded, this);
-   // boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
+    // std::function<void ()> sm_content_loaded_cb = boost::bind (&lif_serie_processor::sm_content_loaded, this);
+    // boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
     
     // Create a contraction object
     m_caRef = contraction_analyzer::create ();
@@ -289,7 +291,7 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
  */
 
 void lif_serie_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& images){
-      std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_3d_stats_done = false;
     
     std::vector<std::thread> threads(1);
@@ -299,7 +301,7 @@ void lif_serie_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& imag
 
 
 void lif_serie_processor::finalize_segmentation (cv::Mat& space){
-
+    
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
     
     auto createRegion = [](const std::vector<cv::Point> &external)
@@ -344,10 +346,10 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& space){
     vector<vector<cv::Point> > contours;
     vector<cv::Point> all_contours;
     vector<Vec4i> hierarchy;
-
+    
     auto thr = threshold(space, threshold_output, 125, 255, THRESH_BINARY | THRESH_OTSU);
     std::cout << thr << std::endl;
-
+    
     cv::findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
     vector< region > regions;
     
@@ -372,7 +374,7 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& space){
         m_motion_mass = RotatedRect(points[0], points[1], points[2]);
         
         auto dims = box.size;
-
+        
         // Signal to listeners
         if (signal_geometry_available && signal_geometry_available->num_slots() > 0)
             signal_geometry_available->operator()();
@@ -389,7 +391,7 @@ void lif_serie_processor::run_detect_geometry (const int channel_index){
  */
 
 svl::stats<int64_t> lif_serie_processor::run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>& images){
-      std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_3d_stats_done = false;
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
     std::vector<std::tuple<uint8_t,uint8_t>> rts;
@@ -441,7 +443,7 @@ std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::run_flu_statistics (cons
 
 void lif_serie_processor::compute_shortterm (const uint32_t halfWinSz) const{
     
-     uint32_t tWinSz = 2 * halfWinSz + 1;
+    uint32_t tWinSz = 2 * halfWinSz + 1;
     
     auto shannon = [](double r) { return (-1.0 * r * log2 (r)); };
     double _log2MSz = log2(tWinSz);
@@ -483,7 +485,7 @@ void lif_serie_processor::compute_shortterm (const uint32_t halfWinSz) const{
                 }
                 _entropies[proj_row] = _entropies[proj_row]/_log2MSz;// Normalize for cnt of samples
             }
-
+        
         std::lock_guard<std::mutex> lk(m_shortterms_mutex);
         m_shortterms.push(1.0f - _entropies[halfWinSz]);
         m_shortterm_cv.notify_one();
@@ -494,7 +496,7 @@ void lif_serie_processor::compute_shortterm (const uint32_t halfWinSz) const{
 
 void lif_serie_processor::shortterm_pci (const uint32_t& halfWinSz) {
     
- 
+    
     // Check if full sm has been done
     m_shortterm_pci_tracks.at(0).second.clear();
     for (auto pp = 0; pp < halfWinSz; pp++){
@@ -505,9 +507,9 @@ void lif_serie_processor::shortterm_pci (const uint32_t& halfWinSz) {
         res.second = -1.0f;
         m_shortterm_pci_tracks.at(0).second.emplace_back(res);
     }
-        
+    
     compute_shortterm(halfWinSz);
-//    auto twinSz = 2 * halfWinSz + 1;
+    //    auto twinSz = 2 * halfWinSz + 1;
     auto ii = halfWinSz;
     auto last = m_frameCount - halfWinSz;
     while(true){
@@ -522,7 +524,7 @@ void lif_serie_processor::shortterm_pci (const uint32_t& halfWinSz) {
         res.first = ti;
         res.second = static_cast<float>(val);
         m_shortterm_pci_tracks.at(0).second.emplace_back(res);
-//        std::cout << m_shortterm_pci_tracks.at(0).second.size() << "," << m_shortterms.size() << std::endl;
+        //        std::cout << m_shortterm_pci_tracks.at(0).second.size() << "," << m_shortterms.size() << std::endl;
         
         if(ii == last)
             break;
@@ -544,16 +546,23 @@ void lif_serie_processor::shortterm_pci (const uint32_t& halfWinSz) {
 // PCI track is being used for initial emtropy and median leveled
 std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci (const std::vector<roiWindow<P8U>>& images)
 {
-    auto sp =  similarity_producer();
-    sp->load_images (images);
-    std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
-    std::future<bool>  future_ss = task.get_future();  // get a future
-    std::thread(std::move(task)).join(); // Finish on a thread
-    if (future_ss.get())
-    {
-        const deque<double>& entropies = sp->shannonProjection ();
-        m_entropies.insert(m_entropies.end(), entropies.begin(), entropies.end());
-        const std::deque<deque<double>>& sm = sp->similarityMatrix();
+    bool cache_ok = false;
+    size_t dim = images.size();
+    std::shared_ptr<ssResultContainer> ssref;
+    
+    if(fs::exists(mCurrentSerieCachePath)){
+        auto cache_path = mCurrentSerieCachePath / s_result_container_cache_name;
+        if(fs::exists(cache_path)){
+            ssref = ssResultContainer::create(cache_path);
+        }
+        cache_ok = ssref && ssref->size_check(dim);
+    }
+    
+    if(cache_ok){
+        vlogger::instance().console()->info(" SS result container cache : Hit ");
+        m_entropies.insert(m_entropies.end(), ssref->entropies().begin(),
+                           ssref->entropies().end());
+        const std::deque<deque<double>>& sm = ssref->smatrix();
         for (auto row : sm){
             vector<double> rowv;
             rowv.insert(rowv.end(), row.begin(), row.end());
@@ -562,11 +571,39 @@ std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci (co
         m_caRef->load(m_entropies,m_smat);
         update ();
         
-        // Signal we are done with ACI
-        static int dummy;
-        if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
-            signal_sm1d_available->operator()(dummy);
+    }else{
+        
+        auto cache_path = mCurrentSerieCachePath / s_result_container_cache_name;
+        auto sp =  similarity_producer();
+        sp->load_images (images);
+        std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
+        std::future<bool>  future_ss = task.get_future();  // get a future
+        std::thread(std::move(task)).join(); // Finish on a thread
+        if (future_ss.get())
+        {
+            const deque<double>& entropies = sp->shannonProjection ();
+            const std::deque<deque<double>>& sm = sp->similarityMatrix();
+            m_entropies.insert(m_entropies.end(), entropies.begin(), entropies.end());
+            for (auto row : sm){
+                vector<double> rowv;
+                rowv.insert(rowv.end(), row.begin(), row.end());
+                m_smat.push_back(rowv);
+            }
+            m_caRef->load(m_entropies,m_smat);
+            update ();
+            bool ok = ssResultContainer::store(cache_path, entropies, sm);
+            if(ok)
+                vlogger::instance().console()->info(" SS result container cache : filled ");
+            else
+                vlogger::instance().console()->info(" SS result container cache : failed ");
+            
+        }
     }
+    // Signal we are done with ACI
+    static int dummy;
+    if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
+        signal_sm1d_available->operator()(dummy);
+
     return m_contraction_pci_tracksRef;
 }
 
@@ -593,14 +630,14 @@ void lif_serie_processor::update ()
 
 void lif_serie_processor::contraction_analyzed (contractionContainer_t& contractions)
 {
-      std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
     // Call the contraction available cb if any
     if (signal_contraction_available && signal_contraction_available->num_slots() > 0)
     {
         contractionContainer_t copied = m_caRef->contractions();
         signal_contraction_available->operator()(copied);
     }
-     vlogger::instance().console()->info(" Contractions Analyzed: ");
+    vlogger::instance().console()->info(" Contractions Analyzed: ");
 }
 
 
@@ -655,15 +692,15 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
         }
         m_frameCount++;
     }
- 
-     
+    
+    
 }
 
 // Note tracks contained timed data.
 // Each call to find_best can be with different median cut-off
 void lif_serie_processor::median_leveled_pci (namedTrack_t& track)
 {
-  //  std::lock_guard<std::mutex> lock(m_mutex);
+    //  std::lock_guard<std::mutex> lock(m_mutex);
     
     try{
         std::weak_ptr<contraction_analyzer> weakCaPtr (m_caRef);
@@ -743,7 +780,7 @@ void lif_serie_processor::generateVoxels_on_channel (const int channel_index, st
 // Return 2D latice of voxel self-similarity
 
 void lif_serie_processor::generateVoxelSelfSimilarities_on_channel (const int channel_index, uint32_t sample_x, uint32_t sample_y){
-
+    
     bool cache_ok = false;
     
     //@todo add width and height so we do not have to do this
@@ -754,8 +791,8 @@ void lif_serie_processor::generateVoxelSelfSimilarities_on_channel (const int ch
     if(fs::exists(mCurrentSerieCachePath)){
         auto image_path = mCurrentSerieCachePath / s_image_cache_name;
         if(fs::exists(image_path)){
-        try{
-            m_temporal_ss = imread(image_path.string(), IMREAD_GRAYSCALE);
+            try{
+                m_temporal_ss = imread(image_path.string(), IMREAD_GRAYSCALE);
             } catch( std::exception& ex){
                 auto msg = s_image_cache_name + " Exists but could not be read ";
                 vlogger::instance().console()->info(msg);
@@ -786,12 +823,12 @@ void lif_serie_processor::generateVoxelSelfSimilarities_on_channel (const int ch
 
 void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& images,
                                           std::vector<std::vector<roiWindow<P8U>>>& output,
-                                            uint32_t sample_x, uint32_t sample_y){
+                                          uint32_t sample_x, uint32_t sample_y){
     output.resize(0);
     size_t t_d = images.size();
     uint32_t width = images[0].width();
     uint32_t height = images[0].height();
-
+    
     for (auto row = 0; row < height; row+=sample_y){
         std::vector<roiWindow<P8U>> row_bufs;
         for (auto col = 0; col < width; col+=sample_x){
@@ -810,7 +847,7 @@ void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& ima
 void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels){
     int height = static_cast<int>(voxels.size());
     int width = static_cast<int>(voxels[0].size());
-
+    
     
     vlogger::instance().console()->info("starting generating voxel self-similarity");
     // Create a single vector of all roi windows
@@ -818,10 +855,10 @@ void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector
     auto sp =  similarity_producer();
     for(std::vector<roiWindow<P8U>>& row: voxels){
         for(roiWindow<P8U>& voxel : row){
-                all.emplace_back(voxel.frameBuf(), voxel.bound());
-            }
+            all.emplace_back(voxel.frameBuf(), voxel.bound());
         }
-
+    }
+    
     sp->load_images (all);
     std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
     std::future<bool>  future_ss = task.get_future();  // get a future
@@ -859,10 +896,10 @@ void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector
         // Call the content loaded cb if any
         if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0)
             signal_ss_image_available->operator()(m_temporal_ss);
-   
+        
         
     }
-
+    
 }
 
 
