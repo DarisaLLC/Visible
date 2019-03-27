@@ -51,7 +51,7 @@
 #include "vision/drawUtils.hpp"
 #include "ut_localvar.hpp"
 #include "vision/labelBlob.hpp"
-#include "cvmat_cereal_serialization.h"
+#include "result_serialization.h"
 #include <cereal/cereal.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/types/utility.hpp>
@@ -104,6 +104,23 @@ static const auto CVCOLOR_GRAY = cv::Vec3b(127, 127, 127);
 static const auto CVCOLOR_BLACK = cv::Vec3b(0, 0, 0);
 static const auto CVCOLOR_WHITE = cv::Vec3b(255, 255, 255);
 static const auto CVCOLOR_VIOLET = cv::Vec3b(127, 0, 255);
+
+
+std::vector<double> oneD_example = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655, 39.0342,
+    38.8791, 38.8527, 39.0099, 38.8608, 38.9188, 38.8499, 38.6693,
+    38.2513, 37.9095, 37.3313, 36.765, 36.3621, 35.7261, 35.0656,
+    34.2602, 33.2523, 32.3183, 31.6464, 31.0073, 29.8166, 29.3423,
+    28.5223, 27.5152, 26.8191, 26.3114, 25.8164, 25.0818, 24.7631,
+    24.6277, 24.8184, 25.443, 26.2479, 27.8759, 29.2094, 30.7956,
+    32.3586, 33.6268, 35.1586, 35.9315, 36.808, 37.3002, 37.67, 37.9986,
+    38.2788, 38.465, 38.5513, 38.6818, 38.8076, 38.9388, 38.9592,
+    39.058, 39.1322, 39.0803, 39.1779, 39.1531, 39.1375, 39.1978,
+    39.0379, 39.1231, 39.202, 39.1581, 39.1777, 39.2971, 39.2366,
+    39.1555, 39.2822, 39.243, 39.1807, 39.1488, 39.2491, 39.265, 39.198,
+    39.2855, 39.2595, 39.4274, 39.3258, 39.3162, 39.4143, 39.3034,
+    39.2099, 39.2775, 39.5042, 39.1446, 39.188, 39.2006, 39.1799,
+    39.4077, 39.2694, 39.1967, 39.2828, 39.2438, 39.2093, 39.2167,
+    39.2749, 39.4703, 39.2846};
 
 void cvDrawPlot (std::vector<float>& tmp){
     
@@ -272,6 +289,37 @@ TEST(ut_permutation_entropy, n_2){
     }
 }
 
+TEST(ut_serialization, ssResultContainer){
+    uint32_t cols = 21;
+    uint32_t rows = 21;
+    deque<deque<double>> sm;
+    for (auto j = 0; j < rows; j++){
+        deque<double> row;
+        for (auto i = 0; i < cols; i++)
+            row.push_back(1.0 / (i + j + 1));
+        sm.push_back(row);
+    }
+    
+    // Create sin signals
+    auto sinvecD = [](float step, uint32_t size, std::deque<double>& out){
+        out.clear ();
+        for (auto i : irange(0u, size)) {
+            out.push_back(sin(i * 3.14159 *  step));
+        }
+    };
+    
+    deque<double> entropy;
+    sinvecD(1.0, rows, entropy);
+    ssResultContainer ssr;
+    ssr.load(entropy, sm);
+    auto tempFilePath = boost::filesystem::temp_directory_path() / boost::filesystem::unique_path();
+    bool ok = ssResultContainer::store(tempFilePath, entropy, sm);
+    EXPECT_TRUE(ok);
+
+    auto ssr_new_ref = ssResultContainer::create(tempFilePath.string());
+    EXPECT_TRUE(ssr.is_same(*ssr_new_ref));
+    
+}
 
 TEST (ut_dm, basic){
     roiWindow<P8U> p0 (320, 240);
@@ -398,25 +446,10 @@ TEST (ut_fit_ellipse, local_maxima){
 }
 
 
-std::vector<double> acid = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655, 39.0342,
-    38.8791, 38.8527, 39.0099, 38.8608, 38.9188, 38.8499, 38.6693,
-    38.2513, 37.9095, 37.3313, 36.765, 36.3621, 35.7261, 35.0656,
-    34.2602, 33.2523, 32.3183, 31.6464, 31.0073, 29.8166, 29.3423,
-    28.5223, 27.5152, 26.8191, 26.3114, 25.8164, 25.0818, 24.7631,
-    24.6277, 24.8184, 25.443, 26.2479, 27.8759, 29.2094, 30.7956,
-    32.3586, 33.6268, 35.1586, 35.9315, 36.808, 37.3002, 37.67, 37.9986,
-    38.2788, 38.465, 38.5513, 38.6818, 38.8076, 38.9388, 38.9592,
-    39.058, 39.1322, 39.0803, 39.1779, 39.1531, 39.1375, 39.1978,
-    39.0379, 39.1231, 39.202, 39.1581, 39.1777, 39.2971, 39.2366,
-    39.1555, 39.2822, 39.243, 39.1807, 39.1488, 39.2491, 39.265, 39.198,
-    39.2855, 39.2595, 39.4274, 39.3258, 39.3162, 39.4143, 39.3034,
-    39.2099, 39.2775, 39.5042, 39.1446, 39.188, 39.2006, 39.1799,
-    39.4077, 39.2694, 39.1967, 39.2828, 39.2438, 39.2093, 39.2167,
-    39.2749, 39.4703, 39.2846};
 
 TEST(ut_median, basic){
     std::vector<double> dst;
-    bool ok = rolling_median_3(acid.begin(), acid.end(), dst);
+    bool ok = rolling_median_3(oneD_example.begin(), oneD_example.end(), dst);
     EXPECT_TRUE(ok);
     
 }
@@ -765,9 +798,9 @@ TEST(tracks, basic){
     // Generate test data
     namedTrack_t ntrack;
    timedVecOfVals_t& data = ntrack.second;
-    data.resize(acid.size());
-    for (int tt = 0; tt < acid.size(); tt++){
-        data[tt].second = acid[tt];
+    data.resize(oneD_example.size());
+    for (int tt = 0; tt < oneD_example.size(); tt++){
+        data[tt].second = oneD_example[tt];
         data[tt].first.first = tt;
         data[tt].first.second = time_spec_t(tt / 1000.0);
     }
@@ -775,10 +808,10 @@ TEST(tracks, basic){
     std::vector<float> X, Y;
     domainFromPairedTracks_D (ntrack, X, Y);
     
-    EXPECT_EQ(X.size(), acid.size());
-    EXPECT_EQ(Y.size(), acid.size());
-    for(auto ii = 0; ii < acid.size(); ii++){
-        EXPECT_TRUE(svl::RealEq(Y[ii],(float)acid[ii]));
+    EXPECT_EQ(X.size(), oneD_example.size());
+    EXPECT_EQ(Y.size(), oneD_example.size());
+    for(auto ii = 0; ii < oneD_example.size(); ii++){
+        EXPECT_TRUE(svl::RealEq(Y[ii],(float)oneD_example[ii]));
     }
 }
 
@@ -983,15 +1016,15 @@ TEST(UT_contraction_profiler, basic)
     typedef vector<double>::iterator dItr_t;
     
     std::vector<double> fder, fder2;
-    fder.resize (acid.size());
-    fder2.resize (acid.size());
+    fder.resize (oneD_example.size());
+    fder2.resize (oneD_example.size());
     
     // Get contraction peak ( valley ) first
-    auto min_iter = std::min_element(acid.begin(),acid.end());
-    ctr.contraction_peak.first = std::distance(acid.begin(),min_iter);
+    auto min_iter = std::min_element(oneD_example.begin(),oneD_example.end());
+    ctr.contraction_peak.first = std::distance(oneD_example.begin(),min_iter);
     
     // Computer First Difference,
-    adjacent_difference(acid.begin(),acid.end(), fder.begin());
+    adjacent_difference(oneD_example.begin(),oneD_example.end(), fder.begin());
     std::rotate(fder.begin(), fder.begin()+1, fder.end());
     fder.pop_back();
     auto medianD = stl_utils::median1D<double>(7);
@@ -1025,7 +1058,7 @@ TEST(UT_contraction_profiler, basic)
     
 //   @todo reconcile with recent implementation
 //    contraction_profile_analyzer ca;
-//    ca.run(acid);
+//    ca.run(oneD_example);
 //        bool test = contraction_analyzer::contraction_t::equal(ca.contraction(), ctr);
 //       EXPECT_TRUE(test);
 //    {
@@ -1223,7 +1256,7 @@ TEST(UT_smfilter, basic)
 {
     vector<int> ranks;
     vector<double> norms;
-    norm_scale(acid,norms);
+    norm_scale(oneD_example,norms);
 //    stl_utils::Out(norms);
     
     vector<double> output;

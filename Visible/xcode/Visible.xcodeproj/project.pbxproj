@@ -738,7 +738,7 @@
 		C2DA19581E7F30E800062DBC /* csv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = csv.hpp; sourceTree = "<group>"; };
 		C2DA19591E8091FA00062DBC /* kmeans1d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kmeans1d.hpp; sourceTree = "<group>"; };
 		C2DB59B121557C0C00750C2E /* app_core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = app_core.h; path = ../include/app_core.h; sourceTree = "<group>"; };
-		C2DB59B221557CF800750C2E /* cvmat_cereal_serialization.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = cvmat_cereal_serialization.h; path = ../include/cvmat_cereal_serialization.h; sourceTree = "<group>"; };
+		C2DB59B221557CF800750C2E /* result_serialization.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = result_serialization.h; path = ../include/result_serialization.h; sourceTree = "<group>"; };
 		C2E321FE1D038B16006DFE5E /* AVReader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AVReader.hpp; path = ../include/AVReader.hpp; sourceTree = "<group>"; };
 		C2E321FF1D0480E4006DFE5E /* mediaInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mediaInfo.h; path = ../include/mediaInfo.h; sourceTree = "<group>"; };
 		C2E322001D05B90C006DFE5E /* time_index.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time_index.h; path = ../include/time_index.h; sourceTree = "<group>"; };
@@ -1081,7 +1081,7 @@
 				C2B87C9821D008AC00C91E35 /* visible_logger_macro.h */,
 				C2820F3321752C1100DFA7A6 /* gui_base.hpp */,
 				C2820F3421752C1100DFA7A6 /* gui_handler.hpp */,
-				C2DB59B221557CF800750C2E /* cvmat_cereal_serialization.h */,
+				C2DB59B221557CF800750C2E /* result_serialization.h */,
 				C2DB59B121557C0C00750C2E /* app_core.h */,
 				C2EF8D1B214873E700A5D3D6 /* Item.h */,
 				C2EF8D19214873E600A5D3D6 /* Swatch.h */,
