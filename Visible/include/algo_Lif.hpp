@@ -193,6 +193,32 @@ class LifSignaler : public base_signaler
  
  */
 
+
+/** @struct region
+ * Structure containing information about the blob and its children
+ */
+struct region
+{
+    int index; /*!< Index of blob during extraction */
+    cv::Point2f center; /*!< Center of blob */
+    double majorAxis; /*!< Ellipse major axis (a) */
+    double minorAxis; /*!< Ellipse minor axis (b) */
+    double orientation; /*!< Ellipse orientation */
+    double area; /*!< External area of blob */
+    double realArea; /*!< Real area (remove intrior blobs) */
+    cv::RotatedRect ellipse;
+    bool isValid; /*!< True if blob has more than 5 points (ellipse approx) */
+    
+    friend ostream & operator<<(ostream & os, const region & rg){
+        os << rg.index << "," << std::boolalpha << rg.isValid << std::endl;
+        os << rg.area << "," << rg.orientation << std::endl;
+        os << rg.center.x << "," << rg.center.y << std::endl;
+        os << rg.majorAxis << "," << rg.minorAxis << std::endl;
+        return os;
+    }
+};
+
+
 class lif_serie_processor : public LifSignaler
 {
 public:
@@ -206,7 +232,7 @@ public:
     typedef void (sig_cb_sm1d_available) (int&);
     typedef void (sig_cb_sm1dmed_available) (int&,int&);
     typedef void (sig_cb_3dstats_available) ();
-    typedef void (sig_cb_volume_var_available) ();
+    typedef void (sig_cb_geometry_available) ();
     typedef void (sig_cb_ss_image_available) (cv::Mat &);
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     typedef std::vector<channel_images_t> channel_vec_t;
@@ -217,8 +243,7 @@ public:
     const int64_t& frame_count () const;
     const int64_t channel_count () const;
     const svl::stats<int64_t> stats3D () const;
-    const cv::Mat & volume_variances () const { return m_var_image;  }
-    cv::Mat & display_volume_variances () const { return m_var_display_image;  }
+    cv::Mat & segmented () const { return m_temporal_ss;  }
     
     // Check if the returned has expired
     std::weak_ptr<contraction_analyzer> contractionWeakRef ();
@@ -233,12 +258,12 @@ public:
     // Run accumulator of 3d stats on a channel at index
     svl::stats<int64_t> run_volume_sum_sumsq_count (const int channel_index);
     // Run per pixel stdev accumulator a channel at index
-    void run_volume_variances (const int channel_index);
+    void run_detect_geometry (const int channel_index);
   
     
     // Vector of 8bit roiWindows API for IDLab custom organization
     svl::stats<int64_t> run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>&);
-    void run_volume_variances (std::vector<roiWindow<P8U>>& );
+    void run_detect_geometry (std::vector<roiWindow<P8U>>& );
 
     // Run to get Entropies and Median Level Set. Both short term and long term pic
     // @todo event though index is an argument, only room for one channel is kept.
@@ -259,7 +284,6 @@ public:
     // Return 2D latice of voxel self-similarity
     void generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>&);
     void generateVoxelSelfSimilarities_on_channel (const int channel_index, uint32_t sample_x = 1, uint32_t sample_y = 1);
-    cv::Mat& temporal_selfSimilarity () const { return m_temporal_ss; }
     
     void finalize_segmentation (cv::Mat&);
     const std::vector<Rectf>& rois () const;
@@ -284,7 +308,7 @@ protected:
     boost::signals2::signal<lif_serie_processor::sig_cb_sm1dmed_available>* signal_sm1dmed_available;
     boost::signals2::signal<lif_serie_processor::sig_cb_contraction_available>* signal_contraction_available;
     boost::signals2::signal<lif_serie_processor::sig_cb_3dstats_available>* signal_3dstats_available;
-    boost::signals2::signal<lif_serie_processor::sig_cb_volume_var_available>* signal_volume_var_available;
+    boost::signals2::signal<lif_serie_processor::sig_cb_geometry_available>* signal_geometry_available;
     boost::signals2::signal<lif_serie_processor::sig_cb_ss_image_available>* signal_ss_image_available;
     
 private:
@@ -325,8 +349,6 @@ private:
     std::vector<double> m_medianLevel;
     
     // Std Dev Image
-    cv::Mat m_var_image;
-    mutable cv::Mat m_var_display_image;
     mutable mapU8PeaksToPointfs_t m_map_peaks_to_points;
     
     channel_images_t m_images;
