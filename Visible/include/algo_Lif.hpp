@@ -206,9 +206,9 @@ struct region
     double orientation; /*!< Ellipse orientation */
     double area; /*!< External area of blob */
     double realArea; /*!< Real area (remove intrior blobs) */
+    std::vector<cv::Point> dPoly;
     cv::RotatedRect ellipse;
     bool isValid; /*!< True if blob has more than 5 points (ellipse approx) */
-    
     friend ostream & operator<<(ostream & os, const region & rg){
         os << rg.index << "," << std::boolalpha << rg.isValid << std::endl;
         os << rg.area << "," << rg.orientation << std::endl;

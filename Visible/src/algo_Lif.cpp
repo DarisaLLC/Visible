@@ -308,19 +308,18 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& space){
     {
         region blob;
         blob.isValid = false;
+        if(external.size() < 10)
+            return blob;
         blob.area = cv::contourArea( external );
         blob.realArea = blob.area;
-        
-        if(blob.area<25){
+        if(blob.area<25)
             return blob;
-        }
-        
+
         std::vector<cv::Point> hull;
-        cv::convexHull(external,hull);
+        cv::approxPolyDP (external,hull,3,true);
         
         if( hull.size() > 5 ){
             cv::RotatedRect ellipse = cv::fitEllipse( hull );
-            
             if(ellipse.size.width<=0 || ellipse.size.height<=0){
                 std::cerr << "Bad ellipse" << std::endl;
                 return blob;
@@ -342,7 +341,7 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& space){
         return blob;
     };
     
-    Mat threshold_output;
+    Mat threshold_output, dilate_output;
     vector<vector<cv::Point> > contours;
     vector<cv::Point> all_contours;
     vector<Vec4i> hierarchy;
@@ -350,7 +349,7 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& space){
     auto thr = threshold(space, threshold_output, 125, 255, THRESH_BINARY | THRESH_OTSU);
     std::cout << thr << std::endl;
     
-    cv::findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+    cv::findContours(threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
     vector< region > regions;
     
     // find convex hull for each contour
@@ -364,15 +363,13 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& space){
     
     if (! regions.empty()){
         RotatedRect box = regions[0].ellipse;
-        cv::Point2f points[4];
-        box.points(points);
+        std::array<cv::Point2f,4> points;
+        box.points(points.data());
         for (auto ii = 0; ii < 4; ii++){
             points[ii].x *= 3;
             points[ii].y *= 3;
         }
-        
-        m_motion_mass = RotatedRect(points[0], points[1], points[2]);
-        
+        m_motion_mass = RotatedRectOutOf4(points);
         auto dims = box.size;
         
         // Signal to listeners
