@@ -237,7 +237,9 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     //Input:  NORMALISED src image, gamma
     //Output: Modified image
     void Gamma_Correction(const cv::Mat&  src, cv::Mat& dst, double gamma);
-   
+
+    RotatedRect RotatedRectOutOf4 (std::array<cv::Point2f,4> & src);
+    
 }
 
 

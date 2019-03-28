@@ -17,6 +17,28 @@ using namespace svl;
 
 namespace svl
 {
+    RotatedRect RotatedRectOutOf4 (std::array<cv::Point2f,4>& src){
+        
+        std::vector<int> idx = {0,1,2,3};
+        
+        auto pcheck = [](std::array<Point2f,4>& cand){
+            Vec2f vecs[2];
+            vecs[0] = Vec2f(cand[0] - cand[1]);
+            vecs[1] = Vec2f(cand[1] - cand[3]);
+            // check that given sides are perpendicular
+            return ( abs(vecs[0].dot(vecs[1])) / (norm(vecs[0]) * norm(vecs[1])) <= FLT_EPSILON );
+        };
+        
+        do {
+            if(pcheck(src)){
+                return RotatedRect(src[idx[0]], src[idx[1]], src[idx[2]]);
+            }
+        } while(std::next_permutation(idx.begin(),idx.end()));
+        
+        return RotatedRect ();
+        
+    }
+    
     
     //Function used to perform the complex DFT of a grayscale image
     //Input:  image
