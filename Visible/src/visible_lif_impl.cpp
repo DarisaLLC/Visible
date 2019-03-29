@@ -92,6 +92,8 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const f
     std::string msg = folder_exists ? " exists " : " does not exist ";
     msg = " folder for " + m_serie.name() + msg;
     vlogger::instance().console()->info(msg);
+    m_idlab_defaults.median_level_set_cutoff_fraction = 7;
+    
     
     m_valid = false;
         m_valid = sd.index() >= 0;
@@ -981,9 +983,21 @@ void lifContext::add_navigation(){
         ImGui::PopID();
         
         if(!m_contraction_pci_trackWeakRef.expired()){
-            int default_median_cover_pct = getMedianCutOff();
-            ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, 0, 20);
-            setMedianCutOff(default_median_cover_pct);
+            if(m_median_set_at_default){
+                int default_median_cover_pct = m_idlab_defaults.median_level_set_cutoff_fraction;
+                setMedianCutOff(default_median_cover_pct);
+                ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, default_median_cover_pct, default_median_cover_pct);
+            }
+            else{
+                int default_median_cover_pct = getMedianCutOff();
+                ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, 0, 20);
+                setMedianCutOff(default_median_cover_pct);
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button(m_median_set_at_default ? "Default" : "Not Set"))
+        {
+            m_median_set_at_default = ! m_median_set_at_default;
         }
         
         //   int a = m_current_clip_index;

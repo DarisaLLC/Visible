@@ -132,6 +132,8 @@ private:
     lif_serie_data m_serie;
     boost::filesystem::path mPath;
     std::vector<std::string> m_plot_names;
+    idlab_cardiac_defaults m_idlab_defaults;
+    
     
     // Callbacks
     void signal_content_loaded (int64_t&);
@@ -245,6 +247,7 @@ private:
     // UI flags
     bool m_showLog, m_showGUI, m_showHelp;
     bool m_show_contractions, m_show_playback;
+    bool m_median_set_at_default;
     
     
     // imGui
