@@ -160,7 +160,6 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     int leftTailPost (const cv::Mat1b& image, float left_tail_fraction);
     int rightTailPost (const cv::Mat1b& image, float right_tail_fraction);
     
-    void toHistVector (const cv::Mat& hist, std::vector<float>& vh);
     void generate_mask (const cv::Mat& rg, cv::Mat& mask, float left_tail_post, bool debug_output = false);
    
     void sobel_opencv (const cv::Mat& input_gray, cv::Mat& mag, cv::Mat& ang, uint32_t square_size = 3);
@@ -238,7 +237,6 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     //Output: Modified image
     void Gamma_Correction(const cv::Mat&  src, cv::Mat& dst, double gamma);
 
-    RotatedRect RotatedRectOutOf4 (std::array<cv::Point2f,4> & src);
     
 }
 

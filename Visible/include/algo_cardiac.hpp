@@ -15,6 +15,10 @@
 using namespace std;
 using namespace stl_utils;
 
+struct idlab_cardiac_defaults{
+    float median_level_set_cutoff_fraction;
+    
+};
 
 struct IntensityStatisticsRunner
 {

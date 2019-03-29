@@ -299,148 +299,105 @@ void lif_serie_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& imag
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 }
 
-
-int main(int argc, char *argv[])
-{
-    //! [load_image]
-    // Load the image
-    CommandLineParser parser( argc, argv, "{@input | ../data/cards.png | input image}" );
-    Mat src = imread( parser.get<String>( "@input" ), IMREAD_GRAYSCALE );
-    if( src.empty() )
-    {
-        cout << "Could not open or find the image!\n" << endl;
-        cout << "Usage: " << argv[0] << " <Input image>" << endl;
-        return -1;
-    }
-    
-    int top, bottom, left, right;
-    
-    // Show source image
-    imshow("Source Image", src);
-    //! [load_image]
-    
-    top = (int) (0.10*src.rows); bottom = top;
-    left = (int) (0.0*src.cols); right = left;
-    
-    
-    //! [bin]
-    // Create binary image from source image
-    cv::Mat bw;
-    copyMakeBorder( src, bw, top, bottom, left, right,BORDER_REPLICATE, 0);
-    
-    // Show source image
-    imshow("Monochrom Image", bw);
-    //! [load_image]
-    
-    /// Find the convex hull from edge outlines
-    vector<vector<Point> >hull;
-    Mat dist_8u;
-    threshold(bw, dist_8u, 126, 255, THRESH_BINARY | THRESH_OTSU);
-    imshow("Binary Image", dist_8u);
-    //! [bin]
-    
-    //    Mat dist;
-    //    // Dilate a bit the dist image
-    //    Mat kernel1 = Mat::ones(5,5, CV_8U);
-    //    dilate(dist_8u, dist, kernel1);
-    //    erode(dist_8u, dist, kernel1);
-    //    imshow("Peaks", dist);
-    //! [peaks]
-    
-    get_edge_contours(bw, 10, hull);
-    
-    vector<vector<Point> > contours;
-    vector<Vec4i> hierarchy;
-    findContours(dist_8u, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-    
-    /// Draw contours
-    Mat drawing = Mat::zeros( bw.size(), CV_8UC3 );
-    vector<vector<Point> > contours_poly( contours.size() );
-    
-    for( size_t i = 0; i< contours.size(); i++ )
-    {
-        if( contours[i].size() < 10) continue;
-        vector<Point> poly;
-        approxPolyDP( contours[i], contours_poly[i], 3, true );
-        Scalar color = Scalar( 10, 0, 255);
-        drawContours( drawing, contours_poly, (int)i, color );
-        Scalar color2 = Scalar( 255, 0, 10);
-        drawContours( drawing, contours, (int)i, color2, 1, LINE_8, hierarchy, 0 );
-    }
-    
-    for (auto ct = 0; ct < hull.size(); ct++){
-        if( hull[ct].size() < 10) continue;
-        
-        Scalar color2 = Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
-        drawContours( drawing, hull, (int)ct, color2 );
-        std::cout << hull[ct].size() << std::endl;
-        
-        if( hull[ct].size() > 5 ){
-            cv::RotatedRect ellipse = cv::fitEllipse( hull[ct] );
-            
-            if(ellipse.size.width<=0 || ellipse.size.height<=0){
-                std::cerr << "Bad ellipse" << std::endl;
-            }
-        }
-    }
-    
-    imshow("Final Result", drawing);
-    //! [watershed]
-    
-    waitKey();
-    return 0;
-}
-
 void lif_serie_processor::finalize_segmentation (cv::Mat& space){
     
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
     
-    auto createRegion = [](const std::vector<cv::Point> &external)
+    auto createRegion = [](const std::vector<cv::Point> &contour)
     {
         region blob;
         blob.isValid = false;
-        if(external.size() < 10)
+        if(contour.size() < 10)
             return blob;
-        blob.area = cv::contourArea( external );
+        blob.area = cv::contourArea( contour );
         blob.realArea = blob.area;
         if(blob.area<25)
             return blob;
 
-        std::vector<cv::Point> hull;
-        cv::approxPolyDP (external,hull,3,true);
+        std::vector<cv::Point> dp;
+        cv::approxPolyDP (contour,dp,3,true);
+        blob.dPoly = dp;
+        blob.ellipse = minAreaRect(dp);
+        blob.center = blob.ellipse.center;
+        blob.orientation = blob.ellipse.angle;
+        blob.majorAxis =  std::max(blob.ellipse.size.width,blob.ellipse.size.height) / 2.0;
+        blob.minorAxis =  std::min(blob.ellipse.size.width,blob.ellipse.size.height) / 2.0;
         
-        if( hull.size() > 5 ){
-            cv::RotatedRect ellipse = cv::fitEllipse( hull );
-            if(ellipse.size.width<=0 || ellipse.size.height<=0){
-                std::cerr << "Bad ellipse" << std::endl;
-                return blob;
-            }
-            
-            blob.ellipse = ellipse;
-            blob.center = ellipse.center;
-            blob.orientation = ellipse.angle;
-            blob.majorAxis =  std::max(ellipse.size.width,ellipse.size.height) / 2.0;
-            blob.minorAxis =  std::min(ellipse.size.width,ellipse.size.height) / 2.0;
-            
-            //Ellipse axis ratio too important
-            if(blob.majorAxis>100.0*blob.minorAxis || blob.majorAxis<1.0){
-                return blob;
-            }
-            
-            blob.isValid = true;
+        //Ellipse axis ratio too important
+        if(blob.majorAxis>100.0*blob.minorAxis || blob.majorAxis<1.0){
+            return blob;
         }
+        blob.isValid = true;
         return blob;
     };
     
-    Mat threshold_output, dilate_output;
+    auto get_edge_contours = [](cv::Mat& src, int thr, vector<vector<cv::Point>>&hull){
+        cv::Mat canny_out;
+        vector<vector<cv::Point>> contours;
+        Canny(src, canny_out, thr, thr*2);
+        findContours(canny_out, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
+        hull.resize(contours.size());
+        for (auto ii = 0; ii < contours.size(); ii++){
+           approxPolyDP( contours[ii], hull[ii], 3, true );
+        }
+        
+    };
+
+    // Replicate
+    cv::Mat mono, bi_level;
+    vector<vector<cv::Point>> edps, idps;
     vector<vector<cv::Point> > contours;
-    vector<cv::Point> all_contours;
     vector<Vec4i> hierarchy;
+    cv::Point replicated_pad (5,5);
+
+    copyMakeBorder( space,mono, replicated_pad.x,replicated_pad.y,
+                   replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);
+
+    auto right_tail = leftTailPost(mono,0.2f);
+    cv::normalize(mono, mono, right_tail, NORM_MINMAX);
     
-    auto thr = threshold(space, threshold_output, 125, 255, THRESH_BINARY | THRESH_OTSU);
-    std::cout << thr << std::endl;
+    // Show source image
+//    imshow("Monochrome Image",mono);
+//    threshold(mono, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
+//    imshow("Binary Image", bi_level);
     
-    cv::findContours(threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+    get_edge_contours(mono, 10, edps);
+    findContours(bi_level, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, replicated_pad);
+    
+    /// Draw contours
+    Mat drawing = Mat::zeros(mono.size(), CV_8UC3 );
+    idps.resize ( contours.size() );
+    
+    for( size_t i = 0; i< contours.size(); i++ )
+    {
+        if( contours[i].size() < 10) continue;
+        vector<cv::Point> poly;
+        approxPolyDP( contours[i], idps[i], 3, true );
+        Scalar color = Scalar( 10, 0, 255);
+        drawContours( drawing, idps, (int)i, color );
+        Scalar color2 = Scalar( 255, 0, 10);
+        drawContours( drawing, contours, (int)i, color2, 1, LINE_8, hierarchy, 0 );
+    }
+    
+    for (auto ct = 0; ct < edps.size(); ct++){
+        if( edps[ct].size() < 10) continue;
+        
+        Scalar color2 = Scalar( 10, 255, 10 );
+        drawContours( drawing, edps, (int)ct, color2 );
+        
+        if( edps[ct].size() > 5 ){
+            cv::RotatedRect ellipse = cv::fitEllipse( edps [ct] );
+            if(ellipse.size.width<=0 || ellipse.size.height<=0){
+                std::cerr << "Bad ellipse" << std::endl;
+            }
+            else
+                drawRectOR(drawing, ellipse.boundingRect(), color2, 2, ellipse.angle);
+        }
+    }
+    
+ //   imshow("Final Result", drawing);
+ //   waitKey();
+
     vector< region > regions;
     
     // find convex hull for each contour
@@ -453,15 +410,8 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& space){
     }
     
     if (! regions.empty()){
-        RotatedRect box = regions[0].ellipse;
-        std::array<cv::Point2f,4> points;
-        box.points(points.data());
-        for (auto ii = 0; ii < 4; ii++){
-            points[ii].x *= 3;
-            points[ii].y *= 3;
-        }
-        m_motion_mass = RotatedRectOutOf4(points);
-        auto dims = box.size;
+        m_motion_mass = regions[0].ellipse;
+        auto dims = regions[0].ellipse.size;
         
         // Signal to listeners
         if (signal_geometry_available && signal_geometry_available->num_slots() > 0)

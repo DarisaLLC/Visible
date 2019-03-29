@@ -810,17 +810,6 @@ namespace svl
     
     
     // Return -1 or 0-255 for left_tail
-    void toHistVector (const cv::Mat& hist, std::vector<float>& vh)
-    {
-        vh.clear ();
-        if (hist.rows != 256) return;
-        
-        for (int i=0; i<256 ;i++)
-            vh.push_back(hist.at<float>(i));
-    }
-    
-    
-    // Return -1 or 0-255 for left_tail
     // @note: add accumulative hist
     int leftTailPost (const cv::Mat1b& image, float left_tail_fraction)
     {
