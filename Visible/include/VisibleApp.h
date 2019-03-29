@@ -66,8 +66,8 @@ namespace VisibleAppControl{
     static constexpr const char c_visible_cache_folder_name [] = ".Visible";
     bool check_input (const string &filename);
     
-    fs::path get_visible_app_directory ();
-    fs::path get_runner_app_directory ();
+    fs::path get_visible_app_support_directory ();
+    fs::path get_runner_app_support_directory ();
     fs::path get_visible_cache_directory ();
     
     bool setup_loggers (const fs::path app_support_dir,  imGuiLog& visualLog, std::string id_name);
