@@ -141,7 +141,7 @@ VAPPLOG_INFO(sofar.c_str());
 
 void VisibleRunApp::setup()
 {
-    const fs::path root_output_dir = vac::get_runner_app_directory();
+    const fs::path root_output_dir = vac::get_runner_app_support_directory();
     const fs::path& appPath = ci::app::getAppPath();
     const fs::path plist = appPath / "VisibleRun.app/Contents/Info.plist";
     if (exists (appPath)){

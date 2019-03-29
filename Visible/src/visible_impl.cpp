@@ -57,8 +57,8 @@ bool VisibleAppControl::check_input (const string &filename){
 }
 
 
-fs::path  VisibleAppControl::get_visible_app_directory () { return get_app_directory_exists (fs::path(c_visible_app_support));}
-fs::path  VisibleAppControl::get_runner_app_directory () { return get_app_directory_exists (fs::path(c_visible_runner_app_support));}
+fs::path  VisibleAppControl::get_visible_app_support_directory () { return get_app_directory_exists (fs::path(c_visible_app_support));}
+fs::path  VisibleAppControl::get_runner_app_support_directory () { return get_app_directory_exists (fs::path(c_visible_runner_app_support));}
 fs::path VisibleAppControl::get_visible_cache_directory () {
     // Create an invisible folder for storage
     auto visiblePath = getHomeDirectory()/c_visible_cache_folder_name;

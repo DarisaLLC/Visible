@@ -63,17 +63,18 @@ void VisibleApp::fileDrop( FileDropEvent event )
 {
     auto imageFile = event.getFile(0);
     
-    const fs::path& file = imageFile;
+    const fs::path& some_path = imageFile;
+    mFileExtension = some_path.extension().string();
+    mFileName = some_path.filename().string();
     
-    if (! exists(file) ) return;
+    if (! exists(some_path) ) return;
     
     
-    if (file.has_extension())
-    {
-        std::string ext = file.extension().string ();
-        if (ext.compare(".lif") == 0)
-            initData(file);
-        return;
+    if (mFileExtension.compare(".lif") == 0)
+        initData(some_path);
+    else{
+        std::string msg = some_path.string() + " is not a valid path to a file ";
+        vlogger::instance().console()->info(msg);
     }
 }
 
@@ -116,9 +117,17 @@ void VisibleApp::setup()
     ImGuiStyle* st = &ImGui::GetStyle();
     ImGui::StyleColorsLightGreen(st);
     
-    fs::path root_output_dir = VisibleAppControl::get_visible_app_directory();
+    fs::path root_output_dir = VisibleAppControl::get_visible_app_support_directory();
+    VisibleAppControl::setup_loggers( root_output_dir, app_log, mFileName);
     
+    auto sep = boost::filesystem::path::preferred_separator;
     const fs::path& appPath = ci::app::getAppPath();
+    const std::string run_app_path = ci::app::getAppPath().string() + sep + "Visible.app" + sep + "Contents" + sep + "MacOS" + sep + "VisibleRun.app";
+    if(exists(fs::path(run_app_path)))vlogger::instance().console()->info(run_app_path + " Exists ");
+    else
+        vlogger::instance().console()->error(run_app_path + " is incorrect or App content is damaged ");
+    
+    
     const fs::path plist = appPath / "Visible.app/Contents/Info.plist";
     std::ifstream stream(plist.c_str(), std::ios::binary);
     Plist::readPlist(stream, mPlist);
@@ -129,7 +138,7 @@ void VisibleApp::setup()
     setWindowSize(APP_WIDTH/2,APP_HEIGHT/2);
     setFrameRate( 60 );
     setWindowPos(getWindowSize()/4);
-//    getWindow()->setAlwaysOnTop();
+
     WindowRef ww = getWindow ();
     if( mVisibleScope ){
         gl::draw( mVisibleScope, getWindowBounds() );
@@ -170,7 +179,7 @@ void VisibleApp::setup()
     mTopBorder		= 375.0f;
     mItemSpacing	= 22.0f;
     
-    VisibleAppControl::setup_loggers( root_output_dir, app_log, mFileName);
+ 
     
     // create items
     std::vector<std::string> extensions = {"lif"};
