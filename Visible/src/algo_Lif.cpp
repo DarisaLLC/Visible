@@ -300,6 +300,97 @@ void lif_serie_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& imag
 }
 
 
+int main(int argc, char *argv[])
+{
+    //! [load_image]
+    // Load the image
+    CommandLineParser parser( argc, argv, "{@input | ../data/cards.png | input image}" );
+    Mat src = imread( parser.get<String>( "@input" ), IMREAD_GRAYSCALE );
+    if( src.empty() )
+    {
+        cout << "Could not open or find the image!\n" << endl;
+        cout << "Usage: " << argv[0] << " <Input image>" << endl;
+        return -1;
+    }
+    
+    int top, bottom, left, right;
+    
+    // Show source image
+    imshow("Source Image", src);
+    //! [load_image]
+    
+    top = (int) (0.10*src.rows); bottom = top;
+    left = (int) (0.0*src.cols); right = left;
+    
+    
+    //! [bin]
+    // Create binary image from source image
+    cv::Mat bw;
+    copyMakeBorder( src, bw, top, bottom, left, right,BORDER_REPLICATE, 0);
+    
+    // Show source image
+    imshow("Monochrom Image", bw);
+    //! [load_image]
+    
+    /// Find the convex hull from edge outlines
+    vector<vector<Point> >hull;
+    Mat dist_8u;
+    threshold(bw, dist_8u, 126, 255, THRESH_BINARY | THRESH_OTSU);
+    imshow("Binary Image", dist_8u);
+    //! [bin]
+    
+    //    Mat dist;
+    //    // Dilate a bit the dist image
+    //    Mat kernel1 = Mat::ones(5,5, CV_8U);
+    //    dilate(dist_8u, dist, kernel1);
+    //    erode(dist_8u, dist, kernel1);
+    //    imshow("Peaks", dist);
+    //! [peaks]
+    
+    get_edge_contours(bw, 10, hull);
+    
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    findContours(dist_8u, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+    
+    /// Draw contours
+    Mat drawing = Mat::zeros( bw.size(), CV_8UC3 );
+    vector<vector<Point> > contours_poly( contours.size() );
+    
+    for( size_t i = 0; i< contours.size(); i++ )
+    {
+        if( contours[i].size() < 10) continue;
+        vector<Point> poly;
+        approxPolyDP( contours[i], contours_poly[i], 3, true );
+        Scalar color = Scalar( 10, 0, 255);
+        drawContours( drawing, contours_poly, (int)i, color );
+        Scalar color2 = Scalar( 255, 0, 10);
+        drawContours( drawing, contours, (int)i, color2, 1, LINE_8, hierarchy, 0 );
+    }
+    
+    for (auto ct = 0; ct < hull.size(); ct++){
+        if( hull[ct].size() < 10) continue;
+        
+        Scalar color2 = Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
+        drawContours( drawing, hull, (int)ct, color2 );
+        std::cout << hull[ct].size() << std::endl;
+        
+        if( hull[ct].size() > 5 ){
+            cv::RotatedRect ellipse = cv::fitEllipse( hull[ct] );
+            
+            if(ellipse.size.width<=0 || ellipse.size.height<=0){
+                std::cerr << "Bad ellipse" << std::endl;
+            }
+        }
+    }
+    
+    imshow("Final Result", drawing);
+    //! [watershed]
+    
+    waitKey();
+    return 0;
+}
+
 void lif_serie_processor::finalize_segmentation (cv::Mat& space){
     
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
