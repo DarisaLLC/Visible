@@ -142,8 +142,10 @@ private:
     vec2                mSize;
     fs::path            mCurrentLifFilePath;
     fs::path            mUserStorageDirPath;
+    fs::path            mRunAppPath;
     std::string         mFileName;
     std::string         mFileExtension;
+    std::string         mRunAppAppString;
     
     int convergence = 0;
     bool m_isIdLabLif = false;

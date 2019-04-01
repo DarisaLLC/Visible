@@ -35,21 +35,22 @@ void prepareSettings( App::Settings *settings )
 void VisibleApp::dispatch_lif_viewer (const int serie_index)
 {
     auto name_index_itr = mLifRef->index_to_name_map().find(serie_index);
-    auto sep = boost::filesystem::path::preferred_separator;
     static std::string space ("  ");
+    vlogger::instance().console()->info(" Serie " + svl::toString(serie_index) + " Requested " );
     if (name_index_itr != mLifRef->index_to_name_map().end())
     {
+        vlogger::instance().console()->info(" Serie " + svl::toString(serie_index) + " Fetched " );
         const std::string& name = name_index_itr->second;
-        auto command = ci::app::getAppPath().string() + sep + "Visible.app" + sep + "Contents" + sep + "MacOS" + sep + "VisibleRun.app" + sep  + " --args " +
-        mCurrentLifFilePath.string() + space + name;
+        assert(exists(mRunAppPath));
+        auto command = mRunAppPath.string()  + space  + " --args " + mCurrentLifFilePath.string() + space + name;
         if (m_isIdLabLif) command += space + vac::LIF_CUSTOM;
         
         command = "open -n -F -a " + command;
-        std::cout << command << std::endl;
-        
+        vlogger::instance().console()->info(command);
         std::system(command.c_str());
         
-    }
+    }else
+        vlogger::instance().console()->error(" Serie " + svl::toString(serie_index) + " Could not be Fetched " );
 }
 
 
@@ -120,12 +121,12 @@ void VisibleApp::setup()
     fs::path root_output_dir = VisibleAppControl::get_visible_app_support_directory();
     VisibleAppControl::setup_loggers( root_output_dir, app_log, mFileName);
     
-    auto sep = boost::filesystem::path::preferred_separator;
     const fs::path& appPath = ci::app::getAppPath();
-    const std::string run_app_path = ci::app::getAppPath().string() + sep + "Visible.app" + sep + "Contents" + sep + "MacOS" + sep + "VisibleRun.app";
-    if(exists(fs::path(run_app_path)))vlogger::instance().console()->info(run_app_path + " Exists ");
+    mRunAppPath = appPath / "Visible.app/Contents/MacOS/VisibleRun.app";
+    mRunAppAppString = mRunAppPath.string();
+    if(exists(mRunAppPath))vlogger::instance().console()->info(mRunAppPath.string()  + " Exists ");
     else
-        vlogger::instance().console()->error(run_app_path + " is incorrect or App content is damaged ");
+        vlogger::instance().console()->error(mRunAppAppString  + " is incorrect or App content is damaged ");
     
     
     const fs::path plist = appPath / "Visible.app/Contents/Info.plist";
