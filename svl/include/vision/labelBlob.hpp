@@ -31,7 +31,7 @@ namespace svl
     class momento : CvMoments
     {
     public:
-        momento(): m_is_loaded (false), m_eigen_done(false) {}
+        momento(): m_is_loaded (false), m_eigen_done(false), m_is_nan(true) {}
         momento(const momento& other);
         ~momento() {}
         
@@ -43,7 +43,9 @@ namespace svl
         uRadian getOrientation () const;
         bool isLoaded () const { return m_is_loaded; }
         bool isValidEigen () const { return m_eigen_ok; }
+        bool isNan () const { return m_is_nan; }
         bool isEigenDone () const { return m_eigen_done; }
+
         
     private:
         mutable cv::Point m_offset;
@@ -57,6 +59,7 @@ namespace svl
         mutable bool m_eigen_ok;
         mutable bool m_is_loaded;
         mutable bool m_eigen_done;
+        mutable bool m_is_nan;
         void getDirectionals () const;
         
     };
@@ -69,7 +72,7 @@ class lblMgr : public base_signaler
     getName () const { return "LabelManager"; }
 };
 
-/*
+    /* @todo: add filters
  * labelBlob generates label regions from an image ( @todo add color )
  * it handles filtering the result and support signals 
  * It can run async and report results via signals
@@ -84,15 +87,18 @@ public:
     typedef std::shared_ptr<labelBlob> ref;
     typedef std::weak_ptr<labelBlob> weak_ref;
     
-    static ref create(const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id = 0);
+    static ref create(const cv::Mat& gray, const cv::Mat& threshold_out,  const int64_t client_id = 0, const int minAreaPixelCount = 10);
     labelBlob ();
-    labelBlob (const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id = 0);
+    labelBlob (const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id = 0, const int minAreaPixelCount = 10);
     
     class blob {
     public:
         blob ( const uint32_t label, const int64_t id, const cv::Rect2f& roi) :
             m_id(id), m_label(label), m_roi (roi), m_moments_ready(false)
-        {}
+        {
+            m_extend = std::sqrt(roi.width*roi.width+roi.height*roi.height);
+        }
+        
         blob(const blob& other){
             m_id = other.m_id;
             m_label = other.m_label;
@@ -107,16 +113,18 @@ public:
         bool moments_ready () const { return m_moments_ready; }
         const cv::Rect2f& roi () const { return m_roi; }
         const svl::momento& moments () const { return m_moments; }
+        float extend () const { return m_extend;}
         
     private:
         int64_t m_id;
         uint32_t m_label;
         mutable svl::momento m_moments;
+        mutable float m_extend;
         cv::Rect2f m_roi;
         mutable std::atomic<bool> m_moments_ready;
     };
     
-    void reload (const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id = 0) const;
+    void reload (const cv::Mat& gray, const cv::Mat& threshold_out,  const int64_t client_id = 0, const int minAreaPixelCount = 10) const;
     
     // Result available can be checked via subscription to results_ready signal or
     // checking hasResults.
@@ -127,6 +135,7 @@ public:
     bool hasResults () const;
     const int64_t& client_id () const { return m_client_id; }
     
+    const int& min_area_count () const { return m_min_area; }
     const std::vector<labelBlob::blob>& results() const { return m_blobs; }
     const cv::Mat& graphicOutput () const { return m_graphics; }
     const std::vector<cv::KeyPoint>& keyPoints (bool regen = false) const;
@@ -155,6 +164,7 @@ private:
     mutable std::vector<cv::Rect2f> m_rois;
     mutable int64_t m_client_id;
     mutable std::vector<cv::KeyPoint> m_kps;
+    mutable int m_min_area;
   
 };
 
