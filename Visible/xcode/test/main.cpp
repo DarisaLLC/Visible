@@ -164,65 +164,10 @@ void output_array (const std::vector<std::vector<float>>& data, const std::strin
         }
     }
 }
-
-
+void finalize_segmentation (cv::Mat& space);
 cv::Mat generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels,
-                                                         std::vector<std::vector<float>>& ss){
-    
-    int height = static_cast<int>(voxels.size());
-    int width = static_cast<int>(voxels[0].size());
- 
-    
-    // Create a single vector of all roi windows
-    std::vector<roiWindow<P8U>> all;
-    // semilarity producer
-    auto sp = std::shared_ptr<sm_producer> ( new sm_producer () );
-    for(std::vector<roiWindow<P8U>>& row: voxels){
-        for(roiWindow<P8U>& voxel : row){
-            all.emplace_back(voxel.frameBuf(), voxel.bound());
-        }
-    }
-    
-    sp->load_images (all);
-    std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
-    std::future<bool>  future_ss = task.get_future();  // get a future
-    std::thread(std::move(task)).join(); // Finish on a thread
-    if (future_ss.get())
-    {
-        cv::Mat m_temporal_ss (height,width, CV_32FC1);
-        m_temporal_ss.setTo(0.0f);
-        
-        const deque<double>& entropies = sp->shannonProjection ();
-        vector<float> m_entropies;
-        ss.resize(0);
-        m_entropies.insert(m_entropies.end(), entropies.begin(), entropies.end());
-        vector<float>::const_iterator start = m_entropies.begin();
-        for (auto row =0; row < height; row++){
-            vector<float> rowv;
-            auto end = start + width; // point to one after
-            rowv.insert(rowv.end(), start, end);
-            ss.push_back(rowv);
-            start = end;
-        }
-        
-        auto getMat = [] (std::vector< std::vector<float> > &inVec){
-            int rows = static_cast<int>(inVec.size());
-            int cols = static_cast<int>(inVec[0].size());
-            
-            cv::Mat_<float> resmat(rows, cols);
-            for (int i = 0; i < rows; i++)
-            {
-                resmat.row(i) = cv::Mat(inVec[i]).t();
-            }
-            return resmat;
-        };
-        
-        m_temporal_ss = getMat(ss);
-        return m_temporal_ss;
-    }
-    return cv::Mat ();
-    
-}
+                                       std::vector<std::vector<float>>& ss);
+
 
 
 std::shared_ptr<test_utils::genv> dgenv_ptr;
@@ -270,6 +215,19 @@ std::vector<Point2f> ellipse_test = {
     {778.129881,381.776216},
     {839.415543,384.804510}};
 
+
+
+
+TEST (ut_algo_lif, segment){
+    
+    auto res = dgenv_ptr->asset_path("voxel_ss_.png");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    cv::Mat image = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    finalize_segmentation (image);
+    
+}
+
 TEST(ut_voxel_freq, basic){
     EXPECT_TRUE(fft1D::test());
 }
@@ -315,7 +273,7 @@ TEST(ut_serialization, ssResultContainer){
     auto tempFilePath = boost::filesystem::temp_directory_path() / boost::filesystem::unique_path();
     bool ok = ssResultContainer::store(tempFilePath, entropy, sm);
     EXPECT_TRUE(ok);
-
+    
     auto ssr_new_ref = ssResultContainer::create(tempFilePath.string());
     EXPECT_TRUE(ssr.is_same(*ssr_new_ref));
     
@@ -345,7 +303,7 @@ TEST (ut_dm, basic){
     
     EXPECT_TRUE(fixed == iPair(2*fixed_half_size.first+1,2*fixed_half_size.second+1));
     EXPECT_TRUE(moving == iPair(2*moving_half_size.first+1,2*moving_half_size.second+1));
-  
+    
     CorrelationParts cp;
     ff.update(im0);
     ff.update(im0);
@@ -364,7 +322,7 @@ TEST (ut_dm, basic){
         }
         space.push_back(rs);
     }
-
+    
     EXPECT_TRUE(space[1][1] == 908);
     EXPECT_TRUE(space[1][3] == 905);
     EXPECT_TRUE(space[3][1] == 905);
@@ -384,29 +342,29 @@ TEST (ut_dm, basic){
     std::cout << std::endl;
     for(std::vector<int>& row : space){
         for (const int& score : row){
-           std::cout << setw(4) << score << '\t';
+            std::cout << setw(4) << score << '\t';
         }
         std::cout << std::endl;
     }
     
-//    {
-//        auto name = "Motion";
-//        namedWindow(name, CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
-//        cv::Point p0 (fixed_tl.first,fixed_tl.second);
-//        cv::Point p1 (p0.x+fixed.first, p0.y+fixed.second);
-//        rectangle(im1,p0,p1, CV_RGB(20,150,20));
-//        circle(im1,loc+p0, 5, CV_RGB(255,255,255));
-//        imshow( "im0", im0);
-//        cv::waitKey(-1);
-//        imshow( "im1", im1);
-//        cv::waitKey(-1);
-//    }
-
+    //    {
+    //        auto name = "Motion";
+    //        namedWindow(name, CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+    //        cv::Point p0 (fixed_tl.first,fixed_tl.second);
+    //        cv::Point p1 (p0.x+fixed.first, p0.y+fixed.second);
+    //        rectangle(im1,p0,p1, CV_RGB(20,150,20));
+    //        circle(im1,loc+p0, 5, CV_RGB(255,255,255));
+    //        imshow( "im0", im0);
+    //        cv::waitKey(-1);
+    //        imshow( "im1", im1);
+    //        cv::waitKey(-1);
+    //    }
+    
     
     
 }
 TEST (ut_fit_ellipse, local_maxima){
-   
+    
     auto same_point = [] (const Point2f& a, const Point2f& b, float eps){return svl::equal(a.x, b.x, eps) && svl::equal(a.y, b.y, eps);};
     Point2f ellipse_gold (841.376, 386.055);
     RotatedRect box0 = fitEllipse(ellipse_test);
@@ -460,11 +418,11 @@ void done_callback (void)
 }
 
 TEST (ut_opencvutils, anistropic_diffusion){
-   
+    
     double endtime;
     std::clock_t start;
     
-   
+    
     auto res = dgenv_ptr->asset_path("image230.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
@@ -568,19 +526,19 @@ TEST (ut_opencvutils, difference){
     CImg<unsigned char> cMoving (moving);
     CImg<unsigned char> cMovingPast(moving.clone());
     
-//    const float sharpness=0.33f;
-//    const float anisotropy=0.6f;
-//    const float alpha=30.0f;
-//    const float sigma=1.1f;
-//    const float dl=0.8f;
-//    const float da=3;
+    //    const float sharpness=0.33f;
+    //    const float anisotropy=0.6f;
+    //    const float alpha=30.0f;
+    //    const float sigma=1.1f;
+    //    const float dl=0.8f;
+    //    const float da=3;
     auto mImg = cMoving.blur_anisotropic( 10, 0.8, 3);
     auto mout = mImg.get_MAT();
     auto fImg = cFixed.blur_anisotropic( 10, 0.8, 3);
     auto fout = fImg.get_MAT();
     
-  //  show_gradient(fout, " Fixed ");
-  //  show_gradient(mout, " Moving ");
+    //  show_gradient(fout, " Fixed ");
+    //  show_gradient(mout, " Moving ");
     
     auto fang = show_cv_angle(fout, " Fixed ");
     auto mang = show_cv_angle(mout, " Moving ");
@@ -591,14 +549,14 @@ TEST (ut_opencvutils, difference){
 
 TEST (ut_3d_per_element, standard_dev)
 {
-  
+    
     roiWindow<P8U> pels0(5, 4); pels0.set(0);
     roiWindow<P8U> pels1(5, 4); pels1.set(1);
     roiWindow<P8U> pels2(5, 4); pels2.set(2);
     
-   
+    
     vector<roiWindow<P8U>> frames {pels0, pels1, pels2};
-  
+    
     auto test_allpels = [] (cv::Mat& img, float val, bool show_failure){
         for(int i=0; i<img.rows; i++)
             for(int j=0; j<img.cols; j++)
@@ -620,7 +578,7 @@ TEST (ut_3d_per_element, standard_dev)
     EXPECT_EQ(3, image_count);
     EXPECT_TRUE(test_allpels(m_sum, 3.0f, true));
     EXPECT_TRUE(test_allpels(m_sqsum, 5.0f, true));
-
+    
     
     cv::Mat m_var_image;
     SequenceAccumulator::computeVariance(m_sum, m_sqsum, image_count, m_var_image);
@@ -635,60 +593,60 @@ TEST (ut_ss_voxel, basic){
     // Create sin signals
     auto sinvec8 = [](float step, uint32_t size){
         std::vector<uint8_t> base(size);
-
+        
         for (auto i : irange(0u, size)) {
             float v = (sin(i * 3.14159 *  step) + 1.0)*127.0f;
             base[i] = static_cast<uint8_t>(v);
         }
-
+        
         return base;
     };
- 
+    
     // Create random signals
-//    auto randvec8 = []( uint32_t size){
-//        std::vector<uint8_t> base(size);
-//
-//        for (auto i : irange(0u, size)) {
-//            // base[i] = ((i % 256) / 256.0f - 0.5f) * 0.8;
-//            base[i] = rand() % 255;
-//        }
-//
-//        return base;
-//    };
+    //    auto randvec8 = []( uint32_t size){
+    //        std::vector<uint8_t> base(size);
+    //
+    //        for (auto i : irange(0u, size)) {
+    //            // base[i] = ((i % 256) / 256.0f - 0.5f) * 0.8;
+    //            base[i] = rand() % 255;
+    //        }
+    //
+    //        return base;
+    //    };
     
     double endtime;
     std::clock_t start;
-
+    
     std::vector<std::vector<roiWindow<P8U>>> voxels;
     
     int rows = 32;
     int cols = 32;
     cv::Point2f ctr (cols/2.0f, rows/2.0f);
     
-//    auto d2ctr = [](int r, int c, cv::Point2f& center){
-//        return sqrt(svl::Sqr(c-center.x)+svl::Sqr(r-center.y));
-//    };
+    //    auto d2ctr = [](int r, int c, cv::Point2f& center){
+    //        return sqrt(svl::Sqr(c-center.x)+svl::Sqr(r-center.y));
+    //    };
     start = std::clock();
     for (auto row = 0; row < rows; row++){
         std::vector<roiWindow<P8U>> rrs;
         for (auto col = 0; col < cols; col++){
             float r = (row+col)/2.0;
             r = std::max(1.0f,r);
-
+            
             std::vector<uint8_t> tmp = sinvec8(1.0/r, 64);
-
+            
             rrs.emplace_back(tmp);
             
-        
-     //       cvDrawPlot(signal, title);
+            
+            //       cvDrawPlot(signal, title);
         }
         voxels.push_back(rrs);
     }
-
+    
     endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
     std::cout << " Generating Synthetic Data " << endtime  << " Seconds " << std::endl;
     
-
+    
     std::vector<std::vector<float>> results;
     
 #ifdef INTERACTIVE
@@ -705,7 +663,7 @@ TEST (ut_ss_voxel, basic){
     cv::imwrite(image_path, cm);
     std::cout << " Running Synthetic Data " << endtime  << " Seconds " << std::endl;
     output_array(results, file_path);
- 
+    
     
     /// Show in a window
     namedWindow( " ss voxel ", CV_WINDOW_KEEPRATIO  | WINDOW_OPENGL);
@@ -748,7 +706,7 @@ TEST (UT_AVReaderBasic, run)
         rr.setUserDoneCallBack(check_done);
         rr.setUserProgressCallBack(progress_report);
         rr.run ();
-
+        
         EXPECT_TRUE(rr.info().count == 30);
         EXPECT_FALSE(rr.isEmpty());
         tiny_media_info mif (rr.info());
@@ -797,7 +755,7 @@ TEST(tracks, basic){
     
     // Generate test data
     namedTrack_t ntrack;
-   timedVecOfVals_t& data = ntrack.second;
+    timedVecOfVals_t& data = ntrack.second;
     data.resize(oneD_example.size());
     for (int tt = 0; tt < oneD_example.size(); tt++){
         data[tt].second = oneD_example[tt];
@@ -877,7 +835,7 @@ TEST(cardiac_ut, interpolated_length)
     double            MicronPerPixel = 291.19 / 512.0;
     double            Length_max   = 118.555 * MicronPerPixel; // 67.42584072;
     double            Lenght_min   = 106.551 * MicronPerPixel; // 60.59880018;
-   // double            shortening   = Length_max - Lenght_min;
+                                                               // double            shortening   = Length_max - Lenght_min;
     double            MSI_max  =  0.37240525;
     double            MSI_min   = 0.1277325;
     // double            shortening_um   = 6.827040547;
@@ -919,7 +877,7 @@ TEST(cardiac_ut, interpolated_length)
     auto dcheck = std::minmax_element(diffs.begin(), diffs.end() );
     EXPECT_TRUE(svl::equal(*dcheck.first, 0.0, 1.e-05));
     EXPECT_TRUE(svl::equal(*dcheck.second, 0.0, 1.e-05));
- 
+    
     {
         auto name = "force";
         cvplot::setWindowTitle(name, " Force ");
@@ -938,7 +896,7 @@ TEST(cardiac_ut, interpolated_length)
     }
     
     
-  
+    
     
 }
 
@@ -975,8 +933,8 @@ TEST(cardiac_ut, locate_contractions)
     std::vector<int> tmins, lmins, tmaxs, lmaxs;
     p.GetExtremaIndices(tmins,tmaxs);
     std::cout << " Median val" << median_filtered_val << std::endl;
- //   Out(tmins);
- //   Out(tmaxs);
+    //   Out(tmins);
+    //   Out(tmaxs);
     
     for (auto tmi : tmins){
         if (dst_1[tmi] > median_filtered_val) continue;
@@ -990,8 +948,8 @@ TEST(cardiac_ut, locate_contractions)
     
     std::sort(lmins.begin(),lmins.end());
     std::sort(lmaxs.begin(),lmaxs.end());
-//    Out(lmins);
-//    Out(lmaxs);
+    //    Out(lmins);
+    //    Out(lmaxs);
     std::vector<std::pair<float, float>> contractions;
     for (auto lmi : lmins){
         contractions.emplace_back(lmi,dst_1[lmi]);
@@ -1054,17 +1012,17 @@ TEST(UT_contraction_profiler, basic)
     EXPECT_EQ(ctr.contraction_max_acceleration.first,27);
     EXPECT_EQ(ctr.relaxation_max_acceleration.first,43);
     EXPECT_EQ(ctr.relaxation_end.first,52);
-  
     
-//   @todo reconcile with recent implementation
-//    contraction_profile_analyzer ca;
-//    ca.run(oneD_example);
-//        bool test = contraction_analyzer::contraction_t::equal(ca.contraction(), ctr);
-//       EXPECT_TRUE(test);
-//    {
-//        cvplot::figure("myplot").series("myline").addValue(ca.first_derivative_filtered());
-//        cvplot::figure("myplot").show();
-//    }
+    
+    //   @todo reconcile with recent implementation
+    //    contraction_profile_analyzer ca;
+    //    ca.run(oneD_example);
+    //        bool test = contraction_analyzer::contraction_t::equal(ca.contraction(), ctr);
+    //       EXPECT_TRUE(test);
+    //    {
+    //        cvplot::figure("myplot").series("myline").addValue(ca.first_derivative_filtered());
+    //        cvplot::figure("myplot").show();
+    //    }
     
 }
 TEST(timing8, corr)
@@ -1095,14 +1053,14 @@ TEST(timing8, corr_ocv)
     std::shared_ptr<uint8_t> img2 = test_utils::create_trig(1920, 1080);
     cv::Mat mat1(1080, 1920, CV_8UC(1), img1.get(), 1920);
     cv::Mat mat2(1080, 1920, CV_8UC(1), img2.get(), 1920);
-//    auto binfo = cv::getBuildInformation();
-//    auto numth = cv::getNumThreads();
-//    std::cout << binfo << std::endl << numth << std::endl;
-
+    //    auto binfo = cv::getBuildInformation();
+    //    auto numth = cv::getNumThreads();
+    //    std::cout << binfo << std::endl << numth << std::endl;
+    
     double endtime;
     std::clock_t start;
     int l;
-
+    
     int num_loops = 1000;
     Mat space(cv::Size(1,1), CV_32F);
     // Time setting and resetting
@@ -1111,7 +1069,7 @@ TEST(timing8, corr_ocv)
     {
         cv::matchTemplate (mat1, mat2, space, CV_TM_CCOEFF_NORMED);
     }
-
+    
     endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
     double scale = 1000.0 / (num_loops);
     std::cout << " OCV_Correlation: 1920 * 1080 * 8 bit " << endtime * scale << " millieseconds per " << std::endl;
@@ -1141,7 +1099,7 @@ TEST(ut_serialization, double_cv_mat){
             std::ifstream file(tempFilePath.c_str(), std::ios::binary);
             cereal::BinaryInputArchive ar(file);
             ar(loaded_data);
-
+            
             EXPECT_EQ(rows, data.rows);
             EXPECT_EQ(cols, data.cols);
             
@@ -1183,7 +1141,7 @@ TEST(ut_labelBlob, basic)
     static bool s_results_ready = false;
     static bool s_graphics_ready = false;
     static int64_t cid = 0;
-
+    
     auto res = dgenv_ptr->asset_path("out0.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
@@ -1191,7 +1149,7 @@ TEST(ut_labelBlob, basic)
     EXPECT_EQ(out0.channels() , 1);
     EXPECT_EQ(out0.cols , 512);
     EXPECT_EQ(out0.rows , 128);
-
+    
     // Histogram -> threshold at 5 percent from the right ( 95 from the left :) )
     int threshold = leftTailPost (out0, 95.0 / 100.0);
     EXPECT_EQ(threshold, 40);
@@ -1238,7 +1196,7 @@ TEST(ut_stl_utils, accOverTuple)
     float val = tuple_accumulate(std::make_tuple(5, 3.2, 7U, 6.4f), 0L, functor());
     auto diff = std::fabs(val - 21.6);
     EXPECT_TRUE(diff < 0.000001);
-
+    
     typedef std::tuple<int64_t,int64_t, uint32_t> partial_t;
     std::vector<partial_t> boo;
     for (int ii = 0; ii < 9; ii++)
@@ -1257,20 +1215,20 @@ TEST(UT_smfilter, basic)
     vector<int> ranks;
     vector<double> norms;
     norm_scale(oneD_example,norms);
-//    stl_utils::Out(norms);
+    //    stl_utils::Out(norms);
     
     vector<double> output;
     savgol(norms, output);
-  //  stl_utils::Out(norms);
-  //  stl_utils::Out(output);
+    //  stl_utils::Out(norms);
+    //  stl_utils::Out(output);
     
     auto median_value = contraction_analyzer::Median_levelsets(norms,ranks);
     
     std::cout << median_value << std::endl;
     for (auto ii = 0; ii < norms.size(); ii++)
     {
-//        std::cout << "[" << ii << "] : " << norms[ii] << "     "  << std::abs(norms[ii] - median_value) << "     "  << ranks[ii] << "     " << norms[ranks[ii]] << std::endl;
-//        std::cout << "[" << ii << "] : " << norms[ii] << "     " << output[ii] << std::endl;
+        //        std::cout << "[" << ii << "] : " << norms[ii] << "     "  << std::abs(norms[ii] - median_value) << "     "  << ranks[ii] << "     " << norms[ranks[ii]] << std::endl;
+        //        std::cout << "[" << ii << "] : " << norms[ii] << "     " << output[ii] << std::endl;
     }
     
     
@@ -1290,7 +1248,7 @@ TEST(basicU8, histo)
     
     roiWindow<P8U> pels(20, 5);
     DrawShape(pels, frame);
-
+    
     histoStats hh;
     hh.from_image<P8U>(pels);
     EXPECT_EQ(hh.max(0), 3);
@@ -1336,16 +1294,16 @@ TEST (UT_algo, AVReader)
 
 TEST(ut_similarity, short_term)
 {
-   
+    
     self_similarity_producer<P8U> sm(3,0);
     
     EXPECT_EQ(sm.depth() , D_8U);
     EXPECT_EQ(sm.matrixSz() , 3);
     EXPECT_EQ(sm.cacheSz() , 0);
     EXPECT_EQ(sm.aborted() , false);
-
+    
     vector<roiWindow<P8U>> fill_images(3);
-
+    
     
     auto cpToRoiWindow = [](cv::Mat& m, roiWindow<P8U>& r){
         auto rowPointer = [] (void* data, size_t step, int32_t row ) { return reinterpret_cast<void*>( reinterpret_cast<uint8_t*>(data) + row * step ); };
@@ -1358,7 +1316,7 @@ TEST(ut_similarity, short_term)
         r = rw;
     };
     
-//     cv::Mat gaussianTemplate(const std::pair<uint32_t,uint32_t>& dims, const vec2& sigma = vec2(1.0, 1.0), const vec2& center = vec2(0.5,0.5));
+    //     cv::Mat gaussianTemplate(const std::pair<uint32_t,uint32_t>& dims, const vec2& sigma = vec2(1.0, 1.0), const vec2& center = vec2(0.5,0.5));
     std::pair<uint32_t,uint32_t> dims (32,32);
     
     for (uint32_t i = 0; i < fill_images.size(); i++) {
@@ -1369,26 +1327,26 @@ TEST(ut_similarity, short_term)
     roiWindow<P8U> tmp (dims.first, dims.second);
     tmp.randomFill(1066);
     
-/*
-            Expected Update Output
- 
-    Fill     9.86492e-06            gaussian sigma 0.5
-             6.21764e-06            gaussian sigma 1.0
-             1.1948e-05             gaussian sigma 1.5
-    Update   0.367755           update with random filled
-             0.367793
-             0.994818
-    Update   0.367801           update with sigma 0.5
-             0.994391
-             0.367548
-    Update   0.994314           update with sigma 1.0
-             0.367543
-             0.367757
-    Update   9.86492e-06        update with sigma 1.5
-             6.21764e-06
-             1.1948e-05
-
- */
+    /*
+     Expected Update Output
+     
+     Fill     9.86492e-06            gaussian sigma 0.5
+     6.21764e-06            gaussian sigma 1.0
+     1.1948e-05             gaussian sigma 1.5
+     Update   0.367755           update with random filled
+     0.367793
+     0.994818
+     Update   0.367801           update with sigma 0.5
+     0.994391
+     0.367548
+     Update   0.994314           update with sigma 1.0
+     0.367543
+     0.367757
+     Update   9.86492e-06        update with sigma 1.5
+     6.21764e-06
+     1.1948e-05
+     
+     */
     deque<double> ent;
     bool fRet = sm.fill(fill_images);
     EXPECT_EQ(fRet, true);
@@ -1399,9 +1357,9 @@ TEST(ut_similarity, short_term)
     
     // Now feed the set of one random followed by 3 gaussins few times
     {
-            bool u1 = sm.update(tmp);
-            EXPECT_EQ(u1, true);
-
+        bool u1 = sm.update(tmp);
+        EXPECT_EQ(u1, true);
+        
         bool eRet = sm.entropies(ent);
         EXPECT_EQ(eRet, true);
         EXPECT_EQ(ent.size() , fill_images.size());
@@ -1409,7 +1367,7 @@ TEST(ut_similarity, short_term)
         EXPECT_EQ(std::distance(ent.begin(), std::max_element(ent.begin(), ent.end())), 2);
         
     }
-
+    
     {
         bool u1 = sm.update(fill_images[0]);
         EXPECT_EQ(u1, true);
@@ -1420,7 +1378,7 @@ TEST(ut_similarity, short_term)
         EXPECT_EQ(svl::equal(ent[0], ent[2] , 1.e-3), true);
         EXPECT_EQ(std::distance(ent.begin(), std::max_element(ent.begin(), ent.end())), 1);
     }
-
+    
     {
         bool u1 = sm.update(fill_images[1]);
         EXPECT_EQ(u1, true);
@@ -1490,7 +1448,7 @@ TEST(ut_similarity, long_term)
         images[i] = tmp;
     }
     
-  
+    
     
     fRet = sm.fill(images);
     EXPECT_EQ(fRet, true);
@@ -1605,6 +1563,124 @@ int main(int argc, char ** argv)
     
 }
 
+
+void finalize_segmentation (cv::Mat& space){
+    
+    using blob=svl::labelBlob::blob;
+    static bool s_results_ready = false;
+    static bool s_graphics_ready = false;
+    static int64_t cid = 0;
+
+    
+    cv::Point replicated_pad (5,5);
+    cv::Mat mono, bi_level;
+    
+    //    auto right_tail = leftTailPost(space,0.2f);
+    
+    
+    
+    copyMakeBorder(space,mono, replicated_pad.x,replicated_pad.y,
+                   replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);
+    
+    
+    
+    //Show source image
+    imshow("Monochrome Image",mono);
+    threshold(mono, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
+    imshow("Binary Image", bi_level);
+    
+    labelBlob::ref lbr = labelBlob::create(mono, bi_level, 666);
+    EXPECT_EQ(lbr == nullptr , false);
+    std::function<labelBlob::results_ready_cb> res_ready_lambda = [](int64_t& cbi){ s_results_ready = ! s_results_ready; cid = cbi;};
+    std::function<labelBlob::graphics_ready_cb> graphics_ready_lambda = [](){ s_graphics_ready = ! s_graphics_ready;};
+    boost::signals2::connection results_ready_ = lbr->registerCallback(res_ready_lambda);
+    boost::signals2::connection graphics_ready_ = lbr->registerCallback(graphics_ready_lambda);
+    EXPECT_EQ(false, s_results_ready);
+    EXPECT_EQ(true, cid == 0);
+    EXPECT_EQ(true, lbr->client_id() == 666);
+    lbr->run_async();
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    EXPECT_EQ(true, s_results_ready);
+    EXPECT_EQ(true, lbr->client_id() == 666);
+    EXPECT_EQ(true, cid == 666);
+    EXPECT_EQ(true, lbr->hasResults());
+    const std::vector<blob> blobs = lbr->results();
+    
+
+    lbr->drawOutput();
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    EXPECT_EQ(true, s_graphics_ready);
+    /// Show in a window
+    namedWindow( "LabelBlob ", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+//    std::vector<cv::KeyPoint> one;
+//    one.push_back(lbr->keyPoints()[1]);
+    cv::drawKeypoints(mono, lbr->keyPoints(),bi_level, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    imshow( "LabelBlob", bi_level);
+    cv::waitKey();
+
+
+    
+
+}
+
+
+cv::Mat generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels,
+                                       std::vector<std::vector<float>>& ss){
+    
+    int height = static_cast<int>(voxels.size());
+    int width = static_cast<int>(voxels[0].size());
+    
+    
+    // Create a single vector of all roi windows
+    std::vector<roiWindow<P8U>> all;
+    // semilarity producer
+    auto sp = std::shared_ptr<sm_producer> ( new sm_producer () );
+    for(std::vector<roiWindow<P8U>>& row: voxels){
+        for(roiWindow<P8U>& voxel : row){
+            all.emplace_back(voxel.frameBuf(), voxel.bound());
+        }
+    }
+    
+    sp->load_images (all);
+    std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
+    std::future<bool>  future_ss = task.get_future();  // get a future
+    std::thread(std::move(task)).join(); // Finish on a thread
+    if (future_ss.get())
+    {
+        cv::Mat m_temporal_ss (height,width, CV_32FC1);
+        m_temporal_ss.setTo(0.0f);
+        
+        const deque<double>& entropies = sp->shannonProjection ();
+        vector<float> m_entropies;
+        ss.resize(0);
+        m_entropies.insert(m_entropies.end(), entropies.begin(), entropies.end());
+        vector<float>::const_iterator start = m_entropies.begin();
+        for (auto row =0; row < height; row++){
+            vector<float> rowv;
+            auto end = start + width; // point to one after
+            rowv.insert(rowv.end(), start, end);
+            ss.push_back(rowv);
+            start = end;
+        }
+        
+        auto getMat = [] (std::vector< std::vector<float> > &inVec){
+            int rows = static_cast<int>(inVec.size());
+            int cols = static_cast<int>(inVec[0].size());
+            
+            cv::Mat_<float> resmat(rows, cols);
+            for (int i = 0; i < rows; i++)
+            {
+                resmat.row(i) = cv::Mat(inVec[i]).t();
+            }
+            return resmat;
+        };
+        
+        m_temporal_ss = getMat(ss);
+        return m_temporal_ss;
+    }
+    return cv::Mat ();
+    
+}
 
 #include "ut_lif.hpp"
 

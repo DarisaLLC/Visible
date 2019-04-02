@@ -274,6 +274,10 @@
 		C2AABC262221F94F00339675 /* libdc1394.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC252221F94F00339675 /* libdc1394.dylib */; };
 		C2AABC2A2221F9E000339675 /* libswscale.5.3.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC292221F9E000339675 /* libswscale.5.3.100.dylib */; };
 		C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
+		C2AFAD832252E16A0038AF5B /* UIImage+OpenCV.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2AFAD802252E1690038AF5B /* UIImage+OpenCV.mm */; };
+		C2AFAD842252E16A0038AF5B /* UIImage+OpenCV.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2AFAD802252E1690038AF5B /* UIImage+OpenCV.mm */; };
+		C2AFAD882252E2950038AF5B /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AFAD872252E2950038AF5B /* CoreImage.framework */; };
+		C2AFAD892252E2AE0038AF5B /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AFAD872252E2950038AF5B /* CoreImage.framework */; };
 		C2AFCEFE216E79590080462D /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
 		C2AFCEFF216E79590080462D /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
 		C2AFCF00216E79590080462D /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
@@ -714,6 +718,9 @@
 		C2AABC272221F97F00339675 /* libavresample.4.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavresample.4.0.0.dylib; path = ../../../../../../../usr/local/Cellar/ffmpeg/4.1.1/lib/libavresample.4.0.0.dylib; sourceTree = "<group>"; };
 		C2AABC292221F9E000339675 /* libswscale.5.3.100.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswscale.5.3.100.dylib; path = ../../../../../../../usr/local/Cellar/ffmpeg/4.1.1/lib/libswscale.5.3.100.dylib; sourceTree = "<group>"; };
 		C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "cp-visible-debug.xcconfig"; path = "configs/cp-visible-debug.xcconfig"; sourceTree = "<group>"; };
+		C2AFAD802252E1690038AF5B /* UIImage+OpenCV.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "UIImage+OpenCV.mm"; sourceTree = "<group>"; };
+		C2AFAD852252E17D0038AF5B /* CIImage+OpenCV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CIImage+OpenCV.h"; sourceTree = "<group>"; };
+		C2AFAD872252E2950038AF5B /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		C2AFCEFA216E79570080462D /* imgui_widgets.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_widgets.cpp; path = "../../externals/docking-imgui/imgui/imgui_widgets.cpp"; sourceTree = "<group>"; };
 		C2AFCEFB216E79580080462D /* imgui_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_draw.cpp; path = "../../externals/docking-imgui/imgui/imgui_draw.cpp"; sourceTree = "<group>"; };
 		C2AFCEFC216E79580080462D /* imgui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui.cpp; path = "../../externals/docking-imgui/imgui/imgui.cpp"; sourceTree = "<group>"; };
@@ -768,6 +775,7 @@
 				C273E36A2226FE9B003DA335 /* libdc1394.dylib in Frameworks */,
 				C273E3682226FE96003DA335 /* libavformat.58.20.100.dylib in Frameworks */,
 				C273E3692226FE99003DA335 /* libavcodec.58.35.100.dylib in Frameworks */,
+				C2AFAD882252E2950038AF5B /* CoreImage.framework in Frameworks */,
 				C203D2FB21714D6D00B6B4A8 /* IOKit.framework in Frameworks */,
 				C2606EA51CEE0E660045FF57 /* OpenCL.framework in Frameworks */,
 				C276ECA91C72B5D900242CDB /* CoreGraphics.framework in Frameworks */,
@@ -794,6 +802,7 @@
 				C2AABC242221F92100339675 /* libavcodec.58.35.100.dylib in Frameworks */,
 				C2AABC222221F8F500339675 /* libavformat.58.20.100.dylib in Frameworks */,
 				C2AABC202221F89A00339675 /* libavutil.56.22.100.dylib in Frameworks */,
+				C2AFAD892252E2AE0038AF5B /* CoreImage.framework in Frameworks */,
 				C21FFE731CFE0E1D00C97013 /* OpenCL.framework in Frameworks */,
 				C24CD8AA1CEB840C0008C72B /* Accelerate.framework in Frameworks */,
 				C24CD8AB1CEB840C0008C72B /* AudioToolbox.framework in Frameworks */,
@@ -970,6 +979,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C2AFAD872252E2950038AF5B /* CoreImage.framework */,
 				C2AABC292221F9E000339675 /* libswscale.5.3.100.dylib */,
 				C2AABC272221F97F00339675 /* libavresample.4.0.0.dylib */,
 				C2AABC252221F94F00339675 /* libdc1394.dylib */,
@@ -1120,6 +1130,7 @@
 		C23D0F491E29826F0049ADDB /* otherIO */ = {
 			isa = PBXGroup;
 			children = (
+				C2AFAD852252E17D0038AF5B /* CIImage+OpenCV.h */,
 				C23D0F481E2982690049ADDB /* lifFile.hpp */,
 			);
 			path = otherIO;
@@ -1513,6 +1524,7 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C2AFAD802252E1690038AF5B /* UIImage+OpenCV.mm */,
 				C2109475223F4CFE004E88EE /* opencv_draw.cpp */,
 				C29C53BF222B58D900D17385 /* dense_motion.cpp */,
 				C2398A0821DD8A0A00B180A0 /* file_system.cpp */,
@@ -1886,6 +1898,7 @@
 				C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */,
 				C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
 				C2109470223AEC19004E88EE /* imgui_wrapper.cpp in Sources */,
+				C2AFAD832252E16A0038AF5B /* UIImage+OpenCV.mm in Sources */,
 				C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */,
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,
@@ -1928,6 +1941,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2AFAD842252E16A0038AF5B /* UIImage+OpenCV.mm in Sources */,
 				C210946A2239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
 				C2398A0C21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C26A057C1E7785C300BDC954 /* cinder_support.cpp in Sources */,

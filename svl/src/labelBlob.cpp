@@ -84,7 +84,8 @@ void momento::getDirectionals () const
         double mm2 = m20 - m02;
         auto tana = mm2 + std::sqrt (4*m11*m11 + mm2*mm2);
         theta = atan(2*m11 / tana);
-
+        m_is_nan = isnan(theta);
+        
         double cos2 = cos(theta)*cos(theta);
         double sin2 = sin(theta)*sin(theta);
         double sin2x = sin(theta)*cos(theta);
@@ -109,16 +110,15 @@ svl::labelBlob::labelBlob() : m_results_ready(false){
 }
 
 
-svl::labelBlob::labelBlob(const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id) : m_results_ready(false){
+svl::labelBlob::labelBlob(const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id, const int minAreaPixelCount) : m_results_ready(false){
     // Signals we provide
     signal_results_ready = createSignal<results_ready_cb> ();
     signal_graphics_ready = createSignal<graphics_ready_cb> ();
-    reload(gray, threshold_out, client_id);
+    reload(gray, threshold_out, client_id,  minAreaPixelCount);
 }
 
-svl::labelBlob::ref labelBlob::create(const cv::Mat& gray, const cv::Mat& threshold_out,
-                                      const int64_t client_id) {
-    auto reff = std::make_shared<labelBlob> (gray, threshold_out, client_id);
+svl::labelBlob::ref labelBlob::create(const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id, const int minAreaPixelCount) {
+    auto reff = std::make_shared<labelBlob> (gray, threshold_out, minAreaPixelCount, client_id);
     return reff;
 }
 
@@ -131,7 +131,8 @@ void svl::labelBlob::blob::update_moments(const cv::Mat& image) const {
 }
 bool labelBlob::hasResults() const { return m_results_ready; }
 
-void  labelBlob::reload (const cv::Mat& grayImage, const cv::Mat&threshold_output,const int64_t client_id) const {
+void  labelBlob::reload (const cv::Mat& grayImage, const cv::Mat&threshold_output,const int64_t client_id, const int min_area_count) const {
+    m_min_area = min_area_count;
     m_grey = grayImage;
     m_threshold_out = threshold_output;
     m_results_ready = false;
@@ -149,8 +150,9 @@ void  labelBlob::run() const {
     m_moments.resize(0);
     m_rois.resize(0);
     
-    for(uint32_t i=0; i<m_stats.rows; i++)
+    for(uint32_t i=1; i<=m_stats.rows; i++)
     {
+        if( m_stats.at<int>(i, cv::CC_STAT_AREA) < m_min_area ) continue;
         int x = m_stats.at<int>(Point(0, i));
         int y = m_stats.at<int>(Point(1, i));
         int w = m_stats.at<int>(Point(2, i));
@@ -184,11 +186,19 @@ const std::vector<cv::KeyPoint>& labelBlob::keyPoints (bool regen) const {
         Scalar color = Scalar( rng.uniform(100, 255), rng.uniform(100,255), rng.uniform(100,255) );
         cv::rectangle(m_graphics, blob.roi(), color, 1);
         uRadian theta = blob.moments().getOrientation();
-        if(! isnan(theta))
+       
+        if (blob.moments().isValidEigen() && ! blob.moments().isNan())
         {
             uDegree degs (theta);
-            m_kps.emplace_back(blob.moments().com(), 20, degs.Double());
-        }
+            /*      @param _pt x & y coordinates of the keypoint
+             @param _size keypoint diameter
+             @param _angle keypoint orientation
+             @param _response keypoint detector response on the keypoint (that is, strength of the keypoint)
+             @param _octave pyramid octave in which the keypoint has been detected
+             */
+            m_kps.emplace_back(blob.moments().com(), blob.extend(), degs.Double());
+        }else
+            m_kps.emplace_back(cv::Point(0,0), 0.0);
     }
     return m_kps;
 }
