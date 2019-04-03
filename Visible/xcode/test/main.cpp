@@ -1574,15 +1574,8 @@ void finalize_segmentation (cv::Mat& space){
     
     cv::Point replicated_pad (5,5);
     cv::Mat mono, bi_level;
-    
-    //    auto right_tail = leftTailPost(space,0.2f);
-    
-    
-    
     copyMakeBorder(space,mono, replicated_pad.x,replicated_pad.y,
                    replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);
-    
-    
     
     //Show source image
     imshow("Monochrome Image",mono);

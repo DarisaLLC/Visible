@@ -649,21 +649,13 @@ void lifContext::update_with_mouse_position ( MouseEvent event )
 
 void lifContext::mouseDrag( MouseEvent event )
 {
-    if (isEditing () && mMouseInImage && channelIndex() == 2)
-    {
-        sides_length_t& which = mCellEnds[getManualEditMode()];
-        which.second = event.getPos();
-    }
+  
 }
 
 
 void lifContext::mouseDown( MouseEvent event )
 {
-    if (isEditing() && mMouseInImage && channelIndex() == 2)
-    {
-        sides_length_t& which = mCellEnds[getManualEditMode()];
-        which.first = event.getPos();
-    }
+   
 }
 
 
@@ -1031,7 +1023,7 @@ void lifContext::add_motion_profile (){
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(frame);
     
-    const RotatedRect& mt = m_lifProcRef->motion_surface();
+    const RotatedRect& mt = m_lifProcRef->motion_surface_bottom();
     cv::Point2f points[4];
     mt.points(&points[0]);
 
@@ -1304,9 +1296,13 @@ void lifContext::draw ()
         if (m_geometry_available)
         {
             const cv::RotatedRect& ellipse = m_lifProcRef->motion_surface();
+            const fPair& ab = m_lifProcRef->ellipse_ab();
+            vec2 a_v ((ab.first * gdr.getWidth()) / 512, 0.0f );
+            vec2 b_v (0.0f, (ab.second * gdr.getHeight()) / 128);
+            
             cinder::gl::ScopedLineWidth( 10.0f );
             {
-                cinder::gl::ScopedColor col (ColorA( 1, 0.1, 0.1, 0.8f ) );
+                cinder::gl::ScopedColor col (ColorA( 1.0, 0.1, 0.0, 0.8f ) );
                 {
                     cinder::gl::ScopedModelMatrix _mdl;
                     uDegree da(ellipse.angle);
@@ -1314,12 +1310,14 @@ void lifContext::draw ()
                     vec2 ctr ((ellipse.center.x * gdr.getWidth()) / 512, (ellipse.center.y * gdr.getHeight()) / 128 );
                     ctr = ctr + gdr.getUpperLeft();
                     gl::translate(ctr);
+
                     gl::rotate(dra.Double());
                     ctr = vec2(0,0);
-                    gl::drawLine(ctr-vec2(0,5), ctr+vec2(0,5));
-                    gl::drawLine(ctr-vec2(5,0), ctr+vec2(5,0));
-                    gl::drawStrokedEllipse(ctr, (ellipse.boundingRect().width * gdr.getWidth()) / 512,
-                                           (ellipse.boundingRect().height * gdr.getHeight()) / 128);
+                    gl::drawSolidCircle(ctr, 3.0);
+                    gl::drawLine(ctr-b_v, ctr+b_v);
+                    gl::drawLine(ctr-a_v, ctr+a_v);
+                  
+                    gl::drawStrokedEllipse(ctr, a_v.x, b_v.y);
                 }
             }
         }

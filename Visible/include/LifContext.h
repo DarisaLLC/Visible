@@ -40,7 +40,7 @@ public:
         minor = 1,
     };
 
-    typedef std::pair<vec2,vec2> sides_length_t;
+  
     
     // From a lif_serie_data
     lifContext(ci::app::WindowRef& ww, const lif_serie_data&, const fs::path&  );

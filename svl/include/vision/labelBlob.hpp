@@ -50,8 +50,8 @@ namespace svl
     private:
         mutable cv::Point m_offset;
         mutable cv::Size m_size;
-        mutable double a;
-        mutable double b;
+        mutable double m_a;
+        mutable double m_b;
         mutable uRadian theta;
         mutable double eigen_angle;
         mutable double inv_m00;
@@ -114,6 +114,7 @@ public:
         const cv::Rect2f& roi () const { return m_roi; }
         const svl::momento& moments () const { return m_moments; }
         float extend () const { return m_extend;}
+        cv::RotatedRect rotated_roi () const; 
         
     private:
         int64_t m_id;
@@ -121,7 +122,7 @@ public:
         mutable svl::momento m_moments;
         mutable float m_extend;
         cv::Rect2f m_roi;
-        mutable std::atomic<bool> m_moments_ready;
+        mutable bool m_moments_ready;
     };
     
     void reload (const cv::Mat& gray, const cv::Mat& threshold_out,  const int64_t client_id = 0, const int minAreaPixelCount = 10) const;
