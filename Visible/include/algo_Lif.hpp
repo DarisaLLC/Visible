@@ -26,6 +26,7 @@ using namespace std;
 using namespace boost;
 using namespace boost::filesystem;
 namespace fs = boost::filesystem;
+using blob = svl::labelBlob::blob;
 
 #if 0
 // Default logger factory-  creates synchronous loggers
@@ -45,6 +46,8 @@ struct synchronous_factory
 using default_factory = synchronous_factory;
 
 #endif
+
+  typedef std::pair<vec2,vec2> sides_length_t;
 
 /*
  * if index is -1, data is not valid 
@@ -286,9 +289,12 @@ public:
     void generateVoxelSelfSimilarities_on_channel (const int channel_index, uint32_t sample_x = 1, uint32_t sample_y = 1);
     
     void finalize_segmentation (cv::Mat&);
-    const std::vector<Rectf>& rois () const;
+    const std::vector<Rectf>& channel_rois () const;
     const cv::RotatedRect& motion_surface () const;
+    const cv::RotatedRect& motion_surface_bottom () const;
     const  std::deque<double>& medianSet () const;
+    const fPair& ellipse_ab () const;
+    
     
     // Update. Called also when cutoff offset has changed
     void update ();
@@ -312,6 +318,8 @@ protected:
     boost::signals2::signal<lif_serie_processor::sig_cb_ss_image_available>* signal_ss_image_available;
     
 private:
+    const std::vector<blob>& blobs () const { return m_blobs; }
+    
     void compute_shortterm (const uint32_t halfWinSz) const;
     
     void contraction_analyzed (contractionContainer_t&);
@@ -355,7 +363,7 @@ private:
     channel_vec_t m_all_by_channel;
     
     int64_t m_frameCount;
-    std::vector<Rectf> m_rois;
+    std::vector<Rectf> m_channel_rois;
     Rectf m_all;
     
     // @note Specific to ID Lab Lif Files
@@ -372,10 +380,16 @@ private:
     mutable svl::stats<int64_t> m_3d_stats;
     std::atomic<bool> m_3d_stats_done;
     cv::RotatedRect m_motion_mass;
+    cv::RotatedRect m_motion_mass_bottom;
     mutable cv::Mat m_temporal_ss;
+    std::vector<sides_length_t> m_cell_ends = {sides_length_t (), sides_length_t()};
+    mutable fPair m_ab;
+    
     mutable std::vector<std::vector<float>> m_temporal_ss_raw;
-    uiPair m_voxel_xy;
+    uiPair m_voxel_sample;
     std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;
+    labelBlob::ref m_main_blob;
+    std::vector<blob> m_blobs;
     
     std::shared_ptr<OCVImageWriter> m_writer;
     

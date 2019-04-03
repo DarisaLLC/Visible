@@ -261,6 +261,9 @@ const smProducerRef lif_serie_processor::similarity_producer () const {
     
 }
 
+const fPair& lif_serie_processor::ellipse_ab () const { return m_ab; }
+
+
 // Check if the returned has expired
 std::weak_ptr<contraction_analyzer> lif_serie_processor::contractionWeakRef ()
 {
@@ -303,120 +306,44 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& space){
     
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
     
-    auto createRegion = [](const std::vector<cv::Point> &contour)
-    {
-        region blob;
-        blob.isValid = false;
-        if(contour.size() < 10)
-            return blob;
-        blob.area = cv::contourArea( contour );
-        blob.realArea = blob.area;
-        if(blob.area<25)
-            return blob;
-
-        std::vector<cv::Point> dp;
-        cv::approxPolyDP (contour,dp,3,true);
-        blob.dPoly = dp;
-        blob.ellipse = minAreaRect(dp);
-        blob.center = blob.ellipse.center;
-        blob.orientation = blob.ellipse.angle;
-        blob.majorAxis =  std::max(blob.ellipse.size.width,blob.ellipse.size.height) / 2.0;
-        blob.minorAxis =  std::min(blob.ellipse.size.width,blob.ellipse.size.height) / 2.0;
-        
-        //Ellipse axis ratio too important
-        if(blob.majorAxis>100.0*blob.minorAxis || blob.majorAxis<1.0){
-            return blob;
-        }
-        blob.isValid = true;
-        return blob;
-    };
-    
-    auto get_edge_contours = [](cv::Mat& src, int thr, vector<vector<cv::Point>>&hull){
-        cv::Mat canny_out;
-        vector<vector<cv::Point>> contours;
-        Canny(src, canny_out, thr, thr*2);
-        findContours(canny_out, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
-        hull.resize(contours.size());
-        for (auto ii = 0; ii < contours.size(); ii++){
-           approxPolyDP( contours[ii], hull[ii], 3, true );
-        }
-        
-    };
-
-    // Replicate
-    cv::Mat mono, bi_level;
-    vector<vector<cv::Point>> edps, idps;
-    vector<vector<cv::Point> > contours;
-    vector<Vec4i> hierarchy;
     cv::Point replicated_pad (5,5);
-
-    copyMakeBorder( space,mono, replicated_pad.x,replicated_pad.y,
+    cv::Mat mono, bi_level;
+    copyMakeBorder(space,mono, replicated_pad.x,replicated_pad.y,
                    replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);
-
-    auto right_tail = leftTailPost(mono,0.2f);
-    cv::normalize(mono, mono, right_tail, NORM_MINMAX);
-    
-    // Show source image
-//    imshow("Monochrome Image",mono);
-//    threshold(mono, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
-//    imshow("Binary Image", bi_level);
-    
-    get_edge_contours(mono, 10, edps);
-    findContours(bi_level, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, replicated_pad);
-    
-    /// Draw contours
-    Mat drawing = Mat::zeros(mono.size(), CV_8UC3 );
-    idps.resize ( contours.size() );
-    
-    for( size_t i = 0; i< contours.size(); i++ )
+    threshold(mono, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
+    m_main_blob = labelBlob::create(mono, bi_level, 666);
+    std::function<labelBlob::results_ready_cb> res_ready_lambda = [this](int64_t& cbi)
     {
-        if( contours[i].size() < 10) continue;
-        vector<cv::Point> poly;
-        approxPolyDP( contours[i], idps[i], 3, true );
-        Scalar color = Scalar( 10, 0, 255);
-        drawContours( drawing, idps, (int)i, color );
-        Scalar color2 = Scalar( 255, 0, 10);
-        drawContours( drawing, contours, (int)i, color2, 1, LINE_8, hierarchy, 0 );
-    }
-    
-    for (auto ct = 0; ct < edps.size(); ct++){
-        if( edps[ct].size() < 10) continue;
+        const std::vector<blob>& blobs = m_main_blob->results();
         
-        Scalar color2 = Scalar( 10, 255, 10 );
-        drawContours( drawing, edps, (int)ct, color2 );
         
-        if( edps[ct].size() > 5 ){
-            cv::RotatedRect ellipse = cv::fitEllipse( edps [ct] );
-            if(ellipse.size.width<=0 || ellipse.size.height<=0){
-                std::cerr << "Bad ellipse" << std::endl;
-            }
-            else
-                drawRectOR(drawing, ellipse.boundingRect(), color2, 2, ellipse.angle);
+        
+        if (! blobs.empty()){
+            
+            
+            m_motion_mass_bottom = blobs[0].rotated_roi();
+            m_motion_mass = blobs[0].rotated_roi();
+            m_motion_mass.center.x -= 5.0;
+            m_motion_mass.center.y -= 5.0;
+            m_motion_mass.center.x *= m_voxel_sample.first;
+            m_motion_mass.center.y *= m_voxel_sample.second;
+            m_motion_mass.size.width *= m_voxel_sample.first;
+            m_motion_mass.size.height *= m_voxel_sample.second;
+            
+            m_ab = blobs[0].moments().getEllipseAspect ();
+            
+            // Signal to listeners
+            if (signal_geometry_available && signal_geometry_available->num_slots() > 0)
+                signal_geometry_available->operator()();
         }
-    }
-    
- //   imshow("Final Result", drawing);
- //   waitKey();
+        
+        
+    };
+ 
+    boost::signals2::connection results_ready_ = m_main_blob->registerCallback(res_ready_lambda);
+    m_main_blob->run_async();
+  
 
-    vector< region > regions;
-    
-    // find convex hull for each contour
-    for(int i = 0; i < contours.size(); i++){
-        auto rgn = createRegion(contours[i]);
-        if(rgn.isValid){
-            regions.push_back(rgn);
-            std::cout << rgn;
-        }
-    }
-    
-    if (! regions.empty()){
-        m_motion_mass = regions[0].ellipse;
-        auto dims = regions[0].ellipse.size;
-        
-        // Signal to listeners
-        if (signal_geometry_available && signal_geometry_available->num_slots() > 0)
-            signal_geometry_available->operator()();
-    }
     
 }
 
@@ -653,10 +580,12 @@ std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci_on_
 }
 
 
-const std::vector<Rectf>& lif_serie_processor::rois () const { return m_rois; }
+const std::vector<Rectf>& lif_serie_processor::channel_rois () const { return m_channel_rois; }
 
 
 const cv::RotatedRect& lif_serie_processor::motion_surface() const { return m_motion_mass; }
+const cv::RotatedRect& lif_serie_processor::motion_surface_bottom() const { return m_motion_mass_bottom; }
+
 
 // Update. Called also when cutoff offset has changed
 void lif_serie_processor::update ()
@@ -691,7 +620,7 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
     m_all_by_channel.clear();
     m_channel_count = frames->media_info().getNumChannels();
     m_all_by_channel.resize (m_channel_count);
-    m_rois.resize (0);
+    m_channel_rois.resize (0);
     std::vector<std::string> names = {"Red", "Green","Blue"};
     
     while (frames->checkFrame(m_frameCount))
@@ -710,12 +639,12 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
                 for (auto cc = 0; cc < m3.planes(); cc++)
                     m_all_by_channel[cc].emplace_back(m3.plane(cc));
                 
-                if (m_rois.empty())
+                if (m_channel_rois.empty())
                 {
                     for (auto cc = 0; cc < m3.planes(); cc++)
                     {
                         const iRect& ir = m3.roi(cc);
-                        m_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
+                        m_channel_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
                     }
                 }
                 break;
@@ -724,7 +653,7 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
             {
                 m_all_by_channel[0].emplace_back(*m1);
                 const iRect& ir = m1->frame();
-                m_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
+                m_channel_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
                 break;
             }
         }
@@ -820,7 +749,8 @@ void lif_serie_processor::generateVoxels_on_channel (const int channel_index, st
 void lif_serie_processor::generateVoxelSelfSimilarities_on_channel (const int channel_index, uint32_t sample_x, uint32_t sample_y){
     
     bool cache_ok = false;
-    
+    m_voxel_sample.first = sample_x;
+    m_voxel_sample.second = sample_y;
     //@todo add width and height so we do not have to do this
     auto images = m_all_by_channel[channel_index];
     assert(!images.empty());
@@ -851,8 +781,6 @@ void lif_serie_processor::generateVoxelSelfSimilarities_on_channel (const int ch
         generateVoxels(m_all_by_channel[channel_index], rvs, sample_x, sample_y);
         vlogger::instance().console()->info("finished " + msg);
         generateVoxelSelfSimilarities(rvs);
-        m_voxel_xy.first = sample_x;
-        m_voxel_xy.second = sample_y;
     }
     
 }

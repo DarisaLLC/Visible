@@ -54,7 +54,7 @@ fPair momento::getEllipseAspect () const
     if (! isLoaded()) return fPair();
     
     getDirectionals ();
-    return fPair(a,b);
+    return fPair(m_a,m_b);
 }
 
 uRadian momento::getOrientation () const
@@ -93,8 +93,8 @@ void momento::getDirectionals () const
         double lambda1 = m20*cos2 + m11 * sin2x + m02*sin2;
         double lambda2 = m20*cos2 - m11 * sin2x + m02*sin2;
 
-        a = 2.0 * std::sqrt(lambda1/m00);
-        b = 2.0 * std::sqrt(lambda2/m00);
+        m_a = 2.0 * std::sqrt(lambda1/m00);
+        m_b = 2.0 * std::sqrt(lambda2/m00);
         eigen_angle = angle;
     }
     
@@ -129,6 +129,13 @@ void svl::labelBlob::blob::update_moments(const cv::Mat& image) const {
     m_moments_ready = true;
     
 }
+
+cv::RotatedRect svl::labelBlob::blob::rotated_roi() const {
+    uDegree dg = m_moments.getOrientation();
+    return cv::RotatedRect(m_moments.com(), m_roi.size(), dg.basic());
+}
+
+
 bool labelBlob::hasResults() const { return m_results_ready; }
 
 void  labelBlob::reload (const cv::Mat& grayImage, const cv::Mat&threshold_output,const int64_t client_id, const int min_area_count) const {
