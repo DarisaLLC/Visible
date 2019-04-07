@@ -50,18 +50,18 @@
 typedef std::shared_ptr<cv::VideoCapture>				VideoCaptureRef;
 typedef std::chrono::time_point<std::chrono::high_resolution_clock>	time_point_t;
 
-class OcvVideoPlayer
+class cvVideoPlayer
 {
 public:
-	OcvVideoPlayer();
-	OcvVideoPlayer( const OcvVideoPlayer& rhs );
-	~OcvVideoPlayer();
+	cvVideoPlayer();
+	cvVideoPlayer( const cvVideoPlayer& rhs );
+	~cvVideoPlayer();
 
-	OcvVideoPlayer&			operator=( const OcvVideoPlayer& rhs );
+	cvVideoPlayer&			operator=( const cvVideoPlayer& rhs );
 
-	OcvVideoPlayer&			loop( bool enabled = true );
-	OcvVideoPlayer&			pause( bool resume = false );
-	OcvVideoPlayer&			speed( float v );
+	cvVideoPlayer&			loop( bool enabled = true );
+	cvVideoPlayer&			pause( bool resume = false );
+	cvVideoPlayer&			speed( float v );
 
 	ci::Surface8uRef		createSurface();
 	bool					load( const ci::fs::path& filepath );
@@ -109,7 +109,7 @@ protected:
 	float					mSpeed			= 1.0f;
 };
 
-typedef std::shared_ptr<OcvVideoPlayer>			ocvPlayerRef;
+typedef std::shared_ptr<cvVideoPlayer>			ocvPlayerRef;
 
 #endif
 
