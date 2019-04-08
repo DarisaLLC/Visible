@@ -266,6 +266,7 @@
 		C29C53C1222B58D900D17385 /* dense_motion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29C53BF222B58D900D17385 /* dense_motion.cpp */; };
 		C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
 		C29DB077212B351200930CBD /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
+		C29E1BCE225AA26200CBFFDB /* cvVideoPlasyer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BE851F4FAF5C00977307 /* cvVideoPlasyer.cpp */; };
 		C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611E1F66EA910069F665 /* PlistDate.cpp */; };
 		C2A5DBAD207A003F001C6608 /* Plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611B1F66E95B0069F665 /* Plist.cpp */; };
 		C2AABC202221F89A00339675 /* libavutil.56.22.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC1F2221F89A00339675 /* libavutil.56.22.100.dylib */; };
@@ -297,6 +298,100 @@
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C2DA195B1E80E4E200062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
+		C2DB728F22591DB700C2B986 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
+		C2DB729022591DB700C2B986 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
+		C2DB729122591DB700C2B986 /* sscli-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C240F9FA21E14C8900FBA228 /* sscli-Info.plist */; };
+		C2DB729222591DB700C2B986 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
+		C2DB729322591DB700C2B986 /* Visible.icns in Resources */ = {isa = PBXBuildFile; fileRef = C264F94B215F0B6D00AF3130 /* Visible.icns */; };
+		C2DB729422591DB700C2B986 /* imgui.ini in Resources */ = {isa = PBXBuildFile; fileRef = C2819EC721FA94F000183E44 /* imgui.ini */; };
+		C2DB729522591DB700C2B986 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
+		C2DB729722591DB700C2B986 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
+		C2DB729822591DB700C2B986 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
+		C2DB729922591DB700C2B986 /* contraction_t.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction_t.cpp */; };
+		C2DB729A22591DB700C2B986 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
+		C2DB729B22591DB700C2B986 /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
+		C2DB729C22591DB700C2B986 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
+		C2DB729D22591DB700C2B986 /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
+		C2DB729E22591DB700C2B986 /* Swatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */; };
+		C2DB729F22591DB700C2B986 /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
+		C2DB72A022591DB700C2B986 /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
+		C2DB72A122591DB700C2B986 /* seq_frame_container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* seq_frame_container.cpp */; };
+		C2DB72A222591DB700C2B986 /* Plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611B1F66E95B0069F665 /* Plist.cpp */; };
+		C2DB72A322591DB700C2B986 /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
+		C2DB72A422591DB700C2B986 /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
+		C2DB72A522591DB700C2B986 /* InterfaceUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27ED0A0220BB71D00B55D65 /* InterfaceUtilities.cpp */; };
+		C2DB72A622591DB700C2B986 /* ellipse_fit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20D4DE32208BD34004D9405 /* ellipse_fit.cpp */; };
+		C2DB72A722591DB700C2B986 /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611F1F66EA910069F665 /* pugixml.cpp */; };
+		C2DB72A822591DB700C2B986 /* lineseg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696B1CED3E2C0045FF57 /* lineseg.cpp */; };
+		C2DB72A922591DB700C2B986 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
+		C2DB72AA22591DB700C2B986 /* imguivariouscontrols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */; };
+		C2DB72AB22591DB700C2B986 /* visible_lif_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */; };
+		C2DB72AC22591DB700C2B986 /* visible_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946761CE4DC7100976025 /* visible_impl.cpp */; };
+		C2DB72AD22591DB700C2B986 /* histo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069681CED3E2C0045FF57 /* histo.cpp */; };
+		C2DB72AE22591DB700C2B986 /* Item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0D2148709300A5D3D6 /* Item.cpp */; };
+		C2DB72AF22591DB700C2B986 /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
+		C2DB72B022591DB700C2B986 /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
+		C2DB72B122591DB700C2B986 /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
+		C2DB72B222591DB700C2B986 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
+		C2DB72B322591DB700C2B986 /* ip_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069691CED3E2C0045FF57 /* ip_utils.cpp */; };
+		C2DB72B422591DB700C2B986 /* window.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7E217FDA6600FA9F43 /* window.cc */; };
+		C2DB72B522591DB700C2B986 /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
+		C2DB72B622591DB700C2B986 /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
+		C2DB72B722591DB700C2B986 /* rowfunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069701CED3E2C0045FF57 /* rowfunc.cpp */; };
+		C2DB72B822591DB700C2B986 /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
+		C2DB72B922591DB700C2B986 /* sg_filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24EA2D2207F07EF00555D16 /* sg_filter.cpp */; };
+		C2DB72BA22591DB700C2B986 /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
+		C2DB72BB22591DB700C2B986 /* figure.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7D217FDA6600FA9F43 /* figure.cc */; };
+		C2DB72BC22591DB700C2B986 /* labelconnect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696A1CED3E2C0045FF57 /* labelconnect.cpp */; };
+		C2DB72BD22591DB700C2B986 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
+		C2DB72BE22591DB700C2B986 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
+		C2DB72BF22591DB700C2B986 /* registration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696F1CED3E2C0045FF57 /* registration.cpp */; };
+		C2DB72C022591DB700C2B986 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
+		C2DB72C122591DB700C2B986 /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
+		C2DB72C222591DB700C2B986 /* CinderImGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCF08216F0CF10080462D /* CinderImGui.cpp */; };
+		C2DB72C322591DB700C2B986 /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
+		C2DB72C422591DB700C2B986 /* exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBE1CF277130074C47A /* exception.cpp */; };
+		C2DB72C522591DB700C2B986 /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
+		C2DB72C622591DB700C2B986 /* PlistDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611E1F66EA910069F665 /* PlistDate.cpp */; };
+		C2DB72C722591DB700C2B986 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
+		C2DB72C822591DB700C2B986 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E345F21F2511D00221E68 /* ImSequencer.cpp */; };
+		C2DB72C922591DB700C2B986 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
+		C2DB72CA22591DB700C2B986 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
+		C2DB72CB22591DB700C2B986 /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */; };
+		C2DB72CC22591DB700C2B986 /* color.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7B217FDA6600FA9F43 /* color.cc */; };
+		C2DB72CD22591DB700C2B986 /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBF1CF277130074C47A /* self_similarity.cpp */; };
+		C2DB72CE22591DB700C2B986 /* onImagePlotUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* onImagePlotUtils.cpp */; };
+		C2DB72CF22591DB700C2B986 /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
+		C2DB72D022591DB700C2B986 /* matpixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696D1CED3E2C0045FF57 /* matpixel.cpp */; };
+		C2DB72D122591DB700C2B986 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
+		C2DB72D222591DB700C2B986 /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
+		C2DB72D322591DB700C2B986 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
+		C2DB72D422591DB700C2B986 /* highgui.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7F217FDA6600FA9F43 /* highgui.cc */; };
+		C2DB72D522591DB700C2B986 /* edgel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069661CED3E2C0045FF57 /* edgel.cpp */; };
+		C2DB72D722591DB700C2B986 /* libcinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC61F6B4D6500A0E908 /* libcinder.a */; };
+		C2DB72D822591DB700C2B986 /* libswscale.5.3.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC292221F9E000339675 /* libswscale.5.3.100.dylib */; };
+		C2DB72D922591DB700C2B986 /* libavresample.4.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC272221F97F00339675 /* libavresample.4.0.0.dylib */; };
+		C2DB72DA22591DB700C2B986 /* libavutil.56.22.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC1F2221F89A00339675 /* libavutil.56.22.100.dylib */; };
+		C2DB72DB22591DB700C2B986 /* libdc1394.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC252221F94F00339675 /* libdc1394.dylib */; };
+		C2DB72DC22591DB700C2B986 /* libavformat.58.20.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC212221F8F500339675 /* libavformat.58.20.100.dylib */; };
+		C2DB72DD22591DB700C2B986 /* libavcodec.58.35.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC232221F92000339675 /* libavcodec.58.35.100.dylib */; };
+		C2DB72DE22591DB700C2B986 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AFAD872252E2950038AF5B /* CoreImage.framework */; };
+		C2DB72DF22591DB700C2B986 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995581B128DF400A5C623 /* IOKit.framework */; };
+		C2DB72E022591DB700C2B986 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
+		C2DB72E122591DB700C2B986 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C276ECA81C72B5D900242CDB /* CoreGraphics.framework */; };
+		C2DB72E222591DB700C2B986 /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995591B128DF400A5C623 /* IOSurface.framework */; };
+		C2DB72E322591DB700C2B986 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731819953389008149E2 /* AVFoundation.framework */; };
+		C2DB72E422591DB700C2B986 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731919953389008149E2 /* CoreMedia.framework */; };
+		C2DB72E522591DB700C2B986 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784AF0FF439BC000DE1D7 /* Accelerate.framework */; };
+		C2DB72E622591DB700C2B986 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */; };
+		C2DB72E722591DB700C2B986 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B10FF439BC000DE1D7 /* AudioUnit.framework */; };
+		C2DB72E822591DB700C2B986 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B20FF439BC000DE1D7 /* CoreAudio.framework */; };
+		C2DB72E922591DB700C2B986 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
+		C2DB72EA22591DB700C2B986 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53E3CDFB0E86099300238D2B /* Carbon.framework */; };
+		C2DB72EB22591DB700C2B986 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0091D8F80E81B9330029341E /* OpenGL.framework */; };
+		C2DB72EC22591DB700C2B986 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		C2DB72F022591DB700C2B986 /* visible_scope.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2819ED42201287900183E44 /* visible_scope.png */; };
+		C2E02ED4225AB70E00AC175D /* visible_mov_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */; };
 		C2E0EE621F7B079300D32697 /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693D1CED3E2B0045FF57 /* libgtest.a */; };
 		C2E0EE631F7B079600D32697 /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693E1CED3E2B0045FF57 /* libgtest_main.a */; };
 		C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
@@ -356,6 +451,16 @@
 			dstSubfolderSpec = 7;
 			files = (
 				C2819ED52201287900183E44 /* visible_scope.png in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C2DB72EF22591DB700C2B986 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				C2DB72F022591DB700C2B986 /* visible_scope.png in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -493,8 +598,8 @@
 		C252611B1F66E95B0069F665 /* Plist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Plist.cpp; path = ../src/Plist.cpp; sourceTree = "<group>"; };
 		C252611E1F66EA910069F665 /* PlistDate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlistDate.cpp; path = ../src/PlistDate.cpp; sourceTree = "<group>"; };
 		C252611F1F66EA910069F665 /* pugixml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pugixml.cpp; path = ../src/pugixml.cpp; sourceTree = "<group>"; };
-		C254BE851F4FAF5C00977307 /* OcvVideo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OcvVideo.cpp; path = ../src/OcvVideo.cpp; sourceTree = "<group>"; };
-		C254BE871F4FAF7100977307 /* OcvVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OcvVideo.h; path = ../include/OcvVideo.h; sourceTree = "<group>"; };
+		C254BE851F4FAF5C00977307 /* cvVideoPlasyer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cvVideoPlasyer.cpp; path = ../src/cvVideoPlasyer.cpp; sourceTree = "<group>"; };
+		C254BE871F4FAF7100977307 /* cvVideoPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cvVideoPlayer.h; path = ../include/cvVideoPlayer.h; sourceTree = "<group>"; };
 		C254BEE01F4FB3D300977307 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
 		C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_mov_impl.cpp; path = ../src/visible_mov_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C259145E214492A400F80D5F /* logger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = logger.hpp; path = ../include/logger.hpp; sourceTree = "<group>"; };
@@ -719,7 +824,6 @@
 		C2AABC292221F9E000339675 /* libswscale.5.3.100.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswscale.5.3.100.dylib; path = ../../../../../../../usr/local/Cellar/ffmpeg/4.1.1/lib/libswscale.5.3.100.dylib; sourceTree = "<group>"; };
 		C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "cp-visible-debug.xcconfig"; path = "configs/cp-visible-debug.xcconfig"; sourceTree = "<group>"; };
 		C2AFAD802252E1690038AF5B /* UIImage+OpenCV.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "UIImage+OpenCV.mm"; sourceTree = "<group>"; };
-		C2AFAD852252E17D0038AF5B /* CIImage+OpenCV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CIImage+OpenCV.h"; sourceTree = "<group>"; };
 		C2AFAD872252E2950038AF5B /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		C2AFCEFA216E79570080462D /* imgui_widgets.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_widgets.cpp; path = "../../externals/docking-imgui/imgui/imgui_widgets.cpp"; sourceTree = "<group>"; };
 		C2AFCEFB216E79580080462D /* imgui_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_draw.cpp; path = "../../externals/docking-imgui/imgui/imgui_draw.cpp"; sourceTree = "<group>"; };
@@ -746,6 +850,11 @@
 		C2DA19591E8091FA00062DBC /* kmeans1d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kmeans1d.hpp; sourceTree = "<group>"; };
 		C2DB59B121557C0C00750C2E /* app_core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = app_core.h; path = ../include/app_core.h; sourceTree = "<group>"; };
 		C2DB59B221557CF800750C2E /* result_serialization.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = result_serialization.h; path = ../include/result_serialization.h; sourceTree = "<group>"; };
+		C2DB728822591D8F00C2B986 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		C2DB72F522591DB700C2B986 /* Bina.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bina.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2DB72F622591DBF00C2B986 /* Visible copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Visible copy2-Info.plist"; path = "/Volumes/datastore/arman/dev/Visible/xcode/Visible copy2-Info.plist"; sourceTree = "<absolute>"; };
+		C2E02ED1225AB45E00AC175D /* MovContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MovContext.h; path = ../include/MovContext.h; sourceTree = "<group>"; };
+		C2E02ED2225AB49900AC175D /* algo_Mov.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = algo_Mov.hpp; path = ../include/algo_Mov.hpp; sourceTree = "<group>"; };
 		C2E321FE1D038B16006DFE5E /* AVReader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AVReader.hpp; path = ../include/AVReader.hpp; sourceTree = "<group>"; };
 		C2E321FF1D0480E4006DFE5E /* mediaInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mediaInfo.h; path = ../include/mediaInfo.h; sourceTree = "<group>"; };
 		C2E322001D05B90C006DFE5E /* time_index.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time_index.h; path = ../include/time_index.h; sourceTree = "<group>"; };
@@ -873,6 +982,35 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C2DB72D622591DB700C2B986 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C2DB72D722591DB700C2B986 /* libcinder.a in Frameworks */,
+				C2DB72D822591DB700C2B986 /* libswscale.5.3.100.dylib in Frameworks */,
+				C2DB72D922591DB700C2B986 /* libavresample.4.0.0.dylib in Frameworks */,
+				C2DB72DA22591DB700C2B986 /* libavutil.56.22.100.dylib in Frameworks */,
+				C2DB72DB22591DB700C2B986 /* libdc1394.dylib in Frameworks */,
+				C2DB72DC22591DB700C2B986 /* libavformat.58.20.100.dylib in Frameworks */,
+				C2DB72DD22591DB700C2B986 /* libavcodec.58.35.100.dylib in Frameworks */,
+				C2DB72DE22591DB700C2B986 /* CoreImage.framework in Frameworks */,
+				C2DB72DF22591DB700C2B986 /* IOKit.framework in Frameworks */,
+				C2DB72E022591DB700C2B986 /* OpenCL.framework in Frameworks */,
+				C2DB72E122591DB700C2B986 /* CoreGraphics.framework in Frameworks */,
+				C2DB72E222591DB700C2B986 /* IOSurface.framework in Frameworks */,
+				C2DB72E322591DB700C2B986 /* AVFoundation.framework in Frameworks */,
+				C2DB72E422591DB700C2B986 /* CoreMedia.framework in Frameworks */,
+				C2DB72E522591DB700C2B986 /* Accelerate.framework in Frameworks */,
+				C2DB72E622591DB700C2B986 /* AudioToolbox.framework in Frameworks */,
+				C2DB72E722591DB700C2B986 /* AudioUnit.framework in Frameworks */,
+				C2DB72E822591DB700C2B986 /* CoreAudio.framework in Frameworks */,
+				C2DB72E922591DB700C2B986 /* CoreVideo.framework in Frameworks */,
+				C2DB72EA22591DB700C2B986 /* Carbon.framework in Frameworks */,
+				C2DB72EB22591DB700C2B986 /* OpenGL.framework in Frameworks */,
+				C2DB72EC22591DB700C2B986 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -892,7 +1030,7 @@
 				C252611E1F66EA910069F665 /* PlistDate.cpp */,
 				C252611F1F66EA910069F665 /* pugixml.cpp */,
 				C252611B1F66E95B0069F665 /* Plist.cpp */,
-				C254BE851F4FAF5C00977307 /* OcvVideo.cpp */,
+				C254BE851F4FAF5C00977307 /* cvVideoPlasyer.cpp */,
 				C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */,
 				C2B38A4F1D022D2A00C70872 /* AVReader.mm */,
 				C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */,
@@ -919,6 +1057,7 @@
 				C24CD87C1CEA5B1B0008C72B /* VisibleGtest */,
 				C26A053A1E771CCF00BDC954 /* sscli */,
 				C26F5FFD21B0AA6D00EAE156 /* VisibleRun.app */,
+				C2DB72F522591DB700C2B986 /* Bina.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -936,11 +1075,13 @@
 				C240F9F921E1466D00FBA228 /* VisibleTestApp */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				C26A053B1E771CCF00BDC954 /* sscli */,
+				C2DB728722591D8F00C2B986 /* bina */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				C26F5FFE21B0AA6F00EAE156 /* VisibleRunner-Info.plist */,
 				C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */,
 				C240F9FA21E14C8900FBA228 /* sscli-Info.plist */,
+				C2DB72F622591DBF00C2B986 /* Visible copy2-Info.plist */,
 			);
 			name = QuickTimeIteration;
 			sourceTree = "<group>";
@@ -1098,7 +1239,7 @@
 				C259145E214492A400F80D5F /* logger.hpp */,
 				C25261191F66E8F40069F665 /* Plist.hpp */,
 				C252611A1F66E8F40069F665 /* PlistDate.hpp */,
-				C254BE871F4FAF7100977307 /* OcvVideo.h */,
+				C254BE871F4FAF7100977307 /* cvVideoPlayer.h */,
 				C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */,
 				C2B38A541D022E9D00C70872 /* AVReader.h */,
 				C2E321FE1D038B16006DFE5E /* AVReader.hpp */,
@@ -1110,10 +1251,12 @@
 				C24FC84C1E5E40130071AA1A /* async_tracks.h */,
 				C213607821647E4A00F794AB /* cached_results.hpp */,
 				C241BBAA1FB11B51000DE36E /* algo_Lif.hpp */,
+				C2E02ED2225AB49900AC175D /* algo_Mov.hpp */,
 				C219469E1CE4EA4900976025 /* simple_pair.h */,
 				C219469F1CE4EA4900976025 /* sshist.hpp */,
 				C21946A31CE4EA4900976025 /* guiContext.h */,
 				C2F1B6211FB13FE600DDD7DB /* LifContext.h */,
+				C2E02ED1225AB45E00AC175D /* MovContext.h */,
 				C2B005861CFF8FE100AC2E64 /* hockey_etc_cocoa_wrappers.h */,
 				C2E321FF1D0480E4006DFE5E /* mediaInfo.h */,
 				C2BF1A671E71D12200A30407 /* timeMarker.h */,
@@ -1130,7 +1273,6 @@
 		C23D0F491E29826F0049ADDB /* otherIO */ = {
 			isa = PBXGroup;
 			children = (
-				C2AFAD852252E17D0038AF5B /* CIImage+OpenCV.h */,
 				C23D0F481E2982690049ADDB /* lifFile.hpp */,
 			);
 			path = otherIO;
@@ -1613,6 +1755,14 @@
 			name = imgui;
 			sourceTree = "<group>";
 		};
+		C2DB728722591D8F00C2B986 /* bina */ = {
+			isa = PBXGroup;
+			children = (
+				C2DB728822591D8F00C2B986 /* main.cpp */,
+			);
+			path = bina;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1691,6 +1841,26 @@
 			productReference = C26F5FFD21B0AA6D00EAE156 /* VisibleRun.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C2DB728D22591DB700C2B986 /* Bina */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C2DB72F222591DB700C2B986 /* Build configuration list for PBXNativeTarget "Bina" */;
+			buildPhases = (
+				C2DB728E22591DB700C2B986 /* Resources */,
+				C2DB729622591DB700C2B986 /* Sources */,
+				C2DB72D622591DB700C2B986 /* Frameworks */,
+				C2DB72EF22591DB700C2B986 /* CopyFiles */,
+				C2DB72F122591DB700C2B986 /* Build Number */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Bina;
+			productInstallPath = "$(HOME)/Applications";
+			productName = QuickTimeIteration;
+			productReference = C2DB72F522591DB700C2B986 /* Bina.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1722,6 +1892,10 @@
 						DevelopmentTeam = W4F7HL2GN5;
 						ProvisioningStyle = Automatic;
 					};
+					C2DB728D22591DB700C2B986 = {
+						DevelopmentTeam = W4F7HL2GN5;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Visible" */;
@@ -1744,6 +1918,7 @@
 				C26F5F9721B0AA6D00EAE156 /* VisibleRun */,
 				C24CD87B1CEA5B1B0008C72B /* VisibleGtest */,
 				C26A05391E771CCF00BDC954 /* sscli */,
+				C2DB728D22591DB700C2B986 /* Bina */,
 			);
 		};
 /* End PBXProject section */
@@ -1776,6 +1951,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C2DB728E22591DB700C2B986 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C2DB728F22591DB700C2B986 /* Visible.cfg in Resources */,
+				C2DB729022591DB700C2B986 /* palette.png in Resources */,
+				C2DB729122591DB700C2B986 /* sscli-Info.plist in Resources */,
+				C2DB729222591DB700C2B986 /* swatchSmall.png in Resources */,
+				C2DB729322591DB700C2B986 /* Visible.icns in Resources */,
+				C2DB729422591DB700C2B986 /* imgui.ini in Resources */,
+				C2DB729522591DB700C2B986 /* swatchLarge.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -1794,6 +1983,20 @@
 			shellScript = "#Update build number with number of git commits if in release mode\nbuildNumber=$(git rev-list HEAD | wc -l | tr -d ' ')\necho $buildNumber\n#if [ ${CONFIGURATION} == \"Release\" ]; then\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n#fi;\n";
 		};
 		C26F5FF921B0AA6D00EAE156 /* Build Number */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build Number";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#Update build number with number of git commits if in release mode\nbuildNumber=$(git rev-list HEAD | wc -l | tr -d ' ')\necho $buildNumber\n#if [ ${CONFIGURATION} == \"Release\" ]; then\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n#fi;\n";
+		};
+		C2DB72F122591DB700C2B986 /* Build Number */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2037,6 +2240,78 @@
 				C2398A0A21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C26F5FDB21B0AA6D00EAE156 /* highgui.cc in Sources */,
 				C28F74392236DD6E0040890C /* edgel.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C2DB729622591DB700C2B986 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C2DB729722591DB700C2B986 /* gradient.cpp in Sources */,
+				C2DB729822591DB700C2B986 /* gui_handler.cpp in Sources */,
+				C2DB729922591DB700C2B986 /* contraction_t.cpp in Sources */,
+				C2DB729A22591DB700C2B986 /* hockey_etc_cocoa_wrappers.mm in Sources */,
+				C2DB729B22591DB700C2B986 /* permutation_entropy.cpp in Sources */,
+				C2DB729C22591DB700C2B986 /* opencv_utils.cpp in Sources */,
+				C2DB729D22591DB700C2B986 /* imgui_widgets.cpp in Sources */,
+				C2DB729E22591DB700C2B986 /* Swatch.cpp in Sources */,
+				C2DB729F22591DB700C2B986 /* time_spec.cpp in Sources */,
+				C2DB72A022591DB700C2B986 /* algo_Lif.cpp in Sources */,
+				C2DB72A122591DB700C2B986 /* seq_frame_container.cpp in Sources */,
+				C2DB72A222591DB700C2B986 /* Plist.cpp in Sources */,
+				C2DB72A322591DB700C2B986 /* tinyxmlparser.cpp in Sources */,
+				C2DB72A422591DB700C2B986 /* localvariance.cpp in Sources */,
+				C2DB72A522591DB700C2B986 /* InterfaceUtilities.cpp in Sources */,
+				C2DB72A622591DB700C2B986 /* ellipse_fit.cpp in Sources */,
+				C2DB72A722591DB700C2B986 /* pugixml.cpp in Sources */,
+				C2DB72A822591DB700C2B986 /* lineseg.cpp in Sources */,
+				C2DB72A922591DB700C2B986 /* cinder_support.cpp in Sources */,
+				C2DB72AA22591DB700C2B986 /* imguivariouscontrols.cpp in Sources */,
+				C2DB72AB22591DB700C2B986 /* visible_lif_impl.cpp in Sources */,
+				C2DB72AC22591DB700C2B986 /* visible_impl.cpp in Sources */,
+				C2DB72AD22591DB700C2B986 /* histo.cpp in Sources */,
+				C2DB72AE22591DB700C2B986 /* Item.cpp in Sources */,
+				C2DB72AF22591DB700C2B986 /* rand_support.cpp in Sources */,
+				C2DB72B022591DB700C2B986 /* lifFile.cpp in Sources */,
+				C2DB72B122591DB700C2B986 /* tinyxmlerror.cpp in Sources */,
+				C2DB72B222591DB700C2B986 /* labelBlob.cpp in Sources */,
+				C29E1BCE225AA26200CBFFDB /* cvVideoPlasyer.cpp in Sources */,
+				C2DB72B322591DB700C2B986 /* ip_utils.cpp in Sources */,
+				C2DB72B422591DB700C2B986 /* window.cc in Sources */,
+				C2DB72B522591DB700C2B986 /* imgui_wrapper.cpp in Sources */,
+				C2DB72B622591DB700C2B986 /* imgui_draw.cpp in Sources */,
+				C2DB72B722591DB700C2B986 /* rowfunc.cpp in Sources */,
+				C2DB72B822591DB700C2B986 /* csv.cpp in Sources */,
+				C2DB72B922591DB700C2B986 /* sg_filter.cpp in Sources */,
+				C2E02ED4225AB70E00AC175D /* visible_mov_impl.cpp in Sources */,
+				C2DB72BA22591DB700C2B986 /* tinyxml.cpp in Sources */,
+				C2DB72BB22591DB700C2B986 /* figure.cc in Sources */,
+				C2DB72BC22591DB700C2B986 /* labelconnect.cpp in Sources */,
+				C2DB72BD22591DB700C2B986 /* AVReader.mm in Sources */,
+				C2DB72BE22591DB700C2B986 /* ImCurveEdit.cpp in Sources */,
+				C2DB72BF22591DB700C2B986 /* registration.cpp in Sources */,
+				C2DB72C022591DB700C2B986 /* AVReaderWrapper.mm in Sources */,
+				C2DB72C122591DB700C2B986 /* sm_producer.cpp in Sources */,
+				C2DB72C222591DB700C2B986 /* CinderImGui.cpp in Sources */,
+				C2DB72C322591DB700C2B986 /* bitvector.cpp in Sources */,
+				C2DB72C422591DB700C2B986 /* exception.cpp in Sources */,
+				C2DB72C522591DB700C2B986 /* boost_literals.cpp in Sources */,
+				C2DB72C622591DB700C2B986 /* PlistDate.cpp in Sources */,
+				C2DB72C722591DB700C2B986 /* imgui.cpp in Sources */,
+				C2DB72C822591DB700C2B986 /* ImSequencer.cpp in Sources */,
+				C2DB72C922591DB700C2B986 /* ImGuiExtensions.cpp in Sources */,
+				C2DB72CA22591DB700C2B986 /* logger.cpp in Sources */,
+				C2DB72CB22591DB700C2B986 /* VisibleApp.cpp in Sources */,
+				C2DB72CC22591DB700C2B986 /* color.cc in Sources */,
+				C2DB72CD22591DB700C2B986 /* self_similarity.cpp in Sources */,
+				C2DB72CE22591DB700C2B986 /* onImagePlotUtils.cpp in Sources */,
+				C2DB72CF22591DB700C2B986 /* tinystr.cpp in Sources */,
+				C2DB72D022591DB700C2B986 /* matpixel.cpp in Sources */,
+				C2DB72D122591DB700C2B986 /* core_support.cpp in Sources */,
+				C2DB72D222591DB700C2B986 /* opencv_draw.cpp in Sources */,
+				C2DB72D322591DB700C2B986 /* file_system.cpp in Sources */,
+				C2DB72D422591DB700C2B986 /* highgui.cc in Sources */,
+				C2DB72D522591DB700C2B986 /* edgel.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2549,6 +2824,99 @@
 			};
 			name = Release;
 		};
+		C2DB72F322591DB700C2B986 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				CODE_SIGN_ENTITLEMENTS = Visible/Visible.entitlements;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = NO;
+				COPY_PHASE_STRIP = YES;
+				CURRENT_PROJECT_VERSION = 2;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = W4F7HL2GN5;
+				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
+				ENABLE_ON_DEMAND_RESOURCES = NO;
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Visible_Prefix.pch;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = "Visible copy2-Info.plist";
+				INSTALL_PATH = /Applications;
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				MACH_O_TYPE = mh_execute;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
+				OTHER_LDFLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Browser;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				STRIP_INSTALLED_PRODUCT = NO;
+				USER_HEADER_SEARCH_PATHS = include;
+				VALID_ARCHS = "i386 x86_64";
+				VERSIONING_SYSTEM = "apple-generic";
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		C2DB72F422591DB700C2B986 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				CODE_SIGN_ENTITLEMENTS = Visible/Visible.entitlements;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = NO;
+				CURRENT_PROJECT_VERSION = 2;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = W4F7HL2GN5;
+				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
+				ENABLE_ON_DEMAND_RESOURCES = NO;
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_FAST_MATH = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Visible_Prefix.pch;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = "Visible copy2-Info.plist";
+				INSTALL_PATH = /Applications;
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				MACH_O_TYPE = mh_execute;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
+				OTHER_LDFLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Browser;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				STRIP_INSTALLED_PRODUCT = YES;
+				USER_HEADER_SEARCH_PATHS = include;
+				VALID_ARCHS = "i386 x86_64";
+				VERSIONING_SYSTEM = "apple-generic";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2593,6 +2961,15 @@
 			buildConfigurations = (
 				C26F5FFB21B0AA6D00EAE156 /* Debug */,
 				C26F5FFC21B0AA6D00EAE156 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C2DB72F222591DB700C2B986 /* Build configuration list for PBXNativeTarget "Bina" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C2DB72F322591DB700C2B986 /* Debug */,
+				C2DB72F422591DB700C2B986 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
