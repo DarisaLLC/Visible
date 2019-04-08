@@ -28,6 +28,8 @@ using namespace ci;
 using namespace ci::ip;
 using namespace stl_utils;
 
+#define OCV_PLAYER
+
 namespace
 {
     std::vector<std::string> d_names { "green", "red", "gray" };
@@ -187,7 +189,7 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const lifIO::LifSe
     return thisref;
 }
 
-#if OCV_PLAYER
+#ifdef OCV_PLAYER
 template<>
 std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const ocvPlayerRef& mMovie)
 {
