@@ -51,7 +51,7 @@ public:
     }
 
     
-	Signal <void(bool)> signalManualEditMode;
+
 	
 	static const std::string& caption () { static std::string cp ("Lif Viewer # "); return cp; }
 	virtual void draw () override;
@@ -82,13 +82,6 @@ public:
 	
 	const ivec2& imagePos () const { return m_instant_mouse_image_pos; }
 	const uint32_t& channelIndex () const { return m_instant_channel; }
-	
-	void setManualEditMode (Side_t b)  { mManualEditMode = b; }
-	Side_t getManualEditMode ()  { return mManualEditMode; }
-    Side_t getManualNextEditMode ();
-	
-	void setAnalyzeMode (bool b)  { mAnalyze = b; }
-	bool getAnalyzeMode ()  { return mAnalyze; }
 	
 	void setZoom (vec2);
 	vec2 getZoom ();
@@ -205,12 +198,12 @@ private:
     int mMouseInGraphs; // -1 if not, 0 1 2
     bool mMouseInImage; // if in Image, mMouseInGraph is -1
     ivec2 mMouseInImagePosition;
-    sides_length_t mLengthPoints;
+
     std::vector<sides_length_t> mCellEnds = {sides_length_t (), sides_length_t()};
     gl::TextureRef mImage;
     uint32_t m_cutoff_pct;
-    bool mAnalyze;
-    Side_t mManualEditMode;
+
+
     
     // Screen Info
     vec2 mScreenSize;
@@ -231,15 +224,13 @@ private:
     void update_log (const std::string& meg = "") override;
     bool looping () override;
     void looping (bool what) override;
-	void seek( size_t xPos );
+//	void seek( size_t xPos );
 
 	
     // UI Params Menu
     std::vector<std::string> mEditNames = {"label=`Cell Length`", "label=`Cell Width`", "label=`None`"};
     std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
     std::vector<std::string>  mProcessOrProcessing = {"Process", "Processing"};
-	int mButton_title_index;
-	std::string mButton_title;
     
     // Layout Manager
     std::shared_ptr<layoutManager> m_layout;

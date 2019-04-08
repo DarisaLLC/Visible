@@ -197,30 +197,6 @@ class LifSignaler : public base_signaler
  */
 
 
-/** @struct region
- * Structure containing information about the blob and its children
- */
-struct region
-{
-    int index; /*!< Index of blob during extraction */
-    cv::Point2f center; /*!< Center of blob */
-    double majorAxis; /*!< Ellipse major axis (a) */
-    double minorAxis; /*!< Ellipse minor axis (b) */
-    double orientation; /*!< Ellipse orientation */
-    double area; /*!< External area of blob */
-    double realArea; /*!< Real area (remove intrior blobs) */
-    std::vector<cv::Point> dPoly;
-    cv::RotatedRect ellipse;
-    bool isValid; /*!< True if blob has more than 5 points (ellipse approx) */
-    friend ostream & operator<<(ostream & os, const region & rg){
-        os << rg.index << "," << std::boolalpha << rg.isValid << std::endl;
-        os << rg.area << "," << rg.orientation << std::endl;
-        os << rg.center.x << "," << rg.center.y << std::endl;
-        os << rg.majorAxis << "," << rg.minorAxis << std::endl;
-        return os;
-    }
-};
-
 
 class lif_serie_processor : public LifSignaler
 {
