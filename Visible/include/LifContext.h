@@ -224,13 +224,7 @@ private:
     void update_log (const std::string& meg = "") override;
     bool looping () override;
     void looping (bool what) override;
-//	void seek( size_t xPos );
 
-	
-    // UI Params Menu
-    std::vector<std::string> mEditNames = {"label=`Cell Length`", "label=`Cell Width`", "label=`None`"};
-    std::vector<std::string>  mPlayOrPause = {"Play", "Pause"};
-    std::vector<std::string>  mProcessOrProcessing = {"Process", "Processing"};
     
     // Layout Manager
     std::shared_ptr<layoutManager> m_layout;

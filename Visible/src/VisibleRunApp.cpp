@@ -20,7 +20,9 @@
 
 bool VisibleAppControl::ThreadsShouldStop = false;
 
-
+namespace {
+    const std::vector<std::string>& supported_mov_extensions = { ".lif", ".mov", ".mp4", ".ws", ".avi"};
+}
 using namespace ci;
 using namespace ci::app;
 using namespace std;
@@ -165,12 +167,8 @@ void VisibleRunApp::setup()
     {
         mGlobalBounds.include(display->getBounds());
     }
-    
-  
     std::string bpath = m_args[1];
     auto cmds = m_args[1];
-  
-    
     static std::string cok = "chapter_ok";
     static std::string ccok = "chapter_ok_custom_content_ok";
     static std::string cokcnk = "chapter_ok_custom_content_not_recognized";
@@ -180,11 +178,21 @@ void VisibleRunApp::setup()
     std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
     cmds = cmds + " Visible build: " + buildN;
     
+    bool exists_with_extenstion = exists(bpath) && fs::path(bpath).has_extension();
+    if (! exists_with_extenstion){
+         ADD_ERR_AND_RETURN(cmds, " Path not valid or missing extension ");
+    }
     // @todo enumerate args and implement in JSON
-    // Custom Content for LIF files is only IDLab 
-    if(exists(bpath)){
+    // Custom Content for LIF files is only IDLab
+    std::string extension = fs::path(bpath).extension().string();
+    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+    bool is_valid_extension = std::find( supported_mov_extensions.begin(), supported_mov_extensions.end(), extension) != supported_mov_extensions.end();
+    bool is_lif_content = extension == ".lif";
+
+ 
+    if(exists_with_extenstion && is_valid_extension && is_lif_content){
         
-        bool just_list_chapters = m_args.size() == 3 && m_args[2] == "list";
+        bool just_list_chapters = m_args.size() == 3 && is_lif_content && m_args[2] == "list";
         bool selected_by_dialog_no_custom_content_no_chapter = m_args.size() == 2;
         bool chapter_ok =  m_args.size() == 3;
         bool custom_id_exists = m_args.size() == 4;
@@ -221,20 +229,15 @@ void VisibleRunApp::setup()
         }else{
             assert(0);
         }
-        
         VAPPLOG_INFO(info.c_str());
         
         // browser set is allows other threads to work during its setup
         bool browser_is_ready = mBrowser && ! mBrowser->names().empty();
-        
-        
         if(! browser_is_ready){
             ADD_ERR_AND_RETURN(cmds, " No Chapters or Series "){
                 quit();
             }
         }
-
-        
         if(just_list_chapters){
            std::strstream msg;
             for (auto & se : mBrowser->get_all_series  ()){
@@ -245,9 +248,8 @@ void VisibleRunApp::setup()
             VAPPLOG_INFO(tmp.c_str());
             quit();
         }
-
         auto bpath_path = fs::path(bpath);
-        VisibleAppControl::make_result_cache_if_needed (mBrowser, bpath_path);
+        VisibleAppControl::make_result_cache_directory_for_lif (bpath_path, mBrowser);
         auto cache_path = VisibleAppControl::get_visible_cache_directory();
         auto stem = bpath_path.stem();
         cache_path = cache_path / stem;
@@ -285,7 +287,42 @@ void VisibleRunApp::setup()
             ADD_ERR_AND_RETURN(cmds, " No Chapters or Series ")
         }
     }
+    else if (exists_with_extenstion && is_valid_extension){
+        
+        VisibleAppControl::setup_loggers(root_output_dir, visual_log, fs::path(bpath).filename().string());
+        
+        cvVideoPlayer::ref vref = cvVideoPlayer::create(fs::path(bpath));
+        WindowRef ww = getWindow ();
+        
+        auto bpath_path = fs::path(bpath);
+        VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
+        auto cache_path = VisibleAppControl::get_visible_cache_directory();
+        auto stem = bpath_path.stem();
+        cache_path = cache_path / stem;
+        
+        mContext = std::unique_ptr<sequencedImageContext>(new movContext (ww, vref, cache_path));
+        
+        if (mContext->is_valid()){
+            cmds += " [ " + m_args[1] + " ] ";
+            cmds += "  Ok ";
+        }
+        setup_ui();
+        
+        VAPPLOG_INFO(cmds.c_str());
+        update();
+        
+        ww->setTitle ( cmds + " Visible build: " + buildN);
+        mFont = Font( "Menlo", 18 );
+        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+        // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
+        getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
+        getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
+        getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
+        getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
+        gl::enableVerticalSync();
+    }
     ADD_ERR_AND_RETURN(cmds, " Path not valid ");
+    
 }
     
 

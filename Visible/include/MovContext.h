@@ -5,6 +5,7 @@
 #include "clipManager.hpp"
 #include "visible_layout.hpp"
 #include <atomic>
+#include <memory>
 #include "OnImagePlotUtils.h"
 #include "imGuiCustom/ImSequencer.h"
 #include "imGuiCustom/visibleSequencer.h"
@@ -80,7 +81,7 @@ private:
     std::vector<std::string> m_channel_names;
     std::vector<time_spec_t> m_timeSpecs;
     cv::Mat m_poster;
-    mutable std::weak_ref m_lifWeakRef;
+
     
     mutable float  m_length_in_seconds;
     mutable std::string m_contentType; // "" denostes canonical LIF
@@ -114,7 +115,7 @@ public:
   
     
     // From a image_sequence_data
-    movContext(ci::app::WindowRef& ww, const cvVideoPlayer&, const fs::path&  );
+    movContext(ci::app::WindowRef& ww, const cvVideoPlayer::ref&, const fs::path&  );
     
     // shared_from_this() through base class
     movContext* shared_from_above () {
@@ -189,8 +190,7 @@ private:
     std::shared_ptr<sequence_processor> m_movProcRef;
 	void load_current_sequence ();
 	bool have_sequence ();
-    std::shared_ptr<image_sequence> m_cur_image_sequence_ref;
-    image_sequence_data m_serie;
+    cvVideoPlayer::ref m_sequence_player_ref;
     boost::filesystem::path mPath;
     std::vector<std::string> m_plot_names;
     
@@ -227,6 +227,7 @@ private:
     
     // Tracks of frame associated results
     std::weak_ptr<vecOfNamedTrack_t> m_basic_trackWeakRef;
+    std::weak_ptr<vecOfNamedTrack_t> m_longterm_pci_trackWeakRef;
 
     // Folder for Per user result / content caching
     boost::filesystem::path mUserStorageDirPath;
@@ -269,7 +270,8 @@ private:
     vec2 texture_to_display_zoom ();
     void add_result_sequencer ();
     void add_navigation ();
-
+    void add_motion_profile ();
+    
     // Navigation
     void update_log (const std::string& meg = "") override;
     bool looping () override;
@@ -293,7 +295,7 @@ private:
     // UI instant sub-window rects
     Rectf m_results_browser_display;
     Rectf m_navigator_display;
-    
+      Rectf m_motion_profile_display;
 
     OnImagePlot m_tsPlotter;
     
@@ -308,25 +310,26 @@ private:
 	}
 	
 
-};
-
-class scopedPause : private Noncopyable {
-public:
-    scopedPause (const movContextRef& ref) :weakContext(ref) {
-        if (!weakContext){
-            if (weakLif->isPlaying())
-               weakContext->play_pause_button();
-        }
-    }
-    ~scopedPause (){
-        if (!weakContext ){
-            if (!weakContext->isPlaying()){
-               weakContext->play_pause_button();
+    class scopedPause : private Noncopyable {
+    public:
+        scopedPause (const movContextRef& ref) :weakContext(ref) {
+            if (!weakContext){
+                if (weakContext->isPlaying())
+                    weakContext->play_pause_button();
             }
         }
-    }
-private:
-    std::shared_ptr<movContext>weakContext;
+        ~scopedPause (){
+            if (!weakContext ){
+                if (!weakContext->isPlaying()){
+                    weakContext->play_pause_button();
+                }
+            }
+        }
+    private:
+        std::shared_ptr<movContext>weakContext;
+    };
+
+
 };
 
 #endif

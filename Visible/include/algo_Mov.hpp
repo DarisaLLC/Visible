@@ -17,6 +17,7 @@
 #include "sm_producer.h"
 #include "cinder_xchg.hpp"
 #include "vision/histo.h"
+#include "vision/labelBlob.hpp"
 #include "vision/opencv_utils.hpp"
 #include "opencv2/video/tracking.hpp"
 #include "algo_cardiac.hpp"
@@ -71,8 +72,8 @@ public:
     // @todo event though index is an argument, only room for one channel is kept.
     // Short term is specifically run on the channel contraction pci was run on
     // duplictes will be removed from indices for short term pci.
-    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci_on_channel (const int channel_index);
-    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci (const std::vector<roiWindow<P8U>>&);
+    std::shared_ptr<vecOfNamedTrack_t> run_longterm_pci_on_channel (const int channel_index);
+    std::shared_ptr<vecOfNamedTrack_t> run_longterm_pci (const std::vector<roiWindow<P8U>>&);
     std::vector<float> shortterm_pci (const std::vector<uint32_t>& indices);
     void shortterm_pci (const uint32_t& temporal_window);
     const vecOfNamedTrack_t& shortterm_pci () const { return m_shortterm_pci_tracks; }
@@ -115,17 +116,17 @@ protected:
     boost::signals2::signal<sequence_processor::sig_cb_ss_image_available>* signal_ss_image_available;
     
 private:
-    const std::vector<blob>& blobs () const { return m_blobs; }
+
     
     void compute_shortterm (const uint32_t halfWinSz) const;
     
-    void contraction_analyzed (contractionContainer_t&);
+
     void stats_3d_computed ();
     void pci_done ();
     void sm_content_loaded ();
     
     // path to cache folder for this serie
-    fs::path mCurrentSerieCachePath;
+    fs::path mCurrentCachePath;
     
     // Assumes LIF data -- use multiple window.
     void load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames);
@@ -137,7 +138,6 @@ private:
     // @note Specific to ID Lab Lif Files
     void create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names);
     
-    labelBlob::ref get_blobCachedObject (const index_time_t& ti);
     
     mutable std::mutex m_mutex;
     mutable std::mutex m_shortterms_mutex;
@@ -154,7 +154,7 @@ private:
     std::vector<double> m_medianLevel;
     
     // Std Dev Image
-    mutable mapU8PeaksToPointfs_t m_map_peaks_to_points;
+
     
     channel_images_t m_images;
     channel_vec_t m_all_by_channel;
@@ -167,26 +167,23 @@ private:
     // 3 channels: 2 flu one visible
     // 1 channel: visible
     // Note create_named_tracks
-    std::shared_ptr<vecOfNamedTrack_t>  m_flurescence_tracksRef;
-    std::shared_ptr<vecOfNamedTrack_t>  m_contraction_pci_tracksRef;
+    std::shared_ptr<vecOfNamedTrack_t>  m_longterm_pci_tracksRef;
     mutable vecOfNamedTrack_t                   m_shortterm_pci_tracks;
     mutable std::queue<float>               m_shortterms;
     
-    std::shared_ptr<contraction_analyzer> m_caRef;
     
     mutable svl::stats<int64_t> m_3d_stats;
     std::atomic<bool> m_3d_stats_done;
     cv::RotatedRect m_motion_mass;
     cv::RotatedRect m_motion_mass_bottom;
     mutable cv::Mat m_temporal_ss;
-    std::vector<sides_length_t> m_cell_ends = {sides_length_t (), sides_length_t()};
     mutable fPair m_ab;
     
     mutable std::vector<std::vector<float>> m_temporal_ss_raw;
     uiPair m_voxel_sample;
     std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;
     labelBlob::ref m_main_blob;
-    std::vector<blob> m_blobs;
+    std::vector<labelBlob::blob> m_blobs;
     
     std::shared_ptr<OCVImageWriter> m_writer;
     

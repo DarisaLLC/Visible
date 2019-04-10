@@ -329,7 +329,7 @@ void VisibleApp::initData( const fs::path &path )
     m_isIdLabLif = true;
     
     // create if needed cache directories for this lif file
-    bool ok = VisibleAppControl::make_result_cache_if_needed(mLifRef, path);
+    bool ok = VisibleAppControl::make_result_cache_directory_for_lif(path, mLifRef);
     std::string msg = (ok) ? "Cache directories existed or were created" : "Cache directories could not be created";
     vlogger::instance().console()->info(msg);
 
