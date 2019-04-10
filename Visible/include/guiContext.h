@@ -35,7 +35,7 @@
 #include "directoryPlayer.h"
 #include "hockey_etc_cocoa_wrappers.h"
 #include "timeMarker.h"
-#include "OcvVideo.h"
+#include "cvVideoPlayer.h"
 #include <sstream>
 
 #include "DisplayObjectContainer.h"
@@ -63,14 +63,10 @@ class guiContext : public std::enable_shared_from_this<guiContext>
 public:
 	enum Type {
 		null_viewer = 0,
-		matrix_viewer = null_viewer+1,
-		qtime_viewer = matrix_viewer+1,
-		clip_viewer = qtime_viewer+1,
-		image_dir_viewer = clip_viewer+1,
+		cv_video_viewer = null_viewer+1,
+		image_dir_viewer = cv_video_viewer+1,
 		lif_file_viewer = image_dir_viewer+1,
-		movie_dir_viewer = lif_file_viewer+1,
-		timeline_browser = movie_dir_viewer+1,
-		viewer_types = timeline_browser+1,
+		viewer_types = lif_file_viewer+1,
 	};
 	
 	// Signal time point mark to all
@@ -127,43 +123,6 @@ public:
 
 
 
-
-
-
-class matContext : public guiContext
-{
-public:
-	// From just a name, use the open file dialog to get the file
-	// From a name and a path
-	matContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
-    static const std::string& caption () { static std::string cp ("Smm Viewer # "); return cp; }
-
-	virtual void resize ();
-    virtual void draw ();
-    virtual void setup ();
-    virtual void update ();
-    virtual void mouseDrag( MouseEvent event );
-    virtual void mouseDown( MouseEvent event );
-    void draw_window ();
-    virtual void onMarked (marker_info_t&);
-	
-private:
-
-    void internal_setupmat_from_file (const boost::filesystem::path &);
-    params::InterfaceGl         mMatParams;
-    
-    gl::VboMeshRef mPointCloud;
-    gl::BatchRef	mPointsBatch;
-
-    
-    CameraPersp		mCam;
-    CameraUi		mCamUi;
-    
-    boost::filesystem::path mPath;
-};
-
-
-
 ///////////////////   Visual Browsing Contexts
 
 class sequencedImageContext : public guiContext, public gui_base
@@ -196,14 +155,7 @@ public:
 	static ivec2 startup_display_size () { return ivec2( 848, 564 ); }
 	
 protected:
-//	int mMainTimeLineSliderIndex;
-//	TimeLineSlider                    mMainTimeLineSlider;
-//	vector<Widget *>	mWidgets;
-//	vector<bool> mMouseInWidgets;
 
-	
-	
-//	std::vector<graph1d::ref> m_plots;
 	std::mutex m_track_mutex;
 	
 	arrayOfNamedTracks_t m_luminance_tracks;
@@ -211,6 +163,7 @@ protected:
 	
 	async_vecOfNamedTrack_t m_fluorescense_tracks;
 	async_vecOfNamedTrack_t m_contraction_pci_tracks;
+	async_vecOfNamedTrack_t m_longterm_pci_tracks;
 	
 	
 	bool m_have_tracks;
@@ -236,94 +189,6 @@ protected:
 	std::string			mLog;
 	index_time_t    mCurrentIndexTime;
 	
-	
-	
-};
-
-
-class movDirContext : public guiContext
-{
-public:
-	// From a name and a path and an optional format for anonymous file names
-	movDirContext(ci::app::WindowRef& ww, const boost::filesystem::path& pp = boost::filesystem::path ());
-	
-	void set_dir_info (const std::vector<std::string>& extension = { ".jpg", ".png", ".JPG", ".jpeg"},
-					   double fps=29.97, const std::string anonymous_format = "01234567890abcdefghijklmnopqrstuvwxy");
-	
-	const  boost::filesystem::path source_path () const;
-
-	virtual bool is_valid () const
-	{
-		return m_valid && is_context_type(guiContext::movie_dir_viewer);
-	}
-	
-	static const std::string& caption () { static std::string cp ("Image Dir Viewer "); return cp; }
-	
-	virtual void draw ();
-	virtual void resize ();
-	virtual void setup ();
-	virtual void update ();
-	virtual void mouseMove( MouseEvent event );
-	virtual void onMarked (marker_info_t&);
-	virtual void mouseDown( MouseEvent event );
-	virtual void mouseUp( MouseEvent event );
-	virtual void mouseDrag( MouseEvent event );
-	virtual void keyDown( KeyEvent event );
-	
-	
-	
-	void setZoom (vec2);
-	vec2 getZoom ();
-		void draw_info ();
-	
-	void                            seekToFrame( const size_t frame );
-	void                            seekToStart();
-	void                            seekToEnd();
-	size_t                          getCurrentFrame() const;
-	size_t                          getNumFrames() const;
-	double                          getCurrentTime() const;
-	double                          getDuration() const;
-	time_spec_t						getCurrentTime ();
-	
-	
-private:
-	
-	mutable boost::filesystem::path mPath;
-	
-	bool mMoviePlay;
-	bool mMovieLoop;
-	void play_pause_button ();
-	void loop_no_loop_button ();	
-	bool have_movie () const;
-	void play ();
-	void pause ();
-	void clear_movie_params ();
-	void loadMovieFile();
-	
-	void update_log (const std::string& meg = "");
-	Rectf get_image_display_rect ();
-	
-	
-	mutable directoryPlayerRef m_Dm;
-	std::vector<std::string> m_extension;
-	std::string m_anonymous_format;
-	double m_fps;
-	
-	vec2		mMousePos;
-	vec2 m_zoom;
-	vec2 mScreenSize;
-	bool mMouseIsDown;
-	bool mMouseIsMoving;
-	bool mMouseIsDragging;
-	bool mMetaDown;
-	
-	int mMouseInGraphs; // -1 if not, 0 1 2
-	bool mMouseInImage; // if in Image, mMouseInGraph is -1
-	
-	gl::TextureRef		mTextTexture;
-	vec2				mSize;
-	Font				mFont;
-	std::string			mLog;
 	
 	
 };

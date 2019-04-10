@@ -1,5 +1,5 @@
 //
-//  visible_lif_impl.cpp
+//  visible_mov_impl.cpp
 //  Visible
 //
 //  Created by Arman Garakani on 5/13/16.
@@ -25,7 +25,6 @@
 #include "cinder/ip/Blend.h"
 #include "opencv2/highgui.hpp"
 #include "cinder/ip/Flip.h"
-#include "otherIO/lifFile.hpp"
 #include <strstream>
 #include <algorithm>
 #include <future>
@@ -37,9 +36,8 @@
 #include "vision/histo.h"
 #include "core/stl_utils.hpp"
 #include "sm_producer.h"
-#include "algo_Lif.hpp"
+#include "algo_Mov.hpp"
 #include "core/signaler.h"
-#include "contraction.hpp"
 #include "logger.hpp"
 #include "cinder/Log.h"
 #include "CinderImGui.h"
@@ -62,10 +60,10 @@ using namespace svl;
 
 #define ONCE(x) { static int __once = 1; if (__once) {x;} __once = 0; }
 
-namespace anonymous{
+namespace {
     std::map<std::string, unsigned int> named_colors = {{"Red", 0xFF0000FF }, {"red",0xFF0000FF },{"Green", 0xFF00FF00},
         {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFD66D3E}};
-    
+ 
     
 }
 
@@ -83,28 +81,23 @@ namespace anonymous{
 // @ todo setup default repository
 // default median cover pct is 5% (0.05)
 
-movContext::movContext(ci::app::WindowRef& ww, const cvVideoPlayer& sd, const fs::path& cache_path) :sequencedImageContext(ww), m_serie(sd), m_geometry_available(false), mUserStorageDirPath (cache_path) {
-    m_type = guiContext::Type::lif_file_viewer;
+movContext::movContext(ci::app::WindowRef& ww, const cvVideoPlayer::ref& sd, const fs::path& cache_path) :sequencedImageContext(ww), m_sequence_player_ref(sd), m_geometry_available(false), mUserStorageDirPath (cache_path) {
+    m_type = guiContext::Type::cv_video_viewer;
     m_show_contractions = false;
     // Create an invisible folder for storage
-    mCurrentCachePath = mUserStorageDirPath / m_serie.name();
-    bool folder_exists = fs::exists(mCurrentSerieCachePath);
+    mCurrentCachePath = mUserStorageDirPath / m_sequence_player_ref->name();
+    bool folder_exists = fs::exists(mCurrentCachePath);
     std::string msg = folder_exists ? " exists " : " does not exist ";
-    msg = " folder for " + m_serie.name() + msg;
-    vlogger::instance().console()->info(msg);
-    m_idlab_defaults.median_level_set_cutoff_fraction = 7;
+    msg = " folder for " + m_sequence_player_ref->name() + msg;
+   // vlogger::instance().console()->info(msg);
     
     
-    m_valid = false;
-    m_valid = sd.index() >= 0;
+    m_valid = m_sequence_player_ref->isLoaded();
     if (m_valid){
         m_layout = std::make_shared<layoutManager>  ( ivec2 (10, 30) );
-        if (auto lifRef = m_serie.readerWeakRef().lock()){
-            m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&lifRef->getSerie(sd.index()), stl_utils::null_deleter());
             setup();
             ww->getRenderer()->makeCurrentContext(true);
         }
-    }
 }
 
 
@@ -115,35 +108,19 @@ ci::app::WindowRef&  movContext::get_windowRef(){
 void movContext::setup_signals(){
     
     // Create a Processing Object to attach signals to
-    m_lifProcRef = std::make_shared<lif_serie_processor> (mCurrentSerieCachePath);
+    m_movProcRef = std::make_shared<sequence_processor> (mCurrentCachePath);
     
     // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&movContext::signal_content_loaded, shared_from_above(), _1);
-    boost::signals2::connection ml_connection = m_lifProcRef->registerCallback(content_loaded_cb);
+    boost::signals2::connection ml_connection = m_movProcRef->registerCallback(content_loaded_cb);
     
-    // Support lifProcessor::flu results available
-    std::function<void ()> flu_stats_available_cb = boost::bind (&movContext::signal_flu_stats_available, shared_from_above());
-    boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(flu_stats_available_cb);
-    
-    // Support lifProcessor::initial ss results available
+    // Support movProcessor::initial ss results available
     std::function<void (int&)> sm1d_available_cb = boost::bind (&movContext::signal_sm1d_available, shared_from_above(), _1);
-    boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_available_cb);
+    boost::signals2::connection nl_connection = m_movProcRef->registerCallback(sm1d_available_cb);
     
-    // Support lifProcessor::median level set ss results available
+    // Support movProcessor::median level set ss results available
     std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&movContext::signal_sm1dmed_available, shared_from_above(), _1, _2);
-    boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_available_cb);
-    
-    // Support lifProcessor::contraction results available
-    std::function<void (lif_serie_processor::contractionContainer_t&)> contraction_available_cb = boost::bind (&movContext::signal_contraction_available, shared_from_above(), _1);
-    boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_available_cb);
-    
-    // Support lifProcessor::geometry_available
-    std::function<void ()> geometry_available_cb = boost::bind (&movContext::signal_geometry_available, shared_from_above());
-    boost::signals2::connection geometry_connection = m_lifProcRef->registerCallback(geometry_available_cb);
-    
-    // Support lifProcessor::temporal_image_available
-    std::function<void (cv::Mat&)> ss_image_available_cb = boost::bind (&movContext::signal_ss_image_available, shared_from_above(), _1);
-    boost::signals2::connection ss_image_connection = m_lifProcRef->registerCallback(ss_image_available_cb);
+    boost::signals2::connection ol_connection = m_movProcRef->registerCallback(sm1dmed_available_cb);
     
 }
 
@@ -173,14 +150,13 @@ void movContext::setup()
     srand( 133 );
     setup_signals();
     assert(is_valid());
-    ww->setTitle( m_serie.name());
+    ww->setTitle( m_sequence_player_ref->name());
     ww->setSize(1280, 768);
     mFont = Font( "Menlo", 18 );
     auto ws = ww->getSize();
     mSize = vec2( ws[0], ws[1] / 12);
-    m_contraction_names = m_contraction_none;
     clear_playback_params();
-    loadCurrentSerie();
+    load_current_sequence();
     shared_from_above()->update();
     
     ww->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
@@ -205,10 +181,10 @@ void movContext::signal_sm1dmed_available (int& dummy, int& dummy2)
     
     if (haveTracks())
     {
-        auto tracksRef = m_contraction_pci_trackWeakRef.lock();
+        auto tracksRef = m_longterm_pci_trackWeakRef.lock();
         if (!tracksRef->at(0).second.empty()){
             //   m_plots[channel_count()-1]->load(tracksRef->at(0));
-            m_result_seq.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
+            m_result_seq.m_editable_plot_data.load(tracksRef->at(0), named_colors["PCI"], 2);
         }
     }
     vlogger::instance().console()->info("self-similarity available: ");
@@ -220,58 +196,6 @@ void movContext::signal_content_loaded (int64_t& loaded_frame_count )
     vlogger::instance().console()->info(msg);
     process_async();
 }
-void movContext::signal_flu_stats_available ()
-{
-    update();
-    vlogger::instance().console()->info(" Flu Stats Available ");
-    
-}
-
-void movContext::signal_contraction_available (lif_serie_processor::contractionContainer_t& contras)
-{
-    // Pauses playback if playing and restore it at scope's end
-    scopedPause sp(std::shared_ptr<movContext>(shared_from_above(), stl_utils::null_deleter () ));
-    
-    if (contras.empty()) return;
-    
-    
-    // @note: We are handling one contraction for now.
-    m_contractions = contras;
-    reset_entire_clip(mMediaInfo.count);
-    uint32_t index = 0;
-    string name = " C " + svl::toString(index) + " ";
-    m_contraction_names.push_back(name);
-    m_clips.emplace_back(m_contractions[0].contraction_start.first,
-                         m_contractions[0].relaxation_end.first,
-                         m_contractions[0].contraction_peak.first);
-    
-    update_contraction_selection();
-    
-}
-
-
-void movContext::signal_geometry_available()
-{
-    vlogger::instance().console()->info(" Volume Variance are available ");
-    if (! m_lifProcRef){
-        vlogger::instance().console()->error("Lif Processor Object does not exist ");
-        return;
-    }
-    
-}
-
-void movContext::signal_ss_image_available(cv::Mat& image)
-{
-    vlogger::instance().console()->info(" SS Image Available  ");
-    if (! m_lifProcRef){
-        vlogger::instance().console()->error("Lif Processor Object does not exist ");
-        return;
-    }
-    m_segmented_image = image.clone();
-    m_geometry_available = true;
-    
-}
-
 
 
 void movContext::signal_frame_loaded (int& findex, double& timestamp)
@@ -308,8 +232,6 @@ void movContext::reset_entire_clip (const size_t& frame_count) const
     // Stop Playback ?
     m_clips.clear();
     m_clips.emplace_back(frame_count);
-    m_contraction_names.resize(1);
-    m_contraction_names[0] = " Entire ";
     set_current_clip_index(0);
 }
 
@@ -330,14 +252,15 @@ void movContext::clear_playback_params ()
     m_zoom.x = m_zoom.y = 1.0f;
 }
 
-bool movContext::have_lif_serie ()
+bool movContext::have_sequence ()
 {
-    bool have =   m_serie.readerWeakRef().lock() && m_cur_lif_serie_ref  && mFrameSet && m_layout->isSet();
+    cvVideoPlayer::weak_ref wr(m_sequence_player_ref);
+    bool have =   wr.lock() && m_sequence_player_ref && mFrameSet && m_layout->isSet();
     return have;
 }
 
 
-bool movContext::is_valid () const { return m_valid && is_context_type(guiContext::lif_file_viewer); }
+bool movContext::is_valid () const { return m_valid && is_context_type(guiContext::cv_video_viewer); }
 
 
 
@@ -350,7 +273,7 @@ bool movContext::is_valid () const { return m_valid && is_context_type(guiContex
 
 void movContext::loop_no_loop_button ()
 {
-    if (! have_lif_serie()) return;
+    if (! have_sequence()) return;
     if (looping())
         looping(false);
     else
@@ -370,20 +293,20 @@ bool movContext::looping ()
 
 void movContext::play ()
 {
-    if (! have_lif_serie() || m_is_playing ) return;
+    if (! have_sequence() || m_is_playing ) return;
     m_is_playing = true;
 }
 
 void movContext::pause ()
 {
-    if (! have_lif_serie() || ! m_is_playing ) return;
+    if (! have_sequence() || ! m_is_playing ) return;
     m_is_playing = false;
 }
 
 // For use with RAII scoped pause pattern
 void movContext::play_pause_button ()
 {
-    if (! have_lif_serie () ) return;
+    if (! have_sequence () ) return;
     if (m_is_playing)
         pause ();
     else
@@ -392,80 +315,7 @@ void movContext::play_pause_button ()
 
 
 
-void movContext::update_contraction_selection()
-{
-    m_show_contractions = true;
-    m_result_seq.myItems.resize(1);
-    m_result_seq.myItems.push_back(timeLineSequence::timeline_item{ 0,
-        (int) m_contractions[0].contraction_start.first,
-        (int) m_contractions[0].relaxation_end.first , true});
-    
-    
-}
 
-void movContext::add_contractions (bool* p_open)
-{
-    Rectf dr = get_image_display_rect();
-    auto pos = ImVec2(dr.getLowerLeft().x, 150 + getWindowHeight()/2.0);
-    ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(ImVec2(dr.getWidth(), 340), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Contractions", p_open, ImGuiWindowFlags_MenuBar))
-    {
-        if (ImGui::BeginMenuBar())
-        {
-            if (ImGui::BeginMenu("File"))
-            {
-                if (ImGui::MenuItem("Close")) *p_open = false;
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
-        
-        // left
-        static int selected = 0;
-        ImGui::BeginChild("left pane", ImVec2(150, 0), true);
-        for (int i = 0; i < m_contraction_names.size(); i++)
-        {
-            char label[128];
-            sprintf(label, "Contraction %d", i);
-            if (ImGui::Selectable(label, selected == i))
-                selected = i;
-        }
-        ImGui::EndChild();
-        ImGui::SameLine();
-        
-        // right
-        ImGui::BeginGroup();
-        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
-        ImGui::Text("Contraction: %d", selected);
-        ImGui::Separator();
-        if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
-        {
-            if (ImGui::BeginTabItem("Description"))
-            {
-                set_current_clip_index(selected);
-                std::string msg = " Entire ";
-                if (selected != 0){
-                    const contraction_analyzer::contraction_t& se = m_contractions[get_current_clip_index() - 1];
-                    auto ctr_info = " Contraction: [" + to_string(se.contraction_start.first) + "," + to_string(se.relaxation_end.first) + "]";
-                    msg = " Current Clip " + m_contraction_names[get_current_clip_index()] + " " + ctr_info;
-                }
-                ImGui::TextWrapped("%s", msg.c_str());
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Details"))
-            {
-                ImGui::Text("ID: 0123456789");
-                ImGui::EndTabItem();
-            }
-            ImGui::EndTabBar();
-        }
-        ImGui::EndChild();
-        if (ImGui::Button("Save")) {}
-        ImGui::EndGroup();
-    }
-    ImGui::End();
-}
 /************************
  *
  *  Seek Processing
@@ -498,9 +348,7 @@ int movContext::getCurrentFrame ()
 
 time_spec_t movContext::getCurrentTime ()
 {
-    if (m_seek_position >= 0 && m_seek_position < m_serie.timeSpecs().size())
-        return m_serie.timeSpecs()[m_seek_position];
-    else return -1.0;
+    return time_spec_t (m_sequence_player_ref->getElapsedSeconds());
 }
 
 
@@ -575,7 +423,7 @@ void movContext::update_with_mouse_position ( MouseEvent event )
     mMouseInImage = false;
     mMouseInGraphs  = -1;
     
-    if (! have_lif_serie () ) return;
+    if (! have_sequence () ) return;
     
     mMouseInImage = get_image_display_rect().contains(event.getPos());
     if (mMouseInImage)
@@ -633,7 +481,7 @@ void movContext::keyDown( KeyEvent event )
     
     
     // these keys only make sense if there is an active movie
-    if( have_lif_serie () ) {
+    if( have_sequence () ) {
         if( event.getCode() == KeyEvent::KEY_LEFT ) {
             pause();
             seekToFrame (getCurrentFrame() - 1);
@@ -653,57 +501,7 @@ void movContext::keyDown( KeyEvent event )
     }
 }
 
-/************************
- *
- *  MedianCutOff Set/Get
- *
- ************************/
 
-void movContext::setMedianCutOff (int32_t newco)
-{
-    if (! m_lifProcRef) return;
-    // Get a shared_ptr from weak and check if it had not expired
-    auto spt = m_lifProcRef->contractionWeakRef().lock();
-    if (! spt ) return;
-    uint32_t tmp = newco % 100; // pct
-    uint32_t current (spt->get_median_levelset_pct () * 100);
-    if (tmp == current) return;
-    spt->set_median_levelset_pct (tmp / 100.0f);
-    m_lifProcRef->update();
-}
-
-int32_t movContext::getMedianCutOff () const
-{
-    if (! m_cur_lif_serie_ref) return 0;
-    
-    // Get a shared_ptr from weak and check if it had not expired
-    auto spt = m_lifProcRef->contractionWeakRef().lock();
-    if (spt)
-    {
-        uint32_t current (spt->get_median_levelset_pct () * 100);
-        return current;
-    }
-    return 0;
-}
-
-void movContext::setCellLength (uint32_t newco){
-    if (! m_lifProcRef) return;
-    // Get a shared_ptr from weak and check if it had not expired
-    auto spt = m_lifProcRef->contractionWeakRef().lock();
-    if (! spt ) return;
-    m_cell_length = newco;
-}
-uint32_t movContext::getCellLength () const{
-    if (! m_cur_lif_serie_ref) return 0;
-    
-    // Get a shared_ptr from weak and check if it had not expired
-    auto spt = m_lifProcRef->contractionWeakRef().lock();
-    if (spt)
-    {
-        return m_cell_length;
-    }
-    return 0;
-}
 
 
 
@@ -719,9 +517,9 @@ uint32_t movContext::getCellLength () const{
 //  2
 //  3
 
-void movContext::loadCurrentSerie ()
+void movContext::load_current_sequence ()
 {
-    if ( ! is_valid() || ! m_cur_lif_serie_ref)
+    if ( ! is_valid() || ! m_sequence_player_ref )
         return;
     
     try {
@@ -729,14 +527,13 @@ void movContext::loadCurrentSerie ()
          * Clear and pause if we are playing back
          */
         m_clips.clear();
-        setCellLength(0);
         pause();
         
         /*
          * Create the frameset and assign the channel names
          * Fetch the media info
          */
-        mFrameSet = seqFrameContainer::create (*m_cur_lif_serie_ref);
+        mFrameSet = seqFrameContainer::create (m_sequence_player_ref);
         if (! mFrameSet || ! mFrameSet->isValid())
         {
             vlogger::instance().console()->debug("Serie had 1 or no frames ");
@@ -744,7 +541,7 @@ void movContext::loadCurrentSerie ()
         }
         mMediaInfo = mFrameSet->media_info();
         mChannelCount = (uint32_t) mMediaInfo.getNumChannels();
-        if (!(mChannelCount > 0 && mChannelCount < 4)){
+        if (!(mChannelCount > 0 && mChannelCount < 5)){
             vlogger::instance().console()->debug("Expected 1 or 2 or 3 channels ");
             return;
         }
@@ -756,17 +553,17 @@ void movContext::loadCurrentSerie ()
          * Loading also produces voxel images.
          */
         m_plot_names.clear();
-        m_plot_names = m_serie.channel_names();
+        m_plot_names =m_sequence_player_ref->channel_names();
         m_plot_names.push_back("MisRegister");
         cv::Mat result;
         std::vector<std::thread> threads(1);
-        threads[0] = std::thread(&lif_serie_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names(), m_plot_names);
+        threads[0] = std::thread(&sequence_processor::load, m_movProcRef.get(), mFrameSet,m_sequence_player_ref->channel_names(), m_plot_names);
         std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
         
         /*
          * Fetch length and channel names
          */
-        mFrameSet->channel_names (m_serie.channel_names());
+        mFrameSet->channel_names (m_sequence_player_ref->channel_names());
         reset_entire_clip(mFrameSet->count());
         m_minFrame = 0;
         m_maxFrame =  mFrameSet->count() - 1;
@@ -777,7 +574,7 @@ void movContext::loadCurrentSerie ()
         m_result_seq.mSequencerItemTypeNames = {"All", "Contraction", "Force"};
         m_result_seq.myItems.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         
-        m_title = m_serie.name() + " @ " + mPath.filename().string();
+        m_title =m_sequence_player_ref->name() + " @ " + mPath.filename().string();
         
         auto ww = get_windowRef();
         ww->setTitle(m_title );
@@ -801,14 +598,12 @@ void movContext::process_async (){
         case 3:
         {
             // note launch mode is std::launch::async
-            m_fluorescense_tracks = std::async(std::launch::async,&lif_serie_processor::run_flu_statistics,
-                                               m_lifProcRef.get(), std::vector<int> ({0,1}) );
-            m_contraction_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 2);
+            m_longterm_pci_tracks = std::async(std::launch::async, &sequence_processor::run_longterm_pci_on_channel, m_movProcRef.get(), 2);
             break;
         }
         case 1:
         {
-            m_contraction_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel,m_lifProcRef.get(), 0);
+            m_longterm_pci_tracks = std::async(std::launch::async, &sequence_processor::run_longterm_pci_on_channel,m_movProcRef.get(), 0);
             break;
         }
     }
@@ -924,30 +719,6 @@ void movContext::add_navigation(){
         ImGui::InputInt("",  &m_result_seq.mFrameMax, 0, 0);
         ImGui::PopID();
         
-        if(!m_contraction_pci_trackWeakRef.expired()){
-            if(m_median_set_at_default){
-                int default_median_cover_pct = m_idlab_defaults.median_level_set_cutoff_fraction;
-                setMedianCutOff(default_median_cover_pct);
-                ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, default_median_cover_pct, default_median_cover_pct);
-            }
-            else{
-                int default_median_cover_pct = getMedianCutOff();
-                ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, 0, 20);
-                setMedianCutOff(default_median_cover_pct);
-            }
-        }
-        ImGui::SameLine();
-        if (ImGui::Button(m_median_set_at_default ? "Default" : "Not Set"))
-        {
-            m_median_set_at_default = ! m_median_set_at_default;
-        }
-        
-        //   int a = m_current_clip_index;
-        //   ImGui::SliderInt(" Contraction ", &a, 0, m_contraction_names.size());
-        
-        // @todo improve this logic. The moment we are able to set the median cover, set it to the default
-        // of 5 percent
-        // @todo move defaults in general setting
         
     }
     ImGui::End();
@@ -973,7 +744,7 @@ void movContext::add_motion_profile (){
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(frame);
     
-    const RotatedRect& mt = m_lifProcRef->motion_surface_bottom();
+    const RotatedRect& mt = m_movProcRef->motion_surface_bottom();
     cv::Point2f points[4];
     mt.points(&points[0]);
     
@@ -1023,7 +794,6 @@ void  movContext::DrawGUI(){
     add_navigation();
     add_result_sequencer();
     add_motion_profile ();
-    add_contractions(&m_show_contractions);
 }
 
 Rectf movContext::get_image_display_rect ()
@@ -1045,7 +815,7 @@ void  movContext::update_log (const std::string& msg)
 
 void movContext::resize ()
 {
-    if (! have_lif_serie () || ! mSurface ) return;
+    if (! have_sequence () || ! mSurface ) return;
     if (! m_layout->isSet()) return;
     auto ww = get_windowRef();
     auto ws = ww->getSize();
@@ -1058,7 +828,7 @@ void movContext::resize ()
 
 bool movContext::haveTracks()
 {
-    return ! m_flurescence_trackWeakRef.expired() && ! m_contraction_pci_trackWeakRef.expired();
+    return  ! m_longterm_pci_trackWeakRef.expired();
 }
 
 void movContext::update ()
@@ -1068,51 +838,39 @@ void movContext::update ()
     
     
     ww->getRenderer()->makeCurrentContext(true);
-    if (! have_lif_serie() ) return;
+    if (! have_sequence() ) return;
     auto ws = ww->getSize();
     m_layout->update_window_size(ws);
     
     // If Plots are ready, set them up It is ready only for new data
     // @todo replace with signal
     //@todo switch to using weak_ptr all together
-    if ( is_ready (m_fluorescense_tracks) )
-        m_flurescence_trackWeakRef = m_fluorescense_tracks.get();
-    
-    if ( is_ready (m_contraction_pci_tracks)){
-        m_contraction_pci_trackWeakRef = m_contraction_pci_tracks.get();
+    if ( is_ready (m_longterm_pci_tracks)){
+        m_longterm_pci_trackWeakRef = m_longterm_pci_tracks.get();
     }
     
-    
-    // Update Fluorescence results if ready
-    if (! m_flurescence_trackWeakRef.expired())
-    {
-        assert(channel_count() >= 3);
-        auto tracksRef = m_flurescence_trackWeakRef.lock();
-        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors[tracksRef->at(0).first], 0);
-        m_result_seq.m_editable_plot_data.load(tracksRef->at(1), anonymous::named_colors[tracksRef->at(1).first], 1);
-    }
     
     // Update PCI result if ready
-    if ( ! m_contraction_pci_trackWeakRef.expired())
+    if ( ! m_longterm_pci_trackWeakRef.expired())
     {
 #ifdef SHORTTERM_ON
-        //  if (m_lifProcRef->shortterm_pci().at(0).second.empty())
-        //      m_lifProcRef->shortterm_pci(1);
+        //  if (m_movProcRef->shortterm_pci().at(0).second.empty())
+        //      m_movProcRef->shortterm_pci(1);
 #endif
-        auto tracksRef = m_contraction_pci_trackWeakRef.lock();
-        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
+        auto tracksRef = m_longterm_pci_trackWeakRef.lock();
+        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), named_colors["PCI"], 2);
         
         
         // Update shortterm PCI result if ready
-        if ( ! m_lifProcRef->shortterm_pci().at(0).second.empty() )
+        if ( ! m_movProcRef->shortterm_pci().at(0).second.empty() )
         {
-            auto tracksRef = m_lifProcRef->shortterm_pci();
-            m_result_seq.m_editable_plot_data.load(tracksRef.at(0), anonymous::named_colors["Short"], 3);
+            auto tracksRef = m_movProcRef->shortterm_pci();
+            m_result_seq.m_editable_plot_data.load(tracksRef.at(0), named_colors["Short"], 3);
         }
     }
     
     // Fetch Next Frame
-    if (have_lif_serie ()){
+    if (have_sequence ()){
         mSurface = mFrameSet->getFrame(getCurrentFrame());
         mCurrentIndexTime = mFrameSet->currentIndexTime();
         if (mCurrentIndexTime.first != m_seek_position){
@@ -1154,7 +912,7 @@ gl::TextureRef movContext::pixelInfoTexture ()
 {
     if (! mMouseInImage) return gl::TextureRef ();
     TextLayout lout;
-    const auto names = m_serie.channel_names();
+    const auto names =m_sequence_player_ref->channel_names();
     auto channel_name = (m_instant_channel < names.size()) ? names[m_instant_channel] : " ";
     
     // LIF has 3 Channels.
@@ -1209,7 +967,7 @@ void movContext::draw_info ()
 
 void movContext::draw ()
 {
-    if( have_lif_serie()  && mSurface )
+    if( have_sequence()  && mSurface )
     {
         Rectf dr = get_image_display_rect();
         ivec2 tl = dr.getUpperLeft();
@@ -1246,8 +1004,8 @@ void movContext::draw ()
         
         if (m_geometry_available)
         {
-            const cv::RotatedRect& ellipse = m_lifProcRef->motion_surface();
-            const fPair& ab = m_lifProcRef->ellipse_ab();
+            const cv::RotatedRect& ellipse = m_movProcRef->motion_surface();
+            const fPair& ab = m_movProcRef->ellipse_ab();
             vec2 a_v ((ab.first * gdr.getWidth()) / 512, 0.0f );
             vec2 b_v (0.0f, (ab.second * gdr.getHeight()) / 128);
             
@@ -1273,25 +1031,7 @@ void movContext::draw ()
             }
         }
         
-        if (isEditing() && mCellEnds.size() == 2)
-        {
-            const sides_length_t& length = mCellEnds[0];
-            const sides_length_t& width = mCellEnds[1];
-            cinder::gl::ScopedLineWidth( 10.0f );
-            {
-                cinder::gl::ScopedColor col (ColorA( 1, 0.1, 0.1, 0.8f ) );
-                gl::drawLine(length.first, length.second);
-                gl::drawSolidCircle(length.first, 3.0);
-                gl::drawSolidCircle(length.second, 3.0);
-            }
-            {
-                cinder::gl::ScopedColor col (ColorA( 0.1, 1.0, 0.1, 0.8f ) );
-                gl::drawLine(width.first, width.second);
-                gl::drawSolidCircle(width.first, 3.0);
-                gl::drawSolidCircle(width.second, 3.0);
-            }
-        }
-        
+    
         
         if(m_showGUI)
             DrawGUI();

@@ -1,7 +1,7 @@
 #ifndef __QTIME_FRAMES_
 #define __QTIME_FRAMES_
 
-#include "OcvVideo.h"
+#include "cvVideoPlayer.h"
 #include <cinder/Channel.h>
 #include <cinder/Area.h>
 #include <limits>

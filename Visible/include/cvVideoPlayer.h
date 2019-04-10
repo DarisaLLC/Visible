@@ -23,12 +23,14 @@ public:
     typedef std::shared_ptr<cv::VideoCapture>                VideoCaptureRef;
     typedef std::chrono::time_point<std::chrono::high_resolution_clock>    time_point_t;
 
-    ref create(const ci::fs::path& filepath);
+    static ref create(const ci::fs::path& filepath);
     
 	cvVideoPlayer();
 	cvVideoPlayer( const cvVideoPlayer& rhs );
 	~cvVideoPlayer();
 
+    const std::string& name() const { return mName; }
+    const std::vector<std::string>& channel_names() const { return mChannelNames; }
     
 	cvVideoPlayer&			operator=( const cvVideoPlayer& rhs );
 
@@ -37,6 +39,8 @@ public:
 	cvVideoPlayer&			speed( float v );
 
 	ci::Surface8uRef		createSurface();
+    ci::Surface8uRef        createSurface(int idx);
+    
 	bool					load( const ci::fs::path& filepath );
 	void					play();
 	void					seek( double seconds );
@@ -81,6 +85,7 @@ protected:
 	ci::ivec2				mSize;
 	float					mSpeed			= 1.0f;
     std::string                  mName;
+    std::vector<std::string>                  mChannelNames;
 };
 
 

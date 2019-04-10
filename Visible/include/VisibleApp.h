@@ -25,7 +25,9 @@
 #include <string>
 #include <map>
 
+#include "MovContext.h"
 #include "algo_Lif.hpp"
+#include "algo_Mov.hpp"
 #include "Item.h"
 #include "logger.hpp"
 #include "core/core.hpp"
@@ -72,8 +74,9 @@ namespace VisibleAppControl{
     
     bool setup_loggers (const fs::path app_support_dir,  imGuiLog& visualLog, std::string id_name);
     bool setup_text_loggers (const fs::path app_support_dir,  std::string id_name);
-    
-    bool make_result_cache_if_needed (const lif_browser::ref& lif_ref, const boost::filesystem::path& path);
+
+    fs::path make_result_cache_entry_for_content_file (const boost::filesystem::path& path);
+    bool make_result_cache_directory_for_lif (const boost::filesystem::path& path, const lif_browser::ref& lif_ref);
     
     static const std::string LIF_CUSTOM = "IDLab_0";
 }
@@ -193,7 +196,7 @@ private:
     Rectf                        mGlobalBounds;
     map<string, boost::any> mPlist;
 
-    mutable std::unique_ptr<lifContext> mContext;
+    mutable std::unique_ptr<sequencedImageContext> mContext;
     mutable lif_browser::ref mBrowser;
     
     bool showLog = false;

@@ -62,11 +62,22 @@ Surface8uRef cvVideoPlayer::createSurface()
 {
 	if ( mLoaded ) {
 		cv::Mat frame;
-		if ( mCapture->retrieve( frame ) ) {
+        *mCapture >> frame;
+		if ( ! frame.empty() )
 			return Surface8u::create( fromOcv( frame ) );
-		}
 	}
 	return nullptr;
+}
+
+Surface8uRef cvVideoPlayer::createSurface(int idx)
+{
+    if ( mLoaded ) {
+        cv::Mat frame;
+        if ( mCapture->retrieve( frame , idx) ) {
+            return Surface8u::create( fromOcv( frame ) );
+        }
+    }
+    return nullptr;
 }
 
 cvVideoPlayer::ref cvVideoPlayer::create( const fs::path& filepath )
@@ -91,15 +102,17 @@ cvVideoPlayer::ref cvVideoPlayer::create( const fs::path& filepath )
 		dref->mCodec			= string( codec );
 
 		dref->mFilePath	= filepath;
-		dref->mFrameRate	= mCapture->get( CV_CAP_PROP_FPS );
-		dref->mNumFrames	= (uint32_t)mCapture->get( CV_CAP_PROP_FRAME_COUNT );
-		dref->mSize.x		= (int32_t)mCapture->get( CV_CAP_PROP_FRAME_WIDTH );
-		dref->mSize.y		= (int32_t)mCapture->get( CV_CAP_PROP_FRAME_HEIGHT );
+		dref->mFrameRate	= dref->mCapture->get( CV_CAP_PROP_FPS );
+		dref->mNumFrames	= (uint32_t)dref->mCapture->get( CV_CAP_PROP_FRAME_COUNT );
+		dref->mSize.x		= (int32_t)dref->mCapture->get( CV_CAP_PROP_FRAME_WIDTH );
+		dref->mSize.y		= (int32_t)dref->mCapture->get( CV_CAP_PROP_FRAME_HEIGHT );
 
 		if ( dref->mFrameRate > 0.0 ) {
-			dref->mDuration		= (double)mNumFrames / mFrameRate;
-			dref->mFrameDuration	= 1.0 / mFrameRate;
+			dref->mDuration		= (double) dref->mNumFrames / dref->mFrameRate;
+			dref->mFrameDuration	= 1.0 / dref->mFrameRate;
 		}
+        dref->mChannelNames = {"Blue", "Green", "Red", "Alpha"};
+        
 		dref->mLoaded = true;
 	}
     return dref;

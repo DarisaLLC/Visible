@@ -66,9 +66,10 @@ fs::path VisibleAppControl::get_visible_cache_directory () {
     return visiblePath;
 }
 
-bool  VisibleAppControl::make_result_cache_if_needed (const lif_browser::ref& lif_ref, const boost::filesystem::path& path){
-    
-    if(! exists(path) || ! lif_ref) return false;
+fs::path VisibleAppControl::make_result_cache_entry_for_content_file (const boost::filesystem::path& path){
+
+    fs::path ret_path;
+    if(! exists(path)) return ret_path;
     
     try{
         auto visiblePath = get_visible_cache_directory();
@@ -77,12 +78,33 @@ bool  VisibleAppControl::make_result_cache_if_needed (const lif_browser::ref& li
         std::string filestem = path.stem().string();
         auto cachePath = visiblePath/filestem;
         if (!fs::exists( cachePath)) fs::create_directories(cachePath);
-        
+        ret_path = cachePath;
+    }
+    catch (const std::exception & ex)
+    {
+        fs::path null_path;
+        std::cout << "Creating cache directories failed: " << ex.what() << std::endl;
+        return null_path;
+    }
+    return ret_path;
+}
+
+bool  VisibleAppControl::make_result_cache_directory_for_lif (const boost::filesystem::path& path, const lif_browser::ref& lif_ref){
+    
+    if(! exists(path) || ! lif_ref) return false;
+    
+    fs::path cache_path = make_result_cache_entry_for_content_file(path);
+
+    if (cache_path.empty()) return false;
+    
+    try{
+        if(lif_ref){
         auto series = lif_ref->get_all_series ();
         
-        for( vector<lif_serie_data>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt ){
-            auto serie_cache_path = cachePath/serieIt->name();
-            if (!fs::exists( serie_cache_path)) fs::create_directories(serie_cache_path);
+            for( vector<lif_serie_data>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt ){
+                auto serie_cache_path = cache_path/serieIt->name();
+                if (!fs::exists( serie_cache_path)) fs::create_directories(serie_cache_path);
+            }
         }
     }
     catch (const std::exception & ex)

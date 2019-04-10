@@ -63,16 +63,20 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Users/arman/Pictures/lif/3channels.lif"
+            argument = "/Volumes/datastore/arman/Pictures/lif/3_channels/Series007_chan02.mov"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "/Users/arman/Pictures/lif/3channels.lif"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "Series014"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "IDLab_0"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Volumes/nobokovHD/Users/arman/Pictures/lif/Sample1.lif"

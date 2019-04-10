@@ -62,7 +62,7 @@ using namespace svl;
 
 #define ONCE(x) { static int __once = 1; if (__once) {x;} __once = 0; }
 
-namespace anonymous{
+namespace {
     std::map<std::string, unsigned int> named_colors = {{"Red", 0xFF0000FF }, {"red",0xFF0000FF },{"Green", 0xFF00FF00},
         {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFD66D3E}};
     
@@ -208,7 +208,7 @@ void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
         auto tracksRef = m_contraction_pci_trackWeakRef.lock();
         if (!tracksRef->at(0).second.empty()){
          //   m_plots[channel_count()-1]->load(tracksRef->at(0));
-            m_result_seq.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
+            m_result_seq.m_editable_plot_data.load(tracksRef->at(0), named_colors["PCI"], 2);
         }
     }
     vlogger::instance().console()->info("self-similarity available: ");
@@ -390,56 +390,6 @@ void lifContext::play_pause_button ()
         play ();
 }
 
-
-/************************
- *
- *  Manual Edit Support ( Width and Height setting )
- *
- ************************/
-
-lifContext::Side_t lifContext::getManualNextEditMode ()
-{
-    Side_t nm = getManualEditMode();
-    switch(nm)
-    {
-        case Side_t::major:
-            nm = Side_t::minor;
-            break;
-        case Side_t::minor:
-            nm = Side_t::major;
-            break;
-    }
-    return nm;
-    
-}
-
-void lifContext::edit_no_edit_button ()
-{
-    
-//    if (! have_lif_serie () ) return;
-//    m_is_editing = ! m_is_editing;
-//    if (! m_is_editing) return;
-//    
-//    looping(false);
-//
-//    // If we are in Edit mode. Stop and Go to the end as detected
-//    setManualEditMode(getManualNextEditMode());
-//    const std::string& ename = mEditNames[getManualEditMode()];
-//    const clip& clip = m_clips[get_current_clip_index()];
-//    switch(getManualEditMode()){
-//        case Side_t::minor:
-//            seekToFrame(clip.first());
-//            break;
-//        case Side_t::major:
-//            seekToFrame(clip.last());
-//            break;
-//        default:
-//            break;
-//    }
-//    mUIParams.setOptions( "mode", ename);
-//    if (mContainer.getNumChildren())
-//        mContainer.removeChildren();
-}
 
 
 void lifContext::update_contraction_selection()
@@ -1138,8 +1088,8 @@ void lifContext::update ()
     {
         assert(channel_count() >= 3);
         auto tracksRef = m_flurescence_trackWeakRef.lock();
-        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors[tracksRef->at(0).first], 0);
-        m_result_seq.m_editable_plot_data.load(tracksRef->at(1), anonymous::named_colors[tracksRef->at(1).first], 1);
+        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), named_colors[tracksRef->at(0).first], 0);
+        m_result_seq.m_editable_plot_data.load(tracksRef->at(1), named_colors[tracksRef->at(1).first], 1);
     }
 
     // Update PCI result if ready
@@ -1150,14 +1100,14 @@ void lifContext::update ()
       //      m_lifProcRef->shortterm_pci(1);
 #endif
         auto tracksRef = m_contraction_pci_trackWeakRef.lock();
-        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), anonymous::named_colors["PCI"], 2);
+        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), named_colors["PCI"], 2);
 
 
         // Update shortterm PCI result if ready
         if ( ! m_lifProcRef->shortterm_pci().at(0).second.empty() )
         {
             auto tracksRef = m_lifProcRef->shortterm_pci();
-            m_result_seq.m_editable_plot_data.load(tracksRef.at(0), anonymous::named_colors["Short"], 3);
+            m_result_seq.m_editable_plot_data.load(tracksRef.at(0), named_colors["Short"], 3);
         }
     }
     
@@ -1285,7 +1235,8 @@ void lifContext::draw ()
         }
         
         {
-            gl::ScopedColor (getManualEditMode() ? ColorA( 0.25f, 0.5f, 1, 1 ) : ColorA::gray(1.0));
+            //@todo change color to indicate presence in any display area
+          //  gl::ScopedColor (getManualEditMode() ? ColorA( 0.25f, 0.5f, 1, 1 ) : ColorA::gray(1.0));
             gl::drawStrokedRect(get_image_display_rect(), 3.0f);
         }
 

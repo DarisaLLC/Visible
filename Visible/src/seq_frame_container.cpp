@@ -191,7 +191,7 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const lifIO::LifSe
 
 #ifdef OCV_PLAYER
 template<>
-std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const ocvPlayerRef& mMovie)
+std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const cvVideoPlayer::ref& mMovie)
 {
     tiny_media_info minfo;
     minfo.size.width = mMovie->getSize().x;
@@ -199,7 +199,22 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const ocvPlayerRef
     minfo.mFps = mMovie->getFrameRate();
     minfo.count = mMovie->getNumFrames ();
     minfo.duration = mMovie->getDuration();
+    minfo.mChannels = 4;
+    minfo.channel_size = minfo.size;
+    minfo.mIsMovie = true;
+
     seqFrameContainer::ref thisref (new seqFrameContainer(minfo));
+    
+    for(auto ff = 0; ff < minfo.count; ff++){
+        auto sframe = mMovie->createSurface();
+        auto ftime = ff / minfo.mFps;
+        cm_time ft (ftime);
+        bool check = thisref->loadFrame(sframe, ft);
+        if (! check){
+            std::cout << std::endl << "-----------------" << ff << "--------------" << std::endl;
+        }
+    }
+    thisref->mValid = thisref->count() == minfo.count;
     return thisref;
     
 }
@@ -311,7 +326,7 @@ const Surface8uRef seqFrameContainer::getFrame(const time_spec_t& dtime) const
         return s8;
     
     assert(fc->second > 0 && fc->second <= mFrames.size());
-    mCurrentIndexTime.first = fc->second - 1;
+    mCurrentIndexTime.first = fc->second -  1;
     mCurrentIndexTime.second = dtime;
     return mFrames[fc->second-1].first;
     
