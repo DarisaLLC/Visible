@@ -986,6 +986,7 @@ void movContext::draw ()
                 gl::draw (mImage, dr);
                 break;
             case 3:
+            case 4:
                 mImage = gl::Texture::create(*mSurface);
                 mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
                 gl::draw (mImage, dr);
