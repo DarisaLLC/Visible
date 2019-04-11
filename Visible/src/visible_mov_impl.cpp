@@ -575,9 +575,12 @@ void movContext::load_current_sequence ()
     }
 }
 
+void movContext::process_window(int window_id){
+    
+}
+
 void movContext::process_async (){
     
-    // @note: ID_LAB  specific. @todo general LIF / TIFF support
     switch(channel_count()){
         case 3:
         case 4:

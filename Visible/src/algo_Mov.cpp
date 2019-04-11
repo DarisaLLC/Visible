@@ -277,8 +277,6 @@ void sequence_processor::compute_shortterm (const uint32_t halfWinSz) const{
 
 
 void sequence_processor::shortterm_pci (const uint32_t& halfWinSz) {
-    
-    
     // Check if full sm has been done
     m_shortterm_pci_tracks.at(0).second.clear();
     for (auto pp = 0; pp < halfWinSz; pp++){
@@ -326,12 +324,11 @@ void sequence_processor::shortterm_pci (const uint32_t& halfWinSz) {
 // Note tracks contained timed data.
 void  sequence_processor::fill_longterm_pci (namedTrack_t& track)
 {
-    //  std::lock_guard<std::mutex> lock(m_mutex);
-    
     try{
         track.second.clear();
         auto mee = m_entropies.begin();
-        for (auto ss = 0; mee != m_entropies.end() || ss < frame_count(); ss++, mee++)
+        assert(m_entropies.size() == m_frameCount);
+        for (auto ss = 0; mee != m_entropies.end() || ss < m_frameCount; ss++, mee++)
         {
             index_time_t ti;
             ti.first = ss;
@@ -342,10 +339,13 @@ void  sequence_processor::fill_longterm_pci (namedTrack_t& track)
     catch(const std::exception & ex)
     {
         std::cout <<  ex.what() << std::endl;
+        return;
     }
-    // Call the content loaded cb if any
-    if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0)
-        signal_ss_image_available->operator()(m_temporal_ss);
+    // Signal we are done with ACI
+    static int dummy;
+    if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
+        signal_sm1d_available->operator()(dummy);
+
 }
 
 
@@ -408,11 +408,7 @@ std::shared_ptr<vecOfNamedTrack_t>  sequence_processor::run_longterm_pci (const 
             });
         }
     }
-    // Signal we are done with ACI
-    static int dummy;
-    if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
-        signal_sm1d_available->operator()(dummy);
-
+ 
     return m_longterm_pci_tracksRef;
 }
 
@@ -475,8 +471,6 @@ void sequence_processor::load_channels_from_images (const std::shared_ptr<seqFra
         }
         m_frameCount++;
     }
-    
-    
 }
 
 
@@ -484,15 +478,6 @@ void sequence_processor::load_channels_from_images (const std::shared_ptr<seqFra
 const int64_t& sequence_processor::frame_count () const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
-    static int64_t inconsistent (0);
-    
-    if (m_all_by_channel.empty()) return inconsistent;
-    
-    const auto cs = m_all_by_channel[0].size();
-    if (cs != m_frameCount) return inconsistent;
-    for (const auto cc : m_all_by_channel){
-        if (cc.size() != cs) return inconsistent;
-    }
     return m_frameCount;
 }
 

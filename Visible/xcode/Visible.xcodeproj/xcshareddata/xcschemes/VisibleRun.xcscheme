@@ -67,8 +67,16 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/datastore/arman/Pictures/1538076003.ts"
+            argument = "/Volumes/datastore/arman/Movies/testpattern.mov"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "/Volumes/datastore/arman/development/projects/parking_spot/__down_loads__/1538078190.ts"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "/Volumes/datastore/arman/Pictures/1538076003.ts"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Users/arman/Pictures/lif/3channels.lif"
