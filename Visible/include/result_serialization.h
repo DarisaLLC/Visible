@@ -29,6 +29,16 @@ public:
         m_mmatrix = mmatrix;
     }
     
+    void load (const vector<double>& entropies, const vector<vector<double>>& mmatrix){
+        m_entropies.assign(entropies.begin(), entropies.end());
+        deque<double> drow;
+        for (const vector<double>& row : mmatrix){
+            drow.assign(row.begin(),row.end());
+            m_mmatrix.push_back(drow);
+        }
+    }
+    
+    
     static std::shared_ptr<ssResultContainer> create(const fs::path& filepath){
         std::shared_ptr<ssResultContainer> ss_ref = std::make_shared<ssResultContainer> ();
         
@@ -44,6 +54,22 @@ public:
     }
     
     static bool store (fs::path& filepath, const deque<double>& entropies, const deque<deque<double>>& mmatrix){
+        bool ok = false;
+        ssResultContainer ss;
+        ss.load(entropies, mmatrix);
+        try{
+            std::ofstream file(filepath.c_str(), std::ios::binary);
+            cereal::PortableBinaryOutputArchive ar(file);
+            ar(ss);
+            ok = true;
+        } catch (cereal::Exception) {
+            ok = false;
+        }
+        return ok;
+    }
+    
+
+    static bool store (fs::path& filepath, const vector<double>& entropies, const vector<vector<double>>& mmatrix){
         bool ok = false;
         ssResultContainer ss;
         ss.load(entropies, mmatrix);

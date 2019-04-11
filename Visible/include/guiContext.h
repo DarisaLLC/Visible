@@ -161,9 +161,9 @@ protected:
 	arrayOfNamedTracks_t m_luminance_tracks;
 	vecOfNamedTrack_t m_shortterm_tracks;
 	
-	async_vecOfNamedTrack_t m_fluorescense_tracks;
-	async_vecOfNamedTrack_t m_contraction_pci_tracks;
-	async_vecOfNamedTrack_t m_longterm_pci_tracks;
+	async_vecOfNamedTrack_t m_fluorescense_tracks_aync;
+	async_vecOfNamedTrack_t m_contraction_pci_tracks_asyn;
+	async_vecOfNamedTrack_t m_longterm_pci_tracks_async;
 	
 	
 	bool m_have_tracks;

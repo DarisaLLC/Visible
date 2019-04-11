@@ -62,7 +62,7 @@ using namespace svl;
 
 namespace {
     std::map<std::string, unsigned int> named_colors = {{"Red", 0xFF0000FF }, {"red",0xFF0000FF },{"Green", 0xFF00FF00},
-        {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFD66D3E}};
+        {"green", 0xFF00FF00},{ "Long", 0xFFFF0000}, { "long", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFD66D3E}};
  
     
 }
@@ -85,7 +85,7 @@ movContext::movContext(ci::app::WindowRef& ww, const cvVideoPlayer::ref& sd, con
     m_type = guiContext::Type::cv_video_viewer;
     m_show_contractions = false;
     // Create an invisible folder for storage
-    mCurrentCachePath = mUserStorageDirPath / m_sequence_player_ref->name();
+    mCurrentCachePath = mUserStorageDirPath;
     bool folder_exists = fs::exists(mCurrentCachePath);
     std::string msg = folder_exists ? " exists " : " does not exist ";
     msg = " folder for " + m_sequence_player_ref->name() + msg;
@@ -118,9 +118,7 @@ void movContext::setup_signals(){
     std::function<void (int&)> sm1d_available_cb = boost::bind (&movContext::signal_sm1d_available, shared_from_above(), _1);
     boost::signals2::connection nl_connection = m_movProcRef->registerCallback(sm1d_available_cb);
     
-    // Support movProcessor::median level set ss results available
-    std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&movContext::signal_sm1dmed_available, shared_from_above(), _1, _2);
-    boost::signals2::connection ol_connection = m_movProcRef->registerCallback(sm1dmed_available_cb);
+ 
     
 }
 
@@ -173,20 +171,6 @@ void movContext::setup()
 
 void movContext::signal_sm1d_available (int& dummy)
 {
-    vlogger::instance().console()->info("self-similarity available: ");
-}
-
-void movContext::signal_sm1dmed_available (int& dummy, int& dummy2)
-{
-    
-    if (haveTracks())
-    {
-        auto tracksRef = m_longterm_pci_trackWeakRef.lock();
-        if (!tracksRef->at(0).second.empty()){
-            //   m_plots[channel_count()-1]->load(tracksRef->at(0));
-            m_result_seq.m_editable_plot_data.load(tracksRef->at(0), named_colors["PCI"], 2);
-        }
-    }
     vlogger::instance().console()->info("self-similarity available: ");
 }
 
@@ -596,14 +580,15 @@ void movContext::process_async (){
     // @note: ID_LAB  specific. @todo general LIF / TIFF support
     switch(channel_count()){
         case 3:
+        case 4:
         {
             // note launch mode is std::launch::async
-            m_longterm_pci_tracks = std::async(std::launch::async, &sequence_processor::run_longterm_pci_on_channel, m_movProcRef.get(), 2);
+            m_longterm_pci_tracks_async = std::async(std::launch::async, &sequence_processor::run_longterm_pci_on_channel, m_movProcRef.get(), 2);
             break;
         }
         case 1:
         {
-            m_longterm_pci_tracks = std::async(std::launch::async, &sequence_processor::run_longterm_pci_on_channel,m_movProcRef.get(), 0);
+            m_longterm_pci_tracks_async = std::async(std::launch::async, &sequence_processor::run_longterm_pci_on_channel,m_movProcRef.get(), 0);
             break;
         }
     }
@@ -834,9 +819,6 @@ bool movContext::haveTracks()
 void movContext::update ()
 {
     ci::app::WindowRef ww = get_windowRef();
-    
-    
-    
     ww->getRenderer()->makeCurrentContext(true);
     if (! have_sequence() ) return;
     auto ws = ww->getSize();
@@ -845,10 +827,9 @@ void movContext::update ()
     // If Plots are ready, set them up It is ready only for new data
     // @todo replace with signal
     //@todo switch to using weak_ptr all together
-    if ( is_ready (m_longterm_pci_tracks)){
-        m_longterm_pci_trackWeakRef = m_longterm_pci_tracks.get();
+    if ( is_ready (m_longterm_pci_tracks_async)){
+        m_longterm_pci_trackWeakRef = m_longterm_pci_tracks_async.get();
     }
-    
     
     // Update PCI result if ready
     if ( ! m_longterm_pci_trackWeakRef.expired())
@@ -858,8 +839,7 @@ void movContext::update ()
         //      m_movProcRef->shortterm_pci(1);
 #endif
         auto tracksRef = m_longterm_pci_trackWeakRef.lock();
-        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), named_colors["PCI"], 2);
-        
+        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), named_colors["Long"], 2);
         
         // Update shortterm PCI result if ready
         if ( ! m_movProcRef->shortterm_pci().at(0).second.empty() )

@@ -138,6 +138,7 @@ private:
     // @note Specific to ID Lab Lif Files
     void create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names);
     
+    void fill_longterm_pci(namedTrack_t& track);
     
     mutable std::mutex m_mutex;
     mutable std::mutex m_shortterms_mutex;
@@ -147,7 +148,7 @@ private:
     
     // One similarity engine
     mutable smProducerRef m_sm_producer;
-    vector<double> m_entropies;
+    mutable vector<double> m_entropies;
     mutable vector<vector<double>> m_smat;
     
     // Median Levels
