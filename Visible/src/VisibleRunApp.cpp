@@ -21,7 +21,7 @@
 bool VisibleAppControl::ThreadsShouldStop = false;
 
 namespace {
-    const std::vector<std::string>& supported_mov_extensions = { ".lif", ".mov", ".mp4", ".ws", ".avi"};
+    const std::vector<std::string>& supported_mov_extensions = { ".lif", ".mov", ".mp4", ".ts", ".avi"};
 }
 using namespace ci;
 using namespace ci::app;
@@ -295,11 +295,7 @@ void VisibleRunApp::setup()
         WindowRef ww = getWindow ();
         
         auto bpath_path = fs::path(bpath);
-        VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
-        auto cache_path = VisibleAppControl::get_visible_cache_directory();
-        auto stem = bpath_path.stem();
-        cache_path = cache_path / stem;
-        
+        auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
         mContext = std::unique_ptr<sequencedImageContext>(new movContext (ww, vref, cache_path));
         
         if (mContext->is_valid()){

@@ -64,6 +64,10 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "/Volumes/datastore/arman/Pictures/lif/3_channels/Series007_chan02.mov"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "/Volumes/datastore/arman/Pictures/1538076003.ts"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

@@ -801,14 +801,14 @@ void lifContext::process_async (){
         case 3:
         {
             // note launch mode is std::launch::async
-            m_fluorescense_tracks = std::async(std::launch::async,&lif_serie_processor::run_flu_statistics,
+            m_fluorescense_tracks_aync = std::async(std::launch::async,&lif_serie_processor::run_flu_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
-            m_contraction_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 2);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 2);
             break;
         }
         case 1:
         {
-            m_contraction_pci_tracks = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel,m_lifProcRef.get(), 0);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel,m_lifProcRef.get(), 0);
             break;
         }
     }
@@ -1075,11 +1075,11 @@ void lifContext::update ()
     // If Plots are ready, set them up It is ready only for new data
     // @todo replace with signal
     //@todo switch to using weak_ptr all together
-    if ( is_ready (m_fluorescense_tracks) )
-        m_flurescence_trackWeakRef = m_fluorescense_tracks.get();
+    if ( is_ready (m_fluorescense_tracks_aync) )
+        m_flurescence_trackWeakRef = m_fluorescense_tracks_aync.get();
     
-    if ( is_ready (m_contraction_pci_tracks)){
-        m_contraction_pci_trackWeakRef = m_contraction_pci_tracks.get();
+    if ( is_ready (m_contraction_pci_tracks_asyn)){
+        m_contraction_pci_trackWeakRef = m_contraction_pci_tracks_asyn.get();
     }
     
 

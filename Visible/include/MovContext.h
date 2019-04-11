@@ -230,6 +230,7 @@ private:
     std::weak_ptr<vecOfNamedTrack_t> m_longterm_pci_trackWeakRef;
 
     // Folder for Per user result / content caching
+    // @todo clarify the difference. Right now they are the same
     boost::filesystem::path mUserStorageDirPath;
     boost::filesystem::path mCurrentCachePath;
     
