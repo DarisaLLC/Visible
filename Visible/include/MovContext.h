@@ -215,6 +215,8 @@ private:
     
     // Async Processing
     void process_async ();
+    void process_window(int);
+    
     
     // Frame Cache and frame store
     std::shared_ptr<seqFrameContainer> mFrameSet;
@@ -299,6 +301,9 @@ private:
       Rectf m_motion_profile_display;
 
     OnImagePlot m_tsPlotter;
+
+    // User Selectable ROIs
+    std::map<int,Rectf> m_windows;
     
     // Resource Icons
     ci::gl::TextureRef    mNoLoop, mLoop;
