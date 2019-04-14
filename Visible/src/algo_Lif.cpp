@@ -78,6 +78,11 @@ m_index(-1), m_contentType(ct) {
     serie_ref->fill2DBuffer(dst.ptr(0), 0);
     m_poster = dst;
     
+    if(m_dimensions[0] == 512 && m_dimensions[1] == 128 && m_channels.size() == 3 &&
+       serie_ref->content_type() == ""){
+        m_contentType = "IDLab_0";
+        serie_ref->set_content_type(m_contentType);
+    }
     m_lifWeakRef = m_lifRef;
     
 }
