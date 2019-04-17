@@ -130,6 +130,7 @@ const std::vector<std::string>& lif_browser::names () const{
     return m_series_names;
     
 }
+
 /*
  * LIF files are plane organized. 3 Channel LIF file is 3 * rows by cols by ONE byte.
  */
@@ -277,6 +278,12 @@ std::weak_ptr<contraction_analyzer> lif_serie_processor::contractionWeakRef ()
 }
 
 
+
+const std::vector<sides_length_t>& lif_serie_processor::cell_ends() const{
+    return m_cell_ends;
+}
+
+
 int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
@@ -321,21 +328,45 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& space){
     std::function<labelBlob::results_ready_cb> res_ready_lambda = [this](int64_t& cbi)
     {
         const std::vector<blob>& blobs = m_main_blob->results();
-        
-        
-        
         if (! blobs.empty()){
-            
-            
             m_motion_mass_bottom = blobs[0].rotated_roi();
-            m_motion_mass = blobs[0].rotated_roi();
-            m_motion_mass.center.x -= 5.0;
-            m_motion_mass.center.y -= 5.0;
-            m_motion_mass.center.x *= m_voxel_sample.first;
-            m_motion_mass.center.y *= m_voxel_sample.second;
-            m_motion_mass.size.width *= m_voxel_sample.first;
-            m_motion_mass.size.height *= m_voxel_sample.second;
+            auto tmp = m_motion_mass_bottom;
+            tmp.center.x -= m_params.voxel_pad().first;
+            tmp.center.y -= m_params.voxel_pad().second;
+            tmp.center.x *= m_params.voxel_sample().first;
+            tmp.center.y *= m_params.voxel_sample().second;
+            tmp.size.width *= m_voxel_sample.first;
+            tmp.size.height *= m_voxel_sample.second;
             
+            m_motion_mass = cv::RotatedRect(tmp.center, tmp.size, tmp.angle);
+            std::vector<cv::Point2f> mid_points;
+            svl::get_mid_points(m_motion_mass, mid_points);
+
+            auto two_pt_dist = [mid_points](int a, int b){
+                const cv::Point2f& pt1 = mid_points[a];
+                const cv::Point2f& pt2 = mid_points[b];
+                return sqrt(pow(pt1.x-pt2.x,2)+pow(pt1.y-pt2.y,2));
+            };
+            
+            if (mid_points.size() == 4){
+                float dists[2];
+                float d = two_pt_dist(0,2);
+                dists[0] = d;
+                d = two_pt_dist(1,3);
+                dists[1] = d;
+                if (dists[0] >= dists[1]){
+                    m_cell_ends[0].first = vec2(mid_points[0].x,mid_points[0].y);
+                    m_cell_ends[0].second = vec2(mid_points[2].x,mid_points[2].y);
+                    m_cell_ends[1].first = vec2(mid_points[1].x,mid_points[1].y);
+                    m_cell_ends[1].second = vec2(mid_points[3].x,mid_points[3].y);
+                }
+                else{
+                    m_cell_ends[1].first = vec2(mid_points[0].x,mid_points[0].y);
+                    m_cell_ends[1].second = vec2(mid_points[2].x,mid_points[2].y);
+                    m_cell_ends[0].first = vec2(mid_points[1].x,mid_points[1].y);
+                    m_cell_ends[0].second = vec2(mid_points[3].x,mid_points[3].y);
+                }
+            }
             m_ab = blobs[0].moments().getEllipseAspect ();
             
             // Signal to listeners

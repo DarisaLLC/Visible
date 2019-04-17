@@ -974,9 +974,9 @@ void lifContext::add_motion_profile (){
     ImGui::SetNextWindowSize(frame);
     
     const RotatedRect& mt = m_lifProcRef->motion_surface ();
-    std::vector<cv::Point2f> mid_points;
-    svl::get_mid_points(mt, mid_points);
-
+    auto cell_ends =  m_lifProcRef->cell_ends ();
+    mCellEnds = cell_ends;
+    
     if (ImGui::Begin("Motion Profile", nullptr,ImGuiWindowFlags_AlwaysAutoResize ))
     {
         if(m_segmented_texture){
@@ -995,15 +995,25 @@ void lifContext::add_motion_profile (){
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
 
-            for (int ii = 0; ii < mid_points.size(); ii++){
-                cv::Point2f pt = mid_points[ii];
+            auto draw_cell_ends = [cell_ends,pp](int ee, uint32_t color){
+                auto pt = cell_ends[ee].first;
                 pt.x += (pp.x );
                 pt.y += (pp.y );
                 if (pt.x >=5 && pt.y >=5){
-                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), IM_COL32(255, 128, 0, 255), 3.0f);
-                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), IM_COL32(255, 128, 0, 255), 3.0f);
+                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), color, 3.0f);
+                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), color,  3.0f);
                 }
-            }
+                pt = cell_ends[ee].second;
+                pt.x += (pp.x );
+                pt.y += (pp.y );
+                if (pt.x >=5 && pt.y >=5){
+                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), color, 3.0f);
+                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), color, 3.0f);
+                }
+            };
+            
+            draw_cell_ends(0,IM_COL32(0, 255, 0, 255));
+            draw_cell_ends(1,IM_COL32(255, 128, 0, 255));
             ImGui::EndChild();
         }
     }
@@ -1273,10 +1283,24 @@ void lifContext::draw ()
             }
         }
         
-        if (isEditing() && mCellEnds.size() == 2)
+        if (mCellEnds.size() == 2)
         {
-            const sides_length_t& length = mCellEnds[0];
-            const sides_length_t& width = mCellEnds[1];
+            sides_length_t length = mCellEnds[0];
+            sides_length_t width = mCellEnds[1];
+            vec2 thirdpanel (0, 128*2.0);
+            length.first += thirdpanel;
+            length.second += thirdpanel;
+            width.first += thirdpanel;
+            width.second += thirdpanel;
+            length.first.x = (length.first.x*gdr.getWidth()) / 512;
+            length.second.x = (length.second.x*gdr.getWidth()) / 512;
+            width.first.x = (width.first.x*gdr.getWidth()) / 512;
+            width.second.x = (width.second.x*gdr.getWidth()) / 512;
+            length.first.y = (length.first.y*gdr.getHeight()) / 128;
+            length.second.y = (length.second.x*gdr.getHeight()) / 128;
+            width.first.y = (width.first.x*gdr.getHeight()) / 128;
+            width.second.y = (width.second.x*gdr.getHeight()) / 128;
+            
             cinder::gl::ScopedLineWidth( 10.0f );
             {
                 cinder::gl::ScopedColor col (ColorA( 1, 0.1, 0.1, 0.8f ) );

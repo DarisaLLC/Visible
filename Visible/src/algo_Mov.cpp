@@ -153,9 +153,6 @@ void sequence_processor::finalize_segmentation (cv::Mat& space){
     std::function<labelBlob::results_ready_cb> res_ready_lambda = [this](int64_t& cbi)
     {
         const std::vector<labelBlob::blob>& blobs = m_main_blob->results();
-        
-        
-        
         if (! blobs.empty()){
             m_motion_mass_bottom = blobs[0].rotated_roi();
             auto tmp = m_motion_mass_bottom;
