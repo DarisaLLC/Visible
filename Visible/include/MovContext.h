@@ -173,7 +173,6 @@ public:
     void play ();
     void pause ();
     bool isPlaying () const { return m_is_playing; }
-    bool isEditing () const { return m_is_editing; }
     
     // Supporting gui_base
     void SetupGUIVariables() override;

@@ -285,7 +285,7 @@ public:
     const cv::RotatedRect& motion_surface_bottom () const;
     const  std::deque<double>& medianSet () const;
     const fPair& ellipse_ab () const;
-    
+    const std::vector<sides_length_t>& cell_ends() const;
     
     // Update. Called also when cutoff offset has changed
     void update ();

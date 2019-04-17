@@ -171,6 +171,8 @@ private:
     std::vector<std::string> m_contraction_none = {" Entire "};
     mutable std::vector<std::string> m_contraction_names;
     int32_t m_cell_length;
+    std::vector<cv::Point2f> m_mid_points;
+    
     
     // Folder for Per user result / content caching
     boost::filesystem::path mUserStorageDirPath;
