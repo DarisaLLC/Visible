@@ -20,7 +20,10 @@
 #include <boost/foreach.hpp>
 #include "seq_frame_container.hpp"
 #include <boost/filesystem.hpp>
-
+#include <boost/assign/list_of.hpp> // for 'map_list_of()'
+#include <boost/assert.hpp>
+#include <map>
+using namespace boost::assign; // bring 'map_list_of()' into scope
 using namespace cv;
 using namespace std;
 using namespace boost;
@@ -201,6 +204,17 @@ class LifSignaler : public base_signaler
 class lif_serie_processor : public LifSignaler
 {
 public:
+    
+    class params{
+    public:
+        params ():m_voxel_sample(3,3), m_pad(5,5) {}
+        const std::pair<uint32_t,uint32_t>& voxel_sample () {return m_voxel_sample; }
+        const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_pad; }
+    private:
+        std::pair<uint32_t,uint32_t> m_voxel_sample;
+        std::pair<uint32_t,uint32_t> m_pad;
+    };
+    
     using contractionContainer_t = contraction_analyzer::contractionContainer_t;
     
     typedef std::unordered_map<uint8_t,std::vector<Point2f>> mapU8PeaksToPointfs_t;
@@ -215,6 +229,7 @@ public:
     typedef void (sig_cb_ss_image_available) (cv::Mat &);
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     typedef std::vector<channel_images_t> channel_vec_t;
+    
     
     lif_serie_processor (const fs::path& = fs::path());
     
@@ -294,6 +309,9 @@ protected:
     boost::signals2::signal<lif_serie_processor::sig_cb_ss_image_available>* signal_ss_image_available;
     
 private:
+    // Default params. @place_holder for increasing number of params
+    lif_serie_processor::params m_params;
+    
     const std::vector<blob>& blobs () const { return m_blobs; }
     
     void compute_shortterm (const uint32_t halfWinSz) const;

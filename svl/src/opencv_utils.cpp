@@ -17,6 +17,37 @@ using namespace svl;
 
 namespace svl
 {
+    
+    void get_mid_points(const cv::RotatedRect& rotrect, std::vector<cv::Point2f>& mids) {
+        //Draws a rectangle
+        cv::Point2f rect_points[4];
+        rotrect.points( &rect_points[0] );
+        for( int j = 0; j < 4; j++ ) {
+            mids.emplace_back ((rect_points[j].x + rect_points[(j + 1) % 4].x)/2.0f,
+                        (rect_points[j].y + rect_points[(j + 1) % 4].y)/2.0f);
+        }
+    }
+    
+    cv::Point2f rotate2d(const cv::Point2f& pt_in, const double& angle_rad) {
+        cv::Point2f pt_out;
+        //CW rotation
+        pt_out.x = std::cos(angle_rad) * pt_in.x - std::sin(angle_rad) * pt_in.y;
+        pt_out.y = std::sin(angle_rad) * pt_in.x + std::cos(angle_rad) * pt_in.y;
+        return pt_out;
+    }
+    
+    cv::Point2f rotatePoint(const cv::Point2f& pt_in, const cv::Point2f& center, const double& angle_rad) {
+        return rotate2d(pt_in - center, angle_rad) + center;
+    }
+    
+    double pts2angleRad(cv::Point pt1, cv::Point pt2) {
+        return atan2(static_cast<double>(pt2.y - pt1.y), static_cast<double>(pt2.x - pt1.x));
+    }
+    
+    double pts2angleDeg(cv::Point pt1, cv::Point pt2) {
+        return atan2(static_cast<double>(pt2.y - pt1.y), static_cast<double>(pt2.x - pt1.x)) * 180.0 / svl::constants::pi;
+    }
+
     RotatedRect RotatedRectOutOf4 (std::array<cv::Point2f,4>& src){
         
         std::vector<int> idx = {0,1,2,3};

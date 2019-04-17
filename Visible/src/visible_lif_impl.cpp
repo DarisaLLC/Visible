@@ -966,16 +966,16 @@ void lifContext::add_motion_profile (){
     }
     
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
-    ImVec2  frame (m_segmented_texture->getWidth()*3.0f,m_segmented_texture->getHeight()*3.0f);
+    ImVec2  frame (mMediaInfo.channel_size.width, mMediaInfo.channel_size.height);
     Rectf dr = m_results_browser_display;
     auto pos = ImVec2(dr.getLowerLeft().x, dr.getLowerLeft().y + 30);
     m_motion_profile_display = Rectf(pos,frame);
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(frame);
     
-    const RotatedRect& mt = m_lifProcRef->motion_surface_bottom();
-    cv::Point2f points[4];
-    mt.points(&points[0]);
+    const RotatedRect& mt = m_lifProcRef->motion_surface ();
+    std::vector<cv::Point2f> mid_points;
+    svl::get_mid_points(mt, mid_points);
 
     if (ImGui::Begin("Motion Profile", nullptr,ImGuiWindowFlags_AlwaysAutoResize ))
     {
@@ -995,8 +995,8 @@ void lifContext::add_motion_profile (){
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
 
-            for (int ii = 0; ii < 4; ii++){
-                cv::Point2f pt = points[ii];
+            for (int ii = 0; ii < mid_points.size(); ii++){
+                cv::Point2f pt = mid_points[ii];
                 pt.x += (pp.x );
                 pt.y += (pp.y );
                 if (pt.x >=5 && pt.y >=5){

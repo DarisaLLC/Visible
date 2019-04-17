@@ -17,7 +17,13 @@ using namespace svl;
 /*! Functions related to affine transformations. */
 namespace svl
 {
-    
+    // point geom utils
+    void get_mid_points(const cv::RotatedRect& rotrect, std::vector<cv::Point2f>& mids);
+    cv::Point2f rotate2d(const cv::Point2f& pt_in, const double& angle_rad);
+    cv::Point2f rotatePoint(const cv::Point2f& pt_in, const cv::Point2f& center, const double& angle_rad);
+    double pts2angleRad(cv::Point pt1, cv::Point pt2);
+    double pts2angleDeg(cv::Point pt1, cv::Point pt2);
+
     // Draw Utils
     
     void drawArrow(cv::Mat& dst,
