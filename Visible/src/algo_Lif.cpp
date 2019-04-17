@@ -303,7 +303,8 @@ void lif_serie_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& imag
     m_3d_stats_done = false;
     
     std::vector<std::thread> threads(1);
-    threads[0] = std::thread(&lif_serie_processor::generateVoxelSelfSimilarities_on_channel, this, 2, 3, 3);
+    threads[0] = std::thread(&lif_serie_processor::generateVoxelSelfSimilarities_on_channel, this, 2,
+                             m_params.voxel_sample().first,m_params.voxel_sample().second);
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 }
 
@@ -311,7 +312,7 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& space){
     
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
     
-    cv::Point replicated_pad (5,5);
+    cv::Point replicated_pad (m_params.voxel_pad().first,m_params.voxel_pad().second) ;
     cv::Mat mono, bi_level;
     copyMakeBorder(space,mono, replicated_pad.x,replicated_pad.y,
                    replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);

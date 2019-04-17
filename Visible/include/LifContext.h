@@ -126,7 +126,7 @@ private:
     boost::filesystem::path mPath;
     std::vector<std::string> m_plot_names;
     idlab_cardiac_defaults m_idlab_defaults;
-    
+ 
     
     // Callbacks
     void signal_content_loaded (int64_t&);

@@ -34,7 +34,15 @@ class movSignaler : public base_signaler
 class sequence_processor : public movSignaler
 {
 public:
-
+    class params{
+    public:
+        params ():m_voxel_sample(3,3), m_pad(5,5) {}
+        const std::pair<uint32_t,uint32_t>& voxel_sample () {return m_voxel_sample; }
+        const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_pad; }
+    private:
+        std::pair<uint32_t,uint32_t> m_voxel_sample;
+        std::pair<uint32_t,uint32_t> m_pad;
+    };
     typedef void (sig_cb_content_loaded) (int64_t&);
     typedef void (sig_cb_frame_loaded) (int&, double&);
     typedef void (sig_cb_sm1d_available) (int&);
@@ -116,7 +124,8 @@ protected:
     boost::signals2::signal<sequence_processor::sig_cb_ss_image_available>* signal_ss_image_available;
     
 private:
-
+    // Default params. @place_holder for increasing number of params
+    sequence_processor::params m_params;
     
     void compute_shortterm (const uint32_t halfWinSz) const;
     

@@ -11,7 +11,7 @@ SDKROOT = iphoneos
 
 VALID_ARCHS = arm64 armv7
 
-SRCROOT = $(PROJECT_DIR)/../../../cv-svl/svl
+SRCROOT = $(PROJECT_DIR)/../../../svl
 
 PROVISIONING_PROFILE =
 
@@ -32,12 +32,12 @@ LOCAL_BOOST = $(LOCAL_3rdParty)/boost
 LOCAL_CINDER = $(LOCAL_3rdParty)/cinder/cinder_0.9
 LOCAL_PNG = $(LOCAL_3rdParty)/png/include
 LOCAL_gtest = $(LOCAL_3rdParty)/gtest
-LOCAL_OCV = $(LOCAL_CINDER)/blocks/OpenCV3
+LOCAL_MOTION = $(LOCAL_CINDER)/blocks/MotionManager
 
 
-HEADER_SEARCH_PATHS = $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include
+HEADER_SEARCH_PATHS = $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(SRCROOT)/include $(LOCAL_gtest)/include $(LOCAL_MOTION)/src
 
 OTHER_LDFLAGS = $(LOCAL_CINDER)/lib/ios/libboost_filesystem.a $(LOCAL_CINDER)/lib/ios/libboost_system.a $(LOCAL_CINDER)/lib/libcinder-iphone.a
 
-LIBRARY_SEARCH_PATHS = $(LOCAL_OCV)/lib/ios $(LOCAL_CINDER)/lib/
+LIBRARY_SEARCH_PATHS = $(LOCAL_CINDER)/lib/
 
