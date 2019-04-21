@@ -170,8 +170,7 @@ namespace lifIO
         typedef std::shared_ptr<LifReader> ref;
         typedef std::weak_ptr<LifReader> weak_ref;
         
-        // @todo move ctor to private
-        LifReader(const std::string &filename, const std::string& ct = "");
+     
         
         static LifReader::ref create (const std::string&  fqfn_path, const std::string& ct = ""){
             return LifReader::ref ( new LifReader (fqfn_path, ct));
@@ -200,7 +199,8 @@ namespace lifIO
          * utility functions to create
          */
   
-        
+        // @todo move ctor to private
+        LifReader(const std::string &filename, const std::string& ct = "");
         int readInt();
         unsigned int readUnsignedInt();
         unsigned long long readUnsignedLongLong();

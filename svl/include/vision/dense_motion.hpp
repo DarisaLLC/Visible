@@ -17,6 +17,7 @@
 #include "rowfunc.h"  // for correlation parts
 #include <boost/range/irange.hpp>
 #include "core/stl_utils.hpp"
+#include <chrono>
 
 using namespace stl_utils;
 
@@ -45,10 +46,11 @@ namespace svl
     /* +--------------+---------------+ */
      
 
-    class dmf
+    class denseMotion
     {
     public:
         struct match{
+            bool valid;
             float r;
             iPair peak;
             fVector_2d motion;
@@ -60,7 +62,7 @@ namespace svl
         };
         enum direction { forward = 0, backward = 1};
         
-        dmf(const iPair& frame, const iPair& fixed_half_size, const iPair& moving_half_size, const fPair& = fPair(1.0f,1.0f));
+        denseMotion(const iPair& frame, const iPair& fixed_half_size, const iPair& moving_half_size, const fPair& = fPair(1.0f,1.0f));
 
         const iPair& fixed_size () const;
         const iPair& moving_size () const;
@@ -69,52 +71,15 @@ namespace svl
         const std::vector<buffers>::const_iterator fixed_buffers () const;
         const std::vector<buffers>::const_iterator moving_buffers () const;
 
-        // For fixed and moving sizes and centered at location, compute
-        // forward and backward motions and validate them
-        // forward is prev to cur
-        // backward is cur to prev
-       // void block_bi_motion(const iPair& location);
-        
         // Assume moving is larger or equal to fixed.
-        // return position of the best match
+        // return position of the best match of fixed in moving
         // Requires fixed rect at fixed location to be in the moving rect at moving location
         
         //  void block_match(const iRect& fixed, const iRect& moving, direction dir, match& result){
         // Calculate a range of point correlations to compute
         // from dir get which image to use
         //
-        bool block_match(const iPair& fixed, const iPair& moving, direction dir, match& result){
-            iRect mr (moving.first, moving.second, moving_size().first, moving_size().second);
-            iRect fr (fixed.first, fixed.second, fixed_size().first, fixed_size().second);
-            iRect cr (0,0, moving_size().first - fixed_size().first + 1, moving_size().second - fixed_size().second + 1);
-            vector<vector<int>> space;
-            CorrelationParts cp;
-            
-            iPair max_loc(-1,-1);
-            int max_score = 0;
-            for (int j = 0; j < cr.height(); j++){ // rows
-                std::vector<int> rs;
-                for (int i = 0; i < cr.width(); i++){ // cols
-               
-                    iPair tmp(moving.first+j, moving.second+i);
-                    auto r = point_ncc_match(fixed, tmp,cp);
-                    int score = int(r*1000);
-                    if (score > max_score){
-                        max_loc.first = j;
-                        max_loc.second = i;
-                        max_score = score;
-                    }
-                    rs.push_back(score);
-                }
-                space.push_back(rs);
-            }
-            bool valid = max_loc.first >= 0 && max_loc.second >= 0 && max_loc.first < cr.height() && max_loc.second < cr.width();
-            if (! valid ) return valid;
-            valid = valid && space[max_loc.first][max_loc.second] == max_score;
-            return valid;
-            
-        }
-        
+        bool block_match(const iPair& fixed, const iPair& moving, match& result);
      
         // Point match both fixed size
         // Compute ncc at tl location row_0,col_0 in fixed and row_1,col_1 moving using integral images
@@ -122,7 +87,11 @@ namespace svl
       
             
         static uint32_t ring_size () { return 2; }
-            
+        
+        const double& elapsedTime () const { return m_total_elapsed; }
+        const int& numberOfCalls () const { return m_number_of_calls; }
+        
+        
     private:
         void measure_space (const vector<vector<int>>& space, match& res){
 
@@ -133,11 +102,13 @@ namespace svl
         iPair m_msize, m_fsize, m_isize;
         std::vector<std::vector<cv::Mat>> m_data;
         std::vector<buffers> m_links;
-        
+        int m_number_of_calls;
+        double m_total_elapsed;
         std::atomic<int64_t> m_count;
         uint32_t m_minus_index, m_plus_index;
         std::mutex m_mutex;
-
+        std::vector<std::vector<int>> m_space;
+        CorrelationParts cp;
 
   
 

@@ -40,7 +40,7 @@
 #include "algo_Lif.hpp"
 #include "core/signaler.h"
 #include "contraction.hpp"
-#include "logger.hpp"
+#include "logger/logger.hpp"
 #include "cinder/Log.h"
 #include "CinderImGui.h"
 #include "gui_handler.hpp"
@@ -270,6 +270,14 @@ void lifContext::signal_ss_image_available(cv::Mat& image)
     m_segmented_image = image.clone();
     m_geometry_available = true;
     
+    if (! m_segmented_texture ){
+        // Create a texcture for display
+        Surface8uRef sur = Surface8u::create(cinder::fromOcv(m_segmented_image));
+        auto texFormat = gl::Texture2d::Format().loadTopDown();
+        m_segmented_texture = gl::Texture::create(*sur, texFormat);
+        auto cell_ends =  m_lifProcRef->cell_ends ();
+        mCellEnds = cell_ends;
+    }
 }
 
 
@@ -974,8 +982,6 @@ void lifContext::add_motion_profile (){
     ImGui::SetNextWindowSize(frame);
     
     const RotatedRect& mt = m_lifProcRef->motion_surface ();
-    auto cell_ends =  m_lifProcRef->cell_ends ();
-    mCellEnds = cell_ends;
     
     if (ImGui::Begin("Motion Profile", nullptr,ImGuiWindowFlags_AlwaysAutoResize ))
     {
@@ -994,7 +1000,8 @@ void lifContext::add_motion_profile (){
             ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
-
+            auto cell_ends = mCellEnds;
+            
             auto draw_cell_ends = [cell_ends,pp](int ee, uint32_t color){
                 auto pt = cell_ends[ee].first;
                 pt.x += (pp.x );

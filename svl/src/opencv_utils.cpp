@@ -70,6 +70,17 @@ namespace svl
         
     }
     
+    void cpCvMatToRoiWindow8U (const cv::Mat& m, roiWindow<P8U>& r){
+        auto rowPointer = [] (void* data, size_t step, int32_t row ) { return reinterpret_cast<void*>( reinterpret_cast<uint8_t*>(data) + row * step ); };
+        unsigned cols = m.cols;
+        unsigned rows = m.rows;
+        roiWindow<P8U> rw(cols,rows);
+        for (auto row = 0; row < rows; row++) {
+            std::memcpy(rw.rowPointer(row), rowPointer(m.data, m.step, row), cols);
+        }
+        r = rw;
+    }
+    
     
     //Function used to perform the complex DFT of a grayscale image
     //Input:  image

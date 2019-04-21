@@ -123,11 +123,11 @@ svl::labelBlob::ref labelBlob::create(const cv::Mat& gray, const cv::Mat& thresh
 }
 
 void svl::labelBlob::blob::update_moments(const cv::Mat& image) const {
+    std::lock_guard<std::mutex> lock( m_mutex );
     m_moments_ready = false;
     cv::Mat window = image(m_roi);
     m_moments.run(window);
     m_moments_ready = true;
-    
 }
 
 cv::RotatedRect svl::labelBlob::blob::rotated_roi() const {
@@ -148,7 +148,10 @@ void  labelBlob::reload (const cv::Mat& grayImage, const cv::Mat&threshold_outpu
 }
 
 void  labelBlob::run() const {
+    std::lock_guard<std::mutex> lock( m_mutex );
+    
     m_start = std::chrono::high_resolution_clock::now();
+    
     size_t count = cv::connectedComponentsWithStats(m_threshold_out, m_labels, m_stats, m_centroids);
     std::vector<cv::Mat> channels = { m_threshold_out,m_threshold_out,m_threshold_out};
     cv::merge(&channels[0],3,m_graphics);
@@ -157,19 +160,28 @@ void  labelBlob::run() const {
     m_moments.resize(0);
     m_rois.resize(0);
     
+    auto check = [](int width, int height, cv::Rect2f& cand_roi){
+        return (0 <= cand_roi.x && 0 <= cand_roi.width && cand_roi.x + cand_roi.width <= width &&
+        0 <= cand_roi.y && 0 <= cand_roi.height && cand_roi.y + cand_roi.height <= height);
+    };
+
+    // Use m_stats.at<int>(i, cv::CC_STAT_AREA) to checkout the area
     for(uint32_t i=1; i<=m_stats.rows; i++)
     {
         if( m_stats.at<int>(i, cv::CC_STAT_AREA) < m_min_area ) continue;
+
         int x = m_stats.at<int>(Point(0, i));
         int y = m_stats.at<int>(Point(1, i));
         int w = m_stats.at<int>(Point(2, i));
         int h = m_stats.at<int>(Point(3, i));
+        auto roi = cv::Rect2f (x,y,w,h);
+        if(!check(m_threshold_out.cols, m_threshold_out.rows, roi)) continue;
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end-m_start;
         auto id = std::chrono::duration_cast<std::chrono::microseconds>(diff).count();
-        auto roi = cv::Rect2f (x,y,w,h);
         m_blobs.emplace_back(i, id, roi);
         m_blobs.back().update_moments(m_grey);
+
     }
     
   

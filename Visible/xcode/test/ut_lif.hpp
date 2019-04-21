@@ -64,12 +64,13 @@ std::string  expected3Names []
     , "Preview038"
 };
 
+#if 1
 TEST (ut_liffile, browser_single_channel_basic)
 {
     std::string filename ("Sample1.lif");
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
       EXPECT_TRUE(res.second);
-    auto lb_ref = lif_browser::create(res.first.string());
+    auto lb_ref = lif_browser::create(res.first.string(),"IDLab_0");
     EXPECT_EQ(sizeof(expectedNames)/sizeof(std::string), lb_ref->get_all_series ().size ());
     
     BOOST_FOREACH(const lif_serie_data& si, lb_ref->get_all_series ()){
@@ -80,6 +81,7 @@ TEST (ut_liffile, browser_single_channel_basic)
     }
     
 }
+#endif
 
 
 TEST (ut_lifFile, single_channel)
@@ -87,32 +89,32 @@ TEST (ut_lifFile, single_channel)
     std::string filename ("Sample1.lif");
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
     EXPECT_TRUE(res.second);
-    lifIO::LifReader lif(res.first.string(), "");
-    cout << "LIF version "<<lif.getVersion() << endl;
-    EXPECT_EQ(14, lif.getNbSeries() );
+    auto lif = lifIO::LifReader::create(res.first.string(), "IDLab_0");
+  //  cout << "LIF version "<<lif->getVersion() << endl;
+    EXPECT_EQ(14, lif->getNbSeries() );
     size_t serie = 0;
 
-    lifIO::LifSerie& se0 = lif.getSerie(serie);
+    lifIO::LifSerie& se0 = lif->getSerie(serie);
     const std::vector<size_t>& dims = se0.getSpatialDimensions();
     EXPECT_EQ(512, dims[0]);
     EXPECT_EQ(128, dims[1]);
     std::vector<std::string> series;
-    for (auto ss = 0; ss < lif.getNbSeries(); ss++)
-        series.push_back (lif.getSerie(ss).getName());
+    for (auto ss = 0; ss < lif->getNbSeries(); ss++)
+        series.push_back (lif->getSerie(ss).getName());
     
     EXPECT_EQ(sizeof(expectedNames)/sizeof(std::string), series.size ());
     
     for (auto sn = 0; sn < series.size(); sn++)
     {
         EXPECT_EQ(0, expectedNames[sn].compare(series[sn]));
-        EXPECT_EQ(250, lif.getSerie(sn).getNbTimeSteps());
-        EXPECT_EQ(65536, lif.getSerie(sn).getNbPixelsInOneTimeStep ());
-        EXPECT_EQ(1, lif.getSerie(sn).getChannels().size());
+        EXPECT_EQ(250, lif->getSerie(sn).getNbTimeSteps());
+        EXPECT_EQ(65536, lif->getSerie(sn).getNbPixelsInOneTimeStep ());
+        EXPECT_EQ(1, lif->getSerie(sn).getChannels().size());
     }
     
     
     roiWindow<P8U> slice ((int)dims[0], (int)dims[1]);
-    lif.getSerie(0).fill2DBuffer(slice.rowPointer(0));
+    lif->getSerie(0).fill2DBuffer(slice.rowPointer(0));
     histoStats h;
     h.from_image(slice);
     EXPECT_NEAR(h.mean(), 114.271, 0.001);
@@ -128,42 +130,42 @@ TEST (ut_lifFile, triple_channel)
     std::string filename ("3channels.lif");
     std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
     EXPECT_TRUE(res.second);
-    lifIO::LifReader lif(res.first.string(), "");
-    cout << "LIF version "<<lif.getVersion() << endl;
-    EXPECT_EQ(13, lif.getNbSeries() );
+    auto lif = lifIO::LifReader::create(res.first.string(), "IDLab_0");
+    cout << "LIF version "<<lif->getVersion() << endl;
+    EXPECT_EQ(13, lif->getNbSeries() );
     size_t serie = 0;
-    lifIO::LifSerie& se0 = lif.getSerie(serie);
+    lifIO::LifSerie& se0 = lif->getSerie(serie);
     const std::vector<size_t>& dims = se0.getSpatialDimensions();
     EXPECT_EQ(512, dims[0]);
     EXPECT_EQ(128, dims[1]);
     std::vector<std::string> series;
-    for (auto ss = 0; ss < lif.getNbSeries(); ss++)
-        series.push_back (lif.getSerie(ss).getName());
+    for (auto ss = 0; ss < lif->getNbSeries(); ss++)
+        series.push_back (lif->getSerie(ss).getName());
     
     EXPECT_EQ(sizeof(expected3Names)/sizeof(std::string), series.size ());
     
     {
         EXPECT_EQ(0, expected3Names[0].compare(series[0]));
-        EXPECT_EQ(31, lif.getSerie(0).getNbTimeSteps());
-        EXPECT_EQ(65536, lif.getSerie(0).getNbPixelsInOneTimeStep ());
-        EXPECT_EQ(3, lif.getSerie(0).getChannels().size());
+        EXPECT_EQ(31, lif->getSerie(0).getNbTimeSteps());
+        EXPECT_EQ(65536, lif->getSerie(0).getNbPixelsInOneTimeStep ());
+        EXPECT_EQ(3, lif->getSerie(0).getChannels().size());
     }
     for (auto sn = 1; sn < (series.size()-1); sn++)
     {
         EXPECT_EQ(0, expected3Names[sn].compare(series[sn]));
-        EXPECT_EQ(500, lif.getSerie(sn).getNbTimeSteps());
-        EXPECT_EQ(65536, lif.getSerie(sn).getNbPixelsInOneTimeStep ());
-        EXPECT_EQ(3, lif.getSerie(sn).getChannels().size());
+        EXPECT_EQ(500, lif->getSerie(sn).getNbTimeSteps());
+        EXPECT_EQ(65536, lif->getSerie(sn).getNbPixelsInOneTimeStep ());
+        EXPECT_EQ(3, lif->getSerie(sn).getChannels().size());
     }
     {
         EXPECT_EQ(0, expected3Names[series.size()-1].compare(series[series.size()-1]));
-        EXPECT_EQ(1, lif.getSerie(series.size()-1).getNbTimeSteps());
-        EXPECT_EQ(262144, lif.getSerie(series.size()-1).getNbPixelsInOneTimeStep ());
-        EXPECT_EQ(3, lif.getSerie(series.size()-1).getChannels().size());
+        EXPECT_EQ(1, lif->getSerie(series.size()-1).getNbTimeSteps());
+        EXPECT_EQ(262144, lif->getSerie(series.size()-1).getNbPixelsInOneTimeStep ());
+        EXPECT_EQ(3, lif->getSerie(series.size()-1).getChannels().size());
     }
     
 //    roiWindow<P8U> slice ((int) dims[0], (int)dims[1]);
-//    lif.getSerie(0).fill2DBuffer(slice.rowPointer(0));
+//    lif->getSerie(0).fill2DBuffer(slice.rowPointer(0));
 //    histoStats h;
 //    h.from_image(slice);
 //    EXPECT_NEAR(h.mean(), 5.82, 0.001);
@@ -174,7 +176,7 @@ TEST (ut_lifFile, triple_channel)
     std::vector<std::string> names { "green", "red", "gray" };
     
     {
-        lifIO::LifSerie& lls = lif.getSerie(0);
+        lifIO::LifSerie& lls = lif->getSerie(0);
         roiFixedMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[0]);
         lls.fill2DBuffer(oneBy3.rowPointer(0), 0);
         
@@ -188,9 +190,9 @@ TEST (ut_lifFile, triple_channel)
     }
     
     {
-        lifIO::LifSerie& lls = lif.getSerie(0);
+        lifIO::LifSerie& lls = lif->getSerie(0);
         roiFixedMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[30]);
-        lif.getSerie(0).fill2DBuffer(oneBy3.rowPointer(0), 30);
+        lif->getSerie(0).fill2DBuffer(oneBy3.rowPointer(0), 30);
         EXPECT_EQ(oneBy3.timestamp(),lls.getTimestamps()[30] );
         
         histoStats h;

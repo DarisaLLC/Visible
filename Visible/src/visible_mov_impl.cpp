@@ -38,7 +38,7 @@
 #include "sm_producer.h"
 #include "algo_Mov.hpp"
 #include "core/signaler.h"
-#include "logger.hpp"
+#include "logger/logger.hpp"
 #include "cinder/Log.h"
 #include "CinderImGui.h"
 #include "gui_handler.hpp"

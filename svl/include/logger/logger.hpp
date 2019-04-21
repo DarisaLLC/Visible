@@ -34,6 +34,17 @@ public:
               
 };
 
+class glogger : public svl::SingletonLight<glogger>
+{
+public:
+    glogger ()
+    {}
+    
+    const  std::shared_ptr<spdlog::logger> console () {
+        return spdlog::get("GLog");
+    }
+    
+};
 
 namespace logging
 {
@@ -63,8 +74,6 @@ namespace logging
         return input;
     }
 
-    // For UT usage. Sets up VLog
-    bool setup_loggers (const std::string& log_path, std::string& id_name);
 }
 
 

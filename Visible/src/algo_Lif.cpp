@@ -26,7 +26,7 @@
 #include "contraction.hpp"
 #include "vision/localvariance.h"
 #include "algo_Lif.hpp"
-#include "logger.hpp"
+#include "logger/logger.hpp"
 #include "cpp-perf.hpp"
 #include "vision/localvariance.h"
 #include "vision/labelBlob.hpp"
@@ -329,8 +329,8 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& space){
     {
         const std::vector<blob>& blobs = m_main_blob->results();
         if (! blobs.empty()){
-            m_motion_mass_bottom = blobs[0].rotated_roi();
-            auto tmp = m_motion_mass_bottom;
+            m_motion_mass_top = blobs[0].rotated_roi();
+            auto tmp = m_motion_mass_top;
             tmp.center.x -= m_params.voxel_pad().first;
             tmp.center.y -= m_params.voxel_pad().second;
             tmp.center.x *= m_params.voxel_sample().first;
@@ -621,7 +621,7 @@ const std::vector<Rectf>& lif_serie_processor::channel_rois () const { return m_
 
 
 const cv::RotatedRect& lif_serie_processor::motion_surface() const { return m_motion_mass; }
-const cv::RotatedRect& lif_serie_processor::motion_surface_bottom() const { return m_motion_mass_bottom; }
+const cv::RotatedRect& lif_serie_processor::motion_surface_bottom() const { return m_motion_mass_top; }
 
 
 // Update. Called also when cutoff offset has changed

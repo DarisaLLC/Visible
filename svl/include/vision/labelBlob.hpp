@@ -123,6 +123,7 @@ public:
         mutable float m_extend;
         cv::Rect2f m_roi;
         mutable bool m_moments_ready;
+        mutable std::mutex m_mutex;
     };
     
     void reload (const cv::Mat& gray, const cv::Mat& threshold_out,  const int64_t client_id = 0, const int minAreaPixelCount = 10) const;
@@ -166,6 +167,7 @@ private:
     mutable int64_t m_client_id;
     mutable std::vector<cv::KeyPoint> m_kps;
     mutable int m_min_area;
+    mutable std::mutex m_mutex;
   
 };
 

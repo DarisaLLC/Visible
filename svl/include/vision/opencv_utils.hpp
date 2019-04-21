@@ -57,8 +57,11 @@ namespace svl
     
     // Use view roiWindow memory as cv::Mat.
     // Requires cvType to be appropriate
-    // Use within scope. As roiWindow is ref counted. 
+    // Use within scope. As roiWindow is ref counted.
+    // Example    cvMatOfroiWindow(ang, aim, CV_8UC1);
     #define cvMatOfroiWindow(a,b,cvType) cv::Mat b ((a).height(),(a).width(), cvType,(a).pelPointer(0,0), size_t((a).rowUpdate()))
+
+    void cpCvMatToRoiWindow8U (const cv::Mat& m, roiWindow<P8U>& r);
     
     double correlation_ocv(const roiWindow<P8U>& i, const roiWindow<P8U>& m);
     void cumani_opencv (const cv::Mat& input_bgr, cv::Mat& gradAbs, cv::Mat& orientation, float& maxVal);

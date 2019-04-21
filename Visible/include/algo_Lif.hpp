@@ -374,9 +374,10 @@ private:
     mutable svl::stats<int64_t> m_3d_stats;
     std::atomic<bool> m_3d_stats_done;
     cv::RotatedRect m_motion_mass;
-    cv::RotatedRect m_motion_mass_bottom;
+    cv::RotatedRect m_motion_mass_top;
     mutable cv::Mat m_temporal_ss;
     std::vector<sides_length_t> m_cell_ends = {sides_length_t (), sides_length_t()};
+    
     mutable fPair m_ab;
     
     mutable std::vector<std::vector<float>> m_temporal_ss_raw;
