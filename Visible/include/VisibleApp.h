@@ -29,7 +29,7 @@
 #include "algo_Lif.hpp"
 #include "algo_Mov.hpp"
 #include "Item.h"
-#include "logger.hpp"
+#include "logger/logger.hpp"
 #include "core/core.hpp"
 #include "core/singleton.hpp"
 #include "core/file_system.hpp"

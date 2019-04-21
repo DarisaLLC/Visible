@@ -11,6 +11,8 @@
 #pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 #pragma GCC diagnostic ignored "-Wunused-private-field"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#pragma GCC diagnostic ignored "-Wchar-subscripts"
+
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -64,7 +66,7 @@
 #include "time_series/persistence1d.hpp"
 #include "async_tracks.h"
 #include "CinderImGui.h"
-#include "logger.hpp"
+#include "logger/logger.hpp"
 #include "vision/opencv_utils.hpp"
 #include "vision/gauss.hpp"
 #include "vision/dense_motion.hpp"
@@ -122,53 +124,18 @@ std::vector<double> oneD_example = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 
     39.4077, 39.2694, 39.1967, 39.2828, 39.2438, 39.2093, 39.2167,
     39.2749, 39.4703, 39.2846};
 
-void cvDrawPlot (std::vector<float>& tmp){
-    
-    std::string name = svl::toString(std::clock());
-    cvplot::setWindowTitle(name, svl::toString(tmp.size()));
-    cvplot::moveWindow(name, 0, 256);
-    cvplot::resizeWindow(name, 512, 256);
-    cvplot::figure(name).series(name).addValue(tmp).type(cvplot::Line).color(cvplot::Red);
-    cvplot::figure(name).show();
-}
 
-
-std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr)
-{
-    return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
-}
-
-std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename)
-{
-    return make_shared_ofstream(new std::ofstream(filename, std::ofstream::out));
-}
-
-void output_array (const std::vector<std::vector<float>>& data, const std::string& output_file){
-    std::string delim (",");
-    fs::path opath (output_file);
-    auto papa = opath.parent_path ();
-    if (fs::exists(papa))
-    {
-        std::shared_ptr<std::ofstream> myfile = make_shared_ofstream(output_file);
-        for (const vector<float>& row : data)
-        {
-            auto cnt = 0;
-            auto cols = row.size() - 1;
-            for (const float & col : row)
-            {
-                *myfile << col;
-                if (cnt++ < cols)
-                    *myfile << delim;
-            }
-            *myfile << std::endl;
-        }
-    }
-}
+// Support Functions Implementation at the bottom of the file
+bool setup_loggers (const std::string& log_path,  std::string id_name);
+std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr);
+std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename);
+void output_array (const std::vector<std::vector<float>>& data, const std::string& output_file);
 void finalize_segmentation (cv::Mat& space);
 cv::Mat generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels,
                                        std::vector<std::vector<float>>& ss);
-
-
+bool setup_text_loggers (const fs::path app_support_dir, std::string id_name);
+SurfaceRef get_surface(const std::string & path);
+void norm_scale (const std::vector<double>& src, std::vector<double>& dst);
 
 std::shared_ptr<test_utils::genv> dgenv_ptr;
 
@@ -176,33 +143,6 @@ typedef std::weak_ptr<Surface8u>	Surface8uWeakRef;
 typedef std::weak_ptr<Surface8u>	SurfaceWeakRef;
 typedef std::weak_ptr<Surface16u>	Surface16uWeakRef;
 typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
-
-SurfaceRef get_surface(const std::string & path){
-    static std::map<std::string, SurfaceWeakRef> cache;
-    static std::mutex m;
-    
-    std::lock_guard<std::mutex> hold(m);
-    SurfaceRef sp = cache[path].lock();
-    if(!sp)
-    {
-        auto ir = loadImage(path);
-        cache[path] = sp = Surface8u::create(ir);
-    }
-    return sp;
-}
-
-
-void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
-{
-    vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
-    vector<double>::const_iterator top = std::max_element (src.begin (), src.end() );
-    
-    if (svl::equal(*top, *bot)) return;
-    double scaleBy = *top - *bot;
-    dst.resize (src.size ());
-    for (int ii = 0; ii < src.size (); ii++)
-        dst[ii] = (src[ii] - *bot) / scaleBy;
-}
 
 
 std::vector<Point2f> ellipse_test = {
@@ -216,6 +156,7 @@ std::vector<Point2f> ellipse_test = {
     {839.415543,384.804510}};
 
 
+#include "ut_lif.hpp"
 
 
 TEST (ut_algo_lif, segment){
@@ -297,7 +238,7 @@ TEST (ut_dm, basic){
     iPair frame_size (p0.width(),p0.height());
     iPair fixed_half_size(16,16);
     iPair moving_half_size(24,24);
-    dmf ff(frame_size, fixed_half_size, moving_half_size);
+    denseMotion ff(frame_size, fixed_half_size, moving_half_size);
     iPair fixed = ff.fixed_size();
     iPair moving = ff.moving_size();
     
@@ -363,6 +304,45 @@ TEST (ut_dm, basic){
     
     
 }
+
+TEST (ut_dm, block){
+    iPair dims (9,9);
+    iPair fsize(32,64);
+    
+    float sigma = 1.5f;
+    cv::Mat gm = gaussianTemplate(dims,vec2(sigma,sigma));
+    
+    
+    cv::Mat fimage (fsize.second, fsize.first,  CV_8UC(1));
+    fimage = 0;
+    iPair fixed (11,21);
+    CvRect froi(fixed.first,fixed.second,dims.first,dims.second);
+    cv::Mat fwindow = fimage(froi);
+    cv::add (gm, fwindow, fwindow);
+    
+    cv::Mat mimage (fsize.second, fsize.first,  CV_8UC(1));
+    mimage = 0;
+    iPair gold (12,22);
+    CvRect mroi(gold.first,gold.second, dims.first,dims.second);
+    cv::Mat mwindow = mimage(mroi);
+    cv::add (gm, mwindow, mwindow);
+
+    iPair scan (6,6);
+    denseMotion ff(fsize, dims / 2, (dims + scan) / 2);
+    auto moving = fixed - scan / 2;
+    denseMotion::match res;
+    ff.update(fimage);
+    ff.update(mimage);
+    auto check = ff.block_match(fixed, moving, res);
+    std::cout << std::boolalpha << check << std::endl;
+    
+    
+#ifdef INTERACTIVE
+    cv::imshow("block", mimage);
+    cv::waitKey();
+#endif
+}
+
 TEST (ut_fit_ellipse, local_maxima){
     
     auto same_point = [] (const Point2f& a, const Point2f& b, float eps){return svl::equal(a.x, b.x, eps) && svl::equal(a.y, b.y, eps);};
@@ -461,19 +441,8 @@ cv::Mat show_cv_angle (const cv::Mat& src, const std::string& name){
 void show_gradient (const cv::Mat& src, const std::string& name){
     cv::Mat disp3c(src.size(), CV_8UC3, Scalar(255,255,255));
     
-    auto cpToRoiWindow = [](const cv::Mat& m, roiWindow<P8U>& r){
-        auto rowPointer = [] (void* data, size_t step, int32_t row ) { return reinterpret_cast<void*>( reinterpret_cast<uint8_t*>(data) + row * step ); };
-        unsigned cols = m.cols;
-        unsigned rows = m.rows;
-        roiWindow<P8U> rw(cols,rows);
-        for (auto row = 0; row < rows; row++) {
-            std::memcpy(rw.rowPointer(row), rowPointer(m.data, m.step, row), cols);
-        }
-        r = rw;
-    };
-    
     roiWindow<P8U> r8(src.cols, src.rows);
-    cpToRoiWindow(src, r8);
+    cpCvMatToRoiWindow8U (src, r8);
     roiWindow<P8U> mag = r8.clone();
     roiWindow<P8U> ang = r8.clone();
     roiWindow<P8U> peaks = r8.clone();
@@ -623,9 +592,16 @@ TEST (ut_ss_voxel, basic){
     int cols = 32;
     cv::Point2f ctr (cols/2.0f, rows/2.0f);
     
-    //    auto d2ctr = [](int r, int c, cv::Point2f& center){
-    //        return sqrt(svl::Sqr(c-center.x)+svl::Sqr(r-center.y));
-    //    };
+//    auto cvDrawPlot = [] (std::vector<float>& tmp){
+//
+//        std::string name = svl::toString(std::clock());
+//        cvplot::setWindowTitle(name, svl::toString(tmp.size()));
+//        cvplot::moveWindow(name, 0, 256);
+//        cvplot::resizeWindow(name, 512, 256);
+//        cvplot::figure(name).series(name).addValue(tmp).type(cvplot::Line).color(cvplot::Red);
+//        cvplot::figure(name).show();
+//    };
+
     start = std::clock();
     for (auto row = 0; row < rows; row++){
         std::vector<roiWindow<P8U>> rrs;
@@ -636,9 +612,7 @@ TEST (ut_ss_voxel, basic){
             std::vector<uint8_t> tmp = sinvec8(1.0/r, 64);
             
             rrs.emplace_back(tmp);
-            
-            
-            //       cvDrawPlot(signal, title);
+//            cvDrawPlot(signal);
         }
         voxels.push_back(rrs);
     }
@@ -1304,17 +1278,7 @@ TEST(ut_similarity, short_term)
     
     vector<roiWindow<P8U>> fill_images(3);
     
-    
-    auto cpToRoiWindow = [](cv::Mat& m, roiWindow<P8U>& r){
-        auto rowPointer = [] (void* data, size_t step, int32_t row ) { return reinterpret_cast<void*>( reinterpret_cast<uint8_t*>(data) + row * step ); };
-        unsigned cols = m.cols;
-        unsigned rows = m.rows;
-        roiWindow<P8U> rw(cols,rows);
-        for (auto row = 0; row < rows; row++) {
-            std::memcpy(rw.rowPointer(row), rowPointer(m.data, m.step, row), cols);
-        }
-        r = rw;
-    };
+   
     
     //     cv::Mat gaussianTemplate(const std::pair<uint32_t,uint32_t>& dims, const vec2& sigma = vec2(1.0, 1.0), const vec2& center = vec2(0.5,0.5));
     std::pair<uint32_t,uint32_t> dims (32,32);
@@ -1322,7 +1286,7 @@ TEST(ut_similarity, short_term)
     for (uint32_t i = 0; i < fill_images.size(); i++) {
         float sigma = 0.5 + i * 0.5;
         cv::Mat gm = gaussianTemplate(dims,vec2(sigma,sigma));
-        cpToRoiWindow(gm,fill_images[i]);
+        cpCvMatToRoiWindow8U(gm,fill_images[i]);
     }
     roiWindow<P8U> tmp (dims.first, dims.second);
     tmp.randomFill(1066);
@@ -1547,6 +1511,15 @@ TEST (UT_QtimeCache, run)
  */
 
 
+#define GTESTLOG "GLog"
+#define GTESTLOG_INFO(...) spdlog::get("GLog")->info(__VA_ARGS__)
+#define GTESTLOG_TRACE(...) spdlog::get("GLog")->trace(__VA_ARGS__)
+#define GTESTLOG_ERROR(...) spdlog::get("GLog")->error(__VA_ARGS__)
+#define GTESTLOG_WARNING(...) spdlog::get("GLog")->warn(__VA_ARGS__)
+#define GTESTLOG_NOTICE(...) spdlog::get("GLog")->notice(__VA_ARGS__)
+#define GTESTLOG_SEPARATOR() GTESTLOG_INFO("-----------------------------")
+
+
 int main(int argc, char ** argv)
 {
     static std::string id("VGtest");
@@ -1554,13 +1527,118 @@ int main(int argc, char ** argv)
     shared_env->setUpFromArgs(argc, argv);
     dgenv_ptr = shared_env;
     fs::path pp(argv[0]);
-    logging::setup_loggers (pp.parent_path().string(), id);
+    setup_loggers(pp.parent_path().string(), id);
     testing::InitGoogleTest(&argc, argv);
     
     
     auto ret = RUN_ALL_TESTS();
     std::cerr << ret << std::endl;
     
+}
+
+
+/***
+ **  Implementation of Support files
+ */
+
+
+bool setup_loggers (const std::string& log_path,  std::string id_name){
+    
+    try{
+        // get a temporary file name
+        std::string logname =  logging::reserve_unique_file_name(log_path,
+                                                                 logging::create_timestamped_template(id_name));
+        
+        // Setup APP LOG
+        auto daily_file_sink = std::make_shared<logging::sinks::daily_file_sink_mt>(logname, 23, 59);
+        auto console_sink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
+        console_sink->set_level(spdlog::level::warn);
+        console_sink->set_pattern("G[%H:%M:%S:%e:%f %z] [%n] [%^---%L---%$] [thread %t] %v");
+        std::vector<spdlog::sink_ptr> sinks;
+        sinks.push_back(daily_file_sink);
+        sinks.push_back(console_sink);
+        
+        auto combined_logger = std::make_shared<spdlog::logger>("GLog", sinks.begin(),sinks.end());
+        combined_logger->info("Daily Log File: " + logname);
+        //register it if you need to access it globally
+        spdlog::register_logger(combined_logger);
+        
+        {
+            auto combined_logger = std::make_shared<spdlog::logger>("VLog", sinks.begin(),sinks.end());
+            combined_logger->info("Daily Log File: " + logname);
+            //register it if you need to access it globally
+            spdlog::register_logger(combined_logger);
+        }
+    }
+    catch (const spdlog::spdlog_ex& ex)
+    {
+        std::cout << "Log initialization failed: " << ex.what() << std::endl;
+        return false;
+    }
+    return true;
+}
+
+
+
+std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr)
+{
+    return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
+}
+
+std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename)
+{
+    return make_shared_ofstream(new std::ofstream(filename, std::ofstream::out));
+}
+
+
+
+void output_array (const std::vector<std::vector<float>>& data, const std::string& output_file){
+    std::string delim (",");
+    fs::path opath (output_file);
+    auto papa = opath.parent_path ();
+    if (fs::exists(papa))
+    {
+        std::shared_ptr<std::ofstream> myfile = make_shared_ofstream(output_file);
+        for (const vector<float>& row : data)
+        {
+            auto cnt = 0;
+            auto cols = row.size() - 1;
+            for (const float & col : row)
+            {
+                *myfile << col;
+                if (cnt++ < cols)
+                    *myfile << delim;
+            }
+            *myfile << std::endl;
+        }
+    }
+}
+
+SurfaceRef get_surface(const std::string & path){
+    static std::map<std::string, SurfaceWeakRef> cache;
+    static std::mutex m;
+    
+    std::lock_guard<std::mutex> hold(m);
+    SurfaceRef sp = cache[path].lock();
+    if(!sp)
+    {
+        auto ir = loadImage(path);
+        cache[path] = sp = Surface8u::create(ir);
+    }
+    return sp;
+}
+
+
+void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
+{
+    vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
+    vector<double>::const_iterator top = std::max_element (src.begin (), src.end() );
+    
+    if (svl::equal(*top, *bot)) return;
+    double scaleBy = *top - *bot;
+    dst.resize (src.size ());
+    for (int ii = 0; ii < src.size (); ii++)
+        dst[ii] = (src[ii] - *bot) / scaleBy;
 }
 
 
@@ -1576,11 +1654,13 @@ void finalize_segmentation (cv::Mat& space){
     cv::Mat mono, bi_level;
     copyMakeBorder(space,mono, replicated_pad.x,replicated_pad.y,
                    replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);
-    
-    //Show source image
-    imshow("Monochrome Image",mono);
+
     threshold(mono, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
+    //Show source image
+#ifdef INTERACTIVE
+    imshow("Monochrome Image",mono);
     imshow("Binary Image", bi_level);
+#endif
     
     labelBlob::ref lbr = labelBlob::create(mono, bi_level, 666);
     EXPECT_EQ(lbr == nullptr , false);
@@ -1592,7 +1672,8 @@ void finalize_segmentation (cv::Mat& space){
     EXPECT_EQ(true, cid == 0);
     EXPECT_EQ(true, lbr->client_id() == 666);
     lbr->run_async();
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    while (! s_results_ready) std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    
     EXPECT_EQ(true, s_results_ready);
     EXPECT_EQ(true, lbr->client_id() == 666);
     EXPECT_EQ(true, cid == 666);
@@ -1603,6 +1684,7 @@ void finalize_segmentation (cv::Mat& space){
     lbr->drawOutput();
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     EXPECT_EQ(true, s_graphics_ready);
+#ifdef INTERACTIVE
     /// Show in a window
     namedWindow( "LabelBlob ", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
 //    std::vector<cv::KeyPoint> one;
@@ -1610,7 +1692,8 @@ void finalize_segmentation (cv::Mat& space){
     cv::drawKeypoints(mono, lbr->keyPoints(),bi_level, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
     imshow( "LabelBlob", bi_level);
     cv::waitKey();
-
+#endif
+    
 
     
 
@@ -1675,7 +1758,7 @@ cv::Mat generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>&
     
 }
 
-#include "ut_lif.hpp"
+//#include "ut_lif.hpp"
 
 
 

@@ -10,7 +10,7 @@
 #include "sg_filter.h"
 #include "core/core.hpp"
 #include "core/stl_utils.hpp"
-//#include "logger.hpp"
+//#include "logger/logger.hpp"
 #include "cardiomyocyte_model_detail.hpp"
 #include "core/boost_units.hpp"
 #include "core/simple_timing.hpp"

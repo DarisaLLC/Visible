@@ -6,31 +6,39 @@
 //
 #include <iterator>
 #include "core/rectangle.h"
+#include "logger/logger.hpp"
 #include "dense_motion.hpp"
 using namespace svl;
 
 
-dmf::dmf(const iPair& frame, const iPair& fixed_half_size, const iPair& moving_half_size, const fPair& phase ):
+denseMotion::denseMotion(const iPair& frame, const iPair& fixed_half_size, const iPair& moving_half_size, const fPair& phase ):
    m_isize(frame), m_fsize(fixed_half_size * 2 + 1), m_msize(moving_half_size * 2 + 1)
 {
+    std::string msg = std::to_string(frame.first);
+    msg = "Frame: " + msg + " x " + std::to_string(frame.second);
+    vlogger::instance().console()->info(msg);
+    assert(moving_half_size > fixed_half_size);
+    
     allocate_buffers();
 }
 
-const iPair& dmf::fixed_size () const { return m_fsize; }
-const iPair& dmf::moving_size () const { return m_msize; }
 
-const std::vector<svl::dmf::buffers>::const_iterator dmf::fixed_buffers () const{
+
+const iPair& denseMotion::fixed_size () const { return m_fsize; }
+const iPair& denseMotion::moving_size () const { return m_msize; }
+
+const std::vector<svl::denseMotion::buffers>::const_iterator denseMotion::fixed_buffers () const{
     auto bi = m_links.begin();
     std::advance(bi,m_minus_index);
     return bi;
 }
-const std::vector<svl::dmf::buffers>::const_iterator dmf::moving_buffers () const{
+const std::vector<svl::denseMotion::buffers>::const_iterator denseMotion::moving_buffers () const{
     auto bi = m_links.begin();
     std::advance(bi,m_plus_index);
     return bi;
 }
 
-void dmf::update(const cv::Mat& image){
+void denseMotion::update(const cv::Mat& image){
     std::lock_guard<std::mutex> lock( m_mutex );
     
     m_data[1][0].copyTo(m_data[0][0]);
@@ -45,7 +53,7 @@ void dmf::update(const cv::Mat& image){
 
 
 
-bool dmf::allocate_buffers ()
+bool denseMotion::allocate_buffers ()
 {
     m_data.resize(2);
     m_links.resize(2);
@@ -85,6 +93,56 @@ bool dmf::allocate_buffers ()
 //
 //}
 
+bool denseMotion::block_match(const iPair& fixed, const iPair& moving,  match& result){
+    iRect mr (moving.first, moving.second, moving_size().first, moving_size().second);
+    iRect fr (fixed.first, fixed.second, fixed_size().first, fixed_size().second);
+    iRect cr (0,0, moving_size().first - fixed_size().first + 1, moving_size().second - fixed_size().second + 1);
+    m_space.clear();
+    
+    iPair max_loc(-1,-1);
+    int max_score = 0;
+    m_total_elapsed = 0;
+    m_number_of_calls = 0;
+    for (int j = 0; j < cr.height(); j++){ // rows
+        std::vector<int> rs;
+        for (int i = 0; i < cr.width(); i++){ // cols
+            const auto start = std::chrono::high_resolution_clock::now();
+            iPair tmp(moving.first+j, moving.second+i);
+            auto r = point_ncc_match(fixed, tmp,cp);
+            const auto end = std::chrono::high_resolution_clock::now();
+            const auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+            m_total_elapsed += duration.count();
+            m_number_of_calls += 1;
+            
+            int score = int(r*1000);
+            if (score > max_score){
+                max_loc.first = j;
+                max_loc.second = i;
+                max_score = score;
+            }
+            rs.push_back(score);
+        }
+        m_space.push_back(rs);
+    }
+    bool valid = max_loc.first >= 0 && max_loc.second >= 0 && max_loc.first < cr.height() && max_loc.second < cr.width();
+    valid = valid && m_space[max_loc.first][max_loc.second] == max_score;
+    result.valid = valid;
+    result.peak = max_loc;
+    result.motion = fVector_2d ();
+    if (max_loc.first > 0 && max_loc.first < cr.width()-1){
+        // Cheap Parabolic Interpolation
+        auto x = ((m_space[max_loc.second][max_loc.first+1]-m_space[max_loc.second][max_loc.first-1])/2.0) /
+        (m_space[max_loc.second][max_loc.first+1]+m_space[max_loc.second][max_loc.first-1]-m_space[max_loc.second][max_loc.first]);
+        result.motion.x(x);
+    }
+    if (max_loc.second > 0 && max_loc.second < cr.height()-1){
+        auto y = ((m_space[max_loc.second+1][max_loc.first]-m_space[max_loc.second-1][max_loc.first])/2.0) /
+        (m_space[max_loc.second-1][max_loc.first]+m_space[max_loc.second+1][max_loc.first]-m_space[max_loc.second][max_loc.first]);
+        result.motion.y(y);
+    }
+    return valid;
+}
+
 // For fixed and moving sizes and centered at location, compute
 // forward and backward motions and validate them
 // forward is prev to cur
@@ -101,7 +159,7 @@ bool dmf::allocate_buffers ()
 
 // Point match
 // Compute ncc at tl location row_0,col_0 in fixed and row_1,col_1 moving using integral images
-double dmf::point_ncc_match(const iPair& fixed, const iPair& moving, CorrelationParts& cp, direction dir)
+double denseMotion::point_ncc_match(const iPair& fixed, const iPair& moving, CorrelationParts& cp, direction dir)
 {
     const uint32_t& col_0 = fixed.first;
     const uint32_t& row_0 = fixed.second;

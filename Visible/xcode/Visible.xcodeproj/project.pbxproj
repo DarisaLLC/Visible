@@ -249,6 +249,8 @@
 		C276ECA21C72B26F00242CDB /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731819953389008149E2 /* AVFoundation.framework */; };
 		C276ECA31C72B26F00242CDB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731919953389008149E2 /* CoreMedia.framework */; };
 		C276ECA91C72B5D900242CDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C276ECA81C72B5D900242CDB /* CoreGraphics.framework */; };
+		C2770658226A402B00215A55 /* cvVideoPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BE851F4FAF5C00977307 /* cvVideoPlayer.cpp */; };
+		C2770659226A402C00215A55 /* cvVideoPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BE851F4FAF5C00977307 /* cvVideoPlayer.cpp */; };
 		C27DB8B0225BBAA1002AE43D /* algo_Mov.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27DB8AF225BBAA1002AE43D /* algo_Mov.cpp */; };
 		C27DB8B1225BBAA1002AE43D /* algo_Mov.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27DB8AF225BBAA1002AE43D /* algo_Mov.cpp */; };
 		C27DB8B2225BBAA1002AE43D /* algo_Mov.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27DB8AF225BBAA1002AE43D /* algo_Mov.cpp */; };
@@ -606,7 +608,6 @@
 		C254BE871F4FAF7100977307 /* cvVideoPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cvVideoPlayer.h; path = ../include/cvVideoPlayer.h; sourceTree = "<group>"; };
 		C254BEE01F4FB3D300977307 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
 		C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_mov_impl.cpp; path = ../src/visible_mov_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
-		C259145E214492A400F80D5F /* logger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = logger.hpp; path = ../include/logger.hpp; sourceTree = "<group>"; };
 		C259145F2145BA7500F80D5F /* clipManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = clipManager.hpp; path = ../include/clipManager.hpp; sourceTree = "<group>"; };
 		C259982B1ECF668F0015EE7B /* cardiomyocyte_model.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model.hpp; sourceTree = "<group>"; };
 		C259982C1ECF668F0015EE7B /* cerruti_rectangle_integral.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cerruti_rectangle_integral.hpp; sourceTree = "<group>"; };
@@ -1236,7 +1237,6 @@
 				C2DB59B121557C0C00750C2E /* app_core.h */,
 				C2EF8D1B214873E700A5D3D6 /* Item.h */,
 				C2EF8D19214873E600A5D3D6 /* Swatch.h */,
-				C259145E214492A400F80D5F /* logger.hpp */,
 				C25261191F66E8F40069F665 /* Plist.hpp */,
 				C252611A1F66E8F40069F665 /* PlistDate.hpp */,
 				C254BE871F4FAF7100977307 /* cvVideoPlayer.h */,
@@ -2024,6 +2024,7 @@
 				C21094672239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
 				C2606DB01CED3E2E0045FF57 /* opencv_utils.cpp in Sources */,
 				C2AFCEFE216E79590080462D /* imgui_widgets.cpp in Sources */,
+				C2770658226A402B00215A55 /* cvVideoPlayer.cpp in Sources */,
 				C2EF8D1F2148768D00A5D3D6 /* Swatch.cpp in Sources */,
 				C20EDBC31CF277130074C47A /* time_spec.cpp in Sources */,
 				C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */,
@@ -2095,6 +2096,7 @@
 				C24EA2D4207F081000555D16 /* sg_filter.cpp in Sources */,
 				C2398A1921DE980C00B180A0 /* imgui.cpp in Sources */,
 				C27221161D1C912E008EF8B2 /* histo.cpp in Sources */,
+				C2770659226A402C00215A55 /* cvVideoPlayer.cpp in Sources */,
 				C20EDBB71CEFC2E70074C47A /* rowfunc.cpp in Sources */,
 				C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */,
 				C21FFE721CFE0AA300C97013 /* sm_producer.cpp in Sources */,
