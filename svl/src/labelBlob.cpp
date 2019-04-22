@@ -131,6 +131,7 @@ void svl::labelBlob::blob::update_moments(const cv::Mat& image) const {
 }
 
 cv::RotatedRect svl::labelBlob::blob::rotated_roi() const {
+    std::lock_guard<std::mutex> lock( m_mutex );
     uDegree dg = m_moments.getOrientation();
     return cv::RotatedRect(m_moments.com(), m_roi.size(), dg.basic());
 }
@@ -139,6 +140,7 @@ cv::RotatedRect svl::labelBlob::blob::rotated_roi() const {
 bool labelBlob::hasResults() const { return m_results_ready; }
 
 void  labelBlob::reload (const cv::Mat& grayImage, const cv::Mat&threshold_output,const int64_t client_id, const int min_area_count) const {
+    std::lock_guard<std::mutex> lock( m_mutex );
     m_min_area = min_area_count;
     m_grey = grayImage;
     m_threshold_out = threshold_output;
@@ -166,10 +168,10 @@ void  labelBlob::run() const {
     };
 
     // Use m_stats.at<int>(i, cv::CC_STAT_AREA) to checkout the area
+    // std::cout << i << " :  " << m_stats.at<int>(i, cv::CC_STAT_AREA) << std::endl;
     for(uint32_t i=1; i<=m_stats.rows; i++)
     {
         if( m_stats.at<int>(i, cv::CC_STAT_AREA) < m_min_area ) continue;
-
         int x = m_stats.at<int>(Point(0, i));
         int y = m_stats.at<int>(Point(1, i));
         int w = m_stats.at<int>(Point(2, i));
@@ -181,11 +183,7 @@ void  labelBlob::run() const {
         auto id = std::chrono::duration_cast<std::chrono::microseconds>(diff).count();
         m_blobs.emplace_back(i, id, roi);
         m_blobs.back().update_moments(m_grey);
-
     }
-    
-  
-    
     if (signal_results_ready && signal_results_ready->num_slots() > 0)
         signal_results_ready->operator()(m_client_id);
     m_results_ready = true;
@@ -196,6 +194,8 @@ void labelBlob::run_async() const {
 }
 
 const std::vector<cv::KeyPoint>& labelBlob::keyPoints (bool regen) const {
+    std::lock_guard<std::mutex> lock( m_mutex );
+    
     if(! regen && ! (m_kps.empty() || m_blobs.empty() || m_kps.size() != m_blobs.size()))
         return m_kps;
     static RNG rng(12345);
@@ -224,6 +224,7 @@ const std::vector<cv::KeyPoint>& labelBlob::keyPoints (bool regen) const {
 void labelBlob::drawOutput() const {
 
     const std::vector<cv::KeyPoint>& kps = keyPoints();
+    std::lock_guard<std::mutex> lock( m_mutex );
     cv::drawKeypoints(m_graphics, kps,m_graphics, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
     
     if (signal_graphics_ready && signal_graphics_ready->num_slots() > 0)
