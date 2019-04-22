@@ -98,7 +98,7 @@ cardio_model_params_template::cardio_model_params_template (){
     std::get<11>(m_template) = no_velocity;
 }
 
-constexpr   cardio_model_params_template::params_t&  cardio_model_params_template::get_template ()  { return m_template; }
+const   cardio_model_params_template::params_t&  cardio_model_params_template::get_template ()  const { return m_template; }
 
 
 SINGLETON_FCN(cardio_model_params_template,get_default)

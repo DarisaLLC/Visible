@@ -83,10 +83,10 @@ std::string units_string (const quantity<Y>& val)
     using boost::units::cgs::gram;
     using boost::units::cgs::second;
     using boost::units::cgs::dyne;
-    std::strstream ss;
+    std::stringstream ss;
    
     ss << symbol_format << val;
-    std::string s_s = ss.str();
+    std::string s_s = ss.str() + '\n';
     return s_s;
 }
 

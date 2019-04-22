@@ -324,7 +324,7 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& space){
     copyMakeBorder(space,mono, replicated_pad.x,replicated_pad.y,
                    replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);
     threshold(mono, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
-    m_main_blob = labelBlob::create(mono, bi_level, 666);
+    m_main_blob = labelBlob::create(mono, bi_level, m_params.min_seqmentation_area(), 666);
     std::function<labelBlob::results_ready_cb> res_ready_lambda = [this](int64_t& cbi)
     {
         const std::vector<blob>& blobs = m_main_blob->results();
