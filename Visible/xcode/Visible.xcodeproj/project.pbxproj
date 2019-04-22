@@ -555,7 +555,7 @@
 		C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sm_producer.cpp; path = ../src/sm_producer.cpp; sourceTree = "<group>"; };
 		C21FFE711CFDF82600C97013 /* self_similarity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = self_similarity.h; sourceTree = "<group>"; };
 		C21FFE741CFE104600C97013 /* ut_sm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_sm.hpp; sourceTree = "<group>"; };
-		C2203D6421CAFFD9003F2F33 /* logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = logger.cpp; path = ../src/logger.cpp; sourceTree = "<group>"; };
+		C2203D6421CAFFD9003F2F33 /* logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logger.cpp; sourceTree = "<group>"; };
 		C2239AB2218A8298007558AB /* boost_units_literals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = boost_units_literals.h; sourceTree = "<group>"; };
 		C2239AB3218B6270007558AB /* boost_literals.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = boost_literals.cpp; sourceTree = "<group>"; };
 		C2239AB6218B6F30007558AB /* boost_units.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = boost_units.hpp; sourceTree = "<group>"; };
@@ -1024,7 +1024,6 @@
 				C21094662239D1C8004E88EE /* permutation_entropy.cpp */,
 				C27DB8AF225BBAA1002AE43D /* algo_Mov.cpp */,
 				C260AFCE21ED0691003B0FF0 /* sg_filter.cpp */,
-				C2203D6421CAFFD9003F2F33 /* logger.cpp */,
 				C2820F3121752BF600DFA7A6 /* gui_handler.cpp */,
 				C2EF8D0D2148709300A5D3D6 /* Item.cpp */,
 				C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */,
@@ -1667,6 +1666,7 @@
 			isa = PBXGroup;
 			children = (
 				C2AFAD802252E1690038AF5B /* UIImage+OpenCV.mm */,
+				C2203D6421CAFFD9003F2F33 /* logger.cpp */,
 				C2109475223F4CFE004E88EE /* opencv_draw.cpp */,
 				C29C53BF222B58D900D17385 /* dense_motion.cpp */,
 				C2398A0821DD8A0A00B180A0 /* file_system.cpp */,

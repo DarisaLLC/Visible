@@ -1007,7 +1007,7 @@ TEST(timing8, corr)
     std::clock_t start;
     int l;
     start = std::clock();
-    int num_loops = 1000;
+    int num_loops = 10;
     // Time setting and resetting
     for (l = 0; l < num_loops; ++l)
     {
@@ -1035,7 +1035,7 @@ TEST(timing8, corr_ocv)
     std::clock_t start;
     int l;
     
-    int num_loops = 1000;
+    int num_loops = 10;
     Mat space(cv::Size(1,1), CV_32F);
     // Time setting and resetting
     start = std::clock();
@@ -1135,7 +1135,7 @@ TEST(ut_labelBlob, basic)
     cv::threshold(threshold_input
                   , threshold_output, threshold, 255, THRESH_BINARY );
     
-    labelBlob::ref lbr = labelBlob::create(out0, threshold_output, 666);
+    labelBlob::ref lbr = labelBlob::create(out0, threshold_output, 6, 666);
     EXPECT_EQ(lbr == nullptr , false);
     std::function<labelBlob::results_ready_cb> res_ready_lambda = [](int64_t& cbi){ s_results_ready = ! s_results_ready; cid = cbi;};
     std::function<labelBlob::graphics_ready_cb> graphics_ready_lambda = [](){ s_graphics_ready = ! s_graphics_ready;};
@@ -1151,7 +1151,7 @@ TEST(ut_labelBlob, basic)
     EXPECT_EQ(true, cid == 666);
     EXPECT_EQ(true, lbr->hasResults());
     const std::vector<blob> blobs = lbr->results();
-    EXPECT_EQ(59, blobs.size());
+    EXPECT_EQ(44, blobs.size());
     
 #ifdef INTERACTIVE
     lbr->drawOutput();
@@ -1160,7 +1160,7 @@ TEST(ut_labelBlob, basic)
     /// Show in a window
     namedWindow( "LabelBlob ", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
     imshow( "LabelBlob", lbr->graphicOutput());
-    cv::waitKey(60.0);
+    cv::waitKey();
 #endif
     
 }
@@ -1662,7 +1662,7 @@ void finalize_segmentation (cv::Mat& space){
     imshow("Binary Image", bi_level);
 #endif
     
-    labelBlob::ref lbr = labelBlob::create(mono, bi_level, 666);
+    labelBlob::ref lbr = labelBlob::create(mono, bi_level, 10, 666);
     EXPECT_EQ(lbr == nullptr , false);
     std::function<labelBlob::results_ready_cb> res_ready_lambda = [](int64_t& cbi){ s_results_ready = ! s_results_ready; cid = cbi;};
     std::function<labelBlob::graphics_ready_cb> graphics_ready_lambda = [](){ s_graphics_ready = ! s_graphics_ready;};

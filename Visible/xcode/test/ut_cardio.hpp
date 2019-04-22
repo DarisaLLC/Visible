@@ -64,7 +64,16 @@ namespace cardio_ut
             cereal::JSONOutputArchive oar(os);
             oar( CEREAL_NVP(cmm.result()) );
         }
-    
+#if 0
+        cardio_model cmm2;
+        {
+            std::ifstream is ( jpath );
+            cereal::JSONInputArchive iar( is ); // Create an input archive
+            iar(cmm2.result());
+        }
+        
+#endif
+        
         std::stringstream ss;
         {
             cereal::JSONOutputArchive ar(ss);
