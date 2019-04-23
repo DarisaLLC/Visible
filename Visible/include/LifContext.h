@@ -117,6 +117,9 @@ private:
     void setup_params ();
     ci::app::WindowRef& get_windowRef();
     
+    // Normalize for image rendering
+    void glscreen_normalize (const sides_length_t& , const Rectf& display_rect,  sides_length_t&);
+    
     // LIF Support
     std::shared_ptr<lif_serie_processor> m_lifProcRef;
 	void loadCurrentSerie ();
@@ -126,7 +129,7 @@ private:
     boost::filesystem::path mPath;
     std::vector<std::string> m_plot_names;
     idlab_cardiac_defaults m_idlab_defaults;
- 
+    Rectf get_channel_display_rect (const Rectf& screen_rect);
     
     // Callbacks
     void signal_content_loaded (int64_t&);
@@ -161,6 +164,7 @@ private:
     // Variance Image & Texture
     cv::Mat m_segmented_image;
     ci::gl::TextureRef m_segmented_texture;
+    SurfaceRef m_segmented_surface;
     
     // Tracks of frame associated results
     std::weak_ptr<vecOfNamedTrack_t> m_flurescence_trackWeakRef;
@@ -170,7 +174,7 @@ private:
     lif_serie_processor::contractionContainer_t m_contractions;
     std::vector<std::string> m_contraction_none = {" Entire "};
     mutable std::vector<std::string> m_contraction_names;
-    int32_t m_cell_length;
+    float m_major_cell_length, m_minor_cell_length;
     std::vector<cv::Point2f> m_mid_points;
     
     
@@ -185,6 +189,9 @@ private:
     mutable uint32_t  mChannelCount;
     int64_t m_minFrame;
     int64_t m_maxFrame;
+    
+    // Normalized to screen
+    
     
     // Instant information
     int64_t m_seek_position;
@@ -201,7 +208,9 @@ private:
     bool mMouseInImage; // if in Image, mMouseInGraph is -1
     ivec2 mMouseInImagePosition;
 
-    std::vector<sides_length_t> mCellEnds = {sides_length_t (), sides_length_t()};
+    std::vector<sides_length_t> m_cell_ends = {sides_length_t (), sides_length_t()};
+    std::vector<sides_length_t> m_normalized_cell_ends = {sides_length_t (), sides_length_t()};
+    
     gl::TextureRef mImage;
     uint32_t m_cutoff_pct;
 
