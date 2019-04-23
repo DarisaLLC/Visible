@@ -260,6 +260,14 @@ void lifContext::signal_geometry_available()
   
 }
 
+void lifContext::glscreen_normalize (const sides_length_t& src, const Rectf& gdr, sides_length_t& dst){
+    
+    dst.first.x = (src.first.x*gdr.getWidth()) / mMediaInfo.getWidth();
+    dst.second.x = (src.second.x*gdr.getWidth()) / mMediaInfo.getWidth();
+    dst.first.y = (src.first.y*gdr.getHeight()) / mMediaInfo.getHeight();
+    dst.second.y = (src.second.y*gdr.getHeight()) / mMediaInfo.getHeight();
+}
+                                     
 void lifContext::signal_ss_image_available(cv::Mat& image)
 {
     vlogger::instance().console()->info(" SS Image Available  ");
@@ -271,12 +279,9 @@ void lifContext::signal_ss_image_available(cv::Mat& image)
     m_geometry_available = true;
     
     if (! m_segmented_texture ){
-        // Create a texcture for display
-        Surface8uRef sur = Surface8u::create(cinder::fromOcv(m_segmented_image));
-        auto texFormat = gl::Texture2d::Format().loadTopDown();
-        m_segmented_texture = gl::Texture::create(*sur, texFormat);
+        m_segmented_surface = Surface8u::create(cinder::fromOcv(m_segmented_image));
         auto cell_ends =  m_lifProcRef->cell_ends ();
-        mCellEnds = cell_ends;
+        m_cell_ends = cell_ends;
     }
 }
 
@@ -693,26 +698,26 @@ int32_t lifContext::getMedianCutOff () const
     }
     return 0;
 }
-
-void lifContext::setCellLength (uint32_t newco){
-    if (! m_lifProcRef) return;
-    // Get a shared_ptr from weak and check if it had not expired
-    auto spt = m_lifProcRef->contractionWeakRef().lock();
-    if (! spt ) return;
-    m_cell_length = newco;
-}
-uint32_t lifContext::getCellLength () const{
-    if (! m_cur_lif_serie_ref) return 0;
-    
-    // Get a shared_ptr from weak and check if it had not expired
-    auto spt = m_lifProcRef->contractionWeakRef().lock();
-    if (spt)
-    {
-        return m_cell_length;
-    }
-    return 0;
-}
-
+//
+//void lifContext::setCellLength (uint32_t newco){
+//    if (! m_lifProcRef) return;
+//    // Get a shared_ptr from weak and check if it had not expired
+//    auto spt = m_lifProcRef->contractionWeakRef().lock();
+//    if (! spt ) return;
+//    m_cell_length = newco;
+//}
+//uint32_t lifContext::getCellLength () const{
+//    if (! m_cur_lif_serie_ref) return 0;
+//
+//    // Get a shared_ptr from weak and check if it had not expired
+//    auto spt = m_lifProcRef->contractionWeakRef().lock();
+//    if (spt)
+//    {
+//        return m_cell_length;
+//    }
+//    return 0;
+//}
+//
 
 
 /************************
@@ -737,7 +742,7 @@ void lifContext::loadCurrentSerie ()
          * Clear and pause if we are playing back
          */
         m_clips.clear();
-        setCellLength(0);
+//        setCellLength(0);
         pause();
         
         /*
@@ -966,11 +971,11 @@ void lifContext::add_navigation(){
 void lifContext::add_motion_profile (){
     
     if (! m_geometry_available ) return;
-    if (! m_segmented_texture ){
+    if (! m_segmented_texture && m_segmented_surface){
         // Create a texcture for display
         Surface8uRef sur = Surface8u::create(cinder::fromOcv(m_segmented_image));
         auto texFormat = gl::Texture2d::Format().loadTopDown();
-        m_segmented_texture = gl::Texture::create(*sur, texFormat);
+        m_segmented_texture = gl::Texture::create(*m_segmented_surface, texFormat);
     }
     
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
@@ -1000,7 +1005,7 @@ void lifContext::add_motion_profile (){
             ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
             ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
-            auto cell_ends = mCellEnds;
+            auto cell_ends = m_cell_ends;
             
             auto draw_cell_ends = [cell_ends,pp](int ee, uint32_t color){
                 auto pt = cell_ends[ee].first;
@@ -1223,15 +1228,20 @@ void lifContext::draw_info ()
     
 }
 
+Rectf lifContext::get_channel_display_rect (const Rectf& dr){
+    ivec2 tl = dr.getUpperLeft();
+    int cn = channel_count();
+    tl.y += ((cn-1)*dr.getHeight())/cn;
+    return Rectf (tl, dr.getLowerRight());
+}
+
 
 void lifContext::draw ()
 {
     if( have_lif_serie()  && mSurface )
     {
         Rectf dr = get_image_display_rect();
-        ivec2 tl = dr.getUpperLeft();
-        tl.y += (2*dr.getHeight())/3.0;
-        Rectf gdr (tl, dr.getLowerRight());
+        Rectf gdr = get_channel_display_rect(dr);
         
         assert(dr.getWidth() > 0 && dr.getHeight() > 0);
 
@@ -1268,58 +1278,58 @@ void lifContext::draw ()
             vec2 a_v ((ab.first * gdr.getWidth()) / 512, 0.0f );
             vec2 b_v (0.0f, (ab.second * gdr.getHeight()) / 128);
             
+            glscreen_normalize(m_cell_ends[0], gdr, m_normalized_cell_ends[0]);
+            glscreen_normalize(m_cell_ends[1], gdr, m_normalized_cell_ends[1]);
+            m_major_cell_length = distance(m_normalized_cell_ends[0].first,m_normalized_cell_ends[0].second);
+            m_minor_cell_length = distance(m_normalized_cell_ends[1].first,m_normalized_cell_ends[1].second);
+            
+            uDegree da(ellipse.angle);
+            uRadian dra (da);
+            vec2 ctr0 ((ellipse.center.x * gdr.getWidth()) / 512, (ellipse.center.y * gdr.getHeight()) / 128 );
+            
             cinder::gl::ScopedLineWidth( 10.0f );
+            cinder::gl::ScopedColor col (ColorA( 1.0, 0.1, 0.0, 0.8f ) );
             {
-                cinder::gl::ScopedColor col (ColorA( 1.0, 0.1, 0.0, 0.8f ) );
+                cinder::gl::ScopedModelMatrix _mdl;
+                auto ctr = ctr0 + gdr.getUpperLeft();
+                gl::translate(ctr);
+
+                gl::rotate(dra.Double());
+                ctr = vec2(0,0);
+                gl::drawSolidCircle(ctr, 3.0);
+                gl::drawLine(ctr-b_v, ctr+b_v);
+                gl::drawLine(ctr-a_v, ctr+a_v);
+          
+                gl::drawStrokedEllipse(ctr, a_v.x, b_v.y);
+            }
+            
+            if (m_cell_ends.size() == 2)
+            {
+           
+                vec2 a_v ( m_major_cell_length / 2.0, 0.0f );
+                vec2 b_v (0.0f, m_minor_cell_length / 2.0f);
+                
                 {
                     cinder::gl::ScopedModelMatrix _mdl;
-                    uDegree da(ellipse.angle);
-                    uRadian dra (da);
-                    vec2 ctr ((ellipse.center.x * gdr.getWidth()) / 512, (ellipse.center.y * gdr.getHeight()) / 128 );
-                    ctr = ctr + gdr.getUpperLeft();
+                    auto ctr = ctr0 + gdr.getUpperLeft();
                     gl::translate(ctr);
-
+                    
                     gl::rotate(dra.Double());
                     ctr = vec2(0,0);
                     gl::drawSolidCircle(ctr, 3.0);
-                    gl::drawLine(ctr-b_v, ctr+b_v);
-                    gl::drawLine(ctr-a_v, ctr+a_v);
-                  
-                    gl::drawStrokedEllipse(ctr, a_v.x, b_v.y);
+                    {
+                        cinder::gl::ScopedColor col (ColorA( 0.1, 1.0, 0.1, 0.8f ) );
+                        gl::drawLine(ctr-b_v, ctr+b_v);
+                        gl::drawSolidCircle(ctr-b_v, 3.0);
+                        gl::drawSolidCircle( ctr+b_v, 3.0);
+                    }
+                    {
+                        cinder::gl::ScopedColor col (ColorA( 0.1, 0.1, 1.0, 0.8f ) );
+                        gl::drawLine(ctr-a_v, ctr+a_v);
+                        gl::drawSolidCircle(ctr-a_v, 3.0);
+                        gl::drawSolidCircle( ctr+a_v, 3.0);
+                    }
                 }
-            }
-        }
-        
-        if (mCellEnds.size() == 2)
-        {
-            sides_length_t length = mCellEnds[0];
-            sides_length_t width = mCellEnds[1];
-            vec2 thirdpanel (0, 128*2.0);
-            length.first += thirdpanel;
-            length.second += thirdpanel;
-            width.first += thirdpanel;
-            width.second += thirdpanel;
-            length.first.x = (length.first.x*gdr.getWidth()) / 512;
-            length.second.x = (length.second.x*gdr.getWidth()) / 512;
-            width.first.x = (width.first.x*gdr.getWidth()) / 512;
-            width.second.x = (width.second.x*gdr.getWidth()) / 512;
-            length.first.y = (length.first.y*gdr.getHeight()) / 128;
-            length.second.y = (length.second.x*gdr.getHeight()) / 128;
-            width.first.y = (width.first.x*gdr.getHeight()) / 128;
-            width.second.y = (width.second.x*gdr.getHeight()) / 128;
-            
-            cinder::gl::ScopedLineWidth( 10.0f );
-            {
-                cinder::gl::ScopedColor col (ColorA( 1, 0.1, 0.1, 0.8f ) );
-                gl::drawLine(length.first, length.second);
-                gl::drawSolidCircle(length.first, 3.0);
-                gl::drawSolidCircle(length.second, 3.0);
-            }
-            {
-                cinder::gl::ScopedColor col (ColorA( 0.1, 1.0, 0.1, 0.8f ) );
-                gl::drawLine(width.first, width.second);
-                gl::drawSolidCircle(width.first, 3.0);
-                gl::drawSolidCircle(width.second, 3.0);
             }
         }
         
@@ -1331,5 +1341,20 @@ void lifContext::draw ()
     
     
 }
-
+    //                {
+    //                    cinder::gl::ScopedColor col (ColorA( 1, 0.1, 0.1, 0.8f ) );
+    //                    gl::drawSolidCircle(length.first, 3.0);
+    //                    gl::drawSolidCircle(length.second, 3.0);
+    //                    gl::translate (gdr.getUpperLeft() + length.first);
+    //                    vec2 ctr (0,0);
+    //                    gl::drawLine(ctr, length.second - length.first);
+    //
+    //                }
+    //                {
+    //                    cinder::gl::ScopedColor col (ColorA( 0.1, 1.0, 0.1, 0.8f ) );
+    //                    gl::drawLine(width.first, width.second);
+    //                    gl::drawSolidCircle(width.first, 3.0);
+    //                    gl::drawSolidCircle(width.second, 3.0);
+    //                }
+    
 #pragma GCC diagnostic pop
