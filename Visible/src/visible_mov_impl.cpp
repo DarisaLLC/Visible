@@ -611,6 +611,24 @@ void movContext::process_async (){
  * Size height: app window height / 2
  */
 
+
+void  movContext::update_channel_display_rects (){
+    int cn = channel_count();
+    assert(m_instant_channel_display_rects.size() == channel_count());
+    vec2 channel_size (get_image_display_rect().getWidth(), get_image_display_rect().getHeight()/cn);
+    vec2 itl = get_image_display_rect().getUpperLeft();
+    for (int cc = 1; cc <= cn; cc++){
+        Rectf& rect = m_instant_channel_display_rects[cc-1];
+        rect = Rectf(itl, itl+channel_size);
+        itl += ivec2(0, channel_size.y);
+    }
+}
+
+const Rectf& movContext::get_channel_display_rect (const int channel_number_zero_based){
+    return m_instant_channel_display_rects[channel_number_zero_based];
+}
+
+
 void movContext::add_result_sequencer ()
 {
     // let's create the sequencer
@@ -618,7 +636,7 @@ void movContext::add_result_sequencer ()
     static int64 firstFrame = 0;
     static bool expanded = true;
     
-    Rectf dr = get_image_display_rect();
+    const Rectf& dr = get_image_display_rect();
     auto tr = dr.getUpperRight();
     auto pos = ImVec2(tr.x+10, tr.y);
     ImVec2 size (getWindowWidth()-30-pos.x, (3*getWindowHeight()) / 4);
@@ -656,7 +674,7 @@ void movContext::add_result_sequencer ()
 
 void movContext::add_navigation(){
     
-    Rectf dr = get_image_display_rect();
+    const Rectf& dr = get_image_display_rect();
     auto pos = ImVec2(dr.getLowerLeft().x, dr.getLowerLeft().y + 30);
     ImVec2  size (dr.getWidth(), std::min(128.0, dr.getHeight()/2.0));
     m_navigator_display = Rectf(pos,size);
@@ -784,7 +802,7 @@ void  movContext::DrawGUI(){
     add_motion_profile ();
 }
 
-Rectf movContext::get_image_display_rect ()
+const Rectf& movContext::get_image_display_rect ()
 {
     return m_layout->display_frame_rect();
 }
@@ -952,7 +970,7 @@ void movContext::draw ()
 {
     if( have_sequence()  && mSurface )
     {
-        Rectf dr = get_image_display_rect();
+        auto dr = get_image_display_rect();
         ivec2 tl = dr.getUpperLeft();
         tl.y += (2*dr.getHeight())/3.0;
         Rectf gdr (tl, dr.getLowerRight());

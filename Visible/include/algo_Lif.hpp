@@ -212,10 +212,23 @@ public:
         const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_pad; }
         const uint32_t& min_seqmentation_area () {return m_min_segmentation_area; }
         
+        const std::string& image_cache_name () {
+            static std::string s_image_cache_name = "voxel_ss_.png";
+            return s_image_cache_name;
+        }
+        const std::string& result_container_cache_name (){
+            static std::string s_result_container_cache_name = "container_ss_";
+            return s_result_container_cache_name;
+        }
+        
     private:
         std::pair<uint32_t,uint32_t> m_voxel_sample;
         std::pair<uint32_t,uint32_t> m_pad;
         uint32_t m_min_segmentation_area;
+
+       
+      
+
     };
     
     using contractionContainer_t = contraction_analyzer::contractionContainer_t;
@@ -273,14 +286,12 @@ public:
     const vecOfNamedTrack_t& shortterm_pci () const { return m_shortterm_pci_tracks; }
     
     // Return 2D latice of pixels over time
-    void generateVoxels_on_channel (const int channel_index, std::vector<std::vector<roiWindow<P8U>>>&,
-                                    uint32_t sample_x = 1, uint32_t sample_y = 1);
-    void generateVoxels (const std::vector<roiWindow<P8U>>&, std::vector<std::vector<roiWindow<P8U>>>&,
-                         uint32_t sample_x = 1, uint32_t sample_y = 1);
+    void generateVoxels_on_channel (const int channel_index);
+    void generateVoxels (const std::vector<roiWindow<P8U>>&);
     
     // Return 2D latice of voxel self-similarity
-    void generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>&);
-    void generateVoxelSelfSimilarities_on_channel (const int channel_index, uint32_t sample_x = 1, uint32_t sample_y = 1);
+    void generateVoxelSelfSimilarities ();
+    void generateVoxelsAndSelfSimilarities (const std::vector<roiWindow<P8U>>& images);
     
     void finalize_segmentation (cv::Mat&);
     const std::vector<Rectf>& channel_rois () const;
@@ -380,11 +391,13 @@ private:
     cv::RotatedRect m_motion_mass_top;
     mutable cv::Mat m_temporal_ss;
     std::vector<sides_length_t> m_cell_ends = {sides_length_t (), sides_length_t()};
-    
     mutable fPair m_ab;
+    
+    mutable std::vector<roiWindow<P8U>> m_voxels;
     
     mutable std::vector<std::vector<float>> m_temporal_ss_raw;
     uiPair m_voxel_sample;
+    iPair m_expected_segmented_size;
     std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;
     labelBlob::ref m_main_blob;
     std::vector<blob> m_blobs;

@@ -129,7 +129,7 @@ private:
     boost::filesystem::path mPath;
     std::vector<std::string> m_plot_names;
     idlab_cardiac_defaults m_idlab_defaults;
-    Rectf get_channel_display_rect (const Rectf& screen_rect);
+    const Rectf& get_channel_display_rect (const int channel_number);
     
     // Callbacks
     void signal_content_loaded (int64_t&);
@@ -225,7 +225,9 @@ private:
     void clear_playback_params ();
     void update_instant_image_mouse ();
     void update_with_mouse_position ( MouseEvent event );
-    Rectf get_image_display_rect () override;
+    const Rectf& get_image_display_rect () override;
+    void update_channel_display_rects () override;
+    
     vec2 texture_to_display_zoom ();
     void add_result_sequencer ();
     void add_navigation ();

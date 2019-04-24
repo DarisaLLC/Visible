@@ -116,7 +116,7 @@ public:
     
     // Accessors
     inline bool isSet () const { return m_isSet; }
-    inline int channelCount () const { return m_cc; }
+    inline int& channelCount () const { return m_cc; }
     
     inline const Rectf& display_frame_rect ()
     {

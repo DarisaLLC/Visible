@@ -418,7 +418,7 @@ void lifContext::update_contraction_selection()
 
 void lifContext::add_contractions (bool* p_open)
 {
-    Rectf dr = get_image_display_rect();
+    const Rectf& dr = get_image_display_rect();
     auto pos = ImVec2(dr.getLowerLeft().x, 150 + getWindowHeight()/2.0);
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(ImVec2(dr.getWidth(), 340), ImGuiCond_FirstUseEver);
@@ -742,7 +742,7 @@ void lifContext::loadCurrentSerie ()
          * Clear and pause if we are playing back
          */
         m_clips.clear();
-//        setCellLength(0);
+        m_instant_channel_display_rects.clear();
         pause();
         
         /*
@@ -757,6 +757,8 @@ void lifContext::loadCurrentSerie ()
         }
         mMediaInfo = mFrameSet->media_info();
         mChannelCount = (uint32_t) mMediaInfo.getNumChannels();
+        m_instant_channel_display_rects.resize(mChannelCount);
+        
         if (!(mChannelCount > 0 && mChannelCount < 4)){
             vlogger::instance().console()->debug("Expected 1 or 2 or 3 channels ");
             return;
@@ -833,6 +835,29 @@ void lifContext::process_async (){
  *  Update & Draw
  *
  ************************/
+
+
+const Rectf& lifContext::get_image_display_rect ()
+{
+    return m_layout->display_frame_rect();
+}
+
+void  lifContext::update_channel_display_rects (){
+    int cn = channel_count();
+    assert(m_instant_channel_display_rects.size() == channel_count());
+    vec2 channel_size (get_image_display_rect().getWidth(), get_image_display_rect().getHeight()/cn);
+    vec2 itl = get_image_display_rect().getUpperLeft();
+    for (int cc = 1; cc <= cn; cc++){
+        Rectf& rect = m_instant_channel_display_rects[cc-1];
+        rect = Rectf(itl, itl+channel_size);
+        itl += ivec2(0, channel_size.y);
+    }
+}
+
+const Rectf& lifContext::get_channel_display_rect (const int channel_number_zero_based){
+    return m_instant_channel_display_rects[channel_number_zero_based];
+}
+
 
 
 /*
@@ -967,7 +992,9 @@ void lifContext::add_navigation(){
 
 }
 
-
+/*
+ * Segmentation image is reduced from full resolution. It is exanpanded by displaying it in full res here
+ */
 void lifContext::add_motion_profile (){
     
     if (! m_geometry_available ) return;
@@ -1048,11 +1075,6 @@ void  lifContext::DrawGUI(){
     add_contractions(&m_show_contractions);
 }
 
-Rectf lifContext::get_image_display_rect ()
-{
-    return m_layout->display_frame_rect();
-}
-
 void  lifContext::update_log (const std::string& msg)
 {
     if (msg.length() > 2)
@@ -1083,27 +1105,25 @@ bool lifContext::haveTracks()
     return ! m_flurescence_trackWeakRef.expired() && ! m_contraction_pci_trackWeakRef.expired();
 }
 
+
 void lifContext::update ()
 {
-    ci::app::WindowRef ww = get_windowRef();
     
-
-    
-    ww->getRenderer()->makeCurrentContext(true);
     if (! have_lif_serie() ) return;
+
+    ci::app::WindowRef ww = get_windowRef();
+    ww->getRenderer()->makeCurrentContext(true);
     auto ws = ww->getSize();
     m_layout->update_window_size(ws);
+    update_channel_display_rects();
     
-    // If Plots are ready, set them up It is ready only for new data
-    // @todo replace with signal
-    //@todo switch to using weak_ptr all together
+
     if ( is_ready (m_fluorescense_tracks_aync) )
         m_flurescence_trackWeakRef = m_fluorescense_tracks_aync.get();
     
     if ( is_ready (m_contraction_pci_tracks_asyn)){
         m_contraction_pci_trackWeakRef = m_contraction_pci_tracks_asyn.get();
     }
-    
 
     // Update Fluorescence results if ready
     if (! m_flurescence_trackWeakRef.expired())
@@ -1228,20 +1248,13 @@ void lifContext::draw_info ()
     
 }
 
-Rectf lifContext::get_channel_display_rect (const Rectf& dr){
-    ivec2 tl = dr.getUpperLeft();
-    int cn = channel_count();
-    tl.y += ((cn-1)*dr.getHeight())/cn;
-    return Rectf (tl, dr.getLowerRight());
-}
-
 
 void lifContext::draw ()
 {
     if( have_lif_serie()  && mSurface )
     {
         Rectf dr = get_image_display_rect();
-        Rectf gdr = get_channel_display_rect(dr);
+        Rectf gdr = get_channel_display_rect(channel_count()-1);
         
         assert(dr.getWidth() > 0 && dr.getHeight() > 0);
 

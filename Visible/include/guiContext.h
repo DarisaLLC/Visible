@@ -146,10 +146,11 @@ public:
 	virtual void update_log (const std::string& meg = "") = 0;
 	virtual bool looping () = 0;
 	virtual void looping (bool what) = 0;
-	virtual Rectf get_image_display_rect () = 0;
 	virtual void processDrag( ivec2 pos ) = 0;
-	
 	virtual bool have_tracks () const { return m_have_tracks; }
+	
+	virtual const Rectf& get_image_display_rect () = 0;
+	virtual void update_channel_display_rects () = 0;
 
 	// App default startup params
 	static ivec2 startup_display_size () { return ivec2( 848, 564 ); }
@@ -181,7 +182,8 @@ protected:
 	UInt8 m_instant_channel_pixel;
 	float m_instant_pixel_normalized;
 	float m_instant_pixel_Luminance;
-	
+	vec2 m_instant_image_display_scale;
+	std::vector<Rectf> m_instant_channel_display_rects;
 	
 	gl::TextureRef		mTextTexture;
 	vec2				mSize;
