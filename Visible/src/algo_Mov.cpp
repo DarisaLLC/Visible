@@ -5,9 +5,9 @@
 //  Created by Arman Garakani on 8/20/18.
 //
 
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomma"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
 
 #include <stdio.h>
 #include <iostream>

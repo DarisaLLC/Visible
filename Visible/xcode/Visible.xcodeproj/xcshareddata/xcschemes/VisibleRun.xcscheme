@@ -80,23 +80,23 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Users/arman/Pictures/lif/3channels.lif"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "/Volumes/nobokovHD/Users/arman/Pictures/lif/Sample1.lif"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "Series014"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "Series007"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "IDLab_0"
             isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "/Volumes/nobokovHD/Users/arman/Pictures/lif/Sample1.lif"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "Series007"
-            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "list"

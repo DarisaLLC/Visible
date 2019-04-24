@@ -8,6 +8,8 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomma"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+
 
 #include <stdio.h>
 #include <iostream>
@@ -37,9 +39,6 @@
  lif_serie implementation
  
  ****/
-
-static std::string s_image_cache_name = "voxel_ss_.png";
-static std::string s_result_container_cache_name = "container_ss_";
 
 lif_serie_data:: lif_serie_data () : m_index (-1) {}
 
@@ -287,11 +286,19 @@ const std::vector<sides_length_t>& lif_serie_processor::cell_ends() const{
 int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
+    
+    m_voxel_sample.first = m_params.voxel_sample().first;
+    m_expected_segmented_size.first = m_params.voxel_sample().first / 2 + frames->getWidth() / m_params.voxel_sample().first;
+    m_voxel_sample.second = m_params.voxel_sample().second;
+    m_expected_segmented_size.second = m_params.voxel_sample().second / 2 + frames->getHeight() / m_params.voxel_sample().second;
+    
     create_named_tracks(names, plot_names);
     load_channels_from_images(frames);
     lock.unlock();
+    
     int channel_to_use = m_channel_count - 1;
     run_detect_geometry (channel_to_use);
+
     
     // Call the content loaded cb if any
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
@@ -310,8 +317,7 @@ void lif_serie_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& imag
     m_3d_stats_done = false;
     
     std::vector<std::thread> threads(1);
-    threads[0] = std::thread(&lif_serie_processor::generateVoxelSelfSimilarities_on_channel, this, 2,
-                             m_params.voxel_sample().first,m_params.voxel_sample().second);
+    threads[0] = std::thread(&lif_serie_processor::generateVoxelsAndSelfSimilarities, this, images);
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 }
 
@@ -553,7 +559,7 @@ std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci (co
     std::shared_ptr<ssResultContainer> ssref;
     
     if(fs::exists(mCurrentSerieCachePath)){
-        auto cache_path = mCurrentSerieCachePath / s_result_container_cache_name;
+        auto cache_path = mCurrentSerieCachePath / m_params.result_container_cache_name ();
         if(fs::exists(cache_path)){
             ssref = ssResultContainer::create(cache_path);
         }
@@ -575,7 +581,7 @@ std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci (co
         
     }else{
         
-        auto cache_path = mCurrentSerieCachePath / s_result_container_cache_name;
+        auto cache_path = mCurrentSerieCachePath / m_params.result_container_cache_name ();
         auto sp =  similarity_producer();
         sp->load_images (images);
         std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
@@ -774,32 +780,26 @@ void lif_serie_processor::save_channel_images (int channel_index, std::string& d
 
 
 // Return 2D latice of pixels over time
-void lif_serie_processor::generateVoxels_on_channel (const int channel_index, std::vector<std::vector<roiWindow<P8U>>>& rvs,
-                                                     uint32_t sample_x, uint32_t sample_y){
-    std::lock_guard<std::mutex> lock(m_mutex);
-    generateVoxels(m_all_by_channel[channel_index], rvs, sample_x, sample_y);
+void lif_serie_processor::generateVoxels_on_channel (const int channel_index){
+    generateVoxels(m_all_by_channel[channel_index]);
 }
 
 
 // Return 2D latice of voxel self-similarity
 
-void lif_serie_processor::generateVoxelSelfSimilarities_on_channel (const int channel_index, uint32_t sample_x, uint32_t sample_y){
+void lif_serie_processor::generateVoxelsAndSelfSimilarities (const std::vector<roiWindow<P8U>>& images){
     
     bool cache_ok = false;
-    m_voxel_sample.first = sample_x;
-    m_voxel_sample.second = sample_y;
-    //@todo add width and height so we do not have to do this
-    auto images = m_all_by_channel[channel_index];
     assert(!images.empty());
-    auto expected_width = sample_x / 2 + images[0].width() / sample_x;
-    auto expected_height = sample_y / 2 + images[0].height() / sample_y;
+    auto expected_width = m_expected_segmented_size.first;
+    auto expected_height = m_expected_segmented_size.second;
     if(fs::exists(mCurrentSerieCachePath)){
-        auto image_path = mCurrentSerieCachePath / s_image_cache_name;
+        auto image_path = mCurrentSerieCachePath / m_params.image_cache_name ();
         if(fs::exists(image_path)){
             try{
                 m_temporal_ss = imread(image_path.string(), IMREAD_GRAYSCALE);
             } catch( std::exception& ex){
-                auto msg = s_image_cache_name + " Exists but could not be read ";
+                auto msg = m_params.image_cache_name() + " Exists but could not be read ";
                 vlogger::instance().console()->info(msg);
             }
         }
@@ -812,57 +812,56 @@ void lif_serie_processor::generateVoxelSelfSimilarities_on_channel (const int ch
             signal_ss_image_available->operator()(m_temporal_ss);
     }
     else {
-        std::vector<std::vector<roiWindow<P8U>>> rvs;
-        std::string msg = " Generating Voxels @ (" + to_string(sample_x) + "," + to_string(sample_y) + ")";
-        vlogger::instance().console()->info("starting " + msg);
-        generateVoxels(m_all_by_channel[channel_index], rvs, sample_x, sample_y);
-        vlogger::instance().console()->info("finished " + msg);
-        generateVoxelSelfSimilarities(rvs);
+        generateVoxels(images);
+        generateVoxelSelfSimilarities();
     }
     
 }
 
 
 
-void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& images,
-                                          std::vector<std::vector<roiWindow<P8U>>>& output,
-                                          uint32_t sample_x, uint32_t sample_y){
-    output.resize(0);
+void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& images){
     size_t t_d = images.size();
     uint32_t width = images[0].width();
     uint32_t height = images[0].height();
+    uint32_t expected_width = m_expected_segmented_size.first;
+    uint32_t expected_height = m_expected_segmented_size.second;
     
-    for (auto row = 0; row < height; row+=sample_y){
-        std::vector<roiWindow<P8U>> row_bufs;
-        for (auto col = 0; col < width; col+=sample_x){
+    m_voxels.resize(0);
+    std::string msg = " Generating Voxels @ (" + to_string(m_voxel_sample.first) + "," + to_string(m_voxel_sample.second) + ")";
+    msg += "Expected Size: " + to_string(expected_width) + " x " + to_string(expected_height);
+    vlogger::instance().console()->info("starting " + msg);
+
+    int count = 0;
+    for (auto row = 0; row < height; row+=m_voxel_sample.second){
+        for (auto col = 0; col < width; col+=m_voxel_sample.first){
             std::vector<uint8_t> voxel(t_d);
             for (auto tt = 0; tt < t_d; tt++){
                 voxel[tt] = images[tt].getPixel(col, row);
             }
-            row_bufs.emplace_back(voxel);
+            count++;
+            m_voxels.emplace_back(voxel);
         }
-        output.emplace_back(row_bufs);
+        expected_height -= 1;
     }
+    expected_width -= (count / m_expected_segmented_size.second);
+    
+    msg = " remainders: " + to_string(expected_width) + " x " + to_string(expected_height);
+    vlogger::instance().console()->info("finished " + msg);
+    
+    
 }
 
 
 
-void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels){
-    int height = static_cast<int>(voxels.size());
-    int width = static_cast<int>(voxels[0].size());
+void lif_serie_processor::generateVoxelSelfSimilarities (){
+    uint32_t width = m_expected_segmented_size.first;
+    uint32_t height = m_expected_segmented_size.second;
     
     
     vlogger::instance().console()->info("starting generating voxel self-similarity");
-    // Create a single vector of all roi windows
-    std::vector<roiWindow<P8U>> all;
     auto sp =  similarity_producer();
-    for(std::vector<roiWindow<P8U>>& row: voxels){
-        for(roiWindow<P8U>& voxel : row){
-            all.emplace_back(voxel.frameBuf(), voxel.bound());
-        }
-    }
-    
-    sp->load_images (all);
+    sp->load_images (m_voxels);
     std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
     std::future<bool>  future_ss = task.get_future();  // get a future
     std::thread(std::move(task)).join(); // Finish on a thread
@@ -887,6 +886,8 @@ void lif_serie_processor::generateVoxelSelfSimilarities (std::vector<std::vector
             }
             start = end;
         }
+        serial_util::save_voxel_similarities_csv (entropies, "/Users/arman/tmp/entropies.csv");
+        serial_util::save_voxel_similarities_csv (m_entropies, "/Users/arman/tmp/mentropies.csv");
         cv::medianBlur(m_temporal_ss, m_temporal_ss, 5);
         
         vlogger::instance().console()->info("finished voxel self-similarity");

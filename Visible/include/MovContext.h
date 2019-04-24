@@ -184,6 +184,7 @@ private:
     void setup_signals ();
     void setup_params ();
     ci::app::WindowRef& get_windowRef();
+    const Rectf& get_channel_display_rect (const int channel_number);
     
     // mov Support
     std::shared_ptr<sequence_processor> m_movProcRef;
@@ -268,7 +269,9 @@ private:
     void clear_playback_params ();
     void update_instant_image_mouse ();
     void update_with_mouse_position ( MouseEvent event );
-    Rectf get_image_display_rect () override;
+    const Rectf& get_image_display_rect () override;
+    void update_channel_display_rects () override;
+    
     vec2 texture_to_display_zoom ();
     void add_result_sequencer ();
     void add_navigation ();
