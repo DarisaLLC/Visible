@@ -34,6 +34,11 @@
 #include "vision/labelBlob.hpp"
 #include "result_serialization.h"
 
+using namespace std;
+
+
+
+
 /****
  
  lif_serie implementation
@@ -199,6 +204,7 @@ mCurrentSerieCachePath(serie_cache_folder)
     signal_3dstats_available = createSignal<lif_serie_processor::sig_cb_3dstats_available>();
     signal_geometry_available = createSignal<lif_serie_processor::sig_cb_geometry_available>();
     signal_ss_image_available = createSignal<lif_serie_processor::sig_cb_ss_image_available>();
+    signal_ss_voxel_available = createSignal<lif_serie_processor::sig_cb_ss_voxel_available>();
     
     // semilarity producer
     m_sm_producer = std::shared_ptr<sm_producer> ( new sm_producer () );
@@ -223,9 +229,14 @@ mCurrentSerieCachePath(serie_cache_folder)
     std::function<void ()>_3dstats_done_cb = boost::bind (&lif_serie_processor::stats_3d_computed, this);
     boost::signals2::connection _3d_stats_connection = registerCallback(_3dstats_done_cb);
     
-    // Signal us when ss segmentation is ready
-    std::function<void (cv::Mat&)>_ss_image_done_cb = boost::bind (&lif_serie_processor::finalize_segmentation, this, _1);
+    // Signal us when ss segmentation surface is ready
+    std::function<sig_cb_ss_image_available>_ss_image_done_cb = boost::bind (&lif_serie_processor::finalize_segmentation,
+                                                                   this, _1, _2);
     boost::signals2::connection _ss_image_connection = registerCallback(_ss_image_done_cb);
+    
+    // Signal us when ss segmentation is ready
+    std::function<sig_cb_ss_voxel_available> _ss_voxel_done_cb = boost::bind (&lif_serie_processor::create_voxel_surface, this, _1);
+    boost::signals2::connection _ss_voxel_connection = registerCallback(_ss_voxel_done_cb);
     
 }
 
@@ -321,15 +332,10 @@ void lif_serie_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& imag
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 }
 
-void lif_serie_processor::finalize_segmentation (cv::Mat& space){
+void lif_serie_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
-    
-    cv::Point replicated_pad (m_params.voxel_pad().first,m_params.voxel_pad().second) ;
-    cv::Mat mono, bi_level;
-    copyMakeBorder(space,mono, replicated_pad.x,replicated_pad.y,
-                   replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);
-    threshold(mono, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
+ 
     m_main_blob = labelBlob::create(mono, bi_level, m_params.min_seqmentation_area(), 666);
     std::function<labelBlob::results_ready_cb> res_ready_lambda = [this](int64_t& cbi)
     {
@@ -789,32 +795,34 @@ void lif_serie_processor::generateVoxels_on_channel (const int channel_index){
 
 void lif_serie_processor::generateVoxelsAndSelfSimilarities (const std::vector<roiWindow<P8U>>& images){
     
-    bool cache_ok = false;
-    assert(!images.empty());
-    auto expected_width = m_expected_segmented_size.first;
-    auto expected_height = m_expected_segmented_size.second;
-    if(fs::exists(mCurrentSerieCachePath)){
-        auto image_path = mCurrentSerieCachePath / m_params.image_cache_name ();
-        if(fs::exists(image_path)){
-            try{
-                m_temporal_ss = imread(image_path.string(), IMREAD_GRAYSCALE);
-            } catch( std::exception& ex){
-                auto msg = m_params.image_cache_name() + " Exists but could not be read ";
-                vlogger::instance().console()->info(msg);
-            }
-        }
-        cache_ok = expected_width == m_temporal_ss.cols;
-        cache_ok = cache_ok && expected_height == m_temporal_ss.rows;
-    }
-    if ( cache_ok ){
-        // Call the content loaded cb if any
-        if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0)
-            signal_ss_image_available->operator()(m_temporal_ss);
-    }
-    else {
-        generateVoxels(images);
-        generateVoxelSelfSimilarities();
-    }
+    generateVoxels(images);
+    generateVoxelSelfSimilarities();
+
+//
+//    bool cache_ok = false;
+//    assert(!images.empty());
+//    auto expected_width = m_expected_segmented_size.first;
+//    auto expected_height = m_expected_segmented_size.second;
+//    if(fs::exists(mCurrentSerieCachePath)){
+//        auto image_path = mCurrentSerieCachePath / m_params.image_cache_name ();
+//        if(fs::exists(image_path)){
+//            try{
+//                m_temporal_ss = imread(image_path.string(), IMREAD_GRAYSCALE);
+//            } catch( std::exception& ex){
+//                auto msg = m_params.image_cache_name() + " Exists but could not be read ";
+//                vlogger::instance().console()->info(msg);
+//            }
+//        }
+//        cache_ok = expected_width == m_temporal_ss.cols;
+//        cache_ok = cache_ok && expected_height == m_temporal_ss.rows;
+//    }
+//    if ( cache_ok ){
+//        // Call the content loaded cb if any
+//        if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0)
+//            signal_ss_image_available->operator()(m_temporal_ss);
+//    }
+//    else {
+
     
 }
 
@@ -852,58 +860,101 @@ void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& ima
     
 }
 
+void lif_serie_processor::create_voxel_surface(std::vector<float>& ven){
 
-
-void lif_serie_processor::generateVoxelSelfSimilarities (){
     uint32_t width = m_expected_segmented_size.first;
     uint32_t height = m_expected_segmented_size.second;
+    assert(width*height == ven.size());
+    auto extremes = svl::norm_min_max(ven.begin(),ven.end());
+    std::string msg = to_string(extremes.first) + "," + to_string(extremes.second);
+    vlogger::instance().console()->info(msg);
+    m_temporal_ss = cv::Mat(height, width, CV_8U);
+    std::vector<float>::const_iterator start = ven.begin();
     
+    for (auto row =0; row < height; row++){
+        uint8_t* row_ptr = m_temporal_ss.ptr<uint8_t>(row);
+        auto end = start + width; // point to one after
+        for (; start < end; start++, row_ptr++){
+            if(std::isnan(*start)) continue; // nan is set to 1, the pre-set value
+            *row_ptr = uint8_t((*start)*255);
+        }
+        start = end;
+    }
+  //  cv::medianBlur(m_temporal_ss, m_temporal_ss, 5);
     
-    vlogger::instance().console()->info("starting generating voxel self-similarity");
-    auto sp =  similarity_producer();
-    sp->load_images (m_voxels);
-    std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
-    std::future<bool>  future_ss = task.get_future();  // get a future
-    std::thread(std::move(task)).join(); // Finish on a thread
-    vlogger::instance().console()->info("dispatched voxel self-similarity");
-    if (future_ss.get())
-    {
-        vlogger::instance().console()->info("copying results of voxel self-similarity");
-        //@todo remove extra copy here
-        cv::Mat m_temporal_ss (height,width, CV_8UC1);
-        m_temporal_ss.setTo(0);
-        
-        const deque<double>& entropies = sp->shannonProjection ();
-        vector<float> m_entropies;
-        m_entropies.insert(m_entropies.end(), entropies.begin(), entropies.end());
-        vector<float>::const_iterator start = m_entropies.begin();
-        for (auto row =0; row < height; row++){
-            uint8_t* row_ptr = m_temporal_ss.ptr<uint8_t>(row);
-            auto end = start + width; // point to one after
-            for (; start < end; start++, row_ptr++){
-                if(std::isnan(*start)) continue; // nan is set to 1, the pre-set value
-                *row_ptr = uint8_t((*start)*255);
-            }
-            start = end;
-        }
-        serial_util::save_voxel_similarities_csv (entropies, "/Users/arman/tmp/entropies.csv");
-        serial_util::save_voxel_similarities_csv (m_entropies, "/Users/arman/tmp/mentropies.csv");
-        cv::medianBlur(m_temporal_ss, m_temporal_ss, 5);
-        
-        vlogger::instance().console()->info("finished voxel self-similarity");
-        if(fs::exists(mCurrentSerieCachePath)){
-            std::string imagename = "voxel_ss_.png";
-            auto image_path = mCurrentSerieCachePath / imagename;
-            cv::imwrite(image_path.string(), m_temporal_ss);
-        }
-        
-        // Call the content loaded cb if any
-        if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0)
-            signal_ss_image_available->operator()(m_temporal_ss);
-        
-        
+    cv::Point replicated_pad (m_params.voxel_pad().first,m_params.voxel_pad().second) ;
+    cv::Mat mono, bi_level;
+    copyMakeBorder(m_temporal_ss,mono, replicated_pad.x,replicated_pad.y,
+                   replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);
+    
+    threshold(mono, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
+    
+    vlogger::instance().console()->info("finished voxel surface");
+    if(fs::exists(mCurrentSerieCachePath)){
+        std::string imagename = "voxel_ss_.png";
+        auto image_path = mCurrentSerieCachePath / imagename;
+        cv::imwrite(image_path.string(), m_temporal_ss);
     }
     
+    // Call the voxel ready cb if any
+    if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0){
+         signal_ss_image_available->operator()(mono, bi_level);
+    }
+        
+    
+}
+
+void lif_serie_processor::generateVoxelSelfSimilarities (){
+ 
+    bool cache_ok = false;
+    std::shared_ptr<internalContainer> ssref;
+    
+    if(fs::exists(mCurrentSerieCachePath)){
+        auto cache_path = mCurrentSerieCachePath / m_params.internal_container_cache_name ();
+        if(fs::exists(cache_path)){
+            ssref = internalContainer::create(cache_path);
+        }
+        cache_ok = ssref && ssref->size_check(m_expected_segmented_size.first*m_expected_segmented_size.second);
+    }
+    
+    if(cache_ok){
+        vlogger::instance().console()->info(" IC container cache : Hit ");
+        m_voxel_entropies.insert(m_voxel_entropies.end(), ssref->data().begin(),
+                           ssref->data().end());
+        // Call the voxel ready cb if any
+        if (signal_ss_voxel_available && signal_ss_voxel_available->num_slots() > 0)
+            signal_ss_voxel_available->operator()(m_voxel_entropies);
+        
+    }else{
+        
+        auto cache_path = mCurrentSerieCachePath / m_params.internal_container_cache_name ();
+        
+        vlogger::instance().console()->info("starting generating voxel self-similarity");
+        auto sp =  similarity_producer();
+        sp->load_images (m_voxels);
+        std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
+        std::future<bool>  future_ss = task.get_future();  // get a future
+        std::thread(std::move(task)).join(); // Finish on a thread
+        vlogger::instance().console()->info("dispatched voxel self-similarity");
+        if (future_ss.get())
+        {
+            vlogger::instance().console()->info("copying results of voxel self-similarity");
+            const deque<double>& entropies = sp->shannonProjection ();
+            m_voxel_entropies.insert(m_voxel_entropies.end(), entropies.begin(), entropies.end());
+            
+            // Call the voxel ready cb if any
+            if (signal_ss_voxel_available && signal_ss_voxel_available->num_slots() > 0)
+                signal_ss_voxel_available->operator()(m_voxel_entropies);
+            
+            bool ok = internalContainer::store(cache_path, m_voxel_entropies);
+            if(ok)
+                vlogger::instance().console()->info(" SS result container cache : filled ");
+            else
+                vlogger::instance().console()->info(" SS result container cache : failed ");
+            
+     
+        }
+    }
 }
 
 

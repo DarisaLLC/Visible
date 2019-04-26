@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <vector>
 #include "core/static.hpp"
-
+#include "core/core.hpp"
 
 using namespace std;
 
@@ -27,7 +27,7 @@ public:
     typedef std::pair<sumproduct_t, sumproduct_t> imagesum_t;
 
 
-    CorrelationParts();
+    CorrelationParts(double tiny = 1e-10);
     
 
     // default copy, assignment, dtor ok
@@ -52,6 +52,9 @@ public:
         // Avoid divide by zero. Singular will indicate 0 standard deviation in one or both
         if (Eim != 0.0)
             mR = (mCosine * mCosine) / Eim;
+        
+        mR = svl::equal(mR,0.0) ? m_tiny : mR;
+        
         return mR;
     }
 
@@ -124,6 +127,7 @@ private:
     mutable sumproduct_t mSii, mSmm, mSim;
     mutable int mN;
     bool mRp;
+    mutable double m_tiny;
 };
 
 

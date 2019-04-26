@@ -12,16 +12,53 @@
 #include <opencv2/opencv.hpp>
 #include <cereal/cereal.hpp>
 #include "cereal/archives/json.hpp"
-
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/deque.hpp>
 #include <cereal/types/vector.hpp>
 #include <cereal/archives/portable_binary.hpp>
+#include <boost/filesystem.hpp>
+#include <Eigen/Dense>
+#include <fstream>
 #include <iostream>
 #include <core/core.hpp>
-#include <boost/filesystem.hpp>
+
+
+
 
 using namespace boost;
 namespace fs=boost::filesystem;
+
+
+namespace cereal{
+
+// From https://stackoverflow.com/a/22885856
+
+template <class Archive, class _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols> inline
+typename std::enable_if<traits::is_output_serializable<BinaryData<_Scalar>, Archive>::value, void>::type
+save(Archive & ar, Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> const & m)
+{
+    int32_t rows = m.rows();
+    int32_t cols = m.cols();
+    ar(rows);
+    ar(cols);
+    ar(binary_data(m.data(), rows * cols * sizeof(_Scalar)));
+}
+
+template <class Archive, class _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols> inline
+typename std::enable_if<traits::is_input_serializable<BinaryData<_Scalar>, Archive>::value, void>::type
+load(Archive & ar, Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> & m)
+{
+    int32_t rows;
+    int32_t cols;
+    ar(rows);
+    ar(cols);
+    
+    m.resize(rows, cols);
+    
+    ar(binary_data(m.data(), static_cast<std::size_t>(rows * cols * sizeof(_Scalar))));
+}
+}
+
 
 
 class ssResultContainer {
@@ -71,7 +108,7 @@ public:
         return ok;
     }
     
-
+    
     static bool store (fs::path& filepath, const vector<double>& entropies, const vector<vector<double>>& mmatrix){
         bool ok = false;
         ssResultContainer ss;
@@ -171,31 +208,31 @@ struct serial_util {
     {
         return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
     }
-
+    
     static std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename)
     {
         return serial_util::make_shared_ofstream(new std::ofstream(filename, std::ofstream::out));
     }
-
+    
     template<class T, template<typename ELEM, typename ALLOC = std::allocator<ELEM>> class CONT = std::vector >
     static void save_voxel_similarities_csv (const CONT<T>& data, const std::string& output_file){
-    std::string delim (",");
-    fs::path opath (output_file);
-    auto papa = opath.parent_path ();
-    if (fs::exists(papa))
-    {
-        std::shared_ptr<std::ofstream> myfile = make_shared_ofstream(output_file);
-        auto cnt = 0;
-        auto size = data.size() - 1;
-        for (const T & dd : data)
+        std::string delim (",");
+        fs::path opath (output_file);
+        auto papa = opath.parent_path ();
+        if (fs::exists(papa))
         {
-            *myfile << dd;
-            if (cnt++ < size)
-                *myfile << delim;
+            std::shared_ptr<std::ofstream> myfile = make_shared_ofstream(output_file);
+            auto cnt = 0;
+            auto size = data.size() - 1;
+            for (const T & dd : data)
+            {
+                *myfile << dd;
+                if (cnt++ < size)
+                    *myfile << delim;
+            }
+            *myfile << std::endl;
         }
-        *myfile << std::endl;
     }
-}
 };
 
 
@@ -203,7 +240,7 @@ struct serial_util {
 class internalContainer {
 public:
     explicit internalContainer() = default;
-    void load (const vector<double>& entropies){
+    void load (const vector<float>& entropies){
         m_data = entropies;
     }
     
@@ -221,7 +258,7 @@ public:
         return ic_ref;
     }
     
-    static bool store (fs::path& filepath, const vector<double>& entropies){
+    static bool store (fs::path& filepath, const vector<float>& entropies){
         bool ok = false;
         internalContainer ic;
         ic.load(entropies);
@@ -236,7 +273,7 @@ public:
         return ok;
     }
     
-    const  vector<double>& data () const { return m_data; }
+    const  vector<float>& data () const { return m_data; }
     
     bool size_check(size_t dim){
         bool ok = m_data.size() == dim;
@@ -246,7 +283,7 @@ public:
     
     bool is_same(const internalContainer& other) const{
         
-        auto compare_double_vectors = [] (const std::vector<double> a, const std::vector<double> b, double eps) {
+        auto compare_double_vectors = [] (const std::vector<float> a, const std::vector<float> b, float eps) {
             if (a.size() != b.size()) return false;
             for (size_t i = 0; i < a.size(); i++) {
                 if (! svl::equal(a[i], b[i], eps)) {
@@ -257,13 +294,13 @@ public:
             return true;
         };
         
-        bool ok = compare_double_vectors (m_data, other.data(), double(1e-10));
+        bool ok = compare_double_vectors (m_data, other.data(), float(1e-10));
         if (! ok ) return false;
         return true;
     }
     
 private:
-    std::vector<double> m_data;
+    std::vector<float> m_data;
     
     friend class cereal::access;
     

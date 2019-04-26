@@ -142,7 +142,7 @@ void lifContext::setup_signals(){
     boost::signals2::connection geometry_connection = m_lifProcRef->registerCallback(geometry_available_cb);
     
     // Support lifProcessor::temporal_image_available
-    std::function<void (cv::Mat&)> ss_image_available_cb = boost::bind (&lifContext::signal_ss_image_available, shared_from_above(), _1);
+    std::function<void (cv::Mat&,cv::Mat&)> ss_image_available_cb = boost::bind (&lifContext::signal_ss_image_available, shared_from_above(), _1, _2);
     boost::signals2::connection ss_image_connection = m_lifProcRef->registerCallback(ss_image_available_cb);
     
 }
@@ -268,7 +268,7 @@ void lifContext::glscreen_normalize (const sides_length_t& src, const Rectf& gdr
     dst.second.y = (src.second.y*gdr.getHeight()) / mMediaInfo.getHeight();
 }
                                      
-void lifContext::signal_ss_image_available(cv::Mat& image)
+void lifContext::signal_ss_image_available(cv::Mat& image, cv::Mat& label)
 {
     vlogger::instance().console()->info(" SS Image Available  ");
     if (! m_lifProcRef){

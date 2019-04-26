@@ -14,7 +14,7 @@ ostream & operator<<(ostream & os, const CorrelationParts & corr)
 
 // public
 
-CorrelationParts::CorrelationParts (){
+CorrelationParts::CorrelationParts (double tiny): m_tiny(tiny){
     clear();
 }
 

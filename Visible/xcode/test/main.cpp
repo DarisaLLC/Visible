@@ -61,7 +61,7 @@
 #include <cereal/archives/binary.hpp>
 #include "vision/opencv_utils.hpp"
 #include "permutation_entropy.h"
-
+#include "result_serialization.h"
 #include "cvplot/cvplot.h"
 #include "time_series/persistence1d.hpp"
 #include "async_tracks.h"
@@ -158,6 +158,27 @@ std::vector<Point2f> ellipse_test = {
 
 #include "ut_lif.hpp"
 
+TEST(serialization, eigen){
+    Eigen::MatrixXd test = Eigen::MatrixXd::Random(10, 3);
+    
+    {
+        std::ofstream out("eigen.cereal", std::ios::binary);
+        cereal::BinaryOutputArchive archive_o(out);
+        archive_o(test);
+    }
+    
+    std::cout << "test:" << std::endl << test << std::endl;
+    
+    Eigen::MatrixXd test_loaded;
+    
+    {
+        std::ifstream in("eigen.cereal", std::ios::binary);
+        cereal::BinaryInputArchive archive_i(in);
+        archive_i(test_loaded);
+    }
+    
+    std::cout << "test loaded:" << std::endl << test_loaded << std::endl;
+}
 
 TEST (ut_algo_lif, segment){
     
@@ -326,7 +347,7 @@ TEST (ut_dm, block){
     CvRect mroi(gold.first,gold.second, dims.first,dims.second);
     cv::Mat mwindow = mimage(mroi);
     cv::add (gm, mwindow, mwindow);
-
+    
     iPair scan (6,6);
     denseMotion ff(fsize, dims / 2, (dims + scan) / 2);
     auto moving = fixed - scan / 2;
@@ -592,16 +613,16 @@ TEST (ut_ss_voxel, basic){
     int cols = 32;
     cv::Point2f ctr (cols/2.0f, rows/2.0f);
     
-//    auto cvDrawPlot = [] (std::vector<float>& tmp){
-//
-//        std::string name = svl::toString(std::clock());
-//        cvplot::setWindowTitle(name, svl::toString(tmp.size()));
-//        cvplot::moveWindow(name, 0, 256);
-//        cvplot::resizeWindow(name, 512, 256);
-//        cvplot::figure(name).series(name).addValue(tmp).type(cvplot::Line).color(cvplot::Red);
-//        cvplot::figure(name).show();
-//    };
-
+    //    auto cvDrawPlot = [] (std::vector<float>& tmp){
+    //
+    //        std::string name = svl::toString(std::clock());
+    //        cvplot::setWindowTitle(name, svl::toString(tmp.size()));
+    //        cvplot::moveWindow(name, 0, 256);
+    //        cvplot::resizeWindow(name, 512, 256);
+    //        cvplot::figure(name).series(name).addValue(tmp).type(cvplot::Line).color(cvplot::Red);
+    //        cvplot::figure(name).show();
+    //    };
+    
     start = std::clock();
     for (auto row = 0; row < rows; row++){
         std::vector<roiWindow<P8U>> rrs;
@@ -612,7 +633,7 @@ TEST (ut_ss_voxel, basic){
             std::vector<uint8_t> tmp = sinvec8(1.0/r, 64);
             
             rrs.emplace_back(tmp);
-//            cvDrawPlot(signal);
+            //            cvDrawPlot(signal);
         }
         voxels.push_back(rrs);
     }
@@ -809,7 +830,7 @@ TEST(cardiac_ut, interpolated_length)
     double            MicronPerPixel = 291.19 / 512.0;
     double            Length_max   = 118.555 * MicronPerPixel; // 67.42584072;
     double            Lenght_min   = 106.551 * MicronPerPixel; // 60.59880018;
-                                                               // double            shortening   = Length_max - Lenght_min;
+    // double            shortening   = Length_max - Lenght_min;
     double            MSI_max  =  0.37240525;
     double            MSI_min   = 0.1277325;
     // double            shortening_um   = 6.827040547;
@@ -1278,7 +1299,7 @@ TEST(ut_similarity, short_term)
     
     vector<roiWindow<P8U>> fill_images(3);
     
-   
+    
     
     //     cv::Mat gaussianTemplate(const std::pair<uint32_t,uint32_t>& dims, const vec2& sigma = vec2(1.0, 1.0), const vec2& center = vec2(0.5,0.5));
     std::pair<uint32_t,uint32_t> dims (32,32);
@@ -1648,13 +1669,13 @@ void finalize_segmentation (cv::Mat& space){
     static bool s_results_ready = false;
     static bool s_graphics_ready = false;
     static int64_t cid = 0;
-
+    
     
     cv::Point replicated_pad (5,5);
     cv::Mat mono, bi_level;
     copyMakeBorder(space,mono, replicated_pad.x,replicated_pad.y,
                    replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);
-
+    
     threshold(mono, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
     //Show source image
 #ifdef INTERACTIVE
@@ -1680,23 +1701,23 @@ void finalize_segmentation (cv::Mat& space){
     EXPECT_EQ(true, lbr->hasResults());
     const std::vector<blob> blobs = lbr->results();
     
-
+    
     lbr->drawOutput();
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     EXPECT_EQ(true, s_graphics_ready);
 #ifdef INTERACTIVE
     /// Show in a window
     namedWindow( "LabelBlob ", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
-//    std::vector<cv::KeyPoint> one;
-//    one.push_back(lbr->keyPoints()[1]);
+    //    std::vector<cv::KeyPoint> one;
+    //    one.push_back(lbr->keyPoints()[1]);
     cv::drawKeypoints(mono, lbr->keyPoints(),bi_level, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
     imshow( "LabelBlob", bi_level);
     cv::waitKey();
 #endif
     
-
     
-
+    
+    
 }
 
 
@@ -1758,7 +1779,6 @@ cv::Mat generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>&
     
 }
 
-//#include "ut_lif.hpp"
 
 
 
