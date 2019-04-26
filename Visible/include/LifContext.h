@@ -139,7 +139,7 @@ private:
     void signal_contraction_available (contractionContainer_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
     void signal_geometry_available ();
-    void signal_ss_image_available (cv::Mat&);
+    void signal_ss_image_available (cv::Mat&, cv::Mat& );
     
     // Availability
     std::atomic<bool> m_geometry_available;

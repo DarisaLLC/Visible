@@ -23,6 +23,10 @@
 #include <boost/assign/list_of.hpp> // for 'map_list_of()'
 #include <boost/assert.hpp>
 #include <map>
+#include <Eigen/Dense>
+
+using namespace Eigen;
+
 using namespace boost::assign; // bring 'map_list_of()' into scope
 using namespace cv;
 using namespace std;
@@ -30,6 +34,9 @@ using namespace boost;
 using namespace boost::filesystem;
 namespace fs = boost::filesystem;
 using blob = svl::labelBlob::blob;
+
+
+using MappedMat = Eigen::Map<Eigen::MatrixXf, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, 1>>;
 
 #if 0
 // Default logger factory-  creates synchronous loggers
@@ -220,6 +227,10 @@ public:
             static std::string s_result_container_cache_name = "container_ss_";
             return s_result_container_cache_name;
         }
+        const std::string& internal_container_cache_name (){
+            static std::string s_internal_container_cache_name = "internal_ss_";
+            return s_internal_container_cache_name;
+        }
         
     private:
         std::pair<uint32_t,uint32_t> m_voxel_sample;
@@ -242,7 +253,8 @@ public:
     typedef void (sig_cb_sm1dmed_available) (int&,int&);
     typedef void (sig_cb_3dstats_available) ();
     typedef void (sig_cb_geometry_available) ();
-    typedef void (sig_cb_ss_image_available) (cv::Mat &);
+    typedef void (sig_cb_ss_voxel_available) (std::vector<float> &);
+    typedef void (sig_cb_ss_image_available) (cv::Mat &, cv::Mat &);
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     typedef std::vector<channel_images_t> channel_vec_t;
     
@@ -293,7 +305,7 @@ public:
     void generateVoxelSelfSimilarities ();
     void generateVoxelsAndSelfSimilarities (const std::vector<roiWindow<P8U>>& images);
     
-    void finalize_segmentation (cv::Mat&);
+    void finalize_segmentation (cv::Mat& mono, cv::Mat& label);
     const std::vector<Rectf>& channel_rois () const;
     const cv::RotatedRect& motion_surface () const;
     const cv::RotatedRect& motion_surface_bottom () const;
@@ -321,10 +333,13 @@ protected:
     boost::signals2::signal<lif_serie_processor::sig_cb_3dstats_available>* signal_3dstats_available;
     boost::signals2::signal<lif_serie_processor::sig_cb_geometry_available>* signal_geometry_available;
     boost::signals2::signal<lif_serie_processor::sig_cb_ss_image_available>* signal_ss_image_available;
+    boost::signals2::signal<lif_serie_processor::sig_cb_ss_voxel_available>* signal_ss_voxel_available;
     
 private:
     // Default params. @place_holder for increasing number of params
     lif_serie_processor::params m_params;
+    
+    void create_voxel_surface (std::vector<float>&);
     
     const std::vector<blob>& blobs () const { return m_blobs; }
     
@@ -359,7 +374,9 @@ private:
     // One similarity engine
     mutable smProducerRef m_sm_producer;
     vector<double> m_entropies;
+    vector<float> m_voxel_entropies;
     mutable vector<vector<double>> m_smat;
+
     
     // Median Levels
     std::vector<double> m_medianLevel;
@@ -390,18 +407,17 @@ private:
     cv::RotatedRect m_motion_mass;
     cv::RotatedRect m_motion_mass_top;
     mutable cv::Mat m_temporal_ss;
-    std::vector<sides_length_t> m_cell_ends = {sides_length_t (), sides_length_t()};
-    mutable fPair m_ab;
     
-    mutable std::vector<roiWindow<P8U>> m_voxels;
-    
-    mutable std::vector<std::vector<float>> m_temporal_ss_raw;
     uiPair m_voxel_sample;
     iPair m_expected_segmented_size;
     std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;
     labelBlob::ref m_main_blob;
     std::vector<blob> m_blobs;
+
+    std::vector<sides_length_t> m_cell_ends = {sides_length_t (), sides_length_t()};
+    mutable fPair m_ab;
     
+    mutable std::vector<roiWindow<P8U>> m_voxels;
     std::shared_ptr<OCVImageWriter> m_writer;
     
 };
