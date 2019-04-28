@@ -283,7 +283,6 @@
 		C2AABC262221F94F00339675 /* libdc1394.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC252221F94F00339675 /* libdc1394.dylib */; };
 		C2AABC2A2221F9E000339675 /* libswscale.5.3.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC292221F9E000339675 /* libswscale.5.3.100.dylib */; };
 		C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
-		C2AFAD832252E16A0038AF5B /* UIImage+OpenCV.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2AFAD802252E1690038AF5B /* UIImage+OpenCV.mm */; };
 		C2AFAD842252E16A0038AF5B /* UIImage+OpenCV.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2AFAD802252E1690038AF5B /* UIImage+OpenCV.mm */; };
 		C2AFAD882252E2950038AF5B /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AFAD872252E2950038AF5B /* CoreImage.framework */; };
 		C2AFAD892252E2AE0038AF5B /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AFAD872252E2950038AF5B /* CoreImage.framework */; };
@@ -1042,8 +1041,8 @@
 				C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */,
 				C21946651CE4DC7100976025 /* onImagePlotUtils.cpp */,
 				C21946741CE4DC7100976025 /* seq_frame_container.cpp */,
-				C21946761CE4DC7100976025 /* visible_impl.cpp */,
 				C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */,
+				C21946761CE4DC7100976025 /* visible_impl.cpp */,
 				C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */,
 				C21946771CE4DC7100976025 /* VisibleRunApp.cpp */,
 			);
@@ -2104,7 +2103,6 @@
 				C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */,
 				C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
 				C2109470223AEC19004E88EE /* imgui_wrapper.cpp in Sources */,
-				C2AFAD832252E16A0038AF5B /* UIImage+OpenCV.mm in Sources */,
 				C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */,
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,

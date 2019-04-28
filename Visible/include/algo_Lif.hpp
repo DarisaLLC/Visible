@@ -214,7 +214,7 @@ public:
     
     class params{
     public:
-        params ():m_voxel_sample(3,3), m_pad(5,5), m_min_segmentation_area(10) {}
+        params ():m_voxel_sample(3,3), m_pad(0,0), m_min_segmentation_area(10) {}
         const std::pair<uint32_t,uint32_t>& voxel_sample () {return m_voxel_sample; }
         const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_pad; }
         const uint32_t& min_seqmentation_area () {return m_min_segmentation_area; }
@@ -287,6 +287,8 @@ public:
     svl::stats<int64_t> run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>&);
     void run_detect_geometry (std::vector<roiWindow<P8U>>& );
 
+    void run_volume_variances (std::vector<roiWindow<P8U>>& images);
+    
     // Run to get Entropies and Median Level Set. Both short term and long term pic
     // @todo event though index is an argument, only room for one channel is kept.
     // Short term is specifically run on the channel contraction pci was run on
@@ -306,6 +308,7 @@ public:
     void generateVoxelsAndSelfSimilarities (const std::vector<roiWindow<P8U>>& images);
     
     void finalize_segmentation (cv::Mat& mono, cv::Mat& label);
+    const Rectf& measuredArea () const;
     const std::vector<Rectf>& channel_rois () const;
     const cv::RotatedRect& motion_surface () const;
     const cv::RotatedRect& motion_surface_bottom () const;
@@ -407,7 +410,8 @@ private:
     cv::RotatedRect m_motion_mass;
     cv::RotatedRect m_motion_mass_top;
     mutable cv::Mat m_temporal_ss;
-    
+    mutable cv::Mat m_var_image;
+    mutable Rectf m_measured_area;
     uiPair m_voxel_sample;
     iPair m_expected_segmented_size;
     std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;

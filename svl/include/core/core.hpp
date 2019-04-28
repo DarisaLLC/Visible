@@ -295,7 +295,7 @@ namespace svl // protection from unintended ADL
                         *iit = (val - min_val) / scale;
                 }
             }
-            return std::pair<T,T>(min_val, max_val);
+            return extr;
         }
         
         

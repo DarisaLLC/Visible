@@ -1286,10 +1286,14 @@ void lifContext::draw ()
         
         if (m_geometry_available)
         {
+            const Rectf& measured_area = m_lifProcRef->measuredArea ();
+            float width = measured_area.getWidth();
+            float height = measured_area.getHeight();
+            
             const cv::RotatedRect& ellipse = m_lifProcRef->motion_surface();
             const fPair& ab = m_lifProcRef->ellipse_ab();
-            vec2 a_v ((ab.first * gdr.getWidth()) / 512, 0.0f );
-            vec2 b_v (0.0f, (ab.second * gdr.getHeight()) / 128);
+            vec2 a_v ((ab.first * gdr.getWidth()) / (2.0 * width), 0.0f );
+            vec2 b_v (0.0f, (ab.second * gdr.getHeight()) / (2.0* height));
             
             glscreen_normalize(m_cell_ends[0], gdr, m_normalized_cell_ends[0]);
             glscreen_normalize(m_cell_ends[1], gdr, m_normalized_cell_ends[1]);
@@ -1298,7 +1302,7 @@ void lifContext::draw ()
             
             uDegree da(ellipse.angle);
             uRadian dra (da);
-            vec2 ctr0 ((ellipse.center.x * gdr.getWidth()) / 512, (ellipse.center.y * gdr.getHeight()) / 128 );
+            vec2 ctr0 ((ellipse.center.x * gdr.getWidth()) / width, (ellipse.center.y * gdr.getHeight()) / height );
             
             cinder::gl::ScopedLineWidth( 10.0f );
             cinder::gl::ScopedColor col (ColorA( 1.0, 0.1, 0.0, 0.8f ) );

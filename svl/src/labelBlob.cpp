@@ -130,6 +130,12 @@ void svl::labelBlob::blob::update_moments(const cv::Mat& image) const {
     m_moments_ready = true;
 }
 
+void svl::labelBlob::blob::update_points(const std::vector<cv::Point>& pts) const {
+    m_points.clear();
+    for (auto const & pt : pts){
+        m_points.push_back(pt);
+    }
+}
 cv::RotatedRect svl::labelBlob::blob::rotated_roi() const {
     std::lock_guard<std::mutex> lock( m_mutex );
     uDegree dg = m_moments.getOrientation();
@@ -158,6 +164,16 @@ void  labelBlob::run() const {
     std::vector<cv::Mat> channels = { m_threshold_out,m_threshold_out,m_threshold_out};
     cv::merge(&channels[0],3,m_graphics);
     assert(count == m_stats.rows);
+    std::map<int,vector<cv::Point>> lablemap;
+    for (auto row = 0; row < m_labels.rows; row++)
+        for (auto col = 0; col < m_labels.cols; col++)
+        {
+            auto l = m_labels.at<int>(row,col);
+            if (l == 0) continue;
+            std::vector<cv::Point> pts = lablemap[l];
+            pts.emplace_back(col, row);
+            lablemap[l] = pts;
+        }
     
     m_moments.resize(0);
     m_rois.resize(0);
@@ -183,6 +199,7 @@ void  labelBlob::run() const {
         auto id = std::chrono::duration_cast<std::chrono::microseconds>(diff).count();
         m_blobs.emplace_back(i, id, roi);
         m_blobs.back().update_moments(m_grey);
+        m_blobs.back().update_points(lablemap[i]);
     }
     if (signal_results_ready && signal_results_ready->num_slots() > 0)
         signal_results_ready->operator()(m_client_id);

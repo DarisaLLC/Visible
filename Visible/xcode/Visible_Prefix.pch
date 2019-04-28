@@ -6,6 +6,7 @@
 #include "cinder/Vector.h"
 #include "cinder/Quaternion.h"
 #include "imgui.h"
+#include "mediainfo.h"
 #include "lifContext.h"
 #include "vision/roiWindow.h"
 #include "VisibleApp.h"
