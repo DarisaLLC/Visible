@@ -56,6 +56,8 @@ struct tiny_media_info
     int32_t getHeight () const { return size.height; }
     glm::vec2 getSize () const { return glm::vec2(size.width, size.height); }
     glm::vec2 getChannelSize () const { return glm::vec2(channel_size.width, channel_size.height); }
+    int32_t getChannelWidth () const { return channel_size.width; }
+    int32_t getChannelHeight () const { return channel_size.height; }
     
     double getDuration () const { return duration; }
     double getFramerate () const { return mFps; }

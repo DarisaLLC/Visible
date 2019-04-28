@@ -279,6 +279,7 @@ const smProducerRef lif_serie_processor::similarity_producer () const {
 
 const fPair& lif_serie_processor::ellipse_ab () const { return m_ab; }
 
+const Rectf& lif_serie_processor::measuredArea() const { return m_measured_area; }
 
 // Check if the returned has expired
 std::weak_ptr<contraction_analyzer> lif_serie_processor::contractionWeakRef ()
@@ -293,15 +294,21 @@ const std::vector<sides_length_t>& lif_serie_processor::cell_ends() const{
     return m_cell_ends;
 }
 
-
+/*
+ * Note On Sampled Voxel Creation:
+ * Top left of unsampled voxel is at pixel top left, i.e. vCols x vRows
+ * The result of voxel operation is at 0.5, 0.5 of the voxel area
+ * that is in vCols / 2 , vRows / 2
+ * And vCols / 2 , vRows / 2 border
+ */
 int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
     
     m_voxel_sample.first = m_params.voxel_sample().first;
-    m_expected_segmented_size.first = m_params.voxel_sample().first / 2 + frames->getWidth() / m_params.voxel_sample().first;
+    m_expected_segmented_size.first = frames->getChannelWidth() / m_params.voxel_sample().first;
     m_voxel_sample.second = m_params.voxel_sample().second;
-    m_expected_segmented_size.second = m_params.voxel_sample().second / 2 + frames->getHeight() / m_params.voxel_sample().second;
+    m_expected_segmented_size.second = frames->getChannelHeight() / m_params.voxel_sample().second;
     
     create_named_tracks(names, plot_names);
     load_channels_from_images(frames);
@@ -341,16 +348,7 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_leve
     {
         const std::vector<blob>& blobs = m_main_blob->results();
         if (! blobs.empty()){
-            m_motion_mass_top = blobs[0].rotated_roi();
-            auto tmp = m_motion_mass_top;
-            tmp.center.x -= m_params.voxel_pad().first;
-            tmp.center.y -= m_params.voxel_pad().second;
-            tmp.center.x *= m_params.voxel_sample().first;
-            tmp.center.y *= m_params.voxel_sample().second;
-            tmp.size.width *= m_voxel_sample.first;
-            tmp.size.height *= m_voxel_sample.second;
-            
-            m_motion_mass = cv::RotatedRect(tmp.center, tmp.size, tmp.angle);
+            m_motion_mass = blobs[0].rotated_roi();
             std::vector<cv::Point2f> mid_points;
             svl::get_mid_points(m_motion_mass, mid_points);
 
@@ -628,6 +626,24 @@ std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci_on_
     return run_contraction_pci(std::move(m_all_by_channel[channel_index]));
 }
 
+/*
+ * 1 monchrome channel. Compute 3D Standard Dev. per pixel
+ */
+
+void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_3d_stats_done = false;
+    cv::Mat m_sum, m_sqsum;
+    int image_count = 0;
+    std::vector<std::thread> threads(1);
+    threads[0] = std::thread(SequenceAccumulator(),std::ref(images),
+                             std::ref(m_sum), std::ref(m_sqsum), std::ref(image_count));
+    
+    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+    SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_var_image);
+    cv::normalize(m_var_image, m_var_image, 0, 255, NORM_MINMAX, CV_8UC1);
+
+}
 
 const std::vector<Rectf>& lif_serie_processor::channel_rois () const { return m_channel_rois; }
 
@@ -830,8 +846,9 @@ void lif_serie_processor::generateVoxelsAndSelfSimilarities (const std::vector<r
 
 void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& images){
     size_t t_d = images.size();
-    uint32_t width = images[0].width();
-    uint32_t height = images[0].height();
+    auto half_offset = m_voxel_sample / 2;
+    uint32_t width = images[0].width() - half_offset.first;
+    uint32_t height = images[0].height() - half_offset.second;
     uint32_t expected_width = m_expected_segmented_size.first;
     uint32_t expected_height = m_expected_segmented_size.second;
     
@@ -841,8 +858,9 @@ void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& ima
     vlogger::instance().console()->info("starting " + msg);
 
     int count = 0;
-    for (auto row = 0; row < height; row+=m_voxel_sample.second){
-        for (auto col = 0; col < width; col+=m_voxel_sample.first){
+    int row, col;
+    for (row = half_offset.second; row < height; row+=m_voxel_sample.second){
+        for (col = half_offset.first; col < width; col+=m_voxel_sample.first){
             std::vector<uint8_t> voxel(t_d);
             for (auto tt = 0; tt < t_d; tt++){
                 voxel[tt] = images[tt].getPixel(col, row);
@@ -854,8 +872,9 @@ void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& ima
     }
     expected_width -= (count / m_expected_segmented_size.second);
     
+    bool ok = expected_width == expected_height && expected_width == 0;
     msg = " remainders: " + to_string(expected_width) + " x " + to_string(expected_height);
-    vlogger::instance().console()->info("finished " + msg);
+    vlogger::instance().console()->info(ok ? "finished ok " : "finished with error " + msg);
     
     
 }
@@ -868,11 +887,12 @@ void lif_serie_processor::create_voxel_surface(std::vector<float>& ven){
     auto extremes = svl::norm_min_max(ven.begin(),ven.end());
     std::string msg = to_string(extremes.first) + "," + to_string(extremes.second);
     vlogger::instance().console()->info(msg);
-    m_temporal_ss = cv::Mat(height, width, CV_8U);
+ 
+    cv::Mat tmp = cv::Mat(height, width, CV_8U);
     std::vector<float>::const_iterator start = ven.begin();
-    
+
     for (auto row =0; row < height; row++){
-        uint8_t* row_ptr = m_temporal_ss.ptr<uint8_t>(row);
+        uint8_t* row_ptr = tmp.ptr<uint8_t>(row);
         auto end = start + width; // point to one after
         for (; start < end; start++, row_ptr++){
             if(std::isnan(*start)) continue; // nan is set to 1, the pre-set value
@@ -880,14 +900,19 @@ void lif_serie_processor::create_voxel_surface(std::vector<float>& ven){
         }
         start = end;
     }
-  //  cv::medianBlur(m_temporal_ss, m_temporal_ss, 5);
+
+    // Median Blur before up sizeing.
+    cv::medianBlur(tmp, tmp, 5);
+    cv::Size bot(tmp.cols * m_voxel_sample.first, tmp.rows * m_voxel_sample.second);
+    m_temporal_ss = cv::Mat(bot, CV_8U);
+    cv::resize(tmp, m_temporal_ss, bot, 0, 0, INTER_NEAREST);
+    m_measured_area = Rectf(0,0,bot.width, bot.height);
+    assert(m_temporal_ss.cols == m_measured_area.getWidth());
+    assert(m_temporal_ss.rows == m_measured_area.getHeight());
+
+    cv::Mat bi_level;
     
-    cv::Point replicated_pad (m_params.voxel_pad().first,m_params.voxel_pad().second) ;
-    cv::Mat mono, bi_level;
-    copyMakeBorder(m_temporal_ss,mono, replicated_pad.x,replicated_pad.y,
-                   replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);
-    
-    threshold(mono, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
+    threshold(m_temporal_ss, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
     
     vlogger::instance().console()->info("finished voxel surface");
     if(fs::exists(mCurrentSerieCachePath)){
@@ -898,7 +923,7 @@ void lif_serie_processor::create_voxel_surface(std::vector<float>& ven){
     
     // Call the voxel ready cb if any
     if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0){
-         signal_ss_image_available->operator()(mono, bi_level);
+         signal_ss_image_available->operator()(m_temporal_ss, bi_level);
     }
         
     

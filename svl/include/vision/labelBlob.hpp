@@ -104,12 +104,14 @@ public:
             m_label = other.m_label;
             m_roi = other.roi();
             m_moments = other.moments();
+            m_points = other.m_points;
             m_moments_ready = other.moments_ready();
             
         }
 
         
         void update_moments (const cv::Mat& image) const;
+        void update_points (const std::vector<cv::Point>& ) const;
         bool moments_ready () const { return m_moments_ready; }
         const cv::Rect2f& roi () const { return m_roi; }
         const svl::momento& moments () const { return m_moments; }
@@ -122,6 +124,7 @@ public:
         mutable svl::momento m_moments;
         mutable float m_extend;
         cv::Rect2f m_roi;
+        mutable std::vector<cv::Point> m_points;
         mutable bool m_moments_ready;
         mutable std::mutex m_mutex;
     };
