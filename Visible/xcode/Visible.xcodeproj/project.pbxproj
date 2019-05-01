@@ -74,7 +74,6 @@
 		C23E346121F2511D00221E68 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E345F21F2511D00221E68 /* ImSequencer.cpp */; };
 		C23E346321F254DE00221E68 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
 		C23E346421F254DE00221E68 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
-		C240F9FB21E14C8900FBA228 /* sscli-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C240F9FA21E14C8900FBA228 /* sscli-Info.plist */; };
 		C242CCC5217E76D8004F7867 /* contraction_t.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction_t.cpp */; };
 		C248D6D8224939AC00C2C02F /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */; };
 		C248DD2C1F64601A00FF72B1 /* onImagePlotUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* onImagePlotUtils.cpp */; };
@@ -300,7 +299,6 @@
 		C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
 		C2BDEFEF21C8237A00A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
 		C2BDEFF021C8237B00A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
-		C2CBB26222794FB4003C3CF7 /* affine_test.png in Resources */ = {isa = PBXBuildFile; fileRef = C2CBB26122794FB4003C3CF7 /* affine_test.png */; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
@@ -403,7 +401,7 @@
 		C2E0EE631F7B079600D32697 /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693E1CED3E2B0045FF57 /* libgtest_main.a */; };
 		C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
 		C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
-		C2E5AD842279DE2000A7AAD3 /* binaApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E5AD832279DE2000A7AAD3 /* binaApp.cpp */; };
+		C2E5AD842279DE2000A7AAD3 /* affineApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E5AD832279DE2000A7AAD3 /* affineApp.cpp */; };
 		C2ED5BB62209F67600EE52B3 /* imguivariouscontrols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */; };
 		C2ED5BB72209F79B00EE52B3 /* imguivariouscontrols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */; };
 		C2EF8D1E2148768800A5D3D6 /* Item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0D2148709300A5D3D6 /* Item.cpp */; };
@@ -848,7 +846,6 @@
 		C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccordionItem.h; path = ../include/AccordionItem.h; sourceTree = "<group>"; };
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
 		C2C68C3B1ED9F9440095FFC4 /* tracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tracker.h; path = ../include/tracker.h; sourceTree = "<group>"; };
-		C2CBB25F227947EC003C3CF7 /* ocvWarpApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ocvWarpApp.cpp; path = ../../test/ocvWarpApp.cpp; sourceTree = "<group>"; };
 		C2CBB26122794FB4003C3CF7 /* affine_test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = affine_test.png; path = ../../../.Visible/3channels/Series014/affine_test.png; sourceTree = "<group>"; };
 		C2D23FCA219B9B3E00F4A49E /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../../../../../../../usr/local/Cellar/boost/1.67.0_1/lib/libboost_thread-mt.a"; sourceTree = "<group>"; };
 		C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cinder_support.cpp; sourceTree = "<group>"; };
@@ -859,7 +856,7 @@
 		C2DB59B221557CF800750C2E /* result_serialization.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = result_serialization.h; path = ../include/result_serialization.h; sourceTree = "<group>"; };
 		C2DB728822591D8F00C2B986 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		C2DB72F522591DB700C2B986 /* Bina.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bina.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C2DB72F622591DBF00C2B986 /* Visible copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Visible copy2-Info.plist"; path = "/Volumes/datastore/arman/dev/Visible/xcode/Visible copy2-Info.plist"; sourceTree = "<absolute>"; };
+		C2DB72F622591DBF00C2B986 /* Bina.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Bina.plist; path = /Volumes/medvedev/Users/arman/dev/Visible/xcode/Bina.plist; sourceTree = "<absolute>"; };
 		C2E02ED1225AB45E00AC175D /* MovContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MovContext.h; path = ../include/MovContext.h; sourceTree = "<group>"; };
 		C2E02ED2225AB49900AC175D /* algo_Mov.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = algo_Mov.hpp; path = ../include/algo_Mov.hpp; sourceTree = "<group>"; };
 		C2E321FE1D038B16006DFE5E /* AVReader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AVReader.hpp; path = ../include/AVReader.hpp; sourceTree = "<group>"; };
@@ -868,7 +865,8 @@
 		C2E3F55C213D9408007B1088 /* labelBlob.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = labelBlob.cpp; sourceTree = "<group>"; };
 		C2E3F560213D9483007B1088 /* labelBlob.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = labelBlob.hpp; sourceTree = "<group>"; };
 		C2E469CE1D07718B0066B811 /* cm_time.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cm_time.hpp; sourceTree = "<group>"; };
-		C2E5AD832279DE2000A7AAD3 /* binaApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = binaApp.cpp; sourceTree = "<group>"; };
+		C2E5AD832279DE2000A7AAD3 /* affineApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = affineApp.cpp; sourceTree = "<group>"; };
+		C2E5AD85227A5C7000A7AAD3 /* imconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imconfig.h; path = ../../externals/imgui_module/imconfig.h; sourceTree = "<group>"; };
 		C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imguivariouscontrols.cpp; path = ../include/imGuiCustom/imguivariouscontrols.cpp; sourceTree = "<group>"; };
 		C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Swatch.cpp; path = ../src/Swatch.cpp; sourceTree = "<group>"; };
 		C2EF8D0D2148709300A5D3D6 /* Item.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Item.cpp; path = ../src/Item.cpp; sourceTree = "<group>"; };
@@ -1068,6 +1066,7 @@
 		29B97314FDCFA39411CA2CEA /* QuickTimeIteration */ = {
 			isa = PBXGroup;
 			children = (
+				C2E5AD85227A5C7000A7AAD3 /* imconfig.h */,
 				C2175DD22150B779004315C0 /* Visible.entitlements */,
 				C21946891CE4DC9700976025 /* xconfs */,
 				C260099A1CED3E010045FF57 /* svl */,
@@ -1084,7 +1083,7 @@
 				C26F5FFE21B0AA6F00EAE156 /* VisibleRunner-Info.plist */,
 				C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */,
 				C240F9FA21E14C8900FBA228 /* sscli-Info.plist */,
-				C2DB72F622591DBF00C2B986 /* Visible copy2-Info.plist */,
+				C2DB72F622591DBF00C2B986 /* Bina.plist */,
 			);
 			name = QuickTimeIteration;
 			sourceTree = "<group>";
@@ -1326,9 +1325,8 @@
 		C24CD87D1CEA5B1B0008C72B /* VisibleGtest */ = {
 			isa = PBXGroup;
 			children = (
-				C2E5AD832279DE2000A7AAD3 /* binaApp.cpp */,
+				C2E5AD832279DE2000A7AAD3 /* affineApp.cpp */,
 				C290E4032245A41500FD6FD1 /* dsp.cpp */,
-				C2CBB25F227947EC003C3CF7 /* ocvWarpApp.cpp */,
 				C2AABC1A2221D88E00339675 /* kalman_test.cpp */,
 				C28F74312234880B0040890C /* processor_cli.cpp */,
 				C242CCC6217E93FC004F7867 /* ut_cardio.hpp */,
@@ -1936,8 +1934,6 @@
 			files = (
 				C2820F302175298F00DFA7A6 /* Visible.cfg in Resources */,
 				C2175DDC215154EA004315C0 /* palette.png in Resources */,
-				C2CBB26222794FB4003C3CF7 /* affine_test.png in Resources */,
-				C240F9FB21E14C8900FBA228 /* sscli-Info.plist in Resources */,
 				C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */,
 				C264F94C215F0B6D00AF3130 /* Visible.icns in Resources */,
 				C2819EC821FA94F000183E44 /* imgui.ini in Resources */,
@@ -2130,7 +2126,7 @@
 				C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */,
 				C2677586212A325F00B5E080 /* contraction_t.cpp in Sources */,
 				C2601BB81E690409004415A3 /* bitvector.cpp in Sources */,
-				C2E5AD842279DE2000A7AAD3 /* binaApp.cpp in Sources */,
+				C2E5AD842279DE2000A7AAD3 /* affineApp.cpp in Sources */,
 				C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */,
 				C20EDBC81CF277740074C47A /* exception.cpp in Sources */,
 				C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */,
@@ -2864,7 +2860,7 @@
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = "Visible copy2-Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Bina.plist";
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
@@ -2911,7 +2907,7 @@
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = "Visible copy2-Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Bina.plist";
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
