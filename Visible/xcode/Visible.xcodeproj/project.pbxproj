@@ -575,7 +575,7 @@
 		C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../local/tinyxml/tinyxml.cpp; sourceTree = "<group>"; };
 		C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../local/tinyxml/tinyxmlerror.cpp; sourceTree = "<group>"; };
 		C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
-		C23E343421F1477D00221E68 /* imgui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imgui.h; path = "../../externals/docking-imgui/imgui/imgui.h"; sourceTree = "<group>"; };
+		C23E343421F1477D00221E68 /* imgui_module */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = folder; name = imgui_module; path = ../../externals/imgui_module; sourceTree = "<group>"; };
 		C23E345F21F2511D00221E68 /* ImSequencer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImSequencer.cpp; path = ../include/imGuiCustom/ImSequencer.cpp; sourceTree = "<group>"; };
 		C23E346221F254DE00221E68 /* ImCurveEdit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImCurveEdit.cpp; path = ../include/imGuiCustom/ImCurveEdit.cpp; sourceTree = "<group>"; };
 		C240F9FA21E14C8900FBA228 /* sscli-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "sscli-Info.plist"; sourceTree = "<group>"; };
@@ -830,10 +830,10 @@
 		C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "cp-visible-debug.xcconfig"; path = "configs/cp-visible-debug.xcconfig"; sourceTree = "<group>"; };
 		C2AFAD802252E1690038AF5B /* UIImage+OpenCV.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "UIImage+OpenCV.mm"; sourceTree = "<group>"; };
 		C2AFAD872252E2950038AF5B /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
-		C2AFCEFA216E79570080462D /* imgui_widgets.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_widgets.cpp; path = "../../externals/docking-imgui/imgui/imgui_widgets.cpp"; sourceTree = "<group>"; };
-		C2AFCEFB216E79580080462D /* imgui_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_draw.cpp; path = "../../externals/docking-imgui/imgui/imgui_draw.cpp"; sourceTree = "<group>"; };
-		C2AFCEFC216E79580080462D /* imgui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui.cpp; path = "../../externals/docking-imgui/imgui/imgui.cpp"; sourceTree = "<group>"; };
-		C2AFCEFD216E79590080462D /* imgui_demo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_demo.cpp; path = "../../externals/docking-imgui/imgui/imgui_demo.cpp"; sourceTree = "<group>"; };
+		C2AFCEFA216E79570080462D /* imgui_widgets.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_widgets.cpp; path = ../../externals/imgui_module/imgui_widgets.cpp; sourceTree = "<group>"; };
+		C2AFCEFB216E79580080462D /* imgui_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_draw.cpp; path = ../../externals/imgui_module/imgui_draw.cpp; sourceTree = "<group>"; };
+		C2AFCEFC216E79580080462D /* imgui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui.cpp; path = ../../externals/imgui_module/imgui.cpp; sourceTree = "<group>"; };
+		C2AFCEFD216E79590080462D /* imgui_demo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_demo.cpp; path = ../../externals/imgui_module/imgui_demo.cpp; sourceTree = "<group>"; };
 		C2AFCF08216F0CF10080462D /* CinderImGui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CinderImGui.cpp; path = "../../externals/Cinder-ImGui/src/CinderImGui.cpp"; sourceTree = "<group>"; };
 		C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = hockey_etc_cocoa_wrappers.mm; path = ../src/hockey_etc_cocoa_wrappers.mm; sourceTree = "<group>"; };
 		C2B005861CFF8FE100AC2E64 /* hockey_etc_cocoa_wrappers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hockey_etc_cocoa_wrappers.h; path = ../include/hockey_etc_cocoa_wrappers.h; sourceTree = "<group>"; };
@@ -1751,7 +1751,7 @@
 			isa = PBXGroup;
 			children = (
 				C2819EC721FA94F000183E44 /* imgui.ini */,
-				C23E343421F1477D00221E68 /* imgui.h */,
+				C23E343421F1477D00221E68 /* imgui_module */,
 				C2AFCF08216F0CF10080462D /* CinderImGui.cpp */,
 				C2AFCEFD216E79590080462D /* imgui_demo.cpp */,
 				C2AFCEFB216E79580080462D /* imgui_draw.cpp */,

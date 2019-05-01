@@ -15,7 +15,7 @@
 #include <mutex>
 #include <memory>
 #include <map>
-#include "timestamp.h"
+#include "core/timestamp.h"
 #include "mediaInfo.h"
 #include "time_index.h"
 #include "AVReader.hpp"
