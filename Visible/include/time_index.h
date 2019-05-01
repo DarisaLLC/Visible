@@ -1,7 +1,7 @@
 #ifndef __TimeIndex__
 #define __TimeIndex__
 
-#include "timestamp.h"
+#include "core/timestamp.h"
 
 using namespace std;
 

@@ -25,7 +25,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/cstdint.hpp>
 
-#include "timestamp.h"
+#include "core/timestamp.h"
 #include "seq_frame_container.hpp"
 
 #include "roiWindow.h"
