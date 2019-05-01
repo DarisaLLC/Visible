@@ -257,6 +257,10 @@ void lifContext::signal_geometry_available()
         vlogger::instance().console()->error("Lif Processor Object does not exist ");
         return;
     }
+    
+    std::string msg = " lif context thread: " + stl_utils::tostr(std::this_thread::get_id());
+    vlogger::instance().console()->info(msg);
+    m_lifProcRef->generate_affine_windows();
   
 }
 

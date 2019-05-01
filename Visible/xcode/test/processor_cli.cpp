@@ -103,7 +103,7 @@ int imagePaths( const std::string& imageDir, paths_vector_t& frame_paths, const 
     return static_cast<int> (frame_paths.size());
 }
 
-#define cvMatOfroiWindow(a,b,cvType) cv::Mat b ((a).height(),(a).width(), cvType,(a).pelPointer(0,0), size_t((a).rowUpdate()))
+#define cvMatRefroiP8U(a,b,cvType) cv::Mat b ((a).height(),(a).width(), cvType,(a).pelPointer(0,0), size_t((a).rowUpdate()))
 
 /*
  *
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        cvMatOfroiWindow(mag, im, CV_8UC1);
+        cvMatRefroiP8U(mag, im, CV_8UC1);
         
 //        cv::Mat im (mag.height(),ang.width(), CV_8UC(1),ang.pelPointer(0,0), size_t(ang.rowUpdate()));
         

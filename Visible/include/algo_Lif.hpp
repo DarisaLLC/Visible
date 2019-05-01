@@ -311,7 +311,7 @@ public:
     const Rectf& measuredArea () const;
     const std::vector<Rectf>& channel_rois () const;
     const cv::RotatedRect& motion_surface () const;
-    const cv::RotatedRect& motion_surface_bottom () const;
+    const cv::Mat&  surfaceAffine() const;
     const  std::deque<double>& medianSet () const;
     const fPair& ellipse_ab () const;
     const std::vector<sides_length_t>& cell_ends() const;
@@ -325,6 +325,7 @@ public:
     const vector<vector<double>>& ssMatrix () const { return m_smat; }
     const vector<double>& entropies () const { return m_entropies; }
     
+   void generate_affine_windows ();
     
 protected:
     boost::signals2::signal<lif_serie_processor::sig_cb_content_loaded>* signal_content_loaded;
@@ -341,6 +342,10 @@ protected:
 private:
     // Default params. @place_holder for increasing number of params
     lif_serie_processor::params m_params;
+    
+    void internal_generate_affine_windows (const std::vector<roiWindow<P8U>>&);
+    
+    void save_affine_windows (const std::vector<cv::Mat>&);
     
     void create_voxel_surface (std::vector<float>&);
     
@@ -408,7 +413,7 @@ private:
     mutable svl::stats<int64_t> m_3d_stats;
     std::atomic<bool> m_3d_stats_done;
     cv::RotatedRect m_motion_mass;
-    cv::RotatedRect m_motion_mass_top;
+    mutable cv::Mat m_surface_affine;
     mutable cv::Mat m_temporal_ss;
     mutable cv::Mat m_var_image;
     mutable Rectf m_measured_area;
@@ -422,6 +427,7 @@ private:
     mutable fPair m_ab;
     
     mutable std::vector<roiWindow<P8U>> m_voxels;
+    mutable std::vector<cv::Mat> m_affine_windows;
     std::shared_ptr<OCVImageWriter> m_writer;
     
 };

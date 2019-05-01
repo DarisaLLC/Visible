@@ -325,7 +325,11 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
     return m_frameCount;
 }
 
-
+void lif_serie_processor::generate_affine_windows () {
+ 
+    int channel_to_use = m_channel_count - 1;
+    internal_generate_affine_windows(m_all_by_channel[channel_to_use]);
+}
 /*
  * 1 monchrome channel. Compute 3D Standard Dev. per pixel
  */
@@ -337,6 +341,91 @@ void lif_serie_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& imag
     std::vector<std::thread> threads(1);
     threads[0] = std::thread(&lif_serie_processor::generateVoxelsAndSelfSimilarities, this, images);
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+}
+
+
+void lif_serie_processor::internal_generate_affine_windows (const std::vector<roiWindow<P8U>>& rws){
+
+    std::unique_lock<std::mutex> lock(m_mutex);
+
+    
+    std::string msg = " lproc thread: " + stl_utils::tostr(std::this_thread::get_id());
+    vlogger::instance().console()->info(msg);
+    
+ 
+    auto affineCrop = [] (const vector<roiWindow<P8U> >::const_iterator& rw_src, cv::RotatedRect& rect){
+      
+
+        auto matAffineCrop = [] (Mat input, const RotatedRect& box){
+            double angle = box.angle;
+            auto size = box.size;
+            
+            //Adjust the box angle
+            if (angle < -45.0)
+            {
+                angle += 90.0;
+                std::swap(size.width, size.height);
+            }
+            
+            //Rotate the text according to the angle
+            auto transform = getRotationMatrix2D(box.center, angle, 1.0);
+            Mat rotated;
+            warpAffine(input, rotated, transform, input.size(), INTER_CUBIC);
+            
+            //Crop the result
+            Mat cropped;
+            getRectSubPix(rotated, size, box.center, cropped);
+            copyMakeBorder(cropped,cropped,10,10,10,10,BORDER_CONSTANT,Scalar(0));
+            return cropped;
+        };
+
+        cvMatRefroiP8U(*rw_src, src, CV_8UC1);
+        return matAffineCrop(src, rect);
+
+    };
+
+    uint32_t count = 0;
+    uint32_t total = static_cast<uint32_t>(rws.size());
+    m_affine_windows.clear();
+    vector<roiWindow<P8U> >::const_iterator vitr = rws.begin();
+    do
+    {
+        cv::Mat affine = affineCrop(vitr, m_motion_mass);
+        auto clone = affine.clone();
+        m_affine_windows.push_back(clone);
+        count++;
+    }
+    while (++vitr != rws.end());
+    assert(count==total);
+    
+    save_affine_windows (m_affine_windows);
+    
+}
+
+void lif_serie_processor::save_affine_windows (const std::vector<cv::Mat>& rws){
+
+    if(fs::exists(mCurrentSerieCachePath)){
+        std::string subdir ("affine_cell_images");
+        auto save_path = mCurrentSerieCachePath / subdir;
+        boost::system::error_code ec;
+        if(!fs::exists(save_path)){
+            fs::create_directory(save_path, ec);
+            switch( ec.value() ) {
+                case boost::system::errc::success: {
+                    std::string msg = "Created " + save_path.string() ;
+                    vlogger::instance().console()->info(msg);
+                }
+                break;
+                default:
+                    std::string msg = "Failed to create " + save_path.string() + ec.message();
+                    vlogger::instance().console()->info(msg);
+            }
+        } // tried creatring it if was not already
+        if(fs::exists(save_path)){
+            auto writer = get_image_writer();
+            writer->operator()(save_path.string(), m_affine_windows);
+        }
+    }
 }
 
 void lif_serie_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
@@ -351,6 +440,51 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_leve
             m_motion_mass = blobs[0].rotated_roi();
             std::vector<cv::Point2f> mid_points;
             svl::get_mid_points(m_motion_mass, mid_points);
+            m_surface_affine = cv::getRotationMatrix2D(m_motion_mass.center,m_motion_mass.angle, 1);
+            m_surface_affine.at<double>(0,2) -= (m_motion_mass.center.x - m_motion_mass.size.width/2);
+            m_surface_affine.at<double>(1,2) -= (m_motion_mass.center.y - m_motion_mass.size.height/2);
+            
+
+            auto get_trims = [] (const cv::Rect& box, const cv::RotatedRect& rotrect) {
+                
+                
+                //The order is bottomLeft, topLeft, topRight, bottomRight.
+                std::vector<float> trims(4);
+                cv::Point2f rect_points[4];
+                rotrect.points( &rect_points[0] );
+                cv::Point2f xtl; xtl.x = box.tl().x; xtl.y = box.tl().y;
+                cv::Point2f xbr; xbr.x = box.br().x; xbr.y = box.br().y;
+                cv::Point2f dtl (xtl.x - rect_points[1].x, xtl.y - rect_points[1].y);
+                cv::Point2f dbr (xbr.x - rect_points[3].x, xbr.y - rect_points[3].y);
+                trims[0] = rect_points[1].x < xtl.x ? xtl.x - rect_points[1].x : 0.0f;
+                trims[1] = rect_points[1].y < xtl.y ? xtl.y - rect_points[1].y : 0.0f;
+                trims[2] = rect_points[3].x > xbr.x ? rect_points[3].x  - xbr.x : 0.0f;
+                trims[3] = rect_points[3].x > xbr.y ? rect_points[3].y  - xbr.y : 0.0f;
+                std::transform(trims.begin(), trims.end(), trims.begin(),
+                               [](float d) -> float { return std::roundf(d); });
+                
+                return trims;
+            };
+            
+            auto trims = get_trims(cv::Rect(0,0,m_temporal_ss.cols, m_temporal_ss.rows), m_motion_mass);
+            for (auto ff : trims) std::cout << ff << std::endl;
+            
+            cv::Point offset(trims[0],trims[1]);
+            fPair pads (trims[0]+trims[2],trims[1]+trims[3]);
+            cv::Mat canvas (m_temporal_ss.rows+pads.second, m_temporal_ss.cols+pads.first, CV_8U);
+            canvas.setTo(0.0);
+            cv::Mat win (canvas, cv::Rect(offset.x, offset.y, m_temporal_ss.cols, m_temporal_ss.rows));
+            m_temporal_ss.copyTo(win);
+            
+            cv::Mat affine;
+            cv::warpAffine(canvas, affine, m_surface_affine,
+                           m_motion_mass.size, INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0,0,0));
+            if(fs::exists(mCurrentSerieCachePath)){
+                std::string imagename = "voxel_affine_.png";
+                auto image_path = mCurrentSerieCachePath / imagename;
+                cv::imwrite(image_path.string(), affine);
+            }
+            
 
             auto two_pt_dist = [mid_points](int a, int b){
                 const cv::Point2f& pt1 = mid_points[a];
@@ -649,7 +783,7 @@ const std::vector<Rectf>& lif_serie_processor::channel_rois () const { return m_
 
 
 const cv::RotatedRect& lif_serie_processor::motion_surface() const { return m_motion_mass; }
-const cv::RotatedRect& lif_serie_processor::motion_surface_bottom() const { return m_motion_mass_top; }
+const cv::Mat& lif_serie_processor::surfaceAffine() const { return m_surface_affine; }
 
 
 // Update. Called also when cutoff offset has changed
