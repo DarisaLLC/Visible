@@ -7,3 +7,6 @@
 [submodule "externals/CImg"]
 	path = externals/CImg
 	url = git://github.com/dtschump/CImg
+[submodule "externals/Cinder-ImGui"]
+	path = externals/Cinder-ImGui
+	url = https://github.com/simongeilfus/Cinder-ImGui.git
