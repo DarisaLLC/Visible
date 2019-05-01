@@ -17,6 +17,12 @@ using namespace svl;
 /*! Functions related to affine transformations. */
 namespace svl
 {
+    
+
+    
+    double integralMatSum(const Mat &integralMat, cv::Rect roi);
+    Size2f rotateSize(Size2f s, float angle);
+
     // point geom utils
     void get_mid_points(const cv::RotatedRect& rotrect, std::vector<cv::Point2f>& mids);
     cv::Point2f rotate2d(const cv::Point2f& pt_in, const double& angle_rad);
@@ -58,8 +64,8 @@ namespace svl
     // Use view roiWindow memory as cv::Mat.
     // Requires cvType to be appropriate
     // Use within scope. As roiWindow is ref counted.
-    // Example    cvMatOfroiWindow(ang, aim, CV_8UC1);
-    #define cvMatOfroiWindow(a,b,cvType) cv::Mat b ((a).height(),(a).width(), cvType,(a).pelPointer(0,0), size_t((a).rowUpdate()))
+    // Example    cvMatRefroiP8U(ang, aim, CV_8UC1);
+    #define cvMatRefroiP8U(a,b,cvType) cv::Mat b ((a).height(),(a).width(), cvType,(a).pelPointer(0,0), size_t((a).rowUpdate()))
 
     void cpCvMatToRoiWindow8U (const cv::Mat& m, roiWindow<P8U>& r);
     

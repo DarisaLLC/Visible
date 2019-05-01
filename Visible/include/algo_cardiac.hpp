@@ -145,6 +145,8 @@ public:
     }
  
     typedef std::vector<roiWindow<P8U>> channel_images_t;
+    typedef std::vector<cv::Mat> channel_mats_t;
+    
     void operator()(const std::string& dir_fqfn, channel_images_t& channel)
     {
         m_fqfn = dir_fqfn;
@@ -169,6 +171,36 @@ public:
             cv::Mat mat(vitr->height(), vitr->width(), CV_8UC(1), vitr->rowPointer(0), 512);
             std::string fn = m_name +  m_namer(count++, fw, '0') + ".png";
             cv::imwrite(fn, mat);
+            // Signal to listeners
+            if (signal_write_info && signal_write_info->num_slots() > 0)
+                signal_write_info->operator()(count-1,count == total);
+        }
+        while (++vitr != channel.end());
+    }
+    
+    void operator()(const std::string& dir_fqfn, channel_mats_t& channel)
+    {
+        m_fqfn = dir_fqfn;
+        m_valid = boost::filesystem::exists( m_fqfn );
+        m_valid = m_valid && boost::filesystem::is_directory( m_fqfn );
+        if(!m_valid){
+            if (signal_write_info && signal_write_info->num_slots() > 0)
+                signal_write_info->operator()(0,true);
+            return;
+        }
+        m_name = m_fqfn + m_sep +m_name;
+        
+        if (channel.empty()) return;
+        int fw = 1 + std::log10(channel.size());
+        std::lock_guard<std::mutex> guard (m_mutex);
+        
+        uint32_t count = 0;
+        uint32_t total = static_cast<uint32_t>(channel.size());
+        vector<cv::Mat>::const_iterator vitr = channel.begin();
+        do
+        {
+            std::string fn = m_name +  m_namer(count++, fw, '0') + ".png";
+            cv::imwrite(fn, *vitr);
             // Signal to listeners
             if (signal_write_info && signal_write_info->num_slots() > 0)
                 signal_write_info->operator()(count-1,count == total);

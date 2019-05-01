@@ -471,8 +471,8 @@ void show_gradient (const cv::Mat& src, const std::string& name){
     Gradient(r8,mag, ang);
     auto pks = SpatialEdge(mag, ang, features, 2);
     
-    cvMatOfroiWindow(peaks, mim, CV_8UC1);
-    cvMatOfroiWindow(ang, aim, CV_8UC1);
+    cvMatRefroiP8U(peaks, mim, CV_8UC1);
+    cvMatRefroiP8U(ang, aim, CV_8UC1);
     
     
     auto rt = rightTailPost(mim, 0.005f);

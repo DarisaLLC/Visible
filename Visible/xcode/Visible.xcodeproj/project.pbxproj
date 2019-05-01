@@ -300,7 +300,8 @@
 		C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
 		C2BDEFEF21C8237A00A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
 		C2BDEFF021C8237B00A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
-		C2C6A26D2248393C0001D420 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
+		C2CBB260227947EC003C3CF7 /* ocvWarpApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CBB25F227947EC003C3CF7 /* ocvWarpApp.cpp */; };
+		C2CBB26222794FB4003C3CF7 /* affine_test.png in Resources */ = {isa = PBXBuildFile; fileRef = C2CBB26122794FB4003C3CF7 /* affine_test.png */; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
@@ -847,6 +848,8 @@
 		C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccordionItem.h; path = ../include/AccordionItem.h; sourceTree = "<group>"; };
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
 		C2C68C3B1ED9F9440095FFC4 /* tracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tracker.h; path = ../include/tracker.h; sourceTree = "<group>"; };
+		C2CBB25F227947EC003C3CF7 /* ocvWarpApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ocvWarpApp.cpp; path = ../../test/ocvWarpApp.cpp; sourceTree = "<group>"; };
+		C2CBB26122794FB4003C3CF7 /* affine_test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = affine_test.png; path = ../../../.Visible/3channels/Series014/affine_test.png; sourceTree = "<group>"; };
 		C2D23FCA219B9B3E00F4A49E /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../../../../../../../usr/local/Cellar/boost/1.67.0_1/lib/libboost_thread-mt.a"; sourceTree = "<group>"; };
 		C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cinder_support.cpp; sourceTree = "<group>"; };
 		C2DA19561E7F30D800062DBC /* csv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = csv.cpp; sourceTree = "<group>"; };
@@ -1101,6 +1104,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C2CBB26122794FB4003C3CF7 /* affine_test.png */,
 				C2819ED42201287900183E44 /* visible_scope.png */,
 				C23CFBE521E9785000C1DF16 /* PlayLoop.png */,
 				C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */,
@@ -1322,6 +1326,7 @@
 			isa = PBXGroup;
 			children = (
 				C290E4032245A41500FD6FD1 /* dsp.cpp */,
+				C2CBB25F227947EC003C3CF7 /* ocvWarpApp.cpp */,
 				C2AABC1A2221D88E00339675 /* kalman_test.cpp */,
 				C28F74312234880B0040890C /* processor_cli.cpp */,
 				C242CCC6217E93FC004F7867 /* ut_cardio.hpp */,
@@ -1929,6 +1934,7 @@
 			files = (
 				C2820F302175298F00DFA7A6 /* Visible.cfg in Resources */,
 				C2175DDC215154EA004315C0 /* palette.png in Resources */,
+				C2CBB26222794FB4003C3CF7 /* affine_test.png in Resources */,
 				C240F9FB21E14C8900FBA228 /* sscli-Info.plist in Resources */,
 				C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */,
 				C264F94C215F0B6D00AF3130 /* Visible.icns in Resources */,
@@ -2110,11 +2116,11 @@
 				C20D4DE72208BD34004D9405 /* ellipse_fit.cpp in Sources */,
 				C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */,
 				C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */,
+				C2CBB260227947EC003C3CF7 /* ocvWarpApp.cpp in Sources */,
 				C2618F87217FDA9E00FA9F43 /* figure.cc in Sources */,
 				C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */,
 				C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */,
-				C2C6A26D2248393C0001D420 /* main.cpp in Sources */,
 				C2398A1821DE980C00B180A0 /* imgui_widgets.cpp in Sources */,
 				C20EDBB61CEFC2D20074C47A /* registration.cpp in Sources */,
 				C29C53C1222B58D900D17385 /* dense_motion.cpp in Sources */,

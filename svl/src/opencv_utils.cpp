@@ -18,6 +18,43 @@ using namespace svl;
 namespace svl
 {
     
+
+    
+    double integralMatSum(const Mat &integralMat, Rect roi) {
+        switch (integralMat.type()) {
+            case CV_32SC1:
+                return integralMat.at<int32_t>(roi.br())
+                - integralMat.at<int32_t>(roi.y + roi.height, roi.x)
+                - integralMat.at<int32_t>(roi.y, roi.x + roi.width)
+                + integralMat.at<int32_t>(roi.tl());
+            case CV_32FC1:
+                return integralMat.at<float>(roi.br())
+                - integralMat.at<float>(roi.y + roi.height, roi.x)
+                - integralMat.at<float>(roi.y, roi.x + roi.width)
+                + integralMat.at<float>(roi.tl());
+            case CV_64FC1:
+                return integralMat.at<double>(roi.br())
+                - integralMat.at<double>(roi.y + roi.height, roi.x)
+                - integralMat.at<double>(roi.y, roi.x + roi.width)
+                + integralMat.at<double>(roi.tl());
+            default:
+                throw invalid_argument("unsupported type of integralMat");
+        }
+    }
+    
+
+    
+    Size2f rotateSize(Size2f s, float angle) {
+        float w = s.width, h = s.height;
+        angle = float(fabs(angle / 180 * svl::constants::pi));
+        float diagAngle = atan(h / w);
+        float diagLen = sqrt(w * w + h * h);
+        return Size2f(
+                      std::roundf(fabs(diagLen * cos(diagAngle - angle))),
+                      std::roundf(fabs(diagLen * sin(diagAngle + angle)))
+                      );
+    }
+
     void get_mid_points(const cv::RotatedRect& rotrect, std::vector<cv::Point2f>& mids) {
         //Draws a rectangle
         cv::Point2f rect_points[4];
