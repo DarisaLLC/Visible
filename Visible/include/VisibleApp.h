@@ -12,7 +12,7 @@
  */
 
 
-#include "cinder_opencv.h"
+#include "cinder_cv/cinder_opencv.h"
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
