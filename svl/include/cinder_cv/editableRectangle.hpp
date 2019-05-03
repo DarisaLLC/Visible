@@ -9,29 +9,6 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-//! A rectangle that can be transformed.
-struct EditableRect
-{
-	Rectf  area;
-	vec2   position;
-	vec2   scale;
-	quat   rotation;
-
-	EditableRect() : scale( 1 ) {}
-	~EditableRect() {}
-
-	//! Returns the rectangle's model matrix.
-	mat4  matrix()
-	{
-		mat4 m = glm::translate( vec3( position, 0 ) );
-		m *= glm::toMat4( rotation );
-		m *= glm::scale( vec3( scale, 1 ) );
-   		m *= glm::translate( vec3( -area.getSize() * 0.5f, 0 ) );
-
-		return m;
-	}
-    
-};
 
 #if 0
 class WindowToWorldTestApp : public App {

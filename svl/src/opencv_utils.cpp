@@ -65,6 +65,33 @@ namespace svl
         }
     }
     
+    
+#if NOTYET
+    double angle(cv::Point2f origin, cv::Point2f a){
+        auto v = a - origin;
+        double out = atan2(v.x,v.y) * 180.0 / svl::constants::pi;
+        if (out<0) {out+=360.0;}
+        return out;
+    }
+
+    void sortCorners(std::vector<Point2f>& corners, Point2f& center) {
+        
+        
+        // Calculate all the angles from the centroid, maintaining index
+        for (Point p : corners) {polar.push_back(angle(p, cent));}
+        vector<double> sorted = polar;
+        sort(sorted.begin(), sorted.end());
+        
+        // Sort "corners" by the order of sorted "polar"
+        for (double d : sorted) {
+            n = index(polar, d);
+            out.push_back(corners[n]);  // Return sorted corners
+        }
+        return out;
+    }
+
+#endif
+
     cv::Point2f rotate2d(const cv::Point2f& pt_in, const double& angle_rad) {
         cv::Point2f pt_out;
         //CW rotation
@@ -85,11 +112,34 @@ namespace svl
         return atan2(static_cast<double>(pt2.y - pt1.y), static_cast<double>(pt2.x - pt1.x)) * 180.0 / svl::constants::pi;
     }
 
-    RotatedRect RotatedRectOutOf4 (std::array<cv::Point2f,4>& src){
-        
+    // original from https://stackoverflow.com/a/46635372
+    // Computes the quadrant for a and b (0-3):
+    //     ^
+    //   1 | 0
+    //  ---+-->
+    //   2 | 3
+    //  (a.x > center.x) ? ((a.y > center.y) ? 0 : 3) : ((a.y > center.y) ? 1 : 2)); */
+    // In comparing if quadrants are the same return (b.x - center.x) * (a.y - center.y) < (b.y - center.y) * (a.x - center.x);
+    //        std::sort(corners.begin(), corners.end(), [=](const Point2f& a, const Point2f&b) {
+    //            auto dqa = ccwQ(ctr, a); auto dqb = ccwQ(ctr, b);
+    //            if (dqa == dqb) {
+    //                return (b.x - ctr.x) * (a.y - ctr.y) < (b.y - ctr.y) * (a.x - ctr.x);
+    //            }
+    //            return dqa < dqb;
+    //        });
+    
+    
+    int ccwQ(const Point2f &center, const Point2f &a){
+        const int dax = ((a.x - center.x) > 0) ? 1 : 0;
+        const int day = ((a.y - center.y) > 0) ? 1 : 0;
+        return  (1 - dax) + (1 - day) + ((dax & (1 - day)) << 1);
+    }
+    
+    RotatedRect RotatedRectOutOf4 (std::vector<cv::Point2f>& src){
+        assert(src.size() == 4);
         std::vector<int> idx = {0,1,2,3};
         
-        auto pcheck = [](std::array<Point2f,4>& cand){
+        auto pcheck = [](std::vector<Point2f>& cand){
             Vec2f vecs[2];
             vecs[0] = Vec2f(cand[0] - cand[1]);
             vecs[1] = Vec2f(cand[1] - cand[3]);
