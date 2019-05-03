@@ -20,16 +20,13 @@
 #include "cinder/gl/TextureFont.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui.hpp"
-#include <time.h>
 #include "core/stats.hpp"
-#include "vision/ss_segmenter.hpp"
-#include "vision/ColorHistogram.hpp"
 #include "cinder_cv/affine_rectangle.h"
 #include "vision/opencv_utils.hpp"
 #include "boost/filesystem.hpp"
 #include "vision/histo.h"
 #include "vision/ipUtils.h"
-#include "vision/bit_chrome.hpp"
+#include "cvplot/cvplot.h"
 
 #include <string>
 #include <vector>
@@ -108,8 +105,6 @@ void get_output (std::vector<std::pair <uint8_t, int> >& raw, const uint8_t  goa
     
 }
 
-
-
 class MainApp : public AppMac {
 public:
     
@@ -125,6 +120,8 @@ public:
     void saveImage(const cv::Mat & image, const std::string & filename);
     void RGBtoYxy(cv::Mat source, cv::Mat &destination);
     void hueMappedOrientation(cv::Mat source, cv::Mat &destination);
+ 
+    void generate_crop ();
     
     Surface8uRef  loadImageFromPath (const filesystem::path&);
     void fileDrop( FileDropEvent event ) override;
@@ -139,10 +136,9 @@ public:
     Surface8uRef   mImage;
     Surface8uRef   mModelImage;
     Surface8uRef   mHSLImage;
-
+    
     cv::Mat mInputMat;
-    cv::Mat mSegmented;
-    cv::Mat mEdge;
+    cv::Mat mPadded;
     vector<cv::Mat> mLogs;
     vector<cv::Mat> mHSV;
     vector<cv::Mat> mRGB;
@@ -155,16 +151,16 @@ public:
     RectMapping mInveseMap;
     
     int mOption;
-    params::InterfaceGlRef	mParams;
+    params::InterfaceGlRef    mParams;
     vector<string> mNames = { "Input",  "Orientation"};
-    ivec2			mMousePos;
+    ivec2            mMousePos;
     vector<vector<cv::Point> > contours;
     vector<Vec4i> hierarchy;
     Scalar mSkinHue[2];
-    Font				mFont;
+    Font                mFont;
     Font                mScoreFont;
-    gl::TextureFontRef	mTextureFont;
-    gl::TextureFontRef	mTextureScoreFont;
+    gl::TextureFontRef    mTextureFont;
+    gl::TextureFontRef    mTextureScoreFont;
     
     affineRectangle   mRectangle;
     Rectf          mWorkingRect;
@@ -186,18 +182,8 @@ public:
     boost::filesystem::path mFolderPath;
     std::string mExtension;
     std::string mToken;
-    
-    
-    std::string get_timestamp_filename ()
-    {
-#define LOGNAME_FORMAT "bina-model%Y%m%d_%H%M%S"
-#define LOGNAME_SIZE 20
-        
-        static char name[LOGNAME_SIZE];
-        time_t now = time(0);
-        strftime(name, sizeof(name), LOGNAME_FORMAT, localtime(&now));
-        return std::string(name);
-    }
+    int m_pads [4];
+
     
 };
 
@@ -254,6 +240,30 @@ void MainApp::update()
     mIsOver = mRectangle.area().contains( vec2( object ) ) && mTextures[mOption] != nullptr;
 }
 
+void MainApp::generate_crop (){
+
+    auto cvDrawPlot = [] (cv::Mat& image){
+            auto name = "image";
+            auto &view = cvplot::Window::current().view(name);
+            cvplot::moveWindow(name, 0, 0);
+            view.size(cvplot::Size(image.cols*3,image.rows*3));
+            view.drawImage(&image);
+            view.finish();
+            view.flush();
+        };
+    
+    auto cp = mAffineRect;
+    cp.center.x = cp.center.x / 2;
+    cp.center.y = cp.center.y / 2;
+    cp.size.width =     cp.size.width / 2;
+    cp.size.height =     cp.size.height / 2;
+    RotatedRect sp (cp.center, cp.size, cp.angle);
+    cv::Mat crop = affineCrop(mPadded, sp);
+    auto crop2 = mRectangle.rectify_image(mPadded);
+    std::cout << " = " << crop.cols << "," << crop.rows << std::endl;
+    cvDrawPlot(crop);
+}
+    
 void MainApp::setup()
 {
     mFolderPath = Platform::get()->getHomeDirectory();
@@ -282,7 +292,9 @@ void MainApp::setup()
     
     mParams->addButton( "Add image ",
                        std::bind( &MainApp::openFile, this ) );
-    mParams->addSeparator();
+    
+    mParams->addButton(" Crop Affine ", std::bind(&MainApp::generate_crop, this));
+
     
     
 #if defined( CINDER_COCOA_TOUCH )
@@ -333,7 +345,7 @@ std::string MainApp::pixelInfo( const ivec2 &position )
     // first, specify a small region around the current cursor position
     float scaleX = mTextures[mOption]->getWidth() / (float)getWindowWidth();
     float scaleY = mTextures[mOption]->getHeight() / (float)getWindowHeight();
-    ivec2	pixel( (int)( position.x * scaleX ), (int)( (position.y * scaleY ) ) );
+    ivec2    pixel( (int)( position.x * scaleX ), (int)( (position.y * scaleY ) ) );
     if (! mImage ) return " No Image Available ";
     auto val = mImage->getPixel(pixel);
     ostringstream oss( ostringstream::ate );
@@ -488,7 +500,7 @@ void MainApp::keyDown( KeyEvent event )
 
 
 void MainApp::hueMappedOrientation(cv::Mat source, cv::Mat &destination){
-   
+    
     cv::Mat gray, mag, ang, hsv;
     std::vector<cv::Mat> channels;
     channels.resize(source.channels());
@@ -496,14 +508,14 @@ void MainApp::hueMappedOrientation(cv::Mat source, cv::Mat &destination){
     cv::cvtColor(source, gray, CV_RGB2GRAY);
     
     svl::sobel_opencv(gray,mag, ang);
-
+    
     // Map to Hue Hue is 180 degrees
     // Scales, calculates absolute values, and converts the result to 8-bit.
     ang.convertTo(ang,CV_8U,256.0/180.0);
     cv::convertScaleAbs(ang,ang);
     cv::multiply(mag, cv::Scalar(2.0), mag);
     mag.convertTo(mag,CV_8U);
-
+    
     
     hsv = source.clone();
     channels[0] = ang; // set orientation as hue channel
@@ -559,8 +571,6 @@ void MainApp::RGBtoYxy(cv::Mat source, cv::Mat &destination){
 
 void MainApp::process ()
 {
-    
-    cv::Mat inputMatF;
     mTextures.resize(mNames.size());
     mOverlays.resize(mNames.size());
     textureToDisplay = &mTextures[0];
@@ -568,50 +578,39 @@ void MainApp::process ()
     cv::Mat hsv;
     cv::Mat mask;
     cv::Mat xyz;
-
+    
     mInputMat = cv::Mat ( toOcv ( *mImage) );
+    m_pads[0] = mInputMat.rows;
+    m_pads[1] = mInputMat.rows;
+    m_pads[2] = m_pads[3] = 0;
     
-    // resize it with aspect in tact
- //   cv::resize(mInputMat, mInputMat, cv::Size(mInputMat.cols * 2 , mInputMat.rows * 2 ));
-    cv::Mat clear = mInputMat.clone();
+    auto istats = matStats(mInputMat);
+    
+    
+    cv::copyMakeBorder(mInputMat, mPadded, m_pads[0], m_pads[1],m_pads[2], m_pads[3], cv:: BORDER_CONSTANT , cv::Scalar::all(istats[0]));
+
+    cv::Mat clear = mPadded.clone();
     clear = 0;
-    
-    
-    cv::Mat none = mInputMat.clone();
+    cv::Mat none = mPadded.clone();
     mTextures[0] = gl::Texture::create(fromOcv(none));
     mOverlays[0] = gl::Texture::create(fromOcv(clear));
-    
-
-    cv::Mat tmpi = mInputMat.clone();
+    cv::Mat tmpi = mPadded.clone();
     mTextures[1] = gl::Texture::create(fromOcv(tmpi));
     mOverlays[1] = gl::Texture::create(fromOcv(clear));
     
-   // hueMappedOrientation(tmpi, xyz);
-    
- 
-    
-    // convert to hsv and show hue
-    // get the vector of Mats for processing
-    // Surface for display
-
-
-
-    
-    setWindowSize(mInputMat.cols * 2, mInputMat.rows * 2);
+    setWindowSize(mPadded.cols * 2, mPadded.rows * 2);
 }
 
 
 
 void MainApp::draw()
 {
-        gl::enableAlphaBlending();
+ 
+    
+    gl::enableAlphaBlending();
     
     {
-        //    gl::ScopedViewport vp(getWindowPos(), getWindowSize());
-
         gl::draw(mTextures[mOption], getWindowBounds());
-        
-        
         
         if (mOverlays[mOption])
         {
@@ -659,7 +658,7 @@ void MainApp::draw()
 
 void MainApp::drawEditableRect()
 {
-    
+  
     // Either use setMatricesWindow() or setMatricesWindowPersp() to enable 2D rendering.
     gl::setMatricesWindow( getWindowSize(), true );
     

@@ -832,7 +832,7 @@
 		C2AFCEFB216E79580080462D /* imgui_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_draw.cpp; path = ../../externals/imgui_module/imgui_draw.cpp; sourceTree = "<group>"; };
 		C2AFCEFC216E79580080462D /* imgui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui.cpp; path = ../../externals/imgui_module/imgui.cpp; sourceTree = "<group>"; };
 		C2AFCEFD216E79590080462D /* imgui_demo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_demo.cpp; path = ../../externals/imgui_module/imgui_demo.cpp; sourceTree = "<group>"; };
-		C2AFCF08216F0CF10080462D /* CinderImGui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CinderImGui.cpp; path = "../../externals/Cinder-ImGui/src/CinderImGui.cpp"; sourceTree = "<group>"; };
+		C2AFCF08216F0CF10080462D /* CinderImGui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CinderImGui.cpp; path = ../include/imGuiCustom/CinderImGui.cpp; sourceTree = "<group>"; };
 		C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = hockey_etc_cocoa_wrappers.mm; path = ../src/hockey_etc_cocoa_wrappers.mm; sourceTree = "<group>"; };
 		C2B005861CFF8FE100AC2E64 /* hockey_etc_cocoa_wrappers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hockey_etc_cocoa_wrappers.h; path = ../include/hockey_etc_cocoa_wrappers.h; sourceTree = "<group>"; };
 		C2B38A4F1D022D2A00C70872 /* AVReader.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = AVReader.mm; path = ../src/AVReader.mm; sourceTree = "<group>"; };
@@ -866,7 +866,7 @@
 		C2E3F560213D9483007B1088 /* labelBlob.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = labelBlob.hpp; sourceTree = "<group>"; };
 		C2E469CE1D07718B0066B811 /* cm_time.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cm_time.hpp; sourceTree = "<group>"; };
 		C2E5AD832279DE2000A7AAD3 /* affineApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = affineApp.cpp; sourceTree = "<group>"; };
-		C2E5AD85227A5C7000A7AAD3 /* imconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imconfig.h; path = ../../externals/imgui_module/imconfig.h; sourceTree = "<group>"; };
+		C2E5AD85227A5C7000A7AAD3 /* imconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imconfig.h; path = ../include/imGuiCustom/imconfig.h; sourceTree = "<group>"; };
 		C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imguivariouscontrols.cpp; path = ../include/imGuiCustom/imguivariouscontrols.cpp; sourceTree = "<group>"; };
 		C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Swatch.cpp; path = ../src/Swatch.cpp; sourceTree = "<group>"; };
 		C2EF8D0D2148709300A5D3D6 /* Item.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Item.cpp; path = ../src/Item.cpp; sourceTree = "<group>"; };
@@ -1066,7 +1066,6 @@
 		29B97314FDCFA39411CA2CEA /* QuickTimeIteration */ = {
 			isa = PBXGroup;
 			children = (
-				C2E5AD85227A5C7000A7AAD3 /* imconfig.h */,
 				C2175DD22150B779004315C0 /* Visible.entitlements */,
 				C21946891CE4DC9700976025 /* xconfs */,
 				C260099A1CED3E010045FF57 /* svl */,
@@ -1748,6 +1747,7 @@
 		C29C726F216FC7340028AED1 /* imgui */ = {
 			isa = PBXGroup;
 			children = (
+				C2E5AD85227A5C7000A7AAD3 /* imconfig.h */,
 				C2819EC721FA94F000183E44 /* imgui.ini */,
 				C23E343421F1477D00221E68 /* imgui_module */,
 				C2AFCF08216F0CF10080462D /* CinderImGui.cpp */,
