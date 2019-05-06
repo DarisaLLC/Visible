@@ -242,7 +242,7 @@ void MainApp::update()
 
 void MainApp::generate_crop (){
 
-    auto cvDrawPlot = [] (cv::Mat& image){
+    auto cvDrawImage = [] (cv::Mat& image){
             auto name = "image";
             auto &view = cvplot::Window::current().view(name);
             cvplot::moveWindow(name, 0, 0);
@@ -252,16 +252,48 @@ void MainApp::generate_crop (){
             view.flush();
         };
     
+    auto cvDrawPlot = [&] (std::vector<float>& one_d, cvplot::Size& used, std::string& name){
+        {
+            auto name = "transparent";
+            auto alpha = 200;
+            cvplot::setWindowTitle(name, "transparent");
+            cvplot::moveWindow(name, used.width, 0);
+            cvplot::resizeWindow(name, 300+used.width, 300+used.height);
+//            cvplot::setMouseCallback(name, mouse_callback);
+            cvplot::Window::current().view(name).frameColor(cvplot::Sky).alpha(alpha);
+            auto &figure = cvplot::figure(name);
+            figure.series("Projection")
+            .setValue(one_d)
+            .type(cvplot::Dots)
+            .color(cvplot::Blue.alpha(alpha))
+            .legend(false);
+            figure.alpha(alpha).show(true);
+
+        }
+    };
+    
     auto cp = mAffineRect;
-    cp.center.x = cp.center.x / 2;
-    cp.center.y = cp.center.y / 2;
-    cp.size.width =     cp.size.width / 2;
-    cp.size.height =     cp.size.height / 2;
+    vec2 scale (getWindowWidth() / (float) mPadded.cols, getWindowHeight()/ (float) mPadded.rows);
+    cp.center.x = cp.center.x / scale.x;
+    cp.center.y = cp.center.y / scale.x;
+    cp.size.width =     cp.size.width / scale.x;
+    cp.size.height =     cp.size.height / scale.x;
     RotatedRect sp (cp.center, cp.size, cp.angle);
     cv::Mat crop = affineCrop(mPadded, sp);
-    auto crop2 = mRectangle.rectify_image(mPadded);
+    cv::Mat hz (1, crop.cols, CV_32F);
+    cv::Mat vt (crop.rows, 1, CV_32F);
+    horizontal_vertical_projections (crop, hz, vt);
+    std::vector<float> hz_vec(hz.ptr<float>(0),hz.ptr<float>(0)+hz.cols );
+    std::vector<float> vt_vec(crop.rows);
+    for (auto ii = 0; ii < crop.rows; ii++) vt_vec[ii] = vt.at<float>(ii,0);
     std::cout << " = " << crop.cols << "," << crop.rows << std::endl;
-    cvDrawPlot(crop);
+    cvDrawImage(crop);
+    std::string hhh ("hz");
+    std::string vvv ("vt");
+    cvplot::Size used (crop.cols*3, crop.rows*3);
+    cvDrawPlot(vt_vec, used, vvv);
+    
+    
 }
     
 void MainApp::setup()
@@ -368,7 +400,7 @@ std::string MainApp::pixelInfo( const ivec2 &position )
 std::string MainApp::resultInfo (const rank_output& output)
 {
     ostringstream oss( ostringstream::ate );
-    oss << "Redness: " << to_string(m_rank_score.score) << "   " << "Texture: " << to_string(m_rank_score.texture_score);
+    oss << " Affine Prototype ";
     return oss.str();
     
 }
@@ -441,19 +473,23 @@ void MainApp::keyDown( KeyEvent event )
             position.x++;
             break;
         case KeyEvent::KEY_RIGHTBRACKET:
-            mRectangle.area().inflate(vec2(1,0));
+            mRectangle.inflate(vec2(-1,0));
+            mRectangle.worldCorners();
             break;
             
         case KeyEvent::KEY_LEFTBRACKET:
-            mRectangle.area().inflate(vec2(-1,0));
+            mRectangle.inflate(vec2(1,0));
+
             break;
             
         case KeyEvent::KEY_SEMICOLON:
-            mRectangle.area().inflate(vec2(0,1));
+            mRectangle.inflate(vec2(0,-1));
+
             break;
             
         case KeyEvent::KEY_QUOTE:
-            mRectangle.area().inflate(vec2(0,-1));
+            mRectangle.inflate(vec2(0,1));
+
             break;
             
         case KeyEvent::KEY_c:
@@ -598,7 +634,7 @@ void MainApp::process ()
     mTextures[1] = gl::Texture::create(fromOcv(tmpi));
     mOverlays[1] = gl::Texture::create(fromOcv(clear));
     
-    setWindowSize(mPadded.cols * 2, mPadded.rows * 2);
+    setWindowSize(mPadded.cols, mPadded.rows);
 }
 
 
@@ -666,34 +702,47 @@ void MainApp::drawEditableRect()
     gl::pushModelMatrix();
     gl::multModelMatrix( mRectangle.matrix() );
     
-    
     // Draw the same rect as line segments.
-    affineRectangle::draw_oriented_rect (mRectangle.area());
-    
+    {
+        gl::ScopedColor color (ColorA(0.0,1.0,0.0,0.8f));
+        affineRectangle::draw_oriented_rect (mRectangle.area());
+    }
     
     
     // Draw a stroked rect in magenta (if mouse inside) or white (if mouse outside).
-    ColorA cl (1.0, 1.0, 1.0,0.8f);
-    if (mIsOver) cl = ColorA (1.0, 0.0, 1.0,0.8f);
-    
-    gl::ScopedColor color (cl);
-    
-    gl::drawStrokedRect( mRectangle.area());
-    
-    // Draw the 4 corners as yellow crosses.
-    float dsize = 5.0f;
-    int i = 0;
-    for( const vec2 &corner : mRectangle.worldCorners() )
     {
-        gl::drawLine( vec2( corner.x, corner.y - 5 ), vec2( corner.x, corner.y + 5 ) );
-        gl::drawLine( vec2( corner.x - 5, corner.y ), vec2( corner.x + 5, corner.y ) );
+        ColorA cl (1.0, 1.0, 1.0,0.8f);
+        if (mIsOver) cl = ColorA (1.0, 0.0, 1.0,0.8f);
+        gl::ScopedColor color (cl);
+        gl::drawStrokedRect( mRectangle.area());
+    }
+    // Draw the 4 corners as yellow crosses.
+
+    
+    // To test worldToWindowCoord, let's draw the 4 corners again,
+    // this time as red crosses without changing the model matrix. [ Excercising gl::worldToWindowCoord() ].
+    int i = 0;
+    float dsize = 5.0f;
+    for( const vec2 &corner : mRectangle.worldCorners()  ) {
+        vec4 world = mRectangle.matrix() * vec4( corner, 0, 1 );
+        vec2 window = gl::worldToWindowCoord( vec3( world ) );
+        vec2 scale = mRectangle.scale();
+        {
+            gl::ScopedColor color (ColorA (0.0, 1.0, 0.0,0.8f));
+            gl::drawLine( vec2( window.x, window.y - 5 * scale.y ), vec2( window.x, window.y + 5 * scale.y ) );
+            gl::drawLine( vec2( window.x - 5 * scale.x, window.y ), vec2( window.x + 5 * scale.x, window.y ) );
+        }
         ColorA cl (1.0, 0.0, 0.0,0.8f);
         if (i==0 || i == 1)
             cl = ColorA (0.0, 0.0, 1.0,0.8f);
-        gl::drawStrokedCircle(corner, dsize, dsize+5.0f);
+        {
+            gl::ScopedColor color (cl);
+            gl::drawStrokedCircle(corner, dsize, dsize+5.0f);
+        }
         dsize+=5.0f;
         i++;
     }
+    
     
     //    gl::drawStrokedEllipse(mRectangle.position(), mRectangle.area().getWidth()/2, mRectangle.area().getHeight()/2);
     
@@ -704,7 +753,11 @@ void MainApp::drawEditableRect()
     
     std::vector<Point2f> cvcorners;
     compute2DRectCorners(mAffineRect, cvcorners);
-    affineRectangle::draw_oriented_rect(cvcorners);
+    {
+        gl::ScopedColor color (ColorA(1.0,0.0,0.0,0.8f));
+        affineRectangle::draw_oriented_rect(cvcorners);
+
+    }
     
 }
 
