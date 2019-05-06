@@ -49,6 +49,8 @@
 		C21FFE731CFE0E1D00C97013 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
 		C2239AB4218B6270007558AB /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
 		C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
+		C2342E60227CC45F00D74D80 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2342E5F227CC45F00D74D80 /* GLUT.framework */; };
+		C2342E61227CC4AE00D74D80 /* affineApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E5AD832279DE2000A7AAD3 /* affineApp.cpp */; };
 		C2398A0921DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
 		C2398A0A21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
 		C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
@@ -401,7 +403,6 @@
 		C2E0EE631F7B079600D32697 /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693E1CED3E2B0045FF57 /* libgtest_main.a */; };
 		C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
 		C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
-		C2E5AD842279DE2000A7AAD3 /* affineApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E5AD832279DE2000A7AAD3 /* affineApp.cpp */; };
 		C2ED5BB62209F67600EE52B3 /* imguivariouscontrols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */; };
 		C2ED5BB72209F79B00EE52B3 /* imguivariouscontrols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */; };
 		C2EF8D1E2148768800A5D3D6 /* Item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0D2148709300A5D3D6 /* Item.cpp */; };
@@ -559,6 +560,8 @@
 		C2239AB6218B6F30007558AB /* boost_units.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = boost_units.hpp; sourceTree = "<group>"; };
 		C2239AB721922F72007558AB /* cardiomyocyte_model_detail.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model_detail.hpp; sourceTree = "<group>"; };
 		C2309DC61F6B4D6500A0E908 /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../externals/Cinder/lib/macosx/Release/libcinder.a; sourceTree = SOURCE_ROOT; };
+		C2342E5D227CC27300D74D80 /* ps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ps.cpp; sourceTree = "<group>"; };
+		C2342E5F227CC45F00D74D80 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
 		C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleTestApp-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleTestApp-Info.plist"; sourceTree = "<absolute>"; };
 		C23B7CC6220553E1005DE02C /* cpp-perf.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = "cpp-perf.hpp"; path = "../include/cpp-perf.hpp"; sourceTree = "<group>"; };
@@ -911,6 +914,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2342E60227CC45F00D74D80 /* GLUT.framework in Frameworks */,
 				C2AABC2A2221F9E000339675 /* libswscale.5.3.100.dylib in Frameworks */,
 				C2AABC262221F94F00339675 /* libdc1394.dylib in Frameworks */,
 				C2AABC242221F92100339675 /* libavcodec.58.35.100.dylib in Frameworks */,
@@ -1122,6 +1126,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C2342E5F227CC45F00D74D80 /* GLUT.framework */,
 				C2AFAD872252E2950038AF5B /* CoreImage.framework */,
 				C2AABC292221F9E000339675 /* libswscale.5.3.100.dylib */,
 				C2AABC272221F97F00339675 /* libavresample.4.0.0.dylib */,
@@ -1325,6 +1330,7 @@
 			isa = PBXGroup;
 			children = (
 				C2E5AD832279DE2000A7AAD3 /* affineApp.cpp */,
+				C2342E5D227CC27300D74D80 /* ps.cpp */,
 				C290E4032245A41500FD6FD1 /* dsp.cpp */,
 				C2AABC1A2221D88E00339675 /* kalman_test.cpp */,
 				C28F74312234880B0040890C /* processor_cli.cpp */,
@@ -2126,7 +2132,6 @@
 				C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */,
 				C2677586212A325F00B5E080 /* contraction_t.cpp in Sources */,
 				C2601BB81E690409004415A3 /* bitvector.cpp in Sources */,
-				C2E5AD842279DE2000A7AAD3 /* affineApp.cpp in Sources */,
 				C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */,
 				C20EDBC81CF277740074C47A /* exception.cpp in Sources */,
 				C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */,
@@ -2140,6 +2145,7 @@
 				C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */,
 				C2819ECF2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C2618F85217FDA8F00FA9F43 /* highgui.cc in Sources */,
+				C2342E61227CC4AE00D74D80 /* affineApp.cpp in Sources */,
 				C20BBC031E4E33CE002C7D68 /* tinystr.cpp in Sources */,
 				C2BDEFF021C8237B00A8CB94 /* core_support.cpp in Sources */,
 				C2606E721CED44370045FF57 /* seq_frame_container.cpp in Sources */,
