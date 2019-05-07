@@ -46,6 +46,12 @@ using namespace cv;
  }
  
  };
+ 
+ 
+ OpenCv RotatedRect:
+ The rotation angle in a clockwise direction. When the angle is 0, 90, 180, 270 etc., the rectangle becomes an up-right rectangle.
+ 
+ 
  */
 
 class affineRectangle : public Rectf
@@ -63,7 +69,35 @@ public:
         mCornersWorld.resize(4);
         mCornersWindow.resize(4);
     }
-    
+
+    void update () const {
+        mat4 m = glm::translate( vec3( mPosition, 0 ) );
+        m *= glm::toMat4( mRotation );
+        m *= glm::scale( vec3( mScale, 1 ) );
+        m *= glm::translate( vec3( -getSize() * 0.5f, 0 ) );
+        mWorldTransform = m;
+        mCornersWorld.resize(4);
+        Rectf* mArea ((affineRectangle*)this);
+        mArea->canonicalize();
+        mCornersWorld[0]=mArea->getUpperLeft();
+        mCornersWorld[1]=mArea->getUpperRight();
+        mCornersWorld[2]=mArea->getLowerRight();
+        mCornersWorld[3]=mArea->getLowerLeft();
+        mWorldCenter = mArea->getCenter();
+        mCornersWindow.resize(4);
+        for (int i = 0; i < 4; i++)
+        {
+            vec4 world = getWorldTransform() * vec4( mCornersWorld[i], 0, 1 );
+            vec2 window = gl::worldToWindowCoord( vec3( world ) );
+            mCornersWindow[i]=toOcv(window);
+        }
+        {
+            vec4 world = getWorldTransform() * vec4( mWorldCenter, 0, 1 );
+            vec2 window = gl::worldToWindowCoord( vec3( world ) );
+            mWindowCenter=toOcv(window);
+        }
+        mCvRotatedRect = cv::minAreaRect(mCornersWindow);
+    }
     ~affineRectangle () {}
     
     Rectf&  area () { return *this; }
@@ -84,19 +118,17 @@ public:
         return (vec2 (pt[0]*mScale[0],pt[1]*mScale[1]));
     }
     
+    
     //! Returns the rectangle's model matrix.
-    mat4  matrix() const
+    const mat4  &getWorldTransform() const
     {
-        mat4 m = glm::translate( vec3( mPosition, 0 ) );
-        m *= glm::toMat4( mRotation );
-        m *= glm::scale( vec3( mScale, 1 ) );
-        m *= glm::translate( vec3( -getSize() * 0.5f, 0 ) );
-        return m;
+        return mWorldTransform;
     }
+    
     
     float degrees () const
     {
-        return 2*toDegrees(std::acos(mRotation.w));
+        return toDegrees(2*std::acos(mRotation.w));
     }
     
     float radians () const
@@ -105,60 +137,33 @@ public:
     }
     
     float uni_scale () const { return (mScale.x+mScale.y) / 2.0f; }
-    
-    float cvMinorAxis () const { return mCvMinorAxis; }
+
     
     //The order is bottomLeft, topLeft, topRight, bottomRight.
     // return in tl,tr,br,bl
     // @note Check if this makes sense in all cases 
     const std::vector<vec2>& worldCorners () const
     {
-        mCornersWorld.resize(4);
-        Rectf* mArea ((affineRectangle*)this);
-        mArea->canonicalize();
-        mCornersWorld[0]=mArea->getUpperLeft();
-        mCornersWorld[1]=mArea->getUpperRight();
-        mCornersWorld[2]=mArea->getLowerRight();
-        mCornersWorld[3]=mArea->getLowerLeft();
-        mWorldCenter = mArea->getCenter();
-        
         return mCornersWorld;
     }
     
-    cv::RotatedRect get_rotated_rect ()
+    const std::vector<Point2f>& windowCorners () const
     {
-        Point2f ctr (0.0f,0.0f);
-        mCornersWindow.resize(4);
-        for (int i = 0; i < 4; i++)
-        {
-            vec4 world = matrix() * vec4( mCornersWorld[i], 0, 1 );
-            vec2 window = gl::worldToWindowCoord( vec3( world ) );
-            mCornersWindow[i]=toOcv(window);
-        }
-        {
-            vec4 world = matrix() * vec4( mWorldCenter, 0, 1 );
-            vec2 window = gl::worldToWindowCoord( vec3( world ) );
-            mWindowCenter=toOcv(window);
-        }
-        
-        auto rr = cv::minAreaRect(mCornersWindow);
-        if (rr.angle < -45.0){
-            rr.angle += 90.0;
-            auto sz = rr.size;
-            rr.size.width = sz.height;
-            rr.size.height = sz.width;
-        }
+        return mCornersWindow;
+    }
+    
+    cv::RotatedRect& rotated_rect ()
+    {
+  
+//        if (rr.angle < -45.0){
+//            rr.angle += 90.0;
+//            auto sz = rr.size;
+//            rr.size.width = sz.height;
+//            rr.size.height = sz.width;
+//        }
    //     rr.points(mCornersWindow.data());
         
-        float lr_dist = glm::distance(fromOcv(mCornersWindow[2]), fromOcv(mCornersWindow[1]));
-        float td_dist = glm::distance(fromOcv(mCornersWindow[1]), fromOcv(mCornersWindow[0]));
-        Point2f minor_axis = (lr_dist < td_dist) ? mCornersWindow[2] - mCornersWindow[1] : mCornersWindow[0] - mCornersWindow[1];
-        mCvMinorAxis = toDegrees (atan2(-minor_axis.y , minor_axis.x));
-
-        cv::Size rrsize (std::min(lr_dist,td_dist), std::max(lr_dist, td_dist));
-        return cv::RotatedRect(mWindowCenter, rrsize, mCvMinorAxis);
-
-        
+        return mCvRotatedRect;
     }
     
     
@@ -184,13 +189,13 @@ public:
     }
     
     
-private:
-    
-    void compute2DRectCorners(const cv::RotatedRect rect, std::vector<cv::Point2f> & corners) const
+    static void compute2DRectCorners(const cv::RotatedRect rect, std::vector<cv::Point2f> & corners)
     {
         corners.resize(4);
         return rect.points(corners.data());
     }
+private:
+
     
     Point2f map_point(Point2f pt) const
     {
@@ -212,7 +217,9 @@ private:
     mutable std::vector<Point2f> mCornersWindow;
     mutable Point2f mWindowCenter;
     mutable vec2 mWorldCenter;
-    mutable float mCvMinorAxis;
+    mutable RotatedRect mCvRotatedRect;
+    mutable glm::mat4 mTransform;
+    mutable glm::mat4 mWorldTransform;
 };
 
 

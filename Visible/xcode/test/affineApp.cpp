@@ -122,7 +122,9 @@ public:
     void hueMappedOrientation(cv::Mat source, cv::Mat &destination);
  
     void generate_crop ();
-    
+    glm::vec2 screenToObject( const glm::vec2 &pt, float z ) const;
+    glm::vec2 objectToScreen( const glm::vec2 &pt ) const;
+
     Surface8uRef  loadImageFromPath (const filesystem::path&);
     void fileDrop( FileDropEvent event ) override;
     void draw()override;
@@ -156,7 +158,6 @@ public:
     ivec2            mMousePos;
     vector<vector<cv::Point> > contours;
     vector<Vec4i> hierarchy;
-    Scalar mSkinHue[2];
     Font                mFont;
     Font                mScoreFont;
     gl::TextureFontRef    mTextureFont;
@@ -235,8 +236,10 @@ void MainApp::openFile()
 
 void MainApp::update()
 {
+    mRectangle.update();
+    
     // Check if mouse is inside rectangle, by converting the mouse coordinates to object space.
-    vec3 object = gl::windowToObjectCoord( mRectangle.matrix(), mMousePos );
+    vec3 object = gl::windowToObjectCoord( mRectangle.getWorldTransform(), mMousePos );
     mIsOver = mRectangle.area().contains( vec2( object ) ) && mTextures[mOption] != nullptr;
 }
 
@@ -275,10 +278,10 @@ void MainApp::generate_crop (){
     auto cp = mAffineRect;
     vec2 scale (getWindowWidth() / (float) mPadded.cols, getWindowHeight()/ (float) mPadded.rows);
     cp.center.x = cp.center.x / scale.x;
-    cp.center.y = cp.center.y / scale.x;
+    cp.center.y = cp.center.y / scale.y;
     cp.size.width =     cp.size.width / scale.x;
-    cp.size.height =     cp.size.height / scale.x;
-    RotatedRect sp (cp.center, cp.size, cp.angle);
+    cp.size.height =     cp.size.height / scale.y;
+    RotatedRect sp (cp.center, cp.size, -cp.angle);
     cv::Mat crop = affineCrop(mPadded, sp);
     cv::Mat hz (1, crop.cols, CV_32F);
     cv::Mat vt (crop.rows, 1, CV_32F);
@@ -305,10 +308,7 @@ void MainApp::setup()
     assert(exists(mFolderPath));
     
     cv::namedWindow(" Bina ");
-    mOption = 1;
-    mSkinHue[0] = Scalar(3, 40, 90);
-    mSkinHue[1] = Scalar(33, 255, 255);
-    
+
     openFile();
     
     // Setup the parameters
@@ -349,6 +349,7 @@ void MainApp::setup()
     mIsOver = false;
     mMouseIsDown = false;
     
+    mWorkingRect = Rectf(0,0,getWindowWidth(), getWindowHeight());
 }
 
 void MainApp::mouseDown( MouseEvent event )
@@ -357,7 +358,7 @@ void MainApp::mouseDown( MouseEvent event )
     // Check if mouse is inside rectangle, by converting the mouse coordinates
     // to world space and then to object space. [ Excercising gl::windowToWorldCoord() ].
     vec3 world = gl::windowToWorldCoord( event.getPos() );
-    vec4 object = glm::inverse( mRectangle.matrix() ) * vec4( world, 1 );
+    vec4 object = glm::inverse( mRectangle.getWorldTransform() ) * vec4( world, 1 );
     
     // Now we can simply use Area::contains() to find out if the mouse is inside.
     mIsClicked = mRectangle.area().contains( vec2( object ) );
@@ -445,6 +446,7 @@ void MainApp::fileDrop( FileDropEvent event )
         if (mImage)
         {
             mWorkingRect = Rectf (0, 0, mImage->getWidth(), mImage->getHeight());
+            mRectangle = affineRectangle(mWorkingRect);
             process();
         }
     }
@@ -694,20 +696,20 @@ void MainApp::draw()
 
 void MainApp::drawEditableRect()
 {
-  
+    mAffineRect = mRectangle.rotated_rect();
+    mAffineCenter = mAffineRect.center;
+    
+    std::vector<Point2f> cvcorners;
+    affineRectangle::compute2DRectCorners(mAffineRect, cvcorners);
+    
     // Either use setMatricesWindow() or setMatricesWindowPersp() to enable 2D rendering.
     gl::setMatricesWindow( getWindowSize(), true );
     
     // Draw the transformed rectangle.
     gl::pushModelMatrix();
-    gl::multModelMatrix( mRectangle.matrix() );
+    gl::multModelMatrix( mRectangle.getWorldTransform() );
     
-    // Draw the same rect as line segments.
-    {
-        gl::ScopedColor color (ColorA(0.0,1.0,0.0,0.8f));
-        affineRectangle::draw_oriented_rect (mRectangle.area());
-    }
-    
+ 
     
     // Draw a stroked rect in magenta (if mouse inside) or white (if mouse outside).
     {
@@ -716,17 +718,28 @@ void MainApp::drawEditableRect()
         gl::ScopedColor color (cl);
         gl::drawStrokedRect( mRectangle.area());
     }
-    // Draw the 4 corners as yellow crosses.
-
     
-    // To test worldToWindowCoord, let's draw the 4 corners again,
-    // this time as red crosses without changing the model matrix. [ Excercising gl::worldToWindowCoord() ].
+    
+    gl::drawStrokedEllipse(mRectangle.position(), mRectangle.area().getWidth()/2, mRectangle.area().getHeight()/2);
+    {
+        gl::ScopedColor color (ColorA(1.0,0.0,0.0,0.8f));
+        vec2 scale (1.0,1.0);
+        {
+            vec2 window = mRectangle.position();
+            gl::ScopedColor color (ColorA (0.0, 1.0, 0.0,0.8f));
+            gl::drawLine( vec2( window.x, window.y - 5 * scale.y ), vec2( window.x, window.y + 5 * scale.y ) );
+            gl::drawLine( vec2( window.x - 5 * scale.x, window.y ), vec2( window.x + 5 * scale.x, window.y ) );
+        }
+        
+    }
+    gl::popModelMatrix();
+    
+    // Draw the 4 corners as green crosses.
     int i = 0;
     float dsize = 5.0f;
-    for( const vec2 &corner : mRectangle.worldCorners()  ) {
-        vec4 world = mRectangle.matrix() * vec4( corner, 0, 1 );
-        vec2 window = gl::worldToWindowCoord( vec3( world ) );
-        vec2 scale = mRectangle.scale();
+    for( const auto &corner : mRectangle.windowCorners()  ) {
+        vec2 window = fromOcv(corner);
+        vec2 scale (1.0,1.0);
         {
             gl::ScopedColor color (ColorA (0.0, 1.0, 0.0,0.8f));
             gl::drawLine( vec2( window.x, window.y - 5 * scale.y ), vec2( window.x, window.y + 5 * scale.y ) );
@@ -737,30 +750,55 @@ void MainApp::drawEditableRect()
             cl = ColorA (0.0, 0.0, 1.0,0.8f);
         {
             gl::ScopedColor color (cl);
-            gl::drawStrokedCircle(corner, dsize, dsize+5.0f);
+            gl::drawStrokedCircle(window, dsize, dsize+5.0f);
         }
         dsize+=5.0f;
         i++;
     }
     
+ 
     
-    //    gl::drawStrokedEllipse(mRectangle.position(), mRectangle.area().getWidth()/2, mRectangle.area().getHeight()/2);
-    
-    gl::popModelMatrix();
-    
-    mAffineRect = mRectangle.get_rotated_rect();
-    mAffineCenter = mAffineRect.center;
-    
-    std::vector<Point2f> cvcorners;
-    compute2DRectCorners(mAffineRect, cvcorners);
-    {
-        gl::ScopedColor color (ColorA(1.0,0.0,0.0,0.8f));
-        affineRectangle::draw_oriented_rect(cvcorners);
-
-    }
+    std::cout << "affine Rect : " << mRectangle.degrees() << std::endl;
+    std::cout << "Rotated Rect : " << mAffineRect.angle << std::endl;
     
 }
 
+glm::vec2 MainApp::screenToObject( const glm::vec2 &pt, float z ) const
+{
+    // Build the viewport (x, y, width, height).
+    glm::vec2 offset = gl::getViewport().first;
+    glm::vec2 size = gl::getViewport().second;
+    glm::vec4 viewport = glm::vec4( offset.x, offset.y, size.x, size.y );
+    
+    // Calculate the view-projection matrix.
+    glm::mat4 model = mRectangle.getWorldTransform();
+    glm::mat4 viewProjection = gl::getProjectionMatrix() * gl::getViewMatrix();
+    
+    // Calculate the intersection of the mouse ray with the near (z=0) and far (z=1) planes.
+    glm::vec3 near = glm::unProject( glm::vec3( pt.x, size.y - pt.y - 1, 0 ), model, viewProjection, viewport );
+    glm::vec3 far = glm::unProject( glm::vec3( pt.x, size.y - pt.y - 1, 1 ), model, viewProjection, viewport );
+    
+    // Calculate world position.
+    return glm::vec2( ci::lerp( near, far, ( z - near.z ) / ( far.z - near.z ) ) );
+}
+
+
+glm::vec2 MainApp::objectToScreen( const glm::vec2 &pt ) const
+{
+    // Build the viewport (x, y, width, height).
+    glm::vec2 offset = gl::getViewport().first;
+    glm::vec2 size = gl::getViewport().second;
+    glm::vec4 viewport = glm::vec4( offset.x, offset.y, size.x, size.y );
+    
+    // Calculate the view-projection matrix.
+    glm::mat4 model = mRectangle.getWorldTransform();
+    glm::mat4 viewProjection = gl::getProjectionMatrix() * gl::getViewMatrix();
+    
+    glm::vec2 p = glm::vec2( glm::project( glm::vec3( pt, 0 ), model, viewProjection, viewport ) );
+    p.y = size.y - 1 - p.y;
+    
+    return p;
+}
 
 cv::Mat MainApp::affineCrop (cv::Mat& src, cv::RotatedRect& rect)
 {
