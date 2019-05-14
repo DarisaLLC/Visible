@@ -375,37 +375,40 @@ void MainApp::keyDown( KeyEvent event )
 {
     auto position = mRectangle.position();
     vec2 one (0.05, 0.05);
-    
+    float step = svl::constants::pi / 180.;
     
     switch( event.getCode() )
     {
         case KeyEvent::KEY_UP:
-            position.y++;
+            mRectangle.translate(vec2(0,-1));
             break;
         case KeyEvent::KEY_DOWN:
-            position.y--;
+            mRectangle.translate(vec2(0,1));
             break;
-            
         case KeyEvent::KEY_LEFT:
-            position.x--;
+            mRectangle.translate(vec2(-1,0));
             break;
         case KeyEvent::KEY_RIGHT:
-            position.x++;
+            mRectangle.translate(vec2(1,0));
             break;
         case KeyEvent::KEY_RIGHTBRACKET:
             mRectangle.resize(vec2(-one.x,0));
             break;
-            
         case KeyEvent::KEY_LEFTBRACKET:
             mRectangle.resize(vec2(one.x,0));
             break;
-            
         case KeyEvent::KEY_SEMICOLON:
             mRectangle.resize(vec2(0,-one.y));
             break;
             
         case KeyEvent::KEY_QUOTE:
             mRectangle.resize(vec2(0,one.y));
+            break;
+        case KeyEvent::KEY_BACKSLASH:
+            mRectangle.rotate(-step);
+            break;
+        case KeyEvent::KEY_SLASH:
+            mRectangle.rotate(step);
             break;
             
         case KeyEvent::KEY_c:
@@ -445,8 +448,6 @@ void MainApp::keyDown( KeyEvent event )
             else
                 quit();
     }
-    mRectangle.position(position);
-    
 }
 
 

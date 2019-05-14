@@ -42,6 +42,8 @@ public:
     void mouseDown( MouseEvent event );
     void mouseDrag( MouseEvent event );
     void resize( const vec2 change );
+    void rotate( const float change );
+    void translate ( const vec2 change );
     
     vec3 mouseToWorld( const ivec2 &mouse, float z = 0 );
     
@@ -49,7 +51,7 @@ public:
     bool isClicked () const { return mIsClicked; }
     
     const vec2&   position () const { return mRectangle.position; }
-    void   position (const vec2& np) { mRectangle.position = np; }
+  //  void   position (const vec2& np) { mRectangle.position = np; }
     float  degrees () const
     {
         return toDegrees(2*std::acos(mRectangle.rotation.w));
@@ -60,10 +62,6 @@ public:
         return 2*std::acos(mRectangle.rotation.w);
     }
 
-//    const vec2&   scale () const;
-//    const quat   rotation ()const;
-//    float degrees () const;
-//    float radians () const;
     
 private:
     EditableRect   mRectangle;
@@ -112,6 +110,16 @@ void affineRectangle::mouseDown( MouseEvent event )
 void affineRectangle::resize( const vec2 change )
 {
     mRectangle.scale += change;
+}
+
+
+void affineRectangle::rotate( const float change )
+{
+    mRectangle.rotation = mRectangle.rotation * glm::angleAxis(change, vec3( 0, 0, 1 ) );
+}
+
+void  affineRectangle::translate ( const vec2 change ){
+    mRectangle.position += change;
 }
 
 void affineRectangle::mouseDrag( MouseEvent event )
