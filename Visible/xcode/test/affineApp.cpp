@@ -21,7 +21,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui.hpp"
 #include "core/stats.hpp"
-#include "cinder_cv/editableRectangle.hpp"
+#include "cinder_cv/affine_rectangle.h"
 #include "vision/opencv_utils.hpp"
 #include "boost/filesystem.hpp"
 #include "vision/histo.h"
@@ -64,7 +64,7 @@ public:
     void mouseDrag( MouseEvent event ) override;
     void saveImage(const cv::Mat & image, const std::string & filename);
  
-   // void generate_crop ();
+    void generate_crop ();
     glm::vec2 screenToObject( const glm::vec2 &pt, float z ) const;
     glm::vec2 objectToScreen( const glm::vec2 &pt ) const;
 
@@ -176,12 +176,9 @@ void MainApp::openFile()
 
 void MainApp::update()
 {
-    // Check if mouse is inside rectangle, by converting the mouse coordinates to object space.
-    vec3 object = mRectangle.mouseToWorld(mMousePos);
-    mIsOver = mRectangle.area().contains( vec2( object ) ) && mTextures[mOption] != nullptr;
 }
 
-#if 0
+#if 1
 void MainApp::generate_crop (){
 
     auto cvDrawImage = [] (cv::Mat& image){
@@ -214,7 +211,7 @@ void MainApp::generate_crop (){
         }
     };
     
-    auto cp = mRectangle.rotated_rect();
+    auto cp = mRectangle.rotatedRectInImage();
     vec2 scale (getWindowWidth() / (float) mPadded.cols, getWindowHeight()/ (float) mPadded.rows);
     cp.center.x = cp.center.x / scale.x;
     cp.center.y = cp.center.y / scale.y;
@@ -265,7 +262,7 @@ void MainApp::setup()
     mParams->addButton( "Add image ",
                        std::bind( &MainApp::openFile, this ) );
     
- //   mParams->addButton(" Crop Affine ", std::bind(&MainApp::generate_crop, this));
+    mParams->addButton(" Crop Affine ", std::bind(&MainApp::generate_crop, this));
 
     
     
@@ -293,7 +290,7 @@ void MainApp::setup()
 void MainApp::mouseDown( MouseEvent event )
 {
     mMouseIsDown = true;
-    mRectangle.mouseDown(event);
+    mRectangle.mouseDown(event.getPos());
     
     mIsClicked = mRectangle.isClicked();
     if( mIsClicked ) {
@@ -305,6 +302,7 @@ void MainApp::mouseDown( MouseEvent event )
 void MainApp::mouseUp( MouseEvent event )
 {
     mMouseIsDown = false;
+    mRectangle.mouseUp();
 }
 
 std::string MainApp::pixelInfo( const ivec2 &position )
@@ -343,12 +341,13 @@ std::string MainApp::resultInfo ()
 void MainApp::mouseMove( MouseEvent event )
 {
     mMousePos = event.getPos();
+    mIsOver = mRectangle.contains(mMousePos) && mTextures[mOption] != nullptr;
 }
 
 
 void MainApp::mouseDrag( MouseEvent event )
 {
-    mRectangle.mouseDrag(event);
+    mRectangle.mouseDrag(event.getPos());
     // Keep track of mouse position.
     mMousePos = event.getPos();
     mIsClicked = mRectangle.isClicked();
@@ -373,7 +372,6 @@ void MainApp::fileDrop( FileDropEvent event )
 
 void MainApp::keyDown( KeyEvent event )
 {
-    auto position = mRectangle.position();
     vec2 one (0.05, 0.05);
     float step = svl::constants::pi / 180.;
     
@@ -440,7 +438,7 @@ void MainApp::keyDown( KeyEvent event )
             setFullScreen (! isFullScreen () );
             break;
         case KeyEvent::KEY_r:
-            position = getWindowSize() / 2;
+            mRectangle.reset();
             break;
         case KeyEvent::KEY_ESCAPE:
             if (isFullScreen())
@@ -510,7 +508,7 @@ void MainApp::draw()
     }
     
     // Not using the affine rect
-    mRectangle.draw(getWindowSize());
+    mRectangle.draw(getWindowBounds());
 //    drawEditableRect();
     
     
