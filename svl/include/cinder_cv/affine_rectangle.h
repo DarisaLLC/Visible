@@ -10,15 +10,16 @@
 #ifndef __AFFINE_RECTANGLE__
 #define __AFFINE_RECTANGLE__
 
+#include "cinder/Cinder.h"
 #include "cinder_opencv.h"
 #include "cinder/Quaternion.h"
 #include <numeric>
+#include <atomic>
 
 #undef near
 #undef far
 
 using namespace ci;
-using namespace ci::app;
 using namespace std;
 using namespace cv;
 
@@ -54,64 +55,46 @@ using namespace cv;
  
  */
 
-class affineRectangle : public Rectf
+class affineRectangle : private Rectf
 {
 public:
-    affineRectangle () : mScale ( 1 )
-    {
-        mCornersWorld.resize(4);
-        mCornersWindow.resize(4);
-    }
-    
-    affineRectangle (const Rectf& ar) : Rectf(ar)
-    {
-        mScale = vec2(1);
-        mCornersWorld.resize(4);
-        mCornersWindow.resize(4);
-    }
-
-    void update () const {
-        mat4 m = glm::translate( vec3( mPosition, 0 ) );
-        m *= glm::toMat4( mRotation );
-        m *= glm::scale( vec3( mScale, 1 ) );
-        m *= glm::translate( vec3( -getSize() * 0.5f, 0 ) );
-        mWorldTransform = m;
-        mCornersWorld.resize(4);
-        Rectf* mArea ((affineRectangle*)this);
-        mArea->canonicalize();
-        mCornersWorld[0]=mArea->getUpperLeft();
-        mCornersWorld[1]=mArea->getUpperRight();
-        mCornersWorld[2]=mArea->getLowerRight();
-        mCornersWorld[3]=mArea->getLowerLeft();
-        mWorldCenter = mArea->getCenter();
-        mCornersWindow.resize(4);
-        for (int i = 0; i < 4; i++)
-        {
-            vec4 world = getWorldTransform() * vec4( mCornersWorld[i], 0, 1 );
-            vec2 window = gl::worldToWindowCoord( vec3( world ) );
-            mCornersWindow[i]=toOcv(window);
-        }
-        {
-            vec4 world = getWorldTransform() * vec4( mWorldCenter, 0, 1 );
-            vec2 window = gl::worldToWindowCoord( vec3( world ) );
-            mWindowCenter=toOcv(window);
-        }
-        mCvRotatedRect = cv::minAreaRect(mCornersWindow);
-    }
+    affineRectangle ();
+    affineRectangle (const Rectf& ar);
     ~affineRectangle () {}
     
-    Rectf&  area () { return *this; }
+    affineRectangle(const affineRectangle& other);
+    affineRectangle& operator=(const affineRectangle& rhs);
     
-    void   position (const vec2& np) { mPosition = np; }
+    void update () const;
     
-    const vec2&   position () { return mPosition; }
+    // Getters
+    const Rectf&  area () const;
+    const vec2&   position () const;
+    Rectf  norm_area () const { return screenToNormal().map(area()); }
+    vec2   norm_position () const { return screenToNormal().map(position()); }
     
-    const vec2&   scale () const { return mScale; }
+    const vec2&   scale () const;
+    const quat   rotation ()const;
+    //! Returns the rectangle's model matrix.
+    const mat4  &getWorldTransform() const;
+    float degrees () const;
+    float radians () const;
+    const cv::RotatedRect& rotated_rect () const;
+    const RectMapping&    screenToNormal () const;
     
-    void   scale (const vec2& ns) { mScale = ns; }
     
-    quat   rotation ()const { return mRotation; }
-    void rotation (const quat& rq) { mRotation = rq; }
+    // Modifiers Call update
+    void   scale (const vec2& ns);
+    void   position (const vec2& np);
+    void rotation (const quat& rq);
+    void resize (const int width, const int height);
+    void inflate (const vec2 trim);
+    
+    //The order is bottomLeft, topLeft, topRight, bottomRight.
+    // return in tl,tr,br,bl
+    // @note Check if this makes sense in all cases 
+    const std::vector<vec2>& worldCorners () const;
+    const std::vector<Point2f>& windowCorners () const;
     
     vec2 scale_map (const vec2& pt)
     {
@@ -119,54 +102,13 @@ public:
     }
     
     
-    //! Returns the rectangle's model matrix.
-    const mat4  &getWorldTransform() const
+    static void compute2DRectCorners(const cv::RotatedRect rect, std::vector<cv::Point2f> & corners)
     {
-        return mWorldTransform;
+        corners.resize(4);
+        return rect.points(corners.data());
     }
     
-    
-    float degrees () const
-    {
-        return toDegrees(2*std::acos(mRotation.w));
-    }
-    
-    float radians () const
-    {
-        return 2*std::acos(mRotation.w);
-    }
-    
-    float uni_scale () const { return (mScale.x+mScale.y) / 2.0f; }
-
-    
-    //The order is bottomLeft, topLeft, topRight, bottomRight.
-    // return in tl,tr,br,bl
-    // @note Check if this makes sense in all cases 
-    const std::vector<vec2>& worldCorners () const
-    {
-        return mCornersWorld;
-    }
-    
-    const std::vector<Point2f>& windowCorners () const
-    {
-        return mCornersWindow;
-    }
-    
-    cv::RotatedRect& rotated_rect ()
-    {
-  
-//        if (rr.angle < -45.0){
-//            rr.angle += 90.0;
-//            auto sz = rr.size;
-//            rr.size.width = sz.height;
-//            rr.size.height = sz.width;
-//        }
-   //     rr.points(mCornersWindow.data());
-        
-        return mCvRotatedRect;
-    }
-    
-    
+#if 0
     static void draw_oriented_rect (const Rectf& arect)
     {
         vec2 corners[] = { arect.getUpperLeft(), arect.getUpperRight(),
@@ -187,28 +129,13 @@ public:
             gl::drawLine( fromOcv(corners[index]), fromOcv(corners[index_to]));
         }
     }
+#endif
     
-    
-    static void compute2DRectCorners(const cv::RotatedRect rect, std::vector<cv::Point2f> & corners)
-    {
-        corners.resize(4);
-        return rect.points(corners.data());
-    }
-private:
 
+private:
+    Point2f map_point(Point2f pt) const;
+    void update_rect_centered_xform () const;
     
-    Point2f map_point(Point2f pt) const
-    {
-        const cv::Mat& transMat = mXformMat;
-        pt.x = transMat.at<float>(0, 0) * pt.x + transMat.at<float>(0, 1) * pt.y + transMat.at<float>(0, 2);
-        pt.y = transMat.at<float>(1, 0) * pt.y + transMat.at<float>(1, 1) * pt.y + transMat.at<float>(1, 2);
-        return pt;
-    }
-    
-    void update_rect_centered_xform () const
-    {
-        mXformMat = getRotationMatrix2D(toOcv(mPosition),degrees(),uni_scale());
-    }
     vec2   mPosition;
     vec2   mScale;
     quat   mRotation;
@@ -218,8 +145,11 @@ private:
     mutable Point2f mWindowCenter;
     mutable vec2 mWorldCenter;
     mutable RotatedRect mCvRotatedRect;
-    mutable glm::mat4 mTransform;
     mutable glm::mat4 mWorldTransform;
+    
+    mutable RectMapping mScreen2Normal;
+    mutable std::atomic<bool> m_dirty;
+    
 };
 
 

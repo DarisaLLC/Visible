@@ -49,61 +49,6 @@ namespace
 }
 
 
-class woundprocess   : internal_singleton<woundprocess>
-{
-    
-private:
-    mutable int mState;
-    std::vector<SurfaceRef> mViews;
-    cv::Mat mTemplate;
-    std::vector<cv::RotatedRect> mRects;
-    
-};
-
-struct rank_output
-{
-    std::pair< uint8_t, int> peak;
-    std::pair< uint8_t, int> goal;
-    float score;
-    float texture_score;
-    bool valid;
-};
-
-void get_output (std::vector<std::pair <uint8_t, int> >& raw, const uint8_t  goal, const uint8_t peak, rank_output& outp)
-{
-    outp.valid = false;
-    bool got_peak = false;
-    bool got_goal = false;
-    int non_count = 0;
-    outp.goal.first = goal;
-    got_goal = true;
-    
-    for (auto cc : raw)
-    {
-        auto val = cc.first;
-        if (val == goal)
-        {
-            outp.goal = cc;
-            got_goal = true;
-        }
-        else if (val == peak)
-        {
-            outp.peak = cc;
-            got_peak = true;
-        }
-        else
-            non_count++;
-        if (got_peak && got_goal)
-        {
-            outp.score = 1.0f - ((std::max(peak,goal) - std::min(peak,goal))%128) / 128.0f;
-            outp.valid = true;
-            
-            std::cout << " ======  > " << outp.score << std::endl;
-            break;
-        }
-    }
-    
-}
 
 class MainApp : public AppMac {
 public:
@@ -129,8 +74,8 @@ public:
     void fileDrop( FileDropEvent event ) override;
     void draw()override;
     void process ();
+    std::string resultInfo ();
     std::string pixelInfo ( const ivec2 & position);
-    std::string resultInfo (const rank_output& output);
     void drawEditableRect ();
     void openFile();
     static cv::Mat affineCrop (cv::Mat& src, cv::RotatedRect& rect);
@@ -164,14 +109,9 @@ public:
     gl::TextureFontRef    mTextureScoreFont;
     
     affineRectangle   mRectangle;
-    Rectf          mWorkingRect;
-    
-    ivec2          mMouseInitial;
     affineRectangle   mRectangleInitial;
-    RotatedRect    mAffineRect;
-    Point2f          mAffineCenter;
-    
-    rank_output     m_rank_score;
+    Rectf          mWorkingRect;
+    ivec2          mMouseInitial;
     
     vec2           mStringSize;
     bool           mIsOver;
@@ -211,9 +151,10 @@ vec2 MainApp::matStats (const cv::Mat& image)
 void MainApp::resize()
 {
     setWindowSize(getWindowSize());
-    vec2 newsize = mRectangle.scale_map(getWindowSize());
-    mRectangle = affineRectangle (Rectf(0,0,newsize[0], newsize[1]));
-    mRectangle.position (vec2(newsize[0]/2, newsize[1]/2));
+    mRectangle.resize(getWindowWidth(),getWindowHeight());
+//    vec2 newsize = mRectangle.scale_map(getWindowSize());
+//    mRectangle = affineRectangle (Rectf(0,0,newsize[0], newsize[1]));
+//    mRectangle.position (vec2(newsize[0]/2, newsize[1]/2));
 }
 
 
@@ -225,6 +166,8 @@ void MainApp::openFile()
         mImage = loadImageFromPath(getOpenFilePath());
         if (mImage)
         {
+            ivec2 pos ((getWindowWidth() - mImage->getWidth())/2.0, (getWindowHeight() - mImage->getHeight())/2.0);
+            mRectangle = affineRectangle (Rectf(0.0,0.0,mImage->getWidth(), 3*mImage->getHeight()));
             resize();
             process();
         }
@@ -275,7 +218,7 @@ void MainApp::generate_crop (){
         }
     };
     
-    auto cp = mAffineRect;
+    auto cp = mRectangle.rotated_rect();
     vec2 scale (getWindowWidth() / (float) mPadded.cols, getWindowHeight()/ (float) mPadded.rows);
     cp.center.x = cp.center.x / scale.x;
     cp.center.y = cp.center.y / scale.y;
@@ -348,8 +291,6 @@ void MainApp::setup()
     mIsClicked = false;
     mIsOver = false;
     mMouseIsDown = false;
-    
-    mWorkingRect = Rectf(0,0,getWindowWidth(), getWindowHeight());
 }
 
 void MainApp::mouseDown( MouseEvent event )
@@ -398,7 +339,7 @@ std::string MainApp::pixelInfo( const ivec2 &position )
     
 }
 
-std::string MainApp::resultInfo (const rank_output& output)
+std::string MainApp::resultInfo ()
 {
     ostringstream oss( ostringstream::ate );
     oss << " Affine Prototype ";
@@ -445,8 +386,8 @@ void MainApp::fileDrop( FileDropEvent event )
         mImage = loadImageFromPath (event.getFile( 0 ));
         if (mImage)
         {
-            mWorkingRect = Rectf (0, 0, mImage->getWidth(), mImage->getHeight());
-            mRectangle = affineRectangle(mWorkingRect);
+            Rectf tmp (0, 0, mImage->getWidth(), 3*mImage->getHeight());
+            mRectangle = affineRectangle(tmp);
             process();
         }
     }
@@ -476,7 +417,6 @@ void MainApp::keyDown( KeyEvent event )
             break;
         case KeyEvent::KEY_RIGHTBRACKET:
             mRectangle.inflate(vec2(-1,0));
-            mRectangle.worldCorners();
             break;
             
         case KeyEvent::KEY_LEFTBRACKET:
@@ -506,7 +446,8 @@ void MainApp::keyDown( KeyEvent event )
                 try {
                     mImage = Surface::create( Clipboard::getImage() );
                     
-                    mWorkingRect = Rectf (0, 0, mImage->getWidth(), mImage->getHeight());
+                    Rectf tmp (0, 0, mImage->getWidth(), 3*mImage->getHeight());
+                    mRectangle = affineRectangle(tmp);
                     process();
                 }
             catch( std::exception &exc ) {
@@ -665,24 +606,7 @@ void MainApp::draw()
             gl::popModelView();
         }
         
-        if (m_rank_score.valid)
-        {
-            gl::pushModelView();
-            
-            Rectf frac (0.30f, 0.02f, 0.95f, 0.15f);
-            Rectf box (frac.x1*getWindowWidth(),frac.y1*getWindowHeight(),
-                       frac.x2*getWindowWidth(),frac.y2*getWindowHeight());
-            {
-                gl::ScopedColor color (ColorA (0.0, 0.0, 0.0,0.33f));
-                gl::drawSolidRoundedRect (box, 0.5f);
-            }
-            
-            gl::ScopedColor color (ColorA (1.0, 1.0, 1.0,0.8f));
-            mTextureScoreFont->drawString( resultInfo (m_rank_score),
-                                          ivec2( box.x1+10, (box.y1+box.y2)/2));
-            gl::popModelView();
-            
-        }
+    
     }
     
     // Not using the affine rect
@@ -696,49 +620,54 @@ void MainApp::draw()
 
 void MainApp::drawEditableRect()
 {
-    mAffineRect = mRectangle.rotated_rect();
-    mAffineCenter = mAffineRect.center;
-    
-    std::vector<Point2f> cvcorners;
-    affineRectangle::compute2DRectCorners(mAffineRect, cvcorners);
+   // const std::vector<Point2f>& cvcorners =  mRectangle.windowCorners();
+    Area outputArea = app::getWindowBounds();
+    /*
+     Area::proportionalFit( mTextureOrig.getBounds(),
+     app::getWindowBounds(), true, true );
+     */
+    Rectf captureDrawRect = Rectf( outputArea );
+
+    RectMapping n2SMapping( Rectf( 0, 0, 1, 1 ), captureDrawRect );
     
     // Either use setMatricesWindow() or setMatricesWindowPersp() to enable 2D rendering.
     gl::setMatricesWindow( getWindowSize(), true );
     
     // Draw the transformed rectangle.
     gl::pushModelMatrix();
-    gl::multModelMatrix( mRectangle.getWorldTransform() );
+//    gl::multModelMatrix( mRectangle.getWorldTransform() );
     
  
-    
+    auto norm_area = n2SMapping.map(mRectangle.norm_area());
+    auto norm_position = n2SMapping.map(mRectangle.norm_position());
+                                        
     // Draw a stroked rect in magenta (if mouse inside) or white (if mouse outside).
     {
         ColorA cl (1.0, 1.0, 1.0,0.8f);
         if (mIsOver) cl = ColorA (1.0, 0.0, 1.0,0.8f);
         gl::ScopedColor color (cl);
-        gl::drawStrokedRect( mRectangle.area());
+        gl::drawStrokedRect(norm_area);
     }
     
     
-    gl::drawStrokedEllipse(mRectangle.position(), mRectangle.area().getWidth()/2, mRectangle.area().getHeight()/2);
+    gl::drawStrokedEllipse(norm_position, norm_area.getWidth()/2, norm_area.getHeight()/2);
     {
         gl::ScopedColor color (ColorA(1.0,0.0,0.0,0.8f));
         vec2 scale (1.0,1.0);
         {
-            vec2 window = mRectangle.position();
+            vec2 window = norm_position;
             gl::ScopedColor color (ColorA (0.0, 1.0, 0.0,0.8f));
             gl::drawLine( vec2( window.x, window.y - 5 * scale.y ), vec2( window.x, window.y + 5 * scale.y ) );
             gl::drawLine( vec2( window.x - 5 * scale.x, window.y ), vec2( window.x + 5 * scale.x, window.y ) );
         }
         
     }
-    gl::popModelMatrix();
-    
+
     // Draw the 4 corners as green crosses.
     int i = 0;
     float dsize = 5.0f;
-    for( const auto &corner : mRectangle.windowCorners()  ) {
-        vec2 window = fromOcv(corner);
+    for( const auto &corner : mRectangle.worldCorners()  ) {
+        vec2 window = n2SMapping.map(corner);
         vec2 scale (1.0,1.0);
         {
             gl::ScopedColor color (ColorA (0.0, 1.0, 0.0,0.8f));
@@ -756,10 +685,9 @@ void MainApp::drawEditableRect()
         i++;
     }
     
- 
-    
     std::cout << "affine Rect : " << mRectangle.degrees() << std::endl;
-    std::cout << "Rotated Rect : " << mAffineRect.angle << std::endl;
+
+    gl::popModelMatrix();
     
 }
 
