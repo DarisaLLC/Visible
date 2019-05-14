@@ -21,7 +21,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui.hpp"
 #include "core/stats.hpp"
-#include "cinder_cv/affine_rectangle.h"
+#include "cinder_cv/editableRectangle.hpp"
 #include "vision/opencv_utils.hpp"
 #include "boost/filesystem.hpp"
 #include "vision/histo.h"
@@ -63,10 +63,8 @@ public:
     void keyDown(KeyEvent event) override;
     void mouseDrag( MouseEvent event ) override;
     void saveImage(const cv::Mat & image, const std::string & filename);
-    void RGBtoYxy(cv::Mat source, cv::Mat &destination);
-    void hueMappedOrientation(cv::Mat source, cv::Mat &destination);
  
-    void generate_crop ();
+   // void generate_crop ();
     glm::vec2 screenToObject( const glm::vec2 &pt, float z ) const;
     glm::vec2 objectToScreen( const glm::vec2 &pt ) const;
 
@@ -150,8 +148,8 @@ vec2 MainApp::matStats (const cv::Mat& image)
 }
 void MainApp::resize()
 {
-    setWindowSize(getWindowSize());
-    mRectangle.resize(getWindowWidth(),getWindowHeight());
+//    setWindowSize(getWindowSize());
+ //   mRectangle.resize(getWindowWidth(),getWindowHeight());
 //    vec2 newsize = mRectangle.scale_map(getWindowSize());
 //    mRectangle = affineRectangle (Rectf(0,0,newsize[0], newsize[1]));
 //    mRectangle.position (vec2(newsize[0]/2, newsize[1]/2));
@@ -166,8 +164,7 @@ void MainApp::openFile()
         mImage = loadImageFromPath(getOpenFilePath());
         if (mImage)
         {
-            ivec2 pos ((getWindowWidth() - mImage->getWidth())/2.0, (getWindowHeight() - mImage->getHeight())/2.0);
-            mRectangle = affineRectangle (Rectf(0.0,0.0,mImage->getWidth(), 3*mImage->getHeight()));
+            mRectangle = affineRectangle (Area(0.0,0.0,mImage->getWidth(), mImage->getHeight()), getWindowSize() / 2);
             resize();
             process();
         }
@@ -179,13 +176,12 @@ void MainApp::openFile()
 
 void MainApp::update()
 {
-    mRectangle.update();
-    
     // Check if mouse is inside rectangle, by converting the mouse coordinates to object space.
-    vec3 object = gl::windowToObjectCoord( mRectangle.getWorldTransform(), mMousePos );
+    vec3 object = mRectangle.mouseToWorld(mMousePos);
     mIsOver = mRectangle.area().contains( vec2( object ) ) && mTextures[mOption] != nullptr;
 }
 
+#if 0
 void MainApp::generate_crop (){
 
     auto cvDrawImage = [] (cv::Mat& image){
@@ -241,7 +237,8 @@ void MainApp::generate_crop (){
     
     
 }
-    
+#endif
+
 void MainApp::setup()
 {
     mFolderPath = Platform::get()->getHomeDirectory();
@@ -268,7 +265,7 @@ void MainApp::setup()
     mParams->addButton( "Add image ",
                        std::bind( &MainApp::openFile, this ) );
     
-    mParams->addButton(" Crop Affine ", std::bind(&MainApp::generate_crop, this));
+ //   mParams->addButton(" Crop Affine ", std::bind(&MainApp::generate_crop, this));
 
     
     
@@ -296,13 +293,9 @@ void MainApp::setup()
 void MainApp::mouseDown( MouseEvent event )
 {
     mMouseIsDown = true;
-    // Check if mouse is inside rectangle, by converting the mouse coordinates
-    // to world space and then to object space. [ Excercising gl::windowToWorldCoord() ].
-    vec3 world = gl::windowToWorldCoord( event.getPos() );
-    vec4 object = glm::inverse( mRectangle.getWorldTransform() ) * vec4( world, 1 );
+    mRectangle.mouseDown(event);
     
-    // Now we can simply use Area::contains() to find out if the mouse is inside.
-    mIsClicked = mRectangle.area().contains( vec2( object ) );
+    mIsClicked = mRectangle.isClicked();
     if( mIsClicked ) {
         mMouseInitial = event.getPos();
         mRectangleInitial = mRectangle;
@@ -355,27 +348,10 @@ void MainApp::mouseMove( MouseEvent event )
 
 void MainApp::mouseDrag( MouseEvent event )
 {
+    mRectangle.mouseDrag(event);
     // Keep track of mouse position.
     mMousePos = event.getPos();
-    
-    // Scale and rotate the rectangle.
-    if( mIsClicked )
-    {
-        // Calculate the initial click position and the current mouse position, in world coordinates relative to the rectangle's center.
-        vec3 initial = gl::windowToWorldCoord( mMouseInitial ) - vec3( mRectangle.position(), 0 );
-        vec3 current = gl::windowToWorldCoord( event.getPos() ) - vec3( mRectangle.position(), 0 );
-        
-        // Calculate scale by using the distance to the center of the rectangle.
-        float d0 = glm::length( initial );
-        float d1 = glm::length( current );
-        mRectangle.scale (vec2( mRectangleInitial.scale() * ( d1 / d0 ) ) );
-        
-        
-        // Calculate rotation by taking the angle with the X-axis for both positions and calculating the difference.
-        float a0 = ci::math<float>::atan2( initial.y, initial.x );
-        float a1 = ci::math<float>::atan2( current.y, current.x );
-        mRectangle.rotation (mRectangleInitial.rotation() * glm::angleAxis( a1 - a0, vec3( 0, 0, 1 ) ) );
-    }
+    mIsClicked = mRectangle.isClicked();
     
 }
 
@@ -386,8 +362,7 @@ void MainApp::fileDrop( FileDropEvent event )
         mImage = loadImageFromPath (event.getFile( 0 ));
         if (mImage)
         {
-            Rectf tmp (0, 0, mImage->getWidth(), 3*mImage->getHeight());
-            mRectangle = affineRectangle(tmp);
+            mRectangle = affineRectangle (Area(0.0,0.0,mImage->getWidth(), mImage->getHeight()), getWindowSize() / 2);
             process();
         }
     }
@@ -399,6 +374,8 @@ void MainApp::fileDrop( FileDropEvent event )
 void MainApp::keyDown( KeyEvent event )
 {
     auto position = mRectangle.position();
+    vec2 one (0.05, 0.05);
+    
     
     switch( event.getCode() )
     {
@@ -416,22 +393,19 @@ void MainApp::keyDown( KeyEvent event )
             position.x++;
             break;
         case KeyEvent::KEY_RIGHTBRACKET:
-            mRectangle.inflate(vec2(-1,0));
+            mRectangle.resize(vec2(-one.x,0));
             break;
             
         case KeyEvent::KEY_LEFTBRACKET:
-            mRectangle.inflate(vec2(1,0));
-
+            mRectangle.resize(vec2(one.x,0));
             break;
             
         case KeyEvent::KEY_SEMICOLON:
-            mRectangle.inflate(vec2(0,-1));
-
+            mRectangle.resize(vec2(0,-one.y));
             break;
             
         case KeyEvent::KEY_QUOTE:
-            mRectangle.inflate(vec2(0,1));
-
+            mRectangle.resize(vec2(0,one.y));
             break;
             
         case KeyEvent::KEY_c:
@@ -446,8 +420,7 @@ void MainApp::keyDown( KeyEvent event )
                 try {
                     mImage = Surface::create( Clipboard::getImage() );
                     
-                    Rectf tmp (0, 0, mImage->getWidth(), 3*mImage->getHeight());
-                    mRectangle = affineRectangle(tmp);
+                   mRectangle = affineRectangle (Area(0.0,0.0,mImage->getWidth(), mImage->getHeight()), getWindowSize() / 2);
                     process();
                 }
             catch( std::exception &exc ) {
@@ -478,75 +451,6 @@ void MainApp::keyDown( KeyEvent event )
 
 
 
-void MainApp::hueMappedOrientation(cv::Mat source, cv::Mat &destination){
-    
-    cv::Mat gray, mag, ang, hsv;
-    std::vector<cv::Mat> channels;
-    channels.resize(source.channels());
-    
-    cv::cvtColor(source, gray, CV_RGB2GRAY);
-    
-    svl::sobel_opencv(gray,mag, ang);
-    
-    // Map to Hue Hue is 180 degrees
-    // Scales, calculates absolute values, and converts the result to 8-bit.
-    ang.convertTo(ang,CV_8U,256.0/180.0);
-    cv::convertScaleAbs(ang,ang);
-    cv::multiply(mag, cv::Scalar(2.0), mag);
-    mag.convertTo(mag,CV_8U);
-    
-    
-    hsv = source.clone();
-    channels[0] = ang; // set orientation as hue channel
-    channels[1] = mag;
-    channels[2] = mag;
-    
-    cv::merge(channels, hsv);
-    cv::cvtColor(hsv, destination, CV_HSV2RGB);
-}
-
-void MainApp::RGBtoYxy(cv::Mat source, cv::Mat &destination){
-    
-    cv::Mat scaled;
-    source.copyTo(scaled);
-    scaled.convertTo(scaled, CV_64F);
-    
-    cv::Mat sRGBtoXYZ=(cv::Mat_<double>(3, 3) << 0.4124564,  0.3575761,  0.1804375, 0.2126729,  0.7151522,  0.0721750, 0.0193339, 0.1191920, 0.9503041);
-    int rows=source.rows;
-    int cols=source.cols;
-    
-    cv::Mat reshaped=scaled.reshape(1, rows*cols);
-    cv::transpose(reshaped, reshaped);
-    cv::Mat xyz=sRGBtoXYZ*reshaped;
-    
-    cv::transpose(xyz, xyz);
-    xyz=xyz.reshape(3, rows);
-    
-    double eps=2.2204e-16;
-    std::vector<cv::Mat> channels;
-    cv::split(xyz, channels);
-    cv::Mat sum;
-    channels[0].copyTo(sum);
-    for (int i=1;i<3;++i){
-        sum+=channels[i];
-    }
-    sum+=eps;
-    
-    cv::Mat x;
-    cv::divide(channels[0], sum, x);
-    cv::Mat y;
-    cv::divide(channels[1], sum, y);
-    
-    std::vector<cv::Mat> resultChannels;
-    resultChannels.push_back(channels[1]);
-    resultChannels.push_back(x);
-    resultChannels.push_back(y);
-    
-    cv::Mat result;
-    cv::merge(resultChannels, result);
-    
-    result.copyTo(destination);
-}
 
 void MainApp::process ()
 {
@@ -584,10 +488,7 @@ void MainApp::process ()
 
 void MainApp::draw()
 {
- 
-    
     gl::enableAlphaBlending();
-    
     {
         gl::draw(mTextures[mOption], getWindowBounds());
         
@@ -605,19 +506,20 @@ void MainApp::draw()
             mTextureFont->drawString( pixelInfo(mMousePos), ivec2(20, (1.02f - mStringSize.y)*getWindowHeight()));
             gl::popModelView();
         }
-        
-    
     }
     
     // Not using the affine rect
-    drawEditableRect();
+    mRectangle.draw(getWindowSize());
+//    drawEditableRect();
     
     
     // Draw the interface
     if(mParams)
         mParams->draw();
+    
 }
 
+#if 0
 void MainApp::drawEditableRect()
 {
    // const std::vector<Point2f>& cvcorners =  mRectangle.windowCorners();
@@ -691,6 +593,8 @@ void MainApp::drawEditableRect()
     
 }
 
+
+
 glm::vec2 MainApp::screenToObject( const glm::vec2 &pt, float z ) const
 {
     // Build the viewport (x, y, width, height).
@@ -727,6 +631,7 @@ glm::vec2 MainApp::objectToScreen( const glm::vec2 &pt ) const
     
     return p;
 }
+#endif
 
 cv::Mat MainApp::affineCrop (cv::Mat& src, cv::RotatedRect& rect)
 {

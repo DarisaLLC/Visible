@@ -35,13 +35,36 @@ struct EditableRect {
 
 class affineRectangle {
 public:
-    affineRectangle ();
-    void draw();
+    affineRectangle () {}
+    affineRectangle (const Area& bounds, const ivec2& screen_position);
+    void draw (const ivec2& window_size);
     
     void mouseDown( MouseEvent event );
     void mouseDrag( MouseEvent event );
+    void resize( const vec2 change );
     
     vec3 mouseToWorld( const ivec2 &mouse, float z = 0 );
+    
+    Area area () const { return mRectangle.area; }
+    bool isClicked () const { return mIsClicked; }
+    
+    const vec2&   position () const { return mRectangle.position; }
+    void   position (const vec2& np) { mRectangle.position = np; }
+    float  degrees () const
+    {
+        return toDegrees(2*std::acos(mRectangle.rotation.w));
+    }
+    
+    float  radians () const
+    {
+        return 2*std::acos(mRectangle.rotation.w);
+    }
+
+//    const vec2&   scale () const;
+//    const quat   rotation ()const;
+//    float degrees () const;
+//    float radians () const;
+    
 private:
     EditableRect   mRectangle;
     
@@ -51,7 +74,7 @@ private:
     bool           mIsClicked;
 };
 
-void affineRectangle::affineRectangle (const Area& bounds, const ivec2& screen_position)
+affineRectangle::affineRectangle (const ci::Area& bounds, const ivec2& screen_position)
 {
     mRectangle.area = bounds;
     mRectangle.position = screen_position;
@@ -61,12 +84,9 @@ void affineRectangle::affineRectangle (const Area& bounds, const ivec2& screen_p
 
 void affineRectangle::draw(const ivec2& window_size)
 {
-    gl::clear();
-    gl::color( 1, 1, 1 );
-    
     // Either use setMatricesWindow() or setMatricesWindowPersp() to enable 2D rendering.
-    gl::setMatricesWindowPersp( window_size );
-    
+    gl::setMatricesWindow( window_size, true );
+
     // Draw the transformed rectangle.
     gl::pushModelMatrix();
     gl::multModelMatrix( mRectangle.matrix() );
@@ -87,6 +107,11 @@ void affineRectangle::mouseDown( MouseEvent event )
         mMouseInitial = event.getPos();
         mRectangleInitial = mRectangle;
     }
+}
+
+void affineRectangle::resize( const vec2 change )
+{
+    mRectangle.scale += change;
 }
 
 void affineRectangle::mouseDrag( MouseEvent event )
