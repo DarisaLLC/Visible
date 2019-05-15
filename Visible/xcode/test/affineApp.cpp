@@ -92,8 +92,6 @@ public:
     std::vector<gl::TextureRef> mOverlays;
     gl::TextureRef* textureToDisplay;
     gl::TextureRef mOverlay;
-    RectMapping mNormalMap;
-    RectMapping mInveseMap;
     
     int mOption;
     params::InterfaceGlRef    mParams;
@@ -110,6 +108,7 @@ public:
     affineRectangle   mRectangleInitial;
     Rectf          mWorkingRect;
     ivec2          mMouseInitial;
+    Area           mPaddedArea;
     
     vec2           mStringSize;
     bool           mIsOver;
@@ -164,7 +163,7 @@ void MainApp::openFile()
         mImage = loadImageFromPath(getOpenFilePath());
         if (mImage)
         {
-            mRectangle = affineRectangle (Area(0.0,0.0,mImage->getWidth(), mImage->getHeight()), getWindowSize() / 2);
+            mRectangle = affineRectangle (Area(0.0,0.0,mImage->getWidth(), 3*mImage->getHeight()), getWindowSize() / 2);
             resize();
             process();
         }
@@ -178,7 +177,7 @@ void MainApp::update()
 {
 }
 
-#if 1
+
 void MainApp::generate_crop (){
 
     auto cvDrawImage = [] (cv::Mat& image){
@@ -211,14 +210,8 @@ void MainApp::generate_crop (){
         }
     };
     
-    auto cp = mRectangle.rotatedRectInImage();
-    vec2 scale (getWindowWidth() / (float) mPadded.cols, getWindowHeight()/ (float) mPadded.rows);
-    cp.center.x = cp.center.x / scale.x;
-    cp.center.y = cp.center.y / scale.y;
-    cp.size.width =     cp.size.width / scale.x;
-    cp.size.height =     cp.size.height / scale.y;
-    RotatedRect sp (cp.center, cp.size, -cp.angle);
-    cv::Mat crop = affineCrop(mPadded, sp);
+    auto cp = mRectangle.rotatedRectInImage(mPaddedArea);
+    cv::Mat crop = affineCrop(mPadded, cp);
     cv::Mat hz (1, crop.cols, CV_32F);
     cv::Mat vt (crop.rows, 1, CV_32F);
     horizontal_vertical_projections (crop, hz, vt);
@@ -231,10 +224,8 @@ void MainApp::generate_crop (){
     std::string vvv ("vt");
     cvplot::Size used (crop.cols*3, crop.rows*3);
     cvDrawPlot(vt_vec, used, vvv);
-    
-    
 }
-#endif
+
 
 void MainApp::setup()
 {
@@ -474,11 +465,14 @@ void MainApp::process ()
     cv::Mat clear = mPadded.clone();
     clear = 0;
     cv::Mat none = mPadded.clone();
+    
     mTextures[0] = gl::Texture::create(fromOcv(none));
     mOverlays[0] = gl::Texture::create(fromOcv(clear));
     cv::Mat tmpi = mPadded.clone();
     mTextures[1] = gl::Texture::create(fromOcv(tmpi));
     mOverlays[1] = gl::Texture::create(fromOcv(clear));
+    
+    mPaddedArea = Area (0,0,mPadded.cols, mPadded.rows);
     
     setWindowSize(mPadded.cols, mPadded.rows);
 }
@@ -572,8 +566,8 @@ void MainApp::drawEditableRect()
         vec2 scale (1.0,1.0);
         {
             gl::ScopedColor color (ColorA (0.0, 1.0, 0.0,0.8f));
-            gl::drawLine( vec2( window.x, window.y - 5 * scale.y ), vec2( window.x, window.y + 5 * scale.y ) );
-            gl::drawLine( vec2( window.x - 5 * scale.x, window.y ), vec2( window.x + 5 * scale.x, window.y ) );
+            gl::drawLine( vec2( window.x, window.y - 10 * scale.y ), vec2( window.x, window.y + 10 * scale.y ) );
+            gl::drawLine( vec2( window.x - 10 * scale.x, window.y ), vec2( window.x + 10 * scale.x, window.y ) );
         }
         ColorA cl (1.0, 0.0, 0.0,0.8f);
         if (i==0 || i == 1)
