@@ -51,7 +51,7 @@ class affineRectangle {
 public:
     
     affineRectangle () {}
-    affineRectangle (const Area& image_bounds, const ivec2& screen_position);
+    affineRectangle (const Area& bounds, const ivec2& screen_position);
     
     void draw (const Area& display_bounds);
 
@@ -71,11 +71,11 @@ public:
     float  degrees () const;
     float  radians () const;
 
-    const std::vector<cv::Point2f>& cornersInImage() const;
-    const cv::RotatedRect& rotatedRectInImage() const;
+    const cv::RotatedRect& rotatedRectInImage(const Area& image_bounds) const;
     
 private:
-    EditableRect   mRectangle;
+    void cornersInImage(const Area& image_bounds) const;
+    mutable EditableRect   mRectangle;
     ivec2          mMouseInitial;
     EditableRect   mRectangleInitial;
     Area           mInitialArea;
@@ -83,8 +83,20 @@ private:
     bool           mIsClicked;
     Rectf          mImageRect;
     std::vector<vec2> mCornersDisplay;
-    std::vector<cv::Point2f> mCornersImage;
+    std::vector<vec2> mCornersNorm;
+    mutable std::vector<cv::Point2f> mCornersImage;
     mutable cv::RotatedRect mCvRotatedRect;
+    
+    /**
+     * @brief Returns a glm/OpenGL compatible viewport vector that flips y and
+     * has the origin on the top-left, like in OpenCV.
+     *
+     * Note: Move to detail namespace / not used at the moment.
+     */
+    static glm::vec4 get_opencv_viewport(int width, int height)
+    {
+        return glm::vec4(0, height, width, -height);
+    }
     
 };
 
