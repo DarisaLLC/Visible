@@ -72,7 +72,7 @@
 #include "vision/dense_motion.hpp"
 #include "vision/gradient.h"
 #include "algo_Lif.hpp"
-
+#include "cinder/PolyLine.h"
 
 // @FIXME Logger has to come before these
 #include "ut_units.hpp"
@@ -155,6 +155,52 @@ std::vector<Point2f> ellipse_test = {
     {778.129881,381.776216},
     {839.415543,384.804510}};
 
+
+TEST (ut_rotated_rect, basic){
+    std::vector<vec2> points = {{5.5f,3.5f},{7.5f,2.5f},{9.5f,3.5f},{5.5f,6.5f}};
+    Point2f center_gold (11.5,2.5);
+    std::vector<Point2f> cvpoints = {{5.5f,2.5f},{7.5f,2.5f},{9.5f,2.5f},{5.5f,6.5f}};
+    std::vector<Point2f> cvpoints2 = {{5.5f,6.5f},{7.5f,6.5f},{9.5f,6.5f},{5.5f,3.5f}};
+    std::vector<Point2f> cvpoints3 = {{5.5f,6.5f},{7.5f,6.5f},{7.5f,8.5f},{7.5f,12.5f}};
+    Point2f cvcenter_gold (11.5,2.5);
+    
+    ci::PolyLine2 pl(points);
+    bool is_colinear = true;
+    bool isCCW = pl.isCounterclockwise(&is_colinear);
+    EXPECT_TRUE(!is_colinear);
+    EXPECT_TRUE(isCCW);
+    auto com = pl.calcCentroid();
+    auto area = pl.calcArea();
+    std::cout << com << "  ,   " << area << std::endl;
+    
+    {
+        cv::RotatedRect rr;
+        pointsToRotatedRect(cvpoints, rr);
+        std::cout << rr.angle << std::endl;
+        std::cout << rr.center << std::endl;
+        std::cout << rr.size << std::endl;
+    }
+    
+    {
+        cv::RotatedRect rr;
+        pointsToRotatedRect(cvpoints2, rr);
+        std::cout << rr.angle << std::endl;
+        std::cout << rr.center << std::endl;
+        std::cout << rr.size << std::endl;
+    }
+    
+    
+    {
+        cv::RotatedRect rr;
+        pointsToRotatedRect(cvpoints3, rr);
+        std::cout << rr.angle << std::endl;
+        std::cout << rr.center << std::endl;
+        std::cout << rr.size << std::endl;
+    }
+    
+}
+
+#if 0
 
 #include "ut_lif.hpp"
 
@@ -1523,6 +1569,7 @@ TEST (UT_QtimeCache, run)
 
 
 
+#endif
 
 
 

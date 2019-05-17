@@ -31,7 +31,7 @@ struct EditableRect {
     vec2  scale;
     quat  rotation;
     
-    EditableRect() : scale( 1 ) {}
+    EditableRect() : scale( 1 ) { rotation.x = rotation.y = rotation.z = 0; rotation.w = 1; }
     ~EditableRect() {}
     
     //! Returns the rectangle's model matrix.
@@ -51,7 +51,16 @@ class affineRectangle {
 public:
     
     affineRectangle () {}
-    affineRectangle (const Area& bounds, const ivec2& screen_position);
+    /* Args:
+     * bounds :         Initial Display Size
+     * image_bounds:    Image bounds
+     * initial:         initial RotatedRect in image_bounds
+     * padded_bounds:   If not default constructed and empty Area, must be larger than image and is used for padding
+     *                  Padding value is average gray value of image
+     *
+     * Returned stated: initial contains the final RotatedRect
+     */
+    affineRectangle (const Area& bounds, const Area& image_bounds, const cv::RotatedRect& initial,const Area& padded_bounds = Area());
     
     void draw (const Area& display_bounds);
 
@@ -65,7 +74,7 @@ public:
     void reset (); 
     
     Area area () const { return mRectangle.area; }
-    const vec2&   position () const { return mRectangle.position; }
+    vec2   position () const { return mRectangle.area.getCenter(); }
     bool isClicked () const { return mIsClicked; }
     vec3 mouseToWorld( const ivec2 &mouse, float z = 0 );
     float  degrees () const;
@@ -81,12 +90,18 @@ private:
     Area           mInitialArea;
     ivec2          mInitialScreenPos;
     bool           mIsClicked;
-    Rectf          mImageRect;
-    std::vector<vec2> mCornersDisplay;
-    std::vector<vec2> mCornersNorm;
-    mutable std::vector<cv::Point2f> mCornersImage;
+    Rectf           mPaddedRect;
+    Rectf           mImageRect;
+    vec2            mPadded2Image;
+    std::vector<vec2> mCornersImageVec;
+    mutable std::vector<cv::Point2f> mCornersImageCV;
+    cv::RotatedRect mInitialRotatedRect;
     mutable cv::RotatedRect mCvRotatedRect;
-    
+    RectMapping    mPadded2Display;
+    RectMapping    mDisplay2Padded;
+
+    void pointsToRotatedRect (std::vector<cv::Point2f>& , cv::RotatedRect&  ) const;
+
     /**
      * @brief Returns a glm/OpenGL compatible viewport vector that flips y and
      * has the origin on the top-left, like in OpenCV.
