@@ -125,7 +125,45 @@ void affineRectangle::draw(const Area& display_bounds)
     
     vec2 corners[] = { af.getUpperLeft(), af.getUpperRight(),
         af.getLowerRight(), af.getLowerLeft() };
-    
+    mCornersImageVec.clear();
+    int i = 0;
+    float dsize = 5.0f;
+    // Use worldToWindowCoord, and viewport for OpenCv to draw
+    // Store world coordinates
+    gl::pushViewport(0, mImageRect.getHeight(),mImageRect.getWidth(),-mImageRect.getHeight());
+    for( vec2 &corner : corners ) {
+        vec4 world = mRectangle.matrix() * vec4( corner, 0, 1 );
+        vec2 window = gl::worldToWindowCoord( vec3( world ) );
+        mCornersImageVec.push_back(window);
+        vec2 scale = mRectangle.scale;
+        gl::ScopedColor color (ColorA (0.33, 0.67, 1.0,0.8f));
+        gl::drawLine( vec2( window.x, window.y - 10 * scale.y ), vec2( window.x, window.y + 10 * scale.y ) );
+        gl::drawLine( vec2( window.x - 10 * scale.x, window.y ), vec2( window.x + 10 * scale.x, window.y ) );
+
+        {
+            gl::ScopedColor color (ColorA (0.0, 1.0, 0.0,0.8f));
+            gl::drawLine( vec2( window.x, window.y - 5 * scale.y ), vec2( window.x, window.y + 5 * scale.y ) );
+            gl::drawLine( vec2( window.x - 5 * scale.x, window.y ), vec2( window.x + 5 * scale.x, window.y ) );
+        }
+        ColorA cl (1.0, 0.0, 0.0,0.8f);
+        if (i==0 || i == 1)
+            cl = ColorA (0.0, 0.0, 1.0,0.8f);
+        {
+            gl::ScopedColor color (cl);
+            gl::drawStrokedCircle(window, dsize, dsize+5.0f);
+        }
+        dsize+=5.0f;
+        i++;
+    }
+    {
+        const std::vector<vec2>& corners = mCornersImageVec;
+        gl::drawLine( corners[0], corners[1] );
+        gl::drawLine( corners[1], corners[2] );
+        gl::drawLine( corners[2], corners[3] );
+        gl::drawLine( corners[3], corners[0] );
+    }
+            gl::popViewport();
+#if 0
     // Can use setMatricesWindow() or setMatricesWindowPersp() to enable 2D rendering.
     gl::setMatricesWindow(display_bounds.getSize(), true );
     
@@ -162,46 +200,11 @@ void affineRectangle::draw(const Area& display_bounds)
         }
     }
 
-    int i = 0;
-    float dsize = 5.0f;
-    for( const auto &corner : corners  ) {
-        vec2 window = corner;
-        vec2 scale (1.0,1.0);
-        {
-            gl::ScopedColor color (ColorA (0.0, 1.0, 0.0,0.8f));
-            gl::drawLine( vec2( window.x, window.y - 5 * scale.y ), vec2( window.x, window.y + 5 * scale.y ) );
-            gl::drawLine( vec2( window.x - 5 * scale.x, window.y ), vec2( window.x + 5 * scale.x, window.y ) );
-        }
-        ColorA cl (1.0, 0.0, 0.0,0.8f);
-        if (i==0 || i == 1)
-            cl = ColorA (0.0, 0.0, 1.0,0.8f);
-        {
-            gl::ScopedColor color (cl);
-            gl::drawStrokedCircle(window, dsize, dsize+5.0f);
-        }
-        dsize+=5.0f;
-        i++;
-    }
-    gl::popModelMatrix();
-    
-    mCornersImageVec.clear();
 
-    // Use worldToWindowCoord, and viewport for OpenCv to draw
-    // Store world coordinates 
-    gl::pushViewport(0, mImageRect.getHeight(),mImageRect.getWidth(),-mImageRect.getHeight());
-    for( vec2 &corner : corners ) {
-        vec4 world = mRectangle.matrix() * vec4( corner, 0, 1 );
-        vec2 window = gl::worldToWindowCoord( vec3( world ) );
-        mCornersImageVec.push_back(window);
-    }
-    gl::popViewport();
+    gl::popModelMatrix();
+#endif
     
-    for( vec2 &window : mCornersImageVec ) {
-        vec2 scale = mRectangle.scale;
-        gl::ScopedColor color (ColorA (0.33, 0.67, 1.0,0.8f));
-        gl::drawLine( vec2( window.x, window.y - 10 * scale.y ), vec2( window.x, window.y + 10 * scale.y ) );
-        gl::drawLine( vec2( window.x - 10 * scale.x, window.y ), vec2( window.x + 10 * scale.x, window.y ) );
-    }
+ 
 }
 
 void affineRectangle::mouseDown( const vec2& event_pos )
@@ -313,7 +316,7 @@ void affineRectangle::pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints
     float dTB = dist(tl,bl);
     rotated_rect.size.width = std::max(dLR,dTB);
     rotated_rect.size.height = std::min(dLR,dTB);
-    rotated_rect.angle = toDegrees(std::atan2( rotated_rect.size.height,  rotated_rect.size.height));
+    rotated_rect.angle = degrees();
 }
 
 
