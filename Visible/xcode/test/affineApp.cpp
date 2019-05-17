@@ -79,14 +79,10 @@ public:
     static cv::Mat affineCrop (cv::Mat& src, cv::RotatedRect& rect);
     vec2 matStats (const cv::Mat& image);
     Surface8uRef   mImage;
-    Surface8uRef   mModelImage;
-    Surface8uRef   mHSLImage;
     
     cv::Mat mInputMat;
     cv::Mat mPadded;
     vector<cv::Mat> mLogs;
-    vector<cv::Mat> mHSV;
-    vector<cv::Mat> mRGB;
     
     std::vector<gl::TextureRef> mTextures;
     std::vector<gl::TextureRef> mOverlays;
@@ -97,8 +93,6 @@ public:
     params::InterfaceGlRef    mParams;
     vector<string> mNames = { "Input",  "Orientation"};
     ivec2            mMousePos;
-    vector<vector<cv::Point> > contours;
-    vector<Vec4i> hierarchy;
     Font                mFont;
     Font                mScoreFont;
     gl::TextureFontRef    mTextureFont;
@@ -106,20 +100,19 @@ public:
     
     affineRectangle   mRectangle;
     affineRectangle   mRectangleInitial;
-    Rectf          mWorkingRect;
     ivec2          mMouseInitial;
-    Area           mPaddedArea;
+    Area           mPaddedArea, mImageArea;
+    cv::RotatedRect  mRotatedRect;
     
     vec2           mStringSize;
     bool           mIsOver;
     bool           mIsClicked;
     bool           mMouseIsDown;
+    bool           mCtrlDown;
     
     cv::Mat mModel;
-    cv::Mat mConvertedTmp;
     boost::filesystem::path mFolderPath;
     std::string mExtension;
-    std::string mToken;
     int m_pads [4];
 
     
@@ -163,8 +156,6 @@ void MainApp::openFile()
         mImage = loadImageFromPath(getOpenFilePath());
         if (mImage)
         {
-            mRectangle = affineRectangle (Area(0.0,0.0,mImage->getWidth(), 3*mImage->getHeight()), getWindowSize() / 2);
-            resize();
             process();
         }
     }
@@ -231,37 +222,26 @@ void MainApp::setup()
 {
     mFolderPath = Platform::get()->getHomeDirectory();
     mExtension = ".png";
-    mToken = "bina-model";
-    
     assert(exists(mFolderPath));
-    
     cv::namedWindow(" Bina ");
-
     openFile();
     
     // Setup the parameters
     mParams = params::InterfaceGl::create ( getWindow(), "Parameters", vec2( 200, 150 ) );
-    
     // Add an enum (list) selector.
     mOption = 0;
-    
-    
     mParams->addParam( "Display", mNames, &mOption )
     .updateFn( [this] { textureToDisplay = &mTextures[mOption]; console() << "display updated: " << mNames[mOption] << endl; } );
-    
-    
     mParams->addButton( "Add image ",
                        std::bind( &MainApp::openFile, this ) );
     
     mParams->addButton(" Crop Affine ", std::bind(&MainApp::generate_crop, this));
-
-    
     
 #if defined( CINDER_COCOA_TOUCH )
     mFont = Font( "Cochin-Italic", 14);
     mScoreFont = Font( "Cochin-Italic", 18);
 #elif defined( CINDER_COCOA )
-    mFont = Font( "Menlo", 14 );
+    mFont = Font( "Menlo", 18 );
     mScoreFont = Font( "Menlo", 18 );
 #else
     mFont = Font( "Times New Roman", 14 );
@@ -271,8 +251,6 @@ void MainApp::setup()
     mTextureScoreFont = gl::TextureFont::create( mScoreFont );
     
     gl::enableVerticalSync( false );
-    
-    
     mIsClicked = false;
     mIsOver = false;
     mMouseIsDown = false;
@@ -307,12 +285,7 @@ std::string MainApp::pixelInfo( const ivec2 &position )
     ostringstream oss( ostringstream::ate );
     oss << "[" << pixel.x << "," << pixel.y << "] ";
     oss << "rgb " << to_string((int)val.r) << "," << to_string((int)val.g) << "," << to_string((int)val.b);
-    if (mHSLImage)
-    {
-        float hsv = mHSV[0].at<uint8_t>(pixel.y, pixel.x);
-        
-        oss << " hue " << to_string(hsv);
-    }
+
     // Calculate string length for this font and this size. add 5 percent for paddint
     mStringSize = mTextureFont->measureString(oss.str());
     mStringSize /= vec2(getWindowSize());
@@ -352,7 +325,6 @@ void MainApp::fileDrop( FileDropEvent event )
         mImage = loadImageFromPath (event.getFile( 0 ));
         if (mImage)
         {
-            mRectangle = affineRectangle (Area(0.0,0.0,mImage->getWidth(), mImage->getHeight()), getWindowSize() / 2);
             process();
         }
     }
@@ -363,22 +335,24 @@ void MainApp::fileDrop( FileDropEvent event )
 
 void MainApp::keyDown( KeyEvent event )
 {
+    static float trans = (event.isControlDown()) ? 2.0f : 1.0f;
+    
     vec2 one (0.05, 0.05);
     float step = svl::constants::pi / 180.;
     
     switch( event.getCode() )
     {
         case KeyEvent::KEY_UP:
-            mRectangle.translate(vec2(0,-1));
+            mRectangle.translate(vec2(0,-trans));
             break;
         case KeyEvent::KEY_DOWN:
-            mRectangle.translate(vec2(0,1));
+            mRectangle.translate(vec2(0,trans));
             break;
         case KeyEvent::KEY_LEFT:
-            mRectangle.translate(vec2(-1,0));
+            mRectangle.translate(vec2(-trans,0));
             break;
         case KeyEvent::KEY_RIGHT:
-            mRectangle.translate(vec2(1,0));
+            mRectangle.translate(vec2(trans,0));
             break;
         case KeyEvent::KEY_RIGHTBRACKET:
             mRectangle.resize(vec2(-one.x,0));
@@ -411,8 +385,6 @@ void MainApp::keyDown( KeyEvent event )
                 
                 try {
                     mImage = Surface::create( Clipboard::getImage() );
-                    
-                   mRectangle = affineRectangle (Area(0.0,0.0,mImage->getWidth(), mImage->getHeight()), getWindowSize() / 2);
                     process();
                 }
             catch( std::exception &exc ) {
@@ -448,9 +420,7 @@ void MainApp::process ()
     mOverlays.resize(mNames.size());
     textureToDisplay = &mTextures[0];
     
-    cv::Mat hsv;
     cv::Mat mask;
-    cv::Mat xyz;
     
     mInputMat = cv::Mat ( toOcv ( *mImage) );
     m_pads[0] = mInputMat.rows;
@@ -458,10 +428,7 @@ void MainApp::process ()
     m_pads[2] = m_pads[3] = 0;
     
     auto istats = matStats(mInputMat);
-    
-    
     cv::copyMakeBorder(mInputMat, mPadded, m_pads[0], m_pads[1],m_pads[2], m_pads[3], cv:: BORDER_CONSTANT , cv::Scalar::all(istats[0]));
-
     cv::Mat clear = mPadded.clone();
     clear = 0;
     cv::Mat none = mPadded.clone();
@@ -473,8 +440,15 @@ void MainApp::process ()
     mOverlays[1] = gl::Texture::create(fromOcv(clear));
     
     mPaddedArea = Area (0,0,mPadded.cols, mPadded.rows);
-    
+    mImageArea = Area(0,0,mInputMat.cols, mInputMat.rows);
     setWindowSize(mPadded.cols, mPadded.rows);
+    
+   mRotatedRect.angle = toDegrees(svl::constants::pi / 6.0);
+   mRotatedRect.center = toOcv(mImageArea.getCenter());
+   mRotatedRect.size.width = 100;
+   mRotatedRect.size.height = 50;
+    mRectangle = affineRectangle (getWindowBounds(), mImageArea,mRotatedRect,mPaddedArea);
+    
 }
 
 
@@ -501,130 +475,13 @@ void MainApp::draw()
         }
     }
     
-    // Not using the affine rect
     mRectangle.draw(getWindowBounds());
-//    drawEditableRect();
-    
     
     // Draw the interface
     if(mParams)
         mParams->draw();
     
 }
-
-#if 0
-void MainApp::drawEditableRect()
-{
-   // const std::vector<Point2f>& cvcorners =  mRectangle.windowCorners();
-    Area outputArea = app::getWindowBounds();
-    /*
-     Area::proportionalFit( mTextureOrig.getBounds(),
-     app::getWindowBounds(), true, true );
-     */
-    Rectf captureDrawRect = Rectf( outputArea );
-
-    RectMapping n2SMapping( Rectf( 0, 0, 1, 1 ), captureDrawRect );
-    
-    // Either use setMatricesWindow() or setMatricesWindowPersp() to enable 2D rendering.
-    gl::setMatricesWindow( getWindowSize(), true );
-    
-    // Draw the transformed rectangle.
-    gl::pushModelMatrix();
-//    gl::multModelMatrix( mRectangle.getWorldTransform() );
-    
- 
-    auto norm_area = n2SMapping.map(mRectangle.norm_area());
-    auto norm_position = n2SMapping.map(mRectangle.norm_position());
-                                        
-    // Draw a stroked rect in magenta (if mouse inside) or white (if mouse outside).
-    {
-        ColorA cl (1.0, 1.0, 1.0,0.8f);
-        if (mIsOver) cl = ColorA (1.0, 0.0, 1.0,0.8f);
-        gl::ScopedColor color (cl);
-        gl::drawStrokedRect(norm_area);
-    }
-    
-    
-    gl::drawStrokedEllipse(norm_position, norm_area.getWidth()/2, norm_area.getHeight()/2);
-    {
-        gl::ScopedColor color (ColorA(1.0,0.0,0.0,0.8f));
-        vec2 scale (1.0,1.0);
-        {
-            vec2 window = norm_position;
-            gl::ScopedColor color (ColorA (0.0, 1.0, 0.0,0.8f));
-            gl::drawLine( vec2( window.x, window.y - 5 * scale.y ), vec2( window.x, window.y + 5 * scale.y ) );
-            gl::drawLine( vec2( window.x - 5 * scale.x, window.y ), vec2( window.x + 5 * scale.x, window.y ) );
-        }
-        
-    }
-
-    // Draw the 4 corners as green crosses.
-    int i = 0;
-    float dsize = 5.0f;
-    for( const auto &corner : mRectangle.worldCorners()  ) {
-        vec2 window = n2SMapping.map(corner);
-        vec2 scale (1.0,1.0);
-        {
-            gl::ScopedColor color (ColorA (0.0, 1.0, 0.0,0.8f));
-            gl::drawLine( vec2( window.x, window.y - 10 * scale.y ), vec2( window.x, window.y + 10 * scale.y ) );
-            gl::drawLine( vec2( window.x - 10 * scale.x, window.y ), vec2( window.x + 10 * scale.x, window.y ) );
-        }
-        ColorA cl (1.0, 0.0, 0.0,0.8f);
-        if (i==0 || i == 1)
-            cl = ColorA (0.0, 0.0, 1.0,0.8f);
-        {
-            gl::ScopedColor color (cl);
-            gl::drawStrokedCircle(window, dsize, dsize+5.0f);
-        }
-        dsize+=5.0f;
-        i++;
-    }
-    
-    std::cout << "affine Rect : " << mRectangle.degrees() << std::endl;
-
-    gl::popModelMatrix();
-    
-}
-
-
-
-glm::vec2 MainApp::screenToObject( const glm::vec2 &pt, float z ) const
-{
-    // Build the viewport (x, y, width, height).
-    glm::vec2 offset = gl::getViewport().first;
-    glm::vec2 size = gl::getViewport().second;
-    glm::vec4 viewport = glm::vec4( offset.x, offset.y, size.x, size.y );
-    
-    // Calculate the view-projection matrix.
-    glm::mat4 model = mRectangle.getWorldTransform();
-    glm::mat4 viewProjection = gl::getProjectionMatrix() * gl::getViewMatrix();
-    
-    // Calculate the intersection of the mouse ray with the near (z=0) and far (z=1) planes.
-    glm::vec3 near = glm::unProject( glm::vec3( pt.x, size.y - pt.y - 1, 0 ), model, viewProjection, viewport );
-    glm::vec3 far = glm::unProject( glm::vec3( pt.x, size.y - pt.y - 1, 1 ), model, viewProjection, viewport );
-    
-    // Calculate world position.
-    return glm::vec2( ci::lerp( near, far, ( z - near.z ) / ( far.z - near.z ) ) );
-}
-
-
-glm::vec2 MainApp::objectToScreen( const glm::vec2 &pt ) const
-{
-    // Build the viewport (x, y, width, height).
-    glm::vec2 offset = gl::getViewport().first;
-    glm::vec2 size = gl::getViewport().second;
-    glm::vec4 viewport = glm::vec4( offset.x, offset.y, size.x, size.y );
-    
-    // Calculate the view-projection matrix.
-    glm::mat4 model = mRectangle.getWorldTransform();
-    glm::mat4 viewProjection = gl::getProjectionMatrix() * gl::getViewMatrix();
-    
-    glm::vec2 p = glm::vec2( glm::project( glm::vec3( pt, 0 ), model, viewProjection, viewport ) );
-    p.y = size.y - 1 - p.y;
-    
-    return p;
-}
-#endif
 
 cv::Mat MainApp::affineCrop (cv::Mat& src, cv::RotatedRect& rect)
 {
