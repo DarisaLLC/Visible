@@ -25,26 +25,8 @@ using namespace cv;
  */
 affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, const cv::RotatedRect& initial,const Area& padded_bounds){
     
-  //  auto rect_contains = [](const Rectf& outer, const Area& bounds){
-  //      return outer.contains(bounds.getUL()) && outer.contains(bounds.getLR());
-   // };
-    
- //   auto dist = [](const cv::Point2f&a, const cv::Point2f&b){ return std::sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y)); };
-    
-   
-    mInitialRotatedRect = initial;
-    mInitialRotatedRect.center += toOcv(mPadded2Image);
-    
-    auto initial_bound = mInitialRotatedRect.boundingRect();
-    cv::Point2f offset_to_rr_bound (initial.center.x - initial_bound.width / 2.0f, initial.center.y - initial_bound.height / 2.0f);
-    mInitialRotatedRect.center += (initial.center - offset_to_rr_bound);
-    
-    std::cout << mInitialRotatedRect.center   << std::endl;
-//    assert(rect_contains(mImageRect, initial_bound));
-    // The points array for storing rectangle vertices. The order is bottomLeft, topLeft, topRight, bottomRight.
-    cv::Point2f corners [4];
-    mInitialRotatedRect.points(corners);
-    
+    // Padded Rect is image bounds in either padded or not padded case
+    // Get the offsets
     mImageRect = Rectf(image_bounds);
     mDisplayRect = Rectf(bounds);
     mPaddedRect = (padded_bounds == Area()) ? mImageRect : Rectf(padded_bounds);
@@ -52,13 +34,26 @@ affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, 
     mDisplay2Padded = RectMapping(Rectf(bounds), mPaddedRect);
     mPadded2Image = (mPaddedRect.getSize() - mImageRect.getSize()) / 2.0f;
     
+    mInitialRotatedRect = initial;
+    mInitialRotatedRect.center += toOcv(mPadded2Image);
+    
+    auto initial_bound = mInitialRotatedRect.boundingRect();
+  //  cv::Point2f offset_to_rr_bound (initial.center.x - initial_bound.width / 2.0f, initial.center.y - initial_bound.height / 2.0f);
+ //   mInitialRotatedRect.center += (initial.center - offset_to_rr_bound);
+    
+    std::cout << mInitialRotatedRect.center   << std::endl;
+    //    assert(rect_contains(mImageRect, initial_bound));
+    // The points array for storing rectangle vertices. The order is bottomLeft, topLeft, topRight, bottomRight.
+    cv::Point2f corners [4];
+    mInitialRotatedRect.points(corners);
+    
     vec2 ul = mPadded2Display.map(vec2(corners[1].x,corners[1].y));
     vec2 lr = mPadded2Display.map(vec2(corners[3].x,corners[3].y));
     vec2 ctr = mPadded2Display.map(fromOcv(mInitialRotatedRect.center));
     
     uDegree rra(mInitialRotatedRect.angle);
     uRadian rrr(rra);
-  //  rotate(-rrr.Double());
+    rotate(rrr.Double());
     
     mRectangle.area  = Area (ul,lr);
     std::cout << mRectangle.area.getCenter() << "  ?  " << ctr << std::endl;
@@ -75,7 +70,7 @@ affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, 
     
 }
 
-size_t affineRectangle::getNearestIndex( const ivec2 &pt ) const
+int affineRectangle::getNearestIndex( const ivec2 &pt ) const
 {
     uint8_t index = 0;
     float   distance = 10.0e6f;
@@ -120,7 +115,8 @@ void affineRectangle::rotate( const float change )
 }
 
 void  affineRectangle::translate ( const vec2 change ){
-    mRectangle.area.offset(change);
+    mRectangle.position += change;
+//    mRectangle.area.offset(change);
 }
 
 void affineRectangle::reset (){
@@ -166,7 +162,13 @@ const cv::RotatedRect&  affineRectangle::rotatedRectInImage (const Area& image_b
 
 void affineRectangle::draw(const Area& display_bounds)
 {
+    static Rectf persist;
     Rectf af(area());
+    auto diff = af - persist;
+    if (diff.x1 != 0 || diff.y1 != 0 || diff.x2 != 0 || diff.y2 != 0){
+        std::cout << diff << std::endl;
+        persist = af;
+    }
     
     vec2 corners[] = { af.getUpperLeft(), af.getUpperRight(),
         af.getLowerRight(), af.getLowerLeft() };
@@ -216,6 +218,8 @@ void affineRectangle::draw(const Area& display_bounds)
     // Draw the transformed rectangle.
     gl::pushModelMatrix();
     gl::multModelMatrix( mRectangle.matrix() );
+
+        
     // Draw a stroked rect in magenta (if mouse inside) or white (if mouse outside).
     {
         ColorA cl (1.0, 1.0, 1.0,0.8f);
@@ -233,14 +237,17 @@ void affineRectangle::draw(const Area& display_bounds)
         vec2 scale (1.0,1.0);
         {
             vec2 window = area().getCenter();
-            gl::ScopedColor color (ColorA (0.0, 1.0, 0.0,0.8f));
+            ColorA cl (0.0, 1.0, 0.0,0.8f);
+            if(mSelected >= 0)
+                cl = ColorA (1.0, 0.0, 0.0,0.8f);
+            gl::ScopedColor color (cl);
             gl::drawLine( vec2( window.x, window.y - 5 * scale.y ), vec2( window.x, window.y + 5 * scale.y ) );
             gl::drawLine( vec2( window.x - 5 * scale.x, window.y ), vec2( window.x + 5 * scale.x, window.y ) );
         }
         
         {
             vec2 window = area().getCenter();
-            const vec2& tl = position();
+            const vec2& tl = area().getUL();
             gl::ScopedColor color (ColorA (1.0, 1.0, 0.0,0.8f));
             gl::drawLine( tl, window);
         }
@@ -265,8 +272,7 @@ void affineRectangle::mouseDown( const vec2& event_pos )
         mMouseInitial = event_pos;
         mRectangleInitial = mRectangle;
         auto selected = getNearestIndex( mMouseInitial );
-        if (mSelected < 0) mSelected = selected;
-        else mSelected = -1;
+        mSelected = (mSelected < 0) ? selected : -1;
         mInitialPosition = mCornersImageVec[mSelected];
     }
 }

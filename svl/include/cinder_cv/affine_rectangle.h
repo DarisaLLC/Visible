@@ -87,7 +87,7 @@ public:
     const cv::RotatedRect& rotatedRectInImage(const Area& image_bounds) const;
     
 private:
-    size_t getNearestIndex( const ivec2 &pt ) const;
+    int getNearestIndex( const ivec2 &pt ) const;
     
     void cornersInImage(const Area& image_bounds) const;
     mutable EditableRect   mRectangle;
@@ -99,7 +99,7 @@ private:
     bool           mIsOver;
     bool           mMouseIsDown;
     
-    size_t          mSelected;
+    int          mSelected;
     Rectf           mDisplayRect;
     Rectf           mPaddedRect;
     Rectf           mImageRect;
