@@ -437,10 +437,10 @@ void MainApp::process ()
     mImageArea = Area(0,0,mInputMat.cols, mInputMat.rows);
     setWindowSize(mPadded.cols, mPadded.rows);
     
-    mRotatedRect.angle = 0; //toDegrees(0);
+    mRotatedRect.angle = 0.0; //toDegrees(svl::constants::pi / 6.0);
    mRotatedRect.center = toOcv(mImageArea.getCenter());
    mRotatedRect.size.width = 100;
-   mRotatedRect.size.height = 50;
+   mRotatedRect.size.height = 100;
     mRectangle = affineRectangle (getWindowBounds(), mImageArea,mRotatedRect,mPaddedArea);
     
 }
