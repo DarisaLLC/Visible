@@ -63,11 +63,15 @@ public:
     affineRectangle (const Area& bounds, const Area& image_bounds, const cv::RotatedRect& initial,const Area& padded_bounds = Area());
     
     void draw (const Area& display_bounds);
-
+    void resize( const Area &);
+    
     void mouseDown( const vec2& event_pos );
     void mouseUp( );
     void mouseDrag( const vec2& event_pos );
-    void resize( const vec2 change );
+    void mouseMove( const vec2& event_pos );
+    
+
+    void scale( const vec2 change );
     void rotate( const float change );
     void translate ( const vec2 change );
     bool contains ( const vec2 pos);
@@ -83,6 +87,8 @@ public:
     const cv::RotatedRect& rotatedRectInImage(const Area& image_bounds) const;
     
 private:
+    size_t getNearestIndex( const ivec2 &pt ) const;
+    
     void cornersInImage(const Area& image_bounds) const;
     mutable EditableRect   mRectangle;
     ivec2          mMouseInitial;
@@ -90,9 +96,16 @@ private:
     Area           mInitialArea;
     ivec2          mInitialScreenPos;
     bool           mIsClicked;
+    bool           mIsOver;
+    bool           mMouseIsDown;
+    
+    size_t          mSelected;
+    Rectf           mDisplayRect;
     Rectf           mPaddedRect;
     Rectf           mImageRect;
     vec2            mPadded2Image;
+    vec2            mInitialPosition;
+    
     std::vector<vec2> mCornersImageVec;
     mutable std::vector<cv::Point2f> mCornersImageCV;
     cv::RotatedRect mInitialRotatedRect;

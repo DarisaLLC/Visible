@@ -31,11 +31,7 @@ affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, 
     
  //   auto dist = [](const cv::Point2f&a, const cv::Point2f&b){ return std::sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y)); };
     
-    mImageRect = Rectf(image_bounds);
-    mPaddedRect = (padded_bounds == Area()) ? mImageRect : Rectf(padded_bounds);
-    mPadded2Display = RectMapping(mPaddedRect, Rectf(bounds));
-    mDisplay2Padded = RectMapping(Rectf(bounds), mPaddedRect);
-    mPadded2Image = (mPaddedRect.getSize() - mImageRect.getSize()) / 2.0f;
+   
     mInitialRotatedRect = initial;
     mInitialRotatedRect.center += toOcv(mPadded2Image);
     
@@ -49,15 +45,12 @@ affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, 
     cv::Point2f corners [4];
     mInitialRotatedRect.points(corners);
     
-//    auto d1 = dist(corners[0],corners[1]);
-//    auto d2 = dist(corners[0],corners[2]);
-//    auto d3 = dist(corners[0],corners[3]);
-//    auto d4 = dist(corners[1],corners[2]);
-//    auto d5 = dist(corners[1],corners[3]);
-//    auto d6 = dist(corners[2],corners[3]);
-//
-//    std::cout << d1 << "," << d2 << "," << d3 << std::endl;
-//    std::cout << d4 << "," << d5 << "," << d6 << std::endl;
+    mImageRect = Rectf(image_bounds);
+    mDisplayRect = Rectf(bounds);
+    mPaddedRect = (padded_bounds == Area()) ? mImageRect : Rectf(padded_bounds);
+    mPadded2Display = RectMapping(mPaddedRect, Rectf(bounds));
+    mDisplay2Padded = RectMapping(Rectf(bounds), mPaddedRect);
+    mPadded2Image = (mPaddedRect.getSize() - mImageRect.getSize()) / 2.0f;
     
     vec2 ul = mPadded2Display.map(vec2(corners[1].x,corners[1].y));
     vec2 lr = mPadded2Display.map(vec2(corners[3].x,corners[3].y));
@@ -77,6 +70,57 @@ affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, 
     mInitialScreenPos = vec2(0,0);
 
     mIsClicked = false;
+    mIsOver = false;
+    mSelected = -1;
+    
+}
+
+size_t affineRectangle::getNearestIndex( const ivec2 &pt ) const
+{
+    uint8_t index = 0;
+    float   distance = 10.0e6f;
+    
+    for( uint8_t i = 0; i < 4; ++i ) {
+        const float d = glm::distance( vec2( mCornersImageVec[i].x, mCornersImageVec[i].y ), vec2( pt ) );
+        if( d < distance ) {
+            distance = d;
+            index = i;
+        }
+    }
+    
+    return index;
+}
+
+void affineRectangle::mouseMove(  const vec2& event_pos )
+{
+    mIsOver = contains( event_pos );
+}
+
+void affineRectangle::resize(const Area &display_bounds){
+    
+    mDisplayRect.getCenteredFit(Rectf(display_bounds), true);
+    mPadded2Display = RectMapping(mPaddedRect, mDisplayRect);
+    mDisplay2Padded = RectMapping(mDisplayRect, mPaddedRect);
+}
+
+bool affineRectangle::contains (const vec2 pos){
+    vec3 object = mouseToWorld(pos);
+    return area().contains( vec2( object ) );
+}
+
+void affineRectangle::scale( const vec2 change )
+{
+    mRectangle.scale += change;
+}
+
+
+void affineRectangle::rotate( const float change )
+{
+    mRectangle.rotation = mRectangle.rotation * glm::angleAxis(change, vec3( 0, 0, 1 ) );
+}
+
+void  affineRectangle::translate ( const vec2 change ){
+    mRectangle.area.offset(change);
 }
 
 void affineRectangle::reset (){
@@ -147,13 +191,13 @@ void affineRectangle::draw(const Area& display_bounds)
             gl::drawLine( vec2( window.x - 5 * scale.x, window.y ), vec2( window.x + 5 * scale.x, window.y ) );
         }
         ColorA cl (1.0, 0.0, 0.0,0.8f);
-        if (i==0 || i == 1)
+        if (mSelected < 0 || i != mSelected)
             cl = ColorA (0.0, 0.0, 1.0,0.8f);
         {
             gl::ScopedColor color (cl);
-            gl::drawStrokedCircle(window, dsize, dsize+5.0f);
+            gl::drawStrokedCircle(window, dsize, dsize+1.0f);
         }
-        dsize+=5.0f;
+        dsize+=1.0f;
         i++;
     }
     {
@@ -166,7 +210,6 @@ void affineRectangle::draw(const Area& display_bounds)
             gl::popViewport();
     
     
-#if 1
     // Can use setMatricesWindow() or setMatricesWindowPersp() to enable 2D rendering.
     gl::setMatricesWindow(display_bounds.getSize(), true );
     
@@ -205,13 +248,12 @@ void affineRectangle::draw(const Area& display_bounds)
 
 
     gl::popModelMatrix();
-#endif
-    
  
 }
 
 void affineRectangle::mouseDown( const vec2& event_pos )
 {
+    mMouseIsDown = true;
     // Check if mouse is inside rectangle, by converting the mouse coordinates
     // to world space and then to object space.
     vec3 world = mouseToWorld( event_pos );
@@ -222,32 +264,17 @@ void affineRectangle::mouseDown( const vec2& event_pos )
     if( mIsClicked ) {
         mMouseInitial = event_pos;
         mRectangleInitial = mRectangle;
+        auto selected = getNearestIndex( mMouseInitial );
+        if (mSelected < 0) mSelected = selected;
+        else mSelected = -1;
+        mInitialPosition = mCornersImageVec[mSelected];
     }
 }
 
 void affineRectangle::mouseUp(  )
 {
     mIsClicked = false;
-}
-
-bool affineRectangle::contains (const vec2 pos){
-    vec3 object = mouseToWorld(pos);
-    return area().contains( vec2( object ) );
-}
-
-void affineRectangle::resize( const vec2 change )
-{
-    mRectangle.scale += change;
-}
-
-
-void affineRectangle::rotate( const float change )
-{
-    mRectangle.rotation = mRectangle.rotation * glm::angleAxis(change, vec3( 0, 0, 1 ) );
-}
-
-void  affineRectangle::translate ( const vec2 change ){
-    mRectangle.area.offset(change);
+    mMouseIsDown = false;
 }
 
 void affineRectangle::mouseDrag(const vec2& event_pos )
@@ -322,161 +349,7 @@ void affineRectangle::pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints
     rotated_rect.angle = degrees();
 }
 
-
 #if 0
-affineRectangle::affineRectangle () : mScale ( 1 )
-{
-    mCornersWorld.resize(4);
-    mCornersWindow.resize(4);
-    mXformMat = cv::Mat(2,3,CV_64F);
-    m_dirty = false;
-}
-
-affineRectangle& affineRectangle::operator=(const affineRectangle& rhs){
-    mPosition = rhs.position();
-    mScale = rhs.scale();
-    mRotation = rhs.rotation();
-    mXformMat = rhs.mXformMat;
-    mCornersWorld = rhs.mCornersWorld;
-    mCornersWindow = rhs.mCornersWindow;
-    mWindowCenter = rhs.mWindowCenter;
-    mWorldCenter = rhs.mWorldCenter;
-    mCvRotatedRect = rhs.mCvRotatedRect;
-    mWorldTransform = rhs.mWorldTransform;
-    mScreen2Normal = rhs.mScreen2Normal;
-    m_dirty = rhs.m_dirty.load();
-    return *this;
-}
-
-affineRectangle::affineRectangle(const affineRectangle& other){
-    mPosition = other.position();
-    mScale = other.scale();
-    mRotation = other.rotation();
-    mXformMat = other.mXformMat;
-    mCornersWorld = other.mCornersWorld;
-    mCornersWindow = other.mCornersWindow;
-    mWindowCenter = other.mWindowCenter;
-    mWorldCenter = other.mWorldCenter;
-    mCvRotatedRect = other.mCvRotatedRect;
-    mWorldTransform = other.mWorldTransform;
-    mScreen2Normal = other.mScreen2Normal;
-    m_dirty = other.m_dirty.load();
-}
-affineRectangle::affineRectangle (const Rectf& ar) : Rectf(ar)
-{
-    mScale = vec2(1);
-    mCornersWorld.resize(4);
-    mCornersWindow.resize(4);
-    mXformMat = cv::Mat(2,3,CV_64F);
-    mScreen2Normal = RectMapping(ar, Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
-
-    m_dirty = false;
-}
-
-void affineRectangle::update () const {
-
-        // Translate to the position
-        mat4 m = glm::translate( vec3( mPosition, 0 ) );
-        // Rotate
-        m *= glm::toMat4( mRotation );
-        // Scale
-        m *= glm::scale( vec3( mScale, 1 ) );
-        // Get the center point
-        m *= glm::translate( vec3( -getSize() * 0.5f, 0 ) );
-        
-        mWorldTransform = m;
-        
-        // Normalize us + setup the display locations
-        mCornersWorld.resize(4);
-        Rectf* mArea ((affineRectangle*)this);
-//        mArea->canonicalize();
-        mCornersWorld[0]=mScreen2Normal.map(mArea->getUpperLeft());
-        mCornersWorld[1]=mScreen2Normal.map(mArea->getUpperRight());
-        mCornersWorld[2]=mScreen2Normal.map(mArea->getLowerRight());
-        mCornersWorld[3]=mScreen2Normal.map(mArea->getLowerLeft());
-        mWorldCenter = mScreen2Normal.map(mArea->getCenter());
-        
-        // Get the image locations in cv::Point
-        mCornersWindow.resize(4);
-        for (int i = 0; i < 4; i++)
-        {
-            vec4 world = getWorldTransform() * vec4( mCornersWorld[i], 0, 1 );
-            vec2 window = gl::worldToWindowCoord( vec3( world ) );
-            mCornersWindow[i]=toOcv(window);
-        }
-        {
-            vec4 world = getWorldTransform() * vec4( mWorldCenter, 0, 1 );
-            vec2 window = gl::worldToWindowCoord( vec3( world ) );
-            mWindowCenter=toOcv(window);
-        }
-        
-        //
-        mCvRotatedRect = cv::minAreaRect(mCornersWindow);
-        update_rect_centered_xform();
-
-}
-
-const Rectf&   affineRectangle::area () const { return *this; }
-const vec2&    affineRectangle::position () const { return mPosition; }
-const vec2&    affineRectangle::scale () const { return mScale; }
-const quat    affineRectangle::rotation ()const { return mRotation; }
-const RectMapping&    affineRectangle::screenToNormal ()const { return mScreen2Normal; }
-
-void    affineRectangle::scale (const vec2& ns) { mScale = ns; m_dirty = true; }
-void  affineRectangle::rotation (const quat& rq) { mRotation = rq; m_dirty = true; }
-void    affineRectangle::position (const vec2& np) { mPosition = np; m_dirty = true; }
-
-void  affineRectangle::resize (const int width, const int height){
-    ivec2 dd (width - getWidth(), height - getHeight());
-    inflate(dd);
-    m_dirty = true;
-}
-
-void affineRectangle::inflate (const vec2 trim){
-    static_cast<Rectf*>(this)->inflate(trim);
-    m_dirty = true;
-}
-//vec2 scale_map (const vec2& pt)
-//{
-//    return (vec2 (pt[0]*mScale[0],pt[1]*mScale[1]));
-//}
-
-//! Returns the rectangle's model matrix.
-const mat4  & affineRectangle::getWorldTransform() const
-{
-    return mWorldTransform;
-}
-
-
-float  affineRectangle::degrees () const
-{
-    return toDegrees(2*std::acos(mRotation.w));
-}
-
-float  affineRectangle::radians () const
-{
-    return 2*std::acos(mRotation.w);
-}
-
-
-//The order is bottomLeft, topLeft, topRight, bottomRight.
-// return in tl,tr,br,bl
-// @note Check if this makes sense in all cases
-const std::vector<vec2>&  affineRectangle::worldCorners () const
-{
-    return mCornersWorld;
-}
-
-const std::vector<Point2f>&  affineRectangle::windowCorners () const
-{
-    return mCornersWindow;
-}
-
-const cv::RotatedRect&  affineRectangle::rotated_rect () const
-{
-    return mCvRotatedRect;
-}
-
 Point2f  affineRectangle::map_point(Point2f pt) const
 {
     const cv::Mat& transMat = mXformMat;
