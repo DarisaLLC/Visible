@@ -37,7 +37,7 @@ affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, 
     mInitialRotatedRect = initial;
     mInitialRotatedRect.center += toOcv(mPadded2Image);
     
-    auto initial_bound = mInitialRotatedRect.boundingRect();
+   // auto initial_bound = mInitialRotatedRect.boundingRect();
   //  cv::Point2f offset_to_rr_bound (initial.center.x - initial_bound.width / 2.0f, initial.center.y - initial_bound.height / 2.0f);
  //   mInitialRotatedRect.center += (initial.center - offset_to_rr_bound);
     
