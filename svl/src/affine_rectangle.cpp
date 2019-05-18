@@ -21,6 +21,8 @@ using namespace ci;
 using namespace std;
 using namespace cv;
 
+/*  @note: add position of image in padded
+ */
 affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, const cv::RotatedRect& initial,const Area& padded_bounds){
     
   //  auto rect_contains = [](const Rectf& outer, const Area& bounds){
@@ -31,9 +33,9 @@ affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, 
     
     mImageRect = Rectf(image_bounds);
     mPaddedRect = (padded_bounds == Area()) ? mImageRect : Rectf(padded_bounds);
-    mPadded2Display = RectMapping(mImageRect, Rectf(bounds));
-    mDisplay2Padded = RectMapping(Rectf(bounds), mImageRect);
-    mPadded2Image = mPaddedRect.getUpperLeft() - mImageRect.getUpperLeft();
+    mPadded2Display = RectMapping(mPaddedRect, Rectf(bounds));
+    mDisplay2Padded = RectMapping(Rectf(bounds), mPaddedRect);
+    mPadded2Image = (mPaddedRect.getSize() - mImageRect.getSize()) / 2.0f;
     mInitialRotatedRect = initial;
     mInitialRotatedRect.center += toOcv(mPadded2Image);
     
@@ -63,7 +65,6 @@ affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, 
     
     uDegree rra(mInitialRotatedRect.angle);
     uRadian rrr(rra);
-   // mat3 matrix = glm::rotate( mat3(), (float) -rrr.Double());
   //  rotate(-rrr.Double());
     
     mRectangle.area  = Area (ul,lr);
@@ -130,7 +131,7 @@ void affineRectangle::draw(const Area& display_bounds)
     float dsize = 5.0f;
     // Use worldToWindowCoord, and viewport for OpenCv to draw
     // Store world coordinates
-    gl::pushViewport(0, mImageRect.getHeight(),mImageRect.getWidth(),-mImageRect.getHeight());
+    gl::pushViewport(0, mPaddedRect.getHeight(),mPaddedRect.getWidth(),-mPaddedRect.getHeight());
     for( vec2 &corner : corners ) {
         vec4 world = mRectangle.matrix() * vec4( corner, 0, 1 );
         vec2 window = gl::worldToWindowCoord( vec3( world ) );
@@ -163,7 +164,9 @@ void affineRectangle::draw(const Area& display_bounds)
         gl::drawLine( corners[3], corners[0] );
     }
             gl::popViewport();
-#if 0
+    
+    
+#if 1
     // Can use setMatricesWindow() or setMatricesWindowPersp() to enable 2D rendering.
     gl::setMatricesWindow(display_bounds.getSize(), true );
     
