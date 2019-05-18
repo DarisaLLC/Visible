@@ -140,15 +140,8 @@ vec2 MainApp::matStats (const cv::Mat& image)
 }
 void MainApp::resize()
 {
-//    setWindowSize(getWindowSize());
- //   mRectangle.resize(getWindowWidth(),getWindowHeight());
-//    vec2 newsize = mRectangle.scale_map(getWindowSize());
-//    mRectangle = affineRectangle (Rectf(0,0,newsize[0], newsize[1]));
-//    mRectangle.position (vec2(newsize[0]/2, newsize[1]/2));
+    mRectangle.resize(getWindowBounds());
 }
-
-
-
 
 void MainApp::openFile()
 {
@@ -355,17 +348,17 @@ void MainApp::keyDown( KeyEvent event )
             mRectangle.translate(vec2(trans,0));
             break;
         case KeyEvent::KEY_RIGHTBRACKET:
-            mRectangle.resize(vec2(-one.x,0));
+            mRectangle.scale(vec2(-one.x,0));
             break;
         case KeyEvent::KEY_LEFTBRACKET:
-            mRectangle.resize(vec2(one.x,0));
+            mRectangle.scale(vec2(one.x,0));
             break;
         case KeyEvent::KEY_SEMICOLON:
-            mRectangle.resize(vec2(0,-one.y));
+            mRectangle.scale(vec2(0,-one.y));
             break;
             
         case KeyEvent::KEY_QUOTE:
-            mRectangle.resize(vec2(0,one.y));
+            mRectangle.scale(vec2(0,one.y));
             break;
         case KeyEvent::KEY_BACKSLASH:
             mRectangle.rotate(-step);
@@ -402,6 +395,7 @@ void MainApp::keyDown( KeyEvent event )
             break;
         case KeyEvent::KEY_r:
             mRectangle.reset();
+            resize ();
             break;
         case KeyEvent::KEY_ESCAPE:
             if (isFullScreen())
