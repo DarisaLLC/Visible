@@ -37,10 +37,10 @@ struct EditableRect {
     //! Returns the rectangle's model matrix.
     mat4  matrix()
     {
-        mat4 m = glm::translate( vec3( position, 0 ) );
+        mat4 m = glm::translate( vec3( area.getSize() / 2, 0 ) );
         m *= glm::toMat4( rotation );
         m *= glm::scale( vec3( scale, 1 ) );
-        m *= glm::translate( vec3( -area.getSize() / 2, 0 ) );
+        m *= glm::translate( vec3( -position, 0 ) );
         
         return m;
     }
@@ -62,6 +62,7 @@ public:
      */
     affineRectangle (const Area& bounds, const Area& image_bounds, const cv::RotatedRect& initial,const Area& padded_bounds = Area());
     
+    void update ();
     void draw (const Area& display_bounds);
     void resize( const Area &);
     
