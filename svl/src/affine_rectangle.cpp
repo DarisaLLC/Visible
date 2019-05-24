@@ -45,29 +45,31 @@ affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, 
     mInitialRotatedRect.points(corners.data());
     pointsToRotatedRect(corners, mInitialRotatedRect);
     mInitialRotatedRect.points(corners.data());
-
     
-    vec2 ul = mPadded2Display.map(vec2(corners[1].x,corners[1].y));
-    vec2 lr = mPadded2Display.map(vec2(corners[3].x,corners[3].y));
-  //  vec2 ctr = mPadded2Display.map(fromOcv(mInitialRotatedRect.center));
-    
-    uDegree rra(mInitialRotatedRect.angle);
-    uRadian rrr(rra);
-    rotate(rrr.Double());
-    
-    mRectangle.area  = Area (ul,lr);
+    mCornersImageCV = corners;
+    mCornersImageVec.clear();
+    for(auto & window : corners){
+        mCornersImageVec.emplace_back(fromOcv(window));
+    }
     auto initial_aspect = (float)initial.size.width / (float) initial.size.height;
-//    auto guess_aspect = (float)mRectangle.area.getWidth() / (float) mRectangle.area.getHeight();
     mWoHaspect = initial_aspect;
-
-
-    
-    mRectangle.position = vec2(0,0);
-    mInitialArea = mRectangle.area;
-    mInitialScreenPos = vec2(0,0);
     mIsClicked = false;
     mIsOver = false;
     mSelected = -1;
+
+    //@todo move to update 
+    vec2 ul = mPadded2Display.map(vec2(corners[1].x,corners[1].y));
+    vec2 lr = mPadded2Display.map(vec2(corners[3].x,corners[3].y));
+    mRectangle.area  = Area (ul,lr);
+    translate(mRectangle.area.getCenter());
+    uDegree rra(mInitialRotatedRect.angle);
+    uRadian rrr(rra);
+    rotate(rrr.Double());
+
+    
+    mInitialArea = mRectangle.area;
+    mInitialScreenPos = mRectangle.position;
+  
     
 }
 
@@ -112,7 +114,9 @@ void affineRectangle::scale( const vec2 change )
 
 void affineRectangle::rotate( const float change )
 {
-    mRectangle.rotation = mRectangle.rotation * glm::angleAxis(change, vec3( 0, 0, 1 ) );
+ 
+    mRectangle.rotation = mRectangle.rotation * glm::angleAxis(change, vec3( 0, 0, -1 ) );
+    
 }
 
 void  affineRectangle::translate ( const vec2 change ){
@@ -184,6 +188,9 @@ const cv::RotatedRect&  affineRectangle::rotatedRectInImage (const Area& image_b
  
  */
 
+void affineRectangle::update(){
+//    gl::worldToWindowCoord
+}
 void affineRectangle::draw(const Area& display_bounds)
 {
     static Rectf persist;
@@ -251,7 +258,6 @@ void affineRectangle::draw(const Area& display_bounds)
         printCorners(mCornersImageVec);
             gl::popViewport();
     
-    
     // Can use setMatricesWindow() or setMatricesWindowPersp() to enable 2D rendering.
     gl::setMatricesWindow(display_bounds.getSize(), true );
     
@@ -271,6 +277,7 @@ void affineRectangle::draw(const Area& display_bounds)
         std::for_each(ds.begin(), ds.end(), print);
         std::cout << '\n';
     };
+
     printCornersPlus(corners);
     // Draw a stroked rect in magenta (if mouse inside) or white (if mouse outside).
     {
