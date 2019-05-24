@@ -74,7 +74,7 @@ namespace svl
         return out;
     }
 
-    void sortCorners(std::vector<Point2f>& corners, Point2f& center) {
+    void sortCorners(std::vector<Point2f>& corners, Point2f& center, std::vector<Point2f>& out) {
         
         
         // Calculate all the angles from the centroid, maintaining index
@@ -102,14 +102,6 @@ namespace svl
     
     cv::Point2f rotatePoint(const cv::Point2f& pt_in, const cv::Point2f& center, const double& angle_rad) {
         return rotate2d(pt_in - center, angle_rad) + center;
-    }
-    
-    double pts2angleRad(cv::Point pt1, cv::Point pt2) {
-        return atan2(static_cast<double>(pt2.y - pt1.y), static_cast<double>(pt2.x - pt1.x));
-    }
-    
-    double pts2angleDeg(cv::Point pt1, cv::Point pt2) {
-        return atan2(static_cast<double>(pt2.y - pt1.y), static_cast<double>(pt2.x - pt1.x)) * 180.0 / svl::constants::pi;
     }
 
     // original from https://stackoverflow.com/a/46635372
@@ -139,10 +131,10 @@ namespace svl
         assert(src.size() == 4);
         std::vector<int> idx = {0,1,2,3};
         
-        auto pcheck = [](std::vector<Point2f>& cand){
+        auto pcheck = [idx](std::vector<Point2f>& cand){
             Vec2f vecs[2];
-            vecs[0] = Vec2f(cand[0] - cand[1]);
-            vecs[1] = Vec2f(cand[1] - cand[3]);
+            vecs[0] = Vec2f(cand[idx[0]] - cand[idx[1]]);
+            vecs[1] = Vec2f(cand[idx[1]] - cand[idx[2]]);
             // check that given sides are perpendicular
             return ( abs(vecs[0].dot(vecs[1])) / (norm(vecs[0]) * norm(vecs[1])) <= FLT_EPSILON );
         };
@@ -491,7 +483,7 @@ namespace svl
         meanStdDev(im_float_2, im2_Mean, im2_Std);
         
         // Compute covariance and correlation coefficient
-        double covar = (im_float_1 - im1_Mean).dot(im_float_2 - im2_Mean) / n_pixels;
+         double covar = (im_float_1 - im1_Mean).dot(im_float_2 - im2_Mean) / n_pixels;
         double correl = covar / (im1_Std[0] * im2_Std[0]);
         
         return correl;
