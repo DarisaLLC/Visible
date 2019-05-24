@@ -11,6 +11,7 @@
 #include "core/stl_utils.hpp"
 #include "core/stats.hpp"
 #include "vision/localvariance.h"
+#include "core/lineseg.hpp"
 
 using namespace std;
 using namespace stl_utils;
@@ -19,6 +20,10 @@ struct idlab_cardiac_defaults{
     float median_level_set_cutoff_fraction;
     
 };
+
+
+void pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints, cv::RotatedRect& rotated_rect );
+
 
 struct IntensityStatisticsRunner
 {
