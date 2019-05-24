@@ -21,7 +21,8 @@
 #include "async_tracks.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
-#include "cinder_xchg.hpp"
+#include "cinder_cv/cinder_xchg.hpp"
+#include "cinder_cv/cinder_opencv.h"
 #include "vision/histo.h"
 #include "vision/opencv_utils.hpp"
 #include "algo_cardiac.hpp"
@@ -431,13 +432,16 @@ void lif_serie_processor::save_affine_windows (const std::vector<cv::Mat>& rws){
 void lif_serie_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
- 
+     
     m_main_blob = labelBlob::create(mono, bi_level, m_params.min_seqmentation_area(), 666);
     std::function<labelBlob::results_ready_cb> res_ready_lambda = [this](int64_t& cbi)
     {
         const std::vector<blob>& blobs = m_main_blob->results();
         if (! blobs.empty()){
             m_motion_mass = blobs[0].rotated_roi();
+            std::vector<cv::Point2f> corners(4);
+            m_motion_mass.points(corners.data());
+            pointsToRotatedRect(corners, m_motion_mass);
             std::vector<cv::Point2f> mid_points;
             svl::get_mid_points(m_motion_mass, mid_points);
             m_surface_affine = cv::getRotationMatrix2D(m_motion_mass.center,m_motion_mass.angle, 1);
@@ -1116,6 +1120,64 @@ void lif_serie_processor::generateVoxelSelfSimilarities (){
     }
 }
 
+
+void pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints, cv::RotatedRect& rotated_rect ){
+    // get the left most
+    std::sort (imagePoints.begin(), imagePoints.end(),[](const cv::Point2f&a, const cv::Point2f&b){
+        return a.x > b.x;
+    });
+    
+    std::sort (imagePoints.begin(), imagePoints.end(),[](const cv::Point2f&a, const cv::Point2f&b){
+        return a.y < b.y;
+    });
+    
+    auto cwOrder = [&] (std::vector<cv::Point2f>& cc, std::vector<std::pair<std::pair<int,int>,float>>& results) {
+        const float d01 = glm::distance( fromOcv(cc[0]), fromOcv(cc[1]) );
+        const float d02 = glm::distance( fromOcv(cc[0]), fromOcv(cc[2]) );
+        const float d03 = glm::distance( fromOcv(cc[0]), fromOcv(cc[3]) );
+        
+        std::vector<std::pair<std::pair<int,int>,float>> ds = {{{0,1},d01}, {{0,2},d02}, {{0,3},d03}};
+        std::sort (ds.begin(), ds.end(),[](std::pair<std::pair<int,int>,float>&a, const std::pair<std::pair<int,int>,float>&b){
+            return a.second > b.second;
+        });
+        results = ds;
+        auto print = [](std::pair<std::pair<int,int>,float>& vv) { std::cout << "::" << vv.second; };
+        std::for_each(ds.begin(), ds.end(), print);
+        std::cout << '\n';
+    };
+    
+    std::vector<std::pair<std::pair<int,int>,float>> ranked_corners;
+    cwOrder(imagePoints, ranked_corners);
+    assert(ranked_corners.size()==3);
+    fVector_2d tl (imagePoints[ranked_corners[1].first.first].x, imagePoints[ranked_corners[1].first.first].y);
+    fVector_2d tr (imagePoints[ranked_corners[1].first.second].x, imagePoints[ranked_corners[1].first.second].y);
+    fVector_2d bl (imagePoints[ranked_corners[2].first.second].x, imagePoints[ranked_corners[2].first.second].y);
+    fLineSegment2d sideOne (tl, tr);
+    fLineSegment2d sideTwo (tl, bl);
+    
+    
+    cv::Point2f ctr(0,0);
+    for (auto const& p : imagePoints){
+        ctr.x += p.x;
+        ctr.y += p.y;
+    }
+    ctr.x /= 4;
+    ctr.y /= 4;
+    rotated_rect.center = ctr;
+    float dLR = sideOne.length();
+    float dTB = sideTwo.length();
+    rotated_rect.size.width = dTB;
+    rotated_rect.size.height = dLR;
+    std::cout << toDegrees(sideOne.angle().Double()) << " Side One " << sideOne.length() << std::endl;
+    std::cout << toDegrees(sideTwo.angle().Double()) << " Side Two " << sideTwo.length() << std::endl;
+    
+    uDegree angle = sideTwo.angle();
+    if (angle.Double() < -45.0){
+        angle = angle + uDegree::piOverTwo();
+        std::swap(rotated_rect.size.width,rotated_rect.size.height);
+    }
+    rotated_rect.angle = angle.Double();
+}
 
 #pragma GCC diagnostic pop
 
