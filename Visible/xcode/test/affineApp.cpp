@@ -76,7 +76,7 @@ public:
     std::string pixelInfo ( const ivec2 & position);
     void drawEditableRect ();
     void openFile();
-    static cv::Mat affineCrop (cv::Mat& src, cv::RotatedRect& rect);
+    static cv::Mat affineCrop (cv::Mat& src, cv::RotatedRect& rect, float aspect);
     vec2 matStats (const cv::Mat& image);
     Surface8uRef   mImage;
     
@@ -195,7 +195,7 @@ void MainApp::generate_crop (){
     };
     
     auto cp = mRectangle.rotatedRectInImage(mPaddedArea);
-    cv::Mat crop = affineCrop(mPadded, cp);
+    cv::Mat crop = affineCrop(mPadded, cp, mRectangle.aspect());
     cv::Mat hz (1, crop.cols, CV_32F);
     cv::Mat vt (crop.rows, 1, CV_32F);
     horizontal_vertical_projections (crop, hz, vt);
@@ -437,9 +437,9 @@ void MainApp::process ()
     mImageArea = Area(0,0,mInputMat.cols, mInputMat.rows);
     setWindowSize(mPadded.cols, mPadded.rows);
     
-    mRotatedRect.angle = 0.0; //toDegrees(svl::constants::pi / 6.0);
+    mRotatedRect.angle = toDegrees(svl::constants::pi / 6.0);
    mRotatedRect.center = toOcv(mImageArea.getCenter());
-   mRotatedRect.size.width = 100;
+   mRotatedRect.size.width = 50;
    mRotatedRect.size.height = 100;
     mRectangle = affineRectangle (getWindowBounds(), mImageArea,mRotatedRect,mPaddedArea);
     
@@ -477,12 +477,16 @@ void MainApp::draw()
     
 }
 
-cv::Mat MainApp::affineCrop (cv::Mat& src, cv::RotatedRect& rect)
+cv::Mat MainApp::affineCrop (cv::Mat& src, cv::RotatedRect& in_rect, float aspect)
 {
+    auto rect = in_rect;
     Mat M, rotated, cropped;
     float angle = rect.angle;
     auto rect_size = rect.size;
-    
+    float in_aspect = (float)rect.size.width / (float) rect.size.height;
+    if ((in_aspect > 1.0) != (aspect > 1.0)){
+        std::swap(rect.size.width,rect.size.height);
+    }
     
     // get the rotation matrix
     M = getRotationMatrix2D(rect.center, angle, 1.0);

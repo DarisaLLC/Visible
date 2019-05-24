@@ -13,6 +13,381 @@
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
 
+
+#include "opencv2/imgproc.hpp"
+#include "opencv2/highgui.hpp"
+#include "vision/opencv_utils.hpp"
+#include "vision/ellipse.hpp"
+#include "core/angle_units.h"
+#include "vision/ellipse_fit.hpp"
+#include "core/lineseg.hpp"
+
+
+#define precision 0.0001
+
+using namespace cv;
+#include <iostream>
+#include <cmath>
+#include <vector>
+
+using namespace std;
+using namespace svl;
+
+
+std::string toString (const cv::RotatedRect& rr){
+    std::ostringstream ss;
+    ss << "[ + " << rr.center << " / " << rr.angle << " | " << rr.size.height << " - " << rr.size.width << "]";
+    return ss.str();
+}
+
+cv::RotatedRect getBoundingRectPCA( cv::Mat& binaryImg ) {
+    cv::RotatedRect result;
+    
+    //1. convert to matrix that contains point coordinates as column vectors
+    int count = cv::countNonZero(binaryImg);
+    if (count == 0) {
+        std::cout << "Utilities::getBoundingRectPCA() encountered 0 pixels in binary image!" << std::endl;
+        return cv::RotatedRect();
+    }
+    
+    cv::Mat data(2, count, CV_32FC1);
+    int dataColumnIndex = 0;
+    for (int row = 0; row < binaryImg.rows; row++) {
+        for (int col = 0; col < binaryImg.cols; col++) {
+            if (binaryImg.at<unsigned char>(row, col) != 0) {
+                data.at<float>(0, dataColumnIndex) = (float) col; //x coordinate
+                data.at<float>(1, dataColumnIndex) = (float) (binaryImg.rows - row); //y coordinate, such that y axis goes up
+                ++dataColumnIndex;
+            }
+        }
+    }
+    
+    //2. perform PCA
+    const int maxComponents = 1;
+    cv::PCA pca(data, cv::Mat() /*mean*/, CV_PCA_DATA_AS_COL, maxComponents);
+    //result is contained in pca.eigenvectors (as row vectors)
+    //std::cout << pca.eigenvectors << std::endl;
+    
+    //3. get angle of principal axis
+    float dx = pca.eigenvectors.at<float>(0, 0);
+    float dy = pca.eigenvectors.at<float>(0, 1);
+    float angle = atan2f(dy, dx)  / (float)CV_PI*180.0f;
+    
+    //find the bounding rectangle with the given angle, by rotating the contour around the mean so that it is up-right
+    //easily finding the bounding box then
+    cv::Point2f center(pca.mean.at<float>(0,0), binaryImg.rows - pca.mean.at<float>(1,0));
+    cv::Mat rotationMatrix = cv::getRotationMatrix2D(center, -angle, 1);
+    cv::Mat rotationMatrixInverse = cv::getRotationMatrix2D(center, angle, 1);
+    
+    std::vector<std::vector<cv::Point> > contours;
+    cv::findContours(binaryImg, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    if (contours.size() != 1) {
+        std::cout << "Warning: found " << contours.size() << " contours in binaryImg (expected one)" << std::endl;
+        return result;
+    }
+    
+    //turn vector of points into matrix (with points as column vectors, with a 3rd row full of 1's, i.e. points are converted to extended coords)
+    cv::Mat contourMat(3, contours[0].size(), CV_64FC1);
+    double* row0 = contourMat.ptr<double>(0);
+    double* row1 = contourMat.ptr<double>(1);
+    double* row2 = contourMat.ptr<double>(2);
+    for (int i = 0; i < (int) contours[0].size(); i++) {
+        row0[i] = (double) (contours[0])[i].x;
+        row1[i] = (double) (contours[0])[i].y;
+        row2[i] = 1;
+    }
+    
+    cv::Mat uprightContour = rotationMatrix*contourMat;
+    
+    //get min/max in order to determine width and height
+    double minX, minY, maxX, maxY;
+    cv::minMaxLoc(cv::Mat(uprightContour, cv::Rect(0, 0, contours[0].size(), 1)), &minX, &maxX); //get minimum/maximum of first row
+    cv::minMaxLoc(cv::Mat(uprightContour, cv::Rect(0, 1, contours[0].size(), 1)), &minY, &maxY); //get minimum/maximum of second row
+    
+    int minXi = cvFloor(minX);
+    int minYi = cvFloor(minY);
+    int maxXi = cvCeil(maxX);
+    int maxYi = cvCeil(maxY);
+    
+    //fill result
+    result.angle = angle;
+    result.size.width = (float) (maxXi - minXi);
+    result.size.height = (float) (maxYi - minYi);
+    
+    //Find the correct center:
+    cv::Mat correctCenterUpright(3, 1, CV_64FC1);
+    correctCenterUpright.at<double>(0, 0) = maxX - result.size.width/2;
+    correctCenterUpright.at<double>(1,0) = maxY - result.size.height/2;
+    correctCenterUpright.at<double>(2,0) = 1;
+    cv::Mat correctCenterMat = rotationMatrixInverse*correctCenterUpright;
+    cv::Point correctCenter = cv::Point(cvRound(correctCenterMat.at<double>(0,0)), cvRound(correctCenterMat.at<double>(1,0)));
+    
+    result.center = correctCenter;
+    
+    return result;
+    
+}
+
+
+void pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints, cv::RotatedRect& rotated_rect) {
+    // get the left most
+    std::sort (imagePoints.begin(), imagePoints.end(),[](const cv::Point2f&a, const cv::Point2f&b){
+        return a.x > b.x;
+    });
+    
+    std::sort (imagePoints.begin(), imagePoints.end(),[](const cv::Point2f&a, const cv::Point2f&b){
+        return a.y < b.y;
+    });
+    
+    fVector_2d tl (imagePoints[0].x, imagePoints[0].y);
+    fVector_2d bl (imagePoints[1].x, imagePoints[1].y);
+    fVector_2d tr (imagePoints[2].x, imagePoints[2].y);
+    fVector_2d br (imagePoints[3].x, imagePoints[3].y);
+    fLineSegment2d sideOne (tl, tr);
+    fLineSegment2d sideTwo (bl, br);
+    
+    
+    cv::Point2f ctr(0,0);
+    for (auto const& p : imagePoints){
+        ctr.x += p.x;
+        ctr.y += p.y;
+    }
+    ctr.x /= 4;
+    ctr.y /= 4;
+    rotated_rect.center = ctr;
+    float dLR = sideOne.length();
+    float dTB = sideTwo.length();
+    rotated_rect.size.width = dLR;
+    rotated_rect.size.height = dTB;
+    std::cout << toDegrees(sideOne.angle().Double()) << " Side One " << std::endl;
+    std::cout << toDegrees(sideTwo.angle().Double()) << " Side Two " << std::endl;
+    
+    uDegree angle = sideTwo.angle();
+    if (angle.Double() < -45.0){
+        angle = angle + uDegree::piOverTwo();
+        std::swap(rotated_rect.size.width,rotated_rect.size.height);
+    }
+    rotated_rect.angle = angle.Double();
+}
+
+    
+#if 0
+    float X[]={185,182.854,181.225,180.086,178.973,177.868,176.755,175.622,174.296,173.13,171.969,170.798,169.279,168.079,166.893,164.909,163.696,162.138,160.956,159.762,158.209,157.017,155.826,154.192,152.988,150.933,148.857,147.078,144.993,142.906,140.81,139.01,136.911,135.068,132.962,130.85,128.978,127.072,124.962,123.033,120.929,118.985,117.026,114.933,112.97,110.997,109.017,107.03,104.968,102.983,100.992,98.997,96.9998,95.0016,93.0035,91.007,89.0142,86.9663,84.9676,82.9798,81.0034,79.0373,76.9419,74.9862,73.043,70.9357,69.0133,66.9003,64.9952,62.8779,60.9968,58.8842,57.0397,54.9433,52.8446,51.0558,48.9744,46.8964,44.8226,43.1216,41.9258,39.8931,38.2492,37.0425,35.8484,34.2504,33.055,31.8722,30.6703,29.1848,28.0179,26.8576,25.6873,24.2945,23.136,21.9922,20.8515,19.7037,18.3912,17.2477};
+    float Y[]={61.198,61.5732,62.3475,63.1181,63.9648,64.8266,65.6698,66.469,67.4408,68.2048,68.9483,69.6458,70.5159,71.1517,71.7898,72.8201,73.4095,74.264,74.9162,75.5511,76.3976,77.0326,77.6426,78.4249,78.9721,79.8223,80.5938,81.2261,81.9788,82.7216,83.4149,84.0314,84.6993,85.2384,85.8604,86.4056,86.9039,87.3347,87.8113,88.1805,88.5699,88.8985,89.1848,89.4768,89.7476,89.9753,90.1773,90.3597,90.5298,90.663,90.7535,90.804,90.82,90.8109,90.7843,90.7399,90.6681,90.5499,90.3878,90.1938,89.9716,89.7166,89.3934,89.0862,88.7556,88.3275,87.9361,87.4582,87.0212,86.503,86.0123,85.4124,84.8682,84.1757,83.4614,82.8385,82.0713,81.272,80.4356,79.7146,79.1696,78.2374,77.4562,76.9088,76.3161,75.5034,74.8949,74.2351,73.5835,72.6877,71.9707,71.2272,70.4893,69.5496,68.7953,68.0116,67.2182,66.4283,65.4503,64.6586};
+    
+    Eigen::Map<Eigen::VectorXf> xVec(X,4);
+    Eigen::Map<Eigen::VectorXf> yVec(Y,4);
+    DirectEllipseFit ellipFit(xVec, yVec);
+    Ellipse ellip = ellipFit.doEllipseFit();
+    std::cout << ellip << std::endl;
+    return ellip.phi;
+#endif
+    
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <math.h>
+
+cv::Mat mkKernel(int ks, double sig, double th, double lm, double ps)
+{
+    int hks = (ks-1)/2;
+    double theta = th*CV_PI/180;
+    double psi = ps*CV_PI/180;
+    double del = 2.0/(ks-1);
+    double lmbd = lm;
+    double sigma = sig/ks;
+    double x_theta;
+    double y_theta;
+    cv::Mat kernel(ks,ks, CV_32F);
+    for (int y=-hks; y<=hks; y++)
+    {
+        for (int x=-hks; x<=hks; x++)
+        {
+            x_theta = x*del*cos(theta)+y*del*sin(theta);
+            y_theta = -x*del*sin(theta)+y*del*cos(theta);
+            kernel.at<float>(hks+y,hks+x) = (float)exp(-0.5*(pow(x_theta,2)+pow(y_theta,2))/pow(sigma,2))* cos(2*CV_PI*x_theta/lmbd + psi);
+        }
+    }
+
+ 
+    return kernel;
+}
+
+int kernel_size=21;
+int pos_sigma= 5;
+int pos_lm = 50;
+int pos_th = 0;
+int pos_psi = 90;
+cv::Mat src_f;
+cv::Mat dest;
+
+void Process(int , void *)
+{
+    double sig = pos_sigma;
+    double lm = 0.5+pos_lm/100.0;
+    double th = pos_th;
+    double ps = pos_psi;
+    cv::Mat kernel = mkKernel(kernel_size, sig, th, lm, ps);
+    cv::filter2D(src_f, dest, CV_32F, kernel);
+    cv::imshow("Process window", dest);
+    cv::Mat Lkernel(kernel_size*20, kernel_size*20, CV_32F);
+    cv::resize(kernel, Lkernel, Lkernel.size());
+    Lkernel /= 2.;
+    Lkernel += 0.5;
+    cv::imshow("Kernel", Lkernel);
+    cv::Mat mag;
+    cv::pow(dest, 2.0, mag);
+    cv::imshow("Mag", mag);
+}
+
+
+int main_gabor ()
+{
+    cv::Mat image = cv::imread("/Volumes/medvedev/Users/arman/tmp/c2_set/c2/image000.png",1);
+    cv::imshow("Src", image);
+    cv::Mat src;
+    cv::cvtColor(image, src, CV_BGR2GRAY);
+    src.convertTo(src_f, CV_32F, 1.0/255, 0);
+    if (!kernel_size%2)
+    {
+        kernel_size+=1;
+    }
+    cv::namedWindow("Process window", 1);
+    cv::createTrackbar("Sigma", "Process window", &pos_sigma, kernel_size, Process);
+    cv::createTrackbar("Lambda", "Process window", &pos_lm, 100, Process);
+    cv::createTrackbar("Theta", "Process window", &pos_th, 180, Process);
+    cv::createTrackbar("Psi", "Process window", &pos_psi, 360, Process);
+    Process(0,0);
+    cv::waitKey(0);
+    return 0;
+}
+
+
+
+
+int main()
+{
+   // main_gabor();
+    
+  
+    
+    Mat image(1000, 2000, CV_8UC3, Scalar(196,196,196,0.5));
+    Mat display(1000, 2000, CV_8UC3, Scalar(196,196,196,0.5));
+    vector<cv::Mat> bgr_planes;
+    split(image, bgr_planes );
+    
+    
+    static cv::Point2f offset(50,50);
+    auto inspect = [=](cv::Mat& image, cv::Mat& display, cv::Size& size, cv::Point2f& ctr, float degrees, bool correct = true){
+        
+        
+
+        auto moved = ctr + offset;
+        RotatedRect rRect = RotatedRect(moved, size, degrees);
+        std::vector<Point2f> points(4);
+        rRect.points(points.data());
+        RotatedRect ri;
+        pointsToRotatedRect(points, ri);
+        
+        svl::ellipseShape er(ri);
+        er.get(ri);
+        int maxd = std::sqrt(rRect.size.width*rRect.size.width+rRect.size.height*rRect.size.height)+1;
+        maxd = (maxd % 2)==0 ? maxd+1 : maxd;
+        cv::Rect bb (rRect.center.x - maxd / 2, rRect.center.y- maxd / 2, maxd, maxd);
+        
+        double ks=maxd;
+        double sig = 32;
+        double lm = 0.75;
+        double th = ri.angle;
+        double ps = 270.0;
+        cv::Mat kernel = mkKernel(ks, sig, th, lm, ps);
+        cv::normalize(kernel,kernel,0.0,255.0,cv::NORM_MINMAX);
+        cv::Mat kernel2(maxd,maxd ,CV_8U);
+        kernel.convertTo(kernel2, CV_8U);
+        std::vector<cv::Mat> kcs = {kernel2,kernel2,kernel2};
+        cv::Mat pat;
+        cv::merge(kcs,pat);
+        cv::Mat window (image, bb);
+        pat.copyTo(window);
+        
+
+       
+        
+        rRect.angle = ri.angle;
+        drawRotatedRect(image, ri, Scalar(0,255,0,0.5),Scalar(255,0,255,0.5), Scalar(0,255,255,0.5), true, false);
+        
+        auto matAffineCrop = [] (Mat input, const RotatedRect& box){
+            double angle = box.angle;
+            auto size = box.size;
+            
+
+         
+            
+            //Rotate the text according to the angle
+            auto transform = getRotationMatrix2D(box.center, angle, 1.0);
+            Mat rotated;
+            warpAffine(input, rotated, transform, input.size(), INTER_NEAREST);
+            
+            //Crop the result
+            Mat cropped;
+            size.width -= 3;
+            size.height -= 3;
+            
+            getRectSubPix(rotated, size, box.center, cropped);
+//            cv::Mat big;
+//            cv::resize(cropped, big,cv::Size(),10,10,cv::INTER_NEAREST);
+//            imshow("cropped", big);
+//            waitKey(0);
+            return cropped;
+            
+        };
+        
+        auto md = matAffineCrop(image, rRect);
+        
+
+        
+        
+        moved.y += 100;
+        rRect.center.y += 100;
+        offset.x += (1.67 * std::max(size.width,size.height));
+        
+    };
+
+
+    cv::Size sz(65,65);
+    cv::Point2f cc(64,64);
+    float dt = -22.5;
+    int count = 1 + 360/22.5;
+    for (auto ii = 0; ii < count; ii++)
+        inspect(image, display, sz, cc , -90+(ii*dt));
+    
+    offset.x = 50;
+    offset.y = 300;
+    
+    sz.width = 32;
+    for (auto ii = 0; ii < count; ii++)
+        inspect(image, display, sz, cc , -90+(ii*dt));
+    
+    
+    offset.x = 50;
+    offset.y = 600;
+    
+    sz.width = 65;;
+    sz.height = 32;
+    for (auto ii = 0; ii < count; ii++)
+        inspect(image, display, sz, cc , -90+(ii*dt));
+    
+    
+    imshow("rectangles", image);
+    waitKey(0);
+    
+    
+    return 0;
+}
+
+
+#if 0
+
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -876,7 +1251,7 @@ TEST(cardiac_ut, interpolated_length)
     double            MicronPerPixel = 291.19 / 512.0;
     double            Length_max   = 118.555 * MicronPerPixel; // 67.42584072;
     double            Lenght_min   = 106.551 * MicronPerPixel; // 60.59880018;
-    // double            shortening   = Length_max - Lenght_min;
+                                                               // double            shortening   = Length_max - Lenght_min;
     double            MSI_max  =  0.37240525;
     double            MSI_min   = 0.1277325;
     // double            shortening_um   = 6.827040547;
@@ -1827,6 +2202,7 @@ cv::Mat generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>&
 }
 
 
+#endif
 
 
 #pragma GCC diagnostic pop

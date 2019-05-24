@@ -84,6 +84,8 @@ public:
     float  degrees () const;
     float  radians () const;
 
+    float aspect () const { return mWoHaspect; }
+    
     const cv::RotatedRect& rotatedRectInImage(const Area& image_bounds) const;
     
 private:
@@ -110,6 +112,7 @@ private:
     mutable std::vector<cv::Point2f> mCornersImageCV;
     cv::RotatedRect mInitialRotatedRect;
     mutable cv::RotatedRect mCvRotatedRect;
+    mutable float mWoHaspect;
     RectMapping    mPadded2Display;
     RectMapping    mDisplay2Padded;
 
@@ -125,6 +128,7 @@ private:
     {
         return glm::vec4(0, height, width, -height);
     }
+
     
 };
 
