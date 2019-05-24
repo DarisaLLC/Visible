@@ -197,7 +197,7 @@ inline bool vector_2d<T>::operator==(const vector_2d<T>& v) const
     if (! std::is_floating_point<T> () )
         return ((mX[0] == v.mX[0]) && (mX[1] == v.mX[1]));
     else
-        return svl::equal(mX[0] , v.mX[0]) && svl::equal(mX[0] , v.mX[0]);
+        return svl::equal(mX[0] , v.mX[0]) && svl::equal(mX[1] , v.mX[1]);
 }
 
 template<class T>

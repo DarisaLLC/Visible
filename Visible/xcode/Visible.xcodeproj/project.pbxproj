@@ -53,6 +53,8 @@
 		C21FFE731CFE0E1D00C97013 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
 		C2239AB4218B6270007558AB /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
 		C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
+		C232F00B2296FDCB0075B2EE /* lineseg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696B1CED3E2C0045FF57 /* lineseg.cpp */; };
+		C232F00E229729AD0075B2EE /* affineApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E5AD832279DE2000A7AAD3 /* affineApp.cpp */; };
 		C2342E60227CC45F00D74D80 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2342E5F227CC45F00D74D80 /* GLUT.framework */; };
 		C2398A0921DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
 		C2398A0A21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
@@ -102,7 +104,6 @@
 		C25261211F66EA910069F665 /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611F1F66EA910069F665 /* pugixml.cpp */; };
 		C25346422150521B002E1CC7 /* libcinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2309DC61F6B4D6500A0E908 /* libcinder.a */; };
 		C254BE841F4F912E00977307 /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
-		C2599839228F820F0043851F /* affineApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E5AD832279DE2000A7AAD3 /* affineApp.cpp */; };
 		C2601BB81E690409004415A3 /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
 		C2601BB91E69042B004415A3 /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
 		C2606DA91CED3E2E0045FF57 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
@@ -569,6 +570,7 @@
 		C2239AB6218B6F30007558AB /* boost_units.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = boost_units.hpp; sourceTree = "<group>"; };
 		C2239AB721922F72007558AB /* cardiomyocyte_model_detail.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model_detail.hpp; sourceTree = "<group>"; };
 		C2309DC61F6B4D6500A0E908 /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../externals/Cinder/lib/macosx/Release/libcinder.a; sourceTree = SOURCE_ROOT; };
+		C232F00A229377770075B2EE /* ellipse.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ellipse.hpp; sourceTree = "<group>"; };
 		C2342E5D227CC27300D74D80 /* ps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ps.cpp; sourceTree = "<group>"; };
 		C2342E5F227CC45F00D74D80 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
@@ -1557,6 +1559,7 @@
 		C26009FF1CED3E010045FF57 /* vision */ = {
 			isa = PBXGroup;
 			children = (
+				C232F00A229377770075B2EE /* ellipse.hpp */,
 				C210947F2243039A004E88EE /* voxel_frequency.h */,
 				C20D4DE42208BD34004D9405 /* ellipse_fit.hpp */,
 				C2E3F560213D9483007B1088 /* labelBlob.hpp */,
@@ -2140,6 +2143,7 @@
 				C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */,
 				C2618F87217FDA9E00FA9F43 /* figure.cc in Sources */,
 				C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */,
+				C232F00E229729AD0075B2EE /* affineApp.cpp in Sources */,
 				C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */,
 				C2398A1821DE980C00B180A0 /* imgui_widgets.cpp in Sources */,
@@ -2151,7 +2155,6 @@
 				C2677586212A325F00B5E080 /* contraction_t.cpp in Sources */,
 				C2601BB81E690409004415A3 /* bitvector.cpp in Sources */,
 				C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */,
-				C2599839228F820F0043851F /* affineApp.cpp in Sources */,
 				C20EDBC81CF277740074C47A /* exception.cpp in Sources */,
 				C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */,
 				C2398A1621DE980C00B180A0 /* imgui_demo.cpp in Sources */,
@@ -2165,6 +2168,7 @@
 				C2819ECF2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C2618F85217FDA8F00FA9F43 /* highgui.cc in Sources */,
 				C20BBC031E4E33CE002C7D68 /* tinystr.cpp in Sources */,
+				C232F00B2296FDCB0075B2EE /* lineseg.cpp in Sources */,
 				C2BDEFF021C8237B00A8CB94 /* core_support.cpp in Sources */,
 				C2606E721CED44370045FF57 /* seq_frame_container.cpp in Sources */,
 			);

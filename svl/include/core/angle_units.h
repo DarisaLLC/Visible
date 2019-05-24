@@ -101,7 +101,8 @@ public:
   inline uDegree (uRadian);
   inline uDegree (uAngle8);
   inline uDegree (uAngle16);
-
+  inline static const uDegree piOverTwo () { return uDegree (360.0 / 4); }
+    
   uDegree norm () const;	// result range is [0-360)
   uDegree normSigned () const;	// result range is [-180, 180)
 };

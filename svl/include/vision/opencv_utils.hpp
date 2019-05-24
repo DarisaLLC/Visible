@@ -7,6 +7,7 @@
 #include "opencv2/opencv.hpp"
 #include "vision/roiWindow.h"
 #include "vision/roiVariant.hpp"
+#include "vision/ellipse.hpp"
 #include <stdio.h>
 #include <iostream>
 
@@ -27,10 +28,26 @@ namespace svl
     void get_mid_points(const cv::RotatedRect& rotrect, std::vector<cv::Point2f>& mids);
     cv::Point2f rotate2d(const cv::Point2f& pt_in, const double& angle_rad);
     cv::Point2f rotatePoint(const cv::Point2f& pt_in, const cv::Point2f& center, const double& angle_rad);
-    double pts2angleRad(cv::Point pt1, cv::Point pt2);
-    double pts2angleDeg(cv::Point pt1, cv::Point pt2);
-
+    
+    template<typename T>
+    double pts2angleRad(cv::Point_<T> pt1, cv::Point_<T> pt2) {
+        return atan2(static_cast<double>(pt2.y - pt1.y), static_cast<double>(pt2.x - pt1.x));
+    }
+    
+    template<typename T>
+    double pts2angleDegree(cv::Point_<T> pt1, cv::Point_<T> pt2) {
+        return atan2(static_cast<double>(pt2.y - pt1.y), static_cast<double>(pt2.x - pt1.x)) * 180.0 / svl::constants::pi;
+    }
+    
     // Draw Utils
+    void drawFourCorners(cv::Mat& dst, const std::vector<Point2f>& vertices, float angle,
+                    const cv::Scalar & ctr_color, const cv::Scalar & fill_color,
+                         const cv::Scalar & vertex_color);
+
+    void drawRotatedRect(cv::Mat& dst, const cv::RotatedRect& rRect,const cv::Scalar & ctr_color, const cv::Scalar & line_color,
+                         const cv::Scalar & vertex_color, bool sort = false, bool fill_only = false);
+    
+    void drawEllipse(cv::Mat& dst, svl::ellipseShape& ,const cv::Scalar & );
     
     void drawArrow(cv::Mat& dst,
                    const cv::Point& p1, const cv::Point& p2,
@@ -68,7 +85,7 @@ namespace svl
     #define cvMatRefroiP8U(a,b,cvType) cv::Mat b ((a).height(),(a).width(), cvType,(a).pelPointer(0,0), size_t((a).rowUpdate()))
 
     void cpCvMatToRoiWindow8U (const cv::Mat& m, roiWindow<P8U>& r);
-    
+    double correlation (cv::Mat &image_1, cv::Mat &image_2);
     double correlation_ocv(const roiWindow<P8U>& i, const roiWindow<P8U>& m);
     void cumani_opencv (const cv::Mat& input_bgr, cv::Mat& gradAbs, cv::Mat& orientation, float& maxVal);
     void PeakDetect(const cv::Mat& space, std::vector<Point2f>& peaks, uint8_t accept);
