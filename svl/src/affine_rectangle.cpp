@@ -61,10 +61,10 @@ affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, 
     vec2 ul = mPadded2Display.map(vec2(corners[1].x,corners[1].y));
     vec2 lr = mPadded2Display.map(vec2(corners[3].x,corners[3].y));
     mRectangle.area  = Area (ul,lr);
-    translate(mRectangle.area.getCenter());
+//    translate(mRectangle.area.getCenter());
     uDegree rra(mInitialRotatedRect.angle);
     uRadian rrr(rra);
-    rotate(rrr.Double());
+//    rotate(rrr.Double());
 
     
     mInitialArea = mRectangle.area;

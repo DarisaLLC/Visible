@@ -13,9 +13,27 @@
 
 using namespace std;
 
+/*
+ Notes:
+ TimeDataCollection supports ImCurveEdit::delegate interface ( from ImGuizmo + modifications ).
+ Each time data is is represented by vectors of these attributes at index curveIndex :
+    1. Plot Data vecto<vector<vec2>>
+    2. Plot data point counts
+    3. Plot Names
+    4. Plot Colors
+    5. Plot Visibility
+ 
+ To add a new plot:
+    1. TimeDataCollection contains thier representation. It is typically added using load
+    2. Load can either update an existing plot index or add one to the end by passing index of -1 ( it is pushed_back )
+    3. Load is typically called in the update function and therefore it is time critical.
+    4. Entries have to be added to maps of plot types and color
+ 
+ */
+
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
 
-class RampEdit : public ImCurveEdit::Delegate
+class TimeDataCollection : public ImCurveEdit::Delegate
 {
     std::vector<std::vector<ImVec2>> mPts; // [editable plot data][8];
     std::vector<size_t> mPointCount;
@@ -27,7 +45,7 @@ class RampEdit : public ImCurveEdit::Delegate
     ImVec2 mMax;
     
 public:
-    RampEdit(size_t plot_count)
+    TimeDataCollection(size_t plot_count)
     {
         mPts.resize(plot_count);
         mPointCount.resize(plot_count);
@@ -70,6 +88,14 @@ public:
             mPointCount[at_index] = pts.size();
             return at_index;
         }
+        if (at_index == -1 ){
+            mPts.push_back(pts);
+            mPlotNames.push_back(track.first);
+            mPlotColors.push_back(color);
+            mPointCount.push_back(pts.size());
+            mbVisible.push_back(false);
+            return static_cast<int>(mPts.size()-1);
+        }
         return -1;
     }
     
@@ -84,7 +110,7 @@ public:
     //@todo document this
     size_t GetCurveCount()
     {
-        return 4;
+        return mPlotColors.size();
     }
     
     bool IsVisible(size_t curveIndex)
@@ -144,6 +170,13 @@ private:
     }
 };
 
+
+/*
+ @notes:
+ SequenceInterface provides functionality of time / frame / duration editing and visualization
+ timeLineSequence encapsulates operation of such sequencer with a TimeDataCollection.
+ */
+
 struct timeLineSequence : public ImSequencer::SequenceInterface
 {
     
@@ -157,8 +190,8 @@ struct timeLineSequence : public ImSequencer::SequenceInterface
         int mFrameStart, mFrameEnd;
         bool mExpanded;
     };
-    std::vector<timeline_item> myItems;
-    RampEdit m_editable_plot_data;
+    std::vector<timeline_item> items;
+    TimeDataCollection m_time_data;
     
     // interface with sequencer
     
@@ -168,20 +201,20 @@ struct timeLineSequence : public ImSequencer::SequenceInterface
     virtual int64_t GetFrameMax() const {
         return mFrameMax;
     }
-    virtual size_t GetItemCount() const { return myItems.size(); }
+    virtual size_t GetItemCount() const { return items.size(); }
     
     virtual size_t GetItemTypeCount() const { return mSequencerItemTypeNames.size(); }
     virtual const char *GetItemTypeName(int typeIndex) const { return mSequencerItemTypeNames[typeIndex].c_str(); }
     virtual const char *GetItemLabel(int index) const
     {
         static char tmps[512];
-        sprintf(tmps, "[%02d] %s", index, mSequencerItemTypeNames[myItems[index].mType].c_str());
+        sprintf(tmps, "[%02d] %s", index, mSequencerItemTypeNames[items[index].mType].c_str());
         return tmps;
     }
     
     virtual void Get(int index, int** start, int** end, int *type, unsigned int *color)
     {
-        timeline_item &item = myItems[index];
+        timeline_item &item = items[index];
         if (color)
             *color = 0xFFAA8080; // same color for everyone, return color based on type
         if (start)
@@ -191,64 +224,64 @@ struct timeLineSequence : public ImSequencer::SequenceInterface
         if (type)
             *type = item.mType;
     }
-    virtual void Add(int type) { myItems.push_back(timeline_item{ type, 0, 10, false }); };
-    virtual void Del(int index) { myItems.erase(myItems.begin() + index); }
-    virtual void Duplicate(int index) { myItems.push_back(myItems[index]); }
+    virtual void Add(int type) { items.push_back(timeline_item{ type, 0, 10, false }); };
+    virtual void Del(int index) { items.erase(items.begin() + index); }
+    virtual void Duplicate(int index) { items.push_back(items[index]); }
     
-    virtual size_t GetCustomHeight(int index) { return myItems[index].mExpanded ? 300 : 0; }
+    virtual size_t GetCustomHeight(int index) { return items[index].mExpanded ? 300 : 0; }
     
     // my datas
     // @todo remove hard-wired 4 standing for Red, Green and PCI
     // @note where adding to the plots needs to accounted
-    timeLineSequence() : m_editable_plot_data(4), mFrameMin(0), mFrameMax(0) {}
+    timeLineSequence() : m_time_data(4), mFrameMin(0), mFrameMax(0) {}
 
     
     virtual void DoubleClick(int index) {
-        if (myItems[index].mExpanded)
+        if (items[index].mExpanded)
         {
-            myItems[index].mExpanded = false;
+            items[index].mExpanded = false;
             return;
         }
-        for (auto& item : myItems)
+        for (auto& item : items)
             item.mExpanded = false;
-        myItems[index].mExpanded = !myItems[index].mExpanded;
+        items[index].mExpanded = !items[index].mExpanded;
     }
     
     virtual void CustomDraw(int index, ImDrawList* draw_list, const ImRect& rc, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect)
     {
 
-        m_editable_plot_data.SetMax(ImVec2(float(mFrameMax), 1.f));
-        m_editable_plot_data.SetMin(ImVec2(float(mFrameMin), 0.f));
+        m_time_data.SetMax(ImVec2(float(mFrameMax), 1.f));
+        m_time_data.SetMin(ImVec2(float(mFrameMin), 0.f));
         
         draw_list->PushClipRect(legendClippingRect.Min, legendClippingRect.Max, true);
-        for (int i = 0; i <  m_editable_plot_data.plotCount(); i++)
+        for (int i = 0; i <  m_time_data.plotCount(); i++)
         {
             ImVec2 pta(legendRect.Min.x + 30, legendRect.Min.y + i * 14.f);
             ImVec2 ptb(legendRect.Max.x, legendRect.Min.y + (i+1) * 14.f);
-            draw_list->AddText(pta, m_editable_plot_data.visibles()[i]?0xFFFFFFFF:0x80FFFFFF, m_editable_plot_data.names()[i].c_str());
+            draw_list->AddText(pta, m_time_data.visibles()[i]?0xFFFFFFFF:0x80FFFFFF, m_time_data.names()[i].c_str());
             if (ImRect(pta, ptb).Contains(ImGui::GetMousePos()) && ImGui::IsMouseClicked(0)){
-                bool tmp = m_editable_plot_data.visibles()[i];
-                m_editable_plot_data.visibles()[i] = !tmp;
+                bool tmp = m_time_data.visibles()[i];
+                m_time_data.visibles()[i] = !tmp;
             }
         }
         draw_list->PopClipRect();
         
         ImGui::SetCursorScreenPos(rc.Min);
-        ImCurveEdit::Edit(m_editable_plot_data, rc.Max-rc.Min, 137 + index, &clippingRect);
+        ImCurveEdit::Edit(m_time_data, rc.Max-rc.Min, 137 + index, &clippingRect);
     }
     
     virtual void CustomDrawCompact(int index, ImDrawList* draw_list, const ImRect& rc, const ImRect& clippingRect)
     {
-        m_editable_plot_data.SetMax(ImVec2(float(mFrameMax), 1.f));
-        m_editable_plot_data.SetMin(ImVec2(float(mFrameMin), 0.f));
+        m_time_data.SetMax(ImVec2(float(mFrameMax), 1.f));
+        m_time_data.SetMin(ImVec2(float(mFrameMin), 0.f));
         
         draw_list->PushClipRect(clippingRect.Min, clippingRect.Max, true);
-        for (int i = 0; i < m_editable_plot_data.plotCount(); i++)
+        for (int i = 0; i < m_time_data.plotCount(); i++)
         {
-            for (int j = 0; j < m_editable_plot_data.pointCount()[i]; j++)
+            for (int j = 0; j < m_time_data.pointCount()[i]; j++)
             {
-                float p = m_editable_plot_data.points()[i][j].x;
-                if (p < myItems[index].mFrameStart || p > myItems[index].mFrameEnd)
+                float p = m_time_data.points()[i][j].x;
+                if (p < items[index].mFrameStart || p > items[index].mFrameEnd)
                     continue;
                 float r = (p - mFrameMin) / float(mFrameMax - mFrameMin);
                 float x = ImLerp(rc.Min.x, rc.Max.x, r);

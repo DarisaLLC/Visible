@@ -12,6 +12,7 @@
 #include "core/stats.hpp"
 #include "vision/localvariance.h"
 #include "core/lineseg.hpp"
+#include <boost/range/irange.hpp>
 
 using namespace std;
 using namespace stl_utils;
@@ -51,6 +52,32 @@ struct IntensityStatisticsRunner
         }
     }
 };
+
+
+// Create sin signals
+
+template<float (*TF)(float), int S,  int E>
+struct UnitSyntheticProducer
+{
+    UnitSyntheticProducer (timedVecOfVals_t& results)
+    {
+        // Create sin signals
+        auto trigvecf = [](float step, uint32_t size){
+            timedVecOfVals_t base(size);
+            
+            for (auto i : boost::irange(0u, size)) {
+                timedVal_t res;
+                index_time_t ti;
+                ti.first = i;
+                base[i].first = ti;
+                base[i].second =  TF (i * 3.14159 *  step);
+            }
+            return base;
+        };
+        results = trigvecf(1.0f/float(E),S);
+    }
+};
+
 
 
 struct SequenceAccumulator
@@ -122,7 +149,6 @@ struct IntensityStatisticsPartialRunner
         }
     }
 };
-
 
 
 

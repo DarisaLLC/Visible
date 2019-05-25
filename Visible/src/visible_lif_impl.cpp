@@ -51,7 +51,7 @@
 #include "cinder_opencv.h"
 #include "imguivariouscontrols.h"
 #include "imgui_wrapper.h"
-
+#include <boost/range/irange.hpp>
 
 using namespace ci;
 using namespace ci::app;
@@ -64,7 +64,9 @@ using namespace svl;
 
 namespace {
     std::map<std::string, unsigned int> named_colors = {{"Red", 0xFF0000FF }, {"red",0xFF0000FF },{"Green", 0xFF00FF00},
-        {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFD66D3E}};
+        {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFD66D3E},
+        { "Synth", 0xFFFB4551}, { "synth", 0xFFFB4551}
+    };
     
     
 }
@@ -208,7 +210,7 @@ void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
         auto tracksRef = m_contraction_pci_trackWeakRef.lock();
         if (!tracksRef->at(0).second.empty()){
          //   m_plots[channel_count()-1]->load(tracksRef->at(0));
-            m_result_seq.m_editable_plot_data.load(tracksRef->at(0), named_colors["PCI"], 2);
+            m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
         }
     }
     vlogger::instance().console()->info("self-similarity available: ");
@@ -412,8 +414,8 @@ void lifContext::play_pause_button ()
 void lifContext::update_contraction_selection()
 {
     m_show_contractions = true;
-    m_result_seq.myItems.resize(1);
-    m_result_seq.myItems.push_back(timeLineSequence::timeline_item{ 0,
+    m_result_seq.items.resize(1);
+    m_result_seq.items.push_back(timeLineSequence::timeline_item{ 0,
         (int) m_contractions[0].contraction_start.first,
         (int) m_contractions[0].relaxation_end.first , true});
 
@@ -653,13 +655,13 @@ void lifContext::keyDown( KeyEvent event )
     if( have_lif_serie () ) {
         if( event.getCode() == KeyEvent::KEY_LEFT ) {
             pause();
-            seekToFrame (getCurrentFrame() - 1);
+            seekToFrame (getCurrentFrame() - m_playback_speed);
             if (mMouseInImage)
                 update_instant_image_mouse ();
         }
         else if( event.getCode() == KeyEvent::KEY_RIGHT ) {
             pause ();
-            seekToFrame (getCurrentFrame() + 1);
+            seekToFrame (getCurrentFrame() + m_playback_speed);
             if (mMouseInImage)
                 update_instant_image_mouse ();
         }
@@ -793,8 +795,8 @@ void lifContext::loadCurrentSerie ()
         // Initialize Sequencer
         m_result_seq.mFrameMin = 0;
         m_result_seq.mFrameMax = (int) mFrameSet->count() - 1;
-        m_result_seq.mSequencerItemTypeNames = {"All", "Contraction", "Force"};
-        m_result_seq.myItems.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
+        m_result_seq.mSequencerItemTypeNames = {"All", "Contractions", "Synth"};
+        m_result_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         
         m_title = m_serie.name() + " @ " + mPath.filename().string();
         
@@ -872,6 +874,10 @@ const Rectf& lifContext::get_channel_display_rect (const int channel_number_zero
 
 void lifContext::add_result_sequencer ()
 {
+ 
+    
+
+    
     // let's create the sequencer
     static int selectedEntry = -1;
     static int64 firstFrame = 0;
@@ -900,17 +906,13 @@ void lifContext::add_result_sequencer ()
     Sequencer(&m_result_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
     ImGui::End();
     
-//    // add a UI to edit that particular item
-//    if (selectedEntry != -1)
-//    {
-//        const timeLineSequence::timeline_item &item = mySequence.myItems[selectedEntry];
-//        ImGui::Text("I am a %s, please edit me", mySequence.mSequencerItemTypeNames[item.mType].c_str());
-//        // switch (type) ....
-//    }
-    
-
-    
-    
+    // add a UI to edit that particular item
+    if (selectedEntry != -1)
+    {
+        const timeLineSequence::timeline_item &item = m_result_seq.items[selectedEntry];
+        ImGui::Text("I am a %s, please edit me", m_result_seq.mSequencerItemTypeNames[item.mType].c_str());
+        // switch (type) ....
+    }
 }
 
 void lifContext::add_navigation(){
@@ -934,10 +936,10 @@ void lifContext::add_navigation(){
             seekToStart();
         ImGui::SameLine();
         if (ImGui::Button("<"))
-            seekToFrame (getCurrentFrame() - 1);
+            seekToFrame (getCurrentFrame() - m_playback_speed);
         ImGui::SameLine();
         if (ImGui::Button(">"))
-            seekToFrame (getCurrentFrame() + 1);
+            seekToFrame (getCurrentFrame() + m_playback_speed);
         ImGui::SameLine();
         if (ImGui::Button(">|"))
             seekToEnd();
@@ -965,6 +967,12 @@ void lifContext::add_navigation(){
         ImGui::PushID(202);
         ImGui::InputInt("",  &m_result_seq.mFrameMax, 0, 0);
         ImGui::PopID();
+        ImGui::SameLine();
+        if (ImGui::Button(m_playback_speed == 1 ? " 1 " : " 10x "))
+        {
+            m_playback_speed = m_playback_speed == 1 ? 10 : 1;
+        }
+        
         
         if(!m_contraction_pci_trackWeakRef.expired()){
             if(m_median_set_at_default){
@@ -1134,8 +1142,8 @@ void lifContext::update ()
     {
         assert(channel_count() >= 3);
         auto tracksRef = m_flurescence_trackWeakRef.lock();
-        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), named_colors[tracksRef->at(0).first], 0);
-        m_result_seq.m_editable_plot_data.load(tracksRef->at(1), named_colors[tracksRef->at(1).first], 1);
+        m_result_seq.m_time_data.load(tracksRef->at(0), named_colors[tracksRef->at(0).first], 0);
+        m_result_seq.m_time_data.load(tracksRef->at(1), named_colors[tracksRef->at(1).first], 1);
     }
 
     // Update PCI result if ready
@@ -1146,15 +1154,24 @@ void lifContext::update ()
       //      m_lifProcRef->shortterm_pci(1);
 #endif
         auto tracksRef = m_contraction_pci_trackWeakRef.lock();
-        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), named_colors["PCI"], 2);
+        m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
 
 
         // Update shortterm PCI result if ready
         if ( ! m_lifProcRef->shortterm_pci().at(0).second.empty() )
         {
             auto tracksRef = m_lifProcRef->shortterm_pci();
-            m_result_seq.m_editable_plot_data.load(tracksRef.at(0), named_colors["Short"], 3);
+            m_result_seq.m_time_data.load(tracksRef.at(0), named_colors["Short"], 3);
         }
+    }
+
+    if(m_result_seq.m_time_data.plotCount() == 4){
+        timedVecOfVals_t synth;
+        UnitSyntheticProducer<std::sin, 512, 16> sp(synth);
+        namedTrack_t synth_track;
+        synth_track.first = "synth";
+        synth_track.second = synth;
+        m_result_seq.m_time_data.load(synth_track,named_colors["Synth"], -1);
     }
     
     // Fetch Next Frame
@@ -1169,7 +1186,7 @@ void lifContext::update ()
     if (m_is_playing )
     {
         update_instant_image_mouse ();
-        seekToFrame (getCurrentFrame() + 1);
+        seekToFrame (getCurrentFrame() + m_playback_speed);
     }
     
     // Update text texture with most recent text

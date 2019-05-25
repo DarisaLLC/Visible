@@ -256,7 +256,7 @@ private:
     Rectf m_results_browser_display;
     Rectf m_motion_profile_display;
     Rectf m_navigator_display;
-    
+    int8_t m_playback_speed;
 
     OnImagePlot m_tsPlotter;
     

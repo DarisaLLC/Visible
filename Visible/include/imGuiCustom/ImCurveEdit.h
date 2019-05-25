@@ -49,7 +49,7 @@ namespace ImCurveEdit
         virtual const vector<ImVec2>& GetPoints(size_t curveIndex) = 0;
         virtual int EditPoint(size_t curveIndex, int pointIndex, ImVec2 value) = 0;
         virtual void AddPoint(size_t curveIndex, ImVec2 value) = 0;
-        virtual unsigned int GetBackgroundColor() { return 0xFF202020; }
+        virtual unsigned int GetBackgroundColor() { return 0xFF404040; }
         // handle undo/redo thru this functions
         virtual void BeginEdit(int /*index*/) {}
         virtual void EndEdit() {}
