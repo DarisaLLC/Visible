@@ -27,6 +27,7 @@
 #include "core/angle_units.h"
 #include "vision/ellipse_fit.hpp"
 #include "core/lineseg.hpp"
+#include <boost/range/irange.hpp>
 
 
 #define precision 0.0001
@@ -132,46 +133,6 @@ cv::RotatedRect getBoundingRectPCA( cv::Mat& binaryImg ) {
 }
 
 
-void pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints, cv::RotatedRect& rotated_rect) {
-    // get the left most
-    std::sort (imagePoints.begin(), imagePoints.end(),[](const cv::Point2f&a, const cv::Point2f&b){
-        return a.x > b.x;
-    });
-    
-    std::sort (imagePoints.begin(), imagePoints.end(),[](const cv::Point2f&a, const cv::Point2f&b){
-        return a.y < b.y;
-    });
-    
-    fVector_2d tl (imagePoints[0].x, imagePoints[0].y);
-    fVector_2d bl (imagePoints[1].x, imagePoints[1].y);
-    fVector_2d tr (imagePoints[2].x, imagePoints[2].y);
-    fVector_2d br (imagePoints[3].x, imagePoints[3].y);
-    fLineSegment2d sideOne (tl, tr);
-    fLineSegment2d sideTwo (bl, br);
-    
-    
-    cv::Point2f ctr(0,0);
-    for (auto const& p : imagePoints){
-        ctr.x += p.x;
-        ctr.y += p.y;
-    }
-    ctr.x /= 4;
-    ctr.y /= 4;
-    rotated_rect.center = ctr;
-    float dLR = sideOne.length();
-    float dTB = sideTwo.length();
-    rotated_rect.size.width = dLR;
-    rotated_rect.size.height = dTB;
-    std::cout << toDegrees(sideOne.angle().Double()) << " Side One " << std::endl;
-    std::cout << toDegrees(sideTwo.angle().Double()) << " Side Two " << std::endl;
-    
-    uDegree angle = sideTwo.angle();
-    if (angle.Double() < -45.0){
-        angle = angle + uDegree::piOverTwo();
-        std::swap(rotated_rect.size.width,rotated_rect.size.height);
-    }
-    rotated_rect.angle = angle.Double();
-}
 
 #if 0
 

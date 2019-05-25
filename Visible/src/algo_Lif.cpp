@@ -362,11 +362,7 @@ void lif_serie_processor::internal_generate_affine_windows (const std::vector<ro
             auto size = box.size;
             
             //Adjust the box angle
-            if (angle < -45.0)
-            {
-                angle += 90.0;
-                std::swap(size.width, size.height);
-            }
+            // Already Done
             
             //Rotate the text according to the angle
             auto transform = getRotationMatrix2D(box.center, angle, 1.0);

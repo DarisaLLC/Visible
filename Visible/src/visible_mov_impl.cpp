@@ -468,13 +468,13 @@ void movContext::keyDown( KeyEvent event )
     if( have_sequence () ) {
         if( event.getCode() == KeyEvent::KEY_LEFT ) {
             pause();
-            seekToFrame (getCurrentFrame() - 1);
+            seekToFrame (getCurrentFrame() - m_playback_speed);
             if (mMouseInImage)
                 update_instant_image_mouse ();
         }
         else if( event.getCode() == KeyEvent::KEY_RIGHT ) {
             pause ();
-            seekToFrame (getCurrentFrame() + 1);
+            seekToFrame (getCurrentFrame() + m_playback_speed);
             if (mMouseInImage)
                 update_instant_image_mouse ();
         }
@@ -556,7 +556,7 @@ void movContext::load_current_sequence ()
         m_result_seq.mFrameMin = 0;
         m_result_seq.mFrameMax = (int) mFrameSet->count() - 1;
         m_result_seq.mSequencerItemTypeNames = {"All", "Contraction", "Force"};
-        m_result_seq.myItems.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
+        m_result_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         
         m_title =m_sequence_player_ref->name() + " @ " + mPath.filename().string();
         
@@ -659,13 +659,13 @@ void movContext::add_result_sequencer ()
     Sequencer(&m_result_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
     ImGui::End();
     
-    //    // add a UI to edit that particular item
-    //    if (selectedEntry != -1)
-    //    {
-    //        const timeLineSequence::timeline_item &item = mySequence.myItems[selectedEntry];
-    //        ImGui::Text("I am a %s, please edit me", mySequence.mSequencerItemTypeNames[item.mType].c_str());
-    //        // switch (type) ....
-    //    }
+    // add a UI to edit that particular item
+    if (selectedEntry != -1)
+    {
+        const timeLineSequence::timeline_item &item = m_result_seq.items[selectedEntry];
+        ImGui::Text("I am a %s, please edit me", m_result_seq.mSequencerItemTypeNames[item.mType].c_str());
+        // switch (type) ....
+    }
     
     
     
@@ -693,10 +693,10 @@ void movContext::add_navigation(){
             seekToStart();
         ImGui::SameLine();
         if (ImGui::Button("<"))
-            seekToFrame (getCurrentFrame() - 1);
+            seekToFrame (getCurrentFrame() - m_playback_speed);
         ImGui::SameLine();
         if (ImGui::Button(">"))
-            seekToFrame (getCurrentFrame() + 1);
+            seekToFrame (getCurrentFrame() + m_playback_speed);
         ImGui::SameLine();
         if (ImGui::Button(">|"))
             seekToEnd();
@@ -860,13 +860,13 @@ void movContext::update ()
         //      m_movProcRef->shortterm_pci(1);
 #endif
         auto tracksRef = m_longterm_pci_trackWeakRef.lock();
-        m_result_seq.m_editable_plot_data.load(tracksRef->at(0), named_colors["Long"], 2);
+        m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["Long"], 2);
         
         // Update shortterm PCI result if ready
         if ( ! m_movProcRef->shortterm_pci().at(0).second.empty() )
         {
             auto tracksRef = m_movProcRef->shortterm_pci();
-            m_result_seq.m_editable_plot_data.load(tracksRef.at(0), named_colors["Short"], 3);
+            m_result_seq.m_time_data.load(tracksRef.at(0), named_colors["Short"], 3);
         }
     }
     
@@ -879,10 +879,11 @@ void movContext::update ()
         }
     }
     
+    //@todo: Playback rate versus realtime processing rate 
     if (m_is_playing )
     {
         update_instant_image_mouse ();
-        seekToFrame (getCurrentFrame() + 1);
+        seekToFrame (getCurrentFrame() + m_playback_speed);
     }
     
     // Update text texture with most recent text
