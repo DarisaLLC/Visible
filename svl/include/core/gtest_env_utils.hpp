@@ -94,7 +94,7 @@ struct recursive_directory_range
     typedef fs::recursive_directory_iterator iterator;
     recursive_directory_range(fs::path p) : p_(p) {}
     
-    iterator begin() { return fs::recursive_directory_iterator(p_); }
+    iterator begin() { return fs::recursive_directory_iterator(p_,boost::filesystem::symlink_option::recurse); }
     iterator end() { return fs::recursive_directory_iterator(); }
     
     fs::path p_;

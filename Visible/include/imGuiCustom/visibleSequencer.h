@@ -31,7 +31,15 @@ using namespace std;
  
  */
 
+/**
+ Operator - for ImVec2
+
+ @param lhs ImVec2
+ @param rhs ImVec2
+ @return lhs - rhs
+ */
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
+
 
 class TimeDataCollection : public ImCurveEdit::Delegate
 {
@@ -57,7 +65,15 @@ public:
         mMin = ImVec2(0.f, 0.f);
     }
 
-    // If at_index is -1, push_back, else if index is valid, load data at that index
+    //
+    /**
+     load
+
+     @param track track
+     @param color color in 4 byte format i.e 0xfffb2141
+     @param at_index If at_index is -1, push_back, else if index is valid, load data at that index
+     @return return number of tracks
+     */
     int load (const namedTrack_t& track, unsigned int color, int at_index)
     {
         
