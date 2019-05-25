@@ -64,7 +64,7 @@ std::string  expected3Names []
     , "Preview038"
 };
 
-#if 1
+#ifdef INTERACTIVE
 TEST (ut_liffile, browser_single_channel_basic)
 {
     std::string filename ("Sample1.lif");

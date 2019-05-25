@@ -44,7 +44,7 @@ void momento::run(const cv::Mat& image) const
 momento::momento(const momento& other){
     *this = other;
 }
-momento::momento(const cv::Mat& image)
+momento::momento(const cv::Mat& image):m_bilevel(image.clone())
 {
     run (image);
 }
@@ -142,6 +142,96 @@ cv::RotatedRect svl::labelBlob::blob::rotated_roi() const {
     return cv::RotatedRect(m_moments.com(), m_roi.size(), dg.basic());
 }
 
+
+cv::RotatedRect svl::labelBlob::blob::rotated_roi_PCA() const {
+    cv::RotatedRect result;
+    
+    //1. convert to matrix that contains point coordinates as column vectors
+    const cv::Mat& binaryImg = m_moments.biLevel();
+    int count = cv::countNonZero(binaryImg);
+    if (count == 0) {
+        std::cout << "Error::getBoundingRectPCA() encountered 0 pixels in binary image!" << std::endl;
+        return cv::RotatedRect();
+    }
+    
+    cv::Mat data(2, count, CV_32FC1);
+    int dataColumnIndex = 0;
+    for (int row = 0; row < binaryImg.rows; row++) {
+        for (int col = 0; col < binaryImg.cols; col++) {
+            if (binaryImg.at<unsigned char>(row, col) != 0) {
+                data.at<float>(0, dataColumnIndex) = (float) col; //x coordinate
+                data.at<float>(1, dataColumnIndex) = (float) (binaryImg.rows - row); //y coordinate, such that y axis goes up
+                ++dataColumnIndex;
+            }
+        }
+    }
+    
+    //2. perform PCA
+    const int maxComponents = 1;
+    cv::PCA pca(data, cv::Mat() /*mean*/, CV_PCA_DATA_AS_COL, maxComponents);
+    //result is contained in pca.eigenvectors (as row vectors)
+    //std::cout << pca.eigenvectors << std::endl;
+    
+    //3. get angle of principal axis
+    float dx = pca.eigenvectors.at<float>(0, 0);
+    float dy = pca.eigenvectors.at<float>(0, 1);
+    float angle = atan2f(dy, dx)  / (float)CV_PI*180.0f;
+    
+    //find the bounding rectangle with the given angle, by rotating the contour around the mean so that it is up-right
+    //easily finding the bounding box then
+    cv::Point2f center(pca.mean.at<float>(0,0), binaryImg.rows - pca.mean.at<float>(1,0));
+    cv::Mat rotationMatrix = cv::getRotationMatrix2D(center, -angle, 1);
+    cv::Mat rotationMatrixInverse = cv::getRotationMatrix2D(center, angle, 1);
+    
+    std::vector<std::vector<cv::Point> > contours;
+    cv::findContours(binaryImg, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    if (contours.size() != 1) {
+        std::cout << "Warning: found " << contours.size() << " contours in binaryImg (expected one)" << std::endl;
+        return result;
+    }
+    
+    //turn vector of points into matrix (with points as column vectors, with a 3rd row full of 1's, i.e. points are converted to extended coords)
+    int contour_size = static_cast<int>(contours[0].size());
+    cv::Mat contourMat(3, contour_size, CV_64FC1);
+    double* row0 = contourMat.ptr<double>(0);
+    double* row1 = contourMat.ptr<double>(1);
+    double* row2 = contourMat.ptr<double>(2);
+    for (int i = 0; i < (int) contours[0].size(); i++) {
+        row0[i] = (double) (contours[0])[i].x;
+        row1[i] = (double) (contours[0])[i].y;
+        row2[i] = 1;
+    }
+    
+    cv::Mat uprightContour = rotationMatrix*contourMat;
+    
+    //get min/max in order to determine width and height
+    double minX, minY, maxX, maxY;
+    cv::minMaxLoc(cv::Mat(uprightContour, cv::Rect(0, 0, contour_size, 1)), &minX, &maxX); //get minimum/maximum of first row
+    cv::minMaxLoc(cv::Mat(uprightContour, cv::Rect(0, 1, contour_size, 1)), &minY, &maxY); //get minimum/maximum of second row
+    
+    int minXi = cvFloor(minX);
+    int minYi = cvFloor(minY);
+    int maxXi = cvCeil(maxX);
+    int maxYi = cvCeil(maxY);
+    
+    //fill result
+    result.angle = angle;
+    result.size.width = (float) (maxXi - minXi);
+    result.size.height = (float) (maxYi - minYi);
+    
+    //Find the correct center:
+    cv::Mat correctCenterUpright(3, 1, CV_64FC1);
+    correctCenterUpright.at<double>(0, 0) = maxX - result.size.width/2;
+    correctCenterUpright.at<double>(1,0) = maxY - result.size.height/2;
+    correctCenterUpright.at<double>(2,0) = 1;
+    cv::Mat correctCenterMat = rotationMatrixInverse*correctCenterUpright;
+    cv::Point correctCenter = cv::Point(cvRound(correctCenterMat.at<double>(0,0)), cvRound(correctCenterMat.at<double>(1,0)));
+    
+    result.center = correctCenter;
+    
+    return result;
+    
+}
 
 bool labelBlob::hasResults() const { return m_results_ready; }
 

@@ -1,56 +1,24 @@
 #ifndef _CERRUTI_INT_HPP
 #define _CERRUTI_INT_HPP
 
-# include <assert.h> // .h to support old libraries w/o <cassert> - effect is the same
-#include "core/core.hpp"
-#include "core/singleton.hpp"
-#include <Eigen/Dense>
-using Eigen::MatrixXd;
+using namespace std;
 #include "cardio_model/metric.hpp"
-#include <boost/core/ref.hpp>
 
-using namespace cm;
-using namespace svl;
-
-namespace cm  // protection from unintended ADL
+namespace cm
 {
-    
-    typedef std::function<double(const double&, const double&)> integrate_func_t;
-    
- //   class cerruti_rect : public internal_singleton<cerruti_rect>
- //   {
- //   public:
-    namespace cerruti_rect {
-        
-    //    cerruti_rect ()
-    //    {
-            
-     //   }
-        
-        //        X Y are the coordinates relative to the center
-        //        a b are the half-sizes of the rectangular load
   
-        static double integ1(const double& a, const double& b)
-        {
-            return b*asinh(a/b)+a*asinh(b/a);
-        }
-        
-        static double integ2(const double& a, const double& b)
-        {
-            return b*asinh(a/b);
-        }
-        
-        static double integ3(const double& a, const double& b)
-        {
-            return a+b - std::sqrt(a*a+b*b);
-        }
-        
-        static double integ4(const double& a, const double& b)
-        {
-            double rtn = a*atan(b/a)+0.5*b*log(1+std::pow(a/b, 2.0) );
-            return - rtn;
-        }
-        
+    namespace cerruti_rect {
+
+
+        /**
+         integrate
+
+         @param X X distance from center
+         @param Y Y distance from the center
+         @param a a b are the half-sizes of the rectangular load
+         @param b
+         @return return integral value
+         */
         static inline integral4_t integrate (double& X, double& Y , const double& a, const double& b)
         {
             integral4_t I;
@@ -59,6 +27,34 @@ namespace cm  // protection from unintended ADL
             double y = Y + b;
             double x2 = x / 2.0;
             double y2 = y / 2.0;
+
+            /**
+             lambdas for partial integration computation
+             
+             @param a a b are the half-sizes of the rectangular load
+             @param b
+             @return part integral
+             */
+            
+            auto integ1 = [](const double& p, const double& q)
+            {
+                return q*asinh(p/q)+p*asinh(q/p);
+            };
+            auto integ2 = [](const double& p, const double& q)
+            {
+                return q*asinh(p/q);
+            };
+            auto integ3 = [](const double& p, const double& q)
+            {
+                return p+q - std::sqrt(p*p+q*q);
+            };
+            auto integ4 = [](const double& p, const double& q)
+            {
+                double rtn = p*atan(q/p)+0.5*q*log(1+std::pow(p/q, 2.0) );
+                return - rtn;
+            };
+
+            
             
             // Normal point within rectangle
             if (std::fabs(X)<=a && std::fabs(Y)<=b)

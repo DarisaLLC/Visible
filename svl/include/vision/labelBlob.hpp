@@ -45,9 +45,10 @@ namespace svl
         bool isValidEigen () const { return m_eigen_ok; }
         bool isNan () const { return m_is_nan; }
         bool isEigenDone () const { return m_eigen_done; }
-
+        const cv::Mat& biLevel () const { return m_bilevel; }
         
     private:
+        mutable cv::Mat m_bilevel;
         mutable cv::Point m_offset;
         mutable cv::Size m_size;
         mutable double m_a;
@@ -116,7 +117,8 @@ public:
         const cv::Rect2f& roi () const { return m_roi; }
         const svl::momento& moments () const { return m_moments; }
         float extend () const { return m_extend;}
-        cv::RotatedRect rotated_roi () const; 
+        cv::RotatedRect rotated_roi () const;
+        cv::RotatedRect rotated_roi_PCA () const;
         
     private:
         int64_t m_id;
