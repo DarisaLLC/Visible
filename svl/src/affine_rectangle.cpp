@@ -30,6 +30,9 @@ namespace {
 /*  @note: add position of image in padded
  */
 affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, const cv::RotatedRect& initial,const Area& padded_bounds){
+    init (bounds, image_bounds, initial, padded_bounds);
+}
+void affineRectangle::init (const Area& bounds, const Area& image_bounds, const cv::RotatedRect& initial,const Area& padded_bounds){
     
     // Padded Rect is image bounds in either padded or not padded case
     // Get the offsets
@@ -168,13 +171,7 @@ void affineRectangle::cornersInImage (const Area& image_bounds) const {
         std::cout << '\n';
     };
     printCorners(mCornersImageVec);
-    
-    
-    auto  toString = [] (const cv::RotatedRect& rr){
-        std::ostringstream ss;
-        ss << "[ + " << rr.center << " / " << rr.angle << " | " << rr.size.height << " - " << rr.size.width << "]";
-        return ss.str();
-    };
+
 
     mCornersImageCV.clear();
     for(auto const & window : mCornersImageVec){
@@ -183,9 +180,7 @@ void affineRectangle::cornersInImage (const Area& image_bounds) const {
     }
 
     pointsToRotatedRect(mCornersImageCV, mCvRotatedRect);
-    std::cout << toString(mCvRotatedRect);
-    
-    
+
     
 }
 
@@ -213,7 +208,6 @@ void affineRectangle::draw(const Area& display_bounds)
     std::vector<vec2> corners = { af.getUpperLeft(), af.getUpperRight(),
         af.getLowerRight(), af.getLowerLeft() };
     
- 
     
     mCornersImageVec.clear();
     int i = 0;
@@ -253,7 +247,7 @@ void affineRectangle::draw(const Area& display_bounds)
         gl::drawLine( corners[3], corners[0] );
     }
 
-            gl::popViewport();
+    gl::popViewport();
     
     // Can use setMatricesWindow() or setMatricesWindowPersp() to enable 2D rendering.
     gl::setMatricesWindow(display_bounds.getSize(), true );

@@ -30,7 +30,6 @@
 
 #include <string>
 #include <vector>
-#include "core/singleton.hpp"
 
 using namespace boost;
 namespace filesystem = boost::filesystem;
@@ -109,9 +108,6 @@ public:
     bool           mIsClicked;
     bool           mMouseIsDown;
     bool           mCtrlDown;
-    float          mAspectRatio;
-    ivec2          mMinSize;
-    vec2          mMinPos;
     
     cv::Mat mModel;
     boost::filesystem::path mFolderPath;
@@ -143,27 +139,8 @@ vec2 affineApp::matStats (const cv::Mat& image)
 }
 void affineApp::resize()
 {
-    float  wndAspectRatio = getWindowAspectRatio();
-    auto wndSz = getWindowSize();
-    auto imageSz = mMinSize;
-    vec2 pos = getWindowPos();
-    if(wndSz.x > mMinSize.x && wndSz.y > mMinSize.y){
-        imageSz = wndSz;
-        ivec2 remainingWndSize(0,0);
-        if (mAspectRatio >= wndAspectRatio){
-            imageSz.y = imageSz.x/mAspectRatio;
-            remainingWndSize.y = wndSz.y - imageSz.y;
-        }
-        else {
-            imageSz.x = imageSz.y*mAspectRatio;remainingWndSize.x = wndSz.x - imageSz.x;
-        }
-        pos = getWindowPos();
-        pos.x+=remainingWndSize.x*0.5;
-        pos.y+=remainingWndSize.y*0.5;
-    }
-    setWindowPos(pos);
-    setWindowSize(imageSz);
     mRectangle.resize(getWindowBounds());
+    std::cout << " resize is not implemented " << std::endl;
     
 }
 
@@ -416,8 +393,8 @@ void affineApp::keyDown( KeyEvent event )
             setFullScreen (! isFullScreen () );
             break;
         case KeyEvent::KEY_r:
-            mRectangle.reset();
-            resize ();
+            std::cout << " Key r is not implemented " << std::endl;
+            
             break;
         case KeyEvent::KEY_ESCAPE:
             if (isFullScreen())
@@ -457,17 +434,13 @@ void affineApp::process ()
     
     mPaddedArea = Area (0,0,mPadded.cols, mPadded.rows);
     mImageArea = Area(0,0,mInputMat.cols, mInputMat.rows);
-    mMinSize.x = mPadded.cols;
-    mMinSize.y = mPadded.rows;
-    setWindowSize(mMinSize);
-    mAspectRatio = getWindowAspectRatio();
-    mMinPos = getWindowPos();
+    setWindowSize(mPadded.cols, mPadded.rows);
     
     mRotatedRect.angle = toDegrees(svl::constants::pi / 6.0);
    mRotatedRect.center = toOcv(mImageArea.getCenter());
    mRotatedRect.size.width = 50;
    mRotatedRect.size.height = 100;
-    mRectangle = affineRectangle (getWindowBounds(), mImageArea,mRotatedRect,mPaddedArea);
+    mRectangle.init(getWindowBounds(), mImageArea,mRotatedRect,mPaddedArea);
     
 }
 
