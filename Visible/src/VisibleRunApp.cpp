@@ -119,10 +119,18 @@ void VisibleRunApp::setup_ui(){
                    .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
                    //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
                    );
-    ImGuiStyle* st = &ImGui::GetStyle();
-    ImGui::StyleColorsLightGreen(st);
+    float dpiScale = 1.f;
+    auto& style = ImGui::GetStyle();
+    style.WindowBorderSize = 1.f * dpiScale;
+    style.FrameBorderSize = 1.f * dpiScale;
+    style.FrameRounding = 5.f * dpiScale;
+    style.ScrollbarSize *= dpiScale;
+    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4( 1, 1, 1, 0.03f );
+    style.Colors[ImGuiCol_WindowBg] = ImVec4( 0.129f, 0.137f, 0.11f, 1.f );
     
-    setWindowPos(getWindowSize()/3);
+    style.AntiAliasedFill = false;
+    style.AntiAliasedLines = false;
+    setWindowPos(getWindowSize()/4);
 }
 /*
  * Browse the LIF file and dispatch VisibleRun with the selected chapter

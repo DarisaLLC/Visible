@@ -875,9 +875,6 @@ const Rectf& lifContext::get_channel_display_rect (const int channel_number_zero
 void lifContext::add_result_sequencer ()
 {
  
-    
-
-    
     // let's create the sequencer
     static int selectedEntry = -1;
     static int64 firstFrame = 0;

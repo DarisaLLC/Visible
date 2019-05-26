@@ -1,8 +1,6 @@
 #include <cstdint>
 
 #include <algorithm>
-#include <iostream>
-
 #include "vision/opencv_utils.hpp"
 #include "vision/gradient.h"
 #include "boost/variant.hpp"
@@ -53,7 +51,7 @@ namespace svl
         return dest;
     }
 
-    std::string toString (const cv::RotatedRect& rr){
+    std::string to_string (const cv::RotatedRect& rr){
         std::ostringstream ss;
         ss << "[ + " << rr.center << " / " << rr.angle << " | " << rr.size.height << " - " << rr.size.width << "]";
         return ss.str();
