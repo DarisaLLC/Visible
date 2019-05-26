@@ -60,6 +60,7 @@ public:
      * Returned stated: initial contains the final RotatedRect
      */
     affineRectangle (const Area& bounds, const Area& image_bounds, const cv::RotatedRect& initial,const Area& padded_bounds = Area());
+    void init (const Area& bounds, const Area& image_bounds, const cv::RotatedRect& initial,const Area& padded_bounds = Area());
     
     void update ();
     void draw (const Area& display_bounds);
