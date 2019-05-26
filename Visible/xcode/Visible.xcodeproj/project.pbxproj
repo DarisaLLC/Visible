@@ -309,7 +309,11 @@
 		C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
 		C2BDEFEF21C8237A00A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
 		C2BDEFF021C8237B00A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
-		C2C5CF632299E9CB004595C5 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
+		C2C5CF64229A081D004595C5 /* affineApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E5AD832279DE2000A7AAD3 /* affineApp.cpp */; };
+		C2C5CF67229A0DB0004595C5 /* glmutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C5CF66229A0DB0004595C5 /* glmutils.cpp */; };
+		C2C5CF68229A0DB0004595C5 /* glmutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C5CF66229A0DB0004595C5 /* glmutils.cpp */; };
+		C2C5CF69229A0DB0004595C5 /* glmutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C5CF66229A0DB0004595C5 /* glmutils.cpp */; };
+		C2C5CF6A229A0DB0004595C5 /* glmutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C5CF66229A0DB0004595C5 /* glmutils.cpp */; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
@@ -862,6 +866,8 @@
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
 		C2C5CF612299E4C7004595C5 /* ut_rotated_rect.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ut_rotated_rect.hpp; sourceTree = "<group>"; };
 		C2C5CF622299E959004595C5 /* Visible_GTest_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Visible_GTest_Prefix.pch; sourceTree = "<group>"; };
+		C2C5CF65229A0D8E004595C5 /* glmutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glmutils.h; sourceTree = "<group>"; };
+		C2C5CF66229A0DB0004595C5 /* glmutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glmutils.cpp; sourceTree = "<group>"; };
 		C2C68C3B1ED9F9440095FFC4 /* tracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tracker.h; path = ../include/tracker.h; sourceTree = "<group>"; };
 		C2CBB26122794FB4003C3CF7 /* affine_test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = affine_test.png; path = ../../../.Visible/3channels/Series014/affine_test.png; sourceTree = "<group>"; };
 		C2D23FCA219B9B3E00F4A49E /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../../../../../../../usr/local/Cellar/boost/1.67.0_1/lib/libboost_thread-mt.a"; sourceTree = "<group>"; };
@@ -1523,6 +1529,7 @@
 		C26009EA1CED3E010045FF57 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				C2C5CF65229A0D8E004595C5 /* glmutils.h */,
 				C2239AB2218A8298007558AB /* boost_units_literals.h */,
 				C2239AB6218B6F30007558AB /* boost_units.hpp */,
 				C2DA19581E7F30E800062DBC /* csv.hpp */,
@@ -1690,6 +1697,7 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C2C5CF66229A0DB0004595C5 /* glmutils.cpp */,
 				C2AEB73A228CD6E60078E687 /* geom_utils.cpp */,
 				C2AFAD802252E1690038AF5B /* UIImage+OpenCV.mm */,
 				C2203D6421CAFFD9003F2F33 /* logger.cpp */,
@@ -2078,6 +2086,7 @@
 				C2606DAB1CED3E2E0045FF57 /* ip_utils.cpp in Sources */,
 				C2618F82217FDA6600FA9F43 /* window.cc in Sources */,
 				C210946E223AEC19004E88EE /* imgui_wrapper.cpp in Sources */,
+				C2C5CF67229A0DB0004595C5 /* glmutils.cpp in Sources */,
 				C2AFCEFF216E79590080462D /* imgui_draw.cpp in Sources */,
 				C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */,
 				C254BE841F4F912E00977307 /* csv.cpp in Sources */,
@@ -2126,6 +2135,7 @@
 				C2398A1921DE980C00B180A0 /* imgui.cpp in Sources */,
 				C27221161D1C912E008EF8B2 /* histo.cpp in Sources */,
 				C2770659226A402C00215A55 /* cvVideoPlayer.cpp in Sources */,
+				C2C5CF64229A081D004595C5 /* affineApp.cpp in Sources */,
 				C2AEB73D228CD6E70078E687 /* geom_utils.cpp in Sources */,
 				C20EDBB71CEFC2E70074C47A /* rowfunc.cpp in Sources */,
 				C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */,
@@ -2143,6 +2153,7 @@
 				C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */,
 				C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */,
 				C2618F87217FDA9E00FA9F43 /* figure.cc in Sources */,
+				C2C5CF69229A0DB0004595C5 /* glmutils.cpp in Sources */,
 				C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */,
 				C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */,
@@ -2165,7 +2176,6 @@
 				C2618F84217FDA8400FA9F43 /* color.cc in Sources */,
 				C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */,
 				C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */,
-				C2C5CF632299E9CB004595C5 /* main.cpp in Sources */,
 				C2819ECF2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C2618F85217FDA8F00FA9F43 /* highgui.cc in Sources */,
 				C20BBC031E4E33CE002C7D68 /* tinystr.cpp in Sources */,
@@ -2241,6 +2251,7 @@
 				C26F5FBC21B0AA6D00EAE156 /* visible_impl.cpp in Sources */,
 				C2398A8121DF239700B180A0 /* VisibleRunApp.cpp in Sources */,
 				C26F5FBD21B0AA6D00EAE156 /* histo.cpp in Sources */,
+				C2C5CF68229A0DB0004595C5 /* glmutils.cpp in Sources */,
 				C26F5FBE21B0AA6D00EAE156 /* Item.cpp in Sources */,
 				C26F5FBF21B0AA6D00EAE156 /* rand_support.cpp in Sources */,
 				C26F5FC021B0AA6D00EAE156 /* lifFile.cpp in Sources */,
@@ -2316,6 +2327,7 @@
 				C2DB72AE22591DB700C2B986 /* Item.cpp in Sources */,
 				C2DB72AF22591DB700C2B986 /* rand_support.cpp in Sources */,
 				C2DB72B022591DB700C2B986 /* lifFile.cpp in Sources */,
+				C2C5CF6A229A0DB0004595C5 /* glmutils.cpp in Sources */,
 				C2DB72B122591DB700C2B986 /* tinyxmlerror.cpp in Sources */,
 				C2DB72B222591DB700C2B986 /* labelBlob.cpp in Sources */,
 				C29E1BCE225AA26200CBFFDB /* cvVideoPlayer.cpp in Sources */,

@@ -24,7 +24,7 @@ namespace svl
     
     cv::Mat filterWithGaborKernel (cv::Mat& image, cv::Mat& kernel);
 
-    std::string toString (const cv::RotatedRect& rr);
+    std::string to_string (const cv::RotatedRect& rr);
     
     double integralMatSum(const Mat &integralMat, cv::Rect roi);
     Size2f rotateSize(Size2f s, float angle);

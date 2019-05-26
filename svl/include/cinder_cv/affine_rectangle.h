@@ -37,11 +37,10 @@ struct EditableRect {
     //! Returns the rectangle's model matrix.
     mat4  matrix()
     {
-        mat4 m = glm::translate( vec3( area.getSize() / 2, 0 ) );
+        mat4 m = glm::translate( vec3(  position, 0 ) );
         m *= glm::toMat4( rotation );
         m *= glm::scale( vec3( scale, 1 ) );
-        m *= glm::translate( vec3( -position, 0 ) );
-        
+        m *= glm::translate( vec3( -area.getSize() / 2, 0 ) );
         return m;
     }
 };
@@ -78,9 +77,10 @@ public:
     bool contains ( const vec2 pos);
     void reset (); 
     
-    Area area () const { return mRectangle.area; }
+    Area area() const { return mRectangle.area; }
     vec2   position () const { return mRectangle.area.getCenter(); }
     bool isClicked () const { return mIsClicked; }
+    bool isOver () const { return mIsOver; }
     vec3 mouseToWorld( const ivec2 &mouse, float z = 0 );
     float  degrees () const;
     float  radians () const;

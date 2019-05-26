@@ -50,7 +50,7 @@ namespace
 
 
 
-class MainApp : public AppMac {
+class affineApp : public AppMac {
 public:
     
     
@@ -109,6 +109,9 @@ public:
     bool           mIsClicked;
     bool           mMouseIsDown;
     bool           mCtrlDown;
+    float          mAspectRatio;
+    ivec2          mMinSize;
+    vec2          mMinPos;
     
     cv::Mat mModel;
     boost::filesystem::path mFolderPath;
@@ -119,7 +122,7 @@ public:
 };
 
 
-Surface8uRef MainApp::loadImageFromPath (const filesystem::path& path)
+Surface8uRef affineApp::loadImageFromPath (const filesystem::path& path)
 {
     Surface8uRef sref;
     
@@ -131,19 +134,40 @@ Surface8uRef MainApp::loadImageFromPath (const filesystem::path& path)
     
 }
 
-vec2 MainApp::matStats (const cv::Mat& image)
+vec2 affineApp::matStats (const cv::Mat& image)
 {
     // compute statistics for Hue value
     cv::Scalar mean, stddev;
     cv::meanStdDev(image, mean, stddev);
     return vec2(mean[0], stddev[0]);
 }
-void MainApp::resize()
+void affineApp::resize()
 {
+    float  wndAspectRatio = getWindowAspectRatio();
+    auto wndSz = getWindowSize();
+    auto imageSz = mMinSize;
+    vec2 pos = getWindowPos();
+    if(wndSz.x > mMinSize.x && wndSz.y > mMinSize.y){
+        imageSz = wndSz;
+        ivec2 remainingWndSize(0,0);
+        if (mAspectRatio >= wndAspectRatio){
+            imageSz.y = imageSz.x/mAspectRatio;
+            remainingWndSize.y = wndSz.y - imageSz.y;
+        }
+        else {
+            imageSz.x = imageSz.y*mAspectRatio;remainingWndSize.x = wndSz.x - imageSz.x;
+        }
+        pos = getWindowPos();
+        pos.x+=remainingWndSize.x*0.5;
+        pos.y+=remainingWndSize.y*0.5;
+    }
+    setWindowPos(pos);
+    setWindowSize(imageSz);
     mRectangle.resize(getWindowBounds());
+    
 }
 
-void MainApp::openFile()
+void affineApp::openFile()
 {
     try {
         mImage = loadImageFromPath(getOpenFilePath());
@@ -157,12 +181,12 @@ void MainApp::openFile()
     }
 }
 
-void MainApp::update()
+void affineApp::update()
 {
 }
 
 
-void MainApp::generate_crop (){
+void affineApp::generate_crop (){
 
     auto cvDrawImage = [] (cv::Mat& image){
             auto name = "image";
@@ -181,7 +205,6 @@ void MainApp::generate_crop (){
             cvplot::setWindowTitle(name, "transparent");
             cvplot::moveWindow(name, used.width, 0);
             cvplot::resizeWindow(name, 300+used.width, 300+used.height);
-//            cvplot::setMouseCallback(name, mouse_callback);
             cvplot::Window::current().view(name).frameColor(cvplot::Sky).alpha(alpha);
             auto &figure = cvplot::figure(name);
             figure.series("Projection")
@@ -202,7 +225,6 @@ void MainApp::generate_crop (){
     std::vector<float> hz_vec(hz.ptr<float>(0),hz.ptr<float>(0)+hz.cols );
     std::vector<float> vt_vec(crop.rows);
     for (auto ii = 0; ii < crop.rows; ii++) vt_vec[ii] = vt.at<float>(ii,0);
-    std::cout << " = " << crop.cols << "," << crop.rows << std::endl;
     cvDrawImage(crop);
     std::string hhh ("hz");
     std::string vvv ("vt");
@@ -211,7 +233,7 @@ void MainApp::generate_crop (){
 }
 
 
-void MainApp::setup()
+void affineApp::setup()
 {
     mFolderPath = Platform::get()->getHomeDirectory();
     mExtension = ".png";
@@ -221,14 +243,13 @@ void MainApp::setup()
     
     // Setup the parameters
     mParams = params::InterfaceGl::create ( getWindow(), "Parameters", vec2( 200, 150 ) );
-    // Add an enum (list) selector.
     mOption = 0;
     mParams->addParam( "Display", mNames, &mOption )
     .updateFn( [this] { textureToDisplay = &mTextures[mOption]; console() << "display updated: " << mNames[mOption] << endl; } );
     mParams->addButton( "Add image ",
-                       std::bind( &MainApp::openFile, this ) );
+                       std::bind( &affineApp::openFile, this ) );
     
-    mParams->addButton(" Crop Affine ", std::bind(&MainApp::generate_crop, this));
+    mParams->addButton(" Crop Affine ", std::bind(&affineApp::generate_crop, this));
     
 #if defined( CINDER_COCOA_TOUCH )
     mFont = Font( "Cochin-Italic", 14);
@@ -249,7 +270,7 @@ void MainApp::setup()
     mMouseIsDown = false;
 }
 
-void MainApp::mouseDown( MouseEvent event )
+void affineApp::mouseDown( MouseEvent event )
 {
     mMouseIsDown = true;
     mRectangle.mouseDown(event.getPos());
@@ -261,13 +282,13 @@ void MainApp::mouseDown( MouseEvent event )
     }
 }
 
-void MainApp::mouseUp( MouseEvent event )
+void affineApp::mouseUp( MouseEvent event )
 {
     mMouseIsDown = false;
     mRectangle.mouseUp();
 }
 
-std::string MainApp::pixelInfo( const ivec2 &position )
+std::string affineApp::pixelInfo( const ivec2 &position )
 {
     // first, specify a small region around the current cursor position
     float scaleX = mTextures[mOption]->getWidth() / (float)getWindowWidth();
@@ -287,7 +308,7 @@ std::string MainApp::pixelInfo( const ivec2 &position )
     
 }
 
-std::string MainApp::resultInfo ()
+std::string affineApp::resultInfo ()
 {
     ostringstream oss( ostringstream::ate );
     oss << " Affine Prototype ";
@@ -295,14 +316,15 @@ std::string MainApp::resultInfo ()
     
 }
 
-void MainApp::mouseMove( MouseEvent event )
+void affineApp::mouseMove( MouseEvent event )
 {
     mMousePos = event.getPos();
-    mIsOver = mRectangle.contains(mMousePos) && mTextures[mOption] != nullptr;
+    mRectangle.mouseMove(mMousePos);
+    mIsOver = mRectangle.isOver();
 }
 
 
-void MainApp::mouseDrag( MouseEvent event )
+void affineApp::mouseDrag( MouseEvent event )
 {
     mRectangle.mouseDrag(event.getPos());
     // Keep track of mouse position.
@@ -312,7 +334,7 @@ void MainApp::mouseDrag( MouseEvent event )
 }
 
 
-void MainApp::fileDrop( FileDropEvent event )
+void affineApp::fileDrop( FileDropEvent event )
 {
     try {
         mImage = loadImageFromPath (event.getFile( 0 ));
@@ -326,7 +348,7 @@ void MainApp::fileDrop( FileDropEvent event )
     }
 }
 
-void MainApp::keyDown( KeyEvent event )
+void affineApp::keyDown( KeyEvent event )
 {
     static float trans = (event.isControlDown()) ? 2.0f : 1.0f;
     
@@ -408,7 +430,7 @@ void MainApp::keyDown( KeyEvent event )
 
 
 
-void MainApp::process ()
+void affineApp::process ()
 {
     mTextures.resize(mNames.size());
     mOverlays.resize(mNames.size());
@@ -435,7 +457,11 @@ void MainApp::process ()
     
     mPaddedArea = Area (0,0,mPadded.cols, mPadded.rows);
     mImageArea = Area(0,0,mInputMat.cols, mInputMat.rows);
-    setWindowSize(mPadded.cols, mPadded.rows);
+    mMinSize.x = mPadded.cols;
+    mMinSize.y = mPadded.rows;
+    setWindowSize(mMinSize);
+    mAspectRatio = getWindowAspectRatio();
+    mMinPos = getWindowPos();
     
     mRotatedRect.angle = toDegrees(svl::constants::pi / 6.0);
    mRotatedRect.center = toOcv(mImageArea.getCenter());
@@ -447,7 +473,7 @@ void MainApp::process ()
 
 
 
-void MainApp::draw()
+void affineApp::draw()
 {
     gl::enableAlphaBlending();
     {
@@ -477,7 +503,7 @@ void MainApp::draw()
     
 }
 
-cv::Mat MainApp::affineCrop (cv::Mat& src, cv::RotatedRect& in_rect, float aspect)
+cv::Mat affineApp::affineCrop (cv::Mat& src, cv::RotatedRect& in_rect, float aspect)
 {
     auto rect = in_rect;
     Mat M, rotated, cropped;
@@ -487,6 +513,9 @@ cv::Mat MainApp::affineCrop (cv::Mat& src, cv::RotatedRect& in_rect, float aspec
     if ((in_aspect > 1.0) != (aspect > 1.0)){
         std::swap(rect.size.width,rect.size.height);
     }
+    
+    std::string rs = to_string(rect);
+    std::cout << std::endl << rs << std::endl;
     
     // get the rotation matrix
     M = getRotationMatrix2D(rect.center, angle, 1.0);
@@ -498,7 +527,7 @@ cv::Mat MainApp::affineCrop (cv::Mat& src, cv::RotatedRect& in_rect, float aspec
 }
 
 
-CINDER_APP ( MainApp, RendererGl );
+CINDER_APP ( affineApp, RendererGl );
 
 
 #pragma GCC diagnostic pop

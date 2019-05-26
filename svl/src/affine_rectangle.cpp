@@ -14,7 +14,8 @@
 #include "core/angle_units.h"
 #include "glm/gtx/matrix_transform_2d.hpp"
 #include "core/lineseg.hpp"
-
+#include "core/glmutils.h"
+#include "vision/opencv_utils.hpp"
 #undef near
 #undef far
 
@@ -39,37 +40,43 @@ affineRectangle::affineRectangle (const Area& bounds, const Area& image_bounds, 
     mDisplay2Padded = RectMapping(Rectf(bounds), mPaddedRect);
     mPadded2Image = (mPaddedRect.getSize() - mImageRect.getSize()) / 2.0f;
     
+    std::cout << svl::to_string(initial) << std::endl;
+    
     mInitialRotatedRect = initial;
     std::vector<cv::Point2f> corners(4);
     mInitialRotatedRect.center += toOcv(mPadded2Image);
     mInitialRotatedRect.points(corners.data());
+    
+    for_each(corners.begin(), corners.end(),[] (cv::Point2f& pt){std::cout << "b " << pt.x << "," << pt.y << std::endl; });
+
     pointsToRotatedRect(corners, mInitialRotatedRect);
+    std::cout << svl::to_string(mInitialRotatedRect) << std::endl;
     mInitialRotatedRect.points(corners.data());
+
+    for_each(corners.begin(), corners.end(),[] (cv::Point2f& pt){std::cout << "a " << pt.x << "," << pt.y << std::endl; });
+
     
     mCornersImageCV = corners;
     mCornersImageVec.clear();
     for(auto & window : corners){
         mCornersImageVec.emplace_back(fromOcv(window));
     }
+
     auto initial_aspect = (float)initial.size.width / (float) initial.size.height;
     mWoHaspect = initial_aspect;
     mIsClicked = false;
     mIsOver = false;
     mSelected = -1;
 
-    //@todo move to update 
-    vec2 ul = mPadded2Display.map(vec2(corners[1].x,corners[1].y));
-    vec2 lr = mPadded2Display.map(vec2(corners[3].x,corners[3].y));
-    mRectangle.area  = Area (ul,lr);
-//    translate(mRectangle.area.getCenter());
+    mRectangle.area  = Area (0,0,mInitialRotatedRect.size.width, mInitialRotatedRect.size.height);
+    
+    mRectangle.position = bounds.getSize() / 2;
     uDegree rra(mInitialRotatedRect.angle);
     uRadian rrr(rra);
-//    rotate(rrr.Double());
-
-    
+    rotate(rrr.Double());
     mInitialArea = mRectangle.area;
     mInitialScreenPos = mRectangle.position;
-  
+    mRectangleInitial = mRectangle;
     
 }
 
@@ -96,14 +103,22 @@ void affineRectangle::mouseMove(  const vec2& event_pos )
 
 void affineRectangle::resize(const Area &display_bounds){
     
+    // Keep the rectangle centered in the window.
+    mRectangle.position = display_bounds.getSize() / 2;
     mDisplayRect.getCenteredFit(Rectf(display_bounds), true);
     mPadded2Display = RectMapping(mPaddedRect, mDisplayRect);
     mDisplay2Padded = RectMapping(mDisplayRect, mPaddedRect);
 }
 
 bool affineRectangle::contains (const vec2 pos){
-    vec3 object = mouseToWorld(pos);
-    return area().contains( vec2( object ) );
+    
+    // Check if mouse is inside rectangle, by converting the mouse coordinates
+    // to world space and then to object space.
+    vec3 world = mouseToWorld( pos );
+    vec4 object = glm::inverse( mRectangle.matrix() ) * vec4( world, 1 );
+    
+    // Now we can simply use Area::contains() to find out if the mouse is inside.
+    return mRectangle.area.contains( vec2( object ) );
 }
 
 void affineRectangle::scale( const vec2 change )
@@ -114,7 +129,6 @@ void affineRectangle::scale( const vec2 change )
 
 void affineRectangle::rotate( const float change )
 {
- 
     mRectangle.rotation = mRectangle.rotation * glm::angleAxis(change, vec3( 0, 0, -1 ) );
     
 }
@@ -140,6 +154,7 @@ float  affineRectangle::radians () const
 }
 
 void affineRectangle::cornersInImage (const Area& image_bounds) const {
+  
     auto printCorners = [] (const std::vector<vec2>& cc) {
         const float d01 = glm::distance( cc[0], cc[1] );
         const float d02 = glm::distance( cc[0], cc[2] );
@@ -193,13 +208,7 @@ void affineRectangle::update(){
 }
 void affineRectangle::draw(const Area& display_bounds)
 {
-    static Rectf persist;
     Rectf af(area());
-    auto diff = af - persist;
-    if (diff.x1 != 0 || diff.y1 != 0 || diff.x2 != 0 || diff.y2 != 0){
-        std::cout << diff << std::endl;
-        persist = af;
-    }
     // These corners never change as they are transformed later to instant xform
     std::vector<vec2> corners = { af.getUpperLeft(), af.getUpperRight(),
         af.getLowerRight(), af.getLowerLeft() };
@@ -243,19 +252,7 @@ void affineRectangle::draw(const Area& display_bounds)
         gl::drawLine( corners[2], corners[3] );
         gl::drawLine( corners[3], corners[0] );
     }
-    auto printCorners = [&] (std::vector<vec2>& cc) {
-        const float d01 = glm::distance( cc[0], cc[1] );
-        const float d02 = glm::distance( cc[0], cc[2] );
-        const float d03 = glm::distance( cc[0], cc[3] );
-        std::vector<std::pair<int,float>> ds = {{0,d01}, {1,d02}, {2,d03}};
-        std::sort (ds.begin(), ds.end(),[](const std::pair<int,float>&a, const std::pair<int,float>&b){
-            return a.second > b.second;
-        });
-        auto print = [](std::pair<int,float>& vv) { std::cout << ":" << vv.second; };
-        std::for_each(ds.begin(), ds.end(), print);
-        std::cout << '\n';
-    };
-        printCorners(mCornersImageVec);
+
             gl::popViewport();
     
     // Can use setMatricesWindow() or setMatricesWindowPersp() to enable 2D rendering.
@@ -265,20 +262,8 @@ void affineRectangle::draw(const Area& display_bounds)
     gl::pushModelMatrix();
     gl::multModelMatrix( mRectangle.matrix() );
 
-    auto printCornersPlus = [&] (std::vector<vec2>& cc) {
-        const float d01 = glm::distance( cc[0], cc[1] );
-        const float d02 = glm::distance( cc[0], cc[2] );
-        const float d03 = glm::distance( cc[0], cc[3] );
-        std::vector<std::pair<int,float>> ds = {{0,d01}, {1,d02}, {2,d03}};
-        std::sort (ds.begin(), ds.end(),[](const std::pair<int,float>&a, const std::pair<int,float>&b){
-            return a.second > b.second;
-        });
-        auto print = [](std::pair<int,float>& vv) { std::cout << "::" << vv.second; };
-        std::for_each(ds.begin(), ds.end(), print);
-        std::cout << '\n';
-    };
 
-    printCornersPlus(corners);
+    
     // Draw a stroked rect in magenta (if mouse inside) or white (if mouse outside).
     {
         ColorA cl (1.0, 1.0, 1.0,0.8f);
@@ -345,7 +330,7 @@ void affineRectangle::mouseUp(  )
 void affineRectangle::mouseDrag(const vec2& event_pos )
 {
     // Scale and rotate the rectangle.
-    if( mIsClicked ) {
+    if( mIsClicked && mMouseIsDown) {
         // Calculate the initial click position and the current mouse position, in world coordinates relative to the rectangle's center.
         vec3 initial = mouseToWorld( mMouseInitial ) - vec3( mRectangle.position, 0 );
         vec3 current = mouseToWorld( event_pos ) - vec3( mRectangle.position, 0 );
@@ -358,6 +343,7 @@ void affineRectangle::mouseDrag(const vec2& event_pos )
         // Calculate rotation by taking the angle with the X-axis for both positions and calculating the difference.
         float a0 = atan2( initial.y, initial.x );
         float a1 = atan2( current.y, current.x );
+        
         mRectangle.rotation = mRectangleInitial.rotation * glm::angleAxis( a1 - a0, vec3( 0, 0, 1 ) );
     }
 }
@@ -381,8 +367,8 @@ vec3 affineRectangle::mouseToWorld( const ivec2 &mouse, float z )
 }
 
 
-
-void affineRectangle::pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints, cv::RotatedRect& rotated_rect ) const {
+void affineRectangle::pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints, cv::RotatedRect& rotated_rect ) const
+{
     // get the left most
     std::sort (imagePoints.begin(), imagePoints.end(),[](const cv::Point2f&a, const cv::Point2f&b){
         return a.x > b.x;
@@ -392,26 +378,27 @@ void affineRectangle::pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints
         return a.y < b.y;
     });
     
-    auto cwOrder = [&] (std::vector<cv::Point2f>& cc, std::vector<std::pair<int,float>>& results) {
+    auto cwOrder = [&] (std::vector<cv::Point2f>& cc, std::vector<std::pair<std::pair<int,int>,float>>& results) {
         const float d01 = glm::distance( fromOcv(cc[0]), fromOcv(cc[1]) );
         const float d02 = glm::distance( fromOcv(cc[0]), fromOcv(cc[2]) );
         const float d03 = glm::distance( fromOcv(cc[0]), fromOcv(cc[3]) );
-        std::vector<std::pair<int,float>> ds = {{0,d01}, {1,d02}, {2,d03}};
-        std::sort (ds.begin(), ds.end(),[](const std::pair<int,float>&a, const std::pair<int,float>&b){
+        
+        std::vector<std::pair<std::pair<int,int>,float>> ds = {{{0,1},d01}, {{0,2},d02}, {{0,3},d03}};
+        std::sort (ds.begin(), ds.end(),[](std::pair<std::pair<int,int>,float>&a, const std::pair<std::pair<int,int>,float>&b){
             return a.second > b.second;
         });
         results = ds;
-        auto print = [](std::pair<int,float>& vv) { std::cout << "::" << vv.second; };
+        auto print = [](std::pair<std::pair<int,int>,float>& vv) { std::cout << "::" << vv.second; };
         std::for_each(ds.begin(), ds.end(), print);
         std::cout << '\n';
     };
-
-    std::vector<std::pair<int,float>> ranked_corners;
+    
+    std::vector<std::pair<std::pair<int,int>,float>> ranked_corners;
     cwOrder(imagePoints, ranked_corners);
     assert(ranked_corners.size()==3);
-    fVector_2d tl (imagePoints[1].x, imagePoints[1].y);
-    fVector_2d tr (imagePoints[ranked_corners[0].first].x, imagePoints[ranked_corners[0].first].y);
-    fVector_2d bl (imagePoints[ranked_corners[2].first].x, imagePoints[ranked_corners[2].first].y);
+    fVector_2d tl (imagePoints[ranked_corners[1].first.first].x, imagePoints[ranked_corners[1].first.first].y);
+    fVector_2d tr (imagePoints[ranked_corners[1].first.second].x, imagePoints[ranked_corners[1].first.second].y);
+    fVector_2d bl (imagePoints[ranked_corners[2].first.second].x, imagePoints[ranked_corners[2].first.second].y);
     fLineSegment2d sideOne (tl, tr);
     fLineSegment2d sideTwo (tl, bl);
     
@@ -426,10 +413,10 @@ void affineRectangle::pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints
     rotated_rect.center = ctr;
     float dLR = sideOne.length();
     float dTB = sideTwo.length();
-    rotated_rect.size.width = dLR;
-    rotated_rect.size.height = dTB;
-    std::cout << toDegrees(sideOne.angle().Double()) << " Side One " << std::endl;
-    std::cout << toDegrees(sideTwo.angle().Double()) << " Side Two " << std::endl;
+    rotated_rect.size.width = dTB;
+    rotated_rect.size.height = dLR;
+    std::cout << toDegrees(sideOne.angle().Double()) << " Side One " << sideOne.length() << std::endl;
+    std::cout << toDegrees(sideTwo.angle().Double()) << " Side Two " << sideTwo.length() << std::endl;
     
     uDegree angle = sideTwo.angle();
     if (angle.Double() < -45.0){
@@ -437,34 +424,8 @@ void affineRectangle::pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints
         std::swap(rotated_rect.size.width,rotated_rect.size.height);
     }
     rotated_rect.angle = angle.Double();
-//    mWoHaspect = (float)rotated_rect.size.width / (float)rotated_rect.size.height;
-}
-
-#if 0
-Point2f  affineRectangle::map_point(Point2f pt) const
-{
-    const cv::Mat& transMat = mXformMat;
-    pt.x = transMat.at<float>(0, 0) * pt.x + transMat.at<float>(0, 1) * pt.y + transMat.at<float>(0, 2);
-    pt.y = transMat.at<float>(1, 0) * pt.y + transMat.at<float>(1, 1) * pt.y + transMat.at<float>(1, 2);
-    return pt;
-}
-
-void  affineRectangle::update_rect_centered_xform () const
-{
-    const RotatedRect& rr = mCvRotatedRect;
-    float w = rr.size.width / 2;
-    float h = rr.size.height / 2;
-    Mat m(2, 3, CV_64FC1);
-    float ang = rr.angle * CV_PI / 180.0;
-    mXformMat.at<double>(0, 0) = cos(ang);
-    mXformMat.at<double>(1, 0) = sin(ang);
-    mXformMat.at<double>(0, 1) = -sin(ang);
-    mXformMat.at<double>(1, 1) = cos(ang);
-    mXformMat.at<double>(0, 2) = rr.center.x - w*cos(ang) + h*sin(ang);
-    mXformMat.at<double>(1, 2) = rr.center.y - w*sin(ang) - h*cos(ang);
-    
 }
 
 
-#endif
+
 

@@ -5,6 +5,11 @@
 #include <algorithm>
 #include <iostream>
 
+#define FULL_BG_COLOR 0xFF242424
+#define HEADER_COLOR 0xFF3D3837
+#define SLOT_EVEN_COLOR 0xFF413D3D
+#define SLOT_ODD_COLOR 0xFF3A3636
+
 
 namespace ImSequencer
 {
@@ -150,7 +155,7 @@ namespace ImSequencer
             const float contentHeight = contentMax.y - contentMin.y;
 
             // full background
-            draw_list->AddRectFilled(canvas_pos, canvas_pos + canvas_size, 0xFF242424, 0);
+            draw_list->AddRectFilled(canvas_pos, canvas_pos + canvas_size, FULL_BG_COLOR, 0);
 
             // current frame top
             ImRect topRect(ImVec2(canvas_pos.x + legendWidth, canvas_pos.y), ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + ItemHeight));
@@ -174,7 +179,7 @@ namespace ImSequencer
             }
 
             //header
-            draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_size.x + canvas_pos.x, canvas_pos.y + ItemHeight), 0xFF3D3837, 0);
+            draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_size.x + canvas_pos.x, canvas_pos.y + ItemHeight), HEADER_COLOR, 0);
             if (sequenceOptions&SEQUENCER_ADD)
             {
                 if (SequencerAddDelButton(draw_list, ImVec2(canvas_pos.x + legendWidth - ItemHeight, canvas_pos.y + 2), true) && io.MouseReleased[0])
@@ -282,7 +287,7 @@ namespace ImSequencer
             customHeight = 0;
             for (int i = 0; i < sequenceCount; i++)
             {
-                unsigned int col = (i & 1) ? 0xFF3A3636 : 0xFF413D3D;
+                unsigned int col = (i & 1) ? SLOT_ODD_COLOR : SLOT_EVEN_COLOR;
 
                 size_t localCustomHeight = sequence->GetCustomHeight(i);
                 ImVec2 pos = ImVec2(contentMin.x + legendWidth, contentMin.y + ItemHeight * i + 1 + customHeight);
