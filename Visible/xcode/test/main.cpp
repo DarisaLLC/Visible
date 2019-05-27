@@ -147,6 +147,86 @@ typedef std::weak_ptr<Surface16u>	Surface16uWeakRef;
 typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
 
 
+TEST (ut_algo_lif, segment){
+    
+    auto res = dgenv_ptr->asset_path("voxel_ss_.png");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    cv::Mat image = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Size iSize(image.cols,image.rows);
+    cv::Size plusOne(iSize.width+1,iSize.height+1);
+    
+    cv::Mat  sMat (plusOne, CV_32SC1);
+    cv::Mat  ssMat (plusOne, CV_64FC1);
+    cv::integral (image, sMat, ssMat);
+    
+    auto indexMat = [](cv::Size& dims){
+        cv::Mat indexmat (dims, CV_32FC1);
+        auto generate = [](int start, std::vector<float>& vf){
+            static float step = 1.0f;
+            step = 1.0f;
+            auto init = [&](float& elem){ elem = start + step++; };
+            std::for_each(vf.begin(), vf.end(), init );
+        };
+
+        std::vector<float> fv(indexmat.cols);
+        for (auto row = 0; row < indexmat.rows; row++){
+            int st = row * indexmat.cols;
+
+            generate(st, fv);
+            std::copy(fv.begin(), fv.end(),indexmat.ptr<float>(row));
+        }
+        return indexmat;
+    };
+
+    cv::Size ts(plusOne);
+    auto test = indexMat(ts);
+    double minv = 0, maxv = 0;
+    cv::Point minl, maxl;
+  
+
+    cv::Mat snorm, slog, tlog;
+    sMat.convertTo(snorm, CV_32F);
+    cv::log(snorm, slog);
+    cv::log(test, tlog);
+    cv::Mat dlog(plusOne, CV_8U);
+    cv::subtract(slog, tlog, dlog, noArray(), CV_8U);
+    cv::normalize(dlog, dlog,0.0,255.0, cv::NORM_MINMAX);
+    cv::divide(snorm,test,test);
+    cv::minMaxLoc(test, &minv, &maxv, &minl, &maxl);
+    cv::normalize(test, test,0.0,255.0, cv::NORM_MINMAX);
+
+    cv::Mat ut8;
+    test.convertTo(ut8, CV_8U);
+    
+    imshow( "divide", ut8);
+    cv::waitKey(0);
+
+    imshow( "log", dlog);
+    cv::waitKey(0);
+    
+    imshow( "image", image);
+    cv::waitKey(0);
+
+    std::string file_path = "/Volumes/medvedev/Users/arman/tmp/iratio.png";
+    cv::imwrite(file_path, ut8);
+    file_path = "/Volumes/medvedev/Users/arman/tmp/firatio.png";
+    cv::imwrite(file_path, test);
+    file_path = "/Volumes/medvedev/Users/arman/tmp/dlog.png";
+    cv::imwrite(file_path, dlog);
+    
+    
+    auto printMat = [](const cv::Mat& m){
+        for (auto row = 0; row < m.rows; row++){
+            for_each(m.ptr<float>(row), m.ptr<float>(row)+m.cols, [](float elem) { std::cout << " | " << elem; });
+            std::cout << std::endl;
+        }
+    };
+    printMat(test);
+    
+
+}
+
 std::vector<Point2f> ellipse_test = {
     {666.895422,372.895287},
     {683.128254,374.338401},
@@ -226,16 +306,6 @@ TEST(serialization, eigen){
     }
     
     std::cout << "test loaded:" << std::endl << test_loaded << std::endl;
-}
-
-TEST (ut_algo_lif, segment){
-    
-    auto res = dgenv_ptr->asset_path("voxel_ss_.png");
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    cv::Mat image = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
-    finalize_segmentation (image);
-    
 }
 
 TEST(ut_voxel_freq, basic){
