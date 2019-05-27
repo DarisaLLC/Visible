@@ -883,33 +883,36 @@ void lifContext::add_result_sequencer ()
     Rectf dr = get_image_display_rect();
     auto tr = dr.getUpperRight();
     auto pos = ImVec2(tr.x+10, tr.y);
-    ImVec2 size (getWindowWidth()-30-pos.x, (3*getWindowHeight()) / 4);
+    ImVec2 size (getWindowWidth()-30-pos.x, dr.getHeight());
     
     m_results_browser_display = Rectf(pos,size);
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(size);
 
-    ImGui::Begin(" Results ", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    
-    ImGui::PushItemWidth(130);
-    ImGui::InputInt("Frame Min", &m_result_seq.mFrameMin);
-    ImGui::SameLine();
-    ImGui::InputInt64("Frame ", &m_seek_position);
-    ImGui::SameLine();
-    ImGui::InputInt("Frame Max", &m_result_seq.mFrameMax);
-    ImGui::PopItemWidth();
-    
+    static bool results_open;
+    if(ImGui::Begin(" Results ", &results_open, ImGuiWindowFlags_AlwaysAutoResize)){
+        ImGui::PushItemWidth(130);
+        ImGui::InputInt("Frame Min", &m_result_seq.mFrameMin);
+        ImGui::SameLine();
+        ImGui::InputInt64("Frame ", &m_seek_position);
+        ImGui::SameLine();
+        ImGui::InputInt("Frame Max", &m_result_seq.mFrameMax);
+        ImGui::PopItemWidth();
+        
 
-    Sequencer(&m_result_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
-    ImGui::End();
-    
-    // add a UI to edit that particular item
-    if (selectedEntry != -1)
-    {
-        const timeLineSequence::timeline_item &item = m_result_seq.items[selectedEntry];
-        ImGui::Text("I am a %s, please edit me", m_result_seq.mSequencerItemTypeNames[item.mType].c_str());
-        // switch (type) ....
+        Sequencer(&m_result_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
+
+        
+        // add a UI to edit that particular item
+        if (selectedEntry != -1)
+        {
+            const timeLineSequence::timeline_item &item = m_result_seq.items[selectedEntry];
+            ImGui::Text("I am a %s, please edit me", m_result_seq.mSequencerItemTypeNames[item.mType].c_str());
+            // switch (type) ....
+        }
     }
+    ImGui::End();
+                               
 }
 
 void lifContext::add_navigation(){
@@ -1014,17 +1017,19 @@ void lifContext::add_motion_profile (){
         m_segmented_texture = gl::Texture::create(*m_segmented_surface, texFormat);
     }
     
+    ImGuiWindow* window = ImGui::FindWindowByName(" Results ");
+    assert(window != nullptr);
+    
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
-    ImVec2  frame (mMediaInfo.channel_size.width, mMediaInfo.channel_size.height);
-    Rectf dr = m_results_browser_display;
-    auto pos = ImVec2(dr.getLowerLeft().x, dr.getLowerLeft().y + 30);
+    ImVec2  frame (mMediaInfo.channel_size.width*1.2, mMediaInfo.channel_size.height*1.2);
+    ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y);
     m_motion_profile_display = Rectf(pos,frame);
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(frame);
     
     const RotatedRect& mt = m_lifProcRef->motion_surface ();
     
-    if (ImGui::Begin("Motion Profile", nullptr,ImGuiWindowFlags_AlwaysAutoResize ))
+    if (ImGui::Begin("Motion Profile", nullptr, ImGuiWindowFlags_NoScrollbar  ))
     {
         if(m_segmented_texture){
             static ImVec2 zoom_center;

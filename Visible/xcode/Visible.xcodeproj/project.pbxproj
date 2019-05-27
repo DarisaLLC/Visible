@@ -273,6 +273,106 @@
 		C2819ED52201287900183E44 /* visible_scope.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2819ED42201287900183E44 /* visible_scope.png */; };
 		C2820F302175298F00DFA7A6 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
 		C2820F3521752CB000DFA7A6 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
+		C28B016F229B182100B8165D /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
+		C28B0170229B182100B8165D /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
+		C28B0171229B182100B8165D /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
+		C28B0172229B182100B8165D /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
+		C28B0173229B182100B8165D /* sg_filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24EA2D2207F07EF00555D16 /* sg_filter.cpp */; };
+		C28B0174229B182100B8165D /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
+		C28B0175229B182100B8165D /* histo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069681CED3E2C0045FF57 /* histo.cpp */; };
+		C28B0176229B182100B8165D /* cvVideoPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BE851F4FAF5C00977307 /* cvVideoPlayer.cpp */; };
+		C28B0177229B182100B8165D /* affineApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E5AD832279DE2000A7AAD3 /* affineApp.cpp */; };
+		C28B0178229B182100B8165D /* geom_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AEB73A228CD6E60078E687 /* geom_utils.cpp */; };
+		C28B0179229B182100B8165D /* rowfunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069701CED3E2C0045FF57 /* rowfunc.cpp */; };
+		C28B017A229B182100B8165D /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
+		C28B017B229B182100B8165D /* sm_producer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */; };
+		C28B017C229B182100B8165D /* edgel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069661CED3E2C0045FF57 /* edgel.cpp */; };
+		C28B017D229B182100B8165D /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
+		C28B017E229B182100B8165D /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
+		C28B017F229B182100B8165D /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
+		C28B0180229B182100B8165D /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
+		C28B0181229B182100B8165D /* ip_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069691CED3E2C0045FF57 /* ip_utils.cpp */; };
+		C28B0182229B182100B8165D /* matpixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696D1CED3E2C0045FF57 /* matpixel.cpp */; };
+		C28B0183229B182100B8165D /* affine_rectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21E390B228A054C00778A66 /* affine_rectangle.cpp */; };
+		C28B0184229B182100B8165D /* window.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7E217FDA6600FA9F43 /* window.cc */; };
+		C28B0185229B182100B8165D /* ellipse_fit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20D4DE32208BD34004D9405 /* ellipse_fit.cpp */; };
+		C28B0186229B182100B8165D /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
+		C28B0187229B182100B8165D /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
+		C28B0188229B182100B8165D /* figure.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7D217FDA6600FA9F43 /* figure.cc */; };
+		C28B0189229B182100B8165D /* glmutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C5CF66229A0DB0004595C5 /* glmutils.cpp */; };
+		C28B018A229B182100B8165D /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
+		C28B018B229B182100B8165D /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
+		C28B018C229B182100B8165D /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
+		C28B018D229B182100B8165D /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
+		C28B018E229B182100B8165D /* registration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696F1CED3E2C0045FF57 /* registration.cpp */; };
+		C28B018F229B182100B8165D /* dense_motion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29C53BF222B58D900D17385 /* dense_motion.cpp */; };
+		C28B0190229B182100B8165D /* CinderImGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCF08216F0CF10080462D /* CinderImGui.cpp */; };
+		C28B0191229B182100B8165D /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
+		C28B0192229B182100B8165D /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
+		C28B0193229B182100B8165D /* contraction_t.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction_t.cpp */; };
+		C28B0194229B182100B8165D /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
+		C28B0195229B182100B8165D /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
+		C28B0196229B182100B8165D /* exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBE1CF277130074C47A /* exception.cpp */; };
+		C28B0197229B182100B8165D /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
+		C28B0198229B182100B8165D /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFD216E79590080462D /* imgui_demo.cpp */; };
+		C28B0199229B182100B8165D /* algo_Lif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_Lif.cpp */; };
+		C28B019A229B182100B8165D /* algo_Mov.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27DB8AF225BBAA1002AE43D /* algo_Mov.cpp */; };
+		C28B019B229B182100B8165D /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
+		C28B019C229B182100B8165D /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBF1CF277130074C47A /* self_similarity.cpp */; };
+		C28B019D229B182100B8165D /* color.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7B217FDA6600FA9F43 /* color.cc */; };
+		C28B019E229B182100B8165D /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
+		C28B019F229B182100B8165D /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
+		C28B01A0229B182100B8165D /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
+		C28B01A1229B182100B8165D /* highgui.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7F217FDA6600FA9F43 /* highgui.cc */; };
+		C28B01A2229B182100B8165D /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
+		C28B01A3229B182100B8165D /* lineseg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696B1CED3E2C0045FF57 /* lineseg.cpp */; };
+		C28B01A4229B182100B8165D /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
+		C28B01A5229B182100B8165D /* seq_frame_container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* seq_frame_container.cpp */; };
+		C28B01A7229B182100B8165D /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2342E5F227CC45F00D74D80 /* GLUT.framework */; };
+		C28B01A8229B182100B8165D /* libswscale.5.3.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC292221F9E000339675 /* libswscale.5.3.100.dylib */; };
+		C28B01A9229B182100B8165D /* libdc1394.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC252221F94F00339675 /* libdc1394.dylib */; };
+		C28B01AA229B182100B8165D /* libavcodec.58.35.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC232221F92000339675 /* libavcodec.58.35.100.dylib */; };
+		C28B01AB229B182100B8165D /* libavformat.58.20.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC212221F8F500339675 /* libavformat.58.20.100.dylib */; };
+		C28B01AC229B182100B8165D /* libavutil.56.22.100.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AABC1F2221F89A00339675 /* libavutil.56.22.100.dylib */; };
+		C28B01AD229B182100B8165D /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AFAD872252E2950038AF5B /* CoreImage.framework */; };
+		C28B01AE229B182100B8165D /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
+		C28B01AF229B182100B8165D /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784AF0FF439BC000DE1D7 /* Accelerate.framework */; };
+		C28B01B0229B182100B8165D /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */; };
+		C28B01B1229B182100B8165D /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B10FF439BC000DE1D7 /* AudioUnit.framework */; };
+		C28B01B2229B182100B8165D /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B20FF439BC000DE1D7 /* CoreAudio.framework */; };
+		C28B01B3229B182100B8165D /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B50EAFCA7E003A9687 /* QTKit.framework */; };
+		C28B01B4229B182100B8165D /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
+		C28B01B5229B182100B8165D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53E3CDFB0E86099300238D2B /* Carbon.framework */; };
+		C28B01B6229B182100B8165D /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0091D8F80E81B9330029341E /* OpenGL.framework */; };
+		C28B01B7229B182100B8165D /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		C28B01B8229B182100B8165D /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C21946611CE4D95E00976025 /* ImageIO.framework */; };
+		C28B01B9229B182100B8165D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C276ECA81C72B5D900242CDB /* CoreGraphics.framework */; };
+		C28B01BA229B182100B8165D /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995581B128DF400A5C623 /* IOKit.framework */; };
+		C28B01BB229B182100B8165D /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995591B128DF400A5C623 /* IOSurface.framework */; };
+		C28B01BC229B182100B8165D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731819953389008149E2 /* AVFoundation.framework */; };
+		C28B01BD229B182100B8165D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731919953389008149E2 /* CoreMedia.framework */; };
+		C28B01BE229B182100B8165D /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693E1CED3E2B0045FF57 /* libgtest_main.a */; };
+		C28B01BF229B182100B8165D /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693D1CED3E2B0045FF57 /* libgtest.a */; };
+		C28B01C7229B1CD900B8165D /* algo_shortterm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01C6229B1CD900B8165D /* algo_shortterm.cpp */; };
+		C28B01C8229B1CD900B8165D /* algo_shortterm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01C6229B1CD900B8165D /* algo_shortterm.cpp */; };
+		C28B01C9229B1CD900B8165D /* algo_shortterm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01C6229B1CD900B8165D /* algo_shortterm.cpp */; };
+		C28B01CA229B1D7900B8165D /* algo_shortterm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01C6229B1CD900B8165D /* algo_shortterm.cpp */; };
+		C28B01CC229B1DE500B8165D /* lif_serie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01CB229B1DE500B8165D /* lif_serie.cpp */; };
+		C28B01CD229B1DE500B8165D /* lif_serie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01CB229B1DE500B8165D /* lif_serie.cpp */; };
+		C28B01CE229B1DE500B8165D /* lif_serie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01CB229B1DE500B8165D /* lif_serie.cpp */; };
+		C28B01CF229B1DE500B8165D /* lif_serie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01CB229B1DE500B8165D /* lif_serie.cpp */; };
+		C28B01D1229B1E5F00B8165D /* lif_browser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D0229B1E5F00B8165D /* lif_browser.cpp */; };
+		C28B01D2229B1E5F00B8165D /* lif_browser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D0229B1E5F00B8165D /* lif_browser.cpp */; };
+		C28B01D3229B1E5F00B8165D /* lif_browser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D0229B1E5F00B8165D /* lif_browser.cpp */; };
+		C28B01D4229B1E5F00B8165D /* lif_browser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D0229B1E5F00B8165D /* lif_browser.cpp */; };
+		C28B01D6229B1F8000B8165D /* lif_core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D5229B1F8000B8165D /* lif_core.cpp */; };
+		C28B01D7229B1F8000B8165D /* lif_core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D5229B1F8000B8165D /* lif_core.cpp */; };
+		C28B01D8229B1F8000B8165D /* lif_core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D5229B1F8000B8165D /* lif_core.cpp */; };
+		C28B01D9229B1F8000B8165D /* lif_core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D5229B1F8000B8165D /* lif_core.cpp */; };
+		C28B01DC229B210A00B8165D /* voxel_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* voxel_segmentation.cpp */; };
+		C28B01DD229B210A00B8165D /* voxel_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* voxel_segmentation.cpp */; };
+		C28B01DE229B210A00B8165D /* voxel_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* voxel_segmentation.cpp */; };
+		C28B01DF229B210A00B8165D /* voxel_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* voxel_segmentation.cpp */; };
 		C28F74382236D00B0040890C /* edgel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069661CED3E2C0045FF57 /* edgel.cpp */; };
 		C28F74392236DD6E0040890C /* edgel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069661CED3E2C0045FF57 /* edgel.cpp */; };
 		C28F743A2236DD6F0040890C /* edgel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069661CED3E2C0045FF57 /* edgel.cpp */; };
@@ -473,6 +573,15 @@
 				C2819ED52201287900183E44 /* visible_scope.png in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C28B01C0229B182100B8165D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
 		};
 		C2DB72EF22591DB700C2B986 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -828,6 +937,14 @@
 		C2820F3421752C1100DFA7A6 /* gui_handler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = gui_handler.hpp; path = ../include/gui_handler.hpp; sourceTree = "<group>"; };
 		C2820F3621752E5100DFA7A6 /* VisibleApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VisibleApp.h; path = ../include/VisibleApp.h; sourceTree = "<group>"; };
 		C2820F3721754C3100DFA7A6 /* imGuiLogger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = imGuiLogger.hpp; path = ../include/imGuiLogger.hpp; sourceTree = "<group>"; };
+		C28B01C4229B182100B8165D /* affineApp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = affineApp; sourceTree = BUILT_PRODUCTS_DIR; };
+		C28B01C5229B182300B8165D /* VisibleGtest copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleGtest copy-Info.plist"; path = "/Volumes/medvedev/Users/arman/dev/Visible/xcode/VisibleGtest copy-Info.plist"; sourceTree = "<absolute>"; };
+		C28B01C6229B1CD900B8165D /* algo_shortterm.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = algo_shortterm.cpp; path = ../src/algo_shortterm.cpp; sourceTree = "<group>"; };
+		C28B01CB229B1DE500B8165D /* lif_serie.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = lif_serie.cpp; path = ../src/lif_serie.cpp; sourceTree = "<group>"; };
+		C28B01D0229B1E5F00B8165D /* lif_browser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = lif_browser.cpp; path = ../src/lif_browser.cpp; sourceTree = "<group>"; };
+		C28B01D5229B1F8000B8165D /* lif_core.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = lif_core.cpp; path = ../src/lif_core.cpp; sourceTree = "<group>"; };
+		C28B01DA229B210A00B8165D /* voxel_segmentation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = voxel_segmentation.cpp; path = ../src/voxel_segmentation.cpp; sourceTree = "<group>"; };
+		C28B01DB229B210A00B8165D /* voxel_segmentation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = voxel_segmentation.hpp; path = ../include/voxel_segmentation.hpp; sourceTree = "<group>"; };
 		C28F74312234880B0040890C /* processor_cli.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = processor_cli.cpp; sourceTree = "<group>"; };
 		C290E4032245A41500FD6FD1 /* dsp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dsp.cpp; sourceTree = "<group>"; };
 		C294B11F2152D22C00C916B1 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
@@ -1011,6 +1128,38 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C28B01A6229B182100B8165D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C28B01A7229B182100B8165D /* GLUT.framework in Frameworks */,
+				C28B01A8229B182100B8165D /* libswscale.5.3.100.dylib in Frameworks */,
+				C28B01A9229B182100B8165D /* libdc1394.dylib in Frameworks */,
+				C28B01AA229B182100B8165D /* libavcodec.58.35.100.dylib in Frameworks */,
+				C28B01AB229B182100B8165D /* libavformat.58.20.100.dylib in Frameworks */,
+				C28B01AC229B182100B8165D /* libavutil.56.22.100.dylib in Frameworks */,
+				C28B01AD229B182100B8165D /* CoreImage.framework in Frameworks */,
+				C28B01AE229B182100B8165D /* OpenCL.framework in Frameworks */,
+				C28B01AF229B182100B8165D /* Accelerate.framework in Frameworks */,
+				C28B01B0229B182100B8165D /* AudioToolbox.framework in Frameworks */,
+				C28B01B1229B182100B8165D /* AudioUnit.framework in Frameworks */,
+				C28B01B2229B182100B8165D /* CoreAudio.framework in Frameworks */,
+				C28B01B3229B182100B8165D /* QTKit.framework in Frameworks */,
+				C28B01B4229B182100B8165D /* CoreVideo.framework in Frameworks */,
+				C28B01B5229B182100B8165D /* Carbon.framework in Frameworks */,
+				C28B01B6229B182100B8165D /* OpenGL.framework in Frameworks */,
+				C28B01B7229B182100B8165D /* Cocoa.framework in Frameworks */,
+				C28B01B8229B182100B8165D /* ImageIO.framework in Frameworks */,
+				C28B01B9229B182100B8165D /* CoreGraphics.framework in Frameworks */,
+				C28B01BA229B182100B8165D /* IOKit.framework in Frameworks */,
+				C28B01BB229B182100B8165D /* IOSurface.framework in Frameworks */,
+				C28B01BC229B182100B8165D /* AVFoundation.framework in Frameworks */,
+				C28B01BD229B182100B8165D /* CoreMedia.framework in Frameworks */,
+				C28B01BE229B182100B8165D /* libgtest_main.a in Frameworks */,
+				C28B01BF229B182100B8165D /* libgtest.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C2DB72D622591DB700C2B986 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1054,6 +1203,11 @@
 				C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */,
 				C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */,
 				C29DB075212B351200930CBD /* algo_Lif.cpp */,
+				C28B01DA229B210A00B8165D /* voxel_segmentation.cpp */,
+				C28B01D5229B1F8000B8165D /* lif_core.cpp */,
+				C28B01CB229B1DE500B8165D /* lif_serie.cpp */,
+				C28B01D0229B1E5F00B8165D /* lif_browser.cpp */,
+				C28B01C6229B1CD900B8165D /* algo_shortterm.cpp */,
 				C24EA2D2207F07EF00555D16 /* sg_filter.cpp */,
 				C252611E1F66EA910069F665 /* PlistDate.cpp */,
 				C252611F1F66EA910069F665 /* pugixml.cpp */,
@@ -1083,6 +1237,7 @@
 				C26A053A1E771CCF00BDC954 /* sscli */,
 				C26F5FFD21B0AA6D00EAE156 /* VisibleRun.app */,
 				C2DB72F522591DB700C2B986 /* Bina.app */,
+				C28B01C4229B182100B8165D /* affineApp */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1107,6 +1262,7 @@
 				C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */,
 				C240F9FA21E14C8900FBA228 /* sscli-Info.plist */,
 				C2DB72F622591DBF00C2B986 /* Bina.plist */,
+				C28B01C5229B182300B8165D /* VisibleGtest copy-Info.plist */,
 			);
 			name = QuickTimeIteration;
 			sourceTree = "<group>";
@@ -1278,6 +1434,7 @@
 				C24FC84C1E5E40130071AA1A /* async_tracks.h */,
 				C213607821647E4A00F794AB /* cached_results.hpp */,
 				C241BBAA1FB11B51000DE36E /* algo_Lif.hpp */,
+				C28B01DB229B210A00B8165D /* voxel_segmentation.hpp */,
 				C2E02ED2225AB49900AC175D /* algo_Mov.hpp */,
 				C219469E1CE4EA4900976025 /* simple_pair.h */,
 				C219469F1CE4EA4900976025 /* sshist.hpp */,
@@ -1877,6 +2034,23 @@
 			productReference = C26F5FFD21B0AA6D00EAE156 /* VisibleRun.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C28B016D229B182100B8165D /* affineApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C28B01C1229B182100B8165D /* Build configuration list for PBXNativeTarget "affineApp" */;
+			buildPhases = (
+				C28B016E229B182100B8165D /* Sources */,
+				C28B01A6229B182100B8165D /* Frameworks */,
+				C28B01C0229B182100B8165D /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = affineApp;
+			productName = VisibleGtest;
+			productReference = C28B01C4229B182100B8165D /* affineApp */;
+			productType = "com.apple.product-type.tool";
+		};
 		C2DB728D22591DB700C2B986 /* Bina */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C2DB72F222591DB700C2B986 /* Build configuration list for PBXNativeTarget "Bina" */;
@@ -1928,6 +2102,10 @@
 						DevelopmentTeam = W4F7HL2GN5;
 						ProvisioningStyle = Automatic;
 					};
+					C28B016D229B182100B8165D = {
+						DevelopmentTeam = W4F7HL2GN5;
+						ProvisioningStyle = Automatic;
+					};
 					C2DB728D22591DB700C2B986 = {
 						DevelopmentTeam = W4F7HL2GN5;
 						ProvisioningStyle = Automatic;
@@ -1955,6 +2133,7 @@
 				C24CD87B1CEA5B1B0008C72B /* VisibleGtest */,
 				C26A05391E771CCF00BDC954 /* sscli */,
 				C2DB728D22591DB700C2B986 /* Bina */,
+				C28B016D229B182100B8165D /* affineApp */,
 			);
 		};
 /* End PBXProject section */
@@ -2057,6 +2236,7 @@
 				C242CCC5217E76D8004F7867 /* contraction_t.cpp in Sources */,
 				C2B005821CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C21094672239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
+				C28B01D1229B1E5F00B8165D /* lif_browser.cpp in Sources */,
 				C2606DB01CED3E2E0045FF57 /* opencv_utils.cpp in Sources */,
 				C2AFCEFE216E79590080462D /* imgui_widgets.cpp in Sources */,
 				C2770658226A402B00215A55 /* cvVideoPlayer.cpp in Sources */,
@@ -2068,6 +2248,8 @@
 				C2A5DBAD207A003F001C6608 /* Plist.cpp in Sources */,
 				C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */,
 				C2606DAE1CED3E2E0045FF57 /* localvariance.cpp in Sources */,
+				C28B01DC229B210A00B8165D /* voxel_segmentation.cpp in Sources */,
+				C28B01C7229B1CD900B8165D /* algo_shortterm.cpp in Sources */,
 				C27ED0A2220BB71D00B55D65 /* InterfaceUtilities.cpp in Sources */,
 				C20D4DE52208BD34004D9405 /* ellipse_fit.cpp in Sources */,
 				C25261211F66EA910069F665 /* pugixml.cpp in Sources */,
@@ -2082,6 +2264,7 @@
 				C20BBC0B1E4E39E6002C7D68 /* rand_support.cpp in Sources */,
 				C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */,
 				C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */,
+				C28B01D6229B1F8000B8165D /* lif_core.cpp in Sources */,
 				C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */,
 				C2606DAB1CED3E2E0045FF57 /* ip_utils.cpp in Sources */,
 				C2618F82217FDA6600FA9F43 /* window.cc in Sources */,
@@ -2117,6 +2300,7 @@
 				C2606DAF1CED3E2E0045FF57 /* matpixel.cpp in Sources */,
 				C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */,
 				C2109476223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
+				C28B01CC229B1DE500B8165D /* lif_serie.cpp in Sources */,
 				C2398A0921DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C2618F83217FDA6600FA9F43 /* highgui.cc in Sources */,
 				C28F743A2236DD6F0040890C /* edgel.cpp in Sources */,
@@ -2129,6 +2313,7 @@
 			files = (
 				C21094692239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
 				C20BBC071E4E34C3002C7D68 /* lifFile.cpp in Sources */,
+				C28B01CE229B1DE500B8165D /* lif_serie.cpp in Sources */,
 				C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */,
 				C20BBC041E4E33D3002C7D68 /* tinyxml.cpp in Sources */,
 				C24EA2D4207F081000555D16 /* sg_filter.cpp in Sources */,
@@ -2148,8 +2333,10 @@
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,
 				C21E390E228A054C00778A66 /* affine_rectangle.cpp in Sources */,
+				C28B01DE229B210A00B8165D /* voxel_segmentation.cpp in Sources */,
 				C2618F86217FDA9900FA9F43 /* window.cc in Sources */,
 				C20D4DE72208BD34004D9405 /* ellipse_fit.cpp in Sources */,
+				C28B01D3229B1E5F00B8165D /* lif_browser.cpp in Sources */,
 				C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */,
 				C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */,
 				C2618F87217FDA9E00FA9F43 /* figure.cc in Sources */,
@@ -2172,8 +2359,10 @@
 				C29DB077212B351200930CBD /* algo_Lif.cpp in Sources */,
 				C27DB8B2225BBAA1002AE43D /* algo_Mov.cpp in Sources */,
 				C2109478223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
+				C28B01CA229B1D7900B8165D /* algo_shortterm.cpp in Sources */,
 				C20EDBC61CF2776D0074C47A /* self_similarity.cpp in Sources */,
 				C2618F84217FDA8400FA9F43 /* color.cc in Sources */,
+				C28B01D8229B1F8000B8165D /* lif_core.cpp in Sources */,
 				C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */,
 				C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */,
 				C2819ECF2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
@@ -2225,6 +2414,7 @@
 				C2BDEFEF21C8237A00A8CB94 /* core_support.cpp in Sources */,
 				C26F5FA221B0AA6D00EAE156 /* gradient.cpp in Sources */,
 				C26F5FA521B0AA6D00EAE156 /* gui_handler.cpp in Sources */,
+				C28B01C8229B1CD900B8165D /* algo_shortterm.cpp in Sources */,
 				C26F5FA621B0AA6D00EAE156 /* contraction_t.cpp in Sources */,
 				C21094682239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
 				C26F5FA721B0AA6D00EAE156 /* hockey_etc_cocoa_wrappers.mm in Sources */,
@@ -2243,6 +2433,7 @@
 				C20D4DE62208BD34004D9405 /* ellipse_fit.cpp in Sources */,
 				C2AEB73C228CD6E70078E687 /* geom_utils.cpp in Sources */,
 				C26F5FB621B0AA6D00EAE156 /* pugixml.cpp in Sources */,
+				C28B01D2229B1E5F00B8165D /* lif_browser.cpp in Sources */,
 				C26F5FB821B0AA6D00EAE156 /* lineseg.cpp in Sources */,
 				C2ED5BB72209F79B00EE52B3 /* imguivariouscontrols.cpp in Sources */,
 				C21E390D228A054C00778A66 /* affine_rectangle.cpp in Sources */,
@@ -2257,7 +2448,10 @@
 				C26F5FC021B0AA6D00EAE156 /* lifFile.cpp in Sources */,
 				C26F5FC121B0AA6D00EAE156 /* tinyxmlerror.cpp in Sources */,
 				C26F5FC221B0AA6D00EAE156 /* labelBlob.cpp in Sources */,
+				C28B01CD229B1DE500B8165D /* lif_serie.cpp in Sources */,
+				C28B01D7229B1F8000B8165D /* lif_core.cpp in Sources */,
 				C210946F223AEC19004E88EE /* imgui_wrapper.cpp in Sources */,
+				C28B01DD229B210A00B8165D /* voxel_segmentation.cpp in Sources */,
 				C26F5FC321B0AA6D00EAE156 /* ip_utils.cpp in Sources */,
 				C26F5FC421B0AA6D00EAE156 /* window.cc in Sources */,
 				C26F5FC521B0AA6D00EAE156 /* imgui_draw.cpp in Sources */,
@@ -2294,6 +2488,68 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C28B016E229B182100B8165D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C28B016F229B182100B8165D /* permutation_entropy.cpp in Sources */,
+				C28B0170229B182100B8165D /* lifFile.cpp in Sources */,
+				C28B0171229B182100B8165D /* time_spec.cpp in Sources */,
+				C28B0172229B182100B8165D /* tinyxml.cpp in Sources */,
+				C28B0173229B182100B8165D /* sg_filter.cpp in Sources */,
+				C28B0174229B182100B8165D /* imgui.cpp in Sources */,
+				C28B0175229B182100B8165D /* histo.cpp in Sources */,
+				C28B0176229B182100B8165D /* cvVideoPlayer.cpp in Sources */,
+				C28B0177229B182100B8165D /* affineApp.cpp in Sources */,
+				C28B0178229B182100B8165D /* geom_utils.cpp in Sources */,
+				C28B0179229B182100B8165D /* rowfunc.cpp in Sources */,
+				C28B017A229B182100B8165D /* opencv_utils.cpp in Sources */,
+				C28B017B229B182100B8165D /* sm_producer.cpp in Sources */,
+				C28B017C229B182100B8165D /* edgel.cpp in Sources */,
+				C28B017D229B182100B8165D /* csv.cpp in Sources */,
+				C28B017E229B182100B8165D /* AVReaderWrapper.mm in Sources */,
+				C28B017F229B182100B8165D /* imgui_wrapper.cpp in Sources */,
+				C28B0180229B182100B8165D /* cinder_support.cpp in Sources */,
+				C28B0181229B182100B8165D /* ip_utils.cpp in Sources */,
+				C28B0182229B182100B8165D /* matpixel.cpp in Sources */,
+				C28B0183229B182100B8165D /* affine_rectangle.cpp in Sources */,
+				C28B0184229B182100B8165D /* window.cc in Sources */,
+				C28B0185229B182100B8165D /* ellipse_fit.cpp in Sources */,
+				C28B0186229B182100B8165D /* tinyxmlparser.cpp in Sources */,
+				C28B0187229B182100B8165D /* logger.cpp in Sources */,
+				C28B0188229B182100B8165D /* figure.cc in Sources */,
+				C28B0189229B182100B8165D /* glmutils.cpp in Sources */,
+				C28B018A229B182100B8165D /* tinyxmlerror.cpp in Sources */,
+				C28B018B229B182100B8165D /* file_system.cpp in Sources */,
+				C28B018C229B182100B8165D /* gradient.cpp in Sources */,
+				C28B018D229B182100B8165D /* imgui_widgets.cpp in Sources */,
+				C28B018E229B182100B8165D /* registration.cpp in Sources */,
+				C28B018F229B182100B8165D /* dense_motion.cpp in Sources */,
+				C28B0190229B182100B8165D /* CinderImGui.cpp in Sources */,
+				C28B0191229B182100B8165D /* imgui_draw.cpp in Sources */,
+				C28B0192229B182100B8165D /* localvariance.cpp in Sources */,
+				C28B0193229B182100B8165D /* contraction_t.cpp in Sources */,
+				C28B0194229B182100B8165D /* bitvector.cpp in Sources */,
+				C28B0195229B182100B8165D /* boost_literals.cpp in Sources */,
+				C28B0196229B182100B8165D /* exception.cpp in Sources */,
+				C28B0197229B182100B8165D /* rand_support.cpp in Sources */,
+				C28B0198229B182100B8165D /* imgui_demo.cpp in Sources */,
+				C28B0199229B182100B8165D /* algo_Lif.cpp in Sources */,
+				C28B019A229B182100B8165D /* algo_Mov.cpp in Sources */,
+				C28B019B229B182100B8165D /* opencv_draw.cpp in Sources */,
+				C28B019C229B182100B8165D /* self_similarity.cpp in Sources */,
+				C28B019D229B182100B8165D /* color.cc in Sources */,
+				C28B019E229B182100B8165D /* AVReader.mm in Sources */,
+				C28B019F229B182100B8165D /* labelBlob.cpp in Sources */,
+				C28B01A0229B182100B8165D /* ImGuiExtensions.cpp in Sources */,
+				C28B01A1229B182100B8165D /* highgui.cc in Sources */,
+				C28B01A2229B182100B8165D /* tinystr.cpp in Sources */,
+				C28B01A3229B182100B8165D /* lineseg.cpp in Sources */,
+				C28B01A4229B182100B8165D /* core_support.cpp in Sources */,
+				C28B01A5229B182100B8165D /* seq_frame_container.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C2DB729622591DB700C2B986 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2301,6 +2557,7 @@
 				C2DB729722591DB700C2B986 /* gradient.cpp in Sources */,
 				C27DB8B3225BBAA1002AE43D /* algo_Mov.cpp in Sources */,
 				C2DB729822591DB700C2B986 /* gui_handler.cpp in Sources */,
+				C28B01C9229B1CD900B8165D /* algo_shortterm.cpp in Sources */,
 				C2DB729922591DB700C2B986 /* contraction_t.cpp in Sources */,
 				C2DB729A22591DB700C2B986 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C2DB729B22591DB700C2B986 /* permutation_entropy.cpp in Sources */,
@@ -2319,6 +2576,7 @@
 				C2DB72A822591DB700C2B986 /* lineseg.cpp in Sources */,
 				C2AEB73E228CD6E70078E687 /* geom_utils.cpp in Sources */,
 				C2DB72A922591DB700C2B986 /* cinder_support.cpp in Sources */,
+				C28B01D4229B1E5F00B8165D /* lif_browser.cpp in Sources */,
 				C2DB72AA22591DB700C2B986 /* imguivariouscontrols.cpp in Sources */,
 				C2DB72AB22591DB700C2B986 /* visible_lif_impl.cpp in Sources */,
 				C21E390F228A054C00778A66 /* affine_rectangle.cpp in Sources */,
@@ -2333,7 +2591,10 @@
 				C29E1BCE225AA26200CBFFDB /* cvVideoPlayer.cpp in Sources */,
 				C2DB72B322591DB700C2B986 /* ip_utils.cpp in Sources */,
 				C2DB72B422591DB700C2B986 /* window.cc in Sources */,
+				C28B01CF229B1DE500B8165D /* lif_serie.cpp in Sources */,
+				C28B01D9229B1F8000B8165D /* lif_core.cpp in Sources */,
 				C2DB72B522591DB700C2B986 /* imgui_wrapper.cpp in Sources */,
+				C28B01DF229B210A00B8165D /* voxel_segmentation.cpp in Sources */,
 				C2DB72B622591DB700C2B986 /* imgui_draw.cpp in Sources */,
 				C2DB72B722591DB700C2B986 /* rowfunc.cpp in Sources */,
 				C2DB72B822591DB700C2B986 /* csv.cpp in Sources */,
@@ -2886,6 +3147,121 @@
 			};
 			name = Release;
 		};
+		C28B01C2229B182100B8165D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C2AABC1E2221E82200339675 /* gtest.xcconfig */;
+			buildSettings = {
+				ASSETS_DATA = "$(SRCROOT)/Assets/checker";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = W4F7HL2GN5;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Visible_GTest_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = "VisibleGtest copy-Info.plist";
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				MACH_O_TYPE = mh_execute;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.affineApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				VALID_ARCHS = x86_64;
+			};
+			name = Debug;
+		};
+		C28B01C3229B182100B8165D /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C2AABC1E2221E82200339675 /* gtest.xcconfig */;
+			buildSettings = {
+				ASSETS_DATA = "$(SRCROOT)/Assets/checker";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = W4F7HL2GN5;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 1;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Visible_GTest_Prefix.pch;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = "VisibleGtest copy-Info.plist";
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				MACH_O_TYPE = mh_execute;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.affineApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				VALID_ARCHS = x86_64;
+			};
+			name = Release;
+		};
 		C2DB72F322591DB700C2B986 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
@@ -3025,6 +3401,15 @@
 			buildConfigurations = (
 				C26F5FFB21B0AA6D00EAE156 /* Debug */,
 				C26F5FFC21B0AA6D00EAE156 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C28B01C1229B182100B8165D /* Build configuration list for PBXNativeTarget "affineApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C28B01C2229B182100B8165D /* Debug */,
+				C28B01C3229B182100B8165D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
