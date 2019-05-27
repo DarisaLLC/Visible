@@ -24,6 +24,7 @@
 #include <boost/assert.hpp>
 #include <map>
 #include <Eigen/Dense>
+#include "voxel_segmentation.hpp"
 
 using namespace Eigen;
 
@@ -211,13 +212,16 @@ class LifSignaler : public base_signaler
 class lif_serie_processor : public LifSignaler
 {
 public:
+    using voxel_params_t=voxelSegmenter::params;
     
     class params{
     public:
-        params ():m_voxel_sample(3,3), m_pad(0,0), m_min_segmentation_area(10) {}
-        const std::pair<uint32_t,uint32_t>& voxel_sample () {return m_voxel_sample; }
-        const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_pad; }
-        const uint32_t& min_seqmentation_area () {return m_min_segmentation_area; }
+        params (const voxel_params_t voxel_params = voxel_params_t()): m_vparams(voxel_params) {}
+        
+        const std::pair<uint32_t,uint32_t>& voxel_sample () {return m_vparams.voxel_sample(); }
+        const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_vparams.voxel_pad(); }
+        const iPair& expected_segmented_size () {return m_vparams.expected_segmented_size(); }
+        const uint32_t& min_seqmentation_area () {return m_vparams.min_segmentation_area(); }
         
         const std::string& image_cache_name () {
             static std::string s_image_cache_name = "voxel_ss_.png";
@@ -233,13 +237,7 @@ public:
         }
         
     private:
-        std::pair<uint32_t,uint32_t> m_voxel_sample;
-        std::pair<uint32_t,uint32_t> m_pad;
-        uint32_t m_min_segmentation_area;
-
-       
-      
-
+        voxel_params_t m_vparams;
     };
     
     using contractionContainer_t = contraction_analyzer::contractionContainer_t;

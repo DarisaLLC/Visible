@@ -11,7 +11,6 @@
 #include <typeindex>
 #include <map>
 #include <future>
-//#include "core/singleton.hpp"
 #include "async_tracks.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
@@ -21,6 +20,8 @@
 #include "vision/opencv_utils.hpp"
 #include "opencv2/video/tracking.hpp"
 #include "algo_cardiac.hpp"
+#include "voxel_segmentation.hpp"
+
 using namespace cv;
 
 // For base classing
@@ -34,15 +35,34 @@ class movSignaler : public base_signaler
 class sequence_processor : public movSignaler
 {
 public:
+    using voxel_params_t=voxelSegmenter::params;
+    
     class params{
     public:
-        params ():m_voxel_sample(3,3), m_pad(5,5) {}
-        const std::pair<uint32_t,uint32_t>& voxel_sample () {return m_voxel_sample; }
-        const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_pad; }
+        params (const voxel_params_t voxel_params = voxel_params_t()): m_vparams(voxel_params) {}
+        
+        const std::pair<uint32_t,uint32_t>& voxel_sample () {return m_vparams.voxel_sample(); }
+        const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_vparams.voxel_pad(); }
+        const iPair& expected_segmented_size () {return m_vparams.expected_segmented_size(); }
+        const uint32_t& min_seqmentation_area () {return m_vparams.min_segmentation_area(); }
+        
+        const std::string& image_cache_name () {
+            static std::string s_image_cache_name = "voxel_ss_.png";
+            return s_image_cache_name;
+        }
+        const std::string& result_container_cache_name (){
+            static std::string s_result_container_cache_name = "container_ss_";
+            return s_result_container_cache_name;
+        }
+        const std::string& internal_container_cache_name (){
+            static std::string s_internal_container_cache_name = "internal_ss_";
+            return s_internal_container_cache_name;
+        }
+        
     private:
-        std::pair<uint32_t,uint32_t> m_voxel_sample;
-        std::pair<uint32_t,uint32_t> m_pad;
+        voxel_params_t m_vparams;
     };
+
     typedef void (sig_cb_content_loaded) (int64_t&);
     typedef void (sig_cb_frame_loaded) (int&, double&);
     typedef void (sig_cb_sm1d_available) (int&);
