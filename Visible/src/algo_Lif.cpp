@@ -83,7 +83,9 @@ void lif_serie_processor::internal_generate_affine_windows (const std::vector<ro
             
             //Adjust the box angle
             // Already Done
-            
+            std::string msg =             svl::to_string(box);
+            vlogger::instance().console()->info(msg);
+
             //Rotate the text according to the angle
             auto transform = getRotationMatrix2D(box.center, angle, 1.0);
             Mat rotated;
@@ -145,19 +147,36 @@ void lif_serie_processor::save_affine_windows (const std::vector<cv::Mat>& rws){
     }
 }
 
+/**
+ finalize_segmentation
+    [grayscale,bi_level] -> create a blob runner, attach res_ready_lambda as callback, run blob runner
+    [res_ready_lambda] processes only the top blob result (@todo reference blob result sorting criteria)
+                       create an affine transform to affine warp the cell area
+                       create a cell gl model for drawing it.
+ 
+ @param mono gray scale image
+ @param bi_level bi_level ( i.e. binarized image )
+ */
 void lif_serie_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
      
     m_main_blob = labelBlob::create(mono, bi_level, m_params.min_seqmentation_area(), 666);
+    
     std::function<labelBlob::results_ready_cb> res_ready_lambda = [this](int64_t& cbi)
     {
         const std::vector<blob>& blobs = m_main_blob->results();
         if (! blobs.empty()){
             m_motion_mass = blobs[0].rotated_roi();
             std::vector<cv::Point2f> corners(4);
+            std::string msg = svl::to_string(m_motion_mass);
+            msg = " < " + msg;
+            vlogger::instance().console()->info(msg);
             m_motion_mass.points(corners.data());
             pointsToRotatedRect(corners, m_motion_mass);
+            msg = svl::to_string(m_motion_mass);
+            msg = " > " + msg;
+            vlogger::instance().console()->info(msg);
             std::vector<cv::Point2f> mid_points;
             svl::get_mid_points(m_motion_mass, mid_points);
             m_surface_affine = cv::getRotationMatrix2D(m_motion_mass.center,m_motion_mass.angle, 1);

@@ -75,7 +75,7 @@ public:
     std::string pixelInfo ( const ivec2 & position);
     void drawEditableRect ();
     void openFile();
-    static cv::Mat affineCrop (cv::Mat& src, cv::RotatedRect& rect, float aspect);
+    cv::Mat affineCrop (cv::Mat& src, cv::RotatedRect& rect, float aspect);
     vec2 matStats (const cv::Mat& image);
     Surface8uRef   mImage;
     
@@ -108,6 +108,9 @@ public:
     bool           mIsClicked;
     bool           mMouseIsDown;
     bool           mCtrlDown;
+    bool           mKeepAspect;
+    bool           mHorizontal, mVertical;
+    bool mVerticalSyncEnabled = false;
     
     cv::Mat mModel;
     boost::filesystem::path mFolderPath;
@@ -160,20 +163,25 @@ void affineApp::openFile()
 
 void affineApp::update()
 {
+    if ( mVerticalSyncEnabled != gl::isVerticalSyncEnabled() )
+    {
+        gl::enableVerticalSync( mVerticalSyncEnabled );
+    }
 }
 
 
 void affineApp::generate_crop (){
 
+#if 0
     auto cvDrawImage = [] (cv::Mat& image){
-            auto name = "image";
-            auto &view = cvplot::Window::current().view(name);
-            cvplot::moveWindow(name, 0, 0);
-            view.size(cvplot::Size(image.cols*3,image.rows*3));
-            view.drawImage(&image);
-            view.finish();
-            view.flush();
-        };
+        auto name = "image";
+        auto &view = cvplot::Window::current().view(name);
+        cvplot::moveWindow(name, 0, 0);
+        view.size(cvplot::Size(image.cols*3,image.rows*3));
+        view.drawImage(&image);
+        view.finish();
+        view.flush();
+    };
     
     auto cvDrawPlot = [&] (std::vector<float>& one_d, cvplot::Size& used, std::string& name){
         {
@@ -190,23 +198,68 @@ void affineApp::generate_crop (){
             .color(cvplot::Blue.alpha(alpha))
             .legend(false);
             figure.alpha(alpha).show(true);
-
+            
         }
     };
+#endif
+    
+    auto cvDrawAll = [] (cv::Mat& image, std::vector<float>& hz, std::vector<float>& vt ){
+            auto name = "image";
+            auto alpha = 200;
+        int border = 50;
+        int scale = std::max(1,640 / std::max(image.cols,image.rows));
+            auto &view = cvplot::Window::current().view(name);
+            cvplot::resizeWindow(name, scale*(image.cols), scale*(image.rows));
+            cvplot::moveWindow(name, 0, 0);
+            cvplot::Window::current().view(name).frameColor(cvplot::Sky).alpha(alpha);
+            {
+                auto &figure = cvplot::figure(name);
+                figure.origin(false,false);
+                figure.series("Horizontal")
+                .setValue(hz)
+                .type(cvplot::Histogram)
+                .color(cvplot::Blue.alpha(alpha))
+                .legend(false);
+                figure.alpha(alpha).show(true);
+            }
+            cvplot::moveWindow(name, border,scale*image.rows - border - 20);
+            view.size(cvplot::Size(scale*image.cols-2*border,scale*image.rows-(2*border)));
+            view.drawImage(&image);
+            view.finish();
+            view.flush();
+        
+            cvplot::moveWindow(name, scale*image.cols,scale*image.rows - border - 20);
+            cvplot::Window::current().view(name).frameColor(cvplot::Sky).alpha(alpha);
+            auto &figure= cvplot::figure(name);
+            figure.origin(false,false);
+            figure.series("Horizontal")
+            .setValue(vt)
+            .type(cvplot::Vistogram)
+            .color(cvplot::Blue.alpha(alpha))
+            .legend(false);
+            figure.alpha(alpha).show(true);
+
+        };
+    
+    
+  
     
     auto cp = mRectangle.rotatedRectInImage(mPaddedArea);
     cv::Mat crop = affineCrop(mPadded, cp, mRectangle.aspect());
     cv::Mat hz (1, crop.cols, CV_32F);
     cv::Mat vt (crop.rows, 1, CV_32F);
     horizontal_vertical_projections (crop, hz, vt);
-    std::vector<float> hz_vec(hz.ptr<float>(0),hz.ptr<float>(0)+hz.cols );
+    std::vector<float> hz_vec(crop.cols);
+    for (auto ii = 0; ii < crop.cols; ii++) hz_vec[ii] = vt.at<float>(0,ii);
     std::vector<float> vt_vec(crop.rows);
     for (auto ii = 0; ii < crop.rows; ii++) vt_vec[ii] = vt.at<float>(ii,0);
-    cvDrawImage(crop);
-    std::string hhh ("hz");
-    std::string vvv ("vt");
-    cvplot::Size used (crop.cols*3, crop.rows*3);
-    cvDrawPlot(vt_vec, used, vvv);
+
+    
+    svl::norm_min_max(hz_vec.begin(),hz_vec.end());
+    svl::norm_min_max(vt_vec.begin(),vt_vec.end());
+    cvDrawAll(crop, hz_vec, vt_vec);
+    
+
 }
 
 
@@ -221,11 +274,14 @@ void affineApp::setup()
     // Setup the parameters
     mParams = params::InterfaceGl::create ( getWindow(), "Parameters", vec2( 200, 150 ) );
     mOption = 0;
-    mParams->addParam( "Display", mNames, &mOption )
-    .updateFn( [this] { textureToDisplay = &mTextures[mOption]; console() << "display updated: " << mNames[mOption] << endl; } );
+//    mParams->addParam( "Display", mNames, &mOption )
+//    .updateFn( [this] { textureToDisplay = &mTextures[mOption]; console() << "display updated: " << mNames[mOption] << endl; } );
     mParams->addButton( "Add image ",
                        std::bind( &affineApp::openFile, this ) );
-    
+    mParams->addSeparator();
+    mParams->addParam( "Horizontal", &mHorizontal ).updateFn( [this] { if (mVertical) mVertical= false; } );
+    mParams->addParam( "Vertical", &mVertical ).updateFn( [this] { if (mHorizontal) mHorizontal= false; } );
+    mParams->addSeparator();
     mParams->addButton(" Crop Affine ", std::bind(&affineApp::generate_crop, this));
     
 #if defined( CINDER_COCOA_TOUCH )
@@ -245,6 +301,7 @@ void affineApp::setup()
     mIsClicked = false;
     mIsOver = false;
     mMouseIsDown = false;
+
 }
 
 void affineApp::mouseDown( MouseEvent event )
@@ -482,10 +539,15 @@ cv::Mat affineApp::affineCrop (cv::Mat& src, cv::RotatedRect& in_rect, float asp
     Mat M, rotated, cropped;
     float angle = rect.angle;
     auto rect_size = rect.size;
+
+
+#if NOTYET
     float in_aspect = (float)rect.size.width / (float) rect.size.height;
     if ((in_aspect > 1.0) != (aspect > 1.0)){
+        std::cout << "Aspect Correction " << in_aspect << " -> " << aspect << std::endl;
         std::swap(rect.size.width,rect.size.height);
     }
+#endif
     
     std::string rs = to_string(rect);
     std::cout << std::endl << rs << std::endl;
