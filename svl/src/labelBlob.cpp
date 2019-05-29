@@ -105,6 +105,7 @@ void momento::getDirectionals () const
 svl::labelBlob::labelBlob() : m_results_ready(false){
     // Signals we provide
     signal_results_ready = createSignal<results_ready_cb> ();
+    signal_results = createSignal<results_cb> ();
     signal_graphics_ready = createSignal<graphics_ready_cb> ();
     
 }
@@ -113,6 +114,7 @@ svl::labelBlob::labelBlob() : m_results_ready(false){
 svl::labelBlob::labelBlob(const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id, const int minAreaPixelCount) : m_results_ready(false){
     // Signals we provide
     signal_results_ready = createSignal<results_ready_cb> ();
+    signal_results = createSignal<results_cb> ();
     signal_graphics_ready = createSignal<graphics_ready_cb> ();
     reload(gray, threshold_out, client_id,  minAreaPixelCount);
 }
@@ -291,8 +293,12 @@ void  labelBlob::run() const {
         m_blobs.back().update_moments(m_grey);
         m_blobs.back().update_points(lablemap[i]);
     }
+    // Inform listeners of new programs !
     if (signal_results_ready && signal_results_ready->num_slots() > 0)
         signal_results_ready->operator()(m_client_id);
+    if (signal_results && signal_results->num_slots() > 0)
+        signal_results->operator()(m_blobs);
+    
     m_results_ready = true;
 }
 

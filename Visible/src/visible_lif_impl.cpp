@@ -64,8 +64,8 @@ using namespace svl;
 
 namespace {
     std::map<std::string, unsigned int> named_colors = {{"Red", 0xFF0000FF }, {"red",0xFF0000FF },{"Green", 0xFF00FF00},
-        {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFD66D3E},
-        { "Synth", 0xFFFB4551}, { "synth", 0xFFFB4551}
+        {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFFFFF3E},
+        { "Synth", 0xFFFB4551}, { "synth", 0xFFFB4551},{ "Length", 0xFFFFFF3E}, { "length", 0xFFFFFF3E}
     };
     
     
@@ -144,7 +144,7 @@ void lifContext::setup_signals(){
     boost::signals2::connection geometry_connection = m_lifProcRef->registerCallback(geometry_available_cb);
     
     // Support lifProcessor::temporal_image_available
-    std::function<void (cv::Mat&,cv::Mat&)> ss_image_available_cb = boost::bind (&lifContext::signal_ss_image_available, shared_from_above(), _1, _2);
+    std::function<void (cv::Mat&,cv::Mat&, iPair&)> ss_image_available_cb = boost::bind (&lifContext::signal_ss_image_available, shared_from_above(), _1, _2, _3);
     boost::signals2::connection ss_image_connection = m_lifProcRef->registerCallback(ss_image_available_cb);
     
 }
@@ -274,7 +274,7 @@ void lifContext::glscreen_normalize (const sides_length_t& src, const Rectf& gdr
     dst.second.y = (src.second.y*gdr.getHeight()) / mMediaInfo.getHeight();
 }
                                      
-void lifContext::signal_ss_image_available(cv::Mat& image, cv::Mat& label)
+void lifContext::signal_ss_image_available(cv::Mat& image, cv::Mat& label, iPair& ptrans)
 {
     vlogger::instance().console()->info(" SS Image Available  ");
     if (! m_lifProcRef){
@@ -795,7 +795,7 @@ void lifContext::loadCurrentSerie ()
         // Initialize Sequencer
         m_result_seq.mFrameMin = 0;
         m_result_seq.mFrameMax = (int) mFrameSet->count() - 1;
-        m_result_seq.mSequencerItemTypeNames = {"All", "Contractions", "Synth"};
+        m_result_seq.mSequencerItemTypeNames = {"All", "Contractions", "Length"};
         m_result_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         
         m_title = m_serie.name() + " @ " + mPath.filename().string();
@@ -1021,7 +1021,7 @@ void lifContext::add_motion_profile (){
     assert(window != nullptr);
     
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
-    ImVec2  frame (mMediaInfo.channel_size.width*1.2, mMediaInfo.channel_size.height*1.2);
+    ImVec2  frame (mMediaInfo.channel_size.width, mMediaInfo.channel_size.height*3);
     ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y);
     m_motion_profile_display = Rectf(pos,frame);
     ImGui::SetNextWindowPos(pos);
@@ -1036,9 +1036,7 @@ void lifContext::add_motion_profile (){
             // First Child
             ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
             ImVec2 pp = ImGui::GetCursorScreenPos();
-       //     ImGui::ImageZoomAndPan( (void*)(intptr_t)  m_segmented_texture->getId(),sz,
-        //                            m_segmented_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
-            ImVec2 p (pp.x + mt.center.x, pp.y  + mt.center.y);
+            ImVec2 p (pp.x + mt.center.x, pp.y  + mt.center.y+128);
             ImGui::Image( (void*)(intptr_t) m_segmented_texture->getId(), frame);
             ImGui::EndChild();
             
@@ -1051,14 +1049,14 @@ void lifContext::add_motion_profile (){
             auto draw_cell_ends = [cell_ends,pp](int ee, uint32_t color){
                 auto pt = cell_ends[ee].first;
                 pt.x += (pp.x );
-                pt.y += (pp.y );
+                pt.y += (pp.y+128 );
                 if (pt.x >=5 && pt.y >=5){
                     ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), color, 3.0f);
                     ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), color,  3.0f);
                 }
                 pt = cell_ends[ee].second;
                 pt.x += (pp.x );
-                pt.y += (pp.y );
+                pt.y += (pp.y+128 );
                 if (pt.x >=5 && pt.y >=5){
                     ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), color, 3.0f);
                     ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), color, 3.0f);
@@ -1167,13 +1165,14 @@ void lifContext::update ()
         }
     }
 
-    if(m_result_seq.m_time_data.plotCount() == 4){
+    if(m_result_seq.m_time_data.plotCount() == 4 && m_lifProcRef->cell_lengths().size() == 500){
         timedVecOfVals_t synth;
-        UnitSyntheticProducer<std::sin, 512, 16> sp(synth);
+        lengthProducer sp(m_lifProcRef->cell_lengths(), synth);
+//        UnitSyntheticProducer<std::sin, 512, 16> sp(synth);
         namedTrack_t synth_track;
-        synth_track.first = "synth";
+        synth_track.first = "length";
         synth_track.second = synth;
-        m_result_seq.m_time_data.load(synth_track,named_colors["Synth"], -1);
+        m_result_seq.m_time_data.load(synth_track,named_colors["Length"], -1);
     }
     
     // Fetch Next Frame

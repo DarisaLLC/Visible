@@ -27,9 +27,11 @@
 #include "vision/histo.h"
 #include "vision/ipUtils.h"
 #include "cvplot/cvplot.h"
-
+#include "vision/rc_filter1d.h"
 #include <string>
 #include <vector>
+#include "core/pair.hpp"
+
 
 using namespace boost;
 namespace filesystem = boost::filesystem;
@@ -172,38 +174,8 @@ void affineApp::update()
 
 void affineApp::generate_crop (){
 
-#if 0
-    auto cvDrawImage = [] (cv::Mat& image){
-        auto name = "image";
-        auto &view = cvplot::Window::current().view(name);
-        cvplot::moveWindow(name, 0, 0);
-        view.size(cvplot::Size(image.cols*3,image.rows*3));
-        view.drawImage(&image);
-        view.finish();
-        view.flush();
-    };
     
-    auto cvDrawPlot = [&] (std::vector<float>& one_d, cvplot::Size& used, std::string& name){
-        {
-            auto name = "transparent";
-            auto alpha = 200;
-            cvplot::setWindowTitle(name, "transparent");
-            cvplot::moveWindow(name, used.width, 0);
-            cvplot::resizeWindow(name, 300+used.width, 300+used.height);
-            cvplot::Window::current().view(name).frameColor(cvplot::Sky).alpha(alpha);
-            auto &figure = cvplot::figure(name);
-            figure.series("Projection")
-            .setValue(one_d)
-            .type(cvplot::Dots)
-            .color(cvplot::Blue.alpha(alpha))
-            .legend(false);
-            figure.alpha(alpha).show(true);
-            
-        }
-    };
-#endif
-    
-    auto cvDrawAll = [] (cv::Mat& image, std::vector<float>& hz, std::vector<float>& vt ){
+    auto cvDrawAll = [] (cv::Mat& image, std::vector<float>& hz, std::vector<float>& vt, dPair& hext, dPair& vext ){
             auto name = "image";
             auto alpha = 200;
         int border = 50;
@@ -221,6 +193,11 @@ void affineApp::generate_crop (){
                 .color(cvplot::Blue.alpha(alpha))
                 .legend(false);
                 figure.alpha(alpha).show(true);
+                figure.series("line")
+                .setValue({(float)hext.first,(float)hext.second})
+                .type(cvplot::DotLine)
+                .color(cvplot::Blue)
+                .legend(false);
             }
             cvplot::moveWindow(name, border,scale*image.rows - border - 20);
             view.size(cvplot::Size(scale*image.cols-2*border,scale*image.rows-(2*border)));
@@ -232,17 +209,21 @@ void affineApp::generate_crop (){
             cvplot::Window::current().view(name).frameColor(cvplot::Sky).alpha(alpha);
             auto &figure= cvplot::figure(name);
             figure.origin(false,false);
-            figure.series("Horizontal")
+            figure.series("Vertical")
             .setValue(vt)
             .type(cvplot::Vistogram)
             .color(cvplot::Blue.alpha(alpha))
             .legend(false);
             figure.alpha(alpha).show(true);
+            figure.series("line")
+            .setValue({(float)hext.first,(float)hext.second})
+            .type(cvplot::DotLine)
+            .color(cvplot::Blue)
+            .legend(false);
 
         };
     
-    
-  
+ 
     
     auto cp = mRectangle.rotatedRectInImage(mPaddedArea);
     cv::Mat crop = affineCrop(mPadded, cp, mRectangle.aspect());
@@ -257,7 +238,15 @@ void affineApp::generate_crop (){
     
     svl::norm_min_max(hz_vec.begin(),hz_vec.end());
     svl::norm_min_max(vt_vec.begin(),vt_vec.end());
-    cvDrawAll(crop, hz_vec, vt_vec);
+    
+    dPair hextend, vextend;
+    bool hok = rcEdgeFilter1D::peakDetect1d (hz_vec, hextend);
+    bool vok = rcEdgeFilter1D::peakDetect1d (vt_vec, vextend);
+    
+    std::cout << std::boolalpha << hok << " Hz " << hextend << std::endl;
+    std::cout << std::boolalpha << vok << " Hz " << vextend << std::endl;
+    
+    cvDrawAll(crop, hz_vec, vt_vec, hextend, vextend);
     
 
 }

@@ -54,6 +54,27 @@ struct IntensityStatisticsRunner
 };
 
 
+struct lengthProducer
+{
+    lengthProducer (const vector<float>& lengths, timedVecOfVals_t& results)
+    {
+        // Create sin signals
+        auto trigvecf = [](const std::vector<float>& lens){
+            timedVecOfVals_t base(lens.size());
+            
+            for (auto i=0; i < lens.size(); i++) {
+                timedVal_t res;
+                index_time_t ti;
+                ti.first = i;
+                base[i].first = ti;
+                base[i].second =  lens[i];
+            }
+            return base;
+        };
+        results = trigvecf(lengths);
+    }
+};
+
 // Create sin signals
 
 template<float (*TF)(float), int S,  int E>

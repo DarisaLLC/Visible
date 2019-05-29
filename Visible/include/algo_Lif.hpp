@@ -24,7 +24,7 @@
 #include <boost/assert.hpp>
 #include <map>
 #include <Eigen/Dense>
-#include "voxel_segmentation.hpp"
+#include "segmentation_parameters.hpp"
 
 using namespace Eigen;
 
@@ -212,7 +212,7 @@ class LifSignaler : public base_signaler
 class lif_serie_processor : public LifSignaler
 {
 public:
-    using voxel_params_t=voxelSegmenter::params;
+    using voxel_params_t=fynSegmenter::params;
     
     class params{
     public:
@@ -222,6 +222,7 @@ public:
         const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_vparams.voxel_pad(); }
         const iPair& expected_segmented_size () {return m_vparams.expected_segmented_size(); }
         const uint32_t& min_seqmentation_area () {return m_vparams.min_segmentation_area(); }
+        const fPair& normalized_symmetric_padding () { return m_vparams.normalized_symmetric_padding (); }
         
         const std::string& image_cache_name () {
             static std::string s_image_cache_name = "voxel_ss_.png";
@@ -252,7 +253,7 @@ public:
     typedef void (sig_cb_3dstats_available) ();
     typedef void (sig_cb_geometry_available) ();
     typedef void (sig_cb_ss_voxel_available) (std::vector<float> &);
-    typedef void (sig_cb_ss_image_available) (cv::Mat &, cv::Mat &);
+    typedef void (sig_cb_ss_image_available) (cv::Mat &, cv::Mat &, iPair &);
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     typedef std::vector<channel_images_t> channel_vec_t;
     
@@ -305,7 +306,7 @@ public:
     void generateVoxelSelfSimilarities ();
     void generateVoxelsAndSelfSimilarities (const std::vector<roiWindow<P8U>>& images);
     
-    void finalize_segmentation (cv::Mat& mono, cv::Mat& label);
+    void finalize_segmentation (cv::Mat& mono, cv::Mat& label, iPair& padded_translation);
     const Rectf& measuredArea () const;
     const std::vector<Rectf>& channel_rois () const;
     const cv::RotatedRect& motion_surface () const;
@@ -325,6 +326,9 @@ public:
     
    void generate_affine_windows ();
     
+    const std::vector<float>& cell_lengths () const { return m_cell_lengths; }
+    
+    
 protected:
     boost::signals2::signal<lif_serie_processor::sig_cb_content_loaded>* signal_content_loaded;
     boost::signals2::signal<lif_serie_processor::sig_cb_flu_stats_available>* signal_flu_available;
@@ -341,6 +345,7 @@ private:
     // Default params. @place_holder for increasing number of params
     lif_serie_processor::params m_params;
     
+    void internal_generate_affine_profiles ();
     void internal_generate_affine_windows (const std::vector<roiWindow<P8U>>&);
     
     void save_affine_windows (const std::vector<cv::Mat>&);
@@ -420,6 +425,9 @@ private:
     std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;
     labelBlob::ref m_main_blob;
     std::vector<blob> m_blobs;
+    std::vector<std::vector<float>> m_hz_profiles;
+    std::vector<std::vector<float>> m_vt_profiles;
+    std::vector<float> m_cell_lengths;
 
     std::vector<sides_length_t> m_cell_ends = {sides_length_t (), sides_length_t()};
     mutable fPair m_ab;

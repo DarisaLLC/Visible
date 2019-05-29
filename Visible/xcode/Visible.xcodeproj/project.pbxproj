@@ -55,6 +55,11 @@
 		C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
 		C232F00B2296FDCB0075B2EE /* lineseg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696B1CED3E2C0045FF57 /* lineseg.cpp */; };
 		C2342E60227CC45F00D74D80 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2342E5F227CC45F00D74D80 /* GLUT.framework */; };
+		C234C579229EFA0D001EF98B /* rc_filter1d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C234C578229EFA0D001EF98B /* rc_filter1d.cpp */; };
+		C234C57A229EFA0D001EF98B /* rc_filter1d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C234C578229EFA0D001EF98B /* rc_filter1d.cpp */; };
+		C234C57B229EFA0D001EF98B /* rc_filter1d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C234C578229EFA0D001EF98B /* rc_filter1d.cpp */; };
+		C234C57C229EFA0D001EF98B /* rc_filter1d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C234C578229EFA0D001EF98B /* rc_filter1d.cpp */; };
+		C234C57D229EFA0D001EF98B /* rc_filter1d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C234C578229EFA0D001EF98B /* rc_filter1d.cpp */; };
 		C2398A0921DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
 		C2398A0A21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
 		C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
@@ -369,11 +374,15 @@
 		C28B01D7229B1F8000B8165D /* lif_core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D5229B1F8000B8165D /* lif_core.cpp */; };
 		C28B01D8229B1F8000B8165D /* lif_core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D5229B1F8000B8165D /* lif_core.cpp */; };
 		C28B01D9229B1F8000B8165D /* lif_core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D5229B1F8000B8165D /* lif_core.cpp */; };
-		C28B01DC229B210A00B8165D /* voxel_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* voxel_segmentation.cpp */; };
-		C28B01DD229B210A00B8165D /* voxel_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* voxel_segmentation.cpp */; };
-		C28B01DE229B210A00B8165D /* voxel_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* voxel_segmentation.cpp */; };
-		C28B01DF229B210A00B8165D /* voxel_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* voxel_segmentation.cpp */; };
+		C28B01DC229B210A00B8165D /* fyn_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* fyn_segmentation.cpp */; };
+		C28B01DD229B210A00B8165D /* fyn_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* fyn_segmentation.cpp */; };
+		C28B01DE229B210A00B8165D /* fyn_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* fyn_segmentation.cpp */; };
+		C28B01DF229B210A00B8165D /* fyn_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* fyn_segmentation.cpp */; };
 		C28B01E0229BA8DC00B8165D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
+		C28B01E1229CC66100B8165D /* fyn_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* fyn_segmentation.cpp */; };
+		C28B01E2229CC66500B8165D /* lif_core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D5229B1F8000B8165D /* lif_core.cpp */; };
+		C28B01E3229CC66900B8165D /* lif_serie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01CB229B1DE500B8165D /* lif_serie.cpp */; };
+		C28B01E4229CC66C00B8165D /* lif_browser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D0229B1E5F00B8165D /* lif_browser.cpp */; };
 		C28F74382236D00B0040890C /* edgel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069661CED3E2C0045FF57 /* edgel.cpp */; };
 		C28F74392236DD6E0040890C /* edgel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069661CED3E2C0045FF57 /* edgel.cpp */; };
 		C28F743A2236DD6F0040890C /* edgel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069661CED3E2C0045FF57 /* edgel.cpp */; };
@@ -686,6 +695,8 @@
 		C232F00A229377770075B2EE /* ellipse.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ellipse.hpp; sourceTree = "<group>"; };
 		C2342E5D227CC27300D74D80 /* ps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ps.cpp; sourceTree = "<group>"; };
 		C2342E5F227CC45F00D74D80 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
+		C234C578229EFA0D001EF98B /* rc_filter1d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rc_filter1d.cpp; sourceTree = "<group>"; };
+		C234C57E229EFAF4001EF98B /* rc_filter1d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rc_filter1d.h; sourceTree = "<group>"; };
 		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
 		C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleTestApp-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleTestApp-Info.plist"; sourceTree = "<absolute>"; };
 		C23B7CC6220553E1005DE02C /* cpp-perf.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = "cpp-perf.hpp"; path = "../include/cpp-perf.hpp"; sourceTree = "<group>"; };
@@ -943,8 +954,8 @@
 		C28B01CB229B1DE500B8165D /* lif_serie.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = lif_serie.cpp; path = ../src/lif_serie.cpp; sourceTree = "<group>"; };
 		C28B01D0229B1E5F00B8165D /* lif_browser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = lif_browser.cpp; path = ../src/lif_browser.cpp; sourceTree = "<group>"; };
 		C28B01D5229B1F8000B8165D /* lif_core.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = lif_core.cpp; path = ../src/lif_core.cpp; sourceTree = "<group>"; };
-		C28B01DA229B210A00B8165D /* voxel_segmentation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = voxel_segmentation.cpp; path = ../src/voxel_segmentation.cpp; sourceTree = "<group>"; };
-		C28B01DB229B210A00B8165D /* voxel_segmentation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = voxel_segmentation.hpp; path = ../include/voxel_segmentation.hpp; sourceTree = "<group>"; };
+		C28B01DA229B210A00B8165D /* fyn_segmentation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = fyn_segmentation.cpp; path = ../src/fyn_segmentation.cpp; sourceTree = "<group>"; };
+		C28B01DB229B210A00B8165D /* segmentation_parameters.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = segmentation_parameters.hpp; path = ../include/segmentation_parameters.hpp; sourceTree = "<group>"; };
 		C28F74312234880B0040890C /* processor_cli.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = processor_cli.cpp; sourceTree = "<group>"; };
 		C290E4032245A41500FD6FD1 /* dsp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dsp.cpp; sourceTree = "<group>"; };
 		C294B11F2152D22C00C916B1 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
@@ -1203,7 +1214,7 @@
 				C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */,
 				C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */,
 				C29DB075212B351200930CBD /* algo_Lif.cpp */,
-				C28B01DA229B210A00B8165D /* voxel_segmentation.cpp */,
+				C28B01DA229B210A00B8165D /* fyn_segmentation.cpp */,
 				C28B01D5229B1F8000B8165D /* lif_core.cpp */,
 				C28B01CB229B1DE500B8165D /* lif_serie.cpp */,
 				C28B01D0229B1E5F00B8165D /* lif_browser.cpp */,
@@ -1434,7 +1445,7 @@
 				C24FC84C1E5E40130071AA1A /* async_tracks.h */,
 				C213607821647E4A00F794AB /* cached_results.hpp */,
 				C241BBAA1FB11B51000DE36E /* algo_Lif.hpp */,
-				C28B01DB229B210A00B8165D /* voxel_segmentation.hpp */,
+				C28B01DB229B210A00B8165D /* segmentation_parameters.hpp */,
 				C2E02ED2225AB49900AC175D /* algo_Mov.hpp */,
 				C219469E1CE4EA4900976025 /* simple_pair.h */,
 				C219469F1CE4EA4900976025 /* sshist.hpp */,
@@ -1724,6 +1735,7 @@
 		C26009FF1CED3E010045FF57 /* vision */ = {
 			isa = PBXGroup;
 			children = (
+				C234C57E229EFAF4001EF98B /* rc_filter1d.h */,
 				C232F00A229377770075B2EE /* ellipse.hpp */,
 				C210947F2243039A004E88EE /* voxel_frequency.h */,
 				C20D4DE42208BD34004D9405 /* ellipse_fit.hpp */,
@@ -1854,6 +1866,7 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C234C578229EFA0D001EF98B /* rc_filter1d.cpp */,
 				C2C5CF66229A0DB0004595C5 /* glmutils.cpp */,
 				C2AEB73A228CD6E60078E687 /* geom_utils.cpp */,
 				C2AFAD802252E1690038AF5B /* UIImage+OpenCV.mm */,
@@ -2248,7 +2261,7 @@
 				C2A5DBAD207A003F001C6608 /* Plist.cpp in Sources */,
 				C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */,
 				C2606DAE1CED3E2E0045FF57 /* localvariance.cpp in Sources */,
-				C28B01DC229B210A00B8165D /* voxel_segmentation.cpp in Sources */,
+				C28B01DC229B210A00B8165D /* fyn_segmentation.cpp in Sources */,
 				C28B01C7229B1CD900B8165D /* algo_shortterm.cpp in Sources */,
 				C27ED0A2220BB71D00B55D65 /* InterfaceUtilities.cpp in Sources */,
 				C20D4DE52208BD34004D9405 /* ellipse_fit.cpp in Sources */,
@@ -2298,6 +2311,7 @@
 				C248DD2C1F64601A00FF72B1 /* onImagePlotUtils.cpp in Sources */,
 				C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */,
 				C2606DAF1CED3E2E0045FF57 /* matpixel.cpp in Sources */,
+				C234C579229EFA0D001EF98B /* rc_filter1d.cpp in Sources */,
 				C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */,
 				C2109476223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
 				C28B01CC229B1DE500B8165D /* lif_serie.cpp in Sources */,
@@ -2332,11 +2346,12 @@
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,
 				C21E390E228A054C00778A66 /* affine_rectangle.cpp in Sources */,
-				C28B01DE229B210A00B8165D /* voxel_segmentation.cpp in Sources */,
+				C28B01DE229B210A00B8165D /* fyn_segmentation.cpp in Sources */,
 				C2618F86217FDA9900FA9F43 /* window.cc in Sources */,
 				C20D4DE72208BD34004D9405 /* ellipse_fit.cpp in Sources */,
 				C28B01D3229B1E5F00B8165D /* lif_browser.cpp in Sources */,
 				C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */,
+				C234C57B229EFA0D001EF98B /* rc_filter1d.cpp in Sources */,
 				C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */,
 				C2618F87217FDA9E00FA9F43 /* figure.cc in Sources */,
 				C2C5CF69229A0DB0004595C5 /* glmutils.cpp in Sources */,
@@ -2451,7 +2466,8 @@
 				C28B01CD229B1DE500B8165D /* lif_serie.cpp in Sources */,
 				C28B01D7229B1F8000B8165D /* lif_core.cpp in Sources */,
 				C210946F223AEC19004E88EE /* imgui_wrapper.cpp in Sources */,
-				C28B01DD229B210A00B8165D /* voxel_segmentation.cpp in Sources */,
+				C28B01DD229B210A00B8165D /* fyn_segmentation.cpp in Sources */,
+				C234C57A229EFA0D001EF98B /* rc_filter1d.cpp in Sources */,
 				C26F5FC321B0AA6D00EAE156 /* ip_utils.cpp in Sources */,
 				C26F5FC421B0AA6D00EAE156 /* window.cc in Sources */,
 				C26F5FC521B0AA6D00EAE156 /* imgui_draw.cpp in Sources */,
@@ -2494,6 +2510,7 @@
 			files = (
 				C28B016F229B182100B8165D /* permutation_entropy.cpp in Sources */,
 				C28B0170229B182100B8165D /* lifFile.cpp in Sources */,
+				C28B01E3229CC66900B8165D /* lif_serie.cpp in Sources */,
 				C28B0171229B182100B8165D /* time_spec.cpp in Sources */,
 				C28B0172229B182100B8165D /* tinyxml.cpp in Sources */,
 				C28B0173229B182100B8165D /* sg_filter.cpp in Sources */,
@@ -2502,6 +2519,7 @@
 				C28B0176229B182100B8165D /* cvVideoPlayer.cpp in Sources */,
 				C28B0177229B182100B8165D /* affineApp.cpp in Sources */,
 				C28B0178229B182100B8165D /* geom_utils.cpp in Sources */,
+				C234C57D229EFA0D001EF98B /* rc_filter1d.cpp in Sources */,
 				C28B0179229B182100B8165D /* rowfunc.cpp in Sources */,
 				C28B017A229B182100B8165D /* opencv_utils.cpp in Sources */,
 				C28B017B229B182100B8165D /* sm_producer.cpp in Sources */,
@@ -2510,7 +2528,9 @@
 				C28B017E229B182100B8165D /* AVReaderWrapper.mm in Sources */,
 				C28B017F229B182100B8165D /* imgui_wrapper.cpp in Sources */,
 				C28B0180229B182100B8165D /* cinder_support.cpp in Sources */,
+				C28B01E1229CC66100B8165D /* fyn_segmentation.cpp in Sources */,
 				C28B0181229B182100B8165D /* ip_utils.cpp in Sources */,
+				C28B01E2229CC66500B8165D /* lif_core.cpp in Sources */,
 				C28B0182229B182100B8165D /* matpixel.cpp in Sources */,
 				C28B0183229B182100B8165D /* affine_rectangle.cpp in Sources */,
 				C28B0184229B182100B8165D /* window.cc in Sources */,
@@ -2536,6 +2556,7 @@
 				C28B0198229B182100B8165D /* imgui_demo.cpp in Sources */,
 				C28B0199229B182100B8165D /* algo_Lif.cpp in Sources */,
 				C28B019A229B182100B8165D /* algo_Mov.cpp in Sources */,
+				C28B01E4229CC66C00B8165D /* lif_browser.cpp in Sources */,
 				C28B019B229B182100B8165D /* opencv_draw.cpp in Sources */,
 				C28B019C229B182100B8165D /* self_similarity.cpp in Sources */,
 				C28B019D229B182100B8165D /* color.cc in Sources */,
@@ -2594,7 +2615,8 @@
 				C28B01CF229B1DE500B8165D /* lif_serie.cpp in Sources */,
 				C28B01D9229B1F8000B8165D /* lif_core.cpp in Sources */,
 				C2DB72B522591DB700C2B986 /* imgui_wrapper.cpp in Sources */,
-				C28B01DF229B210A00B8165D /* voxel_segmentation.cpp in Sources */,
+				C28B01DF229B210A00B8165D /* fyn_segmentation.cpp in Sources */,
+				C234C57C229EFA0D001EF98B /* rc_filter1d.cpp in Sources */,
 				C2DB72B622591DB700C2B986 /* imgui_draw.cpp in Sources */,
 				C2DB72B722591DB700C2B986 /* rowfunc.cpp in Sources */,
 				C2DB72B822591DB700C2B986 /* csv.cpp in Sources */,
@@ -3054,7 +3076,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = NO;
@@ -3104,7 +3126,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = NO;
