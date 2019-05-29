@@ -29,7 +29,7 @@
 #include "cpp-perf.hpp"
 #include "result_serialization.h"
 
-#include "segmentation_params.hpp"
+#include "segmentation_parameters.hpp"
 
 
 
@@ -120,6 +120,26 @@ void lif_serie_processor::create_voxel_surface(std::vector<float>& ven){
     cv::Mat bi_level;
     
     threshold(m_temporal_ss, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
+
+    // Pad both with zeros
+    // Symmetric: i.e. pad on both sides
+    iPair pad (m_params.normalized_symmetric_padding().first * m_temporal_ss.cols,
+               m_params.normalized_symmetric_padding().second * m_temporal_ss.rows);
+    
+    auto get_padded = [pad = pad](const cv::Mat& src){
+        cv::Mat padded (src.rows+2*pad.second, src.cols+2*pad.first, CV_8U);
+        padded.setTo(0.0);
+        cv::Mat win (padded, cv::Rect(pad.first, pad.second, src.cols, src.rows));
+        src.copyTo(win);
+        return padded;
+    };
+    
+    auto mono_padded = get_padded(m_temporal_ss);
+    auto bi_level_padded = get_padded(bi_level);
+    
+    // Translation to undo padding
+    pad.first = -pad.first;
+    pad.second = -pad.second;
     
     vlogger::instance().console()->info("finished voxel surface");
     if(fs::exists(mCurrentSerieCachePath)){
@@ -130,7 +150,7 @@ void lif_serie_processor::create_voxel_surface(std::vector<float>& ven){
     
     // Call the voxel ready cb if any
     if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0){
-        signal_ss_image_available->operator()(m_temporal_ss, bi_level);
+        signal_ss_image_available->operator()(mono_padded, bi_level_padded, pad);
     }
     
     

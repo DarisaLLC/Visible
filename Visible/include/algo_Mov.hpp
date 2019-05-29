@@ -20,7 +20,7 @@
 #include "vision/opencv_utils.hpp"
 #include "opencv2/video/tracking.hpp"
 #include "algo_cardiac.hpp"
-#include "voxel_segmentation.hpp"
+#include "segmentation_parameters.hpp"
 
 using namespace cv;
 
@@ -35,7 +35,7 @@ class movSignaler : public base_signaler
 class sequence_processor : public movSignaler
 {
 public:
-    using voxel_params_t=voxelSegmenter::params;
+    using voxel_params_t=fynSegmenter::params;
     
     class params{
     public:

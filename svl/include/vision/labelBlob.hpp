@@ -83,11 +83,8 @@ class lblMgr : public base_signaler
 class labelBlob : public lblMgr
 {
 public:
-    typedef void (results_ready_cb) (int64_t&);
-    typedef void (graphics_ready_cb) ();
     typedef std::shared_ptr<labelBlob> ref;
     typedef std::weak_ptr<labelBlob> weak_ref;
-    
     static ref create(const cv::Mat& gray, const cv::Mat& threshold_out,  const int64_t client_id = 0, const int minAreaPixelCount = 10);
     labelBlob ();
     labelBlob (const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id = 0, const int minAreaPixelCount = 10);
@@ -119,6 +116,7 @@ public:
         float extend () const { return m_extend;}
         cv::RotatedRect rotated_roi () const;
         cv::RotatedRect rotated_roi_PCA () const;
+   
         
     private:
         int64_t m_id;
@@ -152,9 +150,16 @@ public:
     labelBlob(labelBlob&&) = default;
     labelBlob& operator=(labelBlob&&) = default;
     
+    
+    typedef void (results_ready_cb) (int64_t&);
+    typedef void (results_cb) (std::vector<labelBlob::blob>&);
+    typedef void (graphics_ready_cb) ();
+  
+    
 protected:
     
     boost::signals2::signal<results_ready_cb>* signal_results_ready;
+    boost::signals2::signal<results_cb>* signal_results;
     boost::signals2::signal<graphics_ready_cb>* signal_graphics_ready;
     
 private:

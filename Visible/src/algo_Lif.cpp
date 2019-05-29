@@ -27,6 +27,7 @@
 #include "algo_Lif.hpp"
 #include "logger/logger.hpp"
 #include "result_serialization.h"
+#include "vision/rc_filter1d.h"
 
 
 const fPair& lif_serie_processor::ellipse_ab () const { return m_ab; }
@@ -117,6 +118,7 @@ void lif_serie_processor::internal_generate_affine_windows (const std::vector<ro
     while (++vitr != rws.end());
     assert(count==total);
     
+    internal_generate_affine_profiles ();
     save_affine_windows (m_affine_windows);
     
 }
@@ -147,6 +149,33 @@ void lif_serie_processor::save_affine_windows (const std::vector<cv::Mat>& rws){
     }
 }
 
+void lif_serie_processor::internal_generate_affine_profiles(){
+    
+    for (auto& mm : m_affine_windows)
+    {
+        cv::Mat hz (1, mm.cols, CV_32F);
+        cv::Mat vt (mm.rows, 1, CV_32F);
+        horizontal_vertical_projections (mm, hz, vt);
+        std::vector<float> hz_vec(mm.cols);
+        for (auto ii = 0; ii < mm.cols; ii++) hz_vec[ii] = vt.at<float>(0,ii);
+        std::vector<float> vt_vec(mm.rows);
+        for (auto ii = 0; ii < mm.rows; ii++) vt_vec[ii] = vt.at<float>(ii,0);
+        m_hz_profiles.emplace_back(hz_vec);
+        m_vt_profiles.emplace_back(vt_vec);
+
+        dPair hextend, vextend;
+        bool hok = rcEdgeFilter1D::peakDetect1d (hz_vec, hextend);
+        bool vok = rcEdgeFilter1D::peakDetect1d (vt_vec, vextend);
+        
+        std::cout << std::boolalpha << hok << " Hz " << hextend << std::endl;
+        std::cout << std::boolalpha << vok << " VT " << vextend << std::endl;
+        if(hok)
+            m_cell_lengths.push_back(std::max(hextend.first,hextend.second )-std::min(hextend.first,hextend.second));
+        else
+            m_cell_lengths.push_back(0.0f);
+
+    }
+}
 /**
  finalize_segmentation
     [grayscale,bi_level] -> create a blob runner, attach res_ready_lambda as callback, run blob runner
@@ -157,70 +186,53 @@ void lif_serie_processor::save_affine_windows (const std::vector<cv::Mat>& rws){
  @param mono gray scale image
  @param bi_level bi_level ( i.e. binarized image )
  */
-void lif_serie_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
+void lif_serie_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level, iPair& pad_trans){
     
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
-     
+    assert(mono.cols == bi_level.cols && mono.rows == bi_level.rows);
+    cv::Rect padded_rect, image_rect;
+    
     m_main_blob = labelBlob::create(mono, bi_level, m_params.min_seqmentation_area(), 666);
     
-    std::function<labelBlob::results_ready_cb> res_ready_lambda = [this](int64_t& cbi)
-    {
-        const std::vector<blob>& blobs = m_main_blob->results();
+//    auto m_surface_affine = std::make_unique<cv::Mat>();
+//    auto m_cell_ends = std::make_unique< std::vector<sides_length_t>>(2);
+//    auto m_blobs = std::make_unique<std::vector<blob>>();
+//    auto m_ab = std::make_unique<fPair>();
+    auto cache_path = mCurrentSerieCachePath;
+    std::function<labelBlob::results_cb> res_ready_lambda = [&,
+                                                             m_blobs = m_blobs,
+                                                             mono=mono,
+                                                             pad_trans=pad_trans,
+                                                             cache_path=cache_path,
+                                                             signal_geometry_available=signal_geometry_available
+                                                                   ](std::vector<blob>& blobs){
         if (! blobs.empty()){
-            m_motion_mass = blobs[0].rotated_roi();
+          //  m_blobs->push_back(blobs[0]);
+            RotatedRect motion_mass = blobs[0].rotated_roi();
             std::vector<cv::Point2f> corners(4);
-            std::string msg = svl::to_string(m_motion_mass);
+            std::string msg = svl::to_string(motion_mass);
             msg = " < " + msg;
             vlogger::instance().console()->info(msg);
-            m_motion_mass.points(corners.data());
-            pointsToRotatedRect(corners, m_motion_mass);
-            msg = svl::to_string(m_motion_mass);
+            motion_mass.points(corners.data());
+            pointsToRotatedRect(corners, motion_mass);
+            motion_mass.center.x += pad_trans.first;
+            motion_mass.center.y += pad_trans.second;
+            msg = svl::to_string(motion_mass);
             msg = " > " + msg;
             vlogger::instance().console()->info(msg);
             std::vector<cv::Point2f> mid_points;
-            svl::get_mid_points(m_motion_mass, mid_points);
-            m_surface_affine = cv::getRotationMatrix2D(m_motion_mass.center,m_motion_mass.angle, 1);
-            m_surface_affine.at<double>(0,2) -= (m_motion_mass.center.x - m_motion_mass.size.width/2);
-            m_surface_affine.at<double>(1,2) -= (m_motion_mass.center.y - m_motion_mass.size.height/2);
-            
-
-            auto get_trims = [] (const cv::Rect& box, const cv::RotatedRect& rotrect) {
-                
-                
-                //The order is bottomLeft, topLeft, topRight, bottomRight.
-                std::vector<float> trims(4);
-                cv::Point2f rect_points[4];
-                rotrect.points( &rect_points[0] );
-                cv::Point2f xtl; xtl.x = box.tl().x; xtl.y = box.tl().y;
-                cv::Point2f xbr; xbr.x = box.br().x; xbr.y = box.br().y;
-                cv::Point2f dtl (xtl.x - rect_points[1].x, xtl.y - rect_points[1].y);
-                cv::Point2f dbr (xbr.x - rect_points[3].x, xbr.y - rect_points[3].y);
-                trims[0] = rect_points[1].x < xtl.x ? xtl.x - rect_points[1].x : 0.0f;
-                trims[1] = rect_points[1].y < xtl.y ? xtl.y - rect_points[1].y : 0.0f;
-                trims[2] = rect_points[3].x > xbr.x ? rect_points[3].x  - xbr.x : 0.0f;
-                trims[3] = rect_points[3].x > xbr.y ? rect_points[3].y  - xbr.y : 0.0f;
-                std::transform(trims.begin(), trims.end(), trims.begin(),
-                               [](float d) -> float { return std::roundf(d); });
-                
-                return trims;
-            };
-            
-            auto trims = get_trims(cv::Rect(0,0,m_temporal_ss.cols, m_temporal_ss.rows), m_motion_mass);
-            for (auto ff : trims) std::cout << ff << std::endl;
-            
-            cv::Point offset(trims[0],trims[1]);
-            fPair pads (trims[0]+trims[2],trims[1]+trims[3]);
-            cv::Mat canvas (m_temporal_ss.rows+pads.second, m_temporal_ss.cols+pads.first, CV_8U);
-            canvas.setTo(0.0);
-            cv::Mat win (canvas, cv::Rect(offset.x, offset.y, m_temporal_ss.cols, m_temporal_ss.rows));
-            m_temporal_ss.copyTo(win);
+            svl::get_mid_points(motion_mass, mid_points);
+            m_surface_affine = cv::getRotationMatrix2D(motion_mass.center,motion_mass.angle, 1);
+            m_surface_affine.at<double>(0,2) -= (motion_mass.center.x - motion_mass.size.width/2);
+            m_surface_affine.at<double>(1,2) -= (motion_mass.center.y - motion_mass.size.height/2);
+      
             
             cv::Mat affine;
-            cv::warpAffine(canvas, affine, m_surface_affine,
-                           m_motion_mass.size, INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0,0,0));
+            cv::warpAffine(mono, affine, m_surface_affine,
+                           motion_mass.size, INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0,0,0));
             if(fs::exists(mCurrentSerieCachePath)){
                 std::string imagename = "voxel_affine_.png";
-                auto image_path = mCurrentSerieCachePath / imagename;
+                auto image_path = cache_path / imagename;
                 cv::imwrite(image_path.string(), affine);
             }
             
@@ -251,13 +263,12 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_leve
                 }
             }
             m_ab = blobs[0].moments().getEllipseAspect ();
+            m_motion_mass = motion_mass;
             
             // Signal to listeners
             if (signal_geometry_available && signal_geometry_available->num_slots() > 0)
                 signal_geometry_available->operator()();
         }
-        
-        
     };
  
     boost::signals2::connection results_ready_ = m_main_blob->registerCallback(res_ready_lambda);
