@@ -54,12 +54,12 @@ struct IntensityStatisticsRunner
 };
 
 
-struct lengthProducer
+struct trackMaker
 {
-    lengthProducer (const vector<float>& lengths, timedVecOfVals_t& results)
+    trackMaker (const vector<float>& lengths, timedVecOfVals_t& results)
     {
         // Create sin signals
-        auto trigvecf = [](const std::vector<float>& lens){
+        auto fill = [](const std::vector<float>& lens){
             timedVecOfVals_t base(lens.size());
             
             for (auto i=0; i < lens.size(); i++) {
@@ -71,7 +71,7 @@ struct lengthProducer
             }
             return base;
         };
-        results = trigvecf(lengths);
+        results = fill (lengths);
     }
 };
 

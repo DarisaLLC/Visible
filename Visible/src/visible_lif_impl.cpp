@@ -1167,7 +1167,7 @@ void lifContext::update ()
 
     if(m_result_seq.m_time_data.plotCount() == 4 && m_lifProcRef->cell_lengths().size() == 500){
         timedVecOfVals_t synth;
-        lengthProducer sp(m_lifProcRef->cell_lengths(), synth);
+        trackMaker sp(m_lifProcRef->cell_lengths(), synth);
 //        UnitSyntheticProducer<std::sin, 512, 16> sp(synth);
         namedTrack_t synth_track;
         synth_track.first = "length";
