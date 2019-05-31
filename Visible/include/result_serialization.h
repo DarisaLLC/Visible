@@ -20,7 +20,8 @@
 #include <Eigen/Dense>
 #include <fstream>
 #include <iostream>
-#include <core/core.hpp>
+#include "core/core.hpp"
+
 
 
 
@@ -28,35 +29,34 @@
 using namespace boost;
 namespace fs=boost::filesystem;
 
-
 namespace cereal{
-
-// From https://stackoverflow.com/a/22885856
-
-template <class Archive, class _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols> inline
-typename std::enable_if<traits::is_output_serializable<BinaryData<_Scalar>, Archive>::value, void>::type
-save(Archive & ar, Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> const & m)
-{
-    int32_t rows = m.rows();
-    int32_t cols = m.cols();
-    ar(rows);
-    ar(cols);
-    ar(binary_data(m.data(), rows * cols * sizeof(_Scalar)));
-}
-
-template <class Archive, class _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols> inline
-typename std::enable_if<traits::is_input_serializable<BinaryData<_Scalar>, Archive>::value, void>::type
-load(Archive & ar, Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> & m)
-{
-    int32_t rows;
-    int32_t cols;
-    ar(rows);
-    ar(cols);
     
-    m.resize(rows, cols);
+    // From https://stackoverflow.com/a/22885856
     
-    ar(binary_data(m.data(), static_cast<std::size_t>(rows * cols * sizeof(_Scalar))));
-}
+    template <class Archive, class _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols> inline
+    typename std::enable_if<traits::is_output_serializable<BinaryData<_Scalar>, Archive>::value, void>::type
+    save(Archive & ar, Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> const & m)
+    {
+        int32_t rows = m.rows();
+        int32_t cols = m.cols();
+        ar(rows);
+        ar(cols);
+        ar(binary_data(m.data(), rows * cols * sizeof(_Scalar)));
+    }
+    
+    template <class Archive, class _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols> inline
+    typename std::enable_if<traits::is_input_serializable<BinaryData<_Scalar>, Archive>::value, void>::type
+    load(Archive & ar, Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> & m)
+    {
+        int32_t rows;
+        int32_t cols;
+        ar(rows);
+        ar(cols);
+        
+        m.resize(rows, cols);
+        
+        ar(binary_data(m.data(), static_cast<std::size_t>(rows * cols * sizeof(_Scalar))));
+    }
 }
 
 
@@ -199,40 +199,6 @@ inline void save_voxel_similarities (std::vector<float> coefficients, std::strin
     }
     cereal::JSONOutputArchive output_archive(file);
     output_archive(cereal::make_nvp("voxel_similarities", coefficients));
-};
-
-
-struct serial_util {
-    
-    static std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr)
-    {
-        return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
-    }
-    
-    static std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename)
-    {
-        return serial_util::make_shared_ofstream(new std::ofstream(filename, std::ofstream::out));
-    }
-    
-    template<class T, template<typename ELEM, typename ALLOC = std::allocator<ELEM>> class CONT = std::vector >
-    static void save_voxel_similarities_csv (const CONT<T>& data, const std::string& output_file){
-        std::string delim (",");
-        fs::path opath (output_file);
-        auto papa = opath.parent_path ();
-        if (fs::exists(papa))
-        {
-            std::shared_ptr<std::ofstream> myfile = make_shared_ofstream(output_file);
-            auto cnt = 0;
-            auto size = data.size() - 1;
-            for (const T & dd : data)
-            {
-                *myfile << dd;
-                if (cnt++ < size)
-                    *myfile << delim;
-            }
-            *myfile << std::endl;
-        }
-    }
 };
 
 

@@ -25,6 +25,7 @@
 #include <map>
 #include <Eigen/Dense>
 #include "segmentation_parameters.hpp"
+#include "iowriter.hpp"
 
 using namespace Eigen;
 
@@ -313,12 +314,14 @@ public:
     const cv::Mat&  surfaceAffine() const;
     const  std::deque<double>& medianSet () const;
     const fPair& ellipse_ab () const;
+    const fPair& length_range () const;
     const std::vector<sides_length_t>& cell_ends() const;
     
     // Update. Called also when cutoff offset has changed
     void update ();
     
-    std::shared_ptr<OCVImageWriter>& get_image_writer ();
+    std::shared_ptr<ioImageWriter>& get_image_writer ();
+    std::shared_ptr<ioImageWriter>& get_csv_writer ();
     void save_channel_images (int channel_index, std::string& dir_fqfn);
     
     const vector<vector<double>>& ssMatrix () const { return m_smat; }
@@ -346,9 +349,11 @@ private:
     lif_serie_processor::params m_params;
     
     void internal_generate_affine_profiles ();
+    void internal_generate_affine_translations ();
     void internal_generate_affine_windows (const std::vector<roiWindow<P8U>>&);
     
-    void save_affine_windows (const std::vector<cv::Mat>&);
+    void save_affine_windows ();
+    void save_affine_profiles ();
     
     void create_voxel_surface (std::vector<float>&);
     
@@ -379,6 +384,9 @@ private:
     mutable std::mutex m_mutex;
     mutable std::mutex m_shortterms_mutex;
     mutable std::mutex m_segmentation_mutex;
+    mutable std::mutex m_processing_mutex;
+    mutable std::mutex m_io_mutex;
+    
     uint32_t m_channel_count;
     mutable std::condition_variable m_shortterm_cv;
     
@@ -431,10 +439,13 @@ private:
 
     std::vector<sides_length_t> m_cell_ends = {sides_length_t (), sides_length_t()};
     mutable fPair m_ab;
-    
+    mutable fPair m_length_range;
     mutable std::vector<roiWindow<P8U>> m_voxels;
     mutable std::vector<cv::Mat> m_affine_windows;
-    std::shared_ptr<OCVImageWriter> m_writer;
+    mutable std::vector<float> m_affine_translations;
+    mutable std::vector<float> m_norm_affine_translations;
+    std::shared_ptr<ioImageWriter> m_image_writer;
+    std::shared_ptr<ioImageWriter> m_csv_writer;
     
 };
 

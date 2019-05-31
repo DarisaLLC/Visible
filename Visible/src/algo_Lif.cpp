@@ -95,7 +95,7 @@ void lif_serie_processor::internal_generate_affine_windows (const std::vector<ro
             //Crop the result
             Mat cropped;
             getRectSubPix(rotated, size, box.center, cropped);
-            copyMakeBorder(cropped,cropped,10,10,10,10,BORDER_CONSTANT,Scalar(0));
+            copyMakeBorder(cropped,cropped,0,0,0,0,BORDER_CONSTANT,Scalar(0));
             return cropped;
         };
 
@@ -104,26 +104,46 @@ void lif_serie_processor::internal_generate_affine_windows (const std::vector<ro
 
     };
 
+
+    auto horizontal_vertical_projections = [](const cv::Mat& mm){
+        cv::Mat hz (1, mm.cols, CV_32F);
+        cv::Mat vt (mm.rows, 1, CV_32F);
+        reduce(mm,vt,1,CV_REDUCE_SUM,CV_32F);
+        reduce(mm,hz,0,CV_REDUCE_SUM,CV_32F);
+        std::vector<float> hz_vec(mm.cols);
+        for (auto ii = 0; ii < mm.cols; ii++) hz_vec[ii] = hz.at<float>(0,ii);
+        std::vector<float> vt_vec(mm.rows);
+        for (auto ii = 0; ii < mm.rows; ii++) vt_vec[ii] = vt.at<float>(ii,0);
+        return std::make_pair(hz_vec, vt_vec);
+    };
+    
     uint32_t count = 0;
     uint32_t total = static_cast<uint32_t>(rws.size());
     m_affine_windows.clear();
+    m_hz_profiles.clear();
+    m_vt_profiles.clear();
     vector<roiWindow<P8U> >::const_iterator vitr = rws.begin();
     do
     {
         cv::Mat affine = affineCrop(vitr, m_motion_mass);
         auto clone = affine.clone();
+        auto hvpair = horizontal_vertical_projections(clone);
         m_affine_windows.push_back(clone);
+        m_hz_profiles.push_back(hvpair.first);
+        m_vt_profiles.push_back(hvpair.second);
         count++;
     }
     while (++vitr != rws.end());
     assert(count==total);
-    
-    internal_generate_affine_profiles ();
-    save_affine_windows (m_affine_windows);
+
+    internal_generate_affine_translations();
+    internal_generate_affine_profiles();
+    save_affine_windows ();
+    save_affine_profiles();
     
 }
 
-void lif_serie_processor::save_affine_windows (const std::vector<cv::Mat>& rws){
+void lif_serie_processor::save_affine_windows (){
 
     if(fs::exists(mCurrentSerieCachePath)){
         std::string subdir ("affine_cell_images");
@@ -143,37 +163,93 @@ void lif_serie_processor::save_affine_windows (const std::vector<cv::Mat>& rws){
             }
         } // tried creatring it if was not already
         if(fs::exists(save_path)){
+            std::lock_guard<std::mutex> process_lock(m_io_mutex);
             auto writer = get_image_writer();
             writer->operator()(save_path.string(), m_affine_windows);
         }
     }
 }
 
+
+void lif_serie_processor::save_affine_profiles (){
+    
+    if(fs::exists(mCurrentSerieCachePath)){
+        std::string subdir ("affine_cell_profiles");
+        auto save_path = mCurrentSerieCachePath / subdir;
+        boost::system::error_code ec;
+        if(!fs::exists(save_path)){
+            fs::create_directory(save_path, ec);
+            switch( ec.value() ) {
+                case boost::system::errc::success: {
+                    std::string msg = "Created " + save_path.string() ;
+                    vlogger::instance().console()->info(msg);
+                }
+                    break;
+                default:
+                    std::string msg = "Failed to create " + save_path.string() + ec.message();
+                    vlogger::instance().console()->info(msg);
+            }
+        } // tried creatring it if was not already
+        if(fs::exists(save_path)){
+            std::lock_guard<std::mutex> process_lock(m_io_mutex);
+            auto this_csv_writer = std::make_shared<ioImageWriter>("hp");
+            this_csv_writer->operator()(save_path.string(), m_hz_profiles);
+            auto other_csv_writer = std::make_shared<ioImageWriter>("vp");
+            other_csv_writer->operator()(save_path.string(), m_vt_profiles);
+        }
+    }
+}
+
+void lif_serie_processor::internal_generate_affine_translations (){
+    if(m_affine_windows.empty()) return;
+
+    auto trans = [] (const cv::Mat& minus, const cv::Mat& plus){
+        auto tw = minus.cols / 3;
+        auto th = minus.rows / 3;
+        auto width = minus.cols;
+        auto height = minus.rows;
+        auto cw = (width - tw)/2;
+        auto ch = (height-th)/2;
+        auto left = cv::Mat(minus, cv::Rect(tw,ch,tw,th));
+        auto right = cv::Mat(minus, cv::Rect(cw,ch,tw,th));
+        auto plus_left = cv::Mat(plus, cv::Rect(0,0,plus.cols/2, plus.rows));
+        auto plus_right = cv::Mat(plus, cv::Rect(plus.cols/2,0,plus.cols/2, plus.rows));
+        
+        cv::Mat norm_xcorr_img;
+        std::pair<cv::Point,cv::Point> max_loc;
+        dPair max_val;
+        cv::matchTemplate(plus_left,left, norm_xcorr_img, cv::TM_CCORR_NORMED, left);
+        cv::minMaxLoc(norm_xcorr_img, NULL, &max_val.first, NULL, &max_loc.first);
+        cv::matchTemplate(plus_right,right, norm_xcorr_img, cv::TM_CCORR_NORMED, right);
+        cv::minMaxLoc(norm_xcorr_img, NULL, &max_val.second, NULL, &max_loc.second);
+        fVector_2d lv(max_loc.first.x,max_loc.first.y);
+        fVector_2d rv(max_loc.second.x+plus.cols/2.0f,max_loc.second.y);
+        return lv.distance(rv);
+    };
+
+    std::vector<float> translations;
+    auto d0 = trans(m_affine_windows[0],m_affine_windows[0]);
+    translations.push_back(static_cast<float>(d0));
+    auto iter = m_affine_windows.begin();
+    while (++iter < m_affine_windows.end()){
+        auto tt = trans(*iter,*(iter-1));
+        translations.push_back(static_cast<float>(tt));
+    }
+    assert(translations.size() == m_affine_windows.size());
+    m_affine_translations = translations;
+    m_affine_translations[0] = m_affine_translations[1];
+    
+}
 void lif_serie_processor::internal_generate_affine_profiles(){
     
-    for (auto& mm : m_affine_windows)
+    m_norm_affine_translations = m_affine_translations;
+    auto extremes = svl::norm_min_max(m_norm_affine_translations.begin(), m_norm_affine_translations.end());
+    m_length_range.first = extremes.first;
+    m_length_range.second = extremes.second;
+    
+    for (auto& mm : m_norm_affine_translations)
     {
-        cv::Mat hz (1, mm.cols, CV_32F);
-        cv::Mat vt (mm.rows, 1, CV_32F);
-        horizontal_vertical_projections (mm, hz, vt);
-        std::vector<float> hz_vec(mm.cols);
-        for (auto ii = 0; ii < mm.cols; ii++) hz_vec[ii] = vt.at<float>(0,ii);
-        std::vector<float> vt_vec(mm.rows);
-        for (auto ii = 0; ii < mm.rows; ii++) vt_vec[ii] = vt.at<float>(ii,0);
-        m_hz_profiles.emplace_back(hz_vec);
-        m_vt_profiles.emplace_back(vt_vec);
-
-        dPair hextend, vextend;
-        bool hok = rcEdgeFilter1D::peakDetect1d (hz_vec, hextend);
-        bool vok = rcEdgeFilter1D::peakDetect1d (vt_vec, vextend);
-        
-        std::cout << std::boolalpha << hok << " Hz " << hextend << std::endl;
-        std::cout << std::boolalpha << vok << " VT " << vextend << std::endl;
-        if(hok)
-            m_cell_lengths.push_back(std::max(hextend.first,hextend.second )-std::min(hextend.first,hextend.second));
-        else
-            m_cell_lengths.push_back(0.0f);
-
+        m_cell_lengths.push_back(mm);
     }
 }
 /**
@@ -285,6 +361,7 @@ void lif_serie_processor::run_detect_geometry (const int channel_index){
 
 const cv::RotatedRect& lif_serie_processor::motion_surface() const { return m_motion_mass; }
 const cv::Mat& lif_serie_processor::surfaceAffine() const { return m_surface_affine; }
+const fPair& lif_serie_processor::length_range() const { return m_length_range; }
 
 
 // Update. Called also when cutoff offset has changed

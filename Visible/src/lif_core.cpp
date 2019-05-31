@@ -430,11 +430,19 @@ const int64_t lif_serie_processor::channel_count () const
     return m_channel_count;
 }
 
-std::shared_ptr<OCVImageWriter>& lif_serie_processor::get_image_writer (){
-    if (! m_writer){
-        m_writer = std::make_shared<OCVImageWriter>();
+std::shared_ptr<ioImageWriter>& lif_serie_processor::get_image_writer (){
+    if (! m_image_writer){
+        m_image_writer = std::make_shared<ioImageWriter>();
     }
-    return m_writer;
+    return m_image_writer;
+}
+
+
+std::shared_ptr<ioImageWriter>& lif_serie_processor::get_csv_writer (){
+    if (! m_csv_writer){
+        m_csv_writer = std::make_shared<ioImageWriter>();
+    }
+    return m_csv_writer;
 }
 
 void lif_serie_processor::save_channel_images (int channel_index, std::string& dir_fqfn){

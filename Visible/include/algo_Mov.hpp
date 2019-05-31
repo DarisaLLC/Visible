@@ -21,7 +21,7 @@
 #include "opencv2/video/tracking.hpp"
 #include "algo_cardiac.hpp"
 #include "segmentation_parameters.hpp"
-
+#include "iowriter.hpp"
 using namespace cv;
 
 // For base classing
@@ -127,7 +127,7 @@ public:
     // Update. Called also when cutoff offset has changed
     void update ();
     
-    std::shared_ptr<OCVImageWriter>& get_image_writer ();
+    std::shared_ptr<ioImageWriter>& get_image_writer ();
     void save_channel_images (int channel_index, std::string& dir_fqfn);
     
     const vector<vector<double>>& ssMatrix () const { return m_smat; }
@@ -215,7 +215,7 @@ private:
     labelBlob::ref m_main_blob;
     std::vector<labelBlob::blob> m_blobs;
     
-    std::shared_ptr<OCVImageWriter> m_writer;
+    std::shared_ptr<ioImageWriter> m_writer;
     
 };
 

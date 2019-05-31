@@ -484,9 +484,9 @@ const int64_t sequence_processor::channel_count () const
     return m_channel_count;
 }
 
-std::shared_ptr<OCVImageWriter>& sequence_processor::get_image_writer (){
+std::shared_ptr<ioImageWriter>& sequence_processor::get_image_writer (){
     if (! m_writer){
-        m_writer = std::make_shared<OCVImageWriter>();
+        m_writer = std::make_shared<ioImageWriter>();
     }
     return m_writer;
 }

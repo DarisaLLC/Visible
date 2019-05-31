@@ -38,7 +38,8 @@
 #include <assert.h>
 
 using namespace std;
-
+using namespace boost;
+namespace fs=boost::filesystem;
 namespace stl_utils
 {
     /*********
@@ -497,6 +498,37 @@ namespace stl_utils
     }
     
     
+    static std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr)
+    {
+        return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
+    }
+    
+    static inline std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename)
+    {
+        return make_shared_ofstream(new std::ofstream(filename, std::ofstream::out));
+    }
+    
+    template<class T, template<typename ELEM, typename ALLOC = std::allocator<ELEM>> class CONT = std::vector >
+    static void save_csv (const CONT<T>& data, const std::string& output_file){
+        std::string delim (",");
+        fs::path opath (output_file);
+        auto papa = opath.parent_path ();
+        if (fs::exists(papa))
+        {
+            std::shared_ptr<std::ofstream> myfile = make_shared_ofstream(output_file);
+            auto cnt = 0;
+            auto size = data.size() - 1;
+            for (const T & dd : data)
+            {
+                *myfile << dd;
+                if (cnt++ < size)
+                    *myfile << delim;
+            }
+            *myfile << std::endl;
+        }
+    }
+
+
     struct naturalComparator
     {
         bool operator () (const std::string& a, const std::string& b)

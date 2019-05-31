@@ -140,7 +140,7 @@ bool rcEdgeFilter1D::peakDetect1d (const vector<float>& signal, dPair& extendPea
     vector<int32_t> efilter, filtered;
     pfinder.genFilter (efilter, 2, 1);
     pfinder.filter (efilter);
-    pfinder.genPeaks (signal, &filtered, peaks, 0, 1.0, 0.5);
+    pfinder.genPeaks (signal, &filtered, peaks, 0, 5.0, 2.0);
     
     for (auto i = 0; i < peaks.size(); i++)
     {
