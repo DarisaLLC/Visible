@@ -959,6 +959,8 @@
 		C28F74312234880B0040890C /* processor_cli.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = processor_cli.cpp; sourceTree = "<group>"; };
 		C290E4032245A41500FD6FD1 /* dsp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dsp.cpp; sourceTree = "<group>"; };
 		C294B11F2152D22C00C916B1 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
+		C296BFD622A0A55E0072BF80 /* iowriter.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = iowriter.hpp; path = ../include/iowriter.hpp; sourceTree = "<group>"; };
+		C296BFD722A0A5D80072BF80 /* iowriter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = iowriter.hpp; path = ../include/iowriter.hpp; sourceTree = "<group>"; };
 		C29C53BF222B58D900D17385 /* dense_motion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dense_motion.cpp; sourceTree = "<group>"; };
 		C29C53C0222B58D900D17385 /* dense_motion.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = dense_motion.hpp; sourceTree = "<group>"; };
 		C29DB075212B351200930CBD /* algo_Lif.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = algo_Lif.cpp; path = ../src/algo_Lif.cpp; sourceTree = "<group>"; };
@@ -1420,6 +1422,7 @@
 			isa = PBXGroup;
 			children = (
 				C210946B2239D1F3004E88EE /* permutation_entropy.h */,
+				C296BFD722A0A5D80072BF80 /* iowriter.hpp */,
 				C23B7CC6220553E1005DE02C /* cpp-perf.hpp */,
 				C2819ED622012DE800183E44 /* Resources.h */,
 				C260AFCF21ED076F003B0FF0 /* sg_filter.h */,
@@ -1456,6 +1459,7 @@
 				C2E321FF1D0480E4006DFE5E /* mediaInfo.h */,
 				C2BF1A671E71D12200A30407 /* timeMarker.h */,
 				C2C68C3B1ED9F9440095FFC4 /* tracker.h */,
+				C296BFD622A0A55E0072BF80 /* iowriter.hpp */,
 				C2601BB41E674F88004415A3 /* visible_layout.hpp */,
 				C21946AC1CE4EA4900976025 /* seq_frame_container.hpp */,
 				C2E322001D05B90C006DFE5E /* time_index.h */,

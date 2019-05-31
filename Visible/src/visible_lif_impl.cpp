@@ -1177,6 +1177,10 @@ void lifContext::update ()
         synth_track.first = "length";
         synth_track.second = synth;
         m_result_seq.m_time_data.load(synth_track,named_colors["Length"], -1);
+        auto lr = m_lifProcRef->length_range();
+        std::string msg = " Length min/max: " + svl::toString(lr.first) + " <-> " + svl::toString(lr.second);
+        vlogger::instance().console()->info(msg);
+        
     }
     
     // Fetch Next Frame

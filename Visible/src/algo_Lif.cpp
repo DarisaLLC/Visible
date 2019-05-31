@@ -71,8 +71,8 @@ void lif_serie_processor::internal_generate_affine_windows (const std::vector<ro
     std::unique_lock<std::mutex> lock(m_mutex);
 
     
-    std::string msg = " lproc thread: " + stl_utils::tostr(std::this_thread::get_id());
-    vlogger::instance().console()->info(msg);
+   // std::string msg = " lproc thread: " + stl_utils::tostr(std::this_thread::get_id());
+  //  vlogger::instance().console()->info(msg);
     
  
     auto affineCrop = [] (const vector<roiWindow<P8U> >::const_iterator& rw_src, cv::RotatedRect& rect){
@@ -84,8 +84,8 @@ void lif_serie_processor::internal_generate_affine_windows (const std::vector<ro
             
             //Adjust the box angle
             // Already Done
-            std::string msg =             svl::to_string(box);
-            vlogger::instance().console()->info(msg);
+         //   std::string msg =             svl::to_string(box);
+         //   vlogger::instance().console()->info(msg);
 
             //Rotate the text according to the angle
             auto transform = getRotationMatrix2D(box.center, angle, 1.0);
@@ -286,16 +286,16 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_leve
           //  m_blobs->push_back(blobs[0]);
             RotatedRect motion_mass = blobs[0].rotated_roi();
             std::vector<cv::Point2f> corners(4);
-            std::string msg = svl::to_string(motion_mass);
-            msg = " < " + msg;
-            vlogger::instance().console()->info(msg);
+       //     std::string msg = svl::to_string(motion_mass);
+      //      msg = " < " + msg;
+      //      vlogger::instance().console()->info(msg);
             motion_mass.points(corners.data());
             pointsToRotatedRect(corners, motion_mass);
             motion_mass.center.x += pad_trans.first;
             motion_mass.center.y += pad_trans.second;
-            msg = svl::to_string(motion_mass);
-            msg = " > " + msg;
-            vlogger::instance().console()->info(msg);
+        //   msg = svl::to_string(motion_mass);
+         //   msg = " > " + msg;
+         //   vlogger::instance().console()->info(msg);
             std::vector<cv::Point2f> mid_points;
             svl::get_mid_points(motion_mass, mid_points);
             m_surface_affine = cv::getRotationMatrix2D(motion_mass.center,motion_mass.angle, 1);
