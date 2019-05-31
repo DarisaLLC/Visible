@@ -146,7 +146,51 @@ typedef std::weak_ptr<Surface8u>	SurfaceWeakRef;
 typedef std::weak_ptr<Surface16u>	Surface16uWeakRef;
 typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
 
-
+TEST (ut_affine_translation, basic){
+    
+    auto res = dgenv_ptr->asset_path("affine_translation.png");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    cv::Mat image = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Size iSize(image.cols,image.rows);
+    
+    auto trans = [] (const cv::Mat& minus, const cv::Mat& plus){
+        auto tw = minus.cols / 3;
+        auto th = minus.rows / 3;
+        auto width = minus.cols;
+        auto height = minus.rows;
+        auto cw = (width - tw)/2;
+        auto ch = (height-th)/2;
+        auto left = cv::Mat(minus, cv::Rect(tw,ch,tw,th));
+        auto right = cv::Mat(minus, cv::Rect(cw,ch,tw,th));
+        auto plus_left = cv::Mat(plus, cv::Rect(0,0,plus.cols/2, plus.rows));
+        auto plus_right = cv::Mat(plus, cv::Rect(plus.cols/2,0,plus.cols/2, plus.rows));
+        
+        cv::Mat norm_xcorr_img;
+        std::pair<cv::Point,cv::Point> max_loc;
+        dPair max_val;
+        cv::matchTemplate(plus_left,left, norm_xcorr_img, cv::TM_CCORR_NORMED, left);
+        cv::minMaxLoc(norm_xcorr_img, NULL, &max_val.first, NULL, &max_loc.first);
+        cv::matchTemplate(plus_right,right, norm_xcorr_img, cv::TM_CCORR_NORMED, right);
+        cv::minMaxLoc(norm_xcorr_img, NULL, &max_val.second, NULL, &max_loc.second);
+        fVector_2d lv(max_loc.first.x,max_loc.first.y);
+        fVector_2d rv(max_loc.second.x+plus.cols/2.0f,max_loc.second.y);
+        return lv.distance(rv);
+    };
+    
+    auto d0 = trans(image,image);
+    std::cout << d0 << std::endl;
+    res = dgenv_ptr->asset_path("affine_translation_close.png");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    cv::Mat close_image = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Size icSize(close_image.cols,close_image.rows);
+    auto d1 = trans(image, close_image);
+    std::cout << d0 - d1 << std::endl;
+    // @todo add check for 108.046 for first and change to -8.06
+    
+    
+}
 TEST (ut_algo_lif, segment){
     
     auto res = dgenv_ptr->asset_path("voxel_ss_.png");
@@ -1725,17 +1769,6 @@ bool setup_loggers (const std::string& log_path,  std::string id_name){
 
 
 
-std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr)
-{
-    return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
-}
-
-std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename)
-{
-    return make_shared_ofstream(new std::ofstream(filename, std::ofstream::out));
-}
-
-
 
 void output_array (const std::vector<std::vector<float>>& data, const std::string& output_file){
     std::string delim (",");
@@ -1743,7 +1776,7 @@ void output_array (const std::vector<std::vector<float>>& data, const std::strin
     auto papa = opath.parent_path ();
     if (fs::exists(papa))
     {
-        std::shared_ptr<std::ofstream> myfile = make_shared_ofstream(output_file);
+        std::shared_ptr<std::ofstream> myfile = stl_utils::make_shared_ofstream(output_file);
         for (const vector<float>& row : data)
         {
             auto cnt = 0;

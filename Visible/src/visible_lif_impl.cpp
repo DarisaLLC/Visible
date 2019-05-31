@@ -95,6 +95,7 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const f
     msg = " folder for " + m_serie.name() + msg;
     vlogger::instance().console()->info(msg);
     m_idlab_defaults.median_level_set_cutoff_fraction = 7;
+    m_playback_speed = 1;
     
     
     m_valid = false;
@@ -968,11 +969,14 @@ void lifContext::add_navigation(){
         ImGui::InputInt("",  &m_result_seq.mFrameMax, 0, 0);
         ImGui::PopID();
         ImGui::SameLine();
-        if (ImGui::Button(m_playback_speed == 1 ? " 1 " : " 10x "))
+        if (ImGui::Button(m_playback_speed == 10 ? " 1 " : " 10x "))
         {
-            m_playback_speed = m_playback_speed == 1 ? 10 : 1;
+            auto current = m_playback_speed;
+            m_playback_speed = current == 1 ? 10 : 1;
         }
-        
+        ImGui::SameLine();
+
+        ui::SameLine(ui::GetWindowWidth() - 160); ui::Text("% 8d\t%4.4f Seconds", getCurrentFrame(), getCurrentTime().secs());
         
         if(!m_contraction_pci_trackWeakRef.expired()){
             if(m_median_set_at_default){
@@ -1166,9 +1170,9 @@ void lifContext::update ()
     }
 
     if(m_result_seq.m_time_data.plotCount() == 4 && m_lifProcRef->cell_lengths().size() == 500){
+        
         timedVecOfVals_t synth;
         trackMaker sp(m_lifProcRef->cell_lengths(), synth);
-//        UnitSyntheticProducer<std::sin, 512, 16> sp(synth);
         namedTrack_t synth_track;
         synth_track.first = "length";
         synth_track.second = synth;
