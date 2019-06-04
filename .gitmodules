@@ -19,6 +19,7 @@
 [submodule "externals/fmt"]
 	path = externals/fmt
 	url = https://github.com/fmtlib/fmt.git
+	branch = master
 [submodule "externals/albatross"]
 	path = externals/albatross
 	url = https://github.com/swift-nav/albatross.git
