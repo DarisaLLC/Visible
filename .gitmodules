@@ -16,3 +16,9 @@
 [submodule "externals/ImGuizmo"]
 	path = externals/ImGuizmo
 	url = git@github.com:DarisaLLC/ImGuizmo.git
+[submodule "externals/fmt"]
+	path = externals/fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "externals/albatross"]
+	path = externals/albatross
+	url = https://github.com/swift-nav/albatross.git
