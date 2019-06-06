@@ -6,16 +6,36 @@ Visible Build Notes:
 3. /external contains 3rd party libraries used:
     boost, Cinder, spdlog and Cimg are submodules. Cimg is not currently used
     imgui and nr_c304 are commited versions of imgui and numerical recipes 
+    gsl is installed using brew
 4. svl, small vision library, is internal unit tested vision library. Moving forward OpenCV is used instead of or a replacement for lower level implementations. It is a requirement that svl operates in macos and ios. 
 5. When building the debug version of libcinder, debug information for the zlib library needs to be enabled. This can be done by adding the option ZLIB_DEBUG=1 ( Xcode 9.4.1 on macOS 10.13.16 )
 
 Submodules:
 
- 505ba78783f339c38d2072a89bf719a03c01d490 externals/CImg (v.203-1-g505ba78)
- 765fb86cc89f50638f4daa4fc7fe32976d4d1755 externals/Cinder-ImGui (remotes/origin/HEAD)
- 39f80117c81159878363aa603d9ea31c2f3ef2a4 externals/ImGuizmo (heads/master)
- e1b4249cde063c76cf946d915da7341bc08de7ec externals/cinder (v0.9.0-2461-ge1b4249cd)
-+0896ce27b2e8dfbc4ef81e882cf438458c17c86a externals/imgui_module (v1.62-728-g0896ce27)
- f2ac7d730cb8afd386d897a3900ed145c392c1d9 externals/spdlog (v1.1.0-48-gf2ac7d7)
+ [submodule "externals/spdlog"]
+        path = externals/spdlog
+        url = https://github.com/gabime/spdlog.git
+[submodule "externals/cinder"]
+        path = externals/cinder
+        url = git://github.com/cinder/Cinder.git
+[submodule "externals/CImg"]
+        path = externals/CImg
+        url = git://github.com/dtschump/CImg
+[submodule "externals/Cinder-ImGui"]
+        path = externals/Cinder-ImGui
+        url = https://github.com/simongeilfus/Cinder-ImGui.git
+[submodule "externals/imgui_module"]
+        path = externals/imgui_module
+        url = https://github.com/ocornut/imgui.git
+[submodule "externals/ImGuizmo"]
+        path = externals/ImGuizmo
+        url = git@github.com:DarisaLLC/ImGuizmo.git
+[submodule "externals/fmt"]
+        path = externals/fmt
+        url = https://github.com/fmtlib/fmt.git
+        branch = master
+[submodule "externals/albatross"]
+        path = externals/albatross
+        url = https://github.com/swift-nav/albatross.git
 
 
