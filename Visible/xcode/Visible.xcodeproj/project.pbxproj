@@ -43,6 +43,12 @@
 		C2175DDA215154A9004315C0 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
 		C2175DDB215154A9004315C0 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
 		C2175DDC215154EA004315C0 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
+		C21A506922A9835A00B0AC7D /* stats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A506822A9835A00B0AC7D /* stats.cpp */; };
+		C21A506A22A9835A00B0AC7D /* stats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A506822A9835A00B0AC7D /* stats.cpp */; };
+		C21A506B22A9835A00B0AC7D /* stats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A506822A9835A00B0AC7D /* stats.cpp */; };
+		C21A506C22A9835A00B0AC7D /* stats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A506822A9835A00B0AC7D /* stats.cpp */; };
+		C21A506D22A9835A00B0AC7D /* stats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A506822A9835A00B0AC7D /* stats.cpp */; };
+		C21A506E22A9835A00B0AC7D /* stats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A506822A9835A00B0AC7D /* stats.cpp */; };
 		C21E390C228A054C00778A66 /* affine_rectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21E390B228A054C00778A66 /* affine_rectangle.cpp */; };
 		C21E390D228A054C00778A66 /* affine_rectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21E390B228A054C00778A66 /* affine_rectangle.cpp */; };
 		C21E390E228A054C00778A66 /* affine_rectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21E390B228A054C00778A66 /* affine_rectangle.cpp */; };
@@ -55,11 +61,6 @@
 		C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
 		C232F00B2296FDCB0075B2EE /* lineseg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696B1CED3E2C0045FF57 /* lineseg.cpp */; };
 		C2342E60227CC45F00D74D80 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2342E5F227CC45F00D74D80 /* GLUT.framework */; };
-		C234C579229EFA0D001EF98B /* rc_filter1d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C234C578229EFA0D001EF98B /* rc_filter1d.cpp */; };
-		C234C57A229EFA0D001EF98B /* rc_filter1d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C234C578229EFA0D001EF98B /* rc_filter1d.cpp */; };
-		C234C57B229EFA0D001EF98B /* rc_filter1d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C234C578229EFA0D001EF98B /* rc_filter1d.cpp */; };
-		C234C57C229EFA0D001EF98B /* rc_filter1d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C234C578229EFA0D001EF98B /* rc_filter1d.cpp */; };
-		C234C57D229EFA0D001EF98B /* rc_filter1d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C234C578229EFA0D001EF98B /* rc_filter1d.cpp */; };
 		C2398A0921DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
 		C2398A0A21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
 		C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
@@ -423,6 +424,21 @@
 		C2C5CF68229A0DB0004595C5 /* glmutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C5CF66229A0DB0004595C5 /* glmutils.cpp */; };
 		C2C5CF69229A0DB0004595C5 /* glmutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C5CF66229A0DB0004595C5 /* glmutils.cpp */; };
 		C2C5CF6A229A0DB0004595C5 /* glmutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C5CF66229A0DB0004595C5 /* glmutils.cpp */; };
+		C2CE9C7422A48AC5003C479A /* etw_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C7322A48AC5003C479A /* etw_utils.cpp */; };
+		C2CE9C7522A48AC5003C479A /* etw_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C7322A48AC5003C479A /* etw_utils.cpp */; };
+		C2CE9C7622A48AC5003C479A /* etw_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C7322A48AC5003C479A /* etw_utils.cpp */; };
+		C2CE9C7722A48AC5003C479A /* etw_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C7322A48AC5003C479A /* etw_utils.cpp */; };
+		C2CE9C7822A48AC5003C479A /* etw_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C7322A48AC5003C479A /* etw_utils.cpp */; };
+		C2CE9C7B22A8983F003C479A /* mathBSpline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C7A22A8983F003C479A /* mathBSpline.cpp */; };
+		C2CE9C7C22A8983F003C479A /* mathBSpline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C7A22A8983F003C479A /* mathBSpline.cpp */; };
+		C2CE9C7D22A8983F003C479A /* mathBSpline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C7A22A8983F003C479A /* mathBSpline.cpp */; };
+		C2CE9C7E22A8983F003C479A /* mathBSpline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C7A22A8983F003C479A /* mathBSpline.cpp */; };
+		C2CE9C7F22A8983F003C479A /* mathBSpline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C7A22A8983F003C479A /* mathBSpline.cpp */; };
+		C2CE9C8722A97D2D003C479A /* math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C8122A97D2D003C479A /* math.cpp */; };
+		C2CE9C8822A97D2D003C479A /* math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C8122A97D2D003C479A /* math.cpp */; };
+		C2CE9C8922A97D2D003C479A /* math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C8122A97D2D003C479A /* math.cpp */; };
+		C2CE9C8A22A97D2D003C479A /* math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C8122A97D2D003C479A /* math.cpp */; };
+		C2CE9C8B22A97D2D003C479A /* math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C8122A97D2D003C479A /* math.cpp */; };
 		C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
@@ -680,6 +696,9 @@
 		C219469F1CE4EA4900976025 /* sshist.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sshist.hpp; path = ../include/sshist.hpp; sourceTree = "<group>"; };
 		C21946A31CE4EA4900976025 /* guiContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = guiContext.h; path = ../include/guiContext.h; sourceTree = "<group>"; usesTabs = 1; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		C21946AC1CE4EA4900976025 /* seq_frame_container.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = seq_frame_container.hpp; path = ../include/seq_frame_container.hpp; sourceTree = "<group>"; };
+		C21A506822A9835A00B0AC7D /* stats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stats.cpp; sourceTree = "<group>"; };
+		C21A506F22A9895C00B0AC7D /* moreMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = moreMath.h; sourceTree = "<group>"; };
+		C21A507022A98AE800B0AC7D /* mathBSpline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mathBSpline.h; sourceTree = "<group>"; };
 		C21E390B228A054C00778A66 /* affine_rectangle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = affine_rectangle.cpp; sourceTree = "<group>"; };
 		C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer_impl.h; path = ../include/sm_producer_impl.h; sourceTree = "<group>"; };
 		C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer.h; path = ../include/sm_producer.h; sourceTree = "<group>"; };
@@ -695,7 +714,6 @@
 		C232F00A229377770075B2EE /* ellipse.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ellipse.hpp; sourceTree = "<group>"; };
 		C2342E5D227CC27300D74D80 /* ps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ps.cpp; sourceTree = "<group>"; };
 		C2342E5F227CC45F00D74D80 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
-		C234C578229EFA0D001EF98B /* rc_filter1d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rc_filter1d.cpp; sourceTree = "<group>"; };
 		C234C57E229EFAF4001EF98B /* rc_filter1d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rc_filter1d.h; sourceTree = "<group>"; };
 		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
 		C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleTestApp-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleTestApp-Info.plist"; sourceTree = "<absolute>"; };
@@ -1000,6 +1018,11 @@
 		C2C5CF66229A0DB0004595C5 /* glmutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glmutils.cpp; sourceTree = "<group>"; };
 		C2C68C3B1ED9F9440095FFC4 /* tracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tracker.h; path = ../include/tracker.h; sourceTree = "<group>"; };
 		C2CBB26122794FB4003C3CF7 /* affine_test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = affine_test.png; path = ../../../.Visible/3channels/Series014/affine_test.png; sourceTree = "<group>"; };
+		C2CE9C7322A48AC5003C479A /* etw_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = etw_utils.cpp; path = ../src/etw_utils.cpp; sourceTree = "<group>"; };
+		C2CE9C7922A49833003C479A /* etw_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = etw_utils.hpp; path = ../include/etw_utils.hpp; sourceTree = "<group>"; };
+		C2CE9C7A22A8983F003C479A /* mathBSpline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mathBSpline.cpp; sourceTree = "<group>"; };
+		C2CE9C8122A97D2D003C479A /* math.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = math.cpp; sourceTree = "<group>"; };
+		C2CE9C8C22A97E8E003C479A /* gen_utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = gen_utils.hpp; sourceTree = "<group>"; };
 		C2D23FCA219B9B3E00F4A49E /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../../../../../../../usr/local/Cellar/boost/1.67.0_1/lib/libboost_thread-mt.a"; sourceTree = "<group>"; };
 		C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cinder_support.cpp; sourceTree = "<group>"; };
 		C2DA19561E7F30D800062DBC /* csv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = csv.cpp; sourceTree = "<group>"; };
@@ -1208,6 +1231,7 @@
 		080E96DDFE201D6D7F000001 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C2CE9C7322A48AC5003C479A /* etw_utils.cpp */,
 				C21094662239D1C8004E88EE /* permutation_entropy.cpp */,
 				C27DB8AF225BBAA1002AE43D /* algo_Mov.cpp */,
 				C260AFCE21ED0691003B0FF0 /* sg_filter.cpp */,
@@ -1421,6 +1445,7 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C2CE9C7922A49833003C479A /* etw_utils.hpp */,
 				C210946B2239D1F3004E88EE /* permutation_entropy.h */,
 				C296BFD722A0A5D80072BF80 /* iowriter.hpp */,
 				C23B7CC6220553E1005DE02C /* cpp-perf.hpp */,
@@ -1701,6 +1726,9 @@
 		C26009EA1CED3E010045FF57 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				C21A507022A98AE800B0AC7D /* mathBSpline.h */,
+				C21A506F22A9895C00B0AC7D /* moreMath.h */,
+				C2CE9C8C22A97E8E003C479A /* gen_utils.hpp */,
 				C2C5CF65229A0D8E004595C5 /* glmutils.h */,
 				C2239AB2218A8298007558AB /* boost_units_literals.h */,
 				C2239AB6218B6F30007558AB /* boost_units.hpp */,
@@ -1870,7 +1898,9 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				C234C578229EFA0D001EF98B /* rc_filter1d.cpp */,
+				C21A506822A9835A00B0AC7D /* stats.cpp */,
+				C2CE9C8122A97D2D003C479A /* math.cpp */,
+				C2CE9C7A22A8983F003C479A /* mathBSpline.cpp */,
 				C2C5CF66229A0DB0004595C5 /* glmutils.cpp */,
 				C2AEB73A228CD6E60078E687 /* geom_utils.cpp */,
 				C2AFAD802252E1690038AF5B /* UIImage+OpenCV.mm */,
@@ -2263,7 +2293,9 @@
 				C29DB076212B351200930CBD /* algo_Lif.cpp in Sources */,
 				C2FC7DAF1CF4F46100D18193 /* seq_frame_container.cpp in Sources */,
 				C2A5DBAD207A003F001C6608 /* Plist.cpp in Sources */,
+				C2CE9C8722A97D2D003C479A /* math.cpp in Sources */,
 				C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */,
+				C2CE9C7422A48AC5003C479A /* etw_utils.cpp in Sources */,
 				C2606DAE1CED3E2E0045FF57 /* localvariance.cpp in Sources */,
 				C28B01DC229B210A00B8165D /* fyn_segmentation.cpp in Sources */,
 				C28B01C7229B1CD900B8165D /* algo_shortterm.cpp in Sources */,
@@ -2306,16 +2338,17 @@
 				C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */,
 				C2AFCF00216E79590080462D /* imgui.cpp in Sources */,
 				C27DB8B0225BBAA1002AE43D /* algo_Mov.cpp in Sources */,
+				C21A506922A9835A00B0AC7D /* stats.cpp in Sources */,
 				C23E346021F2511D00221E68 /* ImSequencer.cpp in Sources */,
 				C2819ECD2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C2B87C9921D012D700C91E35 /* logger.cpp in Sources */,
 				C248D6D8224939AC00C2C02F /* VisibleApp.cpp in Sources */,
 				C2618F80217FDA6600FA9F43 /* color.cc in Sources */,
 				C20EDBC21CF277130074C47A /* self_similarity.cpp in Sources */,
+				C2CE9C7B22A8983F003C479A /* mathBSpline.cpp in Sources */,
 				C248DD2C1F64601A00FF72B1 /* onImagePlotUtils.cpp in Sources */,
 				C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */,
 				C2606DAF1CED3E2E0045FF57 /* matpixel.cpp in Sources */,
-				C234C579229EFA0D001EF98B /* rc_filter1d.cpp in Sources */,
 				C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */,
 				C2109476223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
 				C28B01CC229B1DE500B8165D /* lif_serie.cpp in Sources */,
@@ -2333,6 +2366,7 @@
 				C20BBC071E4E34C3002C7D68 /* lifFile.cpp in Sources */,
 				C28B01CE229B1DE500B8165D /* lif_serie.cpp in Sources */,
 				C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */,
+				C2CE9C7622A48AC5003C479A /* etw_utils.cpp in Sources */,
 				C20BBC041E4E33D3002C7D68 /* tinyxml.cpp in Sources */,
 				C24EA2D4207F081000555D16 /* sg_filter.cpp in Sources */,
 				C2398A1921DE980C00B180A0 /* imgui.cpp in Sources */,
@@ -2351,11 +2385,11 @@
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,
 				C21E390E228A054C00778A66 /* affine_rectangle.cpp in Sources */,
 				C28B01DE229B210A00B8165D /* fyn_segmentation.cpp in Sources */,
+				C2CE9C7D22A8983F003C479A /* mathBSpline.cpp in Sources */,
 				C2618F86217FDA9900FA9F43 /* window.cc in Sources */,
 				C20D4DE72208BD34004D9405 /* ellipse_fit.cpp in Sources */,
 				C28B01D3229B1E5F00B8165D /* lif_browser.cpp in Sources */,
 				C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */,
-				C234C57B229EFA0D001EF98B /* rc_filter1d.cpp in Sources */,
 				C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */,
 				C2618F87217FDA9E00FA9F43 /* figure.cc in Sources */,
 				C2C5CF69229A0DB0004595C5 /* glmutils.cpp in Sources */,
@@ -2366,7 +2400,9 @@
 				C20EDBB61CEFC2D20074C47A /* registration.cpp in Sources */,
 				C29C53C1222B58D900D17385 /* dense_motion.cpp in Sources */,
 				C2398A1521DE980C00B180A0 /* CinderImGui.cpp in Sources */,
+				C21A506B22A9835A00B0AC7D /* stats.cpp in Sources */,
 				C2398A1721DE980C00B180A0 /* imgui_draw.cpp in Sources */,
+				C2CE9C8922A97D2D003C479A /* math.cpp in Sources */,
 				C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */,
 				C28B01E0229BA8DC00B8165D /* main.cpp in Sources */,
 				C2677586212A325F00B5E080 /* contraction_t.cpp in Sources */,
@@ -2417,6 +2453,7 @@
 				C26A05691E777E2100BDC954 /* tinyxmlparser.cpp in Sources */,
 				C26A05591E77744300BDC954 /* sm_producer.cpp in Sources */,
 				C26A05711E777ECC00BDC954 /* gradient.cpp in Sources */,
+				C21A506C22A9835A00B0AC7D /* stats.cpp in Sources */,
 				C26A055D1E77759D00BDC954 /* lifFile.cpp in Sources */,
 				C26A05601E7775A700BDC954 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C2DA195B1E80E4E200062DBC /* csv.cpp in Sources */,
@@ -2436,6 +2473,7 @@
 				C28B01C8229B1CD900B8165D /* algo_shortterm.cpp in Sources */,
 				C26F5FA621B0AA6D00EAE156 /* contraction_t.cpp in Sources */,
 				C21094682239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
+				C2CE9C7522A48AC5003C479A /* etw_utils.cpp in Sources */,
 				C26F5FA721B0AA6D00EAE156 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C26F5FA821B0AA6D00EAE156 /* opencv_utils.cpp in Sources */,
 				C27DB8B4225BDE37002AE43D /* cvVideoPlayer.cpp in Sources */,
@@ -2471,7 +2509,6 @@
 				C28B01D7229B1F8000B8165D /* lif_core.cpp in Sources */,
 				C210946F223AEC19004E88EE /* imgui_wrapper.cpp in Sources */,
 				C28B01DD229B210A00B8165D /* fyn_segmentation.cpp in Sources */,
-				C234C57A229EFA0D001EF98B /* rc_filter1d.cpp in Sources */,
 				C26F5FC321B0AA6D00EAE156 /* ip_utils.cpp in Sources */,
 				C26F5FC421B0AA6D00EAE156 /* window.cc in Sources */,
 				C26F5FC521B0AA6D00EAE156 /* imgui_draw.cpp in Sources */,
@@ -2490,10 +2527,13 @@
 				C26F5FCF21B0AA6D00EAE156 /* bitvector.cpp in Sources */,
 				C26F5FD021B0AA6D00EAE156 /* exception.cpp in Sources */,
 				C27DB8B1225BBAA1002AE43D /* algo_Mov.cpp in Sources */,
+				C21A506A22A9835A00B0AC7D /* stats.cpp in Sources */,
+				C2CE9C8822A97D2D003C479A /* math.cpp in Sources */,
 				C26F5FD121B0AA6D00EAE156 /* boost_literals.cpp in Sources */,
 				C26F5FD221B0AA6D00EAE156 /* PlistDate.cpp in Sources */,
 				C20558FE225D8A9200265170 /* visible_mov_impl.cpp in Sources */,
 				C23E346121F2511D00221E68 /* ImSequencer.cpp in Sources */,
+				C2CE9C7C22A8983F003C479A /* mathBSpline.cpp in Sources */,
 				C2819ECE2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C26F5FD321B0AA6D00EAE156 /* imgui.cpp in Sources */,
 				C26F5FD521B0AA6D00EAE156 /* color.cc in Sources */,
@@ -2521,12 +2561,13 @@
 				C28B0174229B182100B8165D /* imgui.cpp in Sources */,
 				C28B0175229B182100B8165D /* histo.cpp in Sources */,
 				C28B0176229B182100B8165D /* cvVideoPlayer.cpp in Sources */,
+				C21A506E22A9835A00B0AC7D /* stats.cpp in Sources */,
 				C28B0177229B182100B8165D /* affineApp.cpp in Sources */,
 				C28B0178229B182100B8165D /* geom_utils.cpp in Sources */,
-				C234C57D229EFA0D001EF98B /* rc_filter1d.cpp in Sources */,
 				C28B0179229B182100B8165D /* rowfunc.cpp in Sources */,
 				C28B017A229B182100B8165D /* opencv_utils.cpp in Sources */,
 				C28B017B229B182100B8165D /* sm_producer.cpp in Sources */,
+				C2CE9C7F22A8983F003C479A /* mathBSpline.cpp in Sources */,
 				C28B017C229B182100B8165D /* edgel.cpp in Sources */,
 				C28B017D229B182100B8165D /* csv.cpp in Sources */,
 				C28B017E229B182100B8165D /* AVReaderWrapper.mm in Sources */,
@@ -2547,7 +2588,9 @@
 				C28B018B229B182100B8165D /* file_system.cpp in Sources */,
 				C28B018C229B182100B8165D /* gradient.cpp in Sources */,
 				C28B018D229B182100B8165D /* imgui_widgets.cpp in Sources */,
+				C2CE9C8B22A97D2D003C479A /* math.cpp in Sources */,
 				C28B018E229B182100B8165D /* registration.cpp in Sources */,
+				C2CE9C7822A48AC5003C479A /* etw_utils.cpp in Sources */,
 				C28B018F229B182100B8165D /* dense_motion.cpp in Sources */,
 				C28B0190229B182100B8165D /* CinderImGui.cpp in Sources */,
 				C28B0191229B182100B8165D /* imgui_draw.cpp in Sources */,
@@ -2585,6 +2628,7 @@
 				C28B01C9229B1CD900B8165D /* algo_shortterm.cpp in Sources */,
 				C2DB729922591DB700C2B986 /* contraction_t.cpp in Sources */,
 				C2DB729A22591DB700C2B986 /* hockey_etc_cocoa_wrappers.mm in Sources */,
+				C2CE9C7722A48AC5003C479A /* etw_utils.cpp in Sources */,
 				C2DB729B22591DB700C2B986 /* permutation_entropy.cpp in Sources */,
 				C2DB729C22591DB700C2B986 /* opencv_utils.cpp in Sources */,
 				C2DB729D22591DB700C2B986 /* imgui_widgets.cpp in Sources */,
@@ -2620,7 +2664,6 @@
 				C28B01D9229B1F8000B8165D /* lif_core.cpp in Sources */,
 				C2DB72B522591DB700C2B986 /* imgui_wrapper.cpp in Sources */,
 				C28B01DF229B210A00B8165D /* fyn_segmentation.cpp in Sources */,
-				C234C57C229EFA0D001EF98B /* rc_filter1d.cpp in Sources */,
 				C2DB72B622591DB700C2B986 /* imgui_draw.cpp in Sources */,
 				C2DB72B722591DB700C2B986 /* rowfunc.cpp in Sources */,
 				C2DB72B822591DB700C2B986 /* csv.cpp in Sources */,
@@ -2639,10 +2682,13 @@
 				C2DB72C422591DB700C2B986 /* exception.cpp in Sources */,
 				C2DB72C522591DB700C2B986 /* boost_literals.cpp in Sources */,
 				C2DB72C622591DB700C2B986 /* PlistDate.cpp in Sources */,
+				C21A506D22A9835A00B0AC7D /* stats.cpp in Sources */,
+				C2CE9C8A22A97D2D003C479A /* math.cpp in Sources */,
 				C2DB72C722591DB700C2B986 /* imgui.cpp in Sources */,
 				C2DB72C822591DB700C2B986 /* ImSequencer.cpp in Sources */,
 				C2DB72C922591DB700C2B986 /* ImGuiExtensions.cpp in Sources */,
 				C2DB72CA22591DB700C2B986 /* logger.cpp in Sources */,
+				C2CE9C7E22A8983F003C479A /* mathBSpline.cpp in Sources */,
 				C2DB72CB22591DB700C2B986 /* VisibleApp.cpp in Sources */,
 				C2DB72CC22591DB700C2B986 /* color.cc in Sources */,
 				C2DB72CD22591DB700C2B986 /* self_similarity.cpp in Sources */,
