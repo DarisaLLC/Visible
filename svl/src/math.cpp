@@ -8,7 +8,6 @@
 #include <cmath>       //Needed for fabs, signbit, sqrt, etc...
 #include <complex>
 #include <exception>
-//#include <experimental/optional>
 #include <fstream>
 #include <functional>  //Needed for passing kernel functions to integration schemes.
 #include <iomanip>     //Needed for std::setw() for pretty-printing.
