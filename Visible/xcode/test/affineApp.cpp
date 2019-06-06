@@ -27,7 +27,6 @@
 #include "vision/histo.h"
 #include "vision/ipUtils.h"
 #include "cvplot/cvplot.h"
-#include "vision/rc_filter1d.h"
 #include <string>
 #include <vector>
 #include "core/pair.hpp"
@@ -240,11 +239,10 @@ void affineApp::generate_crop (){
     svl::norm_min_max(vt_vec.begin(),vt_vec.end());
     
     dPair hextend, vextend;
-    bool hok = rcEdgeFilter1D::peakDetect1d (hz_vec, hextend);
-    bool vok = rcEdgeFilter1D::peakDetect1d (vt_vec, vextend);
-    
-    std::cout << std::boolalpha << hok << " Hz " << hextend << std::endl;
-    std::cout << std::boolalpha << vok << " Hz " << vextend << std::endl;
+    hextend.first = crop.cols / 4;
+    hextend.second = hextend.first + crop.cols / 2;
+    vextend.first = crop.rows / 4;
+    vextend.second = vextend.first + crop.rows / 2;
     
     cvDrawAll(crop, hz_vec, vt_vec, hextend, vextend);
     

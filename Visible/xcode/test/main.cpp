@@ -75,6 +75,9 @@
 #include "vision/gradient.h"
 #include "algo_Lif.hpp"
 #include "cinder/PolyLine.h"
+#include "etw_utils.hpp"
+
+using namespace etw_utils;
 
 // @FIXME Logger has to come before these
 #include "ut_units.hpp"
@@ -127,6 +130,47 @@ std::vector<double> oneD_example = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 
     39.2749, 39.4703, 39.2846};
 
 
+std::vector<float> oneF_example = {39.1747, 39.2197, 39.126, 39.0549, 39.0818, 39.0655, 39.0342,
+    38.8791, 38.8527, 39.0099, 38.8608, 38.9188, 38.8499, 38.6693,
+    38.2513, 37.9095, 37.3313, 36.765, 36.3621, 35.7261, 35.0656,
+    34.2602, 33.2523, 32.3183, 31.6464, 31.0073, 29.8166, 29.3423,
+    28.5223, 27.5152, 26.8191, 26.3114, 25.8164, 25.0818, 24.7631,
+    24.6277, 24.8184, 25.443, 26.2479, 27.8759, 29.2094, 30.7956,
+    32.3586, 33.6268, 35.1586, 35.9315, 36.808, 37.3002, 37.67, 37.9986,
+    38.2788, 38.465, 38.5513, 38.6818, 38.8076, 38.9388, 38.9592,
+    39.058, 39.1322, 39.0803, 39.1779, 39.1531, 39.1375, 39.1978,
+    39.0379, 39.1231, 39.202, 39.1581, 39.1777, 39.2971, 39.2366,
+    39.1555, 39.2822, 39.243, 39.1807, 39.1488, 39.2491, 39.265, 39.198,
+    39.2855, 39.2595, 39.4274, 39.3258, 39.3162, 39.4143, 39.3034,
+    39.2099, 39.2775, 39.5042, 39.1446, 39.188, 39.2006, 39.1799,
+    39.4077, 39.2694, 39.1967, 39.2828, 39.2438, 39.2093, 39.2167,
+    39.2749, 39.4703, 39.2846};
+
+std::vector<float> ransac_pick = {               39.009900000000002
+    ,       37.909500000000001
+    ,       36.765000000000001
+    ,       36.362099999999998
+    ,       35.726100000000002
+    ,       35.065600000000003
+    ,       33.252299999999998
+    ,       32.318300000000001
+    ,       31.007300000000001
+    ,       28.522300000000001
+    ,       27.5152
+    ,       26.819099999999999
+    ,       26.311399999999999
+    ,       25.816400000000002
+    ,       24.763100000000001
+    ,       24.8184
+    ,       35.9315
+    ,       36.808
+    ,       37.300199999999997
+    ,       37.670000000000002
+    ,       38.465000000000003
+    ,       38.807600000000001
+};
+
+
 // Support Functions Implementation at the bottom of the file
 bool setup_loggers (const std::string& log_path,  std::string id_name);
 std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr);
@@ -145,6 +189,108 @@ typedef std::weak_ptr<Surface8u>	Surface8uWeakRef;
 typedef std::weak_ptr<Surface8u>	SurfaceWeakRef;
 typedef std::weak_ptr<Surface16u>	Surface16uWeakRef;
 typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
+
+#include <stdio.h>
+#include <gsl/gsl_sf_bessel.h>
+
+int
+gsl_main (void)
+{
+    double x = 5.0;
+    double y = gsl_sf_bessel_J0 (x);
+    printf ("J0(%g) = %.18e\n", x, y);
+    return 0;
+}
+
+
+static double ransacZ(const std::vector<double> &Z) {
+    return etw_utils::ransac(
+                         Z, []() -> double { return 0.0; },
+                         [](double z, double zest) { return std::abs(z - zest) < 0.03; });
+}
+
+static Eigen::VectorXd getZPlanes(const std::vector<double> &z) {
+    std::vector<double> zCoords(z.begin(), z.end());
+    Eigen::VectorXd domZs = Eigen::VectorXd::Zero(30);
+    int count = 0;
+    do {
+        double z0 = ransacZ(zCoords);
+        
+        zCoords.erase(
+                      std::remove_if(zCoords,
+                                     [&z0](auto &z) { return std::abs(z - z0) < 0.03; }),
+                      zCoords.end());
+        
+        domZs[count++] = z0;
+        std::cout << domZs.minCoeff() << std::endl;domZs.minCoeff();
+    } while (domZs.minCoeff() <= 0 || count < 2);
+    
+    std::vector<float> fcp;
+    for (auto & dd : zCoords)fcp.push_back((float)dd);
+    
+        auto cvDrawPlot = [] (std::vector<float>& tmp){
+    
+            std::string name = svl::toString(std::clock());
+            cvplot::setWindowTitle(name, svl::toString(tmp.size()));
+            cvplot::moveWindow(name, 0, 256);
+            cvplot::resizeWindow(name, 512, 256);
+            cvplot::figure(name).series(name).addValue(tmp).type(cvplot::Line).color(cvplot::Red);
+            cvplot::figure(name).show();
+        };
+    
+    cvDrawPlot(oneF_example);
+    cvDrawPlot(fcp);
+    
+    
+    return domZs;
+}
+
+TEST(ut_ransac, basic){
+    auto domz = getZPlanes(oneD_example);
+    std::cout << domz << std::endl;
+    
+}
+
+
+/**
+ Gets the first dominate direction.  Dominate direction extraction
+ is done using RANSAC.  N is all normals and M is the ouput
+ */
+void ransacManhattan1(const std::vector<Eigen::Vector3d> &N,
+                      Eigen::Vector3d &M) {
+    M = etw_utils::ransac(
+                      N, []() -> Eigen::Vector3d { return Eigen::Vector3d::Zero(); },
+                      [](auto &n, auto &nest) {
+                          return std::fabs(nest.z() - n.z()) > 1;
+                      },
+                      [](const auto &ave, const auto &n, const auto &est) -> Eigen::Vector3d {
+                          if (std::fabs(est.z() - n.z()) < 2)
+                              return ave - n;
+                          else
+                              return ave + n;
+                      });
+}
+
+TEST(ut_ransac, plane){
+    auto res = dgenv_ptr->asset_path("checkerboard_u8.png");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    cv::Mat image = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Size iSize(image.cols,image.rows);
+    
+    std::vector<Eigen::Vector3d> normals;
+    normals.reserve(image.rows*image.cols);
+    for(auto row = 0; row < image.rows; row++){
+        for (auto col = 0; col < image.cols; col++){
+            normals.emplace_back(col, row, (double) image.at<uint8_t>(row,col));
+        }
+    }
+    
+    std::vector<Eigen::Vector3d> M(3);
+    ransacManhattan1(normals, M[0]);
+    
+    std::cout << "D1: " << M[0] << std::endl << std::endl;
+}
 
 TEST (ut_affine_translation, basic){
     
