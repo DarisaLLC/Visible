@@ -32,40 +32,40 @@ using namespace svl;
 
 
 //---------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------- vec3: A three-dimensional vector -------------------------------------------------
+//---------------------------------------- vec_3: A three-dimensional vector -------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------
 //Constructors.
-template <class T>    vec3<T>::vec3(){   x=(T)(0);   y=(T)(0);   z=(T)(0);  }
+template <class T>    vec_3<T>::vec_3(){   x=(T)(0);   y=(T)(0);   z=(T)(0);  }
 
-//    template vec3<int>::vec3(void);
-//    template vec3<long int>::vec3(void);
-    template vec3<float>::vec3(void);
-    template vec3<double>::vec3(void);
+//    template vec_3<int>::vec_3(void);
+//    template vec_3<long int>::vec_3(void);
+    template vec_3<float>::vec_3(void);
+    template vec_3<double>::vec_3(void);
 
 
-template <class T>    vec3<T>::vec3(T a, T b, T c) : x(a), y(b), z(c) { }
+template <class T>    vec_3<T>::vec_3(T a, T b, T c) : x(a), y(b), z(c) { }
 
-//    template vec3<int>::vec3(int, int, int);
-//    template vec3<long int>::vec3(long int, long int, long int);
-    template vec3<float>::vec3(float, float, float);
-    template vec3<double>::vec3(double, double, double);
+//    template vec_3<int>::vec_3(int, int, int);
+//    template vec_3<long int>::vec_3(long int, long int, long int);
+    template vec_3<float>::vec_3(float, float, float);
+    template vec_3<double>::vec_3(double, double, double);
 
     
-template <class T>    vec3<T>::vec3( const vec3<T> &in ) : x(in.x), y(in.y), z(in.z) { }
+template <class T>    vec_3<T>::vec_3( const vec_3<T> &in ) : x(in.x), y(in.y), z(in.z) { }
 
-//    template vec3<int>::vec3( const vec3<int> & );
-//    template vec3<long int>::vec3( const vec3<long int> & );
-    template vec3<float>::vec3( const vec3<float> & );
-    template vec3<double>::vec3( const vec3<double> & );
+//    template vec_3<int>::vec_3( const vec_3<int> & );
+//    template vec_3<long int>::vec_3( const vec_3<long int> & );
+    template vec_3<float>::vec_3( const vec_3<float> & );
+    template vec_3<double>::vec_3( const vec_3<double> & );
 
     
     
 //More general: (but is it needed?)
-//template<class Ch,class Tr,class T>     std::basic_ostream<Ch,Tr> & operator<<( std::basic_ostream<Ch,Tr> &&out, const vec3<T> &L ){
+//template<class Ch,class Tr,class T>     std::basic_ostream<Ch,Tr> & operator<<( std::basic_ostream<Ch,Tr> &&out, const vec_3<T> &L ){
 //    out << "(" << L.x << ", " << L.y << ", " << L.z << ")";
 //    return out;
 //}
-template <class T>    std::ostream & operator<<( std::ostream &out, const vec3<T> &L ){
+template <class T>    std::ostream & operator<<( std::ostream &out, const vec_3<T> &L ){
     //Note: This friend is templated (Y) within the templated class (T). We only
     // care about friend template when T==Y.
     //
@@ -74,92 +74,92 @@ template <class T>    std::ostream & operator<<( std::ostream &out, const vec3<T
     return out;
 }
 
-//    template std::ostream & operator<<(std::ostream &out, const vec3<int> &L );
-//    template std::ostream & operator<<(std::ostream &out, const vec3<long int> &L );
-    template std::ostream & operator<<(std::ostream &out, const vec3<float> &L );
-    template std::ostream & operator<<(std::ostream &out, const vec3<double> &L );
+//    template std::ostream & operator<<(std::ostream &out, const vec_3<int> &L );
+//    template std::ostream & operator<<(std::ostream &out, const vec_3<long int> &L );
+    template std::ostream & operator<<(std::ostream &out, const vec_3<float> &L );
+    template std::ostream & operator<<(std::ostream &out, const vec_3<double> &L );
 
     
     
-template <class T> vec3<T> vec3<T>::Cross(const vec3<T> &in) const {
+template <class T> vec_3<T> vec_3<T>::Cross(const vec_3<T> &in) const {
     const T thex = (*this).y * in.z - (*this).z * in.y;
     const T they = (*this).z * in.x - (*this).x * in.z;
     const T thez = (*this).x * in.y - (*this).y * in.x;
-    return vec3<T>( thex, they, thez );
+    return vec_3<T>( thex, they, thez );
 }
 
-    template vec3<float>  vec3<float>::Cross(const vec3<float> &in) const ;
-    template vec3<double> vec3<double>::Cross(const vec3<double> &in) const ;
+    template vec_3<float>  vec_3<float>::Cross(const vec_3<float> &in) const ;
+    template vec_3<double> vec_3<double>::Cross(const vec_3<double> &in) const ;
 
    
-template <class T> vec3<T> vec3<T>::Mask(const vec3<T> &in) const {
+template <class T> vec_3<T> vec_3<T>::Mask(const vec_3<T> &in) const {
     const T thex = this->x * in.x;
     const T they = this->y * in.y;
     const T thez = this->z * in.z;
-    return vec3<T>( thex, they, thez );
+    return vec_3<T>( thex, they, thez );
 }
 
-    template vec3<float>  vec3<float>::Mask(const vec3<float> &in) const ;
-    template vec3<double> vec3<double>::Mask(const vec3<double> &in) const ;
+    template vec_3<float>  vec_3<float>::Mask(const vec_3<float> &in) const ;
+    template vec_3<double> vec_3<double>::Mask(const vec_3<double> &in) const ;
 
     
-template <class T> T vec3<T>::Dot(const vec3<T> &in) const {
+template <class T> T vec_3<T>::Dot(const vec_3<T> &in) const {
     return (*this).x * in.x + (*this).y * in.y + (*this).z * in.z;
 }
 
-    template float vec3<float>::Dot(const vec3<float> &in) const;
-    template double vec3<double>::Dot(const vec3<double> &in) const;
+    template float vec_3<float>::Dot(const vec_3<float> &in) const;
+    template double vec_3<double>::Dot(const vec_3<double> &in) const;
 
     
     
-template <class T> vec3<T> vec3<T>::unit(void) const {
+template <class T> vec_3<T> vec_3<T>::unit(void) const {
     const T tot = sqrt(x*x + y*y + z*z);
-    return vec3<T>(x/tot, y/tot, z/tot);
+    return vec_3<T>(x/tot, y/tot, z/tot);
 } 
 
-    template vec3<float> vec3<float>::unit(void) const;
-    template vec3<double> vec3<double>::unit(void) const;
+    template vec_3<float> vec_3<float>::unit(void) const;
+    template vec_3<double> vec_3<double>::unit(void) const;
 
     
     
-template <class T> T vec3<T>::length(void) const {
+template <class T> T vec_3<T>::length(void) const {
     const T tot = sqrt(x*x + y*y + z*z);
     return tot;
 }
 
-    template float vec3<float>::length(void) const;
-    template double vec3<double>::length(void) const;
+    template float vec_3<float>::length(void) const;
+    template double vec_3<double>::length(void) const;
 
     
     
-template <class T>  T vec3<T>::distance(const vec3<T> &rhs) const {
+template <class T>  T vec_3<T>::distance(const vec_3<T> &rhs) const {
     const T dist = sqrt((x-rhs.x)*(x-rhs.x) + (y-rhs.y)*(y-rhs.y) + (z-rhs.z)*(z-rhs.z));
     return dist;
 }
 
-    template float vec3<float>::distance(const vec3<float> &rhs) const;
-    template double vec3<double>::distance(const vec3<double> &rhs) const;
+    template float vec_3<float>::distance(const vec_3<float> &rhs) const;
+    template double vec_3<double>::distance(const vec_3<double> &rhs) const;
 
     
 /*
-template <class T>  T vec3<T>::distance(vec3 rhs){
+template <class T>  T vec_3<T>::distance(vec_3 rhs){
     const T dist = sqrt((x-rhs.x)*(x-rhs.x) + (y-rhs.y)*(y-rhs.y) + (z-rhs.z)*(z-rhs.z));
     return dist;
 }
     
-template float vec3<float>::distance(vec3<float> rhs);
-template double vec3<double>::distance(vec3<double> rhs);
+template float vec_3<float>::distance(vec_3<float> rhs);
+template double vec_3<double>::distance(vec_3<double> rhs);
 */
-template <class T>  T vec3<T>::sq_dist(const vec3<T> &rhs) const {
+template <class T>  T vec_3<T>::sq_dist(const vec_3<T> &rhs) const {
     return ((x-rhs.x)*(x-rhs.x) + (y-rhs.y)*(y-rhs.y) + (z-rhs.z)*(z-rhs.z));
 }
 
-    template float vec3<float>::sq_dist(const vec3<float> &rhs) const;
-    template double vec3<double>::sq_dist(const vec3<double> &rhs) const;
+    template float vec_3<float>::sq_dist(const vec_3<float> &rhs) const;
+    template double vec_3<double>::sq_dist(const vec_3<double> &rhs) const;
 
 
 
-template <class T>  T vec3<T>::angle(const vec3<T> &rhs, bool *OK) const {
+template <class T>  T vec_3<T>::angle(const vec_3<T> &rhs, bool *OK) const {
     const bool useOK = (OK != nullptr);
     if(useOK) *OK = false;
 
@@ -192,61 +192,61 @@ template <class T>  T vec3<T>::angle(const vec3<T> &rhs, bool *OK) const {
     return theangle;
 }
 
-    template float  vec3<float >::angle(const vec3<float > &rhs, bool *OK) const;
-    template double vec3<double>::angle(const vec3<double> &rhs, bool *OK) const;
+    template float  vec_3<float >::angle(const vec_3<float > &rhs, bool *OK) const;
+    template double vec_3<double>::angle(const vec_3<double> &rhs, bool *OK) const;
 
 
 template <class T>
-vec3<T>
-vec3<T>::zero(void) const {
-    return vec3<T>( static_cast<T>(0),
+vec_3<T>
+vec_3<T>::zero(void) const {
+    return vec_3<T>( static_cast<T>(0),
                     static_cast<T>(0),
                     static_cast<T>(0) );
 }
 
-    template vec3<float > vec3<float >::zero(void) const;
-    template vec3<double> vec3<double>::zero(void) const;
+    template vec_3<float > vec_3<float >::zero(void) const;
+    template vec_3<double> vec_3<double>::zero(void) const;
 
     
 template <class T>
-vec3<T>
-vec3<T>::rotate_around_x(T angle_rad) const {
-    return vec3<T>( this->x,
+vec_3<T>
+vec_3<T>::rotate_around_x(T angle_rad) const {
+    return vec_3<T>( this->x,
                     this->y * std::cos(angle_rad) - this->z * std::sin(angle_rad),
                     this->y * std::sin(angle_rad) + this->z * std::cos(angle_rad) );
 }
 
-    template vec3<float > vec3<float >::rotate_around_x(float ) const;
-    template vec3<double> vec3<double>::rotate_around_x(double) const;
+    template vec_3<float > vec_3<float >::rotate_around_x(float ) const;
+    template vec_3<double> vec_3<double>::rotate_around_x(double) const;
 
 
 template <class T>
-vec3<T>
-vec3<T>::rotate_around_y(T angle_rad) const {
-    return vec3<T>( this->x * std::cos(angle_rad) + this->z * std::sin(angle_rad),
+vec_3<T>
+vec_3<T>::rotate_around_y(T angle_rad) const {
+    return vec_3<T>( this->x * std::cos(angle_rad) + this->z * std::sin(angle_rad),
                     this->y,
                   - this->x * std::sin(angle_rad) + this->z * std::cos(angle_rad) );
 }
 
-    template vec3<float > vec3<float >::rotate_around_y(float ) const;
-    template vec3<double> vec3<double>::rotate_around_y(double) const;
+    template vec_3<float > vec_3<float >::rotate_around_y(float ) const;
+    template vec_3<double> vec_3<double>::rotate_around_y(double) const;
 
 
 template <class T>
-vec3<T>
-vec3<T>::rotate_around_z(T angle_rad) const {
-    return vec3<T>( this->x * std::cos(angle_rad) - this->y * std::sin(angle_rad),
+vec_3<T>
+vec_3<T>::rotate_around_z(T angle_rad) const {
+    return vec_3<T>( this->x * std::cos(angle_rad) - this->y * std::sin(angle_rad),
                     this->x * std::sin(angle_rad) + this->y * std::cos(angle_rad),
                     this->z );
 }
 
-    template vec3<float > vec3<float >::rotate_around_z(float ) const;
-    template vec3<double> vec3<double>::rotate_around_z(double) const;
+    template vec_3<float > vec_3<float >::rotate_around_z(float ) const;
+    template vec_3<double> vec_3<double>::rotate_around_z(double) const;
 
 
 template <class T>
 bool 
-vec3<T>::GramSchmidt_orthogonalize(vec3<T> &b, vec3<T> &c) const {
+vec_3<T>::GramSchmidt_orthogonalize(vec_3<T> &b, vec_3<T> &c) const {
     //Using *this as seed, orthogonalize the inputs.
     
     //The first vector is *this.
@@ -262,37 +262,26 @@ vec3<T>::GramSchmidt_orthogonalize(vec3<T> &b, vec3<T> &c) const {
     return false;
 }
 
-    template bool vec3<float >::GramSchmidt_orthogonalize(vec3<float > &, vec3<float > &) const;
-    template bool vec3<double>::GramSchmidt_orthogonalize(vec3<double> &, vec3<double> &) const;
+    template bool vec_3<float >::GramSchmidt_orthogonalize(vec_3<float > &, vec_3<float > &) const;
+    template bool vec_3<double>::GramSchmidt_orthogonalize(vec_3<double> &, vec_3<double> &) const;
 
 
 
-template <class T>  std::string vec3<T>::to_string(void) const {
+template <class T>  std::string svl::vec_3<T>::to_string(void) const {
     std::stringstream out;
-    out << *this;
+    out << "[" << this->x << "," << this->y << "," << this->z << "]" ;
     return out.str();
 }
 
-    template std::string vec3<float >::to_string(void) const;
-    template std::string vec3<double>::to_string(void) const;
+    template std::string vec_3<float >::to_string(void) const;
+    template std::string vec_3<double>::to_string(void) const;
 
 
-
-//Sets *this and returns a copy.
-template <class T>  vec3<T> vec3<T>::from_string(const std::string &in){
-    std::stringstream ss;
-    ss << in;
-    ss >> *this;
-    return *this;
-}
-
-    template vec3<float > vec3<float >::from_string(const std::string &in);
-    template vec3<double> vec3<double>::from_string(const std::string &in);
 
     
 
  
-template <class T>    std::istream &operator>>(std::istream &in, vec3<T> &L){
+template <class T>    std::istream &operator>>(std::istream &in, vec_3<T> &L){
     //Note: This friend is templated (Y) within the templated class (T). We only
     // care about friend template when T==Y.
     //
@@ -308,147 +297,147 @@ template <class T>    std::istream &operator>>(std::istream &in, vec3<T> &L){
     return in;
 }
 
-//    template std::istream & operator>>(std::istream &out, vec3<int> &L );
-//    template std::istream & operator>>(std::istream &out, vec3<long int> &L );
-    template std::istream & operator>>(std::istream &out, vec3<float> &L );
-    template std::istream & operator>>(std::istream &out, vec3<double> &L );
+//    template std::istream & operator>>(std::istream &out, vec_3<int> &L );
+//    template std::istream & operator>>(std::istream &out, vec_3<long int> &L );
+    template std::istream & operator>>(std::istream &out, vec_3<float> &L );
+    template std::istream & operator>>(std::istream &out, vec_3<double> &L );
 
      
     
-template <class T>    vec3<T> & vec3<T>::operator=(const vec3<T> &rhs) {
+template <class T>    vec_3<T> & vec_3<T>::operator=(const vec_3<T> &rhs) {
     //Check if it is itself.
     if(this == &rhs) return *this; 
     (*this).x = rhs.x;    (*this).y = rhs.y;    (*this).z = rhs.z;
     return *this;
 }
 
-//    template vec3<int> & vec3<int>::operator=(const vec3<int> &rhs);
-//    template vec3<long int> & vec3<long int>::operator=(const vec3<long int> &rhs);
-    template vec3<float> & vec3<float>::operator=(const vec3<float> &rhs);
-    template vec3<double> & vec3<double>::operator=(const vec3<double> &rhs);
+//    template vec_3<int> & vec_3<int>::operator=(const vec_3<int> &rhs);
+//    template vec_3<long int> & vec_3<long int>::operator=(const vec_3<long int> &rhs);
+    template vec_3<float> & vec_3<float>::operator=(const vec_3<float> &rhs);
+    template vec_3<double> & vec_3<double>::operator=(const vec_3<double> &rhs);
 
     
     
-template <class T>    vec3<T> vec3<T>::operator+(const vec3<T> &rhs) const {
-    return vec3<T>( (*this).x + rhs.x, (*this).y + rhs.y, (*this).z + rhs.z);
+template <class T>    vec_3<T> vec_3<T>::operator+(const vec_3<T> &rhs) const {
+    return vec_3<T>( (*this).x + rhs.x, (*this).y + rhs.y, (*this).z + rhs.z);
 }
 
-//    template vec3<int> vec3<int>::operator+(const vec3<int> &rhs) const;
-//    template vec3<long int> vec3<long int>::operator+(const vec3<long int> &rhs) const;
-    template vec3<float> vec3<float>::operator+(const vec3<float> &rhs) const;
-    template vec3<double> vec3<double>::operator+(const vec3<double> &rhs) const;
+//    template vec_3<int> vec_3<int>::operator+(const vec_3<int> &rhs) const;
+//    template vec_3<long int> vec_3<long int>::operator+(const vec_3<long int> &rhs) const;
+    template vec_3<float> vec_3<float>::operator+(const vec_3<float> &rhs) const;
+    template vec_3<double> vec_3<double>::operator+(const vec_3<double> &rhs) const;
 
 
     
-template <class T>    vec3<T> & vec3<T>::operator+=(const vec3<T> &rhs) {
+template <class T>    vec_3<T> & vec_3<T>::operator+=(const vec_3<T> &rhs) {
     (*this).x += rhs.x;    (*this).y += rhs.y;    (*this).z += rhs.z;
     return *this;
 }
 
-//    template vec3<int> & vec3<int>::operator+=(const vec3<int> &rhs);
-//    template vec3<long int> & vec3<long int>::operator+=(const vec3<long int> &rhs);
-    template vec3<float> & vec3<float>::operator+=(const vec3<float> &rhs);
-    template vec3<double> & vec3<double>::operator+=(const vec3<double> &rhs);
+//    template vec_3<int> & vec_3<int>::operator+=(const vec_3<int> &rhs);
+//    template vec_3<long int> & vec_3<long int>::operator+=(const vec_3<long int> &rhs);
+    template vec_3<float> & vec_3<float>::operator+=(const vec_3<float> &rhs);
+    template vec_3<double> & vec_3<double>::operator+=(const vec_3<double> &rhs);
 
     
     
-template <class T> vec3<T> vec3<T>::operator-(const vec3<T> &rhs) const {
-    return vec3<T>( (*this).x - rhs.x, (*this).y - rhs.y, (*this).z - rhs.z);
+template <class T> vec_3<T> vec_3<T>::operator-(const vec_3<T> &rhs) const {
+    return vec_3<T>( (*this).x - rhs.x, (*this).y - rhs.y, (*this).z - rhs.z);
 }
 
-//    template vec3<int> vec3<int>::operator-(const vec3<int> &rhs) const;
-//    template vec3<long int> vec3<long int>::operator-(const vec3<long int> &rhs) const;
-    template vec3<float> vec3<float>::operator-(const vec3<float> &rhs) const;
-    template vec3<double> vec3<double>::operator-(const vec3<double> &rhs) const;
+//    template vec_3<int> vec_3<int>::operator-(const vec_3<int> &rhs) const;
+//    template vec_3<long int> vec_3<long int>::operator-(const vec_3<long int> &rhs) const;
+    template vec_3<float> vec_3<float>::operator-(const vec_3<float> &rhs) const;
+    template vec_3<double> vec_3<double>::operator-(const vec_3<double> &rhs) const;
 
 
     
-template <class T>    vec3<T> & vec3<T>::operator-=(const vec3<T> &rhs) {
+template <class T>    vec_3<T> & vec_3<T>::operator-=(const vec_3<T> &rhs) {
     (*this).x -= rhs.x;    (*this).y -= rhs.y;    (*this).z -= rhs.z;
     return *this;
 }
 
-//    template vec3<int> & vec3<int>::operator-=(const vec3<int> &rhs);
-//    template vec3<long int> & vec3<long int>::operator-=(const vec3<long int> &rhs);
-    template vec3<float> & vec3<float>::operator-=(const vec3<float> &rhs);
-    template vec3<double> & vec3<double>::operator-=(const vec3<double> &rhs);
+//    template vec_3<int> & vec_3<int>::operator-=(const vec_3<int> &rhs);
+//    template vec_3<long int> & vec_3<long int>::operator-=(const vec_3<long int> &rhs);
+    template vec_3<float> & vec_3<float>::operator-=(const vec_3<float> &rhs);
+    template vec_3<double> & vec_3<double>::operator-=(const vec_3<double> &rhs);
 
     
 //------------------------------ overloaded native-types -----------------------------
 
 /*
-template <class T>    vec3<T> vec3<T>::operator*(const T rhs) {
-    return vec3<T>(x*rhs,y*rhs,z*rhs);
+template <class T>    vec_3<T> vec_3<T>::operator*(const T rhs) {
+    return vec_3<T>(x*rhs,y*rhs,z*rhs);
 }
-template <class T>    vec3<T> & vec3<T>::operator*=(const T rhs) {
+template <class T>    vec_3<T> & vec_3<T>::operator*=(const T rhs) {
     (*this).x *= rhs;    (*this).y *= rhs;    (*this).z *= rhs;
      return *this;
 }
-template vec3<int> & vec3<int>::operator*=(const int rhs);
-template vec3<float> & vec3<float>::operator*=(const float rhs);
-template vec3<double> & vec3<double>::operator*=(const double rhs);
+template vec_3<int> & vec_3<int>::operator*=(const int rhs);
+template vec_3<float> & vec_3<float>::operator*=(const float rhs);
+template vec_3<double> & vec_3<double>::operator*=(const double rhs);
 
 
 
-template <class T>    vec3<T> vec3<T>::operator/(const T rhs) {
-    return vec3<T>(x/rhs,y/rhs,z/rhs);
+template <class T>    vec_3<T> vec_3<T>::operator/(const T rhs) {
+    return vec_3<T>(x/rhs,y/rhs,z/rhs);
 }
-template <class T>    vec3<T> & vec3<T>::operator/=(const T rhs) {
+template <class T>    vec_3<T> & vec_3<T>::operator/=(const T rhs) {
     (*this).x /= rhs;    (*this).y /= rhs;    (*this).z /= rhs;
      return *this;
 }
-template vec3<int> & vec3<int>::operator/=(const int rhs);
-template vec3<float> & vec3<float>::operator/=(const float rhs);
-template vec3<double> & vec3<double>::operator/=(const double rhs);
+template vec_3<int> & vec_3<int>::operator/=(const int rhs);
+template vec_3<float> & vec_3<float>::operator/=(const float rhs);
+template vec_3<double> & vec_3<double>::operator/=(const double rhs);
 */
 
 //--------
 
-template <class T>    vec3<T> vec3<T>::operator*(const T &rhs) const {
-    return vec3<T>(x*rhs,y*rhs,z*rhs);
+template <class T>    vec_3<T> vec_3<T>::operator*(const T &rhs) const {
+    return vec_3<T>(x*rhs,y*rhs,z*rhs);
 }
 
-//    template vec3<int> vec3<int>::operator*(const int &rhs) const;
-//    template vec3<long int> vec3<long int>::operator*(const long int &rhs) const;
-    template vec3<float> vec3<float>::operator*(const float &rhs) const;
-    template vec3<double> vec3<double>::operator*(const double &rhs) const;
+//    template vec_3<int> vec_3<int>::operator*(const int &rhs) const;
+//    template vec_3<long int> vec_3<long int>::operator*(const long int &rhs) const;
+    template vec_3<float> vec_3<float>::operator*(const float &rhs) const;
+    template vec_3<double> vec_3<double>::operator*(const double &rhs) const;
 
     
-template <class T>    vec3<T> & vec3<T>::operator*=(const T &rhs) {
+template <class T>    vec_3<T> & vec_3<T>::operator*=(const T &rhs) {
     (*this).x *= rhs;    (*this).y *= rhs;    (*this).z *= rhs;
     return *this;
 }
 
-//    template vec3<int> & vec3<int>::operator*=(const int &rhs);
-//    template vec3<long int> & vec3<long int>::operator*=(const long int &rhs);
-    template vec3<float> & vec3<float>::operator*=(const float &rhs);
-    template vec3<double> & vec3<double>::operator*=(const double &rhs);
+//    template vec_3<int> & vec_3<int>::operator*=(const int &rhs);
+//    template vec_3<long int> & vec_3<long int>::operator*=(const long int &rhs);
+    template vec_3<float> & vec_3<float>::operator*=(const float &rhs);
+    template vec_3<double> & vec_3<double>::operator*=(const double &rhs);
 
     
     
     
-template <class T>    vec3<T> vec3<T>::operator/(const T &rhs) const {
-    return vec3<T>(x/rhs,y/rhs,z/rhs);
+template <class T>    vec_3<T> vec_3<T>::operator/(const T &rhs) const {
+    return vec_3<T>(x/rhs,y/rhs,z/rhs);
 }
 
-//    template vec3<int> vec3<int>::operator/(const int &rhs) const;
-//    template vec3<long int> vec3<long int>::operator/(const long int &rhs) const;
-    template vec3<float> vec3<float>::operator/(const float &rhs) const;
-    template vec3<double> vec3<double>::operator/(const double &rhs) const;
+//    template vec_3<int> vec_3<int>::operator/(const int &rhs) const;
+//    template vec_3<long int> vec_3<long int>::operator/(const long int &rhs) const;
+    template vec_3<float> vec_3<float>::operator/(const float &rhs) const;
+    template vec_3<double> vec_3<double>::operator/(const double &rhs) const;
 
     
-template <class T>    vec3<T> & vec3<T>::operator/=(const T &rhs) {
+template <class T>    vec_3<T> & vec_3<T>::operator/=(const T &rhs) {
     (*this).x /= rhs;    (*this).y /= rhs;    (*this).z /= rhs;
     return *this;
 }
 
-//    template vec3<int> & vec3<int>::operator/=(const int &rhs);
-//    template vec3<long int> & vec3<long int>::operator/=(const long int &rhs);
-    template vec3<float> & vec3<float>::operator/=(const float &rhs);
-    template vec3<double> & vec3<double>::operator/=(const double &rhs);
+//    template vec_3<int> & vec_3<int>::operator/=(const int &rhs);
+//    template vec_3<long int> & vec_3<long int>::operator/=(const long int &rhs);
+    template vec_3<float> & vec_3<float>::operator/=(const float &rhs);
+    template vec_3<double> & vec_3<double>::operator/=(const double &rhs);
 
     
-template <class T>    T & vec3<T>::operator[](size_t i) {
+template <class T>    T & vec_3<T>::operator[](size_t i) {
     if(false){
     }else if(i == 0){
         return this->x;
@@ -461,12 +450,12 @@ template <class T>    T & vec3<T>::operator[](size_t i) {
     return this->x;
 }
 
-    template float  & vec3<float >::operator[](size_t);
-    template double & vec3<double>::operator[](size_t);
+    template float  & vec_3<float >::operator[](size_t);
+    template double & vec_3<double>::operator[](size_t);
 
     
     
-template <class T>    bool vec3<T>::operator==(const vec3<T> &rhs) const {
+template <class T>    bool vec_3<T>::operator==(const vec_3<T> &rhs) const {
     //There are, of course, varying degrees of equality for floating-point values.
     //
     //Typically the safest approach is an exact bit-wise equality using ==. This is
@@ -494,24 +483,24 @@ template <class T>    bool vec3<T>::operator==(const vec3<T> &rhs) const {
     return false;
 }
 
-//    template bool vec3<int>::operator==(const vec3<int> &rhs) const;
-//    template bool vec3<long int>::operator==(const vec3<long int> &rhs) const;
-    template bool vec3<float>::operator==(const vec3<float> &rhs) const;
-    template bool vec3<double>::operator==(const vec3<double> &rhs) const;
+//    template bool vec_3<int>::operator==(const vec_3<int> &rhs) const;
+//    template bool vec_3<long int>::operator==(const vec_3<long int> &rhs) const;
+    template bool vec_3<float>::operator==(const vec_3<float> &rhs) const;
+    template bool vec_3<double>::operator==(const vec_3<double> &rhs) const;
 
    
-template <class T>    bool vec3<T>::operator!=(const vec3<T> &rhs) const {
+template <class T>    bool vec_3<T>::operator!=(const vec_3<T> &rhs) const {
     return !( *this == rhs );
 }
 
-//    template bool vec3<int>::operator!=(const vec3<int> &rhs) const;
-//    template bool vec3<long int>::operator!=(const vec3<long int> &rhs) const;
-    template bool vec3<float>::operator!=(const vec3<float> &rhs) const;
-    template bool vec3<double>::operator!=(const vec3<double> &rhs) const;
+//    template bool vec_3<int>::operator!=(const vec_3<int> &rhs) const;
+//    template bool vec_3<long int>::operator!=(const vec_3<long int> &rhs) const;
+    template bool vec_3<float>::operator!=(const vec_3<float> &rhs) const;
+    template bool vec_3<double>::operator!=(const vec_3<double> &rhs) const;
 
  
     
-template <class T>    bool vec3<T>::operator<(const vec3<T> &rhs) const {
+template <class T>    bool vec_3<T>::operator<(const vec_3<T> &rhs) const {
     //NOTE: Do *NOT* change this unless there is a weakness in this approach. If you need some
     //      special behaviour, implement for your particular needs elsewhere.
     //
@@ -539,25 +528,25 @@ template <class T>    bool vec3<T>::operator<(const vec3<T> &rhs) const {
     //return this->length() < rhs.length();
 
     //NOTE: Although this is a fairly "unsatisfying" result, it appears to properly allow 
-    // vec3's to be placed in std::maps, whereas more intuitive methods (x<rhs.x, etc..) do NOT. 
+    // vec_3's to be placed in std::maps, whereas more intuitive methods (x<rhs.x, etc..) do NOT.
     // If an actual operator< is to be defined, please do NOT overwrite this one (so that we 
-    // can continue to put vec3's into std::map and not have garbled output and weird bugs!) 
+    // can continue to put vec_3's into std::map and not have garbled output and weird bugs!)
     //
     //return ( (y < rhs.y) ); //  <--- BAD! (See previous note above ^)
 }
 
-//    template bool vec3<int>::operator<(const vec3<int> &rhs) const;
-//    template bool vec3<long int>::operator<(const vec3<long int> &rhs) const;
-    template bool vec3<float>::operator<(const vec3<float> &rhs) const;
-    template bool vec3<double>::operator<(const vec3<double> &rhs) const;
+//    template bool vec_3<int>::operator<(const vec_3<int> &rhs) const;
+//    template bool vec_3<long int>::operator<(const vec_3<long int> &rhs) const;
+    template bool vec_3<float>::operator<(const vec_3<float> &rhs) const;
+    template bool vec_3<double>::operator<(const vec_3<double> &rhs) const;
 
    
-template <class T>    bool vec3<T>::isfinite(void) const {
+template <class T>    bool vec_3<T>::isfinite(void) const {
     return std::isfinite(this->x) && std::isfinite(this->y) && std::isfinite(this->z);
 }
 
-    template bool vec3<float >::isfinite(void) const;
-    template bool vec3<double>::isfinite(void) const;
+    template bool vec_3<float >::isfinite(void) const;
+    template bool vec_3<double>::isfinite(void) const;
 
 
 #ifdef NOTYET
@@ -565,10 +554,10 @@ template <class T>    bool vec3<T>::isfinite(void) const {
 // classical expression for a time- and position-dependent force F(x;t). It is highly unstable, so the number
 // of iterations must be specified. If this is going to be used for anything important, make sure that the
 // number of iterations is chosen sufficiently high so as to produce negligible errors.
-std::tuple<vec3<double>,vec3<double>> Evolve_x_v_over_T_via_F(const std::tuple<vec3<double>,vec3<double>> &x_and_v, 
-                                                              std::function<vec3<double>(vec3<double> x, double T)> F,  
+std::tuple<vec_3<double>,vec_3<double>> Evolve_x_v_over_T_via_F(const std::tuple<vec_3<double>,vec_3<double>> &x_and_v,
+                                                              std::function<vec_3<double>(vec_3<double> x, double T)> F,
                                                               double T, long int steps){
-    std::tuple<vec3<double>,vec3<double>> out(x_and_v), last(x_and_v);
+    std::tuple<vec_3<double>,vec_3<double>> out(x_and_v), last(x_and_v);
     const double m = 1.0;
 
     if(steps <= 0) FUNCERR("Unable to evolve x and v - the number of steps specified is impossible");
@@ -599,40 +588,40 @@ std::tuple<vec3<double>,vec3<double>> Evolve_x_v_over_T_via_F(const std::tuple<v
 
 
 //---------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------- vec2: A three-dimensional vector -------------------------------------------------
+//---------------------------------------- vec_2: A three-dimensional vector -------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------
 //Constructors.
-template <class T>    vec2<T>::vec2(){   x=(T)(0);   y=(T)(0); }
+template <class T>    vec_2<T>::vec_2(){   x=(T)(0);   y=(T)(0); }
 
-//    template vec2<int>::vec2(void);
-//    template vec2<long int>::vec2(void);
-    template vec2<float>::vec2(void);
-    template vec2<double>::vec2(void);
+//    template vec_2<int>::vec_2(void);
+//    template vec_2<long int>::vec_2(void);
+    template vec_2<float>::vec_2(void);
+    template vec_2<double>::vec_2(void);
 
 
-template <class T>    vec2<T>::vec2(T a, T b) : x(a), y(b) { }
+template <class T>    vec_2<T>::vec_2(T a, T b) : x(a), y(b) { }
 
-//    template vec2<int>::vec2(int, int);
-//    template vec2<long int>::vec2(long int, long int);
-    template vec2<float>::vec2(float, float);
-    template vec2<double>::vec2(double, double);
+//    template vec_2<int>::vec_2(int, int);
+//    template vec_2<long int>::vec_2(long int, long int);
+    template vec_2<float>::vec_2(float, float);
+    template vec_2<double>::vec_2(double, double);
 
     
-template <class T>    vec2<T>::vec2( const vec2<T> &in ) : x(in.x), y(in.y) { }
+template <class T>    vec_2<T>::vec_2( const vec_2<T> &in ) : x(in.x), y(in.y) { }
 
-//    template vec2<int>::vec2( const vec2<int> & );
-//    template vec2<long int>::vec2( const vec2<long int> & );
-    template vec2<float>::vec2( const vec2<float> & );
-    template vec2<double>::vec2( const vec2<double> & );
+//    template vec_2<int>::vec_2( const vec_2<int> & );
+//    template vec_2<long int>::vec_2( const vec_2<long int> & );
+    template vec_2<float>::vec_2( const vec_2<float> & );
+    template vec_2<double>::vec_2( const vec_2<double> & );
 
     
     
 //More general: (but is it needed?)
-//template<class Ch,class Tr,class T>     std::basic_ostream<Ch,Tr> & operator<<( std::basic_ostream<Ch,Tr> &&out, const vec2<T> &L ){
+//template<class Ch,class Tr,class T>     std::basic_ostream<Ch,Tr> & operator<<( std::basic_ostream<Ch,Tr> &&out, const vec_2<T> &L ){
 //    out << "(" << L.x << ", " << L.y << ", " << L.z << ")";
 //    return out;
 //}
-template <class T>    std::ostream & operator<<( std::ostream &out, const vec2<T> &L ) {
+template <class T>    std::ostream & operator<<( std::ostream &out, const vec_2<T> &L ) {
     //Note: This friend is templated (Y) within the templated class (T). We only
     // care about friend template when T==Y.
     //
@@ -641,116 +630,105 @@ template <class T>    std::ostream & operator<<( std::ostream &out, const vec2<T
     return out;
 }
 
-//    template std::ostream & operator<<(std::ostream &out, const vec2<int> &L );
-//    template std::ostream & operator<<(std::ostream &out, const vec2<long int> &L );
-    template std::ostream & operator<<(std::ostream &out, const vec2<float> &L );
-    template std::ostream & operator<<(std::ostream &out, const vec2<double> &L );
+//    template std::ostream & operator<<(std::ostream &out, const vec_2<int> &L );
+//    template std::ostream & operator<<(std::ostream &out, const vec_2<long int> &L );
+    template std::ostream & operator<<(std::ostream &out, const vec_2<float> &L );
+    template std::ostream & operator<<(std::ostream &out, const vec_2<double> &L );
 
     
     
-template <class T> T vec2<T>::Dot(const vec2<T> &in) const {
+template <class T> T vec_2<T>::Dot(const vec_2<T> &in) const {
     return (*this).x * in.x + (*this).y * in.y;
 }
 
-    template float vec2<float>::Dot(const vec2<float> &in) const;
-    template double vec2<double>::Dot(const vec2<double> &in) const;
+    template float vec_2<float>::Dot(const vec_2<float> &in) const;
+    template double vec_2<double>::Dot(const vec_2<double> &in) const;
 
    
-template <class T> vec2<T> vec2<T>::Mask(const vec2<T> &in) const {
+template <class T> vec_2<T> vec_2<T>::Mask(const vec_2<T> &in) const {
     const T thex = this->x * in.x; 
     const T they = this->y * in.y;
-    return vec2<T>( thex, they );
+    return vec_2<T>( thex, they );
 }
 
-    template vec2<float > vec2<float >::Mask(const vec2<float > &in) const ;
-    template vec2<double> vec2<double>::Mask(const vec2<double> &in) const ;
+    template vec_2<float > vec_2<float >::Mask(const vec_2<float > &in) const ;
+    template vec_2<double> vec_2<double>::Mask(const vec_2<double> &in) const ;
 
  
     
-template <class T> vec2<T> vec2<T>::unit(void) const {
+template <class T> vec_2<T> vec_2<T>::unit(void) const {
     const T tot = sqrt(x*x + y*y);
-    return vec2<T>(x/tot, y/tot);
+    return vec_2<T>(x/tot, y/tot);
 } 
 
-    template vec2<float> vec2<float>::unit(void) const;
-    template vec2<double> vec2<double>::unit(void) const;
+    template vec_2<float> vec_2<float>::unit(void) const;
+    template vec_2<double> vec_2<double>::unit(void) const;
 
     
     
-template <class T> T vec2<T>::length(void) const {
+template <class T> T vec_2<T>::length(void) const {
     const T tot = sqrt(x*x + y*y);
     return tot;
 }
 
-    template float vec2<float>::length(void) const;
-    template double vec2<double>::length(void) const;
+    template float vec_2<float>::length(void) const;
+    template double vec_2<double>::length(void) const;
 
     
     
-template <class T>  T vec2<T>::distance(const vec2<T> &rhs) const {
+template <class T>  T vec_2<T>::distance(const vec_2<T> &rhs) const {
     const T dist = sqrt((x-rhs.x)*(x-rhs.x) + (y-rhs.y)*(y-rhs.y));
     return dist;
 }
 
-    template float vec2<float>::distance(const vec2<float> &rhs) const;
-    template double vec2<double>::distance(const vec2<double> &rhs) const;
+    template float vec_2<float>::distance(const vec_2<float> &rhs) const;
+    template double vec_2<double>::distance(const vec_2<double> &rhs) const;
 
    
-template <class T>  T vec2<T>::sq_dist(const vec2<T> &rhs) const {
+template <class T>  T vec_2<T>::sq_dist(const vec_2<T> &rhs) const {
     return ((x-rhs.x)*(x-rhs.x) + (y-rhs.y)*(y-rhs.y));
 }
 
-    template float  vec2<float >::sq_dist(const vec2<float > &rhs) const;
-    template double vec2<double>::sq_dist(const vec2<double> &rhs) const;
+    template float  vec_2<float >::sq_dist(const vec_2<float > &rhs) const;
+    template double vec_2<double>::sq_dist(const vec_2<double> &rhs) const;
 
 
 template <class T>
-vec2<T>
-vec2<T>::zero(void) const {
-    return vec2<T>( static_cast<T>(0),
+vec_2<T>
+vec_2<T>::zero(void) const {
+    return vec_2<T>( static_cast<T>(0),
                     static_cast<T>(0) );
 }
 
-    template vec2<float > vec2<float >::zero(void) const;
-    template vec2<double> vec2<double>::zero(void) const;
+    template vec_2<float > vec_2<float >::zero(void) const;
+    template vec_2<double> vec_2<double>::zero(void) const;
 
     
 
 template <class T>
-vec2<T>
-vec2<T>::rotate_around_z(T angle_rad) const {
-    return vec2<T>( this->x * std::cos(angle_rad) - this->y * std::sin(angle_rad),
+vec_2<T>
+vec_2<T>::rotate_around_z(T angle_rad) const {
+    return vec_2<T>( this->x * std::cos(angle_rad) - this->y * std::sin(angle_rad),
                     this->x * std::sin(angle_rad) + this->y * std::cos(angle_rad) );
 }
 
-    template vec2<float > vec2<float >::rotate_around_z(float ) const;
-    template vec2<double> vec2<double>::rotate_around_z(double) const;
+    template vec_2<float > vec_2<float >::rotate_around_z(float ) const;
+    template vec_2<double> vec_2<double>::rotate_around_z(double) const;
 
 
-template <class T>  std::string vec2<T>::to_string(void) const {
+template <class T>  std::string vec_2<T>::to_string(void) const {
     std::stringstream out;
-    out << *this;
+    out << "[" << this->x << "," << this->y << "]" ;
     return out.str();
 }
 
-    template std::string vec2<float >::to_string(void) const;
-    template std::string vec2<double>::to_string(void) const;
+    template std::string vec_2<float >::to_string(void) const;
+    template std::string vec_2<double>::to_string(void) const;
 
-
-//Sets *this and returns a copy.
-template <class T>  vec2<T> vec2<T>::from_string(const std::string &in){
-    std::stringstream ss;
-    ss << in;
-    ss >> *this;
-    return *this;
-}
-
-    template vec2<float > vec2<float >::from_string(const std::string &in);
-    template vec2<double> vec2<double>::from_string(const std::string &in); 
 
 
  
-template <class T>    std::istream &operator>>( std::istream &in, vec2<T> &L ) {
+template <class T>    std::istream &operator>>( std::istream &in, vec_2<T> &L ) {
     //Note: This friend is templated (Y) within the templated class (T). We only
     // care about friend template when T==Y.
     //
@@ -766,119 +744,119 @@ template <class T>    std::istream &operator>>( std::istream &in, vec2<T> &L ) {
     return in;
 }
 
-//    template std::istream & operator>>(std::istream &out, vec2<int> &L );
-//    template std::istream & operator>>(std::istream &out, vec2<long int> &L );
-    template std::istream & operator>>(std::istream &out, vec2<float> &L );
-    template std::istream & operator>>(std::istream &out, vec2<double> &L );
+//    template std::istream & operator>>(std::istream &out, vec_2<int> &L );
+//    template std::istream & operator>>(std::istream &out, vec_2<long int> &L );
+    template std::istream & operator>>(std::istream &out, vec_2<float> &L );
+    template std::istream & operator>>(std::istream &out, vec_2<double> &L );
 
     
     
-template <class T>    vec2<T> & vec2<T>::operator=(const vec2<T> &rhs) {
+template <class T>    vec_2<T> & vec_2<T>::operator=(const vec_2<T> &rhs) {
     //Check if it is itself.
     if (this == &rhs) return *this; 
     (*this).x = rhs.x;    (*this).y = rhs.y;
     return *this;
 }
 
-//    template vec2<int> & vec2<int>::operator=(const vec2<int> &rhs);
-//    template vec2<long int> & vec2<long int>::operator=(const vec2<long int> &rhs);
-    template vec2<float> & vec2<float>::operator=(const vec2<float> &rhs);
-    template vec2<double> & vec2<double>::operator=(const vec2<double> &rhs);
+//    template vec_2<int> & vec_2<int>::operator=(const vec_2<int> &rhs);
+//    template vec_2<long int> & vec_2<long int>::operator=(const vec_2<long int> &rhs);
+    template vec_2<float> & vec_2<float>::operator=(const vec_2<float> &rhs);
+    template vec_2<double> & vec_2<double>::operator=(const vec_2<double> &rhs);
 
     
     
-template <class T>    vec2<T> vec2<T>::operator+(const vec2<T> &rhs) const {
-    return vec2<T>( (*this).x + rhs.x, (*this).y + rhs.y );
+template <class T>    vec_2<T> vec_2<T>::operator+(const vec_2<T> &rhs) const {
+    return vec_2<T>( (*this).x + rhs.x, (*this).y + rhs.y );
 }
 
-//    template vec2<int> vec2<int>::operator+(const vec2<int> &rhs) const;
-//    template vec2<long int> vec2<long int>::operator+(const vec2<long int> &rhs) const;
-    template vec2<float> vec2<float>::operator+(const vec2<float> &rhs) const;
-    template vec2<double> vec2<double>::operator+(const vec2<double> &rhs) const;
+//    template vec_2<int> vec_2<int>::operator+(const vec_2<int> &rhs) const;
+//    template vec_2<long int> vec_2<long int>::operator+(const vec_2<long int> &rhs) const;
+    template vec_2<float> vec_2<float>::operator+(const vec_2<float> &rhs) const;
+    template vec_2<double> vec_2<double>::operator+(const vec_2<double> &rhs) const;
 
 
     
-template <class T>    vec2<T> & vec2<T>::operator+=(const vec2<T> &rhs) {
+template <class T>    vec_2<T> & vec_2<T>::operator+=(const vec_2<T> &rhs) {
     (*this).x += rhs.x;    (*this).y += rhs.y;
     return *this;
 }
 
-//    template vec2<int> & vec2<int>::operator+=(const vec2<int> &rhs);
-//    template vec2<long int> & vec2<long int>::operator+=(const vec2<long int> &rhs);
-    template vec2<float> & vec2<float>::operator+=(const vec2<float> &rhs);
-    template vec2<double> & vec2<double>::operator+=(const vec2<double> &rhs);
+//    template vec_2<int> & vec_2<int>::operator+=(const vec_2<int> &rhs);
+//    template vec_2<long int> & vec_2<long int>::operator+=(const vec_2<long int> &rhs);
+    template vec_2<float> & vec_2<float>::operator+=(const vec_2<float> &rhs);
+    template vec_2<double> & vec_2<double>::operator+=(const vec_2<double> &rhs);
 
     
     
-template <class T> vec2<T> vec2<T>::operator-(const vec2<T> &rhs) const {
-    return vec2<T>( (*this).x - rhs.x, (*this).y - rhs.y);
+template <class T> vec_2<T> vec_2<T>::operator-(const vec_2<T> &rhs) const {
+    return vec_2<T>( (*this).x - rhs.x, (*this).y - rhs.y);
 }
 
-//    template vec2<int> vec2<int>::operator-(const vec2<int> &rhs) const;
-//    template vec2<long int> vec2<long int>::operator-(const vec2<long int> &rhs) const;
-    template vec2<float> vec2<float>::operator-(const vec2<float> &rhs) const;
-    template vec2<double> vec2<double>::operator-(const vec2<double> &rhs) const;
+//    template vec_2<int> vec_2<int>::operator-(const vec_2<int> &rhs) const;
+//    template vec_2<long int> vec_2<long int>::operator-(const vec_2<long int> &rhs) const;
+    template vec_2<float> vec_2<float>::operator-(const vec_2<float> &rhs) const;
+    template vec_2<double> vec_2<double>::operator-(const vec_2<double> &rhs) const;
 
 
     
-template <class T>    vec2<T> & vec2<T>::operator-=(const vec2<T> &rhs) {
+template <class T>    vec_2<T> & vec_2<T>::operator-=(const vec_2<T> &rhs) {
     (*this).x -= rhs.x;    (*this).y -= rhs.y;
     return *this;
 }
 
-//    template vec2<int> & vec2<int>::operator-=(const vec2<int> &rhs);
-//    template vec2<long int> & vec2<long int>::operator-=(const vec2<long int> &rhs);
-    template vec2<float> & vec2<float>::operator-=(const vec2<float> &rhs);
-    template vec2<double> & vec2<double>::operator-=(const vec2<double> &rhs);
+//    template vec_2<int> & vec_2<int>::operator-=(const vec_2<int> &rhs);
+//    template vec_2<long int> & vec_2<long int>::operator-=(const vec_2<long int> &rhs);
+    template vec_2<float> & vec_2<float>::operator-=(const vec_2<float> &rhs);
+    template vec_2<double> & vec_2<double>::operator-=(const vec_2<double> &rhs);
 
     
 //------------------------------ overloaded native-types -----------------------------
 
 
-template <class T>    vec2<T> vec2<T>::operator*(const T &rhs) const {
-    return vec2<T>(x*rhs,y*rhs);
+template <class T>    vec_2<T> vec_2<T>::operator*(const T &rhs) const {
+    return vec_2<T>(x*rhs,y*rhs);
 }
 
-//    template vec2<int> vec2<int>::operator*(const int &rhs) const;
-//    template vec2<long int> vec2<long int>::operator*(const long int &rhs) const;
-    template vec2<float> vec2<float>::operator*(const float &rhs) const;
-    template vec2<double> vec2<double>::operator*(const double &rhs) const;
+//    template vec_2<int> vec_2<int>::operator*(const int &rhs) const;
+//    template vec_2<long int> vec_2<long int>::operator*(const long int &rhs) const;
+    template vec_2<float> vec_2<float>::operator*(const float &rhs) const;
+    template vec_2<double> vec_2<double>::operator*(const double &rhs) const;
 
     
-template <class T>    vec2<T> & vec2<T>::operator*=(const T &rhs) {
+template <class T>    vec_2<T> & vec_2<T>::operator*=(const T &rhs) {
     (*this).x *= rhs;    (*this).y *= rhs;
     return *this;
 }
 
-//    template vec2<int> & vec2<int>::operator*=(const int &rhs);
-//    template vec2<long int> & vec2<long int>::operator*=(const long int &rhs);
-    template vec2<float> & vec2<float>::operator*=(const float &rhs);
-    template vec2<double> & vec2<double>::operator*=(const double &rhs);
+//    template vec_2<int> & vec_2<int>::operator*=(const int &rhs);
+//    template vec_2<long int> & vec_2<long int>::operator*=(const long int &rhs);
+    template vec_2<float> & vec_2<float>::operator*=(const float &rhs);
+    template vec_2<double> & vec_2<double>::operator*=(const double &rhs);
 
     
-template <class T>    vec2<T> vec2<T>::operator/(const T &rhs) const {
-    return vec2<T>(x/rhs,y/rhs);
+template <class T>    vec_2<T> vec_2<T>::operator/(const T &rhs) const {
+    return vec_2<T>(x/rhs,y/rhs);
 }
 
-//    template vec2<int> vec2<int>::operator/(const int &rhs) const;
-//    template vec2<long int> vec2<long int>::operator/(const long int &rhs) const;
-    template vec2<float> vec2<float>::operator/(const float &rhs) const;
-    template vec2<double> vec2<double>::operator/(const double &rhs) const;
+//    template vec_2<int> vec_2<int>::operator/(const int &rhs) const;
+//    template vec_2<long int> vec_2<long int>::operator/(const long int &rhs) const;
+    template vec_2<float> vec_2<float>::operator/(const float &rhs) const;
+    template vec_2<double> vec_2<double>::operator/(const double &rhs) const;
 
     
-template <class T>    vec2<T> & vec2<T>::operator/=(const T &rhs) {
+template <class T>    vec_2<T> & vec_2<T>::operator/=(const T &rhs) {
     (*this).x /= rhs;    (*this).y /= rhs;
     return *this;
 }
 
-//    template vec2<int> & vec2<int>::operator/=(const int &rhs);
-//    template vec2<long int> & vec2<long int>::operator/=(const long int &rhs);
-    template vec2<float> & vec2<float>::operator/=(const float &rhs);
-    template vec2<double> & vec2<double>::operator/=(const double &rhs);
+//    template vec_2<int> & vec_2<int>::operator/=(const int &rhs);
+//    template vec_2<long int> & vec_2<long int>::operator/=(const long int &rhs);
+    template vec_2<float> & vec_2<float>::operator/=(const float &rhs);
+    template vec_2<double> & vec_2<double>::operator/=(const double &rhs);
 
     
     
-template <class T>    T & vec2<T>::operator[](size_t i) {
+template <class T>    T & vec_2<T>::operator[](size_t i) {
     if(false){
     }else if(i == 0){
         return this->x;
@@ -889,33 +867,33 @@ template <class T>    T & vec2<T>::operator[](size_t i) {
     return this->x;
 }
 
-    template float  & vec2<float >::operator[](size_t);
-    template double & vec2<double>::operator[](size_t);
+    template float  & vec_2<float >::operator[](size_t);
+    template double & vec_2<double>::operator[](size_t);
 
     
     
-template <class T>    bool vec2<T>::operator==(const vec2<T> &rhs) const {
+template <class T>    bool vec_2<T>::operator==(const vec_2<T> &rhs) const {
     return ( (x == rhs.x) && (y == rhs.y) );
 }
 
-//    template bool vec2<int>::operator==(const vec2<int> &rhs) const;
-//    template bool vec2<long int>::operator==(const vec2<long int> &rhs) const;
-    template bool vec2<float>::operator==(const vec2<float> &rhs) const;
-    template bool vec2<double>::operator==(const vec2<double> &rhs) const;
+//    template bool vec_2<int>::operator==(const vec_2<int> &rhs) const;
+//    template bool vec_2<long int>::operator==(const vec_2<long int> &rhs) const;
+    template bool vec_2<float>::operator==(const vec_2<float> &rhs) const;
+    template bool vec_2<double>::operator==(const vec_2<double> &rhs) const;
 
    
-template <class T>    bool vec2<T>::operator!=(const vec2<T> &rhs) const {
+template <class T>    bool vec_2<T>::operator!=(const vec_2<T> &rhs) const {
     return !( *this == rhs );
 }
 
-//    template bool vec2<int>::operator!=(const vec2<int> &rhs) const;
-//    template bool vec2<long int>::operator!=(const vec2<long int> &rhs) const;
-    template bool vec2<float>::operator!=(const vec2<float> &rhs) const;
-    template bool vec2<double>::operator!=(const vec2<double> &rhs) const;
+//    template bool vec_2<int>::operator!=(const vec_2<int> &rhs) const;
+//    template bool vec_2<long int>::operator!=(const vec_2<long int> &rhs) const;
+    template bool vec_2<float>::operator!=(const vec_2<float> &rhs) const;
+    template bool vec_2<double>::operator!=(const vec_2<double> &rhs) const;
 
  
     
-template <class T>    bool vec2<T>::operator<(const vec2<T> &rhs) const {
+template <class T>    bool vec_2<T>::operator<(const vec_2<T> &rhs) const {
     //NOTE: Do *NOT* change this unless there is a weakness in this approach. If you need some
     //      special behaviour, implement for your particular needs elsewhere.
     //
@@ -942,26 +920,26 @@ template <class T>    bool vec2<T>::operator<(const vec2<T> &rhs) const {
     //return this->length() < rhs.length();
 
     //NOTE: Although this is a fairly "unsatisfying" result, it appears to properly allow 
-    // vec3's to be placed in std::maps, whereas more intuitive methods (x<rhs.x, etc..) do NOT. 
+    // vec_3's to be placed in std::maps, whereas more intuitive methods (x<rhs.x, etc..) do NOT.
     // If an actual operator< is to be defined, please do NOT overwrite this one (so that we 
-    // can continue to put vec3's into std::map and not have garbled output and weird bugs!) 
+    // can continue to put vec_3's into std::map and not have garbled output and weird bugs!)
     //
     //return ( (y < rhs.y) ); //  <--- BAD! (See previous note above ^)
 }
 
-//    template bool vec2<int>::operator<(const vec2<int> &rhs) const;
-//    template bool vec2<long int>::operator<(const vec2<long int> &rhs) const;
-    template bool vec2<float>::operator<(const vec2<float> &rhs) const;
-    template bool vec2<double>::operator<(const vec2<double> &rhs) const;
+//    template bool vec_2<int>::operator<(const vec_2<int> &rhs) const;
+//    template bool vec_2<long int>::operator<(const vec_2<long int> &rhs) const;
+    template bool vec_2<float>::operator<(const vec_2<float> &rhs) const;
+    template bool vec_2<double>::operator<(const vec_2<double> &rhs) const;
 
 
     
-template <class T>    bool vec2<T>::isfinite(void) const {
+template <class T>    bool vec_2<T>::isfinite(void) const {
     return std::isfinite(this->x) && std::isfinite(this->y);
 }
 
-    template bool vec2<float >::isfinite(void) const;
-    template bool vec2<double>::isfinite(void) const;
+    template bool vec_2<float >::isfinite(void) const;
+    template bool vec_2<double>::isfinite(void) const;
 
 
 
@@ -980,7 +958,7 @@ template <class T>    bool vec2<T>::isfinite(void) const {
 // If the function returns false, it does not imply that the lines diverge - it implies only that the solution computed with this method was unstable!
 //
 //This function accepts 3D vectors, but only uses the x and y parts. The z-component is entirely ignored.
-template <class T>  bool line<T>::Intersects_With_Line_Once( const line<T> &in, vec3<T> &out) const {
+template <class T>  bool line<T>::Intersects_With_Line_Once( const line<T> &in, vec_3<T> &out) const {
 
     //------------
     // Speculation on how to extend this result to a fully-3D result:
@@ -1026,7 +1004,7 @@ template <class T>  bool line<T>::Intersects_With_Line_Once( const line<T> &in, 
     const T t2       = numer_t2 / denom;
 
     //Now we could (should) check if the two t's lead to consistent results. This is not done at the moment because I will surely have nicely-orthogonal lines that will definately intersect nicely.
-    //out = vec3<double>( (*this).R_0.x + (*this).U_0.x*t1, (*this).R_0.y + (*this).U_0.y*t1, (*this).R_0.z  );
+    //out = vec_3<double>( (*this).R_0.x + (*this).U_0.x*t1, (*this).R_0.y + (*this).U_0.y*t1, (*this).R_0.z  );
     out.x = (*this).R_0.x + (*this).U_0.x*t1;
     out.y = (*this).R_0.y + (*this).U_0.y*t1;
     out.z = (*this).R_0.z;
@@ -1038,11 +1016,11 @@ template <class T>  bool line<T>::Intersects_With_Line_Once( const line<T> &in, 
 
 /*
 //This function accepts any line embedded in 3D space.
-template <class T>  bool line<T>::Intersects_With_Line_Once( const line<T> &in, vec3<T> &out) const {
+template <class T>  bool line<T>::Intersects_With_Line_Once( const line<T> &in, vec_3<T> &out) const {
     //First, we construct a plane which houses the unit vectors of the two lines.
     // This will give us two planes: $\vec{N} \cdot ( \vec{R} - \vec{R}_{a,0} )$ and $\vec{N} \cdot ( \vec{R} - \vec{R}_{b,0} )$
     // where $\vec{N} = \vec{U}_{a} \otimes \vec{U}_{b}.$ Since the planes are parallel, we just compute the distance between planes. 
-    const vec3<T> N( this->U_0.Cross( in.U_0 ) );
+    const vec_3<T> N( this->U_0.Cross( in.U_0 ) );
     //FUNCINFO("The cross product of the unit vectors " << (*this).U_0 << " and " << in.U_0  << " of the lines is " << N);
 
 FUNCWARN("This functions requires a code review!");
@@ -1066,7 +1044,7 @@ FUNCWARN("This functions requires a code review!");
         // Then we dot each (vector) equation with alternatively U_0,a and U_0,b to give us two equations for two unknowns (instead of three
         // equations and two unknowns with a ghost parameter.) The extra piece of information was used during the calculation of plane 
         // separation: ie. we have not lost any info by dotting both sides of the identity to reduce the dimensionality.
-        const vec3<T> dR( (*this).R_0 - in.R_0 ); //dR = R_0_a - R_0_b
+        const vec_3<T> dR( (*this).R_0 - in.R_0 ); //dR = R_0_a - R_0_b
         const T udotu = (*this).U_0.Dot( in.U_0 );
         const T denom = (T)(1.0) - udotu*udotu;
         if(denom < (T)(1E-9)) return false; //Is this line required, given that we know ua x ub to be nearly zero ?
@@ -1105,15 +1083,15 @@ template <class T> samples_1D<T>::samples_1D(const samples_1D<T> &in) : samples(
     template samples_1D<double>::samples_1D(const samples_1D<double> &in);
 
 //---------------------------------------------------------------------------------------------------------------------------
-template <class T> samples_1D<T>::samples_1D(const std::list<vec2<T>> &in_samps){ 
+template <class T> samples_1D<T>::samples_1D(const std::list<vec_2<T>> &in_samps){
     //Providing [x_i, f_i] data. Assumes sigma_x_i and sigma_f_i uncertainties are (T)(0).
     for(auto elem : in_samps) this->push_back(elem.x, elem.y);
     this->stable_sort();
     return;
 }
 
-    template samples_1D<float >::samples_1D(const std::list< vec2<float >> &in_points);
-    template samples_1D<double>::samples_1D(const std::list< vec2<double>> &in_points);
+    template samples_1D<float >::samples_1D(const std::list< vec_2<float >> &in_points);
+    template samples_1D<double>::samples_1D(const std::list< vec_2<double>> &in_points);
 
 //---------------------------------------------------------------------------------------------------------------------------
 template <class T> samples_1D<T>::samples_1D(std::vector<std::array<T,4>> in_samps) : samples(std::move(in_samps)) { 
@@ -1180,15 +1158,15 @@ template <class T>  void samples_1D<T>::push_back(T x_i, T f_i, bool inhibit_sor
     template void samples_1D<double>::push_back(double x_i, double f_i, bool inhibit_sort);
 
 //---------------------------------------------------------------------------------------------------------------------------
-template <class T>  void samples_1D<T>::push_back(const vec2<T> &x_i_and_f_i, bool inhibit_sort){
+template <class T>  void samples_1D<T>::push_back(const vec_2<T> &x_i_and_f_i, bool inhibit_sort){
     //We assume sigma_x_i and sigma_f_i uncertainties are (T)(0).        
     this->samples.push_back( {x_i_and_f_i.x, (T)(0), x_i_and_f_i.y, (T)(0)} );
     if(!inhibit_sort) this->stable_sort();
     return;
 }
 
-    template void samples_1D<float >::push_back(const vec2<float > &x_i_and_f_i, bool inhibit_sort);
-    template void samples_1D<double>::push_back(const vec2<double> &x_i_and_f_i, bool inhibit_sort);
+    template void samples_1D<float >::push_back(const vec_2<float > &x_i_and_f_i, bool inhibit_sort);
+    template void samples_1D<double>::push_back(const vec_2<double> &x_i_and_f_i, bool inhibit_sort);
 
 //---------------------------------------------------------------------------------------------------------------------------
 template <class T>  void samples_1D<T>::push_back(T x_i, T f_i, T sigma_f_i, bool inhibit_sort){
@@ -3488,47 +3466,6 @@ template <class T>    std::istream &operator>>( std::istream &in, samples_1D<T> 
 
     template std::istream & operator>>(std::istream &out, samples_1D<float > &L );
     template std::istream & operator>>(std::istream &out, samples_1D<double> &L );
-
-
-//---------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------
-
-template <class C> 
-samples_1D<typename C::value_type> 
-Bag_of_numbers_to_N_equal_bin_samples_1D_histogram(const C &nums, long int N, bool explicitbins){
-    //This function takes a list of (possibly unordered) numbers and returns a histogram with N bars of equal width
-    // suitable for plotting or further computation. The histogram will be normalized such that each bar will be 
-    // (number_of_points_represented_by_bar/total_number_of_points). In other words, the occurence rate.
-    //
-    using T = typename C::value_type; // float or double.
-
-    const T NDasT = static_cast<T>(nums.size());
-
-    //Put the data into a samples_1D with equal sigma_f_i and no uncertainty.
-    const bool inhibit_sort = true; //Temporarily inhibit the sort. We just defer it until all the data is ready.
-    samples_1D<T> shtl; //Used to shuttle the data to the histogramming routine.
-    for(const auto &P : nums){
-        shtl.push_back( { P, (T)(0), (T)(1), (T)(0) }, inhibit_sort );
-    }
-    shtl.stable_sort();
-
-    //Get a non-normalized histogram out of the data. 
-    samples_1D<T> out = shtl.Histogram_Equal_Sized_Bins(N, explicitbins);
-
-    //Normalize the bins with the total number of datum. Ensure the uncertainty is zero, because we have ignored it thusfar.
-    for(auto &P : out.samples){
-        P[2] /= NDasT;
-        P[3] = (T)(0);
-    }
-    return std::move(out);
-}
-
-    template samples_1D<float > Bag_of_numbers_to_N_equal_bin_samples_1D_histogram(const std::list<float > &nums, long int N, bool explicitbins);
-    template samples_1D<double> Bag_of_numbers_to_N_equal_bin_samples_1D_histogram(const std::list<double> &nums, long int N, bool explicitbins);
-
-    template samples_1D<float > Bag_of_numbers_to_N_equal_bin_samples_1D_histogram(const std::vector<float > &nums, long int N, bool explicitbins);
-    template samples_1D<double> Bag_of_numbers_to_N_equal_bin_samples_1D_histogram(const std::vector<double> &nums, long int N, bool explicitbins);
 
 
 

@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #include <memory>
 #include <thread>
+#include <list>
 
 
 #include <boost/foreach.hpp>
@@ -192,14 +193,37 @@ typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
 
 #include <stdio.h>
 #include <gsl/gsl_sf_bessel.h>
+#include "core/moreMath.h"
 
-int
-gsl_main (void)
-{
+TEST(samples_1d, basic){
+    
+    auto convert_to = [] (std::vector<float>& signal){
+        std::list<svl::vec_2<float>> out;
+        int index = 0;
+        for(const auto &val : signal){
+            svl::vec_2<float> iv (index,val);
+            out.push_back(iv);
+        }
+        
+        svl::samples_1D<float> ss (out);
+        return out;
+    };
+    
+    auto ss = convert_to(oneF_example);
+}
+
+
+
+
+
+
+
+
+
+TEST(ut_gsl, basic){
     double x = 5.0;
     double y = gsl_sf_bessel_J0 (x);
     printf ("J0(%g) = %.18e\n", x, y);
-    return 0;
 }
 
 
@@ -429,6 +453,8 @@ std::vector<Point2f> ellipse_test = {
 
 
 TEST (ut_rotated_rect, basic){
+    using vec2=glm::vec2;
+    
     std::vector<vec2> points = {{5.5f,3.5f},{7.5f,2.5f},{9.5f,3.5f},{5.5f,6.5f}};
     Point2f center_gold (11.5,2.5);
     std::vector<Point2f> cvpoints = {{5.5f,2.5f},{7.5f,2.5f},{9.5f,2.5f},{5.5f,6.5f}};
@@ -635,6 +661,8 @@ TEST (ut_dm, basic){
 }
 
 TEST (ut_dm, block){
+    using vec2=glm::vec2;
+    
     iPair dims (9,9);
     iPair fsize(32,64);
     
@@ -1597,6 +1625,7 @@ TEST (UT_algo, AVReader)
 
 TEST(ut_similarity, short_term)
 {
+    using vec2=glm::vec2;
     
     self_similarity_producer<P8U> sm(3,0);
     
