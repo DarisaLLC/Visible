@@ -18,69 +18,71 @@
 #include <utility>
 #include <vector>
 
+namespace svl {
+
 template <class T> class samples_1D;
 
 //---------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------- vec3: A three-dimensional vector -------------------------------------------------
+//---------------------------------------- vec_3: A three-dimensional vector -------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------
 //This class is the basis of the geometry-heavy classes below. It can happily be used on its own.
-template <class T> class vec3 {
+template <class T> class vec_3 {
     public:
         using value_type = T;
         T x, y, z;
     
         //Constructors.
-        vec3();
-        vec3(T a, T b, T c);
-        vec3( const vec3 & );
+        vec_3();
+        vec_3(T a, T b, T c);
+        vec_3( const vec_3 & );
     
-        //Operators - vec3 typed.
-        vec3 & operator=(const vec3 &);
+        //Operators - vec_3 typed.
+        vec_3 & operator=(const vec_3 &);
     
-        vec3   operator+(const vec3 &) const;
-        vec3 & operator+=(const vec3 &);
-        vec3   operator-(const vec3 &) const;
-        vec3 & operator-=(const vec3 &);
+        vec_3   operator+(const vec_3 &) const;
+        vec_3 & operator+=(const vec_3 &);
+        vec_3   operator-(const vec_3 &) const;
+        vec_3 & operator-=(const vec_3 &);
     
-        bool operator==(const vec3 &) const;
-        bool operator!=(const vec3 &) const;
-        bool operator<(const vec3 &) const;   //This is mostly for sorting / placing into a std::map. There is no great 
+        bool operator==(const vec_3 &) const;
+        bool operator!=(const vec_3 &) const;
+        bool operator<(const vec_3 &) const;   //This is mostly for sorting / placing into a std::map. There is no great
                                               // way to define '<' for a vector, so be careful with it.
         bool isfinite(void) const;        //Logical AND of std::isfinite() on each coordinate.
 
-        vec3   operator*(const T &) const;
-        vec3 & operator*=(const T &);
-        vec3   operator/(const T &) const;
-        vec3 & operator/=(const T &);
+        vec_3   operator*(const T &) const;
+        vec_3 & operator*=(const T &);
+        vec_3   operator/(const T &) const;
+        vec_3 & operator/=(const T &);
 
         //Operators - T typed.
         T & operator[](size_t);
     
         //Member functions.
-        T Dot(const vec3 &) const;        // ---> Dot product.
-        vec3 Cross(const vec3 &) const;   // ---> Cross product.
-        vec3 Mask(const vec3 &) const;    // ---> Term-by-term product:   (a b c).Outer(1 2 0) = (a 2*b 0)
+        T Dot(const vec_3 &) const;        // ---> Dot product.
+        vec_3 Cross(const vec_3 &) const;   // ---> Cross product.
+        vec_3 Mask(const vec_3 &) const;    // ---> Term-by-term product:   (a b c).Outer(1 2 0) = (a 2*b 0)
     
-        vec3 unit() const;                // ---> Return a normalized version of this vector.
+        vec_3 unit() const;                // ---> Return a normalized version of this vector.
         T length() const;                 // ---> (pythagorean) length of vector.
-        T distance(const vec3 &) const;   // ---> (pythagorean) distance between vectors.
-        T sq_dist(const vec3 &) const;    // ---> Square of the (pythagorean) distance. Avoids a sqrt().
-        T angle(const vec3 &, bool *OK=nullptr) const;  // ---> The |angle| (in radians, [0:pi]) separating two vectors. 
+        T distance(const vec_3 &) const;   // ---> (pythagorean) distance between vectors.
+        T sq_dist(const vec_3 &) const;    // ---> Square of the (pythagorean) distance. Avoids a sqrt().
+        T angle(const vec_3 &, bool *OK=nullptr) const;  // ---> The |angle| (in radians, [0:pi]) separating two vectors.
 
-        vec3 zero(void) const; //Returns a zero-vector.
+        vec_3 zero(void) const; //Returns a zero-vector.
 
-        vec3<T> rotate_around_x(T angle_rad) const; // Rotate by some angle (in radians, [0:pi]) around a cardinal axis.
-        vec3<T> rotate_around_y(T angle_rad) const;
-        vec3<T> rotate_around_z(T angle_rad) const;
+        vec_3<T> rotate_around_x(T angle_rad) const; // Rotate by some angle (in radians, [0:pi]) around a cardinal axis.
+        vec_3<T> rotate_around_y(T angle_rad) const;
+        vec_3<T> rotate_around_z(T angle_rad) const;
 
-        bool GramSchmidt_orthogonalize(vec3<T> &, vec3<T> &) const; //Using *this as seed, orthogonalize (n.b. not orthonormalize) the inputs.
+        bool GramSchmidt_orthogonalize(vec_3<T> &, vec_3<T> &) const; //Using *this as seed, orthogonalize (n.b. not orthonormalize) the inputs.
 
         std::string to_string(void) const;
-        vec3<T> from_string(const std::string &in); //Sets *this and returns a copy. 
+       // vec_3<T> from_string(const std::string &in); //Sets *this and returns a copy.
     
         //Friends.
-        template<class Y> friend std::ostream & operator << (std::ostream &, const vec3<Y> &); // ---> Overloaded stream operators.
-        template<class Y> friend std::istream & operator >> (std::istream &, vec3<Y> &);      
+        template<class Y> friend std::ostream & operator << (std::ostream &, const vec_3<Y> &); // ---> Overloaded stream operators.
+     //   template<class Y> friend std::istream & operator >> (std::istream &, vec_3<Y> &);
 };
 
 
@@ -88,72 +90,72 @@ template <class T> class vec3 {
 // It also requires a unit vector with which to rotate the plane about.
 //
 // Note: Prefer Gram-Schmidt orthogonalization or the cross-product if you can. This routine has some unfortunate poles...
-vec3<double> rotate_unit_vector_in_plane(const vec3<double> &A, const double &theta, const double &R);
+vec_3<double> rotate_unit_vector_in_plane(const vec_3<double> &A, const double &theta, const double &R);
 
 //This function evolves a pair of position and velocity (x(t=0),v(t=0)) to a pair (x(t=T),v(t=T)) using the
 // classical expression for a time- and position-dependent force F(x;t). It is highly unstable, so the number
 // of iterations must be specified. If this is going to be used for anything important, make sure that the
 // number of iterations is chosen sufficiently high so as to produce negligible errors.
-std::tuple<vec3<double>,vec3<double>> Evolve_x_v_over_T_via_F(const std::tuple<vec3<double>,vec3<double>> &x_and_v, 
-                                                              std::function<vec3<double>(vec3<double> x, double T)> F, 
+std::tuple<vec_3<double>,vec_3<double>> Evolve_x_v_over_T_via_F(const std::tuple<vec_3<double>,vec_3<double>> &x_and_v,
+                                                              std::function<vec_3<double>(vec_3<double> x, double T)> F,
                                                               double T, long int steps);
 
 
 //---------------------------------------------------------------------------------------------------------------------------
-//----------------------------------------- vec2: A two-dimensional vector --------------------------------------------------
+//----------------------------------------- vec_2: A two-dimensional vector --------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------
 //This class is the basis of the geometry-heavy classes below. It can happily be used on its own.
-template <class T> class vec2 {
+template <class T> class vec_2 {
     public:
         using value_type = T;
         T x, y;
 
         //Constructors.
-        vec2();
-        vec2(T a, T b);
-        vec2( const vec2 & );
+        vec_2();
+        vec_2(T a, T b);
+        vec_2( const vec_2 & );
 
-        //Operators - vec2 typed.
-        vec2 & operator=(const vec2 &);
+        //Operators - vec_2 typed.
+        vec_2 & operator=(const vec_2 &);
 
-        vec2   operator+(const vec2 &) const;
-        vec2 & operator+=(const vec2 &);
-        vec2   operator-(const vec2 &) const;
-        vec2 & operator-=(const vec2 &);
+        vec_2   operator+(const vec_2 &) const;
+        vec_2 & operator+=(const vec_2 &);
+        vec_2   operator-(const vec_2 &) const;
+        vec_2 & operator-=(const vec_2 &);
 
-        bool operator==(const vec2 &) const;
-        bool operator!=(const vec2 &) const;
-        bool operator<(const vec2 &) const;   //This is mostly for sorting / placing into a std::map. There is no great 
+        bool operator==(const vec_2 &) const;
+        bool operator!=(const vec_2 &) const;
+        bool operator<(const vec_2 &) const;   //This is mostly for sorting / placing into a std::map. There is no great
                                               // way to define '<' for a vector, so be careful with it.
         bool isfinite(void) const;        //Logical AND of std::isfinite() on each coordinate.
 
-        vec2   operator*(const T &) const;
-        vec2 & operator*=(const T &);
-        vec2   operator/(const T &) const;
-        vec2 & operator/=(const T &);
+        vec_2   operator*(const T &) const;
+        vec_2 & operator*=(const T &);
+        vec_2   operator/(const T &) const;
+        vec_2 & operator/=(const T &);
 
         //Operators - T typed.
         T & operator[](size_t);
 
         //Member functions.
-        T Dot(const vec2 &) const;        // ---> Dot product.
-        vec2 Mask(const vec2 &) const;    // ---> Term-by-term product:   (a b).Outer(5 0) = (5*a 0*b)
+        T Dot(const vec_2 &) const;        // ---> Dot product.
+        vec_2 Mask(const vec_2 &) const;    // ---> Term-by-term product:   (a b).Outer(5 0) = (5*a 0*b)
 
-        vec2 unit() const;                // ---> Return a normalized version of this vector.
+        vec_2 unit() const;                // ---> Return a normalized version of this vector.
         T length() const;                 // ---> (pythagorean) length of vector.
-        T distance(const vec2 &) const;   // ---> (pythagorean) distance between vectors.
-        T sq_dist(const vec2 &) const;    // ---> Square of the (pythagorean) distance. Avoids a sqrt().
+        T distance(const vec_2 &) const;   // ---> (pythagorean) distance between vectors.
+        T sq_dist(const vec_2 &) const;    // ---> Square of the (pythagorean) distance. Avoids a sqrt().
 
-        vec2 zero(void) const; //Returns a zero-vector.
+        vec_2 zero(void) const; //Returns a zero-vector.
 
-        vec2<T> rotate_around_z(T angle_rad) const; // Rotate by some angle (in radians, [0:pi]) around a cardinal axis.
+        vec_2<T> rotate_around_z(T angle_rad) const; // Rotate by some angle (in radians, [0:pi]) around a cardinal axis.
 
         std::string to_string(void) const;
-        vec2<T> from_string(const std::string &in); //Sets *this and returns a copy. 
+     //   vec_2<T> from_string(const std::string &in); //Sets *this and returns a copy.
 
         //Friends.
-        template<class Y> friend std::ostream & operator << (std::ostream &, const vec2<Y> &); // ---> Overloaded stream operators.
-        template<class Y> friend std::istream & operator >> (std::istream &, vec2<Y> &);           
+        template<class Y> friend std::ostream & operator << (std::ostream &, const vec_2<Y> &); // ---> Overloaded stream operators.
+//        template<class Y> friend std::istream & operator >> (std::istream &, vec_2<Y> &);
 };
 
 
@@ -194,7 +196,7 @@ template <class T> class samples_1D {
         samples_1D(std::vector<std::array<T,4>> samps);
 
         //Providing [x_i, f_i] data. Assumes sigma_x_i and sigma_f_i uncertainties are (T)(0).
-        samples_1D(const std::list<vec2<T>> &samps);
+        samples_1D(const std::list<vec_2<T>> &samps);
 
         //------------------------------------------------ Member Functions ------------------------------------------------
         samples_1D<T> operator=(const samples_1D<T> &rhs);
@@ -204,7 +206,7 @@ template <class T> class samples_1D {
         void push_back(const std::array<T,4> &samp, bool inhibit_sort = false);
         void push_back(const std::array<T,2> &x_dx, const std::array<T,2> &y_dy, bool inhibit_sort = false);
         void push_back(T x_i, T f_i, bool inhibit_sort = false);
-        void push_back(const vec2<T> &x_i_and_f_i, bool inhibit_sort = false);
+        void push_back(const vec_2<T> &x_i_and_f_i, bool inhibit_sort = false);
         void push_back(T x_i, T f_i, T sigma_f_i, bool inhibit_sort = false);
 
         bool empty(void) const;  // == this->samples.empty()
@@ -357,12 +359,9 @@ template <class T> class samples_1D {
         template<class Y> friend std::istream & operator >> (std::istream &, samples_1D<Y> &);
 };
 
-//Standalone function for viewing the distribution of a list of scalar numbers. Great for performing a statistical bootstrap
-// or inspecting normality of a measured quantity.
-template <class C>
-samples_1D<typename C::value_type>
-Bag_of_numbers_to_N_equal_bin_samples_1D_histogram(const C &nums, long int N, bool explicitbins = false);
 
+
+}
 
 
 #endif
