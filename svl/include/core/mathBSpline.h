@@ -1,7 +1,7 @@
-//YgorMathBSpline.h
 
-#ifndef YGOR_MATH_BSPLINE_H_
-#define YGOR_MATH_BSPLINE_H_
+
+#ifndef  _MATH_BSPLINE_H_
+#define  _MATH_BSPLINE_H_
 
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_matrix.h>

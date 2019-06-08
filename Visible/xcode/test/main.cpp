@@ -77,6 +77,7 @@
 #include "algo_Lif.hpp"
 #include "cinder/PolyLine.h"
 #include "etw_utils.hpp"
+#include "core/lineseg.hpp"
 
 using namespace etw_utils;
 
@@ -194,27 +195,316 @@ typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
 #include <stdio.h>
 #include <gsl/gsl_sf_bessel.h>
 #include "core/moreMath.h"
+#include "eigen_utils.hpp"
 
 TEST(samples_1d, basic){
     
-    auto convert_to = [] (std::vector<float>& signal){
-        std::list<svl::vec_2<float>> out;
+    auto res = dgenv_ptr->asset_path("signal.csv");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    
+    record_t array;
+    load_record(res.first.string(), array, false);
+    EXPECT_EQ(size_t(500), array.size());
+    
+
+    
+    std::vector<double> dst_1;
+    dst_1.insert(dst_1.end(),array.begin(), array.end());
+
+#if NOTYET
+    auto build_index_data = [=] (std::vector<double>& signal){
+        std::list<svl::vec_2<double>> out;
         int index = 0;
         for(const auto &val : signal){
-            svl::vec_2<float> iv (index,val);
+            svl::vec_2<double> iv (index++,val);
             out.push_back(iv);
         }
+        return out;
+    };
         
-        svl::samples_1D<float> ss (out);
+    auto convert_to = [=] (std::vector<double>& signal){
+        auto out = build_index_data(signal);
+        svl::samples_1D<double> ss (out);
+        return ss;
+    };
+    
+    auto ss = convert_to(dst_1);
+    auto fd = ss.Derivative_Forward_Finite_Differences();
+    auto bd = ss.Derivative_Forward_Finite_Differences();
+    auto peaks = ss.Peaks();
+    auto to_vector = [] (const svl::samples_1D<double>& src){
+        std::vector<double> out(src.samples.size());
+        for (auto& s : src.samples){
+            out[s[0]] = s[2];
+        }
         return out;
     };
     
-    auto ss = convert_to(oneF_example);
+    auto fp = to_vector(peaks);
+
+    
+    bool ok = false;
+    auto lm = ss.Linear_Least_Squares_Regression(&ok, true);
+    std::cout << lm.slope << "  offset  " << lm.intercept << std::endl;
+#endif
+    
+    lsFit<float> lsf;
+    float index = 0.0f;
+    for (auto pt : dst_1){
+        float fpt = pt;
+        lsf.update(index,fpt);
+        index += 1.0f;
+    }
+    auto line = lsf.fit();
+    uRadian ang = line.first;
+    std::cout << ang.Double() << " dist " << line.second << std::endl;
+    
+    // Poly fitting
+    std::vector<double> mathematica_coeffs = {0.742154, 0.00125496, -3.79331e-6};
+    std::vector<double> coeffs;
+    auto iB = dst_1.begin();
+    std::advance(iB, 261);
+    polyfit(iB, dst_1.end(), 1.0, coeffs, 2);
+    EXPECT_TRUE(coeffs.size() == mathematica_coeffs.size());
+    
+    for (auto ii = 0; ii < coeffs.size(); ii++)
+        EXPECT_TRUE(svl::equal(mathematica_coeffs[ii], coeffs[ii], 1.e-05));
+    std::cout << coeffs << std::endl;
+    
+    polyfit (dst_1, 1.0, coeffs, 2);
+    auto pfit = [coeffs](double x){
+        return coeffs[0] - coeffs[1]*x + coeffs[2]*x*x;
+    };
+    
 }
 
 
 
 
+
+TEST(cardiac_ut, load_sm)
+{
+    auto res = dgenv_ptr->asset_path("sm.csv");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    
+    vector<vector<double>> array;
+    load_sm(res.first.string(), array, false);
+    EXPECT_EQ(size_t(500), array.size());
+    for (auto row = 0; row<500; row++){
+        EXPECT_EQ(size_t(500), array[row].size());
+        EXPECT_EQ(1.0,array[row][row]);
+    }
+    
+    
+}
+TEST(cardiac_ut, interpolated_length)
+{
+    auto res = dgenv_ptr->asset_path("avg_baseline25_28_length_length_pct_short_pct.csv");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    
+    vector<vector<double>> array;
+    load_sm(res.first.string(), array, false);
+    EXPECT_EQ(size_t(500), array.size());
+    for (auto row = 0; row<500; row++){
+        EXPECT_EQ(size_t(5), array[row].size());
+    }
+    
+    double            MicronPerPixel = 291.19 / 512.0;
+    double            Length_max   = 118.555 * MicronPerPixel; // 67.42584072;
+    double            Lenght_min   = 106.551 * MicronPerPixel; // 60.59880018;
+                                                               // double            shortening   = Length_max - Lenght_min;
+    double            MSI_max  =  0.37240525;
+    double            MSI_min   = 0.1277325;
+    // double            shortening_um   = 6.827040547;
+    
+    data_t dst;
+    flip(array,dst);
+    auto check = std::minmax_element(dst[1].begin(), dst[1].end() );
+    EXPECT_TRUE(svl::equal(*check.first, MSI_min, 1.e-05));
+    EXPECT_TRUE(svl::equal(*check.second, MSI_max, 1.e-05));
+    
+    auto car = contraction_analyzer::create();
+    car->load(dst[1]);
+    EXPECT_TRUE(car->isPreProcessed());
+    EXPECT_TRUE(car->isValid());
+    EXPECT_TRUE(car->leveled().size() == dst[1].size());
+    car->find_best();
+    const std::pair<double,double>& minmax = car->leveled_min_max ();
+    EXPECT_TRUE(svl::equal(*check.first, minmax.first, 1.e-05));
+    EXPECT_TRUE(svl::equal(*check.second, minmax.second, 1.e-05));
+    
+    const vector<double>& signal = car->leveled();
+    auto start = std::clock();
+    car->compute_interpolated_geometries(Lenght_min, Length_max);
+    auto endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    std::cout << endtime << " interpolated length " << std::endl;
+    start = std::clock();
+    car->compute_force(signal.begin(),signal.end(),Lenght_min, Length_max );
+    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    std::cout << endtime << " FORCE " << std::endl;
+    const vector<double>& lengths = car->interpolated_length();
+    EXPECT_EQ(dst[2].size(), lengths.size());
+    std::vector<double> diffs;
+    for(auto row = 0; row < dst[2].size(); row++)
+    {
+        auto dd = dst[2][row] - lengths[row];
+        diffs.push_back(dd);
+    }
+    
+    auto dcheck = std::minmax_element(diffs.begin(), diffs.end() );
+    EXPECT_TRUE(svl::equal(*dcheck.first, 0.0, 1.e-05));
+    EXPECT_TRUE(svl::equal(*dcheck.second, 0.0, 1.e-05));
+    
+    {
+        auto name = "force";
+        cvplot::setWindowTitle(name, " Force ");
+        cvplot::moveWindow(name, 0, 256);
+        cvplot::resizeWindow(name, 512, 256);
+        cvplot::figure(name).series("Force").addValue(car->total_reactive_force()).type(cvplot::Line).color(cvplot::Red);
+        cvplot::figure(name).show();
+    }
+    {
+        auto name = "interpolated length";
+        cvplot::setWindowTitle(name, " Length ");
+        cvplot::moveWindow(name,0,0);
+        cvplot::resizeWindow(name, 512, 256);
+        cvplot::figure(name).series("Length").addValue(car->interpolated_length()).type(cvplot::Line).color(cvplot::Blue);
+        cvplot::figure(name).show();
+    }
+    
+    
+    
+    
+}
+
+TEST(cardiac_ut, locate_contractions)
+{
+    auto res = dgenv_ptr->asset_path("avg_baseline25_28_length_length_pct_short_pct.csv");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    
+    vector<vector<double>> array;
+    load_sm(res.first.string(), array, false);
+    EXPECT_EQ(size_t(500), array.size());
+    for (auto row = 0; row<500; row++){
+        EXPECT_EQ(size_t(5), array[row].size());
+    }
+    
+    data_t dst;
+    flip(array,dst);
+    
+    // Persistence of Extremas
+    persistenace1d<double> p;
+    vector<double> dst_1;
+    dst_1.insert(dst_1.end(),dst[1].begin(), dst[1].end());
+    
+    // Exponential Smoothing
+    eMAvg<double> emm(0.333,0.0);
+    vector<double> filtered;
+    for (double d : dst_1){
+        filtered.push_back(emm.update(d));
+    }
+    
+    auto median_filtered_val = Median(filtered);
+    p.RunPersistence(filtered);
+    std::vector<int> tmins, lmins, tmaxs, lmaxs;
+    p.GetExtremaIndices(tmins,tmaxs);
+    std::cout << " Median val" << median_filtered_val << std::endl;
+    //   Out(tmins);
+    //   Out(tmaxs);
+    
+    for (auto tmi : tmins){
+        if (dst_1[tmi] > median_filtered_val) continue;
+        lmins.push_back(tmi);
+    }
+    
+    for (auto tma : tmaxs){
+        if (dst_1[tma] < median_filtered_val) continue;
+        lmaxs.push_back(tma);
+    }
+    
+    std::sort(lmins.begin(),lmins.end());
+    std::sort(lmaxs.begin(),lmaxs.end());
+    //    Out(lmins);
+    //    Out(lmaxs);
+    std::vector<std::pair<float, float>> contractions;
+    for (auto lmi : lmins){
+        contractions.emplace_back(lmi,dst_1[lmi]);
+    }
+    
+    {
+        auto name = "Contraction Localization";
+        cvplot::setWindowTitle(name, "Contraction");
+        cvplot::moveWindow(name, 300, 100);
+        cvplot::resizeWindow(name, 1024, 512);
+        cvplot::figure(name).series("Raw").addValue(dst_1);
+        cvplot::figure(name).series("filtered").addValue(filtered);
+        cvplot::figure(name).series("contractions").set(contractions).type(cvplot::Dots).color(cvplot::Red);
+        cvplot::figure(name).show();
+    }
+    
+}
+
+TEST(UT_contraction_profiler, basic)
+{
+    contraction_analyzer::contraction_t ctr;
+    typedef vector<double>::iterator dItr_t;
+    
+    std::vector<double> fder, fder2;
+    fder.resize (oneD_example.size());
+    fder2.resize (oneD_example.size());
+    
+    // Get contraction peak ( valley ) first
+    auto min_iter = std::min_element(oneD_example.begin(),oneD_example.end());
+    ctr.contraction_peak.first = std::distance(oneD_example.begin(),min_iter);
+    
+    // Computer First Difference,
+    adjacent_difference(oneD_example.begin(),oneD_example.end(), fder.begin());
+    std::rotate(fder.begin(), fder.begin()+1, fder.end());
+    fder.pop_back();
+    auto medianD = stl_utils::median1D<double>(7);
+    fder = medianD.filter(fder);
+    std::transform(fder.begin(), fder.end(), fder2.begin(), [](double f)->double { return f * f; });
+    // find first element greater than 0.1
+    auto pos = find_if (fder2.begin(), fder2.end(),    // range
+                        std::bind2nd(greater<double>(),0.1));  // criterion
+    
+    ctr.contraction_start.first = std::distance(fder2.begin(),pos);
+    auto max_accel = std::min_element(fder.begin()+ ctr.contraction_start.first ,fder.begin()+ctr.contraction_peak.first);
+    ctr.contraction_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_start.first, max_accel);
+    ctr.contraction_max_acceleration.first += ctr.contraction_start.first;
+    auto max_relax = std::max_element(fder.begin()+ ctr.contraction_peak.first ,fder.end());
+    ctr.relaxation_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_peak.first, max_relax);
+    ctr.relaxation_max_acceleration.first += ctr.contraction_peak.first;
+    
+    // Initialize rpos to point to the element following the last occurance of a value greater than 0.1
+    // If there is no such value, initialize rpos = to begin
+    // If the last occurance is the last element, initialize this it to end
+    dItr_t rpos = find_if (fder2.rbegin(), fder2.rend(),    // range
+                           std::bind2nd(greater<double>(),0.1)).base();  // criterion
+    ctr.relaxation_end.first = std::distance (fder2.begin(), rpos);
+    
+    EXPECT_EQ(ctr.contraction_start.first,16);
+    EXPECT_EQ(ctr.contraction_peak.first,35);
+    EXPECT_EQ(ctr.contraction_max_acceleration.first,27);
+    EXPECT_EQ(ctr.relaxation_max_acceleration.first,43);
+    EXPECT_EQ(ctr.relaxation_end.first,52);
+    
+    
+    //   @todo reconcile with recent implementation
+    //    contraction_profile_analyzer ca;
+    //    ca.run(oneD_example);
+    //        bool test = contraction_analyzer::contraction_t::equal(ca.contraction(), ctr);
+    //       EXPECT_TRUE(test);
+    //    {
+    //        cvplot::figure("myplot").series("myline").addValue(ca.first_derivative_filtered());
+    //        cvplot::figure("myplot").show();
+    //    }
+    
+}
 
 
 
@@ -1134,228 +1424,6 @@ TEST(units,basic)
     cardio_ut::run(dgenv_ptr);
 }
 
-TEST(cardiac_ut, load_sm)
-{
-    auto res = dgenv_ptr->asset_path("sm.csv");
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    
-    vector<vector<double>> array;
-    load_sm(res.first.string(), array, false);
-    EXPECT_EQ(size_t(500), array.size());
-    for (auto row = 0; row<500; row++){
-        EXPECT_EQ(size_t(500), array[row].size());
-        EXPECT_EQ(1.0,array[row][row]);
-    }
-    
-    
-}
-TEST(cardiac_ut, interpolated_length)
-{
-    auto res = dgenv_ptr->asset_path("avg_baseline25_28_length_length_pct_short_pct.csv");
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    
-    vector<vector<double>> array;
-    load_sm(res.first.string(), array, false);
-    EXPECT_EQ(size_t(500), array.size());
-    for (auto row = 0; row<500; row++){
-        EXPECT_EQ(size_t(5), array[row].size());
-    }
-    
-    double            MicronPerPixel = 291.19 / 512.0;
-    double            Length_max   = 118.555 * MicronPerPixel; // 67.42584072;
-    double            Lenght_min   = 106.551 * MicronPerPixel; // 60.59880018;
-                                                               // double            shortening   = Length_max - Lenght_min;
-    double            MSI_max  =  0.37240525;
-    double            MSI_min   = 0.1277325;
-    // double            shortening_um   = 6.827040547;
-    
-    data_t dst;
-    flip(array,dst);
-    auto check = std::minmax_element(dst[1].begin(), dst[1].end() );
-    EXPECT_TRUE(svl::equal(*check.first, MSI_min, 1.e-05));
-    EXPECT_TRUE(svl::equal(*check.second, MSI_max, 1.e-05));
-    
-    auto car = contraction_analyzer::create();
-    car->load(dst[1]);
-    EXPECT_TRUE(car->isPreProcessed());
-    EXPECT_TRUE(car->isValid());
-    EXPECT_TRUE(car->leveled().size() == dst[1].size());
-    car->find_best();
-    const std::pair<double,double>& minmax = car->leveled_min_max ();
-    EXPECT_TRUE(svl::equal(*check.first, minmax.first, 1.e-05));
-    EXPECT_TRUE(svl::equal(*check.second, minmax.second, 1.e-05));
-    
-    const vector<double>& signal = car->leveled();
-    auto start = std::clock();
-    car->compute_interpolated_geometries(Lenght_min, Length_max);
-    auto endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
-    std::cout << endtime << " interpolated length " << std::endl;
-    start = std::clock();
-    car->compute_force(signal.begin(),signal.end(),Lenght_min, Length_max );
-    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
-    std::cout << endtime << " FORCE " << std::endl;
-    const vector<double>& lengths = car->interpolated_length();
-    EXPECT_EQ(dst[2].size(), lengths.size());
-    std::vector<double> diffs;
-    for(auto row = 0; row < dst[2].size(); row++)
-    {
-        auto dd = dst[2][row] - lengths[row];
-        diffs.push_back(dd);
-    }
-    
-    auto dcheck = std::minmax_element(diffs.begin(), diffs.end() );
-    EXPECT_TRUE(svl::equal(*dcheck.first, 0.0, 1.e-05));
-    EXPECT_TRUE(svl::equal(*dcheck.second, 0.0, 1.e-05));
-    
-    {
-        auto name = "force";
-        cvplot::setWindowTitle(name, " Force ");
-        cvplot::moveWindow(name, 0, 256);
-        cvplot::resizeWindow(name, 512, 256);
-        cvplot::figure(name).series("Force").addValue(car->total_reactive_force()).type(cvplot::Line).color(cvplot::Red);
-        cvplot::figure(name).show();
-    }
-    {
-        auto name = "interpolated length";
-        cvplot::setWindowTitle(name, " Length ");
-        cvplot::moveWindow(name,0,0);
-        cvplot::resizeWindow(name, 512, 256);
-        cvplot::figure(name).series("Length").addValue(car->interpolated_length()).type(cvplot::Line).color(cvplot::Blue);
-        cvplot::figure(name).show();
-    }
-    
-    
-    
-    
-}
-
-TEST(cardiac_ut, locate_contractions)
-{
-    auto res = dgenv_ptr->asset_path("avg_baseline25_28_length_length_pct_short_pct.csv");
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    
-    vector<vector<double>> array;
-    load_sm(res.first.string(), array, false);
-    EXPECT_EQ(size_t(500), array.size());
-    for (auto row = 0; row<500; row++){
-        EXPECT_EQ(size_t(5), array[row].size());
-    }
-    
-    data_t dst;
-    flip(array,dst);
-    
-    // Persistence of Extremas
-    persistenace1d<double> p;
-    vector<double> dst_1;
-    dst_1.insert(dst_1.end(),dst[1].begin(), dst[1].end());
-    
-    // Exponential Smoothing
-    eMAvg<double> emm(0.333,0.0);
-    vector<double> filtered;
-    for (double d : dst_1){
-        filtered.push_back(emm.update(d));
-    }
-    
-    auto median_filtered_val = Median(filtered);
-    p.RunPersistence(filtered);
-    std::vector<int> tmins, lmins, tmaxs, lmaxs;
-    p.GetExtremaIndices(tmins,tmaxs);
-    std::cout << " Median val" << median_filtered_val << std::endl;
-    //   Out(tmins);
-    //   Out(tmaxs);
-    
-    for (auto tmi : tmins){
-        if (dst_1[tmi] > median_filtered_val) continue;
-        lmins.push_back(tmi);
-    }
-    
-    for (auto tma : tmaxs){
-        if (dst_1[tma] < median_filtered_val) continue;
-        lmaxs.push_back(tma);
-    }
-    
-    std::sort(lmins.begin(),lmins.end());
-    std::sort(lmaxs.begin(),lmaxs.end());
-    //    Out(lmins);
-    //    Out(lmaxs);
-    std::vector<std::pair<float, float>> contractions;
-    for (auto lmi : lmins){
-        contractions.emplace_back(lmi,dst_1[lmi]);
-    }
-    
-    {
-        auto name = "Contraction Localization";
-        cvplot::setWindowTitle(name, "Contraction");
-        cvplot::moveWindow(name, 300, 100);
-        cvplot::resizeWindow(name, 1024, 512);
-        cvplot::figure(name).series("Raw").addValue(dst_1);
-        cvplot::figure(name).series("filtered").addValue(filtered);
-        cvplot::figure(name).series("contractions").set(contractions).type(cvplot::Dots).color(cvplot::Red);
-        cvplot::figure(name).show();
-    }
-    
-}
-
-TEST(UT_contraction_profiler, basic)
-{
-    contraction_analyzer::contraction_t ctr;
-    typedef vector<double>::iterator dItr_t;
-    
-    std::vector<double> fder, fder2;
-    fder.resize (oneD_example.size());
-    fder2.resize (oneD_example.size());
-    
-    // Get contraction peak ( valley ) first
-    auto min_iter = std::min_element(oneD_example.begin(),oneD_example.end());
-    ctr.contraction_peak.first = std::distance(oneD_example.begin(),min_iter);
-    
-    // Computer First Difference,
-    adjacent_difference(oneD_example.begin(),oneD_example.end(), fder.begin());
-    std::rotate(fder.begin(), fder.begin()+1, fder.end());
-    fder.pop_back();
-    auto medianD = stl_utils::median1D<double>(7);
-    fder = medianD.filter(fder);
-    std::transform(fder.begin(), fder.end(), fder2.begin(), [](double f)->double { return f * f; });
-    // find first element greater than 0.1
-    auto pos = find_if (fder2.begin(), fder2.end(),    // range
-                        std::bind2nd(greater<double>(),0.1));  // criterion
-    
-    ctr.contraction_start.first = std::distance(fder2.begin(),pos);
-    auto max_accel = std::min_element(fder.begin()+ ctr.contraction_start.first ,fder.begin()+ctr.contraction_peak.first);
-    ctr.contraction_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_start.first, max_accel);
-    ctr.contraction_max_acceleration.first += ctr.contraction_start.first;
-    auto max_relax = std::max_element(fder.begin()+ ctr.contraction_peak.first ,fder.end());
-    ctr.relaxation_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_peak.first, max_relax);
-    ctr.relaxation_max_acceleration.first += ctr.contraction_peak.first;
-    
-    // Initialize rpos to point to the element following the last occurance of a value greater than 0.1
-    // If there is no such value, initialize rpos = to begin
-    // If the last occurance is the last element, initialize this it to end
-    dItr_t rpos = find_if (fder2.rbegin(), fder2.rend(),    // range
-                           std::bind2nd(greater<double>(),0.1)).base();  // criterion
-    ctr.relaxation_end.first = std::distance (fder2.begin(), rpos);
-    
-    EXPECT_EQ(ctr.contraction_start.first,16);
-    EXPECT_EQ(ctr.contraction_peak.first,35);
-    EXPECT_EQ(ctr.contraction_max_acceleration.first,27);
-    EXPECT_EQ(ctr.relaxation_max_acceleration.first,43);
-    EXPECT_EQ(ctr.relaxation_end.first,52);
-    
-    
-    //   @todo reconcile with recent implementation
-    //    contraction_profile_analyzer ca;
-    //    ca.run(oneD_example);
-    //        bool test = contraction_analyzer::contraction_t::equal(ca.contraction(), ctr);
-    //       EXPECT_TRUE(test);
-    //    {
-    //        cvplot::figure("myplot").series("myline").addValue(ca.first_derivative_filtered());
-    //        cvplot::figure("myplot").show();
-    //    }
-    
-}
 TEST(timing8, corr)
 {
     std::shared_ptr<uint8_t> img1 = test_utils::create_trig(1920, 1080);

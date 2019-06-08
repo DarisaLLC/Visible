@@ -22,11 +22,14 @@ public:
     
     fLineSegment2d();
 		
+    fLineSegment2d (const uRadian& angle, const float distance);
+
     //! construct from two bf2dVector<int>
     /*!@param p1 an endpoint on the line
       @param p2 the second endpoint of the line line*/
     fLineSegment2d(const fVector_2d & p1, const fVector_2d & p2);
 
+    fLineSegment2d (const uRadian& angle,  const fVector_2d& pa);
     //! get a point on the line
     /*!@param n get point point + n * direction; for n = 0 (default),
       this is the point entered in the constructor or in reset*/
@@ -60,8 +63,11 @@ public:
 private:
     fVector_2d mPoint1;
     fVector_2d mPoint2;
+    uRadian mAngle;
+    float mDist;
     bool mValid;
     int mId;
+    bool mType; // true means angle dir ctor type hack alert
 };
 
 
@@ -134,5 +140,98 @@ private:
     fVector_2d mDir, mPos;
 };
 
+
+// Least Square Solver Support for
+
+template<typename T>
+class  lsFit
+{
+public:
+    typedef T val_t;
+     lsFit () : mSuu(0.0f), mSuv(0.0f), mSvv(0.0f), mSu (0.0f), mSv (0.0f),mN (0) {}
+    void clear () const;
+    
+    void update (T u, T v) const;
+    
+    /*
+     * Least Square Fit to a Line
+     */
+    std::pair<uRadian, double> fit () const;
+    T error (const std::pair<uRadian, double>& ) const;
+    
+private:
+   mutable T mSuu;
+   mutable T mSuv;
+   mutable T mSvv;
+   mutable T mSu;
+   mutable T mSv;
+   mutable T mN;
+};
+
+
+
+
+#if 0
+template<class T>
+bool  lsFit<T>::solve3p ( fVector_2d& trans, uRadian& rot)
+{
+    if (mN < 3) return false;
+    
+    T e = mN * (mSux + mSvy) - mSu * mSx - mSv * mSy;
+    T d = mN * (mSvx + mSuy) + mSu * mSy - mSv * mSx;
+    
+    rot = atan2 ((double) d, (double) e);
+    T c = (T) cos (rot);
+    T s = (T) sin (rot);
+    trans.x ((mSu - c * mSx + s * mSy) / mN);
+    trans.y ((mSv - s * mSx - c * mSy) / mN);
+    
+    
+    return true;
+}
+
+
+
+template<class T>
+bool  lsFit<T>::solvetp (xform& xm)
+{
+    if (mN < 3) return false;
+    
+     fVector_2d trans;  matrix2 mat;
+    bool success =  lsFit<T>::solvetp (trans, mat);
+    xm.trans(trans);xm.matrix (mat);
+    return success;
+}
+
+
+template<class T>
+bool  lsFit<T>::solvetp ( fVector_2d& trans,  matrix2& mat)
+{
+    if (mN < 3) return false;
+    
+    trans.x ((mSu - mSx) / mN);
+    trans.y ((mSv - mSy) / mN);
+    mat =  matrix2 ((mSux - (mSu * mSx) / mN) /
+                       (mSxx - (mSx * mSx) / mN),
+                       0.0, 0.0,
+                       (mSvy - (mSv * mSy) / mN) /
+                       (mSyy - (mSy * mSy) / mN));
+    
+    
+    return true;
+}
+
+template<class T>
+bool  lsFit<T>::solvetp ( fVector_2d& trans)
+{
+    if (mN < 2) return false;
+    
+    trans.x ((mSu - mSx) / mN);
+    trans.y ((mSv - mSy) / mN);
+    
+    return true;
+}
+
+#endif
 
 #endif /* _bfLINE_H_ */

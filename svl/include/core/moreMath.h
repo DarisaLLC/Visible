@@ -1,7 +1,7 @@
-//YgorMath.h
 
-#ifndef YGOR_MATH_H_
-#define YGOR_MATH_H_
+
+#ifndef  _MATH_H_
+#define  _MATH_H_
 #include <stddef.h>
 #include <array>
 #include <cmath>
@@ -22,6 +22,89 @@ namespace svl {
 
 template <class T> class samples_1D;
 
+    
+    //---------------------------------------------------------------------------------------------------------------------------
+    //-------------- lin_reg_results: a simple helper class for dealing with output from linear regression routines -------------
+    //---------------------------------------------------------------------------------------------------------------------------
+    //This routine is a helper class for holding the results from either weighted or un-weighted linear regression routines.
+    // It mostly holds data as members, but also has some routines for using the results to interpolate and pretty-printing.
+    //
+    // NOTE: All parameters should be inspected for infinity and NaN before using in any calculations. Not all members are
+    //       filled by each routine.
+    //
+    // NOTE: Not all data is always used for all routines. The weighted regression routines will omit some values (e.g., NaNs)
+    //       and possibly unweighted (i.e., infinitely surpressed) values. Always check N or dof instead of ...size().
+    //
+    // NOTE: For more info the parameters here, look at the regression routine notes. They are detailed in context there.
+    //
+    template <class T> class lin_reg_results {
+    public:
+        // ===================================== Fit parameters ========================================
+        T slope             = std::numeric_limits<T>::quiet_NaN(); //m in y=m*x+b.
+        T sigma_slope       = std::numeric_limits<T>::quiet_NaN(); //Uncertainty in m.
+        T intercept         = std::numeric_limits<T>::quiet_NaN(); //b in y=m*x+b.
+        T sigma_intercept   = std::numeric_limits<T>::quiet_NaN(); //Uncertainty in b.
+        
+        // ================= Quantities related to the fit and/or distribution of data =================
+        T N                 = std::numeric_limits<T>::quiet_NaN(); //# of datum used (not the DOF, int casted to a T).
+        T dof               = std::numeric_limits<T>::quiet_NaN(); //# of degrees of freedom used.
+        T sigma_f           = std::numeric_limits<T>::quiet_NaN(); //Std. dev. of the data.
+        T covariance        = std::numeric_limits<T>::quiet_NaN(); //Covariance.
+        T lin_corr          = std::numeric_limits<T>::quiet_NaN(); //Linear corr. coeff. (aka "r", "Pearson's coeff").
+        
+        // -------------------------------- un-weighted regression only --------------------------------
+        T sum_sq_res        = std::numeric_limits<T>::quiet_NaN(); //Sum-of-squared residuals.
+        T tvalue            = std::numeric_limits<T>::quiet_NaN(); //t-value for r.
+        T pvalue            = std::numeric_limits<T>::quiet_NaN(); //Two-tailed p-value for r.
+        
+        // --------------------------------- weighted regression only ----------------------------------
+        T chi_square        = std::numeric_limits<T>::quiet_NaN(); //Sum-of-squared residuals weighted by sigma_f_i^{-2}.
+        T qvalue            = std::numeric_limits<T>::quiet_NaN(); //q-value for chi-square.
+        T cov_params        = std::numeric_limits<T>::quiet_NaN(); //Covariance of the slope and intercept.
+        T corr_params       = std::numeric_limits<T>::quiet_NaN(); //Correlation of sigma_slope and sigma_intercept.
+        
+        // ========== Quantities which might be of interest for computing other quantities =============
+        
+        // -------------------------------- un-weighted regression only --------------------------------
+        T mean_x            = std::numeric_limits<T>::quiet_NaN(); //Mean of all x_i for used datum.
+        T mean_f            = std::numeric_limits<T>::quiet_NaN(); //Mean of all f_i for used datum.
+        T sum_x             = std::numeric_limits<T>::quiet_NaN(); //Sum of x_i.
+        T sum_f             = std::numeric_limits<T>::quiet_NaN(); //Sum of f_i.
+        T sum_xx            = std::numeric_limits<T>::quiet_NaN(); //Sum of x_i*x_i.
+        T sum_xf            = std::numeric_limits<T>::quiet_NaN(); //Sum of f_i*f_i.
+        T Sxf               = std::numeric_limits<T>::quiet_NaN(); //Sum of (x_i - mean_x)*(f_i - mean_f).
+        T Sxx               = std::numeric_limits<T>::quiet_NaN(); //Sum of (x_i - mean_x)^2.
+        T Sff               = std::numeric_limits<T>::quiet_NaN(); //Sum of (f_i - mean_f)^2.
+        
+        // --------------------------------- weighted regression only ----------------------------------
+        // NOTE: sigma_f'_i is an equivalent sigma_f_i which incorporates sigma_f_i and sigma_x_i using a rough guess
+        //       of the slope.
+        T mean_wx           = std::numeric_limits<T>::quiet_NaN(); //Mean of all x_i/(sigma_f'_i^2) for used datum.
+        T mean_wf           = std::numeric_limits<T>::quiet_NaN(); //Mean of all f_i/(sigma_f'_i^2) for used datum.
+        
+        T sum_w             = std::numeric_limits<T>::quiet_NaN(); //Sum of 1/(sigma_f'_i^2).
+        T sum_wx            = std::numeric_limits<T>::quiet_NaN(); //Sum of x_i/(sigma_f'_i^2).
+        T sum_wf            = std::numeric_limits<T>::quiet_NaN(); //Sum of f_i/(sigma_f'_i^2).
+        T sum_wxx           = std::numeric_limits<T>::quiet_NaN(); //Sum of x_i*x_i/(sigma_f'_i^2).
+        T sum_wxf           = std::numeric_limits<T>::quiet_NaN(); //Sum of f_i*f_i/(sigma_f'_i^2).
+        
+        // ==================================== Member functions =======================================
+        lin_reg_results();
+        
+        //Evaluates the model at the given point. Ignores uncertainties.
+        T evaluate_simple(T x) const;
+        
+        //Sample the line over the given range at 'n' equally-spaced points. Ignores uncertainties.
+        samples_1D<T> sample_uniformly_over(T xmin, T xmax, size_t n = 5) const;
+        
+        //Aligns into a simple table.
+        std::string display_table(void) const;
+        
+        //Compare all members which aren't NAN. Aligns into a simple table.
+        std::string comparison_table(const lin_reg_results<T> &in) const;
+    };
+
+    
 //---------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------- vec_3: A three-dimensional vector -------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------
@@ -158,7 +241,32 @@ template <class T> class vec_2 {
 //        template<class Y> friend std::istream & operator >> (std::istream &, vec_2<Y> &);
 };
 
+    template <class T>   class line {
+    public:
+        using value_type = T;
+        vec_3<T> R_0;  //A point which the line intersects.
+        vec_3<T> U_0;  //A unit vector which points along the length of the line.
+        
+        //Constructors.
+        line();
+        line(const vec_3<T> &R_A, const vec_3<T> &R_B);
+        
+        //Member functions.
+        T Distance_To_Point( const vec_3<T> & ) const;
+        
+        bool Intersects_With_Line_Once( const line<T> &, vec_3<T> &) const;
+        
+        bool Closest_Point_To_Line( const line<T> &, vec_3<T> &) const;
+        
+        vec_3<T> Project_Point_Orthogonally( const vec_3<T> & ) const; // Projects the given point onto the nearest point on the line.
+        
+        //Friends.
+        template<class Y> friend std::ostream & operator << (std::ostream &, const line<Y> &); // ---> Overloaded stream operators.
+        template<class Y> friend std::istream & operator >> (std::istream &, line<Y> &);
+    };
+    
 
+    
 template <class T> class samples_1D {
     public:
         //--------------------------------------------------- Data members -------------------------------------------------
@@ -266,7 +374,7 @@ template <class T> class samples_1D {
         std::array<T,4> Interpolate_Linearly(const T &at_x) const;
 
         //Returns linearly interpolated crossing-points.
-     //   samples_1D<T> Crossings(T value) const;
+        samples_1D<T> Crossings(T value) const;
 
         //Returns the locations linearly-interpolated peaks.
         samples_1D<T> Peaks(void) const;
@@ -322,7 +430,8 @@ template <class T> class samples_1D {
         //Computes {Sxy,Sxx,Syy} which are used for linear regression and other procedures.
         std::array<T,3> Compute_Sxy_Sxx_Syy(bool *OK=nullptr) const;
 
-      
+        //Standard linear (y=m*x+b) regression. Ignores all provided uncertainties. Prefer weighted regression. See source.
+        lin_reg_results<T> Linear_Least_Squares_Regression(bool *OK=nullptr, bool SkipExtras = false) const;
 
         //Calculates the discrete derivative using forward finite differences. (The right-side endpoint uses backward 
         // finite differences to handle the boundary.) Data should be reasonably smooth -- no interpolation is used.

@@ -1,4 +1,3 @@
-
 #ifndef _CONTRACTION_H
 #define _CONTRACTION_H
 
@@ -10,10 +9,12 @@
 #include <string>
 #include <tuple>
 #include <chrono>
+
 #include "cardiomyocyte_model.hpp"
 #include "core/stats.hpp"
 #include "core/stl_utils.hpp"
 #include "core/signaler.h"
+#include "core/lineseg.hpp"
 
 
 using namespace std;
@@ -72,6 +73,15 @@ class contraction_profile_analyzer;
 class contraction_analyzer : public ca_signaler, std::enable_shared_from_this<contraction_analyzer>
 {
 public:
+    
+    class params{
+    public:
+        params ():m_median_levelset_fraction(0.07) {}
+        float median_levelset_fraction()const {return m_median_levelset_fraction; }
+        
+    private:
+        float m_median_levelset_fraction;
+    };
     
     using contraction_t = contractionMesh;
     using index_val_t = contractionMesh::index_val_t;
@@ -151,6 +161,8 @@ public:
     
 private:
     contraction_analyzer();
+    contraction_analyzer::params m_params;
+    
     void regenerate () const;
     void compute_median_levelsets () const;
     size_t recompute_signal () const;
@@ -230,18 +242,21 @@ public:
      return std::shared_ptr<contraction_profile_analyzer>(new contraction_profile_analyzer());
     }
     
-    void load (const std::vector<double>& acid) const
+    void load (const std::vector<double>& acid)
     {
-        m_fder.clear ();
-        m_fder.resize (acid.size());
-        m_fder_filtered.resize (acid.size());
-
-        // Computer First Difference,
-        adjacent_difference(acid.begin(),acid.end(), m_fder.begin());
-        std::rotate(m_fder.begin(), m_fder.begin()+1, m_fder.end());
-        m_fder.pop_back();
-        std::transform(m_fder.begin(), m_fder.end(), m_fder_filtered.begin(),
-                       [](double f)->double { return f * f; });
+        m_fder = acid;
+        m_line_fit.clear();
+        double index = 0.0;
+        for (auto& pr : m_fder){
+            m_line_fit.update(index, pr);
+            index += 1.0;
+        }
+        auto line = m_line_fit.fit();
+        m_ls_result  = line;
+        uRadian ang = m_ls_result.first;
+        std::cout << ang.Double() << " offset " << m_ls_result.second << std::endl;
+        m_median = svl::Median(m_fder);
+        
         m_valid = true;
         
     }
@@ -253,18 +268,16 @@ public:
         if (! m_valid) return false;
         contraction_t::clear(mctr);
         mctr.contraction_peak.first = p_index;
-        
-        auto max_accel = std::min_element(m_fder.begin()+ mctr.contraction_start.first ,m_fder.begin()+mctr.contraction_peak.first);
-        mctr.contraction_max_acceleration.first = std::distance(m_fder.begin()+ mctr.contraction_start.first, max_accel);
-        mctr.contraction_max_acceleration.first += mctr.contraction_start.first;
-        auto max_relax = std::max_element(m_fder.begin()+ mctr.contraction_peak.first ,m_fder.end());
-        mctr.relaxation_max_acceleration.first = std::distance(m_fder.begin()+ mctr.contraction_peak.first, max_relax);
-        mctr.relaxation_max_acceleration.first += mctr.contraction_peak.first;
-        
-        auto rpos = std::min_element(m_fder_filtered.begin()+ p_index ,m_fder_filtered.end());
-        auto cpos = std::min_element(m_fder_filtered.begin(), m_fder_filtered.begin() + p_index);
-        mctr.relaxation_end.first = std::distance (m_fder_filtered.begin(), rpos);
-        mctr.contraction_start.first = std::distance(m_fder_filtered.begin(),cpos);
+        auto start = m_fder.begin();
+        auto line_thr = std::min(m_median, m_ls_result.second) - 0.01;
+        while(*start++ > line_thr);
+        mctr.contraction_start.first = std::distance(m_fder.begin(),start);
+        line_thr -= 0.01;
+        auto endp = m_fder.end();
+        endp--;
+        while(*endp-- > line_thr);
+        mctr.relaxation_end.first = std::distance (m_fder.begin(), endp);
+
         
         // Check the length of the entire contraction
         return true;
@@ -285,14 +298,15 @@ public:
     }
     
     const std::vector<double>& first_derivative () const { return m_fder; }
-    const std::vector<double>& first_derivative_filtered () const { return m_fder_filtered; }
     
 private:
     typedef vector<double>::iterator dItr_t;
-
+    lsFit<double> m_line_fit;
+    std::pair<uRadian,double> m_ls_result;
     mutable contraction_t mctr;
+    double m_median;
     mutable std::vector<double> m_fder;
-    mutable std::vector<double> m_fder_filtered;
+
     mutable bool m_valid;
 };
 
