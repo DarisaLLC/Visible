@@ -10,7 +10,7 @@
 #include "sg_filter.h"
 #include "core/core.hpp"
 #include "core/stl_utils.hpp"
-//#include "logger/logger.hpp"
+#include "logger/logger.hpp"
 #include "cardiomyocyte_model_detail.hpp"
 #include "core/boost_units.hpp"
 #include "core/simple_timing.hpp"
@@ -67,8 +67,9 @@ std::shared_ptr<contraction_analyzer> contraction_analyzer::create()
 }
 
 contraction_analyzer::contraction_analyzer() :
-m_cached(false),  mValidInput (false), m_median_levelset_frac (0.0)
+m_cached(false),  mValidInput (false)
 {
+    m_median_levelset_frac = m_params.median_levelset_fraction();
     m_peaks.resize(0);
     m_capRef = contraction_profile_analyzer::create ();
     
@@ -93,7 +94,6 @@ void contraction_analyzer::load(const vector<double>& entropies, const vector<ve
     }
     m_peaks.resize(0);
     mValidInput = verify_input ();
-    m_capRef->load(entropies);
 }
 
 void contraction_analyzer::regenerate() const{
@@ -102,6 +102,7 @@ void contraction_analyzer::regenerate() const{
     // If the fraction of entropies values expected is zero, then just find the minimum and call it contraction
     size_t count = recompute_signal();
     if (count == 0) m_signal = m_entropies;
+    m_capRef->load(m_signal);
 }
 // @todo: add multi-contraction
 bool contraction_analyzer::find_best () const
@@ -143,7 +144,8 @@ bool contraction_analyzer::find_best () const
             std::string c0("Contraction Detected @ ");
             c0 = c0 + to_string(one.contraction_peak.first);
             mValidOutput = true;
-//            vlogger::instance().console()->info(c0);
+            vlogger::instance().console()->info(c0);
+            stl_utils::save_csv(m_signal,"/Volumes/medvedev/Users/arman/tmp/signal.csv");
             return true;
         }
     }

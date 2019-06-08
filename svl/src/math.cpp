@@ -26,8 +26,156 @@
 #include "core/moreMath.h"
 #include "core/gen_utils.hpp"
 #include "core/core.hpp"
+#include "core/stats.hpp"
+
 
 using namespace svl;
+
+
+//---------------------------------------------------------------------------------------------------------------------------
+//-------------- lin_reg_results: a simple helper class for dealing with output from linear regression routines -------------
+//---------------------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------ Constructors -------------------------------------------------------
+template <class T> lin_reg_results<T>::lin_reg_results() { }
+
+template lin_reg_results<float >::lin_reg_results(void);
+template lin_reg_results<double>::lin_reg_results(void);
+
+
+//--------------------------------------------------------- Members ---------------------------------------------------------
+
+template <class T>
+T
+lin_reg_results<T>::evaluate_simple(T x) const {
+    return this->intercept + this->slope * x;
+}
+template float  lin_reg_results<float >::evaluate_simple(float ) const;
+template double lin_reg_results<double>::evaluate_simple(double) const;
+
+
+template <class T>
+samples_1D<T>
+lin_reg_results<T>::sample_uniformly_over(T xmin, T xmax, size_t n) const {
+    if(n < 2) throw std::invalid_argument("Not possible to provide reasonable output with so few sample points");
+    samples_1D<T> out;
+    const bool InhibitSort = true;
+    const auto dx = (xmax - xmin) / static_cast<T>(n-1);
+    const auto zero = static_cast<T>(0);
+    for(size_t i = 0; i < n; ++i){
+        const auto x = static_cast<T>(i) * dx + xmin;
+        out.push_back( x, zero, this->evaluate_simple(x), zero );
+    }
+    return out;
+}
+template samples_1D<float > lin_reg_results<float >::sample_uniformly_over(float , float , size_t) const;
+template samples_1D<double> lin_reg_results<double>::sample_uniformly_over(double, double, size_t) const;
+
+
+
+
+template <class T> std::string lin_reg_results<T>::display_table(void) const {
+    //Compare all members which aren't NAN. Aligns into a simple table.
+    std::stringstream head, item;
+    
+    //Use a macro to simplify walking the struct. This could be replaced by introspection.
+#define LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( NAME )                      \
+{                                                                           \
+if( !std::isnan(this->NAME) ){                                          \
+const std::string n(#NAME);                                         \
+const std::string trunc = (n.size() > 10) ? n.substr(0,10) : n;     \
+head << std::setw(12) << std::setprecision(4) << trunc;             \
+item << std::setw(12) << std::setprecision(4) << this->NAME;        \
+}                                                                       \
+}
+    
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( slope );
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( sigma_slope );
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( intercept );
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( sigma_intercept );
+    
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( N );
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( dof );
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( sigma_f );
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( covariance );
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( lin_corr );
+    
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( sum_sq_res );
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( tvalue );
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( pvalue );
+    
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( chi_square );
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( qvalue );
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( cov_params );
+    LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER( corr_params );
+    
+    //Drop the macro.
+#undef LIN_REG_RESULTS_DISPLAY_TABLE_EXPANDER
+    
+    head << std::endl;
+    item << std::endl;
+    return head.str() + item.str();
+}
+
+template std::string lin_reg_results<float >::display_table(void) const;
+template std::string lin_reg_results<double>::display_table(void) const;
+
+//---------------------------------------------------------------------------------------------------------------------------
+template <class T> std::string lin_reg_results<T>::comparison_table(const lin_reg_results<T> &in) const {
+    //Compare all members which aren't NAN. Aligns into a simple table.
+    std::stringstream head, top, btm, comp;
+    
+    //Use a macro to simplify walking the struct. This could be replaced by introspection.
+#define LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( NAME )                   \
+{                                                                           \
+if( !std::isnan(this->NAME) || !std::isnan(in.NAME) ){                  \
+const std::string n(#NAME);                                         \
+const std::string trunc = (n.size() > 10) ? n.substr(0,10) : n;     \
+head << std::setw(12) << std::setprecision(4) << trunc;             \
+top  << std::setw(12) << std::setprecision(4) << this->NAME;        \
+btm  << std::setw(12) << std::setprecision(4) << in.NAME;           \
+if( !std::isnan(this->NAME) && !std::isnan(in.NAME) ){              \
+comp << std::setw(11) << std::setprecision(4)                   \
+<< svl::equal(this->NAME,in.NAME) << "%";               \
+}else{                                                              \
+comp << std::setw(11) << std::setprecision(4) << "---" << "%";  \
+}                                                                   \
+}                                                                       \
+}
+    
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( slope );
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( sigma_slope );
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( intercept );
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( sigma_intercept );
+    
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( N );
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( dof );
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( sigma_f );
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( covariance );
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( lin_corr );
+    
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( sum_sq_res );
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( tvalue );
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( pvalue );
+    
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( chi_square );
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( qvalue );
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( cov_params );
+    LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER( corr_params );
+    
+    //Drop the macro.
+#undef LIN_REG_RESULTS_COMPARISON_TABLE_EXPANDER
+    
+    head << std::endl;
+    top  << std::endl;
+    btm  << std::endl;
+    comp << std::endl;
+    return head.str() + top.str() + btm.str() + comp.str();
+}
+
+template std::string lin_reg_results<float >::comparison_table(const lin_reg_results<float > &in) const;
+template std::string lin_reg_results<double>::comparison_table(const lin_reg_results<double> &in) const;
+
 
 
 
@@ -474,8 +622,6 @@ template <class T>    bool vec_3<T>::operator==(const vec_3<T> &rhs) const {
     //Perfect, bit-wise match. Sometimes even copying will render this useless.
     if((x == rhs.x) && (y == rhs.y) && (z == rhs.z)) return true;
     
-    //Relative difference match. Should handle zeros and low-near-zeros (I think). 
-    // Macro RELATIVE_DIFF is currently defined in YgorMisc.h (Feb. 2013).
     if(svl::equal(x, rhs.x, MAX_REL_DIFF)
         && svl::equal(y, rhs.y, MAX_REL_DIFF)
             && svl::equal(z, rhs.z, MAX_REL_DIFF)) return true;
@@ -1060,6 +1206,73 @@ FUNCWARN("This functions requires a code review!");
 }
 */
 
+//Constructors.
+template <class T>    line<T>::line(){ }
+template line<float>::line(void);
+template line<double>::line(void);
+template <class T>    line<T>::line(const vec_3<T> &R_A, const vec_3<T> &R_B) : R_0(R_A) {
+    vec_3<T> temp(R_B);
+    temp -= R_A;
+    U_0 = temp.unit();
+}
+template line<float>::line(const vec_3<float> &R_A, const vec_3<float> &R_B);
+template line<double>::line(const vec_3<double> &R_A, const vec_3<double> &R_B);
+
+//This function computes the distance from any line to any point in 3D space.
+template <class T>  T line<T>::Distance_To_Point( const vec_3<T> &R ) const {
+    //This is a fairly simple result. Check out http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html for a slightly
+    // overtly-difficult description of the derivation.
+    const vec_3<T> dR = R - (*this).R_0;
+    return  ( dR.Cross( dR - (*this).U_0 ) ).length();
+}
+
+template float line<float>::Distance_To_Point( const vec_3<float> &R ) const;
+template double line<double>::Distance_To_Point( const vec_3<double> &R ) const;
+
+
+template <class T>  bool line<T>::Closest_Point_To_Line(const line<T> &in, vec_3<T> &out) const {
+    //Returns the point on (*this) which is closest to the given line. Can only fail if the lines
+    // are parallel (or due to fp uncertainties).
+    //    const auto LA = *this;
+    const auto UA = this->U_0;
+    const auto RA = this->R_0;
+    //    const auto LB = in;
+    const auto UB = in.U_0;
+    const auto RB = in.R_0;
+    
+    const auto UAB  = UA.Dot(UB);
+    const auto dRAB = RA - RB;
+    
+    if(((T)(1) == UAB) || ((T)(1) == UAB*UAB)) return false; //Parallel lines - no possible single point.
+    
+    const auto tA_numer = (UB*UAB - UA).Dot(dRAB);
+    const auto tA_denom = ((T)(1) - UAB*UAB);
+    //    const auto tB_numer = (UB - UA*UAB).Dot(dRAB);
+    //    const auto tB_denom = tA_denom;
+    
+    if(!std::isnormal(tA_denom)) return false;
+    if(!std::isnormal((T)(1)/tA_denom)) return false;
+    //    if(!std::isnormal(tB_denom)) return false;
+    //    if(!std::isnormal((T)(1)/tB_denom)) return false;
+    
+    const auto tA = tA_numer/tA_denom;
+    //    const auto tB = tB_numer/tB_denom;
+    
+    const auto PA = UA*tA + RA;
+    out = PA;
+    return true;
+    
+    //If PB or the line PA-PB are required:
+    //const auto PB = UB*tB + RB;
+    //The line intersecting both.
+    //const auto UC = (PB - PA).Unit();
+    //const auto PC = PA;
+}
+
+template bool line<float >::Closest_Point_To_Line( const line<float > &, vec_3<float > &) const;
+template bool line<double>::Closest_Point_To_Line( const line<double> &, vec_3<double> &) const;
+
+
 
 //---------------------------------------------------------------------------------------------------------------------------
 //--------------------- samples_1D: a convenient way to collect a sequentially-sampled array of data ------------------------
@@ -1201,10 +1414,10 @@ template <class T>  void samples_1D<T>::stable_sort() {
     //
     //This routine is called automatically after this->push_back(...) unless it is surpressed by the user. It can also be 
     // called explicitly by the user, but this is not needed unless they are directly editing this->samples for some reason.
-    const auto sort_on_x_i = [](const std::array<T,4> &L, const std::array<T,4> &R) -> bool {
-        return L[0] < R[0];
-    };
-    std::stable_sort(this->samples.begin(), this->samples.end(), sort_on_x_i);
+    //const auto sort_on_x_i = [](const std::array<T,4> &L, const std::array<T,4> &R) -> bool {
+      //  return L[0] < R[0];
+   // };
+  // std::stable_sort(this->samples.begin(), this->samples.end(), sort_on_x_i);
     return;
 }
 
@@ -1961,9 +2174,58 @@ template <class T>  std::array<T,4> samples_1D<T>::Interpolate_Linearly(const T 
     template std::array<double,4> samples_1D<double>::Interpolate_Linearly(const double &at_x) const;
 
 
+template <class T>
+samples_1D<T>
+samples_1D<T>::Crossings(T val) const {
+    //Returns linearly interpolated crossing-points.
+    //
+    // Note: This routine splits the vertical dimension into exactly two parts: >= the value, and < the value.
+    //       This slight bias eliminates the degenerate case of infinite intersections. It is possible to eliminate the
+    //       bias, but then the degenerate case must be dealt with directly.
+    //
+    // Note: This routine requires input to sorted.
+    //
+    // Note: The crossings are returned with an estimate of the uncertainty and f_at_x (which should equal the specified
+    //       value). Mostly you'll probably just want the x's though.
+    //
+    const auto N = this->samples.size();
+    if(N < 2) throw std::invalid_argument("Unable to detect crossing-points with < 2 datum");
+    
+    samples_1D<T> out;
+    out.uncertainties_known_to_be_independent_and_random = this->uncertainties_known_to_be_independent_and_random;
+    const bool InhibitSort = true;
+    
+    bool LastAbove = (this->samples.front()[2] >= val);
+    for(size_t i = 1; i < N; ++i){
+        const auto f = this->samples[i][2];
+        const bool Above = (f >= val);
+        if(Above != LastAbove){
+            const auto xA = this->samples[i-1][0];
+            const auto xB = this->samples[i][0];
+            const auto fA = this->samples[i-1][2];
+            const auto fB = f;
+            line<T> lf( vec_3<T>(xA, fA, static_cast<T>(0)),
+                       vec_3<T>(xB, fB, static_cast<T>(0)) );
+            line<T> lv( vec_3<T>(xA, val, static_cast<T>(0)),
+                       vec_3<T>(xB, val, static_cast<T>(0)) );
+            vec_3<T> P;
+            if(lf.Closest_Point_To_Line( lv, P )){
+                out.push_back( this->Interpolate_Linearly( P.x ), InhibitSort );
+            }else{
+                //Getting here could happen if the implementations differ in their susceptibility to floating-point issues.
+                throw std::logic_error("Unable to compute line-line intersection point.");
+            }
+        }
+        LastAbove = Above;
+    }
+    return out;
+}
+template samples_1D<float > samples_1D<float >::Crossings(float ) const;
+template samples_1D<double> samples_1D<double>::Crossings(double) const;
+
 
 //---------------------------------------------------------------------------------------------------------------------------
-#if 0
+
 template <class T>
 samples_1D<T> 
 samples_1D<T>::Peaks(void) const {
@@ -2000,7 +2262,126 @@ samples_1D<T>::Peaks(void) const {
 
     template samples_1D<float > samples_1D<float >::Peaks(void) const;
     template samples_1D<double> samples_1D<double>::Peaks(void) const;
-#endif
+
+
+//---------------------------------------------------------------------------------------------------------------------------
+template <class T> samples_1D<T> samples_1D<T>::Derivative_Forward_Finite_Differences(void) const {
+    //Calculates the discrete derivative using forward finite differences. (The right-side endpoint uses backward
+    // finite differences to handle the boundary.) Data should be reasonably smooth -- no interpolation is used.
+    //
+    // NOTE: The data needs to be relatively smooth for this routine to be useful. No interpolation or smoothing
+    //       is performed herein. If such is needed, you should do it before calling this routine.
+    //
+    // NOTE: If the spacing between datum is not too large, the centered finite difference will probably be a
+    //       better estimate of the derivative because it is not forward or backward biased.
+    //
+    // NOTE: At the moment, this routine cannot handle when adjacents points' dx is not finite. In the future,
+    //       these points might be averaged -- though the intolerance behaviour is not unreasonable. Do not
+    //       count on either behaviour. (At the time of writing, the derivative at such point will simply be
+    //       infinite or NaN, depending on the implementation.)
+    //
+    // NOTE: AT THE MOMENT, UNCERTAINTIES sigma_x_i and sigma_f_i ARE IGNORED! This should be rectified!
+    //       Ideally, they should propagate standard operations errors AND the inherent finite-difference
+    //       errors (of order O(dx)) PLUS any estimated local sampling noise (if possible).
+    
+#pragma message "Warning - finite difference routine are lacking uncertainty-handling!"
+    
+    const auto samps_size = static_cast<long int>(this->samples.size());
+    if(samps_size < 2) FUNCERR("Cannot compute derivative with so few points. Cannot continue");
+    const bool InhibitSort = true;
+    samples_1D<T> out = *this;
+    
+    for(long int i = 0; i < samps_size; ++i){
+        //Use backward finite differences at the far boundary.
+        if(i == (samps_size - 1)){
+            const auto L = this->samples[i-1];
+            const auto C = this->samples[i];
+            //const auto R = this->samples[i+1];
+            const auto new_x_i = C[0];
+            const auto new_sigma_x_i = C[1]; // <---- need something better here!
+            const auto new_f_i = (C[2] - L[2])/(C[0] - L[0]);
+            const auto new_sigma_f_i = C[3]; // <---- need something better here!
+            
+            out.samples[i] = { new_x_i, new_sigma_x_i, new_f_i, new_sigma_f_i };
+            
+            //Else, use forward finite differences.
+        }else{
+            //const auto L = this->samples[i-1];
+            const auto C = this->samples[i];
+            const auto R = this->samples[i+1];
+            const auto new_x_i = C[0];
+            const auto new_sigma_x_i = C[1]; // <---- need something better here!
+            const auto new_f_i = (R[2] - C[2])/(R[0] - C[0]);
+            const auto new_sigma_f_i = C[3]; // <---- need something better here!
+            
+            out.samples[i] = { new_x_i, new_sigma_x_i, new_f_i, new_sigma_f_i };
+            
+        }
+    }
+    return std::move(out);
+};
+template samples_1D<float > samples_1D<float >::Derivative_Forward_Finite_Differences(void) const;
+template samples_1D<double> samples_1D<double>::Derivative_Forward_Finite_Differences(void) const;
+
+//---------------------------------------------------------------------------------------------------------------------------
+template <class T> samples_1D<T> samples_1D<T>::Derivative_Backward_Finite_Differences(void) const {
+    //Calculates the discrete derivative using backward finite differences. (The right-side endpoint uses forward
+    // finite differences to handle the boundary.) Data should be reasonably smooth -- no interpolation is used.
+    //
+    // NOTE: The data needs to be relatively smooth for this routine to be useful. No interpolation or smoothing
+    //       is performed herein. If such is needed, you should do it before calling this routine.
+    //
+    // NOTE: If the spacing between datum is not too large, the centered finite difference will probably be a
+    //       better estimate of the derivative because it is not forward or backward biased.
+    //
+    // NOTE: At the moment, this routine cannot handle when adjacents points' dx is not finite. In the future,
+    //       these points might be averaged -- though the intolerance behaviour is not unreasonable. Do not
+    //       count on either behaviour. (At the time of writing, the derivative at such point will simply be
+    //       infinite or NaN, depending on the implementation.)
+    //
+    // NOTE: AT THE MOMENT, UNCERTAINTIES sigma_x_i and sigma_f_i ARE IGNORED! This should be rectified!
+    //       Ideally, they should propagate standard operations errors AND the inherent finite-difference
+    //       errors (of order O(dx)) PLUS any estimated local sampling noise (if possible).
+    
+#pragma message "Warning - finite difference routine are lacking uncertainty-handling!"
+    
+    const auto samps_size = static_cast<long int>(this->samples.size());
+    if(samps_size < 2) FUNCERR("Cannot compute derivative with so few points. Cannot continue");
+    const bool InhibitSort = true;
+    samples_1D<T> out = *this;
+    
+    for(long int i = 0; i < samps_size; ++i){
+        //Handle left boundary: use forward finite differences.
+        if(i == 0){
+            //const auto L = this->samples[i-1];
+            const auto C = this->samples[i];
+            const auto R = this->samples[i+1];
+            const auto new_x_i = C[0];
+            const auto new_sigma_x_i = C[1]; // <---- need something better here!
+            const auto new_f_i = (R[2] - C[2])/(R[0] - C[0]);
+            const auto new_sigma_f_i = C[3]; // <---- need something better here!
+            
+            out.samples[i] = { new_x_i, new_sigma_x_i, new_f_i, new_sigma_f_i };
+            
+            //Else, use backward finite differences.
+        }else{
+            const auto L = this->samples[i-1];
+            const auto C = this->samples[i];
+            //const auto R = this->samples[i+1];
+            const auto new_x_i = C[0];
+            const auto new_sigma_x_i = C[1]; // <---- need something better here!
+            const auto new_f_i = (C[2] - L[2])/(C[0] - L[0]);
+            const auto new_sigma_f_i = C[3]; // <---- need something better here!
+            
+            out.samples[i] = { new_x_i, new_sigma_x_i, new_f_i, new_sigma_f_i };
+            
+        }
+    }
+    return std::move(out);
+};
+
+template samples_1D<float > samples_1D<float >::Derivative_Backward_Finite_Differences(void) const;
+template samples_1D<double> samples_1D<double>::Derivative_Backward_Finite_Differences(void) const;
 
 //---------------------------------------------------------------------------------------------------------------------------
 template <class T> samples_1D<T> samples_1D<T>::Derivative_Centered_Finite_Differences(void) const {
@@ -2858,562 +3239,6 @@ template <class T> std::array<T,3> samples_1D<T>::Compute_Sxy_Sxx_Syy(bool *OK) 
 
 
 
-#ifdef NOTYET
-
-//---------------------------------------------------------------------------------------------------------------------------
-template <class T> lin_reg_results<T> samples_1D<T>::Linear_Least_Squares_Regression(bool *OK, bool SkipExtras) const {
-    //Performs a standard linear (y=m*x+b) regression. This routine ignores all provided uncertainties, and instead reports
-    // the calculated (perceived?) uncertainties from the data. Thus, this routine ASSUMES all sigma_y_i are the same, and
-    // ASSUMES all sigma_x_i are ZERO. Obviously these are not robust assumptions, so it is preferrable to use WEIGHTED
-    // REGRESSION if uncertainties are known. 
-    //
-    // An example where this routine would NOT be appropriate: you take some measurements and then 'linearize' your data by
-    // taking the logarithm of all y_i. Unless your data all have very similar y_i, you will very certainly break the 
-    // assumption that all sigma_f_i are equal. (Weighted regression *is* suitable for such a situation.)
-    //
-    // Returns: {[0]slope, [1]sigma_slope, [2]intercept, [3]sigma_intercept, [4]the # of datum used, [5]std dev of 
-    // the data ("sigma_f"), [6]sum-of-squared residuals, [7]covariance, [8]linear corr. coeff. (r, aka "Pearson's),
-    // [9]t-value for r, [10]two-tailed P-value for r}. 
-    //
-    // If you only want the slope and intercept, pass in SkipExtras = true. This should speed up the computation. But
-    // conversely, do not rely on ANYTHING being present other than slope and intercept if you set SkipExtras = true.
-    //
-    // Some important comments on the output parameters:
-    //
-    // - The slope and intercept are defined as [y = slope*x + intercept]. 
-    //
-    // - The std dev of the data is reported -- this is the sigma_f_i for all datum under the assumption that all 
-    //   sigma_f_i are equal. 
-    //
-    // - The covariance is useful for computing uncertainties while performing interpolation using the resultant parameters.
-    //   Neglecting the covariance can lead to substantial under- or over-prediction of uncertainty! (If in doubt, check 
-    //   the standard uncertainty propagation formulae: it includes a covariance term I otherwise neglect. Performing the 
-    //   uncertainty propagation is straightforward so you have no excuse to forgo it.)
-    //
-    // - The sum-of-squared residuals is the metric for fitting. It should be at a minimum for the optimal fit and is often
-    //   reported for non-linear fits. It can be used to compare various types of fits (e.g., linear vs. nonlinear).
-    //
-    // - The linear correlation coefficient (aka "Pearson's", aka "r") describes how well the data fits a linear functional
-    //   form. Numerical Recipes suggests using Spearman's Rank Correlation Coefficient (Rs) or Kendell's Tau coefficient 
-    //   instead, as they take into account characteristics of the x_i and f_i distribution that Pearson's r does not.
-    //
-    // - The t-value and number of datum used can be converted to a probability (P-value) as either a one- or two-tailed 
-    //   distribution. The Degrees of Freedom (DOF) to use is [# of datum used - 2] to account for the number of free 
-    //   parameters. (It might be better to simply use the returned P-value, I don't know at the moment.)
-    //
-    // - The two-tailed P-value describes the probability that the data (N measurements of two uncorrelated variables; the 
-    //   ordinate and abscissa) would give a *larger* |r| than what we reported. So if N=20 and |r|=0.5 then P=0.025 and the
-    //   linear correlation is significant (assuming your threshold is P=0.05). Thus this value can be used to inspect 
-    //   whether the fit line is a 'good fit'. Numerical recipes advocates a Student's t-test while John R. Taylor gives an
-    //   (more likely to be) exact integral for computing p-values which will necessitate a numerical integration or 
-    //   evaluation of a hypergeometric function. (See John R. Taylor's "An Introduction to Error Analysis", 2nd Ed., 
-    //   Appendix C.) We have gone the Student's t-test route for speed and simplicity, but a routine to compute Taylor's
-    //   way is provided in YgorStats. A cursory comparison showed strong agreement in reasonable circumstances. It would
-    //   be prudent to ensure the computations agree if relying on the p-values.
-    //
-    // NOTE: This routine is often used to get first-order guess of fit parameters for more sophisticated routines (i.e.,
-    //       weighted linear regression). This is an established (possibly even statistically legitimate) strategy.
-    //
-    // NOTE: We could go on to compute lots of additional things with what this routine spits out:
-    //       - P-values corresponding to the t-value and DOF=#datum_used-2 (either one- or two-tailed),
-    //       - Coefficient of determination = r*r = r^2,
-    //       - Standard error of r = sqrt((1-r*r)/DOF), (<--- Note this is not the same as the std dev!)
-    //       - (I think) a z-value,
-    //       - If all sigma_x_i are equal, you can transform it into a sigma_f_i uncertainty by rolling it into the
-    //         reported std dev of the data ("sigma_f"). This gives you an equivalent total sigma_f using either:
-    //         1. [std::hypot(sigma_f, slope*sigma_x);] (if normal, random, independent uncertainties), or
-    //         2. [std::abs(sigma_f) + std::abs(slope*sigma_x);] otherwise.
-    //       - The uncertainty in sigma_y as the estimate of the true width of the distribution. Double check this, 
-    //         but I believe it is merely 1/sqrt(2*(N-2)). (Please double check! Search "fractional uncertainty in sigma".)
-    //       And on and on. 
-    //
-
-    if(OK != nullptr) *OK = false;
-    const lin_reg_results<T> ret_on_err;
-    lin_reg_results<T> res;
-
-    //Ensure the data is suitable.
-    if(this->size() < 3){
-        //If we have two points, there are as many parameters as datum. We cannot even compute the stats.
-        // While it is possible to do it for 2 data points, the closed form solution in that case is 
-        // easy enough to do in a couple lines, and probably should just be implemented as needed.
-        if(OK == nullptr) FUNCERR("Unable to perform meaningful linear regression with so few points");
-        FUNCWARN("Unable to perform meaningful linear regression with so few points. Bailing");
-        return ret_on_err;
-    }
-    res.N = static_cast<T>(this->size());
-    res.dof = res.N - (T)(2);
-
-    //Cycle through the data, accumulating the basic ingredients for later.
-/*
-    res.sum_x  = (T)(0);
-    res.sum_f  = (T)(0);
-    res.sum_xx = (T)(0);
-    res.sum_xf = (T)(0);
-    for(const auto &P : this->samples){
-        res.sum_x  += P[0];
-        res.sum_xx += P[0]*P[0];
-        res.sum_f  += P[2];
-        res.sum_xf += P[0]*P[2];
-    }
-*/
-    {   //Accumulate the data before summing, so we can be more careful about summing the numbers.
-        std::vector<T> data_x, data_f, data_xx, data_xf;
-        for(const auto &P : this->samples){
-            data_x.push_back(  P[0]      );
-            data_f.push_back(  P[2]      );
-            data_xx.push_back( P[0]*P[0] );
-            data_xf.push_back( P[0]*P[2] );
-        }
-        res.sum_x  = svl::Sum(data_x);
-        res.sum_f  = svl::Sum(data_f);
-        res.sum_xx = svl::Sum(data_xx);
-        res.sum_xf = svl::Sum(data_xf);
-    }
-
-
-    //Compute the fit parameters.
-    const T common_denom = std::abs(res.N*res.sum_xx - res.sum_x*res.sum_x);
-    if(!std::isnormal(common_denom)){
-        //This cannot be zero, inf, or nan. Proceeding with a sub-normal is also a bad idea.
-        if(OK == nullptr) FUNCERR("Encountered difficulties with data. Is the data pathological?");
-        FUNCWARN("Encountered difficulties with data. Is the data pathological? Bailing");
-        return ret_on_err;
-    }
-
-    res.slope = (res.N*res.sum_xf - res.sum_x*res.sum_f)/common_denom;
-    res.intercept = (res.sum_xx*res.sum_f - res.sum_x*res.sum_xf)/common_denom;
-    if(!std::isfinite(res.slope) || !std::isfinite(res.intercept)){
-        //While we *could* proceed, something must be off. Maybe an overflow (and inf or nan) during accumulation?
-        if(OK == nullptr) FUNCERR("Encountered difficulties computing m and b. Is the data pathological?");
-        FUNCWARN("Encountered difficulties computing m and b. Is the data pathological? Bailing");
-        return ret_on_err;
-    }
-
-    if(SkipExtras){
-        if(OK != nullptr) *OK = true;
-        return std::move(res);
-    }
-
-    //Now compute the statistical stuff.
-    res.mean_x = res.sum_x/res.N;
-    res.mean_f = res.sum_f/res.N;
-    res.sum_sq_res = (T)(0);
-    res.Sxf = (T)(0);
-    res.Sxx = (T)(0);
-    res.Sff = (T)(0);
-    for(const auto &P : this->samples){
-        res.sum_sq_res += std::pow(P[2] - (res.intercept + res.slope*P[0]), 2);
-        res.Sxf += (P[0] - res.mean_x)*(P[2] - res.mean_f);
-        res.Sxx += std::pow(P[0] - res.mean_x, 2.0);
-        res.Sff += std::pow(P[2] - res.mean_f, 2.0);
-    }
-    res.sigma_f = std::sqrt(res.sum_sq_res/res.dof);
-    res.sigma_slope = res.sigma_f*std::sqrt(res.N/common_denom);
-    res.sigma_intercept = res.sigma_f*std::sqrt(res.sum_x/common_denom);
-    res.lin_corr = res.Sxf/std::sqrt(res.Sxx*res.Sff);
-    res.covariance = res.Sxf/res.N;
-    res.tvalue = res.lin_corr*std::sqrt(res.dof/((T)(1)-std::pow(res.lin_corr,2.0)));
-
-    //Reminder: this p-value is based on t-values and is thus only approximately correct!
-    res.pvalue = svl::P_From_StudT_2Tail(res.tvalue, res.dof);
-
-    if(OK != nullptr) *OK = true;
-    return std::move(res);
-}       
-
-    template lin_reg_results<float > samples_1D<float >::Linear_Least_Squares_Regression(bool *OK, bool SkipExtras) const;
-    template lin_reg_results<double> samples_1D<double>::Linear_Least_Squares_Regression(bool *OK, bool SkipExtras) const;
-
-//---------------------------------------------------------------------------------------------------------------------------
-template <class T> lin_reg_results<T> samples_1D<T>::Weighted_Linear_Least_Squares_Regression(bool *OK, T *slope_guess) const {
-    // This routine is not an exact drop-in replacement for the un-weighted case!
-    //
-    // It is a more sophisticated linear regression. Takes into account both sigma_x_i and sigma_f_i uncertainties to 
-    // compute a weighted linear regression using likelihood-maximizing weighting. The sigma_x_i uncertainties are 
-    // converted into equivalent sigma_f_i uncertainties based on a trial (ordinary, non-weighted) linear regression. So 
-    // the underlying assumption is that the uncertainties are of sufficient uniformity that they will not substantially 
-    // affect the regression. This technique is covered in chapter 8 of John R. Taylor's "An Introduction to Error 
-    // Analysis" 2nd Ed.. See eqn. 8.21, its footnote, and problem 8.9 for detail. A better solution would be to 
-    // iterate through the regression with successively-computed slopes, only stopping when (if?) no change is detected
-    // between iterations. (How to achieve this is discussed below.) Some quantities computed were inspired by Numerical
-    // Recipes.
-    //
-    // From what I can ascertain, this routine IS suitable for properly fitting 'linearized' data, so long as the 
-    // uncertainties are transformed according to the standard error propagation formula.
-    //
-    // Returns: {[0]slope, [1]sigma_slope, [2]intercept, [3]sigma_intercept, [4]the # of datum used, [5]std dev of 
-    // the data ("sigma_f"), [6]Chi-square, [7]covariance, [8]linear corr. coeff. (aka "Pearson's), [9]Q-value of fit,
-    // [10]covariance of the slope and intercept, [11]corr. coeff. for sigma_slope and sigma_intercept}.
-    //
-    // Many of these parameters are also reported in the un-weighted linear regression case. The differences:
-    //
-    // - There is no t-value because a Chi-square statistic is now used. There is nothing like the t-value for the Chi-
-    //   square, so the Chi-square itself is reported. (This is essentially a weighted sum-of-square residuals.)
-    //
-    // - There is no p-value. Instead a q-value is reported. This is the Chi-square equivalent to a p-value, but is less
-    //   precise. (It does not involve the linear correlation coefficient like the un-weighted case.) 
-    //
-    // - The correlation between uncertainties ("r_{a,b}" in Numerical Recipes) is reported (c.f., linear correlation 
-    //   coefficient -- aka Pearson's -- which computes the correlation between abscissa and ordinate). If r_{a,b} is 
-    //   positive, errors in the slope and intercept are likely to have the same sign. If negative, they'll be likely to
-    //   have opposite signs. Do not confuse r_{a,b} and Pearson's r. They are totaly different quantities!
-    //
-    //   Also note that if all the datum have ~zero uncertainty, and are thus infinitely weighted, r_{a,b} is not useful
-    //   for anything because sigma_slope and sigma_intercept are zero.
-    //
-    // - The 'covariance of the slope and intercept' ["cov(a,b)"] is different from the 'covariance of the data.' 
-    //   It is introduced in Numerical Recipes, but not discussed in any depth.
-    //
-    // NOTE: You can determine the best slope_guess to use by starting with a guess and iterating the regression.
-    //       Simple tests indicate it seems stable and can be jump-started with just about anything reasonable.
-    //       For example, using data:     { { 1.00, 0.10, 2.0000, 134.221 },
-    //                                    { 1.05, 0.20, 3.0500, 134.221 },
-    //                                    { 1.10, 0.20, 10.600, 134.221 },
-    //                                    { 1.40, 0.90, 1000.0, 134.221 } }
-    //       with the first and last points to guess the slope initially gives successive slopes: 
-    //                                1523, 1675, 1643, 1649, 1648, 1648 ... 
-    //       with a corresponding shrink of sigma_slope. It is recommended to do this if your uncertainties are highly
-    //       variable or if a small number of points appear to be determining the fit.
-    //
-    //       Leaving slope_guess as nullptr will default to an un-weighted regression slope.
-    //
-    // NOTE: This routine can be made to report nearly identical parameters as standard (unweighted) linear regression by
-    //       making all sigma_x_i zero and making all sigma_f_i equal to the std dev of the data ("sigma_y") reported by 
-    //       standard linear regression. Alternatively, increasing sigma_x_i while decreasing sigma_f_i can have the
-    //       same effect (the exact amount depends on the assumptions made about uncertainties).
-    //
-    // *****************************************************************************************************************
-    // ****** Therefore, setting the uncertainties to (T)(1) WILL NOT give you standard linear regression! If you ******
-    // ****** don't have uncertainties, I strongly recommend you to use standard non-weighted linear regression!  ******
-    // *****************************************************************************************************************
-    //
-    // NOTE: The deferral of determining the slope with non-weight linear regression is often used to get a first-order 
-    //       guess of fit parameters for more sophisticated routines (i.e., weighted linear regression). This is an 
-    //       established (possibly even statistically legitimate) strategy. Still, it could be more robust. If in doubt,
-    //       use a Monte Carlo or bootstrap approach instead.
-    //
-    // NOTE: From what I can tell, the conversion of sigma_x_i to an equivalent sigma_f_i based on the slope should always
-    //       combine uncertainties in quadrature -- even if the data are not assumed to be normal, random, and independent
-    //       themselves. This seems to be what John R. Taylor advocates in his book, anyways. I'm not thrilled about this
-    //       and so have decided to play it safe and use the assumption-less propagation formula if no assumptions are 
-    //       specified. This may result in an over-estimate of the uncertainty.
-    //
-    // NOTE: Like the weighted mean, if there are any datum with effectively zero sigma_f_i mixed with non-zero sigma_f_i
-    //       datum, the latter will simply not contribute. And because we cannot differentiate various strengths of inf
-    //       the strong certainty datum will all be treated as if they have identical weighting. This will be surprising
-    //       if you're not prepared, but is the best we can do short of total failure. (And it still makes sense 
-    //       logically, so it seems OK to do it this way.)
-    //
-
-    bool l_OK(false);
-    if(OK != nullptr) *OK = false;
-    const lin_reg_results<T> ret_on_err;
-    lin_reg_results<T> res;
-
-    //Approximating slope, used for converting sigma_x_i to equiv. sigma_f_i.
-    T approx_slope;
-    if(slope_guess != nullptr){
-        approx_slope = *slope_guess;
-    }else{
-        //Attempt to compute the non-weighted linear regression slope. 
-        const auto nwlr = this->Linear_Least_Squares_Regression(&l_OK);
-        if(!l_OK){
-            if(OK == nullptr) FUNCERR("Standard linear regression failed. Cannot properly propagate unertainties");
-            FUNCWARN("Standard linear regression failed. Cannot properly propagate unertainties. Bailing");
-            return ret_on_err;
-        }
-        approx_slope = nwlr.slope;
-    }
-
-    //Ensure the data is suitable.
-    if(this->size() < 3){
-        //If we have two points, there are as many parameters as datum. We cannot even compute the stats...
-        if(OK == nullptr) FUNCERR("Unable to perform meaningful linear regression with so few points");
-        FUNCWARN("Unable to perform meaningful linear regression with so few points. Bailing");
-        return ret_on_err;
-    }
-    res.N = static_cast<T>(this->size());
-    res.dof = res.N - (T)(2);
-
-    //Segregate datum into two groups based on whether the weighting is finite.
-    samples_1D<T> fin_data, inf_data;
-
-    //Pass over the datum, preparing them and computing some simple quantities.
-    res.sum_x  = (T)(0);
-    res.sum_f  = (T)(0);
-    res.sum_xx = (T)(0);
-    res.sum_xf = (T)(0);
-
-    res.sum_w    = (T)(0);
-    res.sum_wx   = (T)(0);
-    res.sum_wf   = (T)(0);
-    res.sum_wxx  = (T)(0);
-    res.sum_wxf  = (T)(0);
-
-    const bool inhibit_sort = true;
-    for(const auto &P : this->samples){
-        auto CP = P; //"CP" == "copy of p".
-
-        //Using the standard linear regression slope, transform sigma_x_i into equivalent sigma_f_i.
-        if(this->uncertainties_known_to_be_independent_and_random){
-            CP[3] = std::hypot(CP[3], approx_slope*CP[1]);
-        }else{
-            CP[3] = std::abs(CP[3]) + std::abs(approx_slope*CP[1]);
-        }
-        CP[1] = (T)(0);
-
-        //Take care of the un-weighted quantities.
-        res.sum_x  += CP[0];
-        res.sum_xx += CP[0]*CP[0];
-        res.sum_f  += CP[2];
-        res.sum_xf += CP[0]*CP[2];
-
-        //Will be infinite if P[3] is zero. If any are finite, all these sums will also be finite.
-        const T w_i = (std::isfinite(CP[3])) ? (T)(1)/(CP[3]*CP[3]) : (T)(0);
-        if(std::isfinite(w_i)){
-            fin_data.push_back(CP,inhibit_sort);
-        }else{
-            inf_data.push_back(CP,inhibit_sort);
-            res.sum_w     = std::numeric_limits<T>::infinity();
-            res.sum_wx    = std::numeric_limits<T>::infinity();
-            res.sum_wf    = std::numeric_limits<T>::infinity();
-            res.sum_wxx   = std::numeric_limits<T>::infinity();
-            res.sum_wxf   = std::numeric_limits<T>::infinity();
-            continue;
-        }
-        res.sum_w    += w_i;
-        res.sum_wx   += w_i*CP[0];
-        res.sum_wxx  += w_i*CP[0]*CP[0];
-        res.sum_wf   += w_i*CP[2];
-        res.sum_wxf  += w_i*CP[0]*CP[2];
-    }
-    const bool tainted_by_inf = !inf_data.empty();
-    res.mean_x = res.sum_x/res.N;
-    res.mean_f = res.sum_f/res.N;
-    if(tainted_by_inf){
-        res.mean_wx = std::numeric_limits<T>::infinity();
-        res.mean_wf = std::numeric_limits<T>::infinity();
-    }else{
-        res.mean_wx = res.sum_wx/res.N;
-        res.mean_wf = res.sum_wf/res.N;
-    }
-
-
-    //Case 1 - all datum have finite weight, and all datum will have been pushed into fin_data.
-    if(!tainted_by_inf){
-        const T common_denom = res.sum_w*res.sum_wxx - res.sum_wx*res.sum_wx;
-        if(!std::isnormal(common_denom)){
-            //This cannot be zero, inf, or nan. Proceeding with a sub-normal is also a bad idea.
-            if(OK == nullptr) FUNCERR("Encountered difficulties with data. Is the data pathological?");
-            FUNCWARN("Encountered difficulties with data. Is the data pathological? Bailing");
-            return ret_on_err;
-        }
-
-        res.slope     = (res.sum_w*res.sum_wxf - res.sum_wx*res.sum_wf)/common_denom;
-        res.intercept = (res.sum_wxx*res.sum_wf - res.sum_wx*res.sum_wxf)/common_denom;
-        if(!std::isfinite(res.slope) || !std::isfinite(res.intercept)){
-            //While we *could* proceed, something must be off. Maybe an overflow (and inf or nan) during accumulation?
-            if(OK == nullptr) FUNCERR("Encountered difficulties computing m and b. Is the data pathological?");
-            FUNCWARN("Encountered difficulties computing m and b. Is the data pathological? Bailing");
-            return ret_on_err;
-        }
-
-        //Now compute the statistical stuff.
-        res.chi_square = (T)(0);
-        res.Sxf        = (T)(0);
-        res.Sxx        = (T)(0);
-        res.Sff        = (T)(0);
-        for(const auto &P : fin_data.samples){
-            res.chi_square += std::pow((P[2] - (res.intercept + res.slope*P[0]))/P[3], 2.0);
-            res.Sxf  += (P[0] - res.mean_x)*(P[2] - res.mean_f);
-            res.Sxx  += (P[0] - res.mean_x)*(P[0] - res.mean_x);
-            res.Sff  += (P[2] - res.mean_f)*(P[2] - res.mean_f);
-        }
-        res.sigma_slope     = std::sqrt(res.sum_w/common_denom);
-        res.sigma_intercept = std::sqrt(res.sum_wxx/common_denom);
-        res.covariance      = res.Sxf/res.N;
-        res.lin_corr        = res.Sxf/std::sqrt(res.Sxx*res.Sff); //Pearson's linear correlation coefficient.
-
-//TODO : check if this is the correct sigma_f or if I should be using corr_params or cov_params here.
-
-        res.sigma_f         = std::sqrt(res.chi_square/(((T)(1)-std::pow(res.lin_corr,2.0))*res.Sff)); //(Of interest? sigma_f_i were provided.)
-        res.qvalue          = svl::Q_From_ChiSq_Fit(res.chi_square, res.dof);
-        res.cov_params      = -res.sum_wx/common_denom;
-        res.corr_params     = -res.sum_wx/std::sqrt(res.sum_w*res.sum_wxx);
-
-        if(OK != nullptr) *OK = true;
-        return std::move(res);
-
-    //Case 2 - some data had infinite weighting.
-    }else{
-
-        if(!fin_data.empty()){
-            //Handling this case will require juggling infs and non-infs for all calculations. I have not done this.
-            // To get around this, just give very small uncertainties to the problematic data. If this functionality
-            // is needed (even though it is a truly stange situation), try doing something like an epsilon argument
-            // where a portion of the data has small uncertainty epsilon and the rest has much larger values. Expand
-            // all expressions for small epsilon with something like a Taylor expansion, and see if there is a finite
-            // expansion.
-            if(OK == nullptr) FUNCERR("Data has a mix of zero (or denormal) and non-zero uncertainties. Not (yet?) supported");
-            FUNCWARN("Data has a mix of zero (or denormal) and non-zero uncertainties. Not (yet?) supported");
-            return ret_on_err;
-        }
-
-        //Note: For the rest of the routine, we assume the data all have the same (infinite) weighting, so sums will all
-        //      cancel nicely. I'm not sure we could possibly do anything else.
-
-        const T common_denom = res.N*res.sum_xx - res.sum_x*res.sum_x; //Omitting factor [1/sigma_f_i^2].
-        if(!std::isnormal(common_denom)){
-            //This cannot be zero, inf, or nan. Proceeding with a sub-normal is also a bad idea.
-            if(OK == nullptr) FUNCERR("Encountered difficulties with data. Is the data pathological?");
-            FUNCWARN("Encountered difficulties with data. Is the data pathological? Bailing");
-            return ret_on_err;
-        }
-        res.slope     = (res.N*res.sum_xf - res.sum_x*res.sum_f)/common_denom;
-        res.intercept = (res.sum_xx*res.sum_f - res.sum_x*res.sum_xf)/common_denom;
-
-        res.sum_sq_res = (T)(0);
-        res.Sxf = (T)(0);
-        res.Sxx = (T)(0);
-        res.Sff = (T)(0);
-        for(const auto &P : inf_data.samples){
-
-// TODO : check if I need to use WEIGHTED means for these quantities.
-            res.sum_sq_res += std::pow(P[2] - (res.intercept + res.slope*P[0]), 2.0);
-            res.Sxf += (P[0] - res.mean_x)*(P[2] - res.mean_f);
-            res.Sxx += (P[0] - res.mean_x)*(P[0] - res.mean_x);
-            res.Sff += (P[2] - res.mean_f)*(P[2] - res.mean_f);
-        }
-        res.sigma_f         = std::sqrt(res.sum_sq_res/res.dof);
-        res.sigma_slope     = (T)(0); //std::sqrt(infSumW/common_denom);
-        res.sigma_intercept = (T)(0); //std::sqrt(res.sum_xx/common_denom);
-        res.covariance      = res.Sxf/res.N;
-        res.lin_corr        = res.Sxf/std::sqrt(res.Sxx*res.Sff); //Pearson's linear correlation coefficient.
-        res.chi_square      = std::numeric_limits<T>::infinity(); //Due to sigma_x_i being ~zero.
-        res.qvalue          = (T)(0); // Limit as ChiSq ---> inf.
-
-        res.cov_params      = (T)(0); //Infinitely weighted down to zero.
-        res.corr_params     = -res.sum_x/std::sqrt(res.N*res.sum_xx);
-
-        if(OK != nullptr) *OK = true;
-        return std::move(res);
-    }
-  
-    FUNCERR("Programming error. Should not have got to this point"); 
-    return ret_on_err;
-}       
-
-    template lin_reg_results<float > samples_1D<float >::Weighted_Linear_Least_Squares_Regression(bool *OK, float  *slope_guess) const;
-    template lin_reg_results<double> samples_1D<double>::Weighted_Linear_Least_Squares_Regression(bool *OK, double *slope_guess) const;
-
-
-
-//---------------------------------------------------------------------------------------------------------------------------
-template <class T>   bool samples_1D<T>::Write_To_File(const std::string &filename) const {
-    //This routine writes the numerical data to file in a 4-column format. It can be directly plotted or otherwise 
-    // manipulated by, say, Gnuplot.
-    //
-    //NOTE: This routine will not overwrite or append an existing file. It will return 'false' on any error or if 
-    //      encountering an existing file.
-    if(Does_File_Exist_And_Can_Be_Read(filename)) return false;
-    return WriteStringToFile(this->Write_To_String(), filename);
-}
-
-    template bool samples_1D<float >::Write_To_File(const std::string &filename) const;
-    template bool samples_1D<double>::Write_To_File(const std::string &filename) const;
-
-//---------------------------------------------------------------------------------------------------------------------------
-template <class T>   bool samples_1D<T>::Read_From_File(const std::string &filename){
-    //This routine reads numerical data from a file in 4-column format. No metadata is retained or recovered. 
-    //
-    // NOTE: This routine will return 'false' on any error.
-    //
-    // NOTE: This routine shouldn't overwrite existing data if a failure is encountered.
-    //
-
-    std::ifstream FI(filename, std::ifstream::in);
-    if(!FI.good()) return false;
-
-    const bool InhibitSort = false;
-    samples_1D<T> indata;
-
-    //Read in the numbers until EOF is encountered.
-    std::string line;
-    while(FI.good()){
-        line.clear();
-        std::getline(FI, line);
-        if(line.empty()) continue;
-
-//    while(!FI.eof()){
-//        std::getline(FI, line);
-//        if(FI.eof()) break;
-        
-        std::size_t nonspace = line.find_first_not_of(" \t");
-        if(nonspace == std::string::npos) continue; //Only whitespace.
-        if(line[nonspace] == '#') continue; //Comment.
-
-        std::stringstream ss(line);
-        T a, b, c, d;
-        ss >> a >> b;
-        const auto ab_ok = (!ss.fail());
-        ss >> c >> d;
-        const auto cd_ok = (!ss.fail());
-        if(ab_ok && !cd_ok){
-            indata.push_back(a, static_cast<T>(0),
-                             b, static_cast<T>(0), InhibitSort);
-        }else if(ab_ok && cd_ok){
-            indata.push_back(a, b, c, d, InhibitSort);
-        }
-    }
-
-    *this = indata;
-    this->metadata.clear();
-    return true;
-}
-
-    template bool samples_1D<float >::Read_From_File(const std::string &filename);
-    template bool samples_1D<double>::Read_From_File(const std::string &filename);
-
-//---------------------------------------------------------------------------------------------------------------------------
-template <class T>   std::string samples_1D<T>::Write_To_String() const {
-    std::stringstream out;
-    for(const auto &P : this->samples) out << P[0] << " " << P[1] << " " << P[2] << " " << P[3] << std::endl;
-    return out.str();
-}
-
-    template std::string samples_1D<float >::Write_To_String() const;
-    template std::string samples_1D<double>::Write_To_String() const;
-
-
-//---------------------------------------------------------------------------------------------------------------------------
-template <class T> void samples_1D<T>::Plot(const std::string &Title) const {
-    //This routine produces a very simple, default plot of the data.
-    //
-    Plotter2 plot_coll;
-    if(!Title.empty()) plot_coll.Set_Global_Title(Title);
-    plot_coll.Insert_samples_1D(*this);//,"", const std::string &linetype = "");
-    plot_coll.Plot();
-    return;
-}
-
-//    template void samples_1D<float >::Plot(const std::string &) const;
-    template void samples_1D<double>::Plot(const std::string &) const;
-
-//---------------------------------------------------------------------------------------------------------------------------
-template <class T> void samples_1D<T>::Plot_as_PDF(const std::string &Title, const std::string &Filename_In) const {
-    //This routine produces a very simple, default plot of the data.
-    Plotter2 plot_coll;
-    if(!Title.empty()) plot_coll.Set_Global_Title(Title);
-    plot_coll.Insert_samples_1D(*this);//,"", const std::string &linetype = "");
-    plot_coll.Plot_as_PDF(Filename_In);
-    return;
-}
-
-//    template void samples_1D<float >::Plot_as_PDF(const std::string &, const std::string &) const;
-    template void samples_1D<double>::Plot_as_PDF(const std::string &, const std::string &) const;
-#endif
-
 //---------------------------------------------------------------------------------------------------------------------------
 template <class T>    std::ostream & operator<<( std::ostream &out, const samples_1D<T> &L ) {
     //Note: This friend is templated (Y) within the templated class (T). We only
@@ -3468,6 +3293,170 @@ template <class T>    std::istream &operator>>( std::istream &in, samples_1D<T> 
     template std::istream & operator>>(std::istream &out, samples_1D<double> &L );
 
 
+//---------------------------------------------------------------------------------------------------------------------------
+template <class T> lin_reg_results<T> samples_1D<T>::Linear_Least_Squares_Regression(bool *OK, bool SkipExtras) const {
+    //Performs a standard linear (y=m*x+b) regression. This routine ignores all provided uncertainties, and instead reports
+    // the calculated (perceived?) uncertainties from the data. Thus, this routine ASSUMES all sigma_y_i are the same, and
+    // ASSUMES all sigma_x_i are ZERO. Obviously these are not robust assumptions, so it is preferrable to use WEIGHTED
+    // REGRESSION if uncertainties are known.
+    //
+    // An example where this routine would NOT be appropriate: you take some measurements and then 'linearize' your data by
+    // taking the logarithm of all y_i. Unless your data all have very similar y_i, you will very certainly break the
+    // assumption that all sigma_f_i are equal. (Weighted regression *is* suitable for such a situation.)
+    //
+    // Returns: {[0]slope, [1]sigma_slope, [2]intercept, [3]sigma_intercept, [4]the # of datum used, [5]std dev of
+    // the data ("sigma_f"), [6]sum-of-squared residuals, [7]covariance, [8]linear corr. coeff. (r, aka "Pearson's),
+    // [9]t-value for r, [10]two-tailed P-value for r}.
+    //
+    // If you only want the slope and intercept, pass in SkipExtras = true. This should speed up the computation. But
+    // conversely, do not rely on ANYTHING being present other than slope and intercept if you set SkipExtras = true.
+    //
+    // Some important comments on the output parameters:
+    //
+    // - The slope and intercept are defined as [y = slope*x + intercept].
+    //
+    // - The std dev of the data is reported -- this is the sigma_f_i for all datum under the assumption that all
+    //   sigma_f_i are equal.
+    //
+    // - The covariance is useful for computing uncertainties while performing interpolation using the resultant parameters.
+    //   Neglecting the covariance can lead to substantial under- or over-prediction of uncertainty! (If in doubt, check
+    //   the standard uncertainty propagation formulae: it includes a covariance term I otherwise neglect. Performing the
+    //   uncertainty propagation is straightforward so you have no excuse to forgo it.)
+    //
+    // - The sum-of-squared residuals is the metric for fitting. It should be at a minimum for the optimal fit and is often
+    //   reported for non-linear fits. It can be used to compare various types of fits (e.g., linear vs. nonlinear).
+    //
+    // - The linear correlation coefficient (aka "Pearson's", aka "r") describes how well the data fits a linear functional
+    //   form. Numerical Recipes suggests using Spearman's Rank Correlation Coefficient (Rs) or Kendell's Tau coefficient
+    //   instead, as they take into account characteristics of the x_i and f_i distribution that Pearson's r does not.
+    //
+    // - The t-value and number of datum used can be converted to a probability (P-value) as either a one- or two-tailed
+    //   distribution. The Degrees of Freedom (DOF) to use is [# of datum used - 2] to account for the number of free
+    //   parameters. (It might be better to simply use the returned P-value, I don't know at the moment.)
+    //
+    // - The two-tailed P-value describes the probability that the data (N measurements of two uncorrelated variables; the
+    //   ordinate and abscissa) would give a *larger* |r| than what we reported. So if N=20 and |r|=0.5 then P=0.025 and the
+    //   linear correlation is significant (assuming your threshold is P=0.05). Thus this value can be used to inspect
+    //   whether the fit line is a 'good fit'. Numerical recipes advocates a Student's t-test while John R. Taylor gives an
+    //   (more likely to be) exact integral for computing p-values which will necessitate a numerical integration or
+    //   evaluation of a hypergeometric function. (See John R. Taylor's "An Introduction to Error Analysis", 2nd Ed.,
+    //   Appendix C.) We have gone the Student's t-test route for speed and simplicity, but a routine to compute Taylor's
+    //   way is provided in stats. A cursory comparison showed strong agreement in reasonable circumstances. It would
+    //   be prudent to ensure the computations agree if relying on the p-values.
+    //
+    // NOTE: This routine is often used to get first-order guess of fit parameters for more sophisticated routines (i.e.,
+    //       weighted linear regression). This is an established (possibly even statistically legitimate) strategy.
+    //
+    // NOTE: We could go on to compute lots of additional things with what this routine spits out:
+    //       - P-values corresponding to the t-value and DOF=#datum_used-2 (either one- or two-tailed),
+    //       - Coefficient of determination = r*r = r^2,
+    //       - Standard error of r = sqrt((1-r*r)/DOF), (<--- Note this is not the same as the std dev!)
+    //       - (I think) a z-value,
+    //       - If all sigma_x_i are equal, you can transform it into a sigma_f_i uncertainty by rolling it into the
+    //         reported std dev of the data ("sigma_f"). This gives you an equivalent total sigma_f using either:
+    //         1. [std::hypot(sigma_f, slope*sigma_x);] (if normal, random, independent uncertainties), or
+    //         2. [std::abs(sigma_f) + std::abs(slope*sigma_x);] otherwise.
+    //       - The uncertainty in sigma_y as the estimate of the true width of the distribution. Double check this,
+    //         but I believe it is merely 1/sqrt(2*(N-2)). (Please double check! Search "fractional uncertainty in sigma".)
+    //       And on and on.
+    //
+    
+    if(OK != nullptr) *OK = false;
+    const lin_reg_results<T> ret_on_err;
+    lin_reg_results<T> res;
+    
+    //Ensure the data is suitable.
+    if(this->size() < 3){
+        //If we have two points, there are as many parameters as datum. We cannot even compute the stats.
+        // While it is possible to do it for 2 data points, the closed form solution in that case is
+        // easy enough to do in a couple lines, and probably should just be implemented as needed.
+        if(OK == nullptr) FUNCERR("Unable to perform meaningful linear regression with so few points");
+        FUNCWARN("Unable to perform meaningful linear regression with so few points. Bailing");
+        return ret_on_err;
+    }
+    res.N = static_cast<T>(this->size());
+    res.dof = res.N - (T)(2);
+    
+    //Cycle through the data, accumulating the basic ingredients for later.
+    /*
+     res.sum_x  = (T)(0);
+     res.sum_f  = (T)(0);
+     res.sum_xx = (T)(0);
+     res.sum_xf = (T)(0);
+     for(const auto &P : this->samples){
+     res.sum_x  += P[0];
+     res.sum_xx += P[0]*P[0];
+     res.sum_f  += P[2];
+     res.sum_xf += P[0]*P[2];
+     }
+     */
+    {   //Accumulate the data before summing, so we can be more careful about summing the numbers.
+        std::vector<T> data_x, data_f, data_xx, data_xf;
+        for(const auto &P : this->samples){
+            data_x.push_back(  P[0]      );
+            data_f.push_back(  P[2]      );
+            data_xx.push_back( P[0]*P[0] );
+            data_xf.push_back( P[0]*P[2] );
+        }
+        res.sum_x  = svl::Sum(data_x);
+        res.sum_f  = svl::Sum(data_f);
+        res.sum_xx = svl::Sum(data_xx);
+        res.sum_xf = svl::Sum(data_xf);
+    }
+    
+    
+    //Compute the fit parameters.
+    const T common_denom = std::abs(res.N*res.sum_xx - res.sum_x*res.sum_x);
+    if(!std::isnormal(common_denom)){
+        //This cannot be zero, inf, or nan. Proceeding with a sub-normal is also a bad idea.
+        if(OK == nullptr) FUNCERR("Encountered difficulties with data. Is the data pathological?");
+        FUNCWARN("Encountered difficulties with data. Is the data pathological? Bailing");
+        return ret_on_err;
+    }
+    
+    res.slope = (res.N*res.sum_xf - res.sum_x*res.sum_f)/common_denom;
+    res.intercept = (res.sum_xx*res.sum_f - res.sum_x*res.sum_xf)/common_denom;
+    if(!std::isfinite(res.slope) || !std::isfinite(res.intercept)){
+        //While we *could* proceed, something must be off. Maybe an overflow (and inf or nan) during accumulation?
+        if(OK == nullptr) FUNCERR("Encountered difficulties computing m and b. Is the data pathological?");
+        FUNCWARN("Encountered difficulties computing m and b. Is the data pathological? Bailing");
+        return ret_on_err;
+    }
+    
+    if(SkipExtras){
+        if(OK != nullptr) *OK = true;
+        return std::move(res);
+    }
+    
+    //Now compute the statistical stuff.
+    res.mean_x = res.sum_x/res.N;
+    res.mean_f = res.sum_f/res.N;
+    res.sum_sq_res = (T)(0);
+    res.Sxf = (T)(0);
+    res.Sxx = (T)(0);
+    res.Sff = (T)(0);
+    for(const auto &P : this->samples){
+        res.sum_sq_res += std::pow(P[2] - (res.intercept + res.slope*P[0]), 2);
+        res.Sxf += (P[0] - res.mean_x)*(P[2] - res.mean_f);
+        res.Sxx += std::pow(P[0] - res.mean_x, 2.0);
+        res.Sff += std::pow(P[2] - res.mean_f, 2.0);
+    }
+    res.sigma_f = std::sqrt(res.sum_sq_res/res.dof);
+    res.sigma_slope = res.sigma_f*std::sqrt(res.N/common_denom);
+    res.sigma_intercept = res.sigma_f*std::sqrt(res.sum_x/common_denom);
+    res.lin_corr = res.Sxf/std::sqrt(res.Sxx*res.Sff);
+    res.covariance = res.Sxf/res.N;
+    res.tvalue = res.lin_corr*std::sqrt(res.dof/((T)(1)-std::pow(res.lin_corr,2.0)));
+    
+    //Reminder: this p-value is based on t-values and is thus only approximately correct!
+    res.pvalue = svl::P_From_StudT_2Tail(res.tvalue, res.dof);
+    
+    if(OK != nullptr) *OK = true;
+    return std::move(res);
+}
+
+template lin_reg_results<float > samples_1D<float >::Linear_Least_Squares_Regression(bool *OK, bool SkipExtras) const;
+template lin_reg_results<double> samples_1D<double>::Linear_Least_Squares_Regression(bool *OK, bool SkipExtras) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3481,7 +3470,7 @@ template <class T>    std::istream &operator>>( std::istream &in, samples_1D<T> 
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //This is a generic 3D bounding box routine. It is written in such a way as to 
-    // hopefully move it into a more general spot somewhere in YgorMath.cc.
+    // hopefully move it into a more general spot somewhere 
 
     // Diagram:
     //              _______------D_                               

@@ -9,21 +9,42 @@ fLineSegment2d::fLineSegment2d()
 // ######################################################################
 fLineSegment2d::fLineSegment2d(const fVector_2d& p1,
                              const fVector_2d& p2)
-  : mPoint1(p1), mPoint2(p2), mValid(p1 != p2)
+  : mPoint1(p1), mPoint2(p2), mValid(p1 != p2), mType(false)
 {}
 
+fLineSegment2d::fLineSegment2d (const uRadian& angle,float distance ):
+    mAngle (angle), mType(true)
+{
+    assert (distance >= float (0));
+    mDist = distance;
+}
+fLineSegment2d::fLineSegment2d (const uRadian& angle, const fVector_2d& pa):
+mPoint1(pa)
+{
+    mType = false;
+    mAngle = angle;
+    float sn = sin (- mAngle);
+    float cs = cos (- mAngle);
+    mPoint2 =  fVector_2d (cs*pa.x()-sn*pa.y(),sn*pa.x()+cs*pa.y());
+    mDist = mPoint2.y();
+    if (mDist < 0)
+    {
+        mDist = - mDist;
+        mAngle = uRadian (svl::constants::pi) + mAngle;
+    }
+}
 
 // ######################################################################
 const fVector_2d& fLineSegment2d::point1() const
 {
- if(!isValid ()) throw invalid_segment(); 
+ if(mType || !isValid ()) throw invalid_segment();
   return (mPoint1);
 }
 
 // ######################################################################
 const fVector_2d& fLineSegment2d::point2() const
 {
- if(!isValid ()) throw invalid_segment();
+ if(mType || !isValid ()) throw invalid_segment();
   return (mPoint2);
 }
 
@@ -31,7 +52,9 @@ const fVector_2d& fLineSegment2d::point2() const
 uRadian fLineSegment2d::angle() const
 {
  if(!isValid ()) throw invalid_segment();
-    return (mPoint1-mPoint2).angle();
+ if(!mType)  return (mPoint1-mPoint2).angle();
+ else return mAngle;
+    
 }
 
 // ######################################################################
@@ -47,7 +70,10 @@ uRadian fLineSegment2d::angleBetween(fLineSegment2d &line) const
 // ######################################################################
 float fLineSegment2d::length() const
 {
-  return (float)(point1().distance(point2()));
+    if(!mType)
+        return (float)(point1().distance(point2()));
+    return mDist;
+    
 }
 // ######################################################################
 bool fLineSegment2d::isValid() const
@@ -249,4 +275,72 @@ double lineInf::offset(const fVector_2d& p) const
 {
     return (p - pos()) * dir();
 }
+
+/*
+ * Horn's "Robot Vision" pages 49-53.
+ */
+template<typename T>
+std::pair<uRadian, double> lsFit<T>::fit () const
+{
+    T
+    xnom = mSu / mN,
+    ynom = mSv / mN,
+    a = mSuu - mSu * xnom,
+    b = 2 * (mSuv - mSu * ynom),
+    c = mSvv - mSv * ynom;
+    
+    if (fabs(b) < 1e-12 && fabs(a - c) < 1e-12)
+        std::cout << "Unstable line Fit" << std::endl;
+    
+    T
+    hypotenuse = std::sqrt(b*b + a*a + c+c + 2*a*c),
+    cos2theta = (a - c) / hypotenuse,
+    sn = sqrt( (1 - cos2theta) / 2),
+    cn = sqrt( (1 + cos2theta) / 2);
+    
+    if (b < 0) cn = -cn;
+    
+    auto distance = -(xnom * sn)+(ynom * cn);
+    uRadian angle(atan2(sn,cn));
+    if (!std::signbit(distance))
+        return std::pair<uRadian, double>(angle,static_cast<double>(distance));
+    return std::pair<uRadian, double>(angle+uRadian(svl::constants::pi),static_cast<double>(-distance));
+    
+}
+
+template<typename T>
+T lsFit<T>::error (const std::pair<uRadian, double> & line) const
+{
+    T d, s, c;
+    
+    d = line.second;
+    s = sin (line.first);
+    c = cos (line.first);
+    
+    return (  d*d*mN
+            + 2*d*(s*mSu - c*mSv)
+            + s*s*mSuu + c*c*mSvv
+            - 2*s*c*mSuv);
+}
+
+template<typename T>
+void lsFit<T>::clear() const {
+        mSuu = mSuv = mSvv = mSu = mSv = T(0);
+        mN = 0;
+}
+
+template<typename T>
+void lsFit<T>::update (T u, T v) const{
+    
+    mSu += u;
+    mSv +=v;
+    mSuu += u * u;
+    mSuv += u * v;
+    mSvv += v * v;
+    mN += 1;
+}
+
+
+template class lsFit<float>;
+template class lsFit<double>;
 

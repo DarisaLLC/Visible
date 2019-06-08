@@ -138,6 +138,12 @@
 		C21A50CB22A9A65900B0AC7D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731919953389008149E2 /* CoreMedia.framework */; };
 		C21A50CC22A9A65900B0AC7D /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693E1CED3E2B0045FF57 /* libgtest_main.a */; };
 		C21A50CD22A9A65900B0AC7D /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693D1CED3E2B0045FF57 /* libgtest.a */; };
+		C21A50E122AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A50DF22AB4D0C00B0AC7D /* eigen_utils.cpp */; };
+		C21A50E222AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A50DF22AB4D0C00B0AC7D /* eigen_utils.cpp */; };
+		C21A50E322AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A50DF22AB4D0C00B0AC7D /* eigen_utils.cpp */; };
+		C21A50E422AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A50DF22AB4D0C00B0AC7D /* eigen_utils.cpp */; };
+		C21A50E522AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A50DF22AB4D0C00B0AC7D /* eigen_utils.cpp */; };
+		C21A50E622AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A50DF22AB4D0C00B0AC7D /* eigen_utils.cpp */; };
 		C21E390C228A054C00778A66 /* affine_rectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21E390B228A054C00778A66 /* affine_rectangle.cpp */; };
 		C21E390D228A054C00778A66 /* affine_rectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21E390B228A054C00778A66 /* affine_rectangle.cpp */; };
 		C21E390E228A054C00778A66 /* affine_rectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21E390B228A054C00778A66 /* affine_rectangle.cpp */; };
@@ -821,7 +827,6 @@
 		C2175DD8215154A9004315C0 /* swatchLarge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = swatchLarge.png; path = ../assets/swatchLarge.png; sourceTree = "<group>"; };
 		C2175DD9215154A9004315C0 /* swatchSmall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = swatchSmall.png; path = ../assets/swatchSmall.png; sourceTree = "<group>"; };
 		C2177BDD215E04FB003E6C3E /* appstore.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = appstore.xcconfig; path = configs/include/appstore.xcconfig; sourceTree = "<group>"; };
-		C219076A1F7D4FB500CC4780 /* contraction_t.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = contraction_t.hpp; path = ../include/contraction_t.hpp; sourceTree = "<group>"; };
 		C21946611CE4D95E00976025 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		C21946651CE4DC7100976025 /* onImagePlotUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = onImagePlotUtils.cpp; path = ../src/onImagePlotUtils.cpp; sourceTree = "<group>"; };
 		C21946741CE4DC7100976025 /* seq_frame_container.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = seq_frame_container.cpp; path = ../src/seq_frame_container.cpp; sourceTree = "<group>"; };
@@ -837,6 +842,9 @@
 		C21A507022A98AE800B0AC7D /* mathBSpline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mathBSpline.h; sourceTree = "<group>"; };
 		C21A50D222A9A65900B0AC7D /* All */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = All; sourceTree = BUILT_PRODUCTS_DIR; };
 		C21A50D322A9A65B00B0AC7D /* VisibleGtest copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleGtest copy2-Info.plist"; path = "/Volumes/medvedev/Users/arman/dev/Visible/xcode/VisibleGtest copy2-Info.plist"; sourceTree = "<absolute>"; };
+		C21A50DE22A9FFA800B0AC7D /* contraction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = contraction.hpp; path = ../include/contraction.hpp; sourceTree = "<group>"; };
+		C21A50DF22AB4D0C00B0AC7D /* eigen_utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = eigen_utils.cpp; path = ../src/eigen_utils.cpp; sourceTree = "<group>"; };
+		C21A50E022AB4D0C00B0AC7D /* eigen_utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = eigen_utils.hpp; path = ../src/eigen_utils.hpp; sourceTree = "<group>"; };
 		C21E390B228A054C00778A66 /* affine_rectangle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = affine_rectangle.cpp; sourceTree = "<group>"; };
 		C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer_impl.h; path = ../include/sm_producer_impl.h; sourceTree = "<group>"; };
 		C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer.h; path = ../include/sm_producer.h; sourceTree = "<group>"; };
@@ -1112,7 +1120,6 @@
 		C28B01D5229B1F8000B8165D /* lif_core.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = lif_core.cpp; path = ../src/lif_core.cpp; sourceTree = "<group>"; };
 		C28B01DA229B210A00B8165D /* fyn_segmentation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = fyn_segmentation.cpp; path = ../src/fyn_segmentation.cpp; sourceTree = "<group>"; };
 		C28B01DB229B210A00B8165D /* segmentation_parameters.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = segmentation_parameters.hpp; path = ../include/segmentation_parameters.hpp; sourceTree = "<group>"; };
-		C28F74312234880B0040890C /* processor_cli.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = processor_cli.cpp; sourceTree = "<group>"; };
 		C290E4032245A41500FD6FD1 /* dsp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dsp.cpp; sourceTree = "<group>"; };
 		C294B11F2152D22C00C916B1 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		C296BFD622A0A55E0072BF80 /* iowriter.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = iowriter.hpp; path = ../include/iowriter.hpp; sourceTree = "<group>"; };
@@ -1425,6 +1432,7 @@
 				C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */,
 				C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */,
 				C2677584212A325F00B5E080 /* contraction_t.cpp */,
+				C21A50DF22AB4D0C00B0AC7D /* eigen_utils.cpp */,
 				C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */,
 				C21946651CE4DC7100976025 /* onImagePlotUtils.cpp */,
 				C21946741CE4DC7100976025 /* seq_frame_container.cpp */,
@@ -1617,6 +1625,7 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C21A50DE22A9FFA800B0AC7D /* contraction.hpp */,
 				C2CE9C7922A49833003C479A /* etw_utils.hpp */,
 				C210946B2239D1F3004E88EE /* permutation_entropy.h */,
 				C296BFD722A0A5D80072BF80 /* iowriter.hpp */,
@@ -1639,7 +1648,6 @@
 				C2E321FE1D038B16006DFE5E /* AVReader.hpp */,
 				C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */,
 				C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */,
-				C219076A1F7D4FB500CC4780 /* contraction_t.hpp */,
 				C259145F2145BA7500F80D5F /* clipManager.hpp */,
 				C219468A1CE4EA4900976025 /* OnImagePlotUtils.h */,
 				C24FC84C1E5E40130071AA1A /* async_tracks.h */,
@@ -1662,6 +1670,7 @@
 				C2E322001D05B90C006DFE5E /* time_index.h */,
 				C2601BBE1E6B5C78004415A3 /* algo_cardiac.hpp */,
 				C2820F3621752E5100DFA7A6 /* VisibleApp.h */,
+				C21A50E022AB4D0C00B0AC7D /* eigen_utils.hpp */,
 			);
 			name = include;
 			sourceTree = "<group>";
@@ -1724,7 +1733,6 @@
 				C2342E5D227CC27300D74D80 /* ps.cpp */,
 				C290E4032245A41500FD6FD1 /* dsp.cpp */,
 				C2AABC1A2221D88E00339675 /* kalman_test.cpp */,
-				C28F74312234880B0040890C /* processor_cli.cpp */,
 				C2C5CF612299E4C7004595C5 /* ut_rotated_rect.hpp */,
 				C242CCC6217E93FC004F7867 /* ut_cardio.hpp */,
 				C242CCC4217BD30A004F7867 /* ut_units.hpp */,
@@ -2521,6 +2529,7 @@
 				C2AFCEFF216E79590080462D /* imgui_draw.cpp in Sources */,
 				C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */,
 				C254BE841F4F912E00977307 /* csv.cpp in Sources */,
+				C21A50E122AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
 				C24EA2D3207F07EF00555D16 /* sg_filter.cpp in Sources */,
 				C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */,
 				C2618F81217FDA6600FA9F43 /* figure.cc in Sources */,
@@ -2663,6 +2672,7 @@
 				C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */,
 				C2618F87217FDA9E00FA9F43 /* figure.cc in Sources */,
 				C2C5CF69229A0DB0004595C5 /* glmutils.cpp in Sources */,
+				C21A50E322AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
 				C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */,
 				C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */,
@@ -2727,6 +2737,7 @@
 				C26A055D1E77759D00BDC954 /* lifFile.cpp in Sources */,
 				C26A05601E7775A700BDC954 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C2DA195B1E80E4E200062DBC /* csv.cpp in Sources */,
+				C21A50E422AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
 				C26A05651E777DF300BDC954 /* registration.cpp in Sources */,
 				C26A057D1E77A90600BDC954 /* histo.cpp in Sources */,
 				C26A056B1E777E3A00BDC954 /* rowfunc.cpp in Sources */,
@@ -2779,6 +2790,7 @@
 				C28B01D7229B1F8000B8165D /* lif_core.cpp in Sources */,
 				C210946F223AEC19004E88EE /* imgui_wrapper.cpp in Sources */,
 				C28B01DD229B210A00B8165D /* fyn_segmentation.cpp in Sources */,
+				C21A50E222AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
 				C26F5FC321B0AA6D00EAE156 /* ip_utils.cpp in Sources */,
 				C26F5FC421B0AA6D00EAE156 /* window.cc in Sources */,
 				C26F5FC521B0AA6D00EAE156 /* imgui_draw.cpp in Sources */,
@@ -2846,6 +2858,7 @@
 				C28B01E1229CC66100B8165D /* fyn_segmentation.cpp in Sources */,
 				C28B0181229B182100B8165D /* ip_utils.cpp in Sources */,
 				C28B01E2229CC66500B8165D /* lif_core.cpp in Sources */,
+				C21A50E622AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
 				C28B0182229B182100B8165D /* matpixel.cpp in Sources */,
 				C28B0183229B182100B8165D /* affine_rectangle.cpp in Sources */,
 				C28B0184229B182100B8165D /* window.cc in Sources */,
@@ -2934,6 +2947,7 @@
 				C28B01D9229B1F8000B8165D /* lif_core.cpp in Sources */,
 				C2DB72B522591DB700C2B986 /* imgui_wrapper.cpp in Sources */,
 				C28B01DF229B210A00B8165D /* fyn_segmentation.cpp in Sources */,
+				C21A50E522AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
 				C2DB72B622591DB700C2B986 /* imgui_draw.cpp in Sources */,
 				C2DB72B722591DB700C2B986 /* rowfunc.cpp in Sources */,
 				C2DB72B822591DB700C2B986 /* csv.cpp in Sources */,
@@ -3029,6 +3043,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "IMGUI_USER_CONFIG=<$(SRCROOT)/include/imGuiCustom/imconfig.h>";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Info.plist;
@@ -3077,6 +3092,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "IMGUI_USER_CONFIG=<$(SRCROOT)/include/imGuiCustom/imconfig.h>";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Info.plist;
@@ -3304,6 +3320,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Visible_GTest_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					"IMGUI_USER_CONFIG=<$(SRCROOT)/include/imGuiCustom/imconfig.h>",
 					"DEBUG=1",
 					"$(inherited)",
 				);
@@ -3557,6 +3574,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Visible_Run_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "IMGUI_USER_CONFIG=<$(SRCROOT)/include/imGuiCustom/imconfig.h>";
 				GCC_REUSE_STRINGS = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
@@ -3607,6 +3625,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Visible_Run_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "IMGUI_USER_CONFIG=<$(SRCROOT)/include/imGuiCustom/imconfig.h>";
 				GCC_REUSE_STRINGS = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
@@ -3770,6 +3789,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bina_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "IMGUI_USER_CONFIG=<$(SRCROOT)/include/imGuiCustom/imconfig.h>";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Bina.plist;
@@ -3818,6 +3838,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bina_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "IMGUI_USER_CONFIG=<$(SRCROOT)/include/imGuiCustom/imconfig.h>";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Bina.plist;

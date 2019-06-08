@@ -1,4 +1,4 @@
-//YgorMathBSpline.cc.
+
 
 #include <cmath>       //Needed for fabs, signbit, sqrt, etc...
 #include <iterator>

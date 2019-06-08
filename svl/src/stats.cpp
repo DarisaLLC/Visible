@@ -4,6 +4,8 @@
 //
 //  Created by Arman Garakani on 6/6/19.
 //
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wextra-qualification"
 
 
 #include <gsl/gsl_errno.h>     //Needed for GSL error reporting.
@@ -24,11 +26,8 @@
 #include "core/gen_utils.hpp"    //For the FUNC* and PERCENT_ERR macro functions, containerSort().
 #include "core/stats.hpp"
 
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
-    #define YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
-#endif
 
-
+namespace svl {
 //--------------------------------------------- "Building block" routine ----------------------------------------------------
 
 
@@ -48,7 +47,7 @@ template <class C> typename C::value_type svl::Min(C in){
     for(const auto &n : in) rmm.Digest(n);
     return rmm.Current_Min();
 }
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
+
 template double   svl::Min(std::list<double>     in);
 template double   svl::Min(std::vector<double>   in);
 
@@ -78,7 +77,7 @@ template uint64_t svl::Min(std::vector<uint64_t> in);
 
 template int64_t  svl::Min(std::list<int64_t>    in);
 template int64_t  svl::Min(std::vector<int64_t>  in);
-#endif
+
 
 
 template <class C> typename C::value_type svl::Max(C in){
@@ -97,7 +96,7 @@ template <class C> typename C::value_type svl::Max(C in){
     for(const auto &n : in) rmm.Digest(n);
     return rmm.Current_Max();
 }
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
+
 template double   svl::Max(std::list<double>     in);
 template double   svl::Max(std::vector<double>   in);
 
@@ -127,7 +126,7 @@ template uint64_t svl::Max(std::vector<uint64_t> in);
 
 template int64_t  svl::Max(std::list<int64_t>    in);
 template int64_t  svl::Max(std::vector<int64_t>  in);
-#endif
+
 
 
 
@@ -189,7 +188,7 @@ template <class C> typename C::value_type svl::Sum(C in){
     //       a measure of numerical uncertainty introduced. It could be returned for various purposes.
     //return { sum, compen };
 }
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
+
 template double   svl::Sum(std::list<double>     in);
 template double   svl::Sum(std::vector<double>   in);
 
@@ -220,7 +219,7 @@ template uint64_t svl::Sum(std::vector<uint64_t> in);
 template int64_t  svl::Sum(std::list<int64_t>    in);
 template int64_t  svl::Sum(std::vector<int64_t>  in);
 
-#endif
+
 
 
 template <class C> typename C::value_type svl::Sum_Squares(C in){
@@ -229,7 +228,7 @@ template <class C> typename C::value_type svl::Sum_Squares(C in){
     for(auto &elem : in) elem = std::pow(elem,2);
     return svl::Sum(std::move(in));
 }
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
+
 template double   svl::Sum_Squares(std::list<double>     in);
 template double   svl::Sum_Squares(std::vector<double>   in);
 
@@ -238,7 +237,7 @@ template uint64_t svl::Sum_Squares(std::vector<uint64_t> in);
 
 template int64_t  svl::Sum_Squares(std::list<int64_t>    in);
 template int64_t  svl::Sum_Squares(std::vector<int64_t>  in);
-#endif
+
 
 
 template <class C> typename C::value_type svl::Percentile(C in, double frac){
@@ -286,7 +285,7 @@ template <class C> typename C::value_type svl::Percentile(C in, double frac){
     
     return static_cast<T>( (1.0 - R)*(*L_it) + R*(*R_it) );
 }
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
+
 template double   svl::Percentile(std::list<double>     in, double frac);
 template double   svl::Percentile(std::vector<double>   in, double frac);
 
@@ -317,13 +316,12 @@ template uint64_t svl::Percentile(std::vector<uint64_t> in, double frac);
 template int64_t  svl::Percentile(std::list<int64_t>    in, double frac);
 template int64_t  svl::Percentile(std::vector<int64_t>  in, double frac);
 
-#endif
 
 
 template <class C> typename C::value_type svl::Median(C in){
     return svl::Percentile(in, 0.5);
 }
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
+
 template double   svl::Median(std::list<double>     in);
 template double   svl::Median(std::vector<double>   in);
 
@@ -354,7 +352,7 @@ template uint64_t svl::Median(std::vector<uint64_t> in);
 template int64_t  svl::Median(std::list<int64_t>    in);
 template int64_t  svl::Median(std::vector<int64_t>  in);
 
-#endif
+
 
 
 template <class C> typename C::value_type svl::Mean(C in){
@@ -371,7 +369,7 @@ template <class C> typename C::value_type svl::Mean(C in){
     const auto N = static_cast<T>(in.size());
     return svl::Sum(std::move(in)) / N;
 }
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
+
 template double   svl::Mean(std::list<double>     in);
 template double   svl::Mean(std::vector<double>   in);
 
@@ -402,7 +400,7 @@ template uint64_t svl::Mean(std::vector<uint64_t> in);
 template int64_t  svl::Mean(std::list<int64_t>    in);
 template int64_t  svl::Mean(std::vector<int64_t>  in);
 
-#endif
+
 
 
 template <class C> typename C::value_type svl::Unbiased_Var_Est(C in){
@@ -441,7 +439,7 @@ template <class C> typename C::value_type svl::Unbiased_Var_Est(C in){
     const T N = static_cast<T>(in.size());
     return (svl::Sum_Squares(in) - std::pow(svl::Sum(in),2)/N) / (N - (T)(1));
 }
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
+
 template double   svl::Unbiased_Var_Est(std::list<double>     in);
 template double   svl::Unbiased_Var_Est(std::vector<double>   in);
 
@@ -453,18 +451,18 @@ template uint64_t svl::Unbiased_Var_Est(std::vector<uint64_t> in);
 
 template int64_t  svl::Unbiased_Var_Est(std::list<int64_t>    in);
 template int64_t  svl::Unbiased_Var_Est(std::vector<int64_t>  in);
-#endif
+
 
 //----------------------------------------- Running Accumulators and Tallies ----------------------------------------------
 template <typename T>
 svl::Running_MinMax<T>::Running_MinMax() : PresentMin(std::numeric_limits<T>::max()),
 PresentMax(std::numeric_limits<T>::min()) { };
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
+
 template svl::Running_MinMax<double  >::Running_MinMax();
 template svl::Running_MinMax<float   >::Running_MinMax();
 template svl::Running_MinMax<uint64_t>::Running_MinMax();
 template svl::Running_MinMax<int64_t >::Running_MinMax();
-#endif
+
 
 template <typename T>
 void svl::Running_MinMax<T>::Digest(T in){
@@ -473,12 +471,12 @@ void svl::Running_MinMax<T>::Digest(T in){
     this->PresentMax = std::max(this->PresentMax, in);
     return;
 }
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
+
 template void svl::Running_MinMax<double  >::Digest(double   in);
 template void svl::Running_MinMax<float   >::Digest(float    in);
 template void svl::Running_MinMax<uint64_t>::Digest(uint64_t in);
 template void svl::Running_MinMax<int64_t >::Digest(int64_t  in);
-#endif
+
 
 template <typename T>
 T svl::Running_MinMax<T>::Current_Min(void) const {
@@ -487,12 +485,12 @@ T svl::Running_MinMax<T>::Current_Min(void) const {
     }
     return this->PresentMin;
 }
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
+
 template double   svl::Running_MinMax<double  >::Current_Min(void) const;
 template float    svl::Running_MinMax<float   >::Current_Min(void) const;
 template uint64_t svl::Running_MinMax<uint64_t>::Current_Min(void) const;
 template int64_t  svl::Running_MinMax<int64_t >::Current_Min(void) const;
-#endif
+
 
 template <typename T>
 T svl::Running_MinMax<T>::Current_Max(void) const {
@@ -501,12 +499,12 @@ T svl::Running_MinMax<T>::Current_Max(void) const {
     }
     return this->PresentMax;
 }
-#ifndef YGORSTATS_DISABLE_ALL_SPECIALIZATIONS
+
 template double   svl::Running_MinMax<double  >::Current_Max(void) const;
 template float    svl::Running_MinMax<float   >::Current_Max(void) const;
 template uint64_t svl::Running_MinMax<uint64_t>::Current_Max(void) const;
 template int64_t  svl::Running_MinMax<int64_t >::Current_Max(void) const;
-#endif
+
 
 
 //--------------------------------------------- P-value (and related) routines ----------------------------------------------
@@ -907,4 +905,8 @@ double svl::Z_From_Observed_Mean(double sample_mean, //Or observed mean.
     return (sample_mean - population_mean)/stddev_of_pop_mean;
 }
 
+
+}
+
+#pragma GCC diagnostic pop
 

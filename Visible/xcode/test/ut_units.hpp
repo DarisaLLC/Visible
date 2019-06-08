@@ -153,6 +153,25 @@ int load_sm(const std::string& file, data_t& data, bool debug = false)
     return 0;
 }
 
+int load_record(const std::string& file, record_t& data, bool debug = false)
+{
+    // Here is the file containing the data. Read it into data.
+    auto infileRef =  make_shared_ifstream(file );
+    *infileRef >> data;
+    if (!infileRef->eof())
+        return 1;
+    
+    
+    
+    if(debug)
+        cout << "CSV file contains " << data.size() << " records.\n";
+
+
+    return 0;
+}
+
+
+
 namespace units_ut
 {
     static void run ()
