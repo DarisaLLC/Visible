@@ -15,7 +15,7 @@
 /*
  *  Concepte:
  *  Movie consisting of M frames identified by time and index in the movie context
- *  qTimeFrameCache is a container of frames identified by time and index
+ *  seq_frame_container is a container of frames identified by time and index
  *                access is done through the following maps
  *                movie time <-> movie index
  *                movie index -> container index ( or iterator )

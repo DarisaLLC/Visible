@@ -9,13 +9,15 @@
 #include <string>
 #include <tuple>
 #include <chrono>
+#include <numeric>
+#include <iterator>
 
 #include "cardiomyocyte_model.hpp"
 #include "core/stats.hpp"
 #include "core/stl_utils.hpp"
 #include "core/signaler.h"
 #include "core/lineseg.hpp"
-
+#include "eigen_utils.hpp"
 
 using namespace std;
 using namespace boost;
@@ -267,19 +269,40 @@ public:
     {
         if (! m_valid) return false;
         contraction_t::clear(mctr);
-        mctr.contraction_peak.first = p_index;
-        auto start = m_fder.begin();
-        auto line_thr = std::min(m_median, m_ls_result.second) - 0.01;
-        while(*start++ > line_thr);
-        mctr.contraction_start.first = std::distance(m_fder.begin(),start);
-        line_thr -= 0.01;
-        auto endp = m_fder.end();
-        endp--;
-        while(*endp-- > line_thr);
-        mctr.relaxation_end.first = std::distance (m_fder.begin(), endp);
-
+   
         
-        // Check the length of the entire contraction
+        auto maxima = [](std::vector<double>::iterator a,
+                         std::vector<double>::iterator b){
+            std::vector<double> coeffs;
+            polyfit(a, b, 1.0, coeffs, 2);
+            assert(coeffs.size() == 3);
+            return (-coeffs[1] / (2 * coeffs[2]));
+        };
+        /* Contraction Start
+         * 1. Find the location of maxima of a quadratic fit to the data before
+         *    Maxima is at -b / 2c (y = a + bx + cx^2 => dy/dx = b + 2cx at Maxima dy/dx = 0 -> x = -b/2c
+         * 1. Find the location of the minima of the first derivative using first differences
+         *    dy = y(x-1) - y(x). x at minimum dy
+         *
+         */
+        mctr.contraction_peak.first = p_index;
+        std::vector<double>::iterator cpt = m_fder.begin() + p_index;
+        std::vector<double> results;
+        results.reserve(p_index);
+        std::adjacent_difference (m_fder.begin(), cpt, std::back_inserter(results));
+        auto min_elem = std::min_element(results.begin(),results.end());
+        auto loc = std::distance(results.begin(), min_elem);
+
+        auto loc_contraction_quadratic = maxima(m_fder.begin(), cpt);
+        mctr.contraction_start.first = (loc_contraction_quadratic + loc)/ 2;
+
+        /* relaxation End
+         * 1. Find the location of maxima of a quadratic fit to the data before
+         *    Maxima is at -b / 2c (y = a + bx + cx^2 => dy/dx = b + 2cx at Maxima dy/dx = 0 -> x = -b/2c
+         */
+        auto loc_relaxation_quadratic = maxima(cpt, m_fder.end());
+        mctr.relaxation_end.first = p_index + loc_relaxation_quadratic;
+
         return true;
     }
     
