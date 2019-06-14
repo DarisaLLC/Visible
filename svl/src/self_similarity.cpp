@@ -228,7 +228,7 @@ bool self_similarity_producer<P>::entropies(deque<double>& signal) const
 }
 
 /*
- *  Visual Entropy is used for mean projection versus ACI an entropic projection
+ *   similarity rank is used for mean projection versus ACI an entropic projection
  */
 template<typename P>
 bool self_similarity_producer<P>::meanProjection(deque<double>& signal) const
@@ -472,7 +472,7 @@ bool self_similarity_producer<P>::internalUpdate(image_t& nextImage, deque<image
     // nextImage.frameBuf().unlock();
     
     /*
-     * if longtermCache is on, write the last entropy value to the cache line
+     * if longtermCache is on, write the last similarity rank value to the cache line
      */
     
     bool rtn = (_finished=ssMatrixUpdate(tWin)) && genMatrixEntropy(tWin.size());

@@ -20,6 +20,130 @@
 
 namespace svl {
 
+    
+    double exponentialMovingAverageIrregular(
+                                             double alpha, double sample, double prevSample,
+                                             double deltaTime, double emaPrev );
+    double exponentialMovingAverage( double sample, double alpha );
+    
+    /*
+     * Exponential Smoothing
+     */
+    
+    template<typename T = double>
+    class eMAvg{
+    public:
+        eMAvg(const T alpha,  const T start_value) : m_alpha(alpha), m_value(start_value) {}
+        
+        bool is_valid () const { return m_alpha >= 0.0 && m_alpha <= 1.0; }
+        
+        // reworking next = (new_val * alpha) + ((1-alpha) * current) to produce incremental change
+        T update(const T new_val) const {
+            return (m_value -= m_alpha * (m_value - new_val));
+        }
+        
+        const T& current () const { return m_value; }
+        const T& alpah () const { return m_alpha; }
+    private:
+        mutable T m_alpha;//variable (in [0,1])
+        mutable T m_value;//current value
+        
+    };
+    
+    /*
+     * Quick rolling window 1d median of size 3
+     */
+#ifndef median_of_3
+    
+#define median_of_3(a, b, c)                                       \
+((a) > (b) ? ((a) < (c) ? (a) : ((b) < (c) ? (c) : (b))) :    \
+((a) > (c) ? (a) : ((b) < (c) ? (b) : (c))))
+    
+#endif
+    
+template <typename Iter, typename T = typename std::iterator_traits<Iter>::value_type>
+static bool rolling_median_3 (Iter begin, Iter endd, std::vector<T>& dst)
+{
+    dst.push_back(*begin++);
+    Iter one = begin;
+    Iter last = endd - 1;
+    for (auto ctr = one; ctr < last; ctr++){
+        T m = *(ctr-1);
+        T c = *(ctr);
+        T p = *(ctr+1);
+        T val = median_of_3(m,c,p);
+        dst.push_back(val);
+    }
+    dst.push_back(*last);
+    return true;
+}
+
+/*
+ Simple 1D filter interface and median filtering derivation
+ 
+ */
+
+template <class T>
+class FilterInterface
+{
+    
+public:
+    virtual std::vector<T> filter(const std::vector<T> & in) = 0;
+    
+private:
+    
+    
+};
+
+template <class T>
+class median1D : public FilterInterface<T>
+{
+    std::vector<T> _history;
+    std::vector<T> _pool;
+    unsigned       _median;
+    
+public:
+    
+    median1D(int32_t window_size)
+    :
+    _history(keep_odd(window_size), T()),
+    _pool(_history),
+    _median(window_size / 2 + 1)
+    {
+        assert(window_size >= 3);
+    }
+    
+    
+    std::vector<T> filter(const std::vector<T> & in)
+    {
+        assert(in.size() > 0);
+        unsigned hist_ptr = 0;
+        std::fill(_history.begin(), _history.end(), in[0]);
+        std::vector<T> out;
+        out.reserve(in.size());
+        for(auto x : in)
+        {
+            _history[hist_ptr] = x;
+            hist_ptr = (hist_ptr + 1) % _history.size();
+            std::copy(_history.begin(), _history.end(), _pool.begin());
+            auto first = _pool.begin();
+            auto last  = _pool.end();
+            auto middle = first + (last - first) / 2;
+            
+            // Sort from first to last around the middle to get the median
+            std::nth_element(first, middle, last);
+            out.push_back(*middle);
+        }
+        return out;
+    }
+    
+    unsigned keep_odd(unsigned n)
+    {
+        return (n % 2 == 0) ? (n + 1) : n;
+    }
+};
+    
+    
 template <class T> class samples_1D;
 
     

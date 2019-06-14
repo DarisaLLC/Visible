@@ -413,9 +413,7 @@ TEST(cardiac_ut, locate_contractions)
     std::vector<int> tmins, lmins, tmaxs, lmaxs;
     p.GetExtremaIndices(tmins,tmaxs);
     std::cout << " Median val" << median_filtered_val << std::endl;
-    //   Out(tmins);
-    //   Out(tmaxs);
-    
+
     for (auto tmi : tmins){
         if (dst_1[tmi] > median_filtered_val) continue;
         lmins.push_back(tmi);
@@ -428,13 +426,11 @@ TEST(cardiac_ut, locate_contractions)
     
     std::sort(lmins.begin(),lmins.end());
     std::sort(lmaxs.begin(),lmaxs.end());
-    //    Out(lmins);
-    //    Out(lmaxs);
+
     std::vector<std::pair<float, float>> contractions;
     for (auto lmi : lmins){
         contractions.emplace_back(lmi,dst_1[lmi]);
     }
-    
     {
         auto name = "Contraction Localization";
         cvplot::setWindowTitle(name, "Contraction");
@@ -493,23 +489,9 @@ TEST(UT_contraction_profiler, basic)
     EXPECT_EQ(ctr.relaxation_max_acceleration.first,43);
     EXPECT_EQ(ctr.relaxation_end.first,52);
     
-    
-    //   @todo reconcile with recent implementation
-    //    contraction_profile_analyzer ca;
-    //    ca.run(oneD_example);
-    //        bool test = contraction_analyzer::contraction_t::equal(ca.contraction(), ctr);
-    //       EXPECT_TRUE(test);
-    //    {
-    //        cvplot::figure("myplot").series("myline").addValue(ca.first_derivative_filtered());
-    //        cvplot::figure("myplot").show();
-    //    }
+ 
     
 }
-
-
-
-
-
 TEST(ut_gsl, basic){
     double x = 5.0;
     double y = gsl_sf_bessel_J0 (x);
@@ -568,7 +550,7 @@ TEST(ut_ransac, basic){
 
 /**
  Gets the first dominate direction.  Dominate direction extraction
- is done using RANSAC.  N is all normals and M is the ouput
+ is done using RANSAC.  N is all normals and M is the ouput
  */
 void ransacManhattan1(const std::vector<Eigen::Vector3d> &N,
                       Eigen::Vector3d &M) {

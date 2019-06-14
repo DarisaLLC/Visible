@@ -13,9 +13,11 @@
 #include "vision/localvariance.h"
 #include "core/lineseg.hpp"
 #include <boost/range/irange.hpp>
+#include "core/moreMath.h"
 
 using namespace std;
 using namespace stl_utils;
+using namespace svl;
 
 struct idlab_cardiac_defaults{
     float median_level_set_cutoff_fraction;

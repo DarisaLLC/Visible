@@ -237,7 +237,6 @@ void lifContext::signal_contraction_available (lif_serie_processor::contractionC
     
     if (contras.empty()) return;
     
-    
     // @note: We are handling one contraction for now.
     m_contractions = contras;
     reset_entire_clip(mMediaInfo.count);
@@ -466,7 +465,7 @@ void lifContext::add_contractions (bool* p_open)
                 set_current_clip_index(selected);
                 std::string msg = " Entire ";
                 if (selected != 0){
-                const contraction_analyzer::contraction_t& se = m_contractions[get_current_clip_index() - 1];
+                const contractionLocator::contraction_t& se = m_contractions[get_current_clip_index() - 1];
                 auto ctr_info = " Contraction: [" + to_string(se.contraction_start.first) + "," + to_string(se.relaxation_end.first) + "]";
                 msg = " Current Clip " + m_contraction_names[get_current_clip_index()] + " " + ctr_info;
                 }

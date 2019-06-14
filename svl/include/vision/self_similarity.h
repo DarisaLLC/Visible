@@ -20,7 +20,7 @@ using namespace std;
 /* self_similarity_producer - Entropy signal generating class. There are two
  * steps to this process.  First, a self-similarity matrix is
  * calculated between a set of images.  Second, a measure of the
- * entropy between the images in this set is calculated based upon the
+ * similarity rank between the images in this set is calculated based upon the
  * previously calculated self-similarity matrix.
  *
  * 
@@ -42,7 +42,7 @@ class self_similarity_producer
   virtual ~self_similarity_producer();
 
 
-  /* ctor - Build an self_similarity_producer object that will generate entropy
+  /* ctor - Build an self_similarity_producer object that will generate similarity rank
    * based upon the following arguments:
    *
    * matrixSz -  Used to size the internally used self-similarity
@@ -86,7 +86,7 @@ class self_similarity_producer
    */
   /* fill - Allow client to specify an initial temporal window's worth
    * of images. If a full temporal window's worth of images are passed
-   * in, an entropy signal is generated.
+   * in, an similarity rank signal is generated.
    *
    * Clears any existing intermediate results, so passing a 0 length
    * set of images can be used to just clear intermediate resutls.
@@ -100,8 +100,8 @@ class self_similarity_producer
    * calls to update().
    *
    * If firstImages is at least temporal window size large, then there
-   * are enough images to calculate an entropy signal. In this case,
-   * an entropy signal is generated and true will be returned.
+   * are enough images to calculate an similarity rank signal. In this case,
+   * an similarity rank signal is generated and true will be returned.
    * Otherwise, no calculations are done and false is returned.
    */
   template <class Iterator>
@@ -111,7 +111,7 @@ class self_similarity_producer
   bool fill(deque<image_t >& firstImages);
     
   /* update - Input the next image in a video stream. If a full
-   * temporal window's worth of images are available, a new entropy
+   * temporal window's worth of images are available, a new similarity rank
    * signal is generated.
    *
    * The image passed in is appended to the end of the internal
@@ -121,7 +121,7 @@ class self_similarity_producer
    *
    * Similar to fill(), the self-similarity calculations are
    * performed. If this results in a full matrix of self-similarity
-   * information being available, a new entropy signal is generated
+   * information being available, a new similarity rank signal is generated
    * and true will be returned.  Otherwise, no calculations are done
    * and false is returned.
    *
@@ -136,14 +136,14 @@ class self_similarity_producer
 
   /* Accessor Functions
    */
-  /* entropies - If an entropy signal has been calculated, store it
+  /* entropies - If an similarity rank signal has been calculated, store it
    * in signal and return true. Otherwise, return false.
    */
   bool entropies(deque<double>& signal) const;
     
     /* Accessor Functions
      */
-    /* entropies - If an entropy signal has been calculated, 
+    /* entropies - If an similarity rank signal has been calculated, 
      * take, produce average similarities to for every frame in the set around the median
      * in signal and return true. Otherwise, return false.
      */
@@ -151,7 +151,7 @@ class self_similarity_producer
     
 
 
-  /* selfSimilarityMatrix - If an entropy signal has been calculated,
+  /* selfSimilarityMatrix - If an similarity rank signal has been calculated,
    * and its self-similarity matrix has been saved, save a copy of it
    * in matrix. Otherwise, return false.
    */
@@ -183,7 +183,7 @@ class self_similarity_producer
   bool operator==(const self_similarity_producer& rhs) const;
 
   /*
-   * specific entropy calculations
+   * specific similarity rank calculations
    */
   bool meanProjection (deque<double>& signal) const;
   void norm_scale (const std::deque<double>& src, std::deque<double>& dst, double pw) const;
@@ -198,8 +198,8 @@ class self_similarity_producer
 
   /* s*Fill - Take initial fill worth of images and perform
    * correlations required to calculate self-similarity information
-   * required to generate entropy signal. If enough self-similarity
-   * info is available, generate the entropy signal.
+   * required to generate similarity rank signal. If enough self-similarity
+   * info is available, generate the similarity rank signal.
    */
   bool ssMatrixFill(deque<image_t >& tWin);
 
@@ -215,7 +215,7 @@ class self_similarity_producer
   /* s*Update - Perform correlations between the last image in the
    * temporal window and all the other images in the window. Use this
    * to update the current self-similarity information. If enough
-   * self-similarity info is available, generate the entropy signal.
+   * self-similarity info is available, generate the similarity rank signal.
    */
     bool ssMatrixUpdate(deque<image_t >& tWin);
     
@@ -235,7 +235,7 @@ class self_similarity_producer
   float histogramIntersection(image_t& i, image_t& m) const;
 
   /* genMatrixEntropy - If a full matix worth of self-similarity info
-   * is available, generate an entropy signal and return true.
+   * is available, generate an similarity rank signal and return true.
    * Otherwise, just return false.
    */
   bool genMatrixEntropy(size_t tWinSz);
@@ -266,7 +266,7 @@ class self_similarity_producer
   double                             _log2MSz;
   
   /* Inputs - Temporal windows used to store the images required to
-   * calculate the entropy signal. Pixel depth is assumed to be same
+   * calculate the similarity rank signal. Pixel depth is assumed to be same
    * in all images, so only one of these may be in use at any one
    * time.
    */
@@ -282,7 +282,7 @@ class self_similarity_producer
    */
   deque<deque<double> >        _SMatrix;   // Used in eExhaustive and
                                            // eApproximate cases
-  deque<double>                m_entropies; // Final entropy signal
+  deque<double>                m_entropies; // Final similarity rank signal
   std::vector<int>               m_median_ranked;
   mutable deque<double>                _sums;     // Final mean signal
   vector<double>               _kernel;    // Filtering Operation Kernel
