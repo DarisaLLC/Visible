@@ -79,6 +79,7 @@ class ca_signaler : public base_signaler
 };
 
 class contractionProfile;
+typedef std::shared_ptr<contractionProfile> profileRef;
 
 class contractionLocator : public ca_signaler, std::enable_shared_from_this<contractionLocator>
 {
@@ -97,7 +98,7 @@ public:
     using index_val_t = contractionMesh::index_val_t;
 
     typedef std::shared_ptr<contractionLocator> Ref;
-    typedef std::vector<contractionProfile::Ref> contractionContainer_t;
+    typedef std::vector<profileRef> contractionContainer_t;
 
     // Signals we provide
     // signal_contraction_available
@@ -106,13 +107,12 @@ public:
 
     // Factory create method
     static Ref create();
-    Ref getShared() const;
-    
+    Ref getShared();
     // Load raw entropies and the self-similarity matrix
     // If no self-similarity matrix is given, entropies are assumed to be filtered and used directly
     void load (const vector<double>& entropies, const vector<vector<double>>& mmatrix = vector<vector<double>>());
     // @todo: add multi-contraction
-    bool find_best () const;
+    bool find_best () ;
     
     bool isValid () const { return mValidInput; }
     bool isOutputValid () const { return mValidOutput; }
@@ -194,7 +194,7 @@ public:
     using contraction_t = contractionMesh;
     using index_val_t = contractionMesh::index_val_t;
 
-    typedef std::shared_ptr<contractionProfile> Ref;
+  
     typedef std::vector<double> sigContainer_t;
     typedef std::vector<double> forceContainer_t;
     typedef std::vector<double>::const_iterator sigIterator_t;
@@ -206,13 +206,13 @@ public:
     
     contractionProfile (contraction_t& , const std::shared_ptr<contractionLocator>& );
 
-    static Ref create(contraction_t& ct, const contractionLocator::Ref& parent){
-        return Ref(new contractionProfile(ct, parent ));
+    static profileRef create(contraction_t& ct, contractionLocator::Ref& parent){
+        return profileRef(new contractionProfile(ct, parent ));
     }
 
     
     // Compute Length Interpolation for measured contraction
-    void compute_interpolated_geometries_and_force(const double relaxed_length);
+    void compute_interpolated_geometries_and_force();
     
     const contraction_t& contraction () const { return m_ctr; }
     const double& relaxed_length () const { return m_relaxed_length; }

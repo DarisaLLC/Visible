@@ -67,7 +67,7 @@ std::shared_ptr<contractionLocator> contractionLocator::create()
     return std::shared_ptr<contractionLocator>(new contractionLocator());
 }
 
-std::shared_ptr<contractionLocator> contractionLocator::getShared (){
+std::shared_ptr<contractionLocator> contractionLocator::getShared () {
         return shared_from_this();
 }
 
@@ -155,7 +155,7 @@ bool contractionLocator::get_contraction_at_point (const size_t p_index, contrac
 }
     
 // @todo: add multi-contraction
-bool contractionLocator::find_best () const
+bool contractionLocator::find_best ()
 {
     if (verify_input())
     {
@@ -189,15 +189,16 @@ bool contractionLocator::find_best () const
             m_peaks.emplace_back(lowest.first, m_signal[lowest.first]);
             contraction_t ct;
             if(!get_contraction_at_point(lowest.first, ct)) return false;
-            auto cp = contractionProfile::create((ct, getShared());
-            m_contractions.push_back(cp);
+            auto profile = std::make_shared<contractionProfile>(ct, getShared());
+            profile->compute_interpolated_geometries_and_force();
+            m_contractions.emplace_back(profile);
                                      
             if (signal_contraction_analyzed && signal_contraction_analyzed->num_slots() > 0)
                 signal_contraction_analyzed->operator()(m_contractions);
             std::string c0("Contraction Detected @ ");
             c0 = c0 + to_string(ct.contraction_peak.first);
             mValidOutput = true;
-            vlogger::instance().console()->info(c0);
+          //  vlogger::instance().console()->info(c0);
             stl_utils::save_csv(m_signal,"/Volumes/medvedev/Users/arman/tmp/signal.csv");
             return true;
         }
@@ -304,7 +305,9 @@ m_ctr(ct), m_connect(cl)
  *
  */
 
-void contractionProfile::compute_interpolated_geometries_and_force(const double relaxed_length){
+void contractionProfile::compute_interpolated_geometries_and_force(){
+    
+    const double relaxed_length = contraction().relaxation_visual_rank;
     
     //@todo check current contraction is measured
     m_elongation.resize(m_fder.size());
