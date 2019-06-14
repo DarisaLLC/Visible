@@ -35,9 +35,9 @@ const fPair& lif_serie_processor::ellipse_ab () const { return m_ab; }
 const Rectf& lif_serie_processor::measuredArea() const { return m_measured_area; }
 
 // Check if the returned has expired
-std::weak_ptr<contraction_analyzer> lif_serie_processor::contractionWeakRef ()
+std::weak_ptr<contractionLocator> lif_serie_processor::contractionWeakRef ()
 {
-    std::weak_ptr<contraction_analyzer> wp (m_caRef);
+    std::weak_ptr<contractionLocator> wp (m_caRef);
     return wp;
 }
 

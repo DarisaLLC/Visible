@@ -289,7 +289,7 @@ public:
 
     void run_volume_variances (std::vector<roiWindow<P8U>>& images);
     
-    // Run to get Entropies and Median Level Set. Both short term and long term pic
+    // Run to get Ranks and Median Level Set. Both short term and long term pic
     // @todo event though index is an argument, only room for one channel is kept.
     // Short term is specifically run on the channel contraction pci was run on
     // duplictes will be removed from indices for short term pci.

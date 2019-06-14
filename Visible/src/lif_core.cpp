@@ -59,15 +59,11 @@ mCurrentSerieCachePath(serie_cache_folder)
     // boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
     
     // Create a contraction object
-    m_caRef = contraction_analyzer::create ();
+    m_caRef = contractionLocator::create ();
     
     // Suport lif_processor::Contraction Analyzed
     std::function<void (contractionContainer_t&)>ca_analyzed_cb = boost::bind (&lif_serie_processor::contraction_analyzed, this, _1);
     boost::signals2::connection ca_connection = m_caRef->registerCallback(ca_analyzed_cb);
-    
-    // Signal us when we have pci mat channels are ready to run contraction analysis
-    //std::function<void (int&)> sm1dmed_available_cb = boost::bind (&lif_processor::pci_done, this);
-    //boost::signals2::connection nl_connection = registerCallback(sm1dmed_available_cb);
     
     // Signal us when 3d stats are ready
     std::function<void ()>_3dstats_done_cb = boost::bind (&lif_serie_processor::stats_3d_computed, this);
@@ -382,7 +378,7 @@ void lif_serie_processor::median_leveled_pci (namedTrack_t& track)
     //  std::lock_guard<std::mutex> lock(m_mutex);
     
     try{
-        std::weak_ptr<contraction_analyzer> weakCaPtr (m_caRef);
+        std::weak_ptr<contractionLocator> weakCaPtr (m_caRef);
         if (weakCaPtr.expired())
             return;
         

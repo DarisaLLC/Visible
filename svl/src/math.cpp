@@ -32,6 +32,26 @@
 using namespace svl;
 
 
+double exponentialMovingAverageIrregular(
+                                         double alpha, double sample, double prevSample,
+                                         double deltaTime, double emaPrev )
+{
+    double a = deltaTime / alpha;
+    double u = exp( a * -1 );
+    double v = ( 1 - u ) / a;
+    
+    double emaNext = ( u * emaPrev ) + (( v - u ) * prevSample ) +
+    (( 1.0 - v ) * sample );
+    return emaNext;
+}
+double exponentialMovingAverage( double sample, double alpha )
+{
+    static double cur = 0;
+    cur = ( sample * alpha ) + (( 1-alpha) * cur );
+    return cur;
+}
+
+
 //---------------------------------------------------------------------------------------------------------------------------
 //-------------- lin_reg_results: a simple helper class for dealing with output from linear regression routines -------------
 //---------------------------------------------------------------------------------------------------------------------------

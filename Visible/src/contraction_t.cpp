@@ -14,7 +14,7 @@
 #include "cardiomyocyte_model_detail.hpp"
 #include "core/boost_units.hpp"
 #include "core/simple_timing.hpp"
-
+#include "core/moreMath.h"
 
 namespace anonymous
 {
@@ -61,26 +61,29 @@ namespace anonymous
 
 
 
-std::shared_ptr<contraction_analyzer> contraction_analyzer::create()
+
+std::shared_ptr<contractionLocator> contractionLocator::create()
 {
-    return std::shared_ptr<contraction_analyzer>(new contraction_analyzer());
+    return std::shared_ptr<contractionLocator>(new contractionLocator());
 }
 
-contraction_analyzer::contraction_analyzer() :
+std::shared_ptr<contractionLocator> contractionLocator::getShared (){
+        return shared_from_this();
+}
+
+contractionLocator::contractionLocator() :
 m_cached(false),  mValidInput (false)
 {
     m_median_levelset_frac = m_params.median_levelset_fraction();
     m_peaks.resize(0);
-    m_capRef = contraction_profile_analyzer::create ();
     
     // Signals we provide
-    signal_contraction_analyzed = createSignal<contraction_analyzer::sig_cb_contraction_analyzed> ();
-    total_reactive_force_ready = createSignal<contraction_analyzer::sig_cb_force_ready>();
-    cell_length_ready = createSignal<contraction_analyzer::sig_cb_cell_length_ready>();
+    signal_contraction_analyzed = createSignal<contractionLocator::sig_cb_contraction_analyzed> ();
+
     
 }
 
-void contraction_analyzer::load(const vector<double>& entropies, const vector<vector<double>>& mmatrix)
+void contractionLocator::load(const vector<double>& entropies, const vector<vector<double>>& mmatrix)
 {
     m_entropies = entropies;
     m_SMatrix = mmatrix;
@@ -96,16 +99,63 @@ void contraction_analyzer::load(const vector<double>& entropies, const vector<ve
     mValidInput = verify_input ();
 }
 
-void contraction_analyzer::regenerate() const{
+void contractionLocator::regenerate() const{
     // Cache Rank Calculations
     compute_median_levelsets ();
     // If the fraction of entropies values expected is zero, then just find the minimum and call it contraction
     size_t count = recompute_signal();
     if (count == 0) m_signal = m_entropies;
-    m_capRef->load(m_signal);
 }
+
+bool contractionLocator::get_contraction_at_point (const size_t p_index, contraction_t& m_contraction) const{
+ 
+    if (! mValidInput) return false;
+    contraction_t::clear(m_contraction);
+    
+    auto maxima = [](std::vector<double>::const_iterator a,
+                     std::vector<double>::const_iterator b){
+        std::vector<double> coeffs;
+        polyfit(a, b, 1.0, coeffs, 2);
+        assert(coeffs.size() == 3);
+        return (-coeffs[1] / (2 * coeffs[2]));
+    };
+    const std::vector<double>& m_fder = m_signal;
+    
+    /* Contraction Start
+     * 1. Find the location of maxima of a quadratic fit to the data before
+     *    Maxima is at -b / 2c (y = a + bx + cx^2 => dy/dx = b + 2cx at Maxima dy/dx = 0 -> x = -b/2c
+     * 1. Find the location of the minima of the first derivative using first differences
+     *    dy = y(x-1) - y(x). x at minimum dy
+     *
+     */
+    m_contraction.contraction_peak.first = p_index;
+    std::vector<double>::const_iterator cpt = m_fder.begin() + p_index;
+    std::vector<double> results;
+    results.reserve(p_index);
+    std::adjacent_difference (m_fder.begin(), cpt, std::back_inserter(results));
+    auto min_elem = std::min_element(results.begin(),results.end());
+    auto loc = std::distance(results.begin(), min_elem);
+    
+    auto loc_contraction_quadratic = maxima(m_fder.begin(), cpt);
+    m_contraction.contraction_start.first = (loc_contraction_quadratic + loc)/ 2;
+    
+    /* relaxation End
+     * 1. Find the location of maxima of a quadratic fit to the data before
+     *    Maxima is at -b / 2c (y = a + bx + cx^2 => dy/dx = b + 2cx at Maxima dy/dx = 0 -> x = -b/2c
+     */
+    auto loc_relaxation_quadratic = maxima(cpt, m_fder.end());
+    m_contraction.relaxation_end.first = p_index + loc_relaxation_quadratic;
+    
+    /*
+     * Use Median visual rank value for relaxation visual rank
+     */
+    m_contraction.relaxation_visual_rank = svl::Median(m_fder);
+
+    return true;
+}
+    
 // @todo: add multi-contraction
-bool contraction_analyzer::find_best () const
+bool contractionLocator::find_best () const
 {
     if (verify_input())
     {
@@ -129,20 +179,23 @@ bool contraction_analyzer::find_best () const
             }
         }
         
-        //@ note: clear and fetch the peak. Set cotraction envelope in frames
         //@todo: multiple contractions
         clear_outputs ();
+   
+
         if (lowest.first < invalid)
         {
             
             m_peaks.emplace_back(lowest.first, m_signal[lowest.first]);
-            m_capRef->measure_contraction_at_point(lowest.first);
-            const contraction_t& one = m_capRef->contraction();
-            m_contractions.emplace_back(one);
+            contraction_t ct;
+            if(!get_contraction_at_point(lowest.first, ct)) return false;
+            auto cp = contractionProfile::create((ct, getShared());
+            m_contractions.push_back(cp);
+                                     
             if (signal_contraction_analyzed && signal_contraction_analyzed->num_slots() > 0)
                 signal_contraction_analyzed->operator()(m_contractions);
             std::string c0("Contraction Detected @ ");
-            c0 = c0 + to_string(one.contraction_peak.first);
+            c0 = c0 + to_string(ct.contraction_peak.first);
             mValidOutput = true;
             vlogger::instance().console()->info(c0);
             stl_utils::save_csv(m_signal,"/Volumes/medvedev/Users/arman/tmp/signal.csv");
@@ -159,7 +212,7 @@ bool contraction_analyzer::find_best () const
  * 3. Sort according to distance to Median
  * 4. Fill up rank vector
  */
-double contraction_analyzer::Median_levelsets (const vector<double>& entropies,  std::vector<int>& ranks )
+double contractionLocator::Median_levelsets (const vector<double>& entropies,  std::vector<int>& ranks )
 {
     vector<double> entcpy;
     
@@ -178,7 +231,7 @@ double contraction_analyzer::Median_levelsets (const vector<double>& entropies, 
     return median_value;
 }
 
-size_t contraction_analyzer::recompute_signal () const
+size_t contractionLocator::recompute_signal () const
 {
     // If the fraction of entropies values expected is zero, then just find the minimum and call it contraction
     size_t count = std::floor (m_entropies.size () * m_median_levelset_frac);
@@ -197,72 +250,20 @@ size_t contraction_analyzer::recompute_signal () const
     }
     return count;
 }
-void contraction_analyzer::compute_median_levelsets () const
+void contractionLocator::compute_median_levelsets () const
 {
     if (m_cached) return;
-    m_median_value = contraction_analyzer::Median_levelsets (m_entropies, m_ranks);
+    m_median_value = contractionLocator::Median_levelsets (m_entropies, m_ranks);
     m_cached = true;
 }
 
 
-void contraction_analyzer::compute_interpolated_geometries( float min_length, float max_length){
-    if(!isOutputValid() || max_length < 1.0f || min_length >= max_length ){
-        return;
-    }
-    
-    double entOlenScale = (1.0 - m_leveled_min_max.first / m_leveled_min_max.second) / (1.0 - min_length / max_length);
-    
-    m_elongation.resize(m_signal.size());
-    m_interpolation.resize(m_signal.size());
-    m_interpolated_length.resize(m_signal.size());
-    
-    for (auto ii = 0; ii < m_signal.size(); ii++)
-    {
-        auto nn = 1.0 - m_signal[ii] / m_leveled_min_max.second;
-        nn = 1.0 - nn / entOlenScale;
-        m_interpolation[ii] = nn;
-        m_interpolated_length[ii] = nn * max_length;
-        m_elongation[ii] = (1.0 - nn) * max_length;
-    }
-    
-    if (cell_length_ready && cell_length_ready->num_slots() > 0)
-        cell_length_ready->operator()(m_interpolated_length);
-
-}
-
-contraction_analyzer::forceOtimeIterator_t contraction_analyzer::compute_force (sigIterator_t _begin , sigIterator_t _end,
-                                                          float min_length, float max_length){
-    sigIterator_t const_begin = m_signal.begin();
-    auto bindex = std::distance( const_begin, _begin);
-    auto eindex = std::distance( const_begin, _end);
-    // Compute force using cardio model
-    m_force.clear();
-    cardio_model cmm;
-    cmm.shear_control(1.0f);
-    cmm.shear_velocity(200.0_cm_s);
-
-    for (auto ii = bindex; ii < eindex; ii++)
-    {
-        cmm.length(m_interpolated_length[ii] * boost::units::cgs::micron);
-        cmm.elongation(m_elongation[ii] * boost::units::cgs::micron);
-        cmm.width((m_interpolated_length[ii]/3.0) * boost::units::cgs::micron);
-        cmm.thickness((m_interpolated_length[ii]/100.0)* boost::units::cgs::micron);
-        cmm.run();
-        m_force.push_back(cmm.result().total_reactive.value());
-    }
-    
-    if (total_reactive_force_ready && total_reactive_force_ready->num_slots() > 0)
-        total_reactive_force_ready->operator()(m_force);
-    
-    return std::make_pair(_begin,m_force.begin());
-}
-
-void contraction_analyzer::clear_outputs () const
+void contractionLocator::clear_outputs () const
 {
     m_peaks.resize(0);
     m_contractions.resize(0);
 }
-bool contraction_analyzer::verify_input () const
+bool contractionLocator::verify_input () const
 {
     bool ok = ! m_entropies.empty();
     if (!ok)return false;
@@ -284,34 +285,66 @@ bool contraction_analyzer::verify_input () const
 
 
 
-void contraction_analyzer::savgol (const vector<double>& signal, vector<double>& dst, int winlen)
+
+
+template boost::signals2::connection contractionLocator::registerCallback(const std::function<contractionLocator::sig_cb_contraction_analyzed>&);
+
+contractionProfile::contractionProfile (contraction_t& ct, const contractionLocator::Ref & cl):
+m_ctr(ct), m_connect(cl)
 {
-    // for scalar data:
-    int order = 4;
-    SGF::real sample_time = 0; // this is simply a float or double, you can change it in the header sg_filter.h if yo u want
-    SGF::ScalarSavitzkyGolayFilter filter(order, winlen, sample_time);
-    dst.resize(signal.size());
-    SGF::real output;
-    for (auto ii = 0; ii < signal.size(); ii++)
-    {
-        filter.AddData(signal[ii]);
-        if (! filter.IsInitialized()) continue;
-        dst[ii] = 0;
-        int ret_code;
-        ret_code = filter.GetOutput(0, output);
-        dst[ii] = output;
+    total_reactive_force_ready = createSignal<contractionProfile::sig_cb_force_ready>();
+    cell_length_ready = createSignal<contractionProfile::sig_cb_cell_length_ready>();
+}
+
+
+
+
+/*
+ * Compute interpolated length and force for this contraction
+ *
+ */
+
+void contractionProfile::compute_interpolated_geometries_and_force(const double relaxed_length){
+    
+    //@todo check current contraction is measured
+    m_elongation.resize(m_fder.size());
+    m_interpolated_length.resize(m_fder.size());
+
+    for (const auto & reading : m_fder){
+        auto linMul = clampValue(reading/m_median, 0.0, 1.0);
+        m_interpolated_length.push_back(linMul);
+        m_elongation.push_back(relaxed_length - linMul);
     }
     
-}
+    if (cell_length_ready && cell_length_ready->num_slots() > 0)
+        cell_length_ready->operator()(m_interpolated_length);
 
-bool contraction_analyzer::savgol_filter () const
-{
-    m_signal.resize(m_entropies.size (), 0.0);
-    int wlen = std::floor (100 * m_median_levelset_frac);
+    /*
+     * Compute force within contraction interval
+     */
+    auto c_start = m_ctr.contraction_start.first;
+    auto c_end = m_ctr.relaxation_end.first;
+    assert(!m_fder.empty());
+    assert(c_start >= 0 && c_start < c_end && c_end < m_fder.size());
     
-    savgol (m_entropies, m_signal, wlen);
-    return true;
+    // Compute force using cardio model
+    m_force.clear();
+    cardio_model cmm;
+    cmm.shear_control(1.0f);
+    cmm.shear_velocity(200.0_cm_s);
+    
+    for (auto ii = c_start; ii < c_end; ii++)
+    {
+        cmm.length(m_interpolated_length[ii] * boost::units::cgs::micron);
+        cmm.elongation(m_elongation[ii] * boost::units::cgs::micron);
+        cmm.width((m_interpolated_length[ii]/3.0) * boost::units::cgs::micron);
+        cmm.thickness((m_interpolated_length[ii]/100.0)* boost::units::cgs::micron);
+        cmm.run();
+        m_force.push_back(cmm.result().total_reactive.value());
+    }
+    
+    if (total_reactive_force_ready && total_reactive_force_ready->num_slots() > 0)
+        total_reactive_force_ready->operator()(m_force);
+    
 }
-
-template boost::signals2::connection contraction_analyzer::registerCallback(const std::function<contraction_analyzer::sig_cb_contraction_analyzed>&);
 
