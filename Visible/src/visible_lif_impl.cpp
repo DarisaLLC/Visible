@@ -243,9 +243,10 @@ void lifContext::signal_contraction_available (lif_serie_processor::contractionC
     uint32_t index = 0;
     string name = " C " + svl::toString(index) + " ";
     m_contraction_names.push_back(name);
-    m_clips.emplace_back(m_contractions[0].contraction_start.first,
-                         m_contractions[0].relaxation_end.first,
-                         m_contractions[0].contraction_peak.first);
+    auto ctr = m_contractions[0]->contraction();
+    m_clips.emplace_back(ctr.contraction_start.first,
+                         ctr.relaxation_end.first,
+                         ctr.contraction_peak.first);
 
     update_contraction_selection();
     
@@ -415,9 +416,11 @@ void lifContext::update_contraction_selection()
 {
     m_show_contractions = true;
     m_result_seq.items.resize(1);
+    auto ctr = m_contractions[0]->contraction();
+
     m_result_seq.items.push_back(timeLineSequence::timeline_item{ 0,
-        (int) m_contractions[0].contraction_start.first,
-        (int) m_contractions[0].relaxation_end.first , true});
+        (int) ctr.contraction_start.first,
+        (int) ctr.relaxation_end.first , true});
 
 
 }
@@ -465,8 +468,9 @@ void lifContext::add_contractions (bool* p_open)
                 set_current_clip_index(selected);
                 std::string msg = " Entire ";
                 if (selected != 0){
-                const contractionLocator::contraction_t& se = m_contractions[get_current_clip_index() - 1];
-                auto ctr_info = " Contraction: [" + to_string(se.contraction_start.first) + "," + to_string(se.relaxation_end.first) + "]";
+                const auto& se = m_contractions[get_current_clip_index() - 1];
+                auto ctr = se->contraction();
+                auto ctr_info = " Contraction: [" + to_string(ctr.contraction_start.first) + "," + to_string(ctr.relaxation_end.first) + "]";
                 msg = " Current Clip " + m_contraction_names[get_current_clip_index()] + " " + ctr_info;
                 }
                 ImGui::TextWrapped("%s", msg.c_str());

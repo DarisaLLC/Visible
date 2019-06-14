@@ -242,7 +242,7 @@ public:
         voxel_params_t m_vparams;
     };
     
-    using contractionContainer_t = contraction_analyzer::contractionContainer_t;
+    using contractionContainer_t = contractionLocator::contractionContainer_t;
     
     typedef std::unordered_map<uint8_t,std::vector<Point2f>> mapU8PeaksToPointfs_t;
     typedef void (sig_cb_content_loaded) (int64_t&);
@@ -268,7 +268,7 @@ public:
     cv::Mat & segmented () const { return m_temporal_ss;  }
     
     // Check if the returned has expired
-    std::weak_ptr<contraction_analyzer> contractionWeakRef ();
+    std::weak_ptr<contractionLocator> contractionWeakRef ();
     
     // Load frames from cache
     int64_t load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names, const std::vector<std::string>& plot_names);
@@ -419,7 +419,7 @@ private:
     mutable vecOfNamedTrack_t                   m_shortterm_pci_tracks;
     mutable std::queue<float>               m_shortterms;
     
-    std::shared_ptr<contraction_analyzer> m_caRef;
+    std::shared_ptr<contractionLocator> m_caRef;
     
     mutable svl::stats<int64_t> m_3d_stats;
     std::atomic<bool> m_3d_stats_done;
