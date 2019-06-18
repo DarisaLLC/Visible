@@ -164,7 +164,7 @@ namespace ImCurveEdit
       draw_list->AddRectFilled(offset, offset + ssize, delegate.GetBackgroundColor());
       
       auto pointToRange = [&](ImVec2 pt) { return (pt - min) / range; };
-      auto rangeToPoint = [&](ImVec2 pt) { return (pt * range) + min; };
+//      auto rangeToPoint = [&](ImVec2 pt) { return (pt * range) + min; };
       
       draw_list->AddLine(ImVec2(-1.f, -min.y/range.y) * viewSize + offset, ImVec2(1.f, -min.y / range.y) * viewSize + offset, 0xFF000000, 1.5f);
       bool overCurveOrPoint = false;
@@ -269,6 +269,7 @@ namespace ImCurveEdit
       if (localOverCurve == -1)
          overCurve = -1;
 
+#if 0
       // move selection
       static bool pointsMoved = false;
       static ImVec2 mousePosOrigin;
@@ -325,43 +326,10 @@ namespace ImCurveEdit
          delegate.AddPoint(overCurve, np);
          delegate.EndEdit();
       }
-
-      // move curve
-      
-      if (movingCurve != -1)
-      {
-         const size_t ptCount = delegate.GetPointCount(movingCurve);
-         const auto pts = delegate.GetPoints(movingCurve);
-         if (!pointsMoved)
-         {
-             mousePosOrigin = io.MousePos;
-             pointsMoved = true;
-             originalPoints.resize(ptCount);
-             for (size_t index = 0;index< ptCount;index++)
-             {
-                 originalPoints[index] = pts[index];
-             }
-         }
-         if (ptCount >= 1)
-         {
-            for (size_t p = 0; p < ptCount; p++)
-            {
-               delegate.EditPoint(movingCurve, int(p), rangeToPoint(pointToRange(originalPoints[p]) + (io.MousePos - mousePosOrigin) * sizeOfPixel));
-            }
-         }
-         if (!io.MouseDown[0])
-         {
-             movingCurve = -1;
-             pointsMoved = false;
-             delegate.EndEdit();
-         }
-      }
-      if (movingCurve == -1 && overCurve != -1 && ImGui::IsMouseClicked(0) && selection.empty() && !selectingQuad)
-      {
-         movingCurve = overCurve;
-         delegate.BeginEdit(overCurve);
-      }
-
+#endif
+       
+ 
+       
       // quad selection
       if (selectingQuad)
       {

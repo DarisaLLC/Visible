@@ -17,7 +17,7 @@
 #include <deque>
 #include <sstream>
 #include <map>
-#include "async_tracks.h"
+#include "timed_value_containers.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
 #include "cinder_cv/cinder_xchg.hpp"
@@ -367,8 +367,12 @@ const fPair& lif_serie_processor::length_range() const { return m_length_range; 
 // Update. Called also when cutoff offset has changed
 void lif_serie_processor::update ()
 {
-    if(m_contraction_pci_tracksRef && !m_contraction_pci_tracksRef->empty() && m_caRef && m_caRef->isValid())
+   // std::lock_guard<std::mutex> lock(m_mutex);
+    if(m_contraction_pci_tracksRef && !m_contraction_pci_tracksRef->empty() && m_caRef && m_caRef->isValid()){
+        m_caRef->update();
         median_leveled_pci(m_contraction_pci_tracksRef->at(0));
+        m_caRef->find_best ();
+    }
 }
 
 
