@@ -58,14 +58,15 @@ using namespace ci::app;
 using namespace std;
 using namespace svl;
 
-#define SHORTTERM_ON
+// #define SHORTTERM_ON
 
 #define ONCE(x) { static int __once = 1; if (__once) {x;} __once = 0; }
 
 namespace {
     std::map<std::string, unsigned int> named_colors = {{"Red", 0xFF0000FF }, {"red",0xFF0000FF },{"Green", 0xFF00FF00},
         {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFFFFF3E},
-        { "Synth", 0xFFFB4551}, { "synth", 0xFFFB4551},{ "Length", 0xFFFFFF3E}, { "length", 0xFFFFFF3E}
+        { "Synth", 0xFFFB4551}, { "synth", 0xFFFB4551},{ "Length", 0xFFFFFF3E}, { "length", 0xFFFFFF3E},
+        { "Force", 0xFFFB4551}, { "force", 0xFFFB4551}, { "Elongation", 0xFF00FF00}, { "elongation", 0xFF00FF00}
     };
     
     
@@ -1156,8 +1157,8 @@ void lifContext::update ()
     if ( ! m_contraction_pci_trackWeakRef.expired())
     {
 #ifdef SHORTTERM_ON
-     //  if (m_lifProcRef->shortterm_pci().at(0).second.empty())
-      //      m_lifProcRef->shortterm_pci(1);
+        if (m_lifProcRef->shortterm_pci().at(0).second.empty())
+                m_lifProcRef->shortterm_pci(1);
 #endif
         auto tracksRef = m_contraction_pci_trackWeakRef.lock();
         m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
@@ -1171,19 +1172,21 @@ void lifContext::update ()
         }
 
     }
-#if 1
+
     if(m_result_seq.m_time_data.plotCount() == 4 && ! m_contractions.empty() &&
        contractionLocator::contraction_t::selfCheck(m_contractions[0])){
         timedVecOfVals_t ll;
         timedVecOfVals_t el;
         timedVecOfVals_t force;
-        contractionTrackMaker sp (m_contractions[0], el, el, force);
-        namedTrack_t force_track;
-        force_track.first = " Force ";
-        force_track.second = force;
-        m_result_seq.m_time_data.load(force_track,named_colors[" Force "], -1);
+        contractionTrackMaker sp (m_contractions[0], ll, el, force);
+        namedTrack_t force_track, length_track, elongation_track;
+        force_track.first = " Force "; length_track.first = " Interpolated Length "; elongation_track.first = " Elongation ";
+        force_track.second = force;length_track.second = ll;elongation_track.second = el;
+        m_result_seq.m_time_data.load(force_track,named_colors["Force"], -1);
+        m_result_seq.m_time_data.load(length_track,named_colors["Length"], -1);
+        m_result_seq.m_time_data.load(elongation_track,named_colors["Elongation"], -1);
     }
-#endif
+
     
     // Fetch Next Frame
     if (have_lif_serie ()){

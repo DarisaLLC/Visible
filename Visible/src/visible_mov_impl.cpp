@@ -56,7 +56,7 @@ using namespace ci::app;
 using namespace std;
 using namespace svl;
 
-#define SHORTTERM_ON
+// #define SHORTTERM_ON
 
 #define ONCE(x) { static int __once = 1; if (__once) {x;} __once = 0; }
 
@@ -856,8 +856,8 @@ void movContext::update ()
     if ( ! m_longterm_pci_trackWeakRef.expired())
     {
 #ifdef SHORTTERM_ON
-        //  if (m_movProcRef->shortterm_pci().at(0).second.empty())
-        //      m_movProcRef->shortterm_pci(1);
+        if (m_movProcRef->shortterm_pci().at(0).second.empty())
+              m_movProcRef->shortterm_pci(1);
 #endif
         auto tracksRef = m_longterm_pci_trackWeakRef.lock();
         m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["Long"], 2);
