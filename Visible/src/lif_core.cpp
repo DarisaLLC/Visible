@@ -17,7 +17,7 @@
 #include <deque>
 #include <sstream>
 #include <map>
-#include "async_tracks.h"
+#include "timed_value_containers.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
 #include "cinder_cv/cinder_xchg.hpp"
@@ -375,18 +375,17 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
  */
 void lif_serie_processor::median_leveled_pci (namedTrack_t& track)
 {
-    //  std::lock_guard<std::mutex> lock(m_mutex);
-    
     try{
         std::weak_ptr<contractionLocator> weakCaPtr (m_caRef);
         if (weakCaPtr.expired())
             return;
         
-        if (! m_caRef->find_best  ()) return;
+        m_caRef->update ();
         m_medianLevel = m_caRef->leveled();
+        auto leveled = m_caRef->leveled();
         track.second.clear();
-        auto mee = m_caRef->leveled().begin();
-        for (auto ss = 0; mee != m_caRef->leveled().end() || ss < frame_count(); ss++, mee++)
+        auto mee = leveled.begin();
+        for (auto ss = 0; mee != leveled.end() || ss < frame_count(); ss++, mee++)
         {
             index_time_t ti;
             ti.first = ss;

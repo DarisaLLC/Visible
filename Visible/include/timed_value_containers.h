@@ -13,7 +13,6 @@
 #include <map>
 #include <future>
 #include "core/bitvector.h"
-//#include "timestamp.h"
 #include "time_index.h"
 #include "vision/opencv_utils.hpp"
 

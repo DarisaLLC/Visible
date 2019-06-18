@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <future>
 #include <mutex>
-#include "async_tracks.h"
+#include "timed_value_containers.h"
 #include "cinder_xchg.hpp"
 #include "visible_layout.hpp"
 #include "vision/opencv_utils.hpp"
@@ -205,12 +205,11 @@ void lifContext::signal_sm1d_available (int& dummy)
 
 void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
 {
-    
-    if (haveTracks())
+   //@note this is also checked in update. Not sure if this is necessary
+   if (haveTracks())
     {
         auto tracksRef = m_contraction_pci_trackWeakRef.lock();
-        if (!tracksRef->at(0).second.empty()){
-         //   m_plots[channel_count()-1]->load(tracksRef->at(0));
+        if ( tracksRef && !tracksRef->at(0).second.empty()){
             m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
         }
     }
@@ -243,7 +242,7 @@ void lifContext::signal_contraction_available (lif_serie_processor::contractionC
     uint32_t index = 0;
     string name = " C " + svl::toString(index) + " ";
     m_contraction_names.push_back(name);
-    auto ctr = m_contractions[0]->contraction();
+    auto ctr = m_contractions[0];
     m_clips.emplace_back(ctr.contraction_start.first,
                          ctr.relaxation_end.first,
                          ctr.contraction_peak.first);
@@ -416,7 +415,7 @@ void lifContext::update_contraction_selection()
 {
     m_show_contractions = true;
     m_result_seq.items.resize(1);
-    auto ctr = m_contractions[0]->contraction();
+    auto ctr = m_contractions[0];
 
     m_result_seq.items.push_back(timeLineSequence::timeline_item{ 0,
         (int) ctr.contraction_start.first,
@@ -468,8 +467,8 @@ void lifContext::add_contractions (bool* p_open)
                 set_current_clip_index(selected);
                 std::string msg = " Entire ";
                 if (selected != 0){
-                const auto& se = m_contractions[get_current_clip_index() - 1];
-                auto ctr = se->contraction();
+                const auto& ctr = m_contractions[get_current_clip_index() - 1];
+
                 auto ctr_info = " Contraction: [" + to_string(ctr.contraction_start.first) + "," + to_string(ctr.relaxation_end.first) + "]";
                 msg = " Current Clip " + m_contraction_names[get_current_clip_index()] + " " + ctr_info;
                 }
@@ -478,7 +477,7 @@ void lifContext::add_contractions (bool* p_open)
             }
             if (ImGui::BeginTabItem("Details"))
             {
-                ImGui::Text("ID: 0123456789");
+                ImGui::Text(" Lengths in microns ");
                 ImGui::EndTabItem();
             }
             ImGui::EndTabBar();
@@ -1170,21 +1169,21 @@ void lifContext::update ()
             auto tracksRef = m_lifProcRef->shortterm_pci();
             m_result_seq.m_time_data.load(tracksRef.at(0), named_colors["Short"], 3);
         }
-    }
 
-    if(m_result_seq.m_time_data.plotCount() == 4 && m_lifProcRef->cell_lengths().size() == 500){
-        
-        timedVecOfVals_t synth;
-        trackMaker sp(m_lifProcRef->cell_lengths(), synth);
-        namedTrack_t synth_track;
-        synth_track.first = "length";
-        synth_track.second = synth;
-        m_result_seq.m_time_data.load(synth_track,named_colors["Length"], -1);
-        auto lr = m_lifProcRef->length_range();
-        std::string msg = " Length min/max: " + svl::toString(lr.first) + " <-> " + svl::toString(lr.second);
-        vlogger::instance().console()->info(msg);
-        
     }
+#if 1
+    if(m_result_seq.m_time_data.plotCount() == 4 && ! m_contractions.empty() &&
+       contractionLocator::contraction_t::selfCheck(m_contractions[0])){
+        timedVecOfVals_t ll;
+        timedVecOfVals_t el;
+        timedVecOfVals_t force;
+        contractionTrackMaker sp (m_contractions[0], el, el, force);
+        namedTrack_t force_track;
+        force_track.first = " Force ";
+        force_track.second = force;
+        m_result_seq.m_time_data.load(force_track,named_colors[" Force "], -1);
+    }
+#endif
     
     // Fetch Next Frame
     if (have_lif_serie ()){

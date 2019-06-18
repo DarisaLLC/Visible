@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <string>
-#include "async_tracks.h"
+#include "timed_value_containers.h"
 #include "core/core.hpp"
 #include "vision/histo.h"
 #include "vision/pixel_traits.h"
@@ -14,6 +14,7 @@
 #include "core/lineseg.hpp"
 #include <boost/range/irange.hpp>
 #include "core/moreMath.h"
+#include "contraction.hpp"
 
 using namespace std;
 using namespace stl_utils;
@@ -56,6 +57,30 @@ struct IntensityStatisticsRunner
 };
 
 
+struct contractionTrackMaker
+{
+    contractionTrackMaker (contractionLocator::contraction_t& ctr, timedVecOfVals_t& ilen, timedVecOfVals_t& elo, timedVecOfVals_t& force)
+    {
+        
+        auto fill = [ctr=ctr](const contractionLocator::contraction_t::sigContainer_t& lens){
+            timedVecOfVals_t base(lens.size());
+            
+            for (auto i=0; i < lens.size(); i++) {
+                timedVal_t res;
+                index_time_t ti;
+                ti.first = i + ctr.contraction_start.first;
+                base[i].first = ti;
+                base[i].second =  lens[i];
+            }
+            return base;
+        };
+        
+        ilen = fill (ctr.interpolated_length);
+        elo = fill (ctr.elongation);
+        force = fill (ctr.force);
+    }
+};
+
 struct trackMaker
 {
     trackMaker (const vector<float>& norm_lengths, timedVecOfVals_t& results)
@@ -76,6 +101,7 @@ struct trackMaker
         results = fill (norm_lengths);
     }
 };
+
 
 // Create sin signals
 

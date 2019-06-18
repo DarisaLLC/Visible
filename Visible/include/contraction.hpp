@@ -11,8 +11,7 @@
 #include <chrono>
 #include <numeric>
 #include <iterator>
-#include <boost/ptr_container/ptr_vector.hpp>
-
+#include "core/pair.hpp"
 #include "cardiomyocyte_model.hpp"
 #include "core/stats.hpp"
 #include "core/stl_utils.hpp"
@@ -24,13 +23,18 @@ using namespace std;
 using namespace boost;
 using namespace svl;
 
+/* contractionMesh contains all measured data for a contraction
+ * duration of a contraction is relaxaton_end - contraction_start
+ * peak contraction is at contraction peak
+ */
 
-struct contractionMesh
+struct contractionMesh : public std::pair<size_t,size_t>
 {
-public:
     //@note: pair representing frame number and frame time
     typedef std::pair<size_t,double> index_val_t;
-    
+    // container
+    typedef std::vector<double> sigContainer_t;
+
     index_val_t contraction_start;
     index_val_t contraction_max_acceleration;
     index_val_t contraction_peak;
@@ -39,10 +43,36 @@ public:
     
     double relaxation_visual_rank;
     double max_length;
+ 
+ 
+   sigContainer_t             elongation;
+   sigContainer_t             interpolated_length;
+   sigContainer_t             force;
+    
+    cm::cardio_model               cardioModel;
 
-    vector<double>             m_elongation;
-    vector<double>             m_interpolated_length;
-    vector<double>             m_force;
+    static size_t timeCount(const contractionMesh& a){
+        return a.relaxation_end.first - a.contraction_start.first;
+    }
+    static size_t first(const contractionMesh& a){
+        return a.contraction_start.first;
+    }
+    static size_t last (const contractionMesh& a){
+        return a.relaxation_end.first;
+    }
+    
+    
+    static bool selfCheck (const contractionMesh& a){
+        bool ok = a.relaxation_end.first > a.contraction_start.first;
+        ok &=  a.contraction_peak.first > a.contraction_start.first;
+        ok &=  a.contraction_peak.first < a.relaxation_end.first;
+        auto fc = ok ? (a.relaxation_end.first - a.contraction_start.first) : 0;
+        ok &= a.force.size() == size_t(fc);
+        ok &= a.elongation.size() == size_t(fc);
+        ok &= a.interpolated_length.size() == size_t(fc);
+        return ok;
+        
+    }
     
     static bool equal (const contractionMesh& left, const contractionMesh& right)
     {
@@ -81,6 +111,8 @@ class ca_signaler : public base_signaler
 class contractionProfile;
 typedef std::shared_ptr<contractionProfile> profileRef;
 
+
+
 class contractionLocator : public ca_signaler, std::enable_shared_from_this<contractionLocator>
 {
 public:
@@ -96,21 +128,29 @@ public:
     
     using contraction_t = contractionMesh;
     using index_val_t = contractionMesh::index_val_t;
-
+    using sigContainer_t = contractionMesh::sigContainer_t;
+  
     typedef std::shared_ptr<contractionLocator> Ref;
-    typedef std::vector<profileRef> contractionContainer_t;
+    typedef std::vector<contraction_t> contractionContainer_t;
 
     // Signals we provide
     // signal_contraction_available
+    // signal pci is median level processed
+    typedef void (sig_cb_pci_available) (std::vector<double>&);
     typedef void (sig_cb_contraction_analyzed) (contractionContainer_t&);
-    typedef void (sig_cb_contraction_interpolated_length) (contractionContainer_t&);
-
+    typedef void (sig_cb_cell_length_ready) (sigContainer_t&);
+    typedef void (sig_cb_force_ready) (sigContainer_t&);
+    
     // Factory create method
     static Ref create();
     Ref getShared();
     // Load raw entropies and the self-similarity matrix
     // If no self-similarity matrix is given, entropies are assumed to be filtered and used directly
     void load (const vector<double>& entropies, const vector<vector<double>>& mmatrix = vector<vector<double>>());
+
+    // Update with most recent median level set
+    void update () const;
+    
     // @todo: add multi-contraction
     bool find_best () ;
     
@@ -149,7 +189,7 @@ private:
     contractionLocator();
     contractionLocator::params m_params;
     
-    void regenerate () const;
+
     void compute_median_levelsets () const;
     size_t recompute_signal () const;
     void clear_outputs () const;
@@ -167,56 +207,45 @@ private:
 
     mutable std::vector<int>            m_ranks;
     size_t m_entsize;
-    mutable std::atomic<bool> m_cached;
     mutable bool mValidInput;
     mutable bool mValidOutput;
     mutable bool mNoSMatrix;
     mutable std::vector<index_val_t> m_peaks;
     mutable contractionContainer_t m_contractions;
 
+    mutable std::atomic<bool> m_cached;
  
 protected:
-    
+    boost::signals2::signal<contractionLocator::sig_cb_cell_length_ready>* cell_length_ready;
+    boost::signals2::signal<contractionLocator::sig_cb_force_ready>* total_reactive_force_ready;
     boost::signals2::signal<contractionLocator::sig_cb_contraction_analyzed>* signal_contraction_analyzed;
-};
-
-class cp_signaler : public base_signaler
-{
-    virtual std::string
-    getName () const { return "cpSignaler"; }
+    boost::signals2::signal<contractionLocator::sig_cb_pci_available>* signal_pci_available;
+    
 };
 
 
 
-class contractionProfile : public cp_signaler
+class contractionProfile
 {
 public:
     using contraction_t = contractionMesh;
     using index_val_t = contractionMesh::index_val_t;
-
-  
-    typedef std::vector<double> sigContainer_t;
-    typedef std::vector<double> forceContainer_t;
-    typedef std::vector<double>::const_iterator sigIterator_t;
-    typedef std::vector<double>::const_iterator forceIterator_t;
+    using sigContainer_t = contractionMesh::sigContainer_t;
     
-    // Signals we provide
-    typedef void (sig_cb_cell_length_ready) (sigContainer_t&);
-    typedef void (sig_cb_force_ready) (sigContainer_t&);
-    
-    contractionProfile (contraction_t& , const std::shared_ptr<contractionLocator>& );
+    contractionProfile (contraction_t&);
 
-    static profileRef create(contraction_t& ct, contractionLocator::Ref& parent){
-        return profileRef(new contractionProfile(ct, parent ));
+    static profileRef create(contraction_t& ct){
+        return profileRef(new contractionProfile(ct));
     }
-
-    
     // Compute Length Interpolation for measured contraction
-    void compute_interpolated_geometries_and_force();
+    void compute_interpolated_geometries_and_force(const std::vector<double>& );
     
     const contraction_t& contraction () const { return m_ctr; }
     const double& relaxed_length () const { return m_relaxed_length; }
-    const std::vector<double>& profiled () const { return m_fder; }
+    const sigContainer_t& profiled () const { return m_fder; }
+    const sigContainer_t& force () const { return m_force; }
+    const sigContainer_t& interpolatedLength () const { return m_interpolated_length; }
+    const sigContainer_t& elongation () const { return m_elongation; }
     
     
 private:
@@ -224,19 +253,12 @@ private:
     lsFit<double> m_line_fit;
     std::pair<uRadian,double> m_ls_result;
     mutable contraction_t m_ctr;
-    double m_median;
     double m_relaxed_length;
     mutable std::vector<double> m_fder;
-    mutable std::vector<double> m_interpolated_length;
-    mutable std::vector<double> m_elongation;
-    mutable std::vector<double> m_force;
+    mutable sigContainer_t m_interpolated_length;
+    mutable sigContainer_t m_elongation;
+    mutable sigContainer_t m_force;
 
-
-    std::weak_ptr<contractionLocator> m_connect;
-    
-protected:
-    boost::signals2::signal<contractionProfile::sig_cb_cell_length_ready>* cell_length_ready;
-    boost::signals2::signal<contractionProfile::sig_cb_force_ready>* total_reactive_force_ready;
 };
 
 
