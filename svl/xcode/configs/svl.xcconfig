@@ -1,0 +1,46 @@
+//
+//  svl.xcconfig
+//  patterns
+//
+//  Created by Arman Garakani on 10/13/15.
+//  Copyright © 2015 Arman Garakani. All rights reserved.
+//
+
+//:configuration = Debug or Release
+ARCHS = $(ARCHS_STANDARD_64_BIT)
+
+//:configuration = Debug or Release
+SDKROOT = macosx
+
+SRCROOT = $(PROJECT_DIR)/../svl
+SVL_ROOT = $(PROJECT_DIR)/../svl
+EXTERNALS = $(PROJECT_DIR)/../externals
+
+PROVISIONING_PROFILE =
+
+LOCAL_OCV = /usr/local/opencv-3.4.3
+LOCAL_BOOST = /usr/local/boost/1.67.0_1
+
+
+TEST_DATA = $(SVL_ROOT)/Assets
+
+LOCAL_CINDER = $(EXTERNALS)/cinder
+LOCAL_SPDLOG = $(EXTERNALS)/spdlog
+
+//:configuration = Debug
+LOCAL_3rdParty = $(SRCROOT)/local
+LOCAL_PNG = $(LOCAL_3rdParty)/png/include
+LOCAL_gtest = $(LOCAL_3rdParty)/gtest
+LOCAL_GLM = $(LOCAL_3rdParty)/glm
+LOCAL_PUGIXML = $(LOCAL_3rdParty)/pugixml/1.7
+LOCAL_EIGEN = $(LOCAL_3rdParty)/Eigen
+LOCAL_CEREAL = $(LOCAL_3rdParty)/cereal-1.1.1/include
+LOCAL_TINYXML = $(LOCAL_3rdParty)/tinyxml
+
+
+HEADER_SEARCH_PATHS =  $(SVL_ROOT)/include /usr/local/include $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(LOCAL_gtest)/include $(LOCAL_OCV)/include $(LOCAL_TINYXML) $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG)  $(LOCAL_SPDLOG)/include $(LOCAL_GLM) 
+
+LIBRARY_SEARCH_PATHS = /usr/local/lib $(LOCAL_BOOST)/lib $(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION) $(PROJECT_DIR) /usr/local/opencv-3.4.3/build/3rdparty/lib/$(CONFIGURATION) /usr/local/opencv-3.4.3/build/lib/$(CONFIGURATION)   /usr/local/Cellar/boost/1.67.0_1/lib /usr/local/Cellar/libdc1394/2.2.2_1/lib
+
+OTHER_LDFLAGS = $(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION)/libcinder.a $(LOCAL_BOOST)/lib/libboost_system-mt.a $(LOCAL_BOOST)/lib/libboost_filesystem-mt.a $(LOCAL_BOOST)/lib/libboost_date_time-mt.a $(LOCAL_BOOST)/lib/libboost_regex-mt.a  $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_core.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgcodecs.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_imgproc.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_highgui.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_features2d.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_video.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_objdetect.a $(LOCAL_OCV)/build/lib/$(CONFIGURATION)/libopencv_videoio.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libippiw.a $(LOCAL_OCV)/build/3rdparty/ippicv/ippicv_mac/lib/intel64/libippicv.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libittnotify.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibpng.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libIlmImf.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibwebp.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjpeg-turbo.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/libzlib.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibjasper.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibtiff.a $(LOCAL_OCV)/build/3rdparty/lib/$(CONFIGURATION)/liblibprotobuf.a
+
