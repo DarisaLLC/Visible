@@ -36,7 +36,15 @@ static tpair<P> GetRange(T * pels, uint32_t num)
 // --+---Input--------------------------------
 //   |
 
-std::pair<uint8_t,std::vector<std::pair<uint8_t, int> > > segmentationByInvaraintStructure(roiWindow<P8U>& src);
+namespace sliceSimilarity{
+    
+    typedef P8U pixel_t;
+    typedef struct  { pixel_t::value_type val; float corr; float weight;} slice_result_t;
+    typedef std::vector<slice_result_t> results_t;
+    
+    slice_result_t threshold (roiWindow<pixel_t>& src,results_t &);
+}
+
 
 roiWindow<P8U> extractAtLevel (roiWindow<P8U>& src, uint8_t thr);
 
@@ -46,5 +54,6 @@ roiWindow<P8U> convert(const uint16_t * pels, uint32_t width, uint32_t height);
 
 void upBiValueMap(roiWindow<P8U> & src, tpair<uint16_t> & range, std::shared_ptr<uint16_t> &);
 
+std::map<uint8_t, double> zscore (roiWindow<P8U>& src);
 
 #endif

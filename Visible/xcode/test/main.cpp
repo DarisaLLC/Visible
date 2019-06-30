@@ -74,6 +74,7 @@
 #include "vision/gauss.hpp"
 #include "vision/dense_motion.hpp"
 #include "vision/gradient.h"
+#include "vision/ipUtils.h"
 #include "algo_Lif.hpp"
 #include "cinder/PolyLine.h"
 #include "etw_utils.hpp"
@@ -197,6 +198,26 @@ typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
 #include "core/moreMath.h"
 #include "eigen_utils.hpp"
 
+
+TEST(zscore, basic){
+    auto res = dgenv_ptr->asset_path("voxel_ss_.png");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    cv::Mat src = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+
+    roiWindow<P8U> r8(src.cols, src.rows);
+    cpCvMatToRoiWindow8U (src, r8);
+    auto tres = zscore (r8);
+    for (const auto& kv : tres) {
+        std::cout << unsigned(kv.first) << " has value " << kv.second << std::endl;
+    }
+    std::vector<sliceSimilarity::slice_result_t> ires;
+    auto sres = sliceSimilarity::threshold(r8, ires);
+    std::cout << unsigned(sres.val) << " @ " <<  sres.corr << " w  " << sres.weight << std::endl;
+
+    
+}
+
 TEST(samples_1d, basic){
     
     auto res = dgenv_ptr->asset_path("signal.csv");
@@ -299,6 +320,8 @@ TEST(cardiac_ut, load_sm)
     
     
 }
+
+#if 0
 TEST(cardiac_ut, interpolated_length)
 {
     auto res = dgenv_ptr->asset_path("avg_baseline25_28_length_length_pct_short_pct.csv");
@@ -374,11 +397,9 @@ TEST(cardiac_ut, interpolated_length)
         cvplot::figure(name).series("Length").addValue(car->interpolated_length()).type(cvplot::Line).color(cvplot::Blue);
         cvplot::figure(name).show();
     }
-    
-    
-    
-    
 }
+#endif
+
 
 TEST(cardiac_ut, locate_contractions)
 {
@@ -444,54 +465,8 @@ TEST(cardiac_ut, locate_contractions)
     
 }
 
-TEST(UT_contraction_profiler, basic)
-{
-    contraction_analyzer::contraction_t ctr;
-    typedef vector<double>::iterator dItr_t;
-    
-    std::vector<double> fder, fder2;
-    fder.resize (oneD_example.size());
-    fder2.resize (oneD_example.size());
-    
-    // Get contraction peak ( valley ) first
-    auto min_iter = std::min_element(oneD_example.begin(),oneD_example.end());
-    ctr.contraction_peak.first = std::distance(oneD_example.begin(),min_iter);
-    
-    // Computer First Difference,
-    adjacent_difference(oneD_example.begin(),oneD_example.end(), fder.begin());
-    std::rotate(fder.begin(), fder.begin()+1, fder.end());
-    fder.pop_back();
-    auto medianD = stl_utils::median1D<double>(7);
-    fder = medianD.filter(fder);
-    std::transform(fder.begin(), fder.end(), fder2.begin(), [](double f)->double { return f * f; });
-    // find first element greater than 0.1
-    auto pos = find_if (fder2.begin(), fder2.end(),    // range
-                        std::bind2nd(greater<double>(),0.1));  // criterion
-    
-    ctr.contraction_start.first = std::distance(fder2.begin(),pos);
-    auto max_accel = std::min_element(fder.begin()+ ctr.contraction_start.first ,fder.begin()+ctr.contraction_peak.first);
-    ctr.contraction_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_start.first, max_accel);
-    ctr.contraction_max_acceleration.first += ctr.contraction_start.first;
-    auto max_relax = std::max_element(fder.begin()+ ctr.contraction_peak.first ,fder.end());
-    ctr.relaxation_max_acceleration.first = std::distance(fder.begin()+ ctr.contraction_peak.first, max_relax);
-    ctr.relaxation_max_acceleration.first += ctr.contraction_peak.first;
-    
-    // Initialize rpos to point to the element following the last occurance of a value greater than 0.1
-    // If there is no such value, initialize rpos = to begin
-    // If the last occurance is the last element, initialize this it to end
-    dItr_t rpos = find_if (fder2.rbegin(), fder2.rend(),    // range
-                           std::bind2nd(greater<double>(),0.1)).base();  // criterion
-    ctr.relaxation_end.first = std::distance (fder2.begin(), rpos);
-    
-    EXPECT_EQ(ctr.contraction_start.first,16);
-    EXPECT_EQ(ctr.contraction_peak.first,35);
-    EXPECT_EQ(ctr.contraction_max_acceleration.first,27);
-    EXPECT_EQ(ctr.relaxation_max_acceleration.first,43);
-    EXPECT_EQ(ctr.relaxation_end.first,52);
-    
- 
-    
-}
+
+
 TEST(ut_gsl, basic){
     double x = 5.0;
     double y = gsl_sf_bessel_J0 (x);
@@ -1591,6 +1566,7 @@ TEST(ut_stl_utils, accOverTuple)
     
 }
 
+#if 0
 TEST(UT_smfilter, basic)
 {
     vector<int> ranks;
@@ -1611,9 +1587,8 @@ TEST(UT_smfilter, basic)
         //        std::cout << "[" << ii << "] : " << norms[ii] << "     "  << std::abs(norms[ii] - median_value) << "     "  << ranks[ii] << "     " << norms[ranks[ii]] << std::endl;
         //        std::cout << "[" << ii << "] : " << norms[ii] << "     " << output[ii] << std::endl;
     }
-    
-    
 }
+#endif
 
 TEST(basicU8, histo)
 {
