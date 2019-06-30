@@ -148,9 +148,9 @@ void upBiValueMap(roiWindow<P8U> & src, tpair<uint16_t> & range, std::shared_ptr
     }
 }
 
-
-
-std::pair<uint8_t,std::vector<std::pair<uint8_t,int> > > segmentationByInvaraintStructure(roiWindow<P8U>& src)
+namespace sliceSimilarity{
+    
+    slice_result_t threshold(roiWindow<pixel_t>& src, std::vector<slice_result_t>& i3results)
 {
 
     histoStats hh;
@@ -158,10 +158,9 @@ std::pair<uint8_t,std::vector<std::pair<uint8_t,int> > > segmentationByInvaraint
      std::cout << hh;
     std::vector<uint8_t> valid_bins;
     valid_bins.resize(0);
-    int two_pct = hh.n() / 50;
     for (unsigned binh = 0; binh < hh.histogram().size(); binh++)
     {
-        if (hh.histogram()[binh] > two_pct ) valid_bins.push_back((uint8_t) binh);
+        if (hh.histogram()[binh] > 0 ) valid_bins.push_back((uint8_t) binh);
     }
     
     auto width = src.width();
@@ -178,8 +177,9 @@ std::pair<uint8_t,std::vector<std::pair<uint8_t,int> > > segmentationByInvaraint
 
 
     roiWindow<P8U> tmp(src.width(), src.height());
-    std::vector<std::pair<uint8_t, int> > i3results;
-    int last_corr_val(0);
+    i3results.clear();
+    int max_corr_val(0);
+    float max_weight = 0;
     uint8_t peak = 255;
     roiWindow<P8U> last;
 
@@ -194,18 +194,27 @@ std::pair<uint8_t,std::vector<std::pair<uint8_t,int> > > segmentationByInvaraint
         corrfunc.areaFunc();
         CorrelationParts cp;
         corrfunc.epilog(cp);
-        int32_t weight = (1000*hh.histogram()[valid_bins[tt]]) / hh.n();
-        i3results.push_back(make_pair(valid_bins[tt],weight));
+        auto weight = (hh.histogram()[valid_bins[tt]]) / (float) hh.n();
+        slice_result_t tmp;
+        tmp.val = valid_bins[tt]; tmp.corr = cp.r(); tmp.weight = weight;
+        i3results.push_back(tmp);
         std::cout << "[" << (int) valid_bins[tt] << "]: " << cp.milR() << "   " << weight << std::endl;
-        if (cp.milR() >= last_corr_val)
+        if (cp.milR() >= max_corr_val)
         {
-            last_corr_val = cp.milR();
+            max_weight = weight;
+            max_corr_val = cp.milR();
             peak = valid_bins[tt];
         }
     }
-
-    return make_pair(peak, i3results);
+    slice_result_t rtn;
+    rtn.val = peak; rtn.corr = max_corr_val; rtn.weight = max_weight;
+    return rtn;
 }
+
+    
+    
+}
+
 
 roiWindow<P8U> extractAtLevel (roiWindow<P8U>& src, uint8_t thr)
 {
@@ -218,6 +227,53 @@ roiWindow<P8U> extractAtLevel (roiWindow<P8U>& src, uint8_t thr)
     pixelMap<uint8_t, uint8_t> converted(src.pelPointer(0, 0), dst.pelPointer(0, 0), width, width, width, height, map);
     converted.areaFunc();
     return dst;
+}
+
+
+std::map<uint8_t, double> zscore (roiWindow<P8U>& src)
+{
+    
+    histoStats hh;
+    hh.from_image<P8U>(src);
+    
+    auto compute_r = [](unsigned mN, double mSi, double mSm, double mSii, double mSmm, double mSim)
+    {
+        assert(mSi >= 0.0);
+        assert(mSm >= 0.0);
+        double mR = 0.0;
+        
+        auto mEi = ((mN * mSii) - (mSi * mSi));
+        auto mEm = ((mN * mSmm) - (mSm * mSm));
+        auto Eim = mEi * mEm;
+        
+        auto mCosine = ((mN * mSim) - (mSi * mSm));
+        
+        // Avoid divide by zero. Singular will indicate 0 standard deviation in one or both
+        if (Eim != 0.0)
+            mR = (mCosine * mCosine) / Eim;
+        
+        return mR;
+    };
+    
+    
+    std::map<uint8_t, double> scores;
+    
+    unsigned n = src.width()*src.height();
+    const auto histg = hh.histogram();
+    double si (hh.sum());
+    double sii (hh.sumSquared());
+    
+    for (unsigned binh = 0; binh < hh.histogram().size(); binh++)
+    {
+        auto val = histg [binh];
+        double sm = val;
+        double smm = val;
+        double sim = binh*val;
+        auto rr = compute_r(n, si, sm, sii, smm, sim);
+        scores[binh] = rr;
+    }
+    
+    return scores;
 }
 
 
