@@ -80,6 +80,7 @@
 #include "etw_utils.hpp"
 #include "core/lineseg.hpp"
 
+
 using namespace etw_utils;
 
 // @FIXME Logger has to come before these
@@ -198,6 +199,86 @@ typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
 #include "core/moreMath.h"
 #include "eigen_utils.hpp"
 
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/geometry/geometries/adapted/boost_tuple.hpp>
+
+BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
+
+
+namespace bg = boost::geometry;
+namespace bgi = boost::geometry::index;
+
+
+TEST(chull, basic){
+    typedef bg::model::point<float, 2, bg::cs::cartesian> point_2d;
+    typedef bg::model::box<point_2d> box_2d;
+    typedef bg::model::polygon<point_2d> polygon_2d;
+    typedef boost::shared_ptr<polygon_2d> shp_2d;
+    typedef std::pair<box_2d, shp_2d> value_2d;
+    
+    // create the rtree using default constructor
+    bgi::rtree< value_2d, bgi::linear<16, 4> > rtree;
+    
+    // create some polygons and fill the spatial index
+    for ( unsigned i = 0 ; i < 10 ; ++i )
+    {
+        // create a polygon
+        shp_2d p_ref (new polygon_2d ());
+        for ( float a = 0 ; a < 6.28316f ; a += 1.04720f )
+        {
+            float x = i + int(10*::cos(a))*0.1f;
+            float y = i + int(10*::sin(a))*0.1f;
+            p_ref->outer().push_back(point_2d(x, y));
+        }
+
+        // display new polygon
+        std::cout << bg::wkt<polygon_2d>(*p_ref) << std::endl;
+        
+        // calculate polygon bounding box
+        box_2d b = bg::return_envelope<box_2d>(*p_ref);
+        // insert new value
+        rtree.insert(std::make_pair(b, p_ref));
+        
+        polygon_2d hull;
+        boost::geometry::convex_hull(*p_ref, hull);
+    
+        using boost::geometry::dsv;
+        std::cout
+        << "polygon: " << dsv(*p_ref) << std::endl
+        << "hull: " << dsv(hull) << std::endl
+        ;
+    }
+    // find values intersecting some area defined by a box
+    box_2d query_box(point_2d(0, 0), point_2d(5, 5));
+    std::vector<value_2d> result_s;
+    rtree.query(bgi::intersects(query_box), std::back_inserter(result_s));
+    
+    // find 5 nearest values to a point
+    std::vector<value_2d> result_n;
+    rtree.query(bgi::nearest(point_2d(0, 0), 5), std::back_inserter(result_n));
+    
+    // note: in Boost.Geometry the WKT representation of a box is polygon
+    
+    // note: the values store the bounding boxes of polygons
+    // the polygons aren't used for querying but are printed
+    
+    // display results
+    std::cout << "spatial query box:" << std::endl;
+    std::cout << bg::wkt<box_2d>(query_box) << std::endl;
+    std::cout << "spatial query result:" << std::endl;
+    BOOST_FOREACH(value_2d const& v, result_s)
+    std::cout << bg::wkt<polygon_2d>(*v.second) << std::endl;
+    
+    std::cout << "knn query point:" << std::endl;
+    std::cout << bg::wkt<point_2d>(point_2d(0, 0)) << std::endl;
+    std::cout << "knn query result:" << std::endl;
+    BOOST_FOREACH(value_2d const& v, result_n)
+    std::cout << bg::wkt<polygon_2d>(*v.second) << std::endl;
+
+
+}
+
 
 TEST(zscore, basic){
     auto res = dgenv_ptr->asset_path("voxel_ss_.png");
@@ -217,6 +298,97 @@ TEST(zscore, basic){
 
     
 }
+
+
+TEST(ut_labelBlob, mult_level)
+{
+    using blob = svl::labelBlob::blob;
+    
+    static bool s_results_ready = false;
+    static bool s_graphics_ready = false;
+    static int64_t cid = 0;
+    
+    auto res = dgenv_ptr->asset_path("voxel_ss_.png");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    cv::Mat src = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    EXPECT_EQ(src.channels() , 1);
+    EXPECT_EQ(src.cols , 510);
+    EXPECT_EQ(src.rows , 126);
+
+    roiWindow<P8U> r8(src.cols, src.rows);
+    cpCvMatToRoiWindow8U (src, r8);
+    
+    histoStats hh;
+    hh.from_image<P8U>(r8);
+    std::cout << hh;
+    std::vector<uint8_t> valid_bins;
+    valid_bins.resize(0);
+    for (unsigned binh = 0; binh < hh.histogram().size(); binh++)
+    {
+        if (hh.histogram()[binh] > 0 ) valid_bins.push_back((uint8_t) binh);
+    }
+    //auto width = r8.width();
+    //auto height = r8.height();
+    
+    // Create lut mapps
+    std::vector<uint8_t> backtoback(512, 0);
+    for (int ii = 256; ii < 512; ii++)
+        backtoback[ii] = 1;
+    
+    // Start at mid point between 0000 and 1111
+    std::vector<uint8_t>::const_iterator pmMid = backtoback.begin();
+    std::advance(pmMid, 256);
+    namedWindow( " Multi Label ", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+    
+    for (unsigned tt = 0; tt < valid_bins.size(); tt++)
+    {
+        s_results_ready = false;
+        s_graphics_ready = false;
+        cid = 0;
+        
+        auto tmp = extractAtLevel(r8, tt);
+        cv::Mat mask (tmp.height(), tmp.width(), CV_8UC(1), tmp.pelPointer(0,0), size_t(tmp.rowUpdate()));
+        
+        labelBlob::ref lbr = labelBlob::create(src, mask, 6, 666);
+        EXPECT_EQ(lbr == nullptr , false);
+        std::function<labelBlob::results_ready_cb> res_ready_lambda = [](int64_t& cbi){ s_results_ready = ! s_results_ready; cid = cbi;};
+        std::function<labelBlob::graphics_ready_cb> graphics_ready_lambda = [](){ s_graphics_ready = ! s_graphics_ready;};
+        boost::signals2::connection results_ready_ = lbr->registerCallback(res_ready_lambda);
+        boost::signals2::connection graphics_ready_ = lbr->registerCallback(graphics_ready_lambda);
+        EXPECT_EQ(false, s_results_ready);
+        EXPECT_EQ(true, cid == 0);
+        EXPECT_EQ(true, lbr->client_id() == 666);
+        lbr->run();
+        while(!s_results_ready){std::this_thread::yield(); }
+        
+        EXPECT_EQ(true, s_results_ready);
+        EXPECT_EQ(true, lbr->client_id() == 666);
+        EXPECT_EQ(true, cid == 666);
+        EXPECT_EQ(true, lbr->hasResults());
+        const std::vector<blob> blobs = lbr->results();
+        std::cout << "["<< tt << "]: " << blobs.size() << std::endl;
+        
+        
+#ifdef INTERACTIVE
+        try{
+        lbr->drawOutput();
+        while(! s_graphics_ready){ std::this_thread::yield(); }
+        EXPECT_EQ(true, s_graphics_ready);
+        /// Show in a window
+        std::string msg = " LabelBlob " + toString(tt) + " ";
+        imshow( msg, lbr->graphicOutput());
+        cv::waitKey();
+        }
+        catch(const std::exception & ex)
+        {
+            std::cout <<  ex.what() << std::endl;
+        }
+
+#endif
+    }
+}
+
 
 TEST(samples_1d, basic){
     
@@ -974,14 +1146,18 @@ TEST (ut_fit_ellipse, local_maxima){
     DrawShape(pels, frame);
     cv::Mat im (pels.height(), pels.width(), CV_8UC(1), pels.pelPointer(0,0), size_t(pels.rowUpdate()));
     
-    std::vector<Point2f> peaks;
-    PeakDetect(im, peaks, 0);
+    std::vector<cv::Point> peaks;
+    PeakDetect(im, peaks);
     EXPECT_EQ(peaks.size(),gold.size());
     for (auto cc = 0; cc < peaks.size(); cc++)
         EXPECT_TRUE(same_point(peaks[cc], gold[cc],0.05));
     
+    std::vector<cv::Point2f> fpeaks;
+    for (auto& peak : peaks){
+        fpeaks.emplace_back(peak.x+0.5,peak.y+0.5);
+    }
     
-    RotatedRect box = fitEllipse(peaks);
+    RotatedRect box = fitEllipse(fpeaks);
     EXPECT_TRUE(same_point(box.center, center_gold, 0.05));
     EXPECT_TRUE(svl::equal(box.angle, 60.85f, 1.0f));
     
@@ -1143,9 +1319,10 @@ TEST (ut_3d_per_element, standard_dev)
     
     cv::Mat m_sum, m_sqsum;
     int image_count = 0;
+    std::atomic<bool> done;
     std::vector<std::thread> threads(1);
     threads[0] = std::thread(SequenceAccumulator(),std::ref(frames),
-                             std::ref(m_sum), std::ref(m_sqsum), std::ref(image_count));
+                             std::ref(m_sum), std::ref(m_sqsum), std::ref(image_count), std::ref(done));
     
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     EXPECT_EQ(3, image_count);
