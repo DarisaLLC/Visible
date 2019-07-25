@@ -236,7 +236,11 @@ cv::RotatedRect svl::labelBlob::blob::rotated_roi_PCA() const {
 }
 
 bool labelBlob::hasResults() const { return m_results_ready; }
-
+/*
+ Params:
+ grayImage: grey scale image
+ threshold_out : mask of blob area
+*/
 void  labelBlob::reload (const cv::Mat& grayImage, const cv::Mat&threshold_output,const int64_t client_id, const int min_area_count) const {
     std::lock_guard<std::mutex> lock( m_mutex );
     m_min_area = min_area_count;
@@ -277,9 +281,11 @@ void  labelBlob::run() const {
 
     // Use m_stats.at<int>(i, cv::CC_STAT_AREA) to checkout the area
     // std::cout << i << " :  " << m_stats.at<int>(i, cv::CC_STAT_AREA) << std::endl;
-    for(uint32_t i=1; i<=m_stats.rows; i++)
+    // Explicitly return sorted by area
+    for(uint32_t i=1; i<m_stats.rows; i++)
     {
-        if( m_stats.at<int>(i, cv::CC_STAT_AREA) < m_min_area ) continue;
+        int area = m_stats.at<int>(i, cv::CC_STAT_AREA);
+        if( area < m_min_area) continue;
         int x = m_stats.at<int>(Point(0, i));
         int y = m_stats.at<int>(Point(1, i));
         int w = m_stats.at<int>(Point(2, i));
@@ -289,10 +295,14 @@ void  labelBlob::run() const {
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end-m_start;
         auto id = std::chrono::duration_cast<std::chrono::microseconds>(diff).count();
-        m_blobs.emplace_back(i, id, roi);
+        m_blobs.emplace_back(i, id, roi, area);
         m_blobs.back().update_moments(m_grey);
         m_blobs.back().update_points(lablemap[i]);
     }
+    std::sort (m_blobs.begin(), m_blobs.end(),[](const blob&a, const blob&b){
+        return a.iarea() > b.iarea();
+    });
+    
     // Inform listeners of new programs !
     if (signal_results_ready && signal_results_ready->num_slots() > 0)
         signal_results_ready->operator()(m_client_id);

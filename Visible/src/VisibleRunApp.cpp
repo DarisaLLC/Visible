@@ -202,7 +202,7 @@ void VisibleRunApp::setup()
         
         bool just_list_chapters = m_args.size() == 3 && is_lif_content && m_args[2] == "list";
         bool selected_by_dialog_no_custom_content_no_chapter = m_args.size() == 2;
-        bool chapter_ok =  m_args.size() == 3;
+        bool chapter_ok =  m_args.size() >= 3;
         bool custom_id_exists = m_args.size() == 4;
         bool known_custom_type =  custom_id_exists && lifIO::isKnownCustomContent(m_args[3]);
         bool chapter_ok_unknown_custom_content = custom_id_exists && ! known_custom_type;
@@ -266,6 +266,8 @@ void VisibleRunApp::setup()
         if (selected_by_dialog_no_custom_content_no_chapter){ // Selected by File Dialog
             m_args.push_back(chapter);
         }
+        std::cout << mBrowser->name_to_index_map() << std::endl;
+        
         auto indexItr = mBrowser->name_to_index_map().find(m_args[2]);
         if (indexItr != mBrowser->name_to_index_map().end()){
             auto serie = mBrowser->get_serie_by_index(indexItr->second);

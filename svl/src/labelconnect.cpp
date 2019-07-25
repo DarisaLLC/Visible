@@ -100,7 +100,7 @@ template<typename P>
 const typename labelConnect<P>::label_bbox_map_t& labelConnect<P>::label_bbox_map () const { return label2roi_; }
 
 template<typename P>
-const roiWindow<P32S> labelConnect<P>::label () const { return label_; }
+const roiWindow<P32S>& labelConnect<P>::label () const { return label_; }
 
 template<typename P>
 uint32_t labelConnect<P>::regions () const { return regions_; }

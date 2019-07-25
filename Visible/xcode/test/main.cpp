@@ -79,9 +79,17 @@
 #include "cinder/PolyLine.h"
 #include "etw_utils.hpp"
 #include "core/lineseg.hpp"
+#include "vision/ellipse.hpp"
 
+
+#include <stdio.h>
+#include <gsl/gsl_sf_bessel.h>
+#include "core/moreMath.h"
+#include "eigen_utils.hpp"
+#include "contraction_geometry.hpp"
 
 using namespace etw_utils;
+using namespace cgeom;
 
 // @FIXME Logger has to come before these
 #include "ut_units.hpp"
@@ -194,21 +202,63 @@ typedef std::weak_ptr<Surface8u>	SurfaceWeakRef;
 typedef std::weak_ptr<Surface16u>	Surface16uWeakRef;
 typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
 
-#include <stdio.h>
-#include <gsl/gsl_sf_bessel.h>
-#include "core/moreMath.h"
-#include "eigen_utils.hpp"
-
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/polygon.hpp>
-#include <boost/geometry/geometries/adapted/boost_tuple.hpp>
-
-BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 
 
-namespace bg = boost::geometry;
-namespace bgi = boost::geometry::index;
 
+#include "ut_lif.hpp"
+
+TEST(cluster_2d, basic){
+    
+    std::vector<point2d_t> points;
+    
+    for (double x = 0.0 ; x < 10.0 ; x += 1.0)
+        for (double y = 0.0 ; y < 10.0 ; y += 1.0)
+            points.push_back(point2d_t{x, y});
+    
+    std::vector<cluster2d_t> clusters;
+    
+    find_2dclusters(points, 3.0, clusters);
+    
+    for(size_t i = 0 ; i < clusters.size() ; ++i) {
+        std::cout << "Cluster " << i << std::endl;
+        for (auto const& p : clusters[i]) {
+            std::cout << bg::wkt(p) << std::endl;
+        }
+    }
+}
+
+
+TEST(cluster, basic){
+
+    std::vector<point3d_t> points;
+    ellipseShape one;
+    one.setEllipse(5.0, 5.0, 3.0, 2.0, 0.0);
+    for (double y = 0.0 ; y < 10.0 ; y += 1.0){
+        for (double x = 0.0 ; x < 10.0 ; x += 1.0){
+                double rz = 0.0;
+                if(! one.insideEllipse(x,y) )
+                    points.push_back(point3d_t{x, y, rz});
+                else{
+                    rz = one.normalizedDistanceFromOrigin(x, y);
+                    points.push_back(point3d_t{x, y, rz});
+                }
+                std::cout << (int)(10*rz) << '\t';
+                if(x == 9.0) std::cout << std::endl;
+        }
+        
+    }
+        std::vector<cluster3d_t> clusters;
+        
+        find_clusters(points, 3.0, clusters);
+        
+        for(size_t i = 0 ; i < clusters.size() ; ++i) {
+            if (clusters[i].empty()) continue;
+            std::cout << "Cluster " << i << std::endl;
+            for (auto const& p : clusters[i]) {
+                std::cout << bg::wkt(p) << std::endl;
+            }
+        }
+    }
 
 TEST(chull, basic){
     typedef bg::model::point<float, 2, bg::cs::cartesian> point_2d;
@@ -917,9 +967,6 @@ TEST (ut_rotated_rect, basic){
     
 }
 
-
-
-#include "ut_lif.hpp"
 
 TEST(serialization, eigen){
     Eigen::MatrixXd test = Eigen::MatrixXd::Random(10, 3);

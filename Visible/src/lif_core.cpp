@@ -96,6 +96,15 @@ void lif_serie_processor::create_named_tracks (const std::vector<std::string>& n
     m_contraction_pci_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
     
     switch(names.size()){
+        case 2:
+            m_flurescence_tracksRef->resize (1);
+            m_contraction_pci_tracksRef->resize (1);
+            m_shortterm_pci_tracks.resize (1);
+            for (auto tt = 0; tt < names.size()-1; tt++)
+                m_flurescence_tracksRef->at(tt).first = plot_names[tt];
+            m_contraction_pci_tracksRef->at(0).first = plot_names[1];
+            m_shortterm_pci_tracks.at(0).first = plot_names[2];
+            break;
         case 3:
             m_flurescence_tracksRef->resize (2);
             m_contraction_pci_tracksRef->resize (1);
@@ -145,6 +154,9 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
     lock.unlock();
     
     int channel_to_use = m_channel_count - 1;
+    m_3d_stats_done = false;
+    run_volume_variances(m_all_by_channel[channel_to_use]);
+    while(!m_3d_stats_done){ std::this_thread::yield();}
     run_detect_geometry (channel_to_use);
     
     
@@ -163,7 +175,7 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
 
 svl::stats<int64_t> lif_serie_processor::run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_3d_stats_done = false;
+
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
     std::vector<std::tuple<uint8_t,uint8_t>> rts;
     std::vector<std::thread> threads(1);
@@ -291,20 +303,31 @@ std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci_on_
 
 /*
  * 1 monchrome channel. Compute 3D Standard Dev. per pixel
+ * the atomic bool m_3d_stats_done is set to true
  */
 
 void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_3d_stats_done = false;
+
     cv::Mat m_sum, m_sqsum;
     int image_count = 0;
     std::vector<std::thread> threads(1);
     threads[0] = std::thread(SequenceAccumulator(),std::ref(images),
-                             std::ref(m_sum), std::ref(m_sqsum), std::ref(image_count));
+                             std::ref(m_sum), std::ref(m_sqsum), std::ref(image_count), std::ref(m_3d_stats_done));
     
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_var_image);
-    cv::normalize(m_var_image, m_var_image, 0, 255, NORM_MINMAX, CV_8UC1);
+    /*
+     * Collect local maximas of var field
+     */
+    m_var_peaks.resize(0);
+    svl::PeakDetect(m_var_image, m_var_peaks);
+    cv::Mat tmp = m_var_image.clone();
+    tmp = 0.0;
+    for(cv::Point& peak : m_var_peaks){
+        tmp.at<float>(peak.y,peak.x) = m_var_image.at<float>(peak.y,peak.x);
+    }
+    cv::normalize(tmp, m_var_image, 0, 255, NORM_MINMAX, CV_8UC1);
     
 }
 
@@ -329,7 +352,7 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
     {
         auto su8 = frames->getFrame(m_frameCount);
         auto ts = m_frameCount;
-        auto m1 = svl::NewRefSingleFromSurface (su8, names, ts);
+        std::shared_ptr<roiWindow<P8U>> m1 = svl::NewRefSingleFromSurface (su8, names, ts);
         
         switch (m_channel_count)
         {
@@ -346,6 +369,22 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
                     for (auto cc = 0; cc < m3.planes(); cc++)
                     {
                         const iRect& ir = m3.roi(cc);
+                        m_channel_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
+                    }
+                }
+                break;
+            }
+            case 2  :
+            {
+                auto m2 = roiFixedMultiWindow<P8UP2,512,256,2>(*m1, names, ts);
+                for (auto cc = 0; cc < m2.planes(); cc++)
+                    m_all_by_channel[cc].emplace_back(m2.plane(cc));
+                
+                if (m_channel_rois.empty())
+                {
+                    for (auto cc = 0; cc < m2.planes(); cc++)
+                    {
+                        const iRect& ir = m2.roi(cc);
                         m_channel_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
                     }
                 }

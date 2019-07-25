@@ -2,7 +2,7 @@
 #ifndef _WINDOW_H_
 #define _WINDOW_H_
 
-
+#include <type_traits>
 #include <iostream>
 #include <cstring>
 #include <iomanip>
@@ -27,11 +27,13 @@ public:
     typedef iRect rect_t;
     typedef rect_t::point_t point_t;
     typedef T traits_t;
-    typedef typename PixelType<T>::pixel_t pixel_t;
+    typedef typename T::value_type pixel_t;
     typedef pixel_t * pixel_ptr_t;
     typedef int64_t timestamp_t;
     typedef root<T> root_t;
     typedef std::shared_ptr<root_t> sharedRoot_t;
+    
+//    typename std::enable_if<is_class<T>::value, T>::type check(T t){ return t;}
     
 
     // Constructors

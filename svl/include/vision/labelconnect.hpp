@@ -25,7 +25,7 @@ public:
     typedef std::map<bin_type,iRect> label_bbox_map_t;
     labelConnect (const roiWindow<P>& src);
     bool run ();
-    const roiWindow<P32S> label () const;
+    const roiWindow<P32S>& label () const;
     uint32_t regions () const;
     const label_bbox_map_t& label_bbox_map () const;
 private:

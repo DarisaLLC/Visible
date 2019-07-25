@@ -42,7 +42,7 @@
       </AdditionalOptions>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -67,6 +67,10 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "&quot;/Volumes/medvedev/Users/arman/Downloads/190724 Action Potential_Single island.lif&quot;"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "/Volumes/datastore/arman/Movies/testpattern.mov"
             isEnabled = "NO">
          </CommandLineArgument>
@@ -80,19 +84,31 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Users/arman/Pictures/lif/3channels.lif"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Users/arman/Pictures/lif/Sample1.lif"
+            argument = "/Users/arman/Pictures/lif/ArmanVideosVerapamil.lif"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "Series014"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "Series007"
+            argument = "Series018"
             isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "Series009"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "VERA7"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "&quot;AP SingleConcractHDCell&quot;"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "IDLab_0"

@@ -58,7 +58,7 @@ void lif_serie_processor::generate_affine_windows () {
 
 void lif_serie_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_3d_stats_done = false;
+
     
     std::vector<std::thread> threads(1);
     threads[0] = std::thread(&lif_serie_processor::generateVoxelsAndSelfSimilarities, this, images);
@@ -261,20 +261,29 @@ void lif_serie_processor::internal_generate_affine_profiles(){
  
  @param mono gray scale image
  @param bi_level bi_level ( i.e. binarized image )
+ ss_image_available signal calls this function
  */
 void lif_serie_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level, iPair& pad_trans){
-    
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
     assert(mono.cols == bi_level.cols && mono.rows == bi_level.rows);
+    assert(m_3d_stats_done);
+    
     cv::Rect padded_rect, image_rect;
+
+    // Sum variances under each cluster
+    // Variances are in m_var_image
     
-    m_main_blob = labelBlob::create(mono, bi_level, m_params.min_seqmentation_area(), 666);
+    /*
+    * Cluster sim space using aprior knowledge of looking for 2 areas.
+    * @todo add support for general input of number of areas or auto
+    */
+    m_main_blob = labelBlob::create(mono,  bi_level, m_params.min_seqmentation_area(), 666);
     
-//    auto m_surface_affine = std::make_unique<cv::Mat>();
-//    auto m_cell_ends = std::make_unique< std::vector<sides_length_t>>(2);
-//    auto m_blobs = std::make_unique<std::vector<blob>>();
-//    auto m_ab = std::make_unique<fPair>();
+  
+    
     auto cache_path = mCurrentSerieCachePath;
+ 
+    
     std::function<labelBlob::results_cb> res_ready_lambda = [&,
                                                              m_blobs = m_blobs,
                                                              mono=mono,
@@ -347,6 +356,17 @@ void lif_serie_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_leve
         }
     };
  
+    if(fs::exists(mCurrentSerieCachePath)){
+        std::string imagename = "voxel_binary_.png";
+        auto image_path = cache_path / imagename;
+        cv::imwrite(image_path.string(), bi_level);
+        {
+            std::string imagename = "peaks_.png";
+            auto image_path = cache_path / imagename;
+            cv::imwrite(image_path.string(), m_var_image);
+        }
+    }
+    
     boost::signals2::connection results_ready_ = m_main_blob->registerCallback(res_ready_lambda);
     m_main_blob->run_async();
   

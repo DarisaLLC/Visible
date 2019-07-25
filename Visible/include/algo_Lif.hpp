@@ -301,7 +301,7 @@ public:
     
     // Return 2D latice of pixels over time
     void generateVoxels_on_channel (const int channel_index);
-    void generateVoxels (const std::vector<roiWindow<P8U>>&);
+    void generateVoxelsOfSampled (const std::vector<roiWindow<P8U>>&);
     
     // Return 2D latice of voxel self-similarity
     void generateVoxelSelfSimilarities ();
@@ -316,6 +316,7 @@ public:
     const fPair& ellipse_ab () const;
     const fPair& length_range () const;
     const std::vector<sides_length_t>& cell_ends() const;
+    
     
     // Update. Called also when cutoff offset has changed
     void update ();
@@ -433,6 +434,7 @@ private:
     std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;
     labelBlob::ref m_main_blob;
     std::vector<blob> m_blobs;
+    std::vector<cv::Point> m_var_peaks;
     std::vector<std::vector<float>> m_hz_profiles;
     std::vector<std::vector<float>> m_vt_profiles;
     std::vector<float> m_cell_lengths;

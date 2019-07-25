@@ -38,7 +38,7 @@ namespace svl
     {
         assert(ci >= 0 && ci < 4);
         
-        uint8_t* pixels = onec.getData();
+        P8U::value_type* pixels = onec.getData();
         roiWindow<P8U> window (onec.getWidth (),onec.getHeight (), image_memory_alignment_policy::align_first_row);
         
         window.copy_pixels_from(pixels, onec.getWidth (),onec.getHeight (), (int32_t) onec.getRowBytes (), ci);
