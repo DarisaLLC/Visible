@@ -29,8 +29,14 @@ public:
     // ellipse support
     double support;
     
-    ellipseShape();
-    ellipseShape(const ellipseShape &e);
+    ellipseShape() {}
+    ellipseShape(const ellipseShape &e){
+        x = e.x;
+        y = e.y;
+        a = e.a;
+        b = e.b;
+        phi = e.phi;
+    }
 
     ellipseShape(const cv::RotatedRect& rect){
         x = rect.center.x;
@@ -99,12 +105,26 @@ public:
         return M_PI*(1.5*(a + b) - sqrt(a*b));
     }
     
-    bool insideEllipse(double _a, double _b, double _x0, double _y0, double _phi, double _x, double _y) const{
+    static bool insideEllipse(double _a, double _b, double _x0, double _y0, double _phi, double _x, double _y) {
         double dx = ((_x - _x0)*cos(_phi) + (_y-_y0)*sin(_phi)) / _a;
         double dy = (-(_x - _x0)*sin(_phi) + (_y-_y0)*cos(_phi)) / _b;
         double distance = dx * dx + dy * dy;
         return (distance < 1.0) ? 1 : 0;
         
+    }
+    
+    bool insideEllipse(double _x, double _y) const{
+        double dx = ((_x - x)*cos(phi) + (_y-y)*sin(phi)) / a;
+        double dy = (-(_x - x)*sin(phi) + (_y-y)*cos(phi)) / b;
+        double distance = dx * dx + dy * dy;
+        return (distance < 1.0) ? 1 : 0;
+        
+    }
+    
+    double normalizedDistanceFromOrigin(double _x, double _y) const{
+        double dx = ((_x - x)*cos(phi) + (_y-y)*sin(phi)) / a;
+        double dy = (-(_x - x)*sin(phi) + (_y-y)*cos(phi)) / b;
+        return 1.0 - (dx * dx + dy * dy);
     }
     
     cv::Mat imagePoints (){

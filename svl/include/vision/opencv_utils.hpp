@@ -19,6 +19,32 @@ using namespace svl;
 namespace svl
 {
     
+    cv::Mat getPadded (const cv::Mat& src, uiPair pad, double pad_value);
+    
+    void findPeaks(const cv::Mat& input, std::vector<cv::Point>& output);
+    
+    std::string matInfo(const cv::Mat &m);
+    
+    cv::Mat matRotateSize(cv::Size sizeIn, cv::Point2f center, float angle, float &minx, float &maxx, float &miny, float &maxy, float scale);
+    
+    void matRing(const cv::Mat &image, cv::Mat &result);
+    
+    void matWarpRing(const cv::Mat &image, cv::Mat &result, std::vector<float> angles);
+    
+    void matWarpAffine(
+                                      const cv::Mat &image,
+                                      cv::Mat &result,
+                                      cv::Point2f center,
+                                      float angle,
+                                      float scale,
+                                      cv::Point2f offset,
+                                      cv::Size size,
+                                      int borderMode=cv::BORDER_REPLICATE,
+                                      cv::Scalar borderValue=cv::Scalar::all(0),
+                                      cv::Point2f reflect=cv::Point2f(0,0),
+                                      int flags=cv::INTER_LINEAR);
+    
+
     cv::Mat gaborKernel(int ks, double sig, double th, double lm, double ps);
   
     
@@ -93,7 +119,7 @@ namespace svl
     double correlation (cv::Mat &image_1, cv::Mat &image_2);
     double correlation_ocv(const roiWindow<P8U>& i, const roiWindow<P8U>& m);
     void cumani_opencv (const cv::Mat& input_bgr, cv::Mat& gradAbs, cv::Mat& orientation, float& maxVal);
-    void PeakDetect(const cv::Mat& space, std::vector<Point2f>& peaks, uint8_t accept);
+    void PeakDetect(const cv::Mat& space, std::vector<cv::Point>& peaks);
     void PeakMapDetect(const cv::Mat& space, std::unordered_map<uint8_t,std::vector<Point2f>>& peaks, uint8_t accept);
     
     double getPSNR(const cv::Mat& I1, const cv::Mat& I2);

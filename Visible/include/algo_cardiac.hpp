@@ -57,6 +57,10 @@ struct IntensityStatisticsRunner
 };
 
 
+/*
+struct contractionTrackMaker
+ Create named tracks for contraction
+*/
 struct contractionTrackMaker
 {
     contractionTrackMaker (contractionLocator::contraction_t& ctr, timedVecOfVals_t& ilen, timedVecOfVals_t& elo, timedVecOfVals_t& force)
@@ -81,6 +85,10 @@ struct contractionTrackMaker
     }
 };
 
+/*
+struct trackMaker
+ Single value trackMaker
+*/
 struct trackMaker
 {
     trackMaker (const vector<float>& norm_lengths, timedVecOfVals_t& results)
@@ -103,8 +111,10 @@ struct trackMaker
 };
 
 
-// Create sin signals
-
+/*
+struct UnitSyntheticProducer
+ Synthetic signal generator ( trig )
+*/
 template<float (*TF)(float), int S,  int E>
 struct UnitSyntheticProducer
 {
@@ -129,14 +139,20 @@ struct UnitSyntheticProducer
 
 
 
+/*
+struct SequenceAccumulator
+ Callable to produce sum of per pixel variances over the pixel or a local neigbourhood around
+ atomic bool is set to true to indicate completion. 
+*/
 struct SequenceAccumulator
 {
 
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     
-    void operator()(channel_images_t& channel_images, cv::Mat& m_sum, cv::Mat& m_sqsum, int& image_count,
+    void operator()(channel_images_t& channel_images, cv::Mat& m_sum, cv::Mat& m_sqsum, int& image_count, std::atomic<bool>& done,
                     uint8_t spatial_x = 0, uint8_t spatial_y = 0 )
     {
+        done = false;
         image_count = 0;
         for (const roiWindow<P8U>& ir : channel_images){
             cv::Mat im (ir.height(), ir.width(), CV_8UC(1), ir.pelPointer(0,0), size_t(ir.rowUpdate()));
@@ -154,6 +170,7 @@ struct SequenceAccumulator
             cv::accumulateSquare( im, m_sqsum );
             image_count++;
         }
+        done = true;
     }
     
 
@@ -176,6 +193,10 @@ struct SequenceAccumulator
 
 };
 
+/*
+struct IntensityStatisticsPartialRunner
+ Callable to produce (count, sum sumsq) and (min, max) over the volume
+*/
 struct IntensityStatisticsPartialRunner
 {
     typedef std::vector<roiWindow<P8U>> channel_images_t;

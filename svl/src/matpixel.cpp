@@ -444,82 +444,72 @@ roiWindow<P> roiWindow<P>::window(int32_t tl_x, int32_t tl_y, int32_t width, int
 
  ****/
 
- template <typename T, typename trait_t, int W, int H>
-roiFixedMultiWindow<T,trait_t,W,H>::roiFixedMultiWindow ()
+ template <typename T,  int W, int H, int CHANNELS>
+roiFixedMultiWindow<T,W,H,CHANNELS>::roiFixedMultiWindow ()
 {
     
 }
 
 
-template <typename T, typename trait_t, int W, int H>
-roiFixedMultiWindow<T,trait_t,W,H>::roiFixedMultiWindow (const window_t& root,const std::vector<std::string>& names_l2r, int64_t timestamp,
-                                               image_memory_alignment_policy im ) : roiWindow<trait_t>(root)
+template <typename T,  int W, int H, int CHANNELS>
+roiFixedMultiWindow<T,W,H,CHANNELS>::roiFixedMultiWindow (const window_t& root,const std::vector<std::string>& names_l2r, int64_t timestamp,
+                                               image_memory_alignment_policy im ) : window_t(root)
 {
-    bool size_ok = root.width () == W && root.height() == (H*3);
+    bool size_ok = root.width () == W && root.height() == (H*CHANNELS);
     assert(size_ok);
     
      init(names_l2r, timestamp, im);
 }
 
- template <typename T, typename trait_t, int W, int H>
-roiFixedMultiWindow<T,trait_t,W,H>::roiFixedMultiWindow(const std::vector<std::string>& names_l2r, int64_t timestamp,
+ template <typename T,  int W, int H, int CHANNELS>
+roiFixedMultiWindow<T,W,H,CHANNELS>::roiFixedMultiWindow(const std::vector<std::string>& names_l2r, int64_t timestamp,
                image_memory_alignment_policy im )
-: roiWindow<trait_t> (W, T::planes_c * H, im)
+: roiWindow<traits_t> (W, CHANNELS * H, im)
 {
     init(names_l2r, timestamp, im);
 }
 
 
-template <typename T, typename trait_t, int W, int H>
-void roiFixedMultiWindow<T,trait_t,W,H>::init (const std::vector<std::string>& names_l2r, int64_t timestamp,
+template <typename T,  int W, int H, int CHANNELS>
+void roiFixedMultiWindow<T,W,H,CHANNELS>::init (const std::vector<std::string>& names_l2r, int64_t timestamp,
                                           image_memory_alignment_policy im )
 {
-    static std::string defaults [3] { "top", "middle", "bottom" };
-    static uint32_t default_ids [3] { 0, 1, 2 };
-    
     this->frameBuf ()->setTimestamp (timestamp);
+    auto names = names_l2r;
+    if(names.empty())
+        for (auto ww = 0; ww < CHANNELS; ww++) names.push_back(tostr(ww));
     
-    if (names_l2r.size() == T::planes_c)
-    {
-         for (unsigned ww = 0; ww < T::planes_c; ww++)
-         {
-             m_names[ww] = names_l2r[ww];
-             m_indexes[ww] = ww;
-         }
-    }
-    else
-    {
-        for (uint32_t i : default_ids)
-        {
-            m_names[i] = defaults[i];
-            m_indexes[i] = i;
-        }
-    }
+     for (unsigned ww = 0; ww < CHANNELS; ww++)
+     {
+         m_names[ww] = names[ww];
+         m_indexes[ww] = ww;
+     }
     
     iPair spacing (0, H);
     iPair msize (W, H);
     m_bounds[0].size (msize);
-    m_bounds[1] = m_bounds[0];
-    m_bounds[1].translate (spacing);
-    m_bounds[2] = m_bounds[1];
-    m_bounds[2].translate (spacing);
+    auto allr = m_bounds[0];
+    for (auto ww = 1; ww < CHANNELS; ww++){
+        m_bounds[ww] = m_bounds[ww-1];
+        m_bounds[ww].translate (spacing);
+        allr |= m_bounds[ww];
+    }
     
-    auto allr = m_bounds[0] | m_bounds[1] | m_bounds[2];
     assert (allr == this->bound ());
     
-    for (unsigned ww = 0; ww < T::planes_c; ww++)
+    for (unsigned ww = 0; ww < CHANNELS; ww++)
     {
-        m_planes[ww] = roiWindow<trait_t>(this->frameBuf(),m_bounds[ww]);
+        m_planes[ww] = roiWindow<traits_t>(this->frameBuf(),m_bounds[ww]);
         assert(m_planes[ww].width() == W);
         assert(m_planes[ww].height() == H);
     }
     
 }
 
- template <typename T, typename trait_t, int W, int H>
-roiFixedMultiWindow<T,trait_t,W,H>::roiFixedMultiWindow(const roiFixedMultiWindow<T,trait_t,W,H> & other)
+ template <typename T, int W, int H, int CHANNELS>
+roiFixedMultiWindow<T,W,H,CHANNELS>::roiFixedMultiWindow(const roiFixedMultiWindow<T,W,H,CHANNELS> & other)
 {
-    for (unsigned ww = 0; ww < T::planes_c; ww++)
+    for (unsigned ww = 0; ww < CHANNELS; ww++)
     {
         m_planes[ww] = other.m_planes[ww];
         m_bounds[ww] = other.m_bounds [ww];
@@ -528,10 +518,10 @@ roiFixedMultiWindow<T,trait_t,W,H>::roiFixedMultiWindow(const roiFixedMultiWindo
     }
 }
 
-template <typename T, typename trait_t, int W, int H>
-bool roiFixedMultiWindow<T,trait_t,W,H>::operator==(const roiFixedMultiWindow<T,trait_t,W,H> & other) const
+template <typename T,  int W, int H, int CHANNELS>
+bool roiFixedMultiWindow<T,W,H,CHANNELS>::operator==(const roiFixedMultiWindow<T,W,H,CHANNELS> & other) const
 {
-    for (unsigned ww = 0; ww < T::planes_c; ww++)
+    for (unsigned ww = 0; ww < CHANNELS; ww++)
     {
         if (m_planes[ww] != other.m_planes[ww]) return false;
         if (m_bounds[ww] != other.m_bounds [ww]) return false;
@@ -543,18 +533,18 @@ bool roiFixedMultiWindow<T,trait_t,W,H>::operator==(const roiFixedMultiWindow<T,
 
 
 
-template <typename T, typename trait_t, int W, int H>
-bool roiFixedMultiWindow<T,trait_t,W,H>::operator!=(const roiFixedMultiWindow<T,trait_t,W,H> & other) const
+template <typename T,  int W, int H, int CHANNELS>
+bool roiFixedMultiWindow<T,W,H,CHANNELS>::operator!=(const roiFixedMultiWindow<T,W,H,CHANNELS> & other) const
 {
     return !operator==(other);
 }
 
 
-template <typename T, typename trait_t, int W, int H>
-const roiFixedMultiWindow<T,trait_t,W,H> & roiFixedMultiWindow<T,trait_t,W,H>::operator=(const roiFixedMultiWindow<T,trait_t,W,H> & rhs)
+template <typename T,  int W, int H, int CHANNELS>
+const roiFixedMultiWindow<T,W,H,CHANNELS> & roiFixedMultiWindow<T,W,H,CHANNELS>::operator=(const roiFixedMultiWindow<T,W,H,CHANNELS> & rhs)
 {
     if (*this == rhs) return *this;
-    for (unsigned ww = 0; ww < T::planes_c; ww++)
+    for (unsigned ww = 0; ww < CHANNELS; ww++)
     {
         m_planes[ww] = rhs.m_planes[ww];
         m_bounds[ww] = rhs.m_bounds [ww];
@@ -684,6 +674,7 @@ namespace svl
     template class roiWindow<P8UC3>;
     template class roiWindow<P8UC4>;
     
+    template class roiFixedMultiWindow<P8UP2,512,256,2>;
     template class roiFixedMultiWindow<P8UP3>;
      template class roiMultiWindow<P8UP3>;
      template class roiMultiWindow<P8UP4>;

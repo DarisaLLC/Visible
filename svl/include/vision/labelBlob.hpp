@@ -91,8 +91,8 @@ public:
     
     class blob {
     public:
-        blob ( const uint32_t label, const int64_t id, const cv::Rect2f& roi) :
-            m_id(id), m_label(label), m_roi (roi), m_moments_ready(false)
+        blob ( const uint32_t label, const int64_t id, const cv::Rect2f& roi, const int& iarea) :
+            m_id(id), m_label(label), m_roi (roi), m_moments_ready(false), m_iarea(iarea)
         {
             m_extend = std::sqrt(roi.width*roi.width+roi.height*roi.height);
         }
@@ -101,12 +101,25 @@ public:
             m_id = other.m_id;
             m_label = other.m_label;
             m_roi = other.roi();
+            m_iarea = other.iarea();
             m_moments = other.moments();
             m_points = other.m_points;
             m_moments_ready = other.moments_ready();
-            
         }
+        
+        blob& operator=(const blob& other){
+            m_id = other.m_id;
+            m_label = other.m_label;
+            m_roi = other.roi();
+            m_iarea = other.iarea();
+            m_moments = other.moments();
+            m_points = other.m_points;
+            m_moments_ready = other.moments_ready();
+            return *this;
+        }
+        
 
+        bool operator < (const blob& rhs) const { return m_iarea < rhs.iarea(); }
         
         void update_moments (const cv::Mat& image) const;
         void update_points (const std::vector<cv::Point>& ) const;
@@ -114,6 +127,9 @@ public:
         const cv::Rect2f& roi () const { return m_roi; }
         const svl::momento& moments () const { return m_moments; }
         float extend () const { return m_extend;}
+        int iarea () const { return m_iarea; }
+        
+        
         cv::RotatedRect rotated_roi () const;
         cv::RotatedRect rotated_roi_PCA () const;
    
@@ -121,6 +137,7 @@ public:
     private:
         int64_t m_id;
         uint32_t m_label;
+        int32_t m_iarea;
         mutable svl::momento m_moments;
         mutable float m_extend;
         cv::Rect2f m_roi;

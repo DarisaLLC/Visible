@@ -831,6 +831,14 @@ void lifContext::process_async (){
             m_contraction_pci_tracks_asyn = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 2);
             break;
         }
+        case 2:
+        {
+            // note launch mode is std::launch::async
+            m_fluorescense_tracks_aync = std::async(std::launch::async,&lif_serie_processor::run_flu_statistics,
+                                                    m_lifProcRef.get(), std::vector<int> ({0}) );
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 1);
+            break;
+        }
         case 1:
         {
             m_contraction_pci_tracks_asyn = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel,m_lifProcRef.get(), 0);
@@ -1028,7 +1036,7 @@ void lifContext::add_motion_profile (){
     assert(window != nullptr);
     
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
-    ImVec2  frame (mMediaInfo.channel_size.width, mMediaInfo.channel_size.height*3);
+    ImVec2  frame (mMediaInfo.channel_size.width, mMediaInfo.channel_size.height);
     ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y);
     m_motion_profile_display = Rectf(pos,frame);
     ImGui::SetNextWindowPos(pos);
@@ -1144,13 +1152,15 @@ void lifContext::update ()
         m_contraction_pci_trackWeakRef = m_contraction_pci_tracks_asyn.get();
     }
 
+    auto flu_cnt = channel_count() - 1;
     // Update Fluorescence results if ready
-    if (! m_flurescence_trackWeakRef.expired())
+    if (flu_cnt > 0 && ! m_flurescence_trackWeakRef.expired())
     {
-        assert(channel_count() >= 3);
+        // Number of Flu runs is channel count - 1
         auto tracksRef = m_flurescence_trackWeakRef.lock();
-        m_result_seq.m_time_data.load(tracksRef->at(0), named_colors[tracksRef->at(0).first], 0);
-        m_result_seq.m_time_data.load(tracksRef->at(1), named_colors[tracksRef->at(1).first], 1);
+        for (auto cc = 0; cc < flu_cnt; cc++){
+            m_result_seq.m_time_data.load(tracksRef->at(cc), named_colors[tracksRef->at(cc).first], cc);
+        }
     }
 
     // Update PCI result if ready
@@ -1161,7 +1171,7 @@ void lifContext::update ()
                 m_lifProcRef->shortterm_pci(1);
 #endif
         auto tracksRef = m_contraction_pci_trackWeakRef.lock();
-        m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
+        m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], channel_count()-1);
 
 
         // Update shortterm PCI result if ready
@@ -1298,6 +1308,11 @@ void lifContext::draw ()
         switch(channel_count())
         {
             case 1:
+                mImage = gl::Texture::create(*mSurface);
+                mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
+                gl::draw (mImage, dr);
+                break;
+            case 2:
                 mImage = gl::Texture::create(*mSurface);
                 mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
                 gl::draw (mImage, dr);

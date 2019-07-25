@@ -7,7 +7,9 @@
 
 // Configuration settings file format documentation can be found at:
 // https://help.apple.com/xcode/#/dev745c5c974
-#include "cp-visible-debug.xcconfig"
+#include "include/local_vars.xcconfig"
+#include "include/main_linker.xcconfig"
+#include "include/main_header_paths.xcconfig"
 
 LOCAL_GTEST = $(LOCAL_3rdParty)/gtest
 LIBRARY_SEARCH_PATHS = $(LIBRARY_SEARCH_PATHS) $(LOCAL_GTEST)/lib/$(CONFIGURATION)

@@ -56,6 +56,21 @@ namespace
         Surface8uRef chsurface = Surface8u::create(*cref);
         out.push_back(chsurface);
     }
+    
+    // We treat the 2 channels as one read all. roiMultiWindow is specifically designed for ID_Lab0 arrangement that is 512 x 246 2 times
+    void internal_fill_one_singleByTwoChannels (const lifIO::LifSerie& lifserie, const tiny_media_info& tm, const int frameCount, std::vector<Surface8uRef>& out,
+                                                  std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator time_iter,
+                                                  std::vector<std::string>& names = d_names){
+        
+        out.resize (0);
+        cm_time ts((*time_iter)/(10000.0));
+        roiFixedMultiWindow<P8UP2, 512, 256, 2> oneBy2 (names, ts.getValue());
+        lifserie.fill2DBuffer(oneBy2.rowPointer(0), frameCount);
+        std::shared_ptr<Channel8u> cref = newCiChannel(oneBy2);
+        Surface8uRef chsurface = Surface8u::create(*cref);
+        out.push_back(chsurface);
+    }
+    
     void internal_fill_one_NChannels (const lifIO::LifSerie& lifserie, const tiny_media_info& tm, const int frameCount, std::vector<Surface8uRef>& out,
                                                   std::vector<lifIO::LifSerieHeader::timestamp_t>::const_iterator time_iter){
         
@@ -110,6 +125,10 @@ namespace
                 return internal_fill_one_NChannels (lifserie, tm,  frameCount, out,time_iter);
             }
             case 4:
+            case 2:
+                if (is_idLab0){
+                    return internal_fill_one_singleByTwoChannels (lifserie, tm,  frameCount, out,time_iter,names);
+                }
                  return internal_fill_one_NChannels (lifserie, tm,  frameCount, out,time_iter);
             default:
                 assert(0);

@@ -16,6 +16,119 @@ using namespace svl;
 namespace svl
 {
     
+    cv::Mat getPadded (const cv::Mat& src, uiPair pad, double pad_value){
+        cv::Mat padded (src.rows+2*pad.second, src.cols+2*pad.first, src.type());
+        padded.setTo(pad_value);
+        cv::Mat win (padded, cv::Rect(pad.first, pad.second, src.cols, src.rows));
+        src.copyTo(win);
+        return padded;
+    }
+    
+    static const char *cv_depth_names[] = {
+        "CV_8U",
+        "CV_8S",
+        "CV_16U",
+        "CV_16S",
+        "CV_32S",
+        "CV_32F",
+        "CV_64F"
+    };
+    
+    string matInfo(const Mat &m) {
+        char buf[100];
+        snprintf(buf, sizeof(buf), "%sC%d(%dx%d)", cv_depth_names[m.depth()], m.channels(), m.rows, m.cols);
+        return string(buf);
+    }
+    
+    Mat matRotateSize(Size sizeIn, Point2f center, float angle, float &minx, float &maxx, float &miny, float &maxy, float scale) {
+        Mat transform = getRotationMatrix2D( center, angle, scale );
+        
+        transform.convertTo(transform, CV_32F);
+        
+        Matx<float,3,4> pts(
+                            0, sizeIn.width-1.0f, sizeIn.width-1.0f, 0,
+                            0, 0, sizeIn.height-1.0f, sizeIn.height-1.0f,
+                            1.0f, 1.0f, 1.0f, 1.0f);
+        Mat mpts(pts);
+        Mat newPts = transform * mpts;
+        minx = newPts.at<float>(0,0);
+        maxx = newPts.at<float>(0,0);
+        miny = newPts.at<float>(1,0);
+        maxy = newPts.at<float>(1,0);
+        for (int c=1; c<4; c++) {
+            float x = newPts.at<float>(0,c);
+            minx = min(minx, x);
+            maxx = max(maxx, x);
+            float y = newPts.at<float>(1,c);
+            miny = min(miny, y);
+            maxy = max(maxy, y);
+        }
+
+        return transform;
+    }
+    
+    void matWarpAffine(const Mat &image, Mat &result, Point2f center, float angle, float scale,
+                       Point2f offset, Size size, int borderMode, Scalar borderValue, Point2f reflect, int flags)
+    {
+        float minx;
+        float maxx;
+        float miny;
+        float maxy;
+        Mat transform = matRotateSize(Size(image.cols,image.rows), center, angle, minx, maxx, miny, maxy, scale);
+        
+        transform.at<float>(0,2) += offset.x;
+        transform.at<float>(1,2) += offset.y;
+        
+        Size resultSize(size);
+        if (resultSize.width <= 0) {
+            resultSize.width = (int)(maxx - minx + 1.5);
+            transform.at<float>(0,2) += (resultSize.width-1)/2.0f - center.x;
+        }
+        if (resultSize.height <= 0) {
+            resultSize.height = (int)(maxy - miny + 1.5);
+            transform.at<float>(1,2) += (resultSize.height-1)/2.0f - center.y;
+        }
+        
+        Mat resultLocal;
+        warpAffine( image, resultLocal, transform, resultSize, flags, borderMode, borderValue );
+        
+        double normReflect = norm(reflect);
+//        LOGTRACE3("matWarpAffine() reflect:(%g,%g) norm:%g", reflect.x, reflect.y, normReflect);
+        if (normReflect != 0) {
+            Mat mReflect = Mat::eye(3,3,CV_32F);
+            mReflect.at<float>(0,0) = (reflect.x*reflect.x-reflect.y*reflect.y)/normReflect;
+            mReflect.at<float>(1,1) = (reflect.y*reflect.y-reflect.x*reflect.x)/normReflect;
+            mReflect.at<float>(0,1) = mReflect.at<float>(1,0) = 2*reflect.x*reflect.y/normReflect;
+            // warpAffine does not work properly with reflection. maybe one day it will
+            if (reflect.x == 0) {
+                flip(resultLocal, resultLocal, 1);    // reflect in y-axis
+            } else if (reflect.y == 0) {
+                flip(resultLocal, resultLocal, 0);    // reflect in x-axis
+            } else if (reflect.x == reflect.y) {
+                flip(resultLocal, resultLocal, -1);    // reflect in x- and y-axes
+            }
+        }
+        
+        result = resultLocal;
+    }
+    
+    void findPeaks(const Mat& src, std::vector<cv::Point>& peaks) {
+        peaks.resize(0);
+        //finds local maximas
+        for (int i = 1; i < src.rows-1; i++)
+        {
+            for (int j = 1; j < src.cols - 1; j++)
+            {
+                if (src.at<float>(i, j) > src.at<float>(i, j - 1) && src.at<float>(i, j) > src.at<float>(i, j + 1)){
+                    peaks.emplace_back(i, j);
+                }
+            }
+        }
+   
+    }
+    
+    
+    
     cv::Mat gaborKernel(int ks, double sig, double th, double lm, double ps)
     {
         int hks = (ks-1)/2;
@@ -395,10 +508,7 @@ namespace svl
         
     }
 
-
-    void PeakDetect(const cv::Mat& space, std::vector<Point2f>& peaks, uint8_t accept)
-    {
-        
+    void PeakDetect(const cv::Mat& space, std::vector<Point>& peaks){
         // Make sure it is empty
         peaks.resize(0);
         
@@ -412,8 +522,7 @@ namespace svl
             const uint8_t* pel = row_ptr;
             for (int col = 1; col < width; col++, pel++)
             {
-                if (*pel >= accept &&
-                    *pel > *(pel - 1) &&
+                if (*pel > *(pel - 1) &&
                     *pel > *(pel - rowUpdate - 1) &&
                     *pel > *(pel - rowUpdate) &&
                     *pel > *(pel - rowUpdate + 1) &&
@@ -422,8 +531,7 @@ namespace svl
                     *pel > *(pel + rowUpdate) &&
                     *pel > *(pel + rowUpdate - 1))
                 {
-                    Point2f dp(col+0.5, row+0.5);
-                    peaks.push_back(dp);
+                    peaks.emplace_back(col,row);
                 }
             }
         }

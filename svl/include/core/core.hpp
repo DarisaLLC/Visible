@@ -28,6 +28,33 @@
 
 namespace svl // protection from unintended ADL
 {
+    
+//    The following code example is taken from the book
+//    C++ Templates - The Complete Guide
+//    by David Vandevoorde and Nicolai M. Josuttis, Addison-Wesley, 2002
+//    © Copyright David Vandevoorde and Nicolai M. Josuttis 2002
+    template<typename T>
+    class IsClassT {
+    private:
+        typedef char One;
+        typedef struct { char a[2]; } Two;
+        template<typename C> static One test(int C::*);
+        template<typename C> static Two test(...);
+    public:
+        enum { Yes = sizeof(IsClassT<T>::test<T>(0)) == 1 };
+        enum { No = !Yes };
+    };
+    
+    
+    /// convenience macro to throw exception with file/line number
+#define throwInfo( x ) \
+do { \
+std::string s = std::string( __FILE__ )+std::string( __LINE__ )+std::stringarg( x ); \
+throw std::runtime_error( s ); \
+} \
+while ( 0 )
+
+    
     namespace constants
     {
         static const double pi   = boost::math::constants::pi<double> () ;   // pi

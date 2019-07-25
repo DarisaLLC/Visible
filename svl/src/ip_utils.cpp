@@ -277,6 +277,35 @@ std::map<uint8_t, double> zscore (roiWindow<P8U>& src)
 }
 
 
+#if bhatt
+float mean( hist)
+{
+    float acc = 0;
+    for (auto &pair : hist)
+        acc += pair.second;
+    
+    return acc/hist.size();
+}
+
+float bhatta(Histogram hist1, Histogram hist2)
+{
+    float h1_mean = mean(hist1);
+    
+    float h2_mean = mean(hist2);
+    
+    float score = 0;
+    
+    // evaluate only keys present on both histograms
+    for (auto &pair : hist1)
+        if (hist2.find(pair.first) != hist2.end())
+            score += sqrt(hist1.at(pair.first) * hist2.at(pair.first));
+    
+    score = sqrt( 1 - ( 1 / sqrt(h1_mean * h2_mean * hist1.size() * hist2.size()) ) * score );
+    
+    return score;
+}
+#endif
+
 template void Gauss3by3(const roiWindow<P8U> &, roiWindow<P8U> &);
 template void Gauss3by3(const roiWindow<P16U> &, roiWindow<P16U> &);
 

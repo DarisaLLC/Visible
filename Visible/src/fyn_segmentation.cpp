@@ -24,11 +24,12 @@
 #include "cinder_cv/cinder_opencv.h"
 #include "vision/histo.h"
 #include "vision/opencv_utils.hpp"
+#include "vision/labelconnect.hpp"
 #include "algo_Lif.hpp"
 #include "logger/logger.hpp"
 #include "cpp-perf.hpp"
 #include "result_serialization.h"
-
+#include "dbscan.h"
 #include "segmentation_parameters.hpp"
 
 
@@ -36,7 +37,7 @@
 
 // Return 2D latice of pixels over time
 void lif_serie_processor::generateVoxels_on_channel (const int channel_index){
-    generateVoxels(m_all_by_channel[channel_index]);
+    generateVoxelsOfSampled(m_all_by_channel[channel_index]);
 }
 
 
@@ -44,14 +45,14 @@ void lif_serie_processor::generateVoxels_on_channel (const int channel_index){
 
 void lif_serie_processor::generateVoxelsAndSelfSimilarities (const std::vector<roiWindow<P8U>>& images){
     
-    generateVoxels(images);
+    generateVoxelsOfSampled(images);
     generateVoxelSelfSimilarities();
 
 }
 
 
 
-void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& images){
+void lif_serie_processor::generateVoxelsOfSampled (const std::vector<roiWindow<P8U>>& images){
     size_t t_d = images.size();
     auto half_offset = m_voxel_sample / 2;
     uint32_t width = images[0].width() - half_offset.first;
@@ -88,6 +89,7 @@ void lif_serie_processor::generateVoxels (const std::vector<roiWindow<P8U>>& ima
 
 void lif_serie_processor::create_voxel_surface(std::vector<float>& ven){
     
+    uiPair half_offset = m_voxel_sample / 2;
     uint32_t width = m_expected_segmented_size.first;
     uint32_t height = m_expected_segmented_size.second;
     assert(width*height == ven.size());
@@ -95,51 +97,106 @@ void lif_serie_processor::create_voxel_surface(std::vector<float>& ven){
     std::string msg = to_string(extremes.first) + "," + to_string(extremes.second);
     vlogger::instance().console()->info(msg);
     
-    cv::Mat tmp = cv::Mat(height, width, CV_8U);
+    cv::Mat ftmp = cv::Mat(height, width, CV_32F);
     std::vector<float>::const_iterator start = ven.begin();
+    std::vector<uint32_t> hist(256,0);
+
     
+    // Fillup floating image and hist of 8bit values
     for (auto row =0; row < height; row++){
-        uint8_t* row_ptr = tmp.ptr<uint8_t>(row);
+        float* f_row_ptr = ftmp.ptr<float>(row);
         auto end = start + width; // point to one after
-        for (; start < end; start++, row_ptr++){
+        for (; start < end; start++, f_row_ptr++){
             if(std::isnan(*start)) continue; // nan is set to 1, the pre-set value
-            *row_ptr = uint8_t((*start)*255);
+            float valf(*start);
+            uint8_t val8 (valf*255);
+            hist[val8]++;
+            *f_row_ptr = valf;
         }
         start = end;
     }
-    
+
+    // Find the mode of the histogram
+    // @note add validation
+    auto hm = std::max_element(hist.begin(), hist.end());
+    if(hm == hist.end()){
+        vlogger::instance().console()->error("motion signal error");
+    }
+
+    double motion_peak(std::distance(hist.begin(), hm));
+
     // Median Blur before up sizeing.
-    cv::medianBlur(tmp, tmp, 5);
-    cv::Size bot(tmp.cols * m_voxel_sample.first, tmp.rows * m_voxel_sample.second);
-    m_temporal_ss = cv::Mat(bot, CV_8U);
-    cv::resize(tmp, m_temporal_ss, bot, 0, 0, INTER_NEAREST);
-    m_measured_area = Rectf(0,0,bot.width, bot.height);
-    assert(m_temporal_ss.cols == m_measured_area.getWidth());
-    assert(m_temporal_ss.rows == m_measured_area.getHeight());
+    cv::medianBlur(ftmp, ftmp, 5);
+    
+    // Stright resize. Add pads afterwards
+    cv::Size bot(ftmp.cols * m_voxel_sample.first,ftmp.rows * m_voxel_sample.second);
+    cv::Mat f_temporal (bot, CV_32F);
+    cv::resize(ftmp, f_temporal, bot, 0, 0, INTER_NEAREST);
+    ftmp = getPadded(f_temporal, half_offset, 0.0);
+    ftmp = ftmp * 255.0f;
+    ftmp.convertTo(m_temporal_ss, CV_8U);
+
+    std::vector<DBSCAN::Point> ps;
+    for (cv::Point& pt : m_var_peaks){
+        DBSCAN::Point p;
+        p.x = pt.x;p.y = pt.y; p.z = m_temporal_ss.at<uint8_t>(pt.y,pt.x);
+        p.clusterID = UNCLASSIFIED;
+        ps.push_back(p);
+    }
+    
+    assert(ps.size() == m_var_peaks.size());
+    DBSCAN ds(4, 100.0 , ps);
+    ds.run();
+    
+    auto pspts = ds.points();
+    std::sort(pspts.begin(), pspts.end(), [](DBSCAN::Point& a, DBSCAN::Point& b){ return a.clusterID < b.clusterID; });
+    
+    auto printResults = [](const vector<DBSCAN::Point>& points, size_t num_points)
+    {
+        auto i = 0;
+        printf("Number of points: %u\n"
+               " x     y     z     cluster_id\n"
+               "-----------------------------\n"
+               , (int) num_points);
+        while (i < num_points)
+        {
+            printf("%5.2lf %5.2lf %5.2lf: %d\n",
+                   points[i].x,
+                   points[i].y, points[i].z,
+                   points[i].clusterID);
+            ++i;
+        }
+    };
+
+    printResults(pspts,  ds.getTotalPointSize());
+    
+    // Sum sim under the var peaks
+    float peaks_sums = 0.0f;
+    for (cv::Point& pt : m_var_peaks)
+        peaks_sums += m_temporal_ss.at<uint8_t>(pt.y,pt.x);
+    auto peaks_average = peaks_sums / int(m_var_peaks.size());
+    
+    std::cout << "peaks_average: " << peaks_average << " Global Peak " << motion_peak << std::endl;
+    
+//    m_measured_area = Rectf(0,0,bot.width, bot.height);
+//    assert(m_temporal_ss.cols == m_measured_area.getWidth());
+//    assert(m_temporal_ss.rows == m_measured_area.getHeight());
     
     cv::Mat bi_level;
-    
-    threshold(m_temporal_ss, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
+
+    threshold(m_temporal_ss, bi_level, peaks_average, 255, THRESH_BINARY);
 
     // Pad both with zeros
     // Symmetric: i.e. pad on both sides
     iPair pad (m_params.normalized_symmetric_padding().first * m_temporal_ss.cols,
                m_params.normalized_symmetric_padding().second * m_temporal_ss.rows);
     
-    auto get_padded = [pad = pad](const cv::Mat& src){
-        cv::Mat padded (src.rows+2*pad.second, src.cols+2*pad.first, CV_8U);
-        padded.setTo(0.0);
-        cv::Mat win (padded, cv::Rect(pad.first, pad.second, src.cols, src.rows));
-        src.copyTo(win);
-        return padded;
-    };
-    
-    auto mono_padded = get_padded(m_temporal_ss);
-    auto bi_level_padded = get_padded(bi_level);
+   // auto mono_padded = getPadded(m_temporal_ss, pad, 0.0);
+   // auto bi_level_padded = getPadded(bi_level, pad, 0.0);
     
     // Translation to undo padding
-    pad.first = -pad.first;
-    pad.second = -pad.second;
+    pad.first = 0; //-pad.first;
+    pad.second = 0; //-pad.second;
     
     vlogger::instance().console()->info("finished voxel surface");
     if(fs::exists(mCurrentSerieCachePath)){
@@ -150,7 +207,7 @@ void lif_serie_processor::create_voxel_surface(std::vector<float>& ven){
     
     // Call the voxel ready cb if any
     if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0){
-        signal_ss_image_available->operator()(mono_padded, bi_level_padded, pad);
+        signal_ss_image_available->operator()(m_temporal_ss, bi_level, pad);
     }
     
     
