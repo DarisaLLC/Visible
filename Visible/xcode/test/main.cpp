@@ -209,13 +209,13 @@ typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
 
 TEST(cluster_2d, basic){
     
-    std::vector<point2d_t> points;
+    std::vector<point2f_t> points;
     
     for (double x = 0.0 ; x < 10.0 ; x += 1.0)
         for (double y = 0.0 ; y < 10.0 ; y += 1.0)
-            points.push_back(point2d_t{x, y});
+            points.push_back(point2f_t{x, y});
     
-    std::vector<cluster2d_t> clusters;
+    std::vector<cluster2f_t> clusters;
     
     find_2dclusters(points, 3.0, clusters);
     
@@ -230,26 +230,26 @@ TEST(cluster_2d, basic){
 
 TEST(cluster, basic){
 
-    std::vector<point3d_t> points;
+    std::vector<point3f_t> points;
     ellipseShape one;
     one.setEllipse(5.0, 5.0, 3.0, 2.0, 0.0);
     for (double y = 0.0 ; y < 10.0 ; y += 1.0){
         for (double x = 0.0 ; x < 10.0 ; x += 1.0){
                 double rz = 0.0;
                 if(! one.insideEllipse(x,y) )
-                    points.push_back(point3d_t{x, y, rz});
+                    points.push_back(point3f_t{x, y, rz});
                 else{
                     rz = one.normalizedDistanceFromOrigin(x, y);
-                    points.push_back(point3d_t{x, y, rz});
+                    points.push_back(point3f_t{x, y, rz});
                 }
                 std::cout << (int)(10*rz) << '\t';
                 if(x == 9.0) std::cout << std::endl;
         }
         
     }
-        std::vector<cluster3d_t> clusters;
+        std::vector<cluster3f_t> clusters;
         
-        find_clusters(points, 3.0, clusters);
+        find_3dclusters(points, 3.0f, 0.3f, clusters);
         
         for(size_t i = 0 ; i < clusters.size() ; ++i) {
             if (clusters[i].empty()) continue;

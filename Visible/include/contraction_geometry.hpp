@@ -22,12 +22,7 @@ BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 
 
 
-namespace bg = boost::geometry;
-namespace bgi = boost::geometry::index;
 
-typedef bg::model::point<double, 2, bg::cs::cartesian> point2d_t;
-typedef bg::model::box<point2d_t> box2d_t;
-typedef std::vector<point2d_t> cluster2d_t;
 
 namespace cgeom{
     // used in the rtree constructor with Boost.Range adaptors
@@ -50,17 +45,25 @@ namespace cgeom{
         bool used;
     };
 
-    typedef bg::model::point<double, 3, bg::cs::cartesian> point3d_t;
-    typedef bg::model::box<point3d_t> box3d_t;
-    typedef std::vector<point3d_t> cluster3d_t;
+    namespace bg = boost::geometry;
+    namespace bgi = boost::geometry::index;
     
+    typedef bg::model::point<float, 2, bg::cs::cartesian> point2f_t;
+    typedef bg::model::box<point2f_t> box2f_t;
+    typedef std::vector<point2f_t> cluster2f_t;
+    
+    typedef bg::model::point<float, 3, bg::cs::cartesian> point3f_t;
+    typedef bg::model::box<point3f_t> box3f_t;
+    typedef std::vector<point3f_t> cluster3f_t;
+    
+
     // find clusters of points using cluster radius r
-    void find_2dclusters(std::vector<point2d_t> const& points,
-                         double r,
-                         std::vector<cluster2d_t> & clusters)
+    void find_2dclusters(std::vector<point2f_t> const& points,
+                         float r,
+                         std::vector<cluster2f_t> & clusters)
     {
-        typedef std::pair<point2d_t, std::size_t> value_t;
-        typedef pair_generator<point2d_t, std::size_t> value_generator;
+        typedef std::pair<point2f_t, std::size_t> value_t;
+        typedef pair_generator<point2f_t, std::size_t> value_generator;
         
         if (r < 0.0)
             return; // or return error
@@ -82,15 +85,15 @@ namespace cgeom{
                 continue;
             
             // current point
-            point2d_t const& p = v.first;
-            double x = bg::get<0>(p);
-            double y = bg::get<1>(p);
+            point2f_t const& p = v.first;
+            float x = bg::get<0>(p);
+            float y = bg::get<1>(p);
             
             // find all points in circle of radius r around current point
             std::vector<value_t> res;
             rtree.query(
                         // return points that are in a box enclosing the circle
-                        bgi::intersects(box2d_t{{x-r, y-r},{x+r, y+r}})
+                        bgi::intersects(box2f_t{{x-r, y-r},{x+r, y+r}})
                         // and were not used before
                         // and are indeed in the circle
                         && bgi::satisfies([&](value_t const& v){
@@ -100,7 +103,7 @@ namespace cgeom{
                         std::back_inserter(res));
             
             // create new cluster
-            clusters.push_back(cluster2d_t());
+            clusters.push_back(cluster2f_t());
             // add points to this cluster and mark them as used
             for(auto const& v : res) {
                 clusters.back().push_back(v.first);
@@ -112,19 +115,19 @@ namespace cgeom{
     
     
     // find clusters of points using cluster radius r
-    void find_clusters(std::vector<point3d_t> const& points,
-                       double r,
-                       std::vector<cluster3d_t> & clusters)
+    void find_3dclusters(std::vector<point3f_t> const& points,
+                       float r, float zr,
+                       std::vector<cluster3f_t> & clusters)
     {
-        typedef std::pair<point3d_t, std::size_t> value3d_t;
-        typedef pair_generator<point3d_t, std::size_t> value_generator;
+        typedef std::pair<point3f_t, std::size_t> value3f_t;
+        typedef pair_generator<point3f_t, std::size_t> value_generator;
         
         if (r < 0.0)
             return; // or return error
         
         // create rtree holding std::pair<point_t, std::size_t>
         // from container of points of type point_t
-        bgi::rtree<value3d_t, bgi::rstar<4> >
+        bgi::rtree<value3f_t, bgi::rstar<4> >
         rtree(points | boost::adaptors::indexed()
               | boost::adaptors::transformed(value_generator()));
         
@@ -139,27 +142,27 @@ namespace cgeom{
                 continue;
             
             // current point
-            point3d_t const& p = v.first;
-            double x = bg::get<0>(p);
-            double y = bg::get<1>(p);
-            double z = bg::get<2>(p);
+            point3f_t const& p = v.first;
+            float x = bg::get<0>(p);
+            float y = bg::get<1>(p);
+            float z = bg::get<2>(p);
             int iz = (int)(z*10);
             
             // find all points in circle of radius r around current point
-            std::vector<value3d_t> res;
+            std::vector<value3f_t> res;
             rtree.query(
                         // return points that are in a box enclosing the circle
-                        bgi::intersects(box3d_t{{x-r, y-r,z-0.1},{x+r, y+r,z+0.1}})
+                        bgi::intersects(box3f_t{{x-r, y-r,0.05},{x+r, y+r,z+zr}})
                         // and were not used before
                         // and are indeed in the circle
-                        && bgi::satisfies([&](value3d_t const& v){
+                        && bgi::satisfies([&](value3f_t const& v){
                 return points_data[v.second].used == false
                 && bg::distance(p, v.first) <= r && iz > 0 ;
             }),
                         std::back_inserter(res));
             
             // create new cluster
-            clusters.push_back(cluster3d_t());
+            clusters.push_back(cluster3f_t());
             // add points to this cluster and mark them as used
             for(auto const& v : res) {
                 clusters.back().push_back(v.first);
