@@ -25,28 +25,56 @@ using namespace svl;
 
 using blob = svl::labelBlob::blob;
 
-void momento::run(const cv::Mat& image) const
+void momento::run(const cv::Mat& image, bool not_binary) const
 {
+    m_not_binary = not_binary;
     image.locateROI(m_size,m_offset);
     
     // Get the basic moments from Cv::Moments. It does respect ROI
     // Fill up the base and only the base.
-    CvMoments mu =  cv::moments(image, false);
+    CvMoments mu =  cv::moments(image, m_not_binary);
     *((CvMoments*)this) = mu;
-    
+    mu11p = mu11 / m00;
+    mu20p = mu20 / m00;
+    mu02p = mu02 / m00;
+
     inv_m00 = mu.inv_sqrt_m00 * mu.inv_sqrt_m00;
     mc = Point2f ((m10 * inv_m00), m01 * inv_m00);
     mc.x += m_offset.x;
     mc.y += m_offset.y;
+
+    m_theta = (mu11p != 0) ? 0.5 * std::atan((2 * mu11p) / (mu20p - mu02p)) : 0.0;
+   
+    double u30 = m30 - 3.0*mc.x*m20 + 2.0*mc.x*mc.x*m10;
+    double u21 = m21 - 2.0*mc.x*m11 - mc.y*m20 + 2.0*mc.x*mc.x*m01;
+    double u12 = m12 - 2.0*mc.y*m11 - mc.x*m02 + 2.0*mc.y*mc.y*m10;
+    double u03 = m03 - 3*mc.y*m02 + 2*mc.y*mc.y*m01;
+    double qx = cos(m_theta);
+    double qy = -sin(m_theta);
+    
+    double s = u30*qx*qx*qx + 3.0*u21*qx*qx*qy + 3.0*u12*qx*qy*qy + u03*qy*qy*qy;
+ 
+    std::cout << "  s  " << s << std::endl;
     m_is_loaded = true;
+    m_eigen_ok = false;
 }
 
+momento::momento(): m_is_loaded (false), m_eigen_done(false), m_is_nan(true) {
+    m_rotation =  cv::Mat::eye(3, 3, CV_32F);
+    m_scale =  cv::Mat::eye(3, 3, CV_32F);
+    m_translation =  cv::Mat::eye(3, 3, CV_32F);
+    m_covar = cv::Mat::zeros(2, 2, CV_32F);
+}
 momento::momento(const momento& other){
     *this = other;
 }
-momento::momento(const cv::Mat& image):m_bilevel(image.clone())
+momento::momento(const cv::Mat& image, bool not_binary):m_bilevel(image.clone())
 {
-    run (image);
+    m_rotation =  cv::Mat::eye(3, 3, CV_32F);
+    m_scale =  cv::Mat::eye(3, 3, CV_32F);
+    m_translation =  cv::Mat::eye(3, 3, CV_32F);
+    m_covar = cv::Mat::zeros(2, 2, CV_32F);
+    run (image,not_binary);
 }
 
 fPair momento::getEllipseAspect () const
@@ -60,30 +88,71 @@ fPair momento::getEllipseAspect () const
 uRadian momento::getOrientation () const
 {
     if (! isLoaded()) return uRadian(std::numeric_limits<double>::max());
-    
-    getDirectionals ();
-    return theta;
+    return m_theta;
 }
 
+/*
+ If using Eigen:
+ Eigen::Matrix2d covariance;
+ covariance(0, 0) = m20;
+ covariance(1, 0) = m11;
+ covariance(0, 1) = m11;
+ covariance(1, 1) = m02;
+ 
+ Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eigensolver (covariance);
+ Eigen::Vector2d evector0 = eigensolver.eigenvectors().col(0);
+ Eigen::Vector2d evector1 = eigensolver.eigenvectors().col(1);
+ 
+*/
 void momento::getDirectionals () const
 {
     if (m_eigen_done) return;
     
-    Mat M = (Mat_<double>(2,2) << m20, m11, m11, m02);
+
+    auto printMat = [](Mat& A){
+        for(int r=0; r<A.rows; r++)
+        {
+            for(int c=0; c<A.cols; c++)
+            {
+                cout<<A.at<double>(r,c)<<'\t';
+            }
+            cout<<endl;
+        }
+    };
+
+
+    // Compute the covariance matrix in order to determine scaling matrix
+   m_covar.at<float>(0, 0) = mu20p;
+   m_covar.at<float>(0, 1) = mu11p;
+   m_covar.at<float>(1, 0) = mu11p;
+   m_covar.at<float>(1, 1) = mu02p;
     
-    //Compute and store the eigenvalues and eigenvectors of covariance matrix CvMat* e_vect = cvCreateMat( 2 , 2 , CV_32FC1 );
-    Mat e_vects = (Mat_<float>(2,2) << 0.0,0.0,0.0,0.0);
-    Mat e_vals = (Mat_<float>(1,2) << 0.0,0.0);
+    // Compute eigenvalues and eigenvector
+    cv::Mat e_vals, e_vects;
+    bool eigenok = cv::eigen(m_covar, e_vals, e_vects);
     
-    bool eigenok = cv::eigen(M, e_vals, e_vects);
+    if (eigenok){
+        // Create the scaling matrix
+        if (mu20 > mu02) {
+            m_scale.at<float>(0, 0) = std::pow(e_vals.at<float>(0, 0) * e_vals.at<float>(1, 0), 0.25) / std::sqrt(e_vals.at<float>(0, 0));
+            m_scale.at<float>(1, 1) = std::pow(e_vals.at<float>(0, 0) * e_vals.at<float>(1, 0), 0.25) / std::sqrt(e_vals.at<float>(1, 0));
+        }
+        else {
+            m_scale.at<float>(0, 0) = std::pow(e_vals.at<float>(0, 0) * e_vals.at<float>(1, 0), 0.25) / std::sqrt(e_vals.at<float>(1, 0));
+            m_scale.at<float>(1, 1) = std::pow(e_vals.at<float>(0, 0) * e_vals.at<float>(1, 0), 0.25) / std::sqrt(e_vals.at<float>(0, 0));
+        }
+        
+        printMat(m_scale);
+    }
     if (eigenok){
         int ev = (e_vals.at<float>(0,0) > e_vals.at<float>(0,1)) ? 0 : 1;
         double angle = atan2 (e_vects.at<float>(ev, 0),e_vects.at<float>(ev, 1));
-
-
-        double mm2 = m20 - m02;
-        auto tana = mm2 + std::sqrt (4*m11*m11 + mm2*mm2);
-        theta = atan(2*m11 / tana);
+        double asr = e_vals.at<float>(0,0) / e_vals.at<float>(1,0);
+          std::cout << "  asr  " << asr << std::endl;
+        
+        double mm2 = mu20p - mu02p;
+        auto tana = mm2 + std::sqrt (4*mu11p*mu11p + mm2*mm2);
+        auto theta = atan(2*mu11p / tana);
         m_is_nan = isnan(theta);
         
         double cos2 = cos(theta)*cos(theta);
@@ -354,4 +423,151 @@ void labelBlob::drawOutput() const {
         signal_graphics_ready->operator()();
 }
 
+
+#if 0
+
+
+/** ---------------------------------------------------------------
+ *      calculates geometric properties of shape x,y
+ *
+ *      input:
+ *        n      number of points
+ *        x(.)   shape coordinate point arrays
+ *        y(.)
+ *        t(.)   skin-thickness array, used only if itype = 2
+ *        itype  = 1 ...   integration is over whole area  dx dy
+ *               = 2 ...   integration is over skin  area   t ds
+ *
+ *      output:
+ *        xcen,ycen  centroid location
+ *        ei11,ei22  principal moments of inertia
+ *        apx1,apx2  principal-axis angles
+ * ---------------------------------------------------------------*/
+bool XFoil::aecalc(int n, double x[], double y[], double t[], int itype, double &area,
+                   double &xcen, double &ycen, double &ei11, double &ei22,
+                   double &apx1, double &apx2)
+{
+    double sint, aint, xint, yint, xxint, yyint, xyint;
+    double eixx, eiyy, eixy, eisq;
+    double dx, dy, xa, ya, ta, ds, da, c1, c2, sgn;
+    int ip, io;
+    sint  = 0.0;
+    aint  = 0.0;
+    xint  = 0.0;
+    yint  = 0.0;
+    xxint = 0.0;
+    xyint = 0.0;
+    yyint = 0.0;
+    
+    for (io = 1; io<= n; io++)
+    {
+        if(io==n) ip = 1;
+        else ip = io + 1;
+        
+        
+        dx =  x[io] - x[ip];
+        dy =  y[io] - y[ip];
+        xa = (x[io] + x[ip])*0.50;
+        ya = (y[io] + y[ip])*0.50;
+        ta = (t[io] + t[ip])*0.50;
+        
+        ds = sqrt(dx*dx + dy*dy);
+        sint = sint + ds;
+        
+        if(itype==1)
+        {
+            //-------- integrate over airfoil cross-section
+            da = ya*dx;
+            aint  = aint  +       da;
+            xint  = xint  + xa   *da;
+            yint  = yint  + ya   *da/2.0;
+            xxint = xxint + xa*xa*da;
+            xyint = xyint + xa*ya*da/2.0;
+            yyint = yyint + ya*ya*da/3.0;
+        }
+        else
+        {
+            //-------- integrate over skin thickness
+            da = ta*ds;
+            aint  = aint  +       da;
+            xint  = xint  + xa   *da;
+            yint  = yint  + ya   *da;
+            xxint = xxint + xa*xa*da;
+            xyint = xyint + xa*ya*da;
+            yyint = yyint + ya*ya*da;
+        }
+    }
+    
+    area = aint;
+    
+    if(aint == 0.0)
+    {
+        xcen  = 0.0;
+        ycen  = 0.0;
+        ei11  = 0.0;
+        ei22  = 0.0;
+        apx1 = 0.0;
+        apx2 = atan2(1.0,0.0);
+        return false;
+    }
+    
+    //---- calculate centroid location
+    xcen = xint/aint;
+    ycen = yint/aint;
+    
+    //---- calculate inertias
+    eixx = yyint - (ycen)*(ycen)*aint;
+    eixy = xyint - (xcen)*(ycen)*aint;
+    eiyy = xxint - (xcen)*(xcen)*aint;
+    
+    //---- set principal-axis inertias, ei11 is closest to "up-down" bending inertia
+    eisq  = 0.25*(eixx - eiyy)*(eixx - eiyy)  + eixy*eixy;
+    sgn = sign(1.0 , eiyy-eixx );
+    ei11 = 0.5*(eixx + eiyy) - sgn*sqrt(eisq);
+    ei22 = 0.5*(eixx + eiyy) + sgn*sqrt(eisq);
+    
+    if(ei11==0.0 || ei22==0.0)
+    {
+        //----- vanishing section stiffness
+        apx1 = 0.0;
+        apx2 = atan2(1.0,0.0);
+    }
+    else
+    {
+        if(eisq/((ei11)*(ei22)) < pow((0.001*sint),4.0))
+        {
+            //----- rotationally-invariant section (circle, square, etc.)
+            apx1 = 0.0;
+            apx2 = atan2(1.0,0.0);
+        }
+        else
+        {
+            //----- normal airfoil section
+            c1 = eixy;
+            s1 = eixx-ei11;
+            
+            c2 = eixy;
+            s2 = eixx-ei22;
+            
+            if(fabs(s1)>fabs(s2)) {
+                apx1 = atan2(s1,c1);
+                apx2 = apx1 + 0.5*PI;
+            }
+            else{
+                apx2 = atan2(s2,c2);
+                apx1 = apx2 - 0.5*PI;
+            }
+            
+            if(apx1<-0.5*PI) apx1 = apx1 + PI;
+            if(apx1>+0.5*PI) apx1 = apx1 - PI;
+            if(apx2<-0.5*PI) apx2 = apx2 + PI;
+            if(apx2>+0.5*PI) apx2 = apx2 - PI;
+            
+        }
+    }
+    
+    return true;
+}
+
+#endif
 

@@ -508,6 +508,19 @@ namespace svl
         
     }
 
+
+    void printMat(cv::Mat& A)
+    {
+        for(int r=0; r<A.rows; r++)
+        {
+            for(int c=0; c<A.cols; c++)
+            {
+                cout<<A.at<double>(r,c)<<'\t';
+            }
+            cout<<endl;
+        }
+    }
+
     void PeakDetect(const cv::Mat& space, std::vector<Point>& peaks){
         // Make sure it is empty
         peaks.resize(0);

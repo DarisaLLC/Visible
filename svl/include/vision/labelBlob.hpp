@@ -31,29 +31,36 @@ namespace svl
     class momento : CvMoments
     {
     public:
-        momento(): m_is_loaded (false), m_eigen_done(false), m_is_nan(true) {}
+        momento();
         momento(const momento& other);
         ~momento() {}
         
-        momento(const cv::Mat&);
+        momento(const cv::Mat&, bool not_binary = false);
         
-        void run (const cv::Mat&) const;
+        void run (const cv::Mat&, bool not_binary = false) const;
         const Point2f& com () const { return mc; }
         fPair getEllipseAspect () const;
         uRadian getOrientation () const;
         bool isLoaded () const { return m_is_loaded; }
         bool isValidEigen () const { return m_eigen_ok; }
         bool isNan () const { return m_is_nan; }
+        bool isNotBinary () const { return m_not_binary; }
         bool isEigenDone () const { return m_eigen_done; }
         const cv::Mat& biLevel () const { return m_bilevel; }
         
     private:
         mutable cv::Mat m_bilevel;
+        mutable cv::Mat m_rotation;
+        mutable cv::Mat m_scale;
+        mutable cv::Mat m_translation;
+        mutable cv::Mat m_covar;
+        mutable double  mu11p,mu20p,mu02p;
+        
         mutable cv::Point m_offset;
         mutable cv::Size m_size;
         mutable double m_a;
         mutable double m_b;
-        mutable uRadian theta;
+        mutable uRadian m_theta;
         mutable double eigen_angle;
         mutable double inv_m00;
         mutable Point2f mc;
@@ -61,6 +68,7 @@ namespace svl
         mutable bool m_is_loaded;
         mutable bool m_eigen_done;
         mutable bool m_is_nan;
+        mutable bool m_not_binary;
         void getDirectionals () const;
         
     };
