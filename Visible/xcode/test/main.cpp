@@ -229,36 +229,39 @@ TEST(cluster_2d, basic){
 
 
 TEST(cluster, basic){
-
+    
     std::vector<point3f_t> points;
+    cv::Mat emat (10,10,CV_8U);
+    
     ellipseShape one;
-    one.setEllipse(5.0, 5.0, 3.0, 2.0, 0.0);
+    one.setEllipse(5.0, 5.0, 3.0, 2.0, svl::constants::pi_2 / 4);
     for (double y = 0.0 ; y < 10.0 ; y += 1.0){
         for (double x = 0.0 ; x < 10.0 ; x += 1.0){
-                double rz = 0.0;
-                if(! one.insideEllipse(x,y) )
-                    points.push_back(point3f_t{x, y, rz});
-                else{
-                    rz = one.normalizedDistanceFromOrigin(x, y);
-                    points.push_back(point3f_t{x, y, rz});
-                }
-                std::cout << (int)(10*rz) << '\t';
-                if(x == 9.0) std::cout << std::endl;
-        }
-        
-    }
-        std::vector<cluster3f_t> clusters;
-        
-        find_3dclusters(points, 3.0f, 0.3f, clusters);
-        
-        for(size_t i = 0 ; i < clusters.size() ; ++i) {
-            if (clusters[i].empty()) continue;
-            std::cout << "Cluster " << i << std::endl;
-            for (auto const& p : clusters[i]) {
-                std::cout << bg::wkt(p) << std::endl;
-            }
+            double rz = one.insideEllipse(x,y) ? one.normalizedDistanceFromOrigin(x, y) : 1.0;
+            emat.at<uint8_t>(y,x) = (uint8_t)(100*rz);
+            std::cout << (int)(10*rz) << '\t';
+            if(x == 9.0) std::cout << std::endl;
         }
     }
+    svl::momento bm(emat, false);
+    svl::momento gm(emat, true);
+    std::cout << bm.com() << '\t' << bm.getEllipseAspect() << '\t' << bm.getOrientation().Double() << std::endl;
+    std::cout << gm.com() << '\t' << gm.getEllipseAspect() << '\t' << gm.getOrientation().Double() << std::endl;
+
+
+    
+    std::vector<cluster3f_t> clusters;
+    
+    find_3dclusters(points, 3.0f, 0.3f, clusters);
+    
+    for(size_t i = 0 ; i < clusters.size() ; ++i) {
+        if (clusters[i].empty()) continue;
+        std::cout << "Cluster " << i << std::endl;
+        for (auto const& p : clusters[i]) {
+            std::cout << bg::wkt(p) << std::endl;
+        }
+    }
+}
 
 TEST(chull, basic){
     typedef bg::model::point<float, 2, bg::cs::cartesian> point_2d;
@@ -2259,10 +2262,10 @@ void finalize_segmentation (cv::Mat& space){
     
     threshold(mono, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
     //Show source image
-#ifdef INTERACTIVE
+//#ifdef INTERACTIVE
     imshow("Monochrome Image",mono);
     imshow("Binary Image", bi_level);
-#endif
+//#endif
     
     labelBlob::ref lbr = labelBlob::create(mono, bi_level, 10, 666);
     EXPECT_EQ(lbr == nullptr , false);
@@ -2286,7 +2289,7 @@ void finalize_segmentation (cv::Mat& space){
     lbr->drawOutput();
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     EXPECT_EQ(true, s_graphics_ready);
-#ifdef INTERACTIVE
+//#ifdef INTERACTIVE
     /// Show in a window
     namedWindow( "LabelBlob ", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
     //    std::vector<cv::KeyPoint> one;
@@ -2294,7 +2297,7 @@ void finalize_segmentation (cv::Mat& space){
     cv::drawKeypoints(mono, lbr->keyPoints(),bi_level, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
     imshow( "LabelBlob", bi_level);
     cv::waitKey();
-#endif
+//#endif
     
     
     

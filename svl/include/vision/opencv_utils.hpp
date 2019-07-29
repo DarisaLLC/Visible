@@ -109,6 +109,8 @@ namespace svl
                   const cv::Scalar & color, const int rad);
 
     
+    void printMat(cv::Mat& A);
+
     // Use view roiWindow memory as cv::Mat.
     // Requires cvType to be appropriate
     // Use within scope. As roiWindow is ref counted.

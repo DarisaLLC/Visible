@@ -152,7 +152,7 @@ namespace cgeom{
             std::vector<value3f_t> res;
             rtree.query(
                         // return points that are in a box enclosing the circle
-                        bgi::intersects(box3f_t{{x-r, y-r,0.05},{x+r, y+r,z+zr}})
+                        bgi::intersects(box3f_t{{x-r, y-r,-0.05},{x+r, y+r,z+0.5}})
                         // and were not used before
                         // and are indeed in the circle
                         && bgi::satisfies([&](value3f_t const& v){
