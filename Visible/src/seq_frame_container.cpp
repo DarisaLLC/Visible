@@ -64,7 +64,7 @@ namespace
         
         out.resize (0);
         cm_time ts((*time_iter)/(10000.0));
-        roiFixedMultiWindow<P8UP2, 512, 256, 2> oneBy2 (names, ts.getValue());
+        roiFixedMultiWindow<P8UP2, 512, 128, 2> oneBy2 (names, ts.getValue());
         lifserie.fill2DBuffer(oneBy2.rowPointer(0), frameCount);
         std::shared_ptr<Channel8u> cref = newCiChannel(oneBy2);
         Surface8uRef chsurface = Surface8u::create(*cref);
