@@ -132,8 +132,9 @@ const smProducerRef lif_serie_processor::similarity_producer () const {
     
 }
 
-
-/*
+//! Load and start async processing of Visible channel
+/*!
+ *
  * Note On Sampled Voxel Creation:
  * Top left of unsampled voxel is at pixel top left, i.e. vCols x vRows
  * The result of voxel operation is at 0.5, 0.5 of the voxel area
@@ -149,6 +150,12 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
     m_voxel_sample.second = m_params.voxel_sample().second;
     m_expected_segmented_size.second = frames->getChannelHeight() / m_params.voxel_sample().second;
     
+    /*
+     Creates named tracks @todo move out of here
+     Loads channels from images @note uses last channel for visible processing
+        i.e 2nd channel from 2 channel LIF file and 3rd channel from a 3 channel LIF file or media file
+     
+     */
     create_named_tracks(names, plot_names);
     load_channels_from_images(frames);
     lock.unlock();
@@ -376,7 +383,7 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
             }
             case 2  :
             {
-                auto m2 = roiFixedMultiWindow<P8UP2,512,256,2>(*m1, names, ts);
+                auto m2 = roiFixedMultiWindow<P8UP2,512,128,2>(*m1, names, ts);
                 for (auto cc = 0; cc < m2.planes(); cc++)
                     m_all_by_channel[cc].emplace_back(m2.plane(cc));
                 
