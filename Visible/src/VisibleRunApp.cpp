@@ -298,7 +298,8 @@ void VisibleRunApp::setup()
         }
     }
     else if (exists_with_extenstion && is_valid_extension){
-        
+     
+#if 0
         VisibleAppControl::setup_loggers(root_output_dir, visual_log, fs::path(bpath).filename().string());
         
         cvVideoPlayer::ref vref = cvVideoPlayer::create(fs::path(bpath));
@@ -326,6 +327,7 @@ void VisibleRunApp::setup()
         getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
         getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
         gl::enableVerticalSync();
+#endif
     }
     ADD_ERR_AND_RETURN(cmds, " Path not valid ");
     

@@ -54,7 +54,7 @@ mCurrentCachePath(serie_cache_folder)
     signal_sm1d_available = createSignal<sequence_processor::sig_cb_sm1d_available>();
     signal_3dstats_available = createSignal<sequence_processor::sig_cb_3dstats_available>();
     signal_geometry_available = createSignal<sequence_processor::sig_cb_geometry_available>();
-    signal_ss_image_available = createSignal<sequence_processor::sig_cb_ss_image_available>();
+    _segmented_view_ready_ = createSignal<sequence_processor::sig_cb_ss_image_available>();
     
     // semilarity producer
     m_sm_producer = std::shared_ptr<sm_producer> ( new sm_producer () );
@@ -537,8 +537,8 @@ void sequence_processor::generateVoxelSelfSimilarities_on_channel (const int cha
     }
     if ( cache_ok ){
         // Call the content loaded cb if any
-        if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0)
-            signal_ss_image_available->operator()(m_temporal_ss);
+        if (_segmented_view_ready_ && _segmented_view_ready_->num_slots() > 0)
+            _segmented_view_ready_->operator()(m_temporal_ss);
     }
     else {
         std::vector<std::vector<roiWindow<P8U>>> rvs;

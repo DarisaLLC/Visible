@@ -115,8 +115,8 @@ void movContext::setup_signals(){
     boost::signals2::connection ml_connection = m_movProcRef->registerCallback(content_loaded_cb);
     
     // Support movProcessor::initial ss results available
-    std::function<void (int&)> sm1d_available_cb = boost::bind (&movContext::signal_sm1d_available, shared_from_above(), _1);
-    boost::signals2::connection nl_connection = m_movProcRef->registerCallback(sm1d_available_cb);
+    std::function<void (int&)> sm1d_ready_cb = boost::bind (&movContext::signal_sm1d_available, shared_from_above(), _1);
+    boost::signals2::connection nl_connection = m_movProcRef->registerCallback(sm1d_ready_cb);
     
  
     

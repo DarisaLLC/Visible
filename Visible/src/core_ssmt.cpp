@@ -24,58 +24,58 @@
 #include "cinder_cv/cinder_opencv.h"
 #include "vision/histo.h"
 #include "vision/opencv_utils.hpp"
-#include "algo_Lif.hpp"
+#include "ssmt.hpp"
 #include "logger/logger.hpp"
 #include "result_serialization.h"
 
 
 /**
- lif_serie_processor
+ ssmt_processor
 
  @param path to the Cache Folder
 
  */
-lif_serie_processor::lif_serie_processor (const fs::path& serie_cache_folder):
+ssmt_processor::ssmt_processor (const fs::path& serie_cache_folder):
 mCurrentSerieCachePath(serie_cache_folder)
 {
     // Signals we provide
-    signal_content_loaded = createSignal<lif_serie_processor::sig_cb_content_loaded>();
-    signal_flu_available = createSignal<lif_serie_processor::sig_cb_flu_stats_available>();
-    signal_frame_loaded = createSignal<lif_serie_processor::sig_cb_frame_loaded>();
-    signal_sm1d_available = createSignal<lif_serie_processor::sig_cb_sm1d_available>();
-    signal_sm1dmed_available = createSignal<lif_serie_processor::sig_cb_sm1dmed_available>();
-    signal_contraction_available = createSignal<lif_serie_processor::sig_cb_contraction_available>();
-    signal_3dstats_available = createSignal<lif_serie_processor::sig_cb_3dstats_available>();
-    signal_geometry_available = createSignal<lif_serie_processor::sig_cb_geometry_available>();
-    signal_ss_image_available = createSignal<lif_serie_processor::sig_cb_ss_image_available>();
-    signal_ss_voxel_available = createSignal<lif_serie_processor::sig_cb_ss_voxel_available>();
+    signal_content_loaded = createSignal<ssmt_processor::sig_cb_content_loaded>();
+    signal_flu_ready = createSignal<ssmt_processor::sig_cb_flu_stats_ready>();
+    signal_frame_loaded = createSignal<ssmt_processor::sig_cb_frame_loaded>();
+    signal_sm1d_ready = createSignal<ssmt_processor::sig_cb_sm1d_ready>();
+    signal_sm1dmed_ready = createSignal<ssmt_processor::sig_cb_sm1dmed_ready>();
+    signal_contraction_ready = createSignal<ssmt_processor::sig_cb_contraction_ready>();
+    signal_3dstats_ready = createSignal<ssmt_processor::sig_cb_3dstats_ready>();
+    signal_geometry_ready = createSignal<ssmt_processor::sig_cb_geometry_ready>();
+    signal_segmented_view_ready = createSignal<ssmt_processor::sig_cb_segmented_view_ready>();
+    signal_ss_voxel_ready = createSignal<ssmt_processor::sig_cb_ss_voxel_ready>();
     
     // semilarity producer
     m_sm_producer = std::shared_ptr<sm_producer> ( new sm_producer () );
     
     // Signals we support
     // support Similarity::Content Loaded
-    // std::function<void ()> sm_content_loaded_cb = boost::bind (&lif_serie_processor::sm_content_loaded, this);
+    // std::function<void ()> sm_content_loaded_cb = boost::bind (&ssmt_processor::sm_content_loaded, this);
     // boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
     
     // Create a contraction object
     m_caRef = contractionLocator::create ();
     
     // Suport lif_processor::Contraction Analyzed
-    std::function<void (contractionContainer_t&)>ca_analyzed_cb = boost::bind (&lif_serie_processor::contraction_analyzed, this, _1);
+    std::function<void (contractionContainer_t&)>ca_analyzed_cb = boost::bind (&ssmt_processor::contraction_ready, this, _1);
     boost::signals2::connection ca_connection = m_caRef->registerCallback(ca_analyzed_cb);
     
     // Signal us when 3d stats are ready
-    std::function<void ()>_3dstats_done_cb = boost::bind (&lif_serie_processor::stats_3d_computed, this);
+    std::function<void ()>_3dstats_done_cb = boost::bind (&ssmt_processor::stats_3d_computed, this);
     boost::signals2::connection _3d_stats_connection = registerCallback(_3dstats_done_cb);
     
     // Signal us when ss segmentation surface is ready
-    std::function<sig_cb_ss_image_available>_ss_image_done_cb = boost::bind (&lif_serie_processor::finalize_segmentation,
+    std::function<sig_cb_segmented_view_ready> _ss_segmentation_done_cb = boost::bind (&ssmt_processor::finalize_segmentation,
                                                                              this, _1, _2, _3);
-    boost::signals2::connection _ss_image_connection = registerCallback(_ss_image_done_cb);
+    boost::signals2::connection _ss_image_connection = registerCallback(_ss_segmentation_done_cb);
     
     // Signal us when ss segmentation is ready
-    std::function<sig_cb_ss_voxel_available> _ss_voxel_done_cb = boost::bind (&lif_serie_processor::create_voxel_surface, this, _1);
+    std::function<sig_cb_ss_voxel_ready> _ss_voxel_done_cb = boost::bind (&ssmt_processor::create_voxel_surface, this, _1);
     boost::signals2::connection _ss_voxel_connection = registerCallback(_ss_voxel_done_cb);
     
 }
@@ -90,7 +90,7 @@ mCurrentSerieCachePath(serie_cache_folder)
  @param names <#names description#>
  @param plot_names <#plot_names description#>
  */
-void lif_serie_processor::create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
+void ssmt_processor::create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
 {
     m_flurescence_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
     m_contraction_pci_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
@@ -127,7 +127,7 @@ void lif_serie_processor::create_named_tracks (const std::vector<std::string>& n
 }
 
 
-const smProducerRef lif_serie_processor::similarity_producer () const {
+const smProducerRef ssmt_processor::similarity_producer () const {
     return m_sm_producer;
     
 }
@@ -141,7 +141,7 @@ const smProducerRef lif_serie_processor::similarity_producer () const {
  * that is in vCols / 2 , vRows / 2
  * And vCols / 2 , vRows / 2 border
  */
-int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
+int64_t ssmt_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
     
@@ -158,6 +158,12 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
      */
     create_named_tracks(names, plot_names);
     load_channels_from_images(frames);
+    
+    
+    // Call the content loaded cb if any
+    if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+        signal_content_loaded->operator()(m_frameCount);
+    
     lock.unlock();
     
     int channel_to_use = m_channel_count - 1;
@@ -165,12 +171,7 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
     run_volume_variances(m_all_by_channel[channel_to_use]);
     while(!m_3d_stats_done){ std::this_thread::yield();}
     run_detect_geometry (channel_to_use);
-    
-    
-    // Call the content loaded cb if any
-    if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
-        signal_content_loaded->operator()(m_frameCount);
-    
+ 
     return m_frameCount;
 }
 
@@ -180,7 +181,7 @@ int64_t lif_serie_processor::load (const std::shared_ptr<seqFrameContainer>& fra
  * 1 monchrome channel. Compute volume stats of each on a thread
  */
 
-svl::stats<int64_t> lif_serie_processor::run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>& images){
+svl::stats<int64_t> ssmt_processor::run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
 
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
@@ -193,19 +194,19 @@ svl::stats<int64_t> lif_serie_processor::run_volume_sum_sumsq_count (std::vector
     m_3d_stats = svl::stats<int64_t> (std::get<0>(res), std::get<1>(res), std::get<2>(res), int64_t(std::get<0>(mes)), int64_t(std::get<1>(mes)));
     
     // Signal to listeners
-    if (signal_3dstats_available && signal_3dstats_available->num_slots() > 0)
-        signal_3dstats_available->operator()();
+    if (signal_3dstats_ready && signal_3dstats_ready->num_slots() > 0)
+        signal_3dstats_ready->operator()();
     return m_3d_stats;
     
 }
 
 
-svl::stats<int64_t> lif_serie_processor::run_volume_sum_sumsq_count (const int channel_index){
+svl::stats<int64_t> ssmt_processor::run_volume_sum_sumsq_count (const int channel_index){
     return run_volume_sum_sumsq_count(m_all_by_channel[channel_index]);
 }
 
 
-void lif_serie_processor::stats_3d_computed(){
+void ssmt_processor::stats_3d_computed(){
     
 }
 /*
@@ -218,7 +219,7 @@ void lif_serie_processor::stats_3d_computed(){
  @param channels vector of channels containing fluorescence images
  @return vecor of named tracks containing of output time series
  */
-std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::run_flu_statistics (const std::vector<int>& channels)
+std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_flu_statistics (const std::vector<int>& channels)
 {
     std::vector<std::thread> threads(channels.size());
     for (auto tt = 0; tt < channels.size(); tt++)
@@ -229,8 +230,8 @@ std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::run_flu_statistics (cons
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     
     // Call the content loaded cb if any
-    if (signal_flu_available && signal_flu_available->num_slots() > 0)
-        signal_flu_available->operator()();
+    if (signal_flu_ready && signal_flu_ready->num_slots() > 0)
+        signal_flu_ready->operator()();
     
     return m_flurescence_tracksRef;
 }
@@ -238,7 +239,7 @@ std::shared_ptr<vecOfNamedTrack_t> lif_serie_processor::run_flu_statistics (cons
 
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled
-std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci (const std::vector<roiWindow<P8U>>& images)
+std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const std::vector<roiWindow<P8U>>& images)
 {
     bool cache_ok = false;
     size_t dim = images.size();
@@ -295,15 +296,15 @@ std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci (co
     }
     // Signal we are done with ACI
     static int dummy;
-    if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
-        signal_sm1d_available->operator()(dummy);
+    if (signal_sm1d_ready && signal_sm1d_ready->num_slots() > 0)
+        signal_sm1d_ready->operator()(dummy);
     
     return m_contraction_pci_tracksRef;
 }
 
 // @todo even though channel index is an argument, but only results for one channel is kept in lif_processor.
 //
-std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci_on_channel (const int channel_index)
+std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci_on_channel (const int channel_index)
 {
     return run_contraction_pci(std::move(m_all_by_channel[channel_index]));
 }
@@ -313,7 +314,7 @@ std::shared_ptr<vecOfNamedTrack_t>  lif_serie_processor::run_contraction_pci_on_
  * the atomic bool m_3d_stats_done is set to true
  */
 
-void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
+void ssmt_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
 
     cv::Mat m_sum, m_sqsum;
@@ -338,7 +339,7 @@ void lif_serie_processor::run_volume_variances (std::vector<roiWindow<P8U>>& ima
     
 }
 
-const std::vector<Rectf>& lif_serie_processor::channel_rois () const { return m_channel_rois; }
+const std::vector<Rectf>& ssmt_processor::channel_rois () const { return m_channel_rois; }
 
 
 
@@ -346,7 +347,7 @@ const std::vector<Rectf>& lif_serie_processor::channel_rois () const { return m_
 // Assumes LIF data -- use multiple window.
 // @todo condider creating cv::Mats and convert to roiWindow when needed.
 
-void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames)
+void ssmt_processor::load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames)
 {
     m_frameCount = 0;
     m_all_by_channel.clear();
@@ -419,7 +420,7 @@ void lif_serie_processor::load_channels_from_images (const std::shared_ptr<seqFr
  Each call to find_best can be with different median cut-off
  @param track track to be filled
  */
-void lif_serie_processor::median_leveled_pci (namedTrack_t& track)
+void ssmt_processor::median_leveled_pci (namedTrack_t& track)
 {
     try{
         std::weak_ptr<contractionLocator> weakCaPtr (m_caRef);
@@ -445,12 +446,12 @@ void lif_serie_processor::median_leveled_pci (namedTrack_t& track)
     }
     // Signal we are done with median level set
     static int dummy;
-    if (signal_sm1dmed_available && signal_sm1dmed_available->num_slots() > 0)
-        signal_sm1dmed_available->operator()(dummy, dummy);
+    if (signal_sm1dmed_ready && signal_sm1dmed_ready->num_slots() > 0)
+        signal_sm1dmed_ready->operator()(dummy, dummy);
 }
 
 
-const int64_t& lif_serie_processor::frame_count () const
+const int64_t& ssmt_processor::frame_count () const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     static int64_t inconsistent (0);
@@ -465,13 +466,13 @@ const int64_t& lif_serie_processor::frame_count () const
     return m_frameCount;
 }
 
-const int64_t lif_serie_processor::channel_count () const
+const int64_t ssmt_processor::channel_count () const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     return m_channel_count;
 }
 
-std::shared_ptr<ioImageWriter>& lif_serie_processor::get_image_writer (){
+std::shared_ptr<ioImageWriter>& ssmt_processor::get_image_writer (){
     if (! m_image_writer){
         m_image_writer = std::make_shared<ioImageWriter>();
     }
@@ -479,14 +480,14 @@ std::shared_ptr<ioImageWriter>& lif_serie_processor::get_image_writer (){
 }
 
 
-std::shared_ptr<ioImageWriter>& lif_serie_processor::get_csv_writer (){
+std::shared_ptr<ioImageWriter>& ssmt_processor::get_csv_writer (){
     if (! m_csv_writer){
         m_csv_writer = std::make_shared<ioImageWriter>();
     }
     return m_csv_writer;
 }
 
-void lif_serie_processor::save_channel_images (int channel_index, std::string& dir_fqfn){
+void ssmt_processor::save_channel_images (int channel_index, std::string& dir_fqfn){
     std::lock_guard<std::mutex> lock(m_mutex);
     int channel_to_use = channel_index % m_channel_count;
     channel_images_t c2 = m_all_by_channel[channel_to_use];
@@ -496,3 +497,6 @@ void lif_serie_processor::save_channel_images (int channel_index, std::string& d
     
 }
 
+const std::vector<moving_region>& ssmt_processor::moving_regions ()const {
+    return m_regions;
+}

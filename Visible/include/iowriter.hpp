@@ -131,7 +131,7 @@ public:
         do
         {
             std::string fn = m_name +  m_namer(count++, fw, '0') + ".csv";
-            save_csv(*vitr, fn);
+            stl_utils::save_csv(*vitr, fn);
             // Signal to listeners
             if (signal_write_info && signal_write_info->num_slots() > 0)
                 signal_write_info->operator()(count-1,count == total);

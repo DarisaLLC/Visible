@@ -24,7 +24,7 @@
 #include "cinder_cv/cinder_opencv.h"
 #include "vision/histo.h"
 #include "vision/opencv_utils.hpp"
-#include "algo_Lif.hpp"
+#include "ssmt.hpp"
 #include "logger/logger.hpp"
 #include "result_serialization.h"
 
@@ -36,7 +36,7 @@
  
  @param halfWinSz half size of the temporal window
  */
-void lif_serie_processor::compute_shortterm (const uint32_t halfWinSz) const{
+void ssmt_processor::compute_shortterm (const uint32_t halfWinSz) const{
     
     uint32_t tWinSz = 2 * halfWinSz + 1;
     
@@ -94,7 +94,7 @@ void lif_serie_processor::compute_shortterm (const uint32_t halfWinSz) const{
  
  @param halfWinSz half size of the temporal window
  */
-void lif_serie_processor::shortterm_pci (const uint32_t& halfWinSz) {
+void ssmt_processor::shortterm_pci (const uint32_t& halfWinSz) {
     
     
     // Check if full sm has been done

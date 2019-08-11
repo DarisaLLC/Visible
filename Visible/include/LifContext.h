@@ -2,6 +2,7 @@
 #define __LIFContext___h
 
 #include "guiContext.h"
+#include "ssmt.hpp"
 #include "algo_Lif.hpp"
 #include "clipManager.hpp"
 #include "visible_layout.hpp"
@@ -31,7 +32,7 @@ class lifContext : public sequencedImageContext
 {
 public:
     
-    using contractionContainer_t = lif_serie_processor::contractionContainer_t;
+    using contractionContainer_t = ssmt_processor::contractionContainer_t;
     
   
     enum Side_t : uint32_t
@@ -121,7 +122,7 @@ private:
     void glscreen_normalize (const sides_length_t& , const Rectf& display_rect,  sides_length_t&);
     
     // LIF Support
-    std::shared_ptr<lif_serie_processor> m_lifProcRef;
+    std::shared_ptr<ssmt_processor> m_lifProcRef;
 	void loadCurrentSerie ();
 	bool have_lif_serie ();
     std::shared_ptr<lifIO::LifSerie> m_cur_lif_serie_ref;
@@ -133,13 +134,13 @@ private:
     
     // Callbacks
     void signal_content_loaded (int64_t&);
-    void signal_flu_stats_available ();
-    void signal_sm1d_available (int&);
-    void signal_sm1dmed_available (int&,int&);
-    void signal_contraction_available (contractionContainer_t&);
+    void signal_flu_stats_ready ();
+    void signal_sm1d_ready (int&);
+    void signal_sm1dmed_ready (int&,int&);
+    void signal_contraction_ready (contractionContainer_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
-    void signal_geometry_available ();
-    void signal_ss_image_available (cv::Mat&, cv::Mat&, iPair& );
+    void signal_geometry_ready (int&);
+    void signal_segmented_view_ready (cv::Mat&, cv::Mat&, iPair& );
     
     // Availability
     std::atomic<bool> m_geometry_available;
@@ -171,7 +172,7 @@ private:
     std::weak_ptr<vecOfNamedTrack_t> m_contraction_pci_trackWeakRef;
 
     // Contraction
-    lif_serie_processor::contractionContainer_t m_contractions;
+    ssmt_processor::contractionContainer_t m_contractions;
     std::vector<std::string> m_contraction_none = {" Entire "};
     mutable std::vector<std::string> m_contraction_names;
     float m_major_cell_length, m_minor_cell_length;

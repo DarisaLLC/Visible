@@ -26,8 +26,6 @@ struct idlab_cardiac_defaults{
 };
 
 
-void pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints, cv::RotatedRect& rotated_rect );
-
 
 struct IntensityStatisticsRunner
 {

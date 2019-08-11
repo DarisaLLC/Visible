@@ -119,35 +119,35 @@ ci::app::WindowRef&  lifContext::get_windowRef(){
 void lifContext::setup_signals(){
 
     // Create a Processing Object to attach signals to
-    m_lifProcRef = std::make_shared<lif_serie_processor> (mCurrentSerieCachePath);
+    m_lifProcRef = std::make_shared<ssmt_processor> (mCurrentSerieCachePath);
     
     // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&lifContext::signal_content_loaded, shared_from_above(), _1);
     boost::signals2::connection ml_connection = m_lifProcRef->registerCallback(content_loaded_cb);
     
     // Support lifProcessor::flu results available
-    std::function<void ()> flu_stats_available_cb = boost::bind (&lifContext::signal_flu_stats_available, shared_from_above());
-    boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(flu_stats_available_cb);
+    std::function<void ()> flu_stats_ready_cb = boost::bind (&lifContext::signal_flu_stats_ready, shared_from_above());
+    boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(flu_stats_ready_cb);
     
     // Support lifProcessor::initial ss results available
-    std::function<void (int&)> sm1d_available_cb = boost::bind (&lifContext::signal_sm1d_available, shared_from_above(), _1);
-    boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_available_cb);
+    std::function<void (int&)> sm1d_ready_cb = boost::bind (&lifContext::signal_sm1d_ready, shared_from_above(), _1);
+    boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_ready_cb);
     
     // Support lifProcessor::median level set ss results available
-    std::function<void (int&,int&)> sm1dmed_available_cb = boost::bind (&lifContext::signal_sm1dmed_available, shared_from_above(), _1, _2);
-    boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_available_cb);
+    std::function<void (int&,int&)> sm1dmed_ready_cb = boost::bind (&lifContext::signal_sm1dmed_ready, shared_from_above(), _1, _2);
+    boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_ready_cb);
     
     // Support lifProcessor::contraction results available
-    std::function<void (lif_serie_processor::contractionContainer_t&)> contraction_available_cb = boost::bind (&lifContext::signal_contraction_available, shared_from_above(), _1);
-    boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_available_cb);
+    std::function<void (ssmt_processor::contractionContainer_t&)> contraction_ready_cb = boost::bind (&lifContext::signal_contraction_ready, shared_from_above(), _1);
+    boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_ready_cb);
     
-    // Support lifProcessor::geometry_available
-    std::function<void ()> geometry_available_cb = boost::bind (&lifContext::signal_geometry_available, shared_from_above());
-    boost::signals2::connection geometry_connection = m_lifProcRef->registerCallback(geometry_available_cb);
+    // Support lifProcessor::geometry_ready
+    std::function<void (int&)> geometry_ready_cb = boost::bind (&lifContext::signal_geometry_ready, shared_from_above(), _1);
+    boost::signals2::connection geometry_connection = m_lifProcRef->registerCallback(geometry_ready_cb);
     
-    // Support lifProcessor::temporal_image_available
-    std::function<void (cv::Mat&,cv::Mat&, iPair&)> ss_image_available_cb = boost::bind (&lifContext::signal_ss_image_available, shared_from_above(), _1, _2, _3);
-    boost::signals2::connection ss_image_connection = m_lifProcRef->registerCallback(ss_image_available_cb);
+    // Support lifProcessor::temporal_image_ready
+    std::function<void (cv::Mat&,cv::Mat&, iPair&)> ss_segmented_view_ready_cb = boost::bind (&lifContext::signal_segmented_view_ready, shared_from_above(), _1, _2, _3);
+    boost::signals2::connection ss_image_connection = m_lifProcRef->registerCallback(ss_segmented_view_ready_cb);
     
 }
 
@@ -199,12 +199,12 @@ void lifContext::setup()
  *
  ************************/
 
-void lifContext::signal_sm1d_available (int& dummy)
+void lifContext::signal_sm1d_ready (int& dummy)
 {
     vlogger::instance().console()->info("self-similarity available: ");
 }
 
-void lifContext::signal_sm1dmed_available (int& dummy, int& dummy2)
+void lifContext::signal_sm1dmed_ready (int& dummy, int& dummy2)
 {
    //@note this is also checked in update. Not sure if this is necessary
    if (haveTracks())
@@ -223,14 +223,14 @@ void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
     vlogger::instance().console()->info(msg);
     process_async();
 }
-void lifContext::signal_flu_stats_available ()
+void lifContext::signal_flu_stats_ready ()
 {
     update();
     vlogger::instance().console()->info(" Flu Stats Available ");
 
 }
 
-void lifContext::signal_contraction_available (lif_serie_processor::contractionContainer_t& contras)
+void lifContext::signal_contraction_ready (ssmt_processor::contractionContainer_t& contras)
 {
     // Pauses playback if playing and restore it at scope's end
     scopedPause sp(std::shared_ptr<lifContext>(shared_from_above(), stl_utils::null_deleter () ));
@@ -253,7 +253,7 @@ void lifContext::signal_contraction_available (lif_serie_processor::contractionC
 }
 
 
-void lifContext::signal_geometry_available()
+void lifContext::signal_geometry_ready(int & count)
 {
     vlogger::instance().console()->info(" Volume Variance are available ");
     if (! m_lifProcRef){
@@ -263,7 +263,8 @@ void lifContext::signal_geometry_available()
     
     std::string msg = " lif context thread: " + stl_utils::tostr(std::this_thread::get_id());
     vlogger::instance().console()->info(msg);
-    m_lifProcRef->generate_affine_windows();
+    //@todo parameterize affine windows generation
+    // m_lifProcRef->generate_affine_windows();
   
 }
 
@@ -275,7 +276,7 @@ void lifContext::glscreen_normalize (const sides_length_t& src, const Rectf& gdr
     dst.second.y = (src.second.y*gdr.getHeight()) / mMediaInfo.getHeight();
 }
                                      
-void lifContext::signal_ss_image_available(cv::Mat& image, cv::Mat& label, iPair& ptrans)
+void lifContext::signal_segmented_view_ready (cv::Mat& image, cv::Mat& label, iPair& ptrans)
 {
     vlogger::instance().console()->info(" SS Image Available  ");
     if (! m_lifProcRef){
@@ -287,8 +288,8 @@ void lifContext::signal_ss_image_available(cv::Mat& image, cv::Mat& label, iPair
     
     if (! m_segmented_texture ){
         m_segmented_surface = Surface8u::create(cinder::fromOcv(m_segmented_image));
-        auto cell_ends =  m_lifProcRef->cell_ends ();
-        m_cell_ends = cell_ends;
+    //    auto cell_ends =  m_lifProcRef->cell_ends ();
+     //   m_cell_ends = cell_ends;
     }
 }
 
@@ -785,7 +786,7 @@ void lifContext::loadCurrentSerie ()
         m_plot_names.push_back("MisRegister");
         cv::Mat result;
         std::vector<std::thread> threads(1);
-        threads[0] = std::thread(&lif_serie_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names(), m_plot_names);
+        threads[0] = std::thread(&ssmt_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names(), m_plot_names);
         std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 
         /*
@@ -826,22 +827,22 @@ void lifContext::process_async (){
         case 3:
         {
             // note launch mode is std::launch::async
-            m_fluorescense_tracks_aync = std::async(std::launch::async,&lif_serie_processor::run_flu_statistics,
+            m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 2);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 2);
             break;
         }
         case 2:
         {
             // note launch mode is std::launch::async
-            m_fluorescense_tracks_aync = std::async(std::launch::async,&lif_serie_processor::run_flu_statistics,
+            m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
                                                     m_lifProcRef.get(), std::vector<int> ({0}) );
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 1);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 1);
             break;
         }
         case 1:
         {
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &lif_serie_processor::run_contraction_pci_on_channel,m_lifProcRef.get(), 0);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_channel,m_lifProcRef.get(), 0);
             break;
         }
     }
@@ -1042,7 +1043,7 @@ void lifContext::add_motion_profile (){
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(frame);
     
-    const RotatedRect& mt = m_lifProcRef->motion_surface ();
+   // const RotatedRect& mt = m_lifProcRef->motion_surface ();
     
     if (ImGui::Begin("Motion Profile", nullptr, ImGuiWindowFlags_NoScrollbar  ))
     {
@@ -1050,37 +1051,37 @@ void lifContext::add_motion_profile (){
             static ImVec2 zoom_center;
             // First Child
             ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
-            ImVec2 pp = ImGui::GetCursorScreenPos();
-            ImVec2 p (pp.x + mt.center.x, pp.y  + mt.center.y+128);
+        //    ImVec2 pp = ImGui::GetCursorScreenPos();
+       //     ImVec2 p (pp.x + mt.center.x, pp.y  + mt.center.y+128);
             ImGui::Image( (void*)(intptr_t) m_segmented_texture->getId(), frame);
             ImGui::EndChild();
             
             // Second Child
-            ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
-            ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
-            ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
-            auto cell_ends = m_cell_ends;
-            
-            auto draw_cell_ends = [cell_ends,pp](int ee, uint32_t color){
-                auto pt = cell_ends[ee].first;
-                pt.x += (pp.x );
-                pt.y += (pp.y+128 );
-                if (pt.x >=5 && pt.y >=5){
-                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), color, 3.0f);
-                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), color,  3.0f);
-                }
-                pt = cell_ends[ee].second;
-                pt.x += (pp.x );
-                pt.y += (pp.y+128 );
-                if (pt.x >=5 && pt.y >=5){
-                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), color, 3.0f);
-                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), color, 3.0f);
-                }
-            };
-            
-            draw_cell_ends(0,IM_COL32(0, 255, 0, 255));
-            draw_cell_ends(1,IM_COL32(255, 128, 0, 255));
-            ImGui::EndChild();
+//            ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
+//            ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
+ //           ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
+//            auto cell_ends = m_cell_ends;
+//
+//            auto draw_cell_ends = [cell_ends,pp](int ee, uint32_t color){
+//                auto pt = cell_ends[ee].first;
+//                pt.x += (pp.x );
+//                pt.y += (pp.y+128 );
+//                if (pt.x >=5 && pt.y >=5){
+//                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), color, 3.0f);
+//                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), color,  3.0f);
+//                }
+//                pt = cell_ends[ee].second;
+//                pt.x += (pp.x );
+//                pt.y += (pp.y+128 );
+//                if (pt.x >=5 && pt.y >=5){
+//                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), color, 3.0f);
+//                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), color, 3.0f);
+//                }
+//            };
+//
+//            draw_cell_ends(0,IM_COL32(0, 255, 0, 255));
+//            draw_cell_ends(1,IM_COL32(255, 128, 0, 255));
+ //           ImGui::EndChild();
         }
     }
     ImGui::End();
@@ -1333,68 +1334,72 @@ void lifContext::draw ()
        // std::vector<float> test = {0.0,0.1,0.2,1.0,0.2,0.1,0.0};
        // m_tsPlotter.setBounds(gdr);
        // m_tsPlotter.draw(test);
-        
+
+        const Rectf& measured_area = m_lifProcRef->measuredArea ();
         if (m_geometry_available)
         {
-            const Rectf& measured_area = m_lifProcRef->measuredArea ();
-            float width = measured_area.getWidth();
-            float height = measured_area.getHeight();
-            
-            const cv::RotatedRect& ellipse = m_lifProcRef->motion_surface();
-            const fPair& ab = m_lifProcRef->ellipse_ab();
-            vec2 a_v ((ab.first * gdr.getWidth()) / (2.0 * width), 0.0f );
-            vec2 b_v (0.0f, (ab.second * gdr.getHeight()) / (2.0* height));
-            
-            glscreen_normalize(m_cell_ends[0], gdr, m_normalized_cell_ends[0]);
-            glscreen_normalize(m_cell_ends[1], gdr, m_normalized_cell_ends[1]);
-            m_major_cell_length = distance(m_normalized_cell_ends[0].first,m_normalized_cell_ends[0].second);
-            m_minor_cell_length = distance(m_normalized_cell_ends[1].first,m_normalized_cell_ends[1].second);
-            
-            uDegree da(ellipse.angle);
-            uRadian dra (da);
-            vec2 ctr0 ((ellipse.center.x * gdr.getWidth()) / width, (ellipse.center.y * gdr.getHeight()) / height );
-            
-            cinder::gl::ScopedLineWidth( 10.0f );
-            cinder::gl::ScopedColor col (ColorA( 1.0, 0.1, 0.0, 0.8f ) );
-            {
-                cinder::gl::ScopedModelMatrix _mdl;
-                auto ctr = ctr0 + gdr.getUpperLeft();
-                gl::translate(ctr);
-
-                gl::rotate(dra.Double());
-                ctr = vec2(0,0);
-                gl::drawSolidCircle(ctr, 3.0);
-                gl::drawLine(ctr-b_v, ctr+b_v);
-                gl::drawLine(ctr-a_v, ctr+a_v);
-          
-                gl::drawStrokedEllipse(ctr, a_v.x, b_v.y);
-            }
-            
-            if (m_cell_ends.size() == 2)
-            {
-           
-                vec2 a_v ( m_major_cell_length / 2.0, 0.0f );
-                vec2 b_v (0.0f, m_minor_cell_length / 2.0f);
+            for (const moving_region& m_ : m_lifProcRef->moving_regions()){
                 
+
+                float width = measured_area.getWidth();
+                float height = measured_area.getHeight();
+                
+                const cv::RotatedRect& ellipse = m_.motion_surface();
+                const fPair& ab = m_.ellipse_ab();
+                vec2 a_v ((ab.first * gdr.getWidth()) / (2.0 * width), 0.0f );
+                vec2 b_v (0.0f, (ab.second * gdr.getHeight()) / (2.0* height));
+                
+                glscreen_normalize(m_cell_ends[0], gdr, m_normalized_cell_ends[0]);
+                glscreen_normalize(m_cell_ends[1], gdr, m_normalized_cell_ends[1]);
+                m_major_cell_length = distance(m_normalized_cell_ends[0].first,m_normalized_cell_ends[0].second);
+                m_minor_cell_length = distance(m_normalized_cell_ends[1].first,m_normalized_cell_ends[1].second);
+                
+                uDegree da(ellipse.angle);
+                uRadian dra (da);
+                vec2 ctr0 ((ellipse.center.x * gdr.getWidth()) / width, (ellipse.center.y * gdr.getHeight()) / height );
+                
+                cinder::gl::ScopedLineWidth( 10.0f );
+                cinder::gl::ScopedColor col (ColorA( 1.0, 0.1, 0.0, 0.8f ) );
                 {
                     cinder::gl::ScopedModelMatrix _mdl;
                     auto ctr = ctr0 + gdr.getUpperLeft();
                     gl::translate(ctr);
-                    
+
                     gl::rotate(dra.Double());
                     ctr = vec2(0,0);
                     gl::drawSolidCircle(ctr, 3.0);
+                    gl::drawLine(ctr-b_v, ctr+b_v);
+                    gl::drawLine(ctr-a_v, ctr+a_v);
+              
+                    gl::drawStrokedEllipse(ctr, a_v.x, b_v.y);
+                }
+                
+                if (m_cell_ends.size() == 2)
+                {
+               
+                    vec2 a_v ( m_major_cell_length / 2.0, 0.0f );
+                    vec2 b_v (0.0f, m_minor_cell_length / 2.0f);
+                    
                     {
-                        cinder::gl::ScopedColor col (ColorA( 0.1, 1.0, 0.1, 0.8f ) );
-                        gl::drawLine(ctr-b_v, ctr+b_v);
-                        gl::drawSolidCircle(ctr-b_v, 3.0);
-                        gl::drawSolidCircle( ctr+b_v, 3.0);
-                    }
-                    {
-                        cinder::gl::ScopedColor col (ColorA( 0.1, 0.1, 1.0, 0.8f ) );
-                        gl::drawLine(ctr-a_v, ctr+a_v);
-                        gl::drawSolidCircle(ctr-a_v, 3.0);
-                        gl::drawSolidCircle( ctr+a_v, 3.0);
+                        cinder::gl::ScopedModelMatrix _mdl;
+                        auto ctr = ctr0 + gdr.getUpperLeft();
+                        gl::translate(ctr);
+                        
+                        gl::rotate(dra.Double());
+                        ctr = vec2(0,0);
+                        gl::drawSolidCircle(ctr, 3.0);
+                        {
+                            cinder::gl::ScopedColor col (ColorA( 0.1, 1.0, 0.1, 0.8f ) );
+                            gl::drawLine(ctr-b_v, ctr+b_v);
+                            gl::drawSolidCircle(ctr-b_v, 3.0);
+                            gl::drawSolidCircle( ctr+b_v, 3.0);
+                        }
+                        {
+                            cinder::gl::ScopedColor col (ColorA( 0.1, 0.1, 1.0, 0.8f ) );
+                            gl::drawLine(ctr-a_v, ctr+a_v);
+                            gl::drawSolidCircle(ctr-a_v, 3.0);
+                            gl::drawSolidCircle( ctr+a_v, 3.0);
+                        }
                     }
                 }
             }

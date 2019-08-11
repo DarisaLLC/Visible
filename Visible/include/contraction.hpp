@@ -137,7 +137,7 @@ public:
     // signal_contraction_available
     // signal pci is median level processed
     typedef void (sig_cb_pci_available) (std::vector<double>&);
-    typedef void (sig_cb_contraction_analyzed) (contractionContainer_t&);
+    typedef void (sig_cb_contraction_ready) (contractionContainer_t&);
     typedef void (sig_cb_cell_length_ready) (sigContainer_t&);
     typedef void (sig_cb_force_ready) (sigContainer_t&);
     
@@ -218,7 +218,7 @@ private:
 protected:
     boost::signals2::signal<contractionLocator::sig_cb_cell_length_ready>* cell_length_ready;
     boost::signals2::signal<contractionLocator::sig_cb_force_ready>* total_reactive_force_ready;
-    boost::signals2::signal<contractionLocator::sig_cb_contraction_analyzed>* signal_contraction_analyzed;
+    boost::signals2::signal<contractionLocator::sig_cb_contraction_ready>* signal_contraction_ready;
     boost::signals2::signal<contractionLocator::sig_cb_pci_available>* signal_pci_available;
     
 };
