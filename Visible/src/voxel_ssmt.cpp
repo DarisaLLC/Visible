@@ -25,7 +25,7 @@
 #include "vision/histo.h"
 #include "vision/opencv_utils.hpp"
 #include "vision/labelconnect.hpp"
-#include "algo_Lif.hpp"
+#include "ssmt.hpp"
 #include "logger/logger.hpp"
 #include "cpp-perf.hpp"
 #include "result_serialization.h"
@@ -36,14 +36,14 @@
 
 
 // Return 2D latice of pixels over time
-void lif_serie_processor::generateVoxels_on_channel (const int channel_index){
+void ssmt_processor::generateVoxels_on_channel (const int channel_index){
     generateVoxelsOfSampled(m_all_by_channel[channel_index]);
 }
 
 
 // Return 2D latice of voxel self-similarity
 
-void lif_serie_processor::generateVoxelsAndSelfSimilarities (const std::vector<roiWindow<P8U>>& images){
+void ssmt_processor::generateVoxelsAndSelfSimilarities (const std::vector<roiWindow<P8U>>& images){
     
     generateVoxelsOfSampled(images);
     generateVoxelSelfSimilarities();
@@ -52,7 +52,7 @@ void lif_serie_processor::generateVoxelsAndSelfSimilarities (const std::vector<r
 
 
 
-void lif_serie_processor::generateVoxelsOfSampled (const std::vector<roiWindow<P8U>>& images){
+void ssmt_processor::generateVoxelsOfSampled (const std::vector<roiWindow<P8U>>& images){
     size_t t_d = images.size();
     auto half_offset = m_voxel_sample / 2;
     uint32_t width = images[0].width() - half_offset.first;
@@ -87,7 +87,7 @@ void lif_serie_processor::generateVoxelsOfSampled (const std::vector<roiWindow<P
     
 }
 
-void lif_serie_processor::create_voxel_surface(std::vector<float>& ven){
+void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
     
     uiPair half_offset = m_voxel_sample / 2;
     uint32_t width = m_expected_segmented_size.first;
@@ -178,9 +178,9 @@ void lif_serie_processor::create_voxel_surface(std::vector<float>& ven){
     
     std::cout << "peaks_average: " << peaks_average << " Global Peak " << motion_peak << std::endl;
     
-//    m_measured_area = Rectf(0,0,bot.width, bot.height);
-//    assert(m_temporal_ss.cols == m_measured_area.getWidth());
-//    assert(m_temporal_ss.rows == m_measured_area.getHeight());
+    m_measured_area = Rectf(0,0,bot.width, bot.height);
+ //   assert(m_temporal_ss.cols == m_measured_area.getWidth());
+ //   assert(m_temporal_ss.rows == m_measured_area.getHeight());
     
     cv::Mat bi_level;
 
@@ -206,14 +206,14 @@ void lif_serie_processor::create_voxel_surface(std::vector<float>& ven){
     }
     
     // Call the voxel ready cb if any
-    if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0){
-        signal_ss_image_available->operator()(m_temporal_ss, bi_level, pad);
+    if (signal_segmented_view_ready && signal_segmented_view_ready->num_slots() > 0){
+        signal_segmented_view_ready->operator()(m_temporal_ss, bi_level, pad);
     }
     
     
 }
 
-void lif_serie_processor::generateVoxelSelfSimilarities (){
+void ssmt_processor::generateVoxelSelfSimilarities (){
     
     bool cache_ok = false;
     std::shared_ptr<internalContainer> ssref;
@@ -231,8 +231,8 @@ void lif_serie_processor::generateVoxelSelfSimilarities (){
         m_voxel_entropies.insert(m_voxel_entropies.end(), ssref->data().begin(),
                                  ssref->data().end());
         // Call the voxel ready cb if any
-        if (signal_ss_voxel_available && signal_ss_voxel_available->num_slots() > 0)
-            signal_ss_voxel_available->operator()(m_voxel_entropies);
+        if (signal_ss_voxel_ready && signal_ss_voxel_ready->num_slots() > 0)
+            signal_ss_voxel_ready->operator()(m_voxel_entropies);
         
     }else{
         
@@ -252,8 +252,8 @@ void lif_serie_processor::generateVoxelSelfSimilarities (){
             m_voxel_entropies.insert(m_voxel_entropies.end(), entropies.begin(), entropies.end());
             
             // Call the voxel ready cb if any
-            if (signal_ss_voxel_available && signal_ss_voxel_available->num_slots() > 0)
-                signal_ss_voxel_available->operator()(m_voxel_entropies);
+            if (signal_ss_voxel_ready && signal_ss_voxel_ready->num_slots() > 0)
+                signal_ss_voxel_ready->operator()(m_voxel_entropies);
             
             bool ok = internalContainer::store(cache_path, m_voxel_entropies);
             if(ok)

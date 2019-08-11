@@ -79,7 +79,7 @@ m_cached(false),  mValidInput (false)
     m_peaks.resize(0);
     
     // Signals we provide
-    signal_contraction_analyzed = createSignal<contractionLocator::sig_cb_contraction_analyzed> ();
+    signal_contraction_ready = createSignal<contractionLocator::sig_cb_contraction_ready> ();
     signal_pci_available = createSignal<contractionLocator::sig_cb_pci_available> ();
     total_reactive_force_ready = createSignal<contractionLocator::sig_cb_force_ready>();
     cell_length_ready = createSignal<contractionLocator::sig_cb_cell_length_ready>();
@@ -239,8 +239,8 @@ bool contractionLocator::find_best ()
         auto profile = std::make_shared<contractionProfile>(ct);
         profile->compute_interpolated_geometries_and_force(m_signal);
         m_contractions.emplace_back(profile->contraction());
-        if (signal_contraction_analyzed && signal_contraction_analyzed->num_slots() > 0)
-            signal_contraction_analyzed->operator()(m_contractions);
+        if (signal_contraction_ready && signal_contraction_ready->num_slots() > 0)
+            signal_contraction_ready->operator()(m_contractions);
         std::string c0("Contraction Detected @ ");
         c0 = c0 + to_string(ct.contraction_peak.first);
         mValidOutput = true;
@@ -288,7 +288,7 @@ bool contractionLocator::verify_input () const
 
 
 
-template boost::signals2::connection contractionLocator::registerCallback(const std::function<contractionLocator::sig_cb_contraction_analyzed>&);
+template boost::signals2::connection contractionLocator::registerCallback(const std::function<contractionLocator::sig_cb_contraction_ready>&);
 
 contractionProfile::contractionProfile (contraction_t& ct/*, const contractionLocator::Ref & cl */ ):
 m_ctr(ct) /*, m_connect(cl) */
