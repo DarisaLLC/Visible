@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cmath>
+#include <map>
 
 #define UNCLASSIFIED -1
 #define CORE_POINT 1
@@ -22,6 +23,8 @@ public:
         int clusterID;  // clustered ID
     }Point;
 
+    typedef std::map<int,uint32_t> dbHist_t;
+    
     DBSCAN(unsigned int minPts, float eps, vector<Point> points){
         m_minPoints = minPts;
         m_epsilon = eps;
@@ -39,8 +42,10 @@ public:
     int getMinimumClusterSize() {return m_minPoints;}
     int getEpsilonSize() {return m_epsilon;}
     const vector<Point>& points () { return m_points; }
+    const dbHist_t& cluster_hist ();
     
 private:
+    dbHist_t m_hist;
     vector<Point> m_points;
     size_t m_pointSize;
     unsigned int m_minPoints;

@@ -2,6 +2,7 @@
 
 int DBSCAN::run()
 {
+    m_hist.clear();
     int clusterID = 1;
     vector<Point>::iterator iter;
     for(iter = m_points.begin(); iter != m_points.end(); ++iter)
@@ -89,4 +90,12 @@ inline double DBSCAN::calculateDistance( Point pointCore, Point pointTarget )
     return pow(pointCore.x - pointTarget.x,2)+pow(pointCore.y - pointTarget.y,2)+pow(pointCore.z - pointTarget.z,2);
 }
 
-
+const DBSCAN::dbHist_t& DBSCAN::cluster_hist (){
+    for(const auto & pp : m_points){
+        auto fe = m_hist.find(pp.clusterID);
+        if(fe == m_hist.end()) { m_hist[pp.clusterID] = 0; }
+        auto current_cnt = m_hist[pp.clusterID];
+        m_hist[pp.clusterID] = current_cnt + 1;
+    }
+    return m_hist;
+}

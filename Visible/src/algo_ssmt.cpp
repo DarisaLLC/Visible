@@ -74,7 +74,7 @@ void ssmt_processor::run_detect_geometry (const int channel_index){
  @param bi_level bi_level ( i.e. binarized image )
  ss_image_available signal calls this function
  */
-void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level, iPair& pad_trans){
+void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
     assert(mono.cols == bi_level.cols && mono.rows == bi_level.rows);
     assert(m_3d_stats_done);
@@ -89,14 +89,9 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level, iP
     * @todo add support for general input of number of areas or auto
     */
     m_main_blob = labelBlob::create(mono,  bi_level, m_params.min_seqmentation_area(), 666);
-    
-  
-    
     auto cache_path = mCurrentSerieCachePath;
- 
-    
-    std::function<labelBlob::results_cb> res_ready_lambda = [=](std::vector<blob>& blobs){
 
+    std::function<labelBlob::results_cb> res_ready_lambda = [=](std::vector<blob>& blobs){
         for (const blob& bb : blobs)
             m_regions.emplace_back(bb);
     };

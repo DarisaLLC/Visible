@@ -32,7 +32,7 @@
 #include "dbscan.h"
 #include "segmentation_parameters.hpp"
 
-
+using namespace stl_utils;
 
 
 // Return 2D latice of pixels over time
@@ -86,10 +86,13 @@ void ssmt_processor::generateVoxelsOfSampled (const std::vector<roiWindow<P8U>>&
     
     
 }
-
+/*
+   Create Entropy Space from voxel entropies
+*/
 void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
     
     uiPair half_offset = m_voxel_sample / 2;
+    uiPair size_diff = half_offset + half_offset;
     uint32_t width = m_expected_segmented_size.first;
     uint32_t height = m_expected_segmented_size.second;
     assert(width*height == ven.size());
@@ -133,43 +136,26 @@ void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
     cv::Mat f_temporal (bot, CV_32F);
     cv::resize(ftmp, f_temporal, bot, 0, 0, INTER_NEAREST);
     ftmp = getPadded(f_temporal, half_offset, 0.0);
-    ftmp = ftmp * 255.0f;
-    ftmp.convertTo(m_temporal_ss, CV_8U);
 
     std::vector<DBSCAN::Point> ps;
     for (cv::Point& pt : m_var_peaks){
         DBSCAN::Point p;
-        p.x = pt.x;p.y = pt.y; p.z = m_temporal_ss.at<uint8_t>(pt.y,pt.x);
+        p.x = pt.x;p.y = pt.y; p.z = ftmp.at<float>(pt.y,pt.x);
         p.clusterID = UNCLASSIFIED;
         ps.push_back(p);
     }
+
+    ftmp = ftmp * 255.0f;
+    ftmp.convertTo(m_temporal_ss, CV_8U);
     
     assert(ps.size() == m_var_peaks.size());
-    DBSCAN ds(4, 100.0 , ps);
-    ds.run();
-    
-    auto pspts = ds.points();
-    std::sort(pspts.begin(), pspts.end(), [](DBSCAN::Point& a, DBSCAN::Point& b){ return a.clusterID < b.clusterID; });
-    
-    auto printResults = [](const vector<DBSCAN::Point>& points, size_t num_points)
-    {
-        auto i = 0;
-        printf("Number of points: %u\n"
-               " x     y     z     cluster_id\n"
-               "-----------------------------\n"
-               , (int) num_points);
-        while (i < num_points)
-        {
-            printf("%5.2lf %5.2lf %5.2lf: %d\n",
-                   points[i].x,
-                   points[i].y, points[i].z,
-                   points[i].clusterID);
-            ++i;
-        }
-    };
+//    DBSCAN ds(4, 10.0 , ps);
+//    ds.run();
+//
+//    auto pspts = ds.points();
+//    DBSCAN::dbHist_t ch = ds.cluster_hist();
+//    std::cout << ch << std::endl;
 
-    printResults(pspts,  ds.getTotalPointSize());
-    
     // Sum sim under the var peaks
     float peaks_sums = 0.0f;
     for (cv::Point& pt : m_var_peaks)
@@ -179,24 +165,13 @@ void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
     std::cout << "peaks_average: " << peaks_average << " Global Peak " << motion_peak << std::endl;
     
     m_measured_area = Rectf(0,0,bot.width, bot.height);
- //   assert(m_temporal_ss.cols == m_measured_area.getWidth());
- //   assert(m_temporal_ss.rows == m_measured_area.getHeight());
+    assert(m_temporal_ss.cols == m_measured_area.getWidth() + size_diff.first);
+    assert(m_temporal_ss.rows == m_measured_area.getHeight() + size_diff.second);
+    
     
     cv::Mat bi_level;
 
     threshold(m_temporal_ss, bi_level, peaks_average, 255, THRESH_BINARY);
-
-    // Pad both with zeros
-    // Symmetric: i.e. pad on both sides
-    iPair pad (m_params.normalized_symmetric_padding().first * m_temporal_ss.cols,
-               m_params.normalized_symmetric_padding().second * m_temporal_ss.rows);
-    
-   // auto mono_padded = getPadded(m_temporal_ss, pad, 0.0);
-   // auto bi_level_padded = getPadded(bi_level, pad, 0.0);
-    
-    // Translation to undo padding
-    pad.first = 0; //-pad.first;
-    pad.second = 0; //-pad.second;
     
     vlogger::instance().console()->info("finished voxel surface");
     if(fs::exists(mCurrentSerieCachePath)){
@@ -207,7 +182,7 @@ void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
     
     // Call the voxel ready cb if any
     if (signal_segmented_view_ready && signal_segmented_view_ready->num_slots() > 0){
-        signal_segmented_view_ready->operator()(m_temporal_ss, bi_level, pad);
+        signal_segmented_view_ready->operator()(m_temporal_ss, bi_level);
     }
     
     

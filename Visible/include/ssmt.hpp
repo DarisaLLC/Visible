@@ -1,5 +1,5 @@
-#ifndef __ALGO_MOV__
-#define __ALGO_MOV__
+#ifndef __SSMT__
+#define __SSMT__
 
 
 #include <map>
@@ -77,10 +77,9 @@ public:
         params (const voxel_params_t voxel_params = voxel_params_t()): m_vparams(voxel_params) {}
         
         const std::pair<uint32_t,uint32_t>& voxel_sample () {return m_vparams.voxel_sample(); }
-        const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_vparams.voxel_pad(); }
+        const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_vparams.voxel_sample_half(); }
         const iPair& expected_segmented_size () {return m_vparams.expected_segmented_size(); }
         const uint32_t& min_seqmentation_area () {return m_vparams.min_segmentation_area(); }
-        const fPair& normalized_symmetric_padding () { return m_vparams.normalized_symmetric_padding (); }
         
         const std::string& image_cache_name () {
             static std::string s_image_cache_name = "voxel_ss_.png";
@@ -111,7 +110,7 @@ public:
     typedef void (sig_cb_3dstats_ready) ();
     typedef void (sig_cb_geometry_ready) (int&);
     typedef void (sig_cb_ss_voxel_ready) (std::vector<float> &);
-    typedef void (sig_cb_segmented_view_ready) (cv::Mat &, cv::Mat &, iPair &);
+    typedef void (sig_cb_segmented_view_ready) (cv::Mat &, cv::Mat &);
     typedef std::vector<roiWindow<P8U>> channel_images_t;
     typedef std::vector<channel_images_t> channel_vec_t;
     
@@ -170,7 +169,7 @@ public:
     void generateVoxelSelfSimilarities ();
     void generateVoxelsAndSelfSimilarities (const std::vector<roiWindow<P8U>>& images);
     
-    void finalize_segmentation (cv::Mat& mono, cv::Mat& label, iPair& padded_translation);
+    void finalize_segmentation (cv::Mat& mono, cv::Mat& label);
     const std::vector<Rectf>& channel_rois () const;
     const  std::deque<double>& medianSet () const;
 
@@ -181,16 +180,8 @@ public:
     // Update. Called also when cutoff offset has changed
     void update ();
     
-    std::shared_ptr<ioImageWriter>& get_image_writer ();
-    std::shared_ptr<ioImageWriter>& get_csv_writer ();
-    void save_channel_images (int channel_index, std::string& dir_fqfn);
-    
     const vector<vector<double>>& ssMatrix () const { return m_smat; }
     const vector<double>& entropies () const { return m_entropies; }
-    
-    void generate_affine_windows ();
-    
-    
     
 protected:
     boost::signals2::signal<ssmt_processor::sig_cb_content_loaded>* signal_content_loaded;
@@ -207,13 +198,8 @@ protected:
 private:
     // Default params. @place_holder for increasing number of params
     ssmt_processor::params m_params;
-    
-    void internal_generate_affine_profiles ();
-    void internal_generate_affine_translations ();
-    void internal_generate_affine_windows (const std::vector<roiWindow<P8U>>&);
-    
-    void save_affine_windows ();
-    void save_affine_profiles ();
+
+ 
     
     void create_voxel_surface (std::vector<float>&);
     
@@ -225,6 +211,18 @@ private:
     void stats_3d_computed ();
     void pci_done ();
     void sm_content_loaded ();
+
+    std::shared_ptr<ioImageWriter>& get_image_writer ();
+    std::shared_ptr<ioImageWriter>& get_csv_writer ();
+    void save_channel_images (int channel_index, std::string& dir_fqfn);
+
+    // Generate profiles and images for moving regions & save them
+    void generate_affine_windows ();
+    void internal_generate_affine_profiles ();
+    void internal_generate_affine_translations ();
+    void internal_generate_affine_windows (const std::vector<roiWindow<P8U>>&);
+    void save_affine_windows ();
+    void save_affine_profiles ();
     
     // path to cache folder for this serie
     fs::path mCurrentSerieCachePath;

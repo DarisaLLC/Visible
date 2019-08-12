@@ -71,7 +71,7 @@ mCurrentSerieCachePath(serie_cache_folder)
     
     // Signal us when ss segmentation surface is ready
     std::function<sig_cb_segmented_view_ready> _ss_segmentation_done_cb = boost::bind (&ssmt_processor::finalize_segmentation,
-                                                                             this, _1, _2, _3);
+                                                                             this, _1, _2);
     boost::signals2::connection _ss_image_connection = registerCallback(_ss_segmentation_done_cb);
     
     // Signal us when ss segmentation is ready
