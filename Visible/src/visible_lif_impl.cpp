@@ -146,7 +146,7 @@ void lifContext::setup_signals(){
     boost::signals2::connection geometry_connection = m_lifProcRef->registerCallback(geometry_ready_cb);
     
     // Support lifProcessor::temporal_image_ready
-    std::function<void (cv::Mat&,cv::Mat&, iPair&)> ss_segmented_view_ready_cb = boost::bind (&lifContext::signal_segmented_view_ready, shared_from_above(), _1, _2, _3);
+    std::function<void (cv::Mat&,cv::Mat&)> ss_segmented_view_ready_cb = boost::bind (&lifContext::signal_segmented_view_ready, shared_from_above(), _1, _2);
     boost::signals2::connection ss_image_connection = m_lifProcRef->registerCallback(ss_segmented_view_ready_cb);
     
 }
@@ -276,7 +276,7 @@ void lifContext::glscreen_normalize (const sides_length_t& src, const Rectf& gdr
     dst.second.y = (src.second.y*gdr.getHeight()) / mMediaInfo.getHeight();
 }
                                      
-void lifContext::signal_segmented_view_ready (cv::Mat& image, cv::Mat& label, iPair& ptrans)
+void lifContext::signal_segmented_view_ready (cv::Mat& image, cv::Mat& label)
 {
     vlogger::instance().console()->info(" SS Image Available  ");
     if (! m_lifProcRef){
@@ -1349,12 +1349,8 @@ void lifContext::draw ()
                 vec2 a_v ((ab.first * gdr.getWidth()) / (2.0 * width), 0.0f );
                 vec2 b_v (0.0f, (ab.second * gdr.getHeight()) / (2.0* height));
                 
-                glscreen_normalize(m_cell_ends[0], gdr, m_normalized_cell_ends[0]);
-                glscreen_normalize(m_cell_ends[1], gdr, m_normalized_cell_ends[1]);
-                m_major_cell_length = distance(m_normalized_cell_ends[0].first,m_normalized_cell_ends[0].second);
-                m_minor_cell_length = distance(m_normalized_cell_ends[1].first,m_normalized_cell_ends[1].second);
                 
-                uDegree da(ellipse.angle);
+                uDegree da(ellipse.angle + 90.0);
                 uRadian dra (da);
                 vec2 ctr0 ((ellipse.center.x * gdr.getWidth()) / width, (ellipse.center.y * gdr.getHeight()) / height );
                 
@@ -1377,6 +1373,10 @@ void lifContext::draw ()
                 if (m_cell_ends.size() == 2)
                 {
                
+                    glscreen_normalize(m_cell_ends[0], gdr, m_normalized_cell_ends[0]);
+                    glscreen_normalize(m_cell_ends[1], gdr, m_normalized_cell_ends[1]);
+                    m_major_cell_length = distance(m_normalized_cell_ends[0].first,m_normalized_cell_ends[0].second);
+                    m_minor_cell_length = distance(m_normalized_cell_ends[1].first,m_normalized_cell_ends[1].second);
                     vec2 a_v ( m_major_cell_length / 2.0, 0.0f );
                     vec2 b_v (0.0f, m_minor_cell_length / 2.0f);
                     
