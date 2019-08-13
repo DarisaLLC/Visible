@@ -25,7 +25,7 @@
 #include "core/gtest_env_utils.hpp"
 #include "vision/roiMultiWindow.h"
 #include "vision/opencv_utils.hpp"
-#include "algo_Lif.hpp"
+#include "lif_content.hpp"
 #include <boost/foreach.hpp>
 
 

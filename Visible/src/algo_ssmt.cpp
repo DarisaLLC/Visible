@@ -1,5 +1,5 @@
 //
-//  algo_Lif.cpp
+//  algo_ssmt.cpp
 //  Visible
 //
 //  Created by Arman Garakani on 8/20/18.
@@ -39,11 +39,6 @@ std::weak_ptr<contractionLocator> ssmt_processor::contractionWeakRef ()
 
 const Rectf& ssmt_processor::measuredArea () const { return m_measured_area; }
 
-void ssmt_processor::generate_affine_windows () {
- 
-    int channel_to_use = m_channel_count - 1;
-    internal_generate_affine_windows(m_all_by_channel[channel_to_use]);
-}
 /*
  * 1 monchrome channel. Compute 3D Standard Dev. per pixel
  */
@@ -93,7 +88,14 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
 
     std::function<labelBlob::results_cb> res_ready_lambda = [=](std::vector<blob>& blobs){
         for (const blob& bb : blobs)
-            m_regions.emplace_back(bb);
+            m_regions.emplace_back(bb, (uint32_t(m_regions.size()+1)));
+        
+        if (signal_geometry_ready  && signal_geometry_ready->num_slots() > 0)
+        {
+            int count = (int) m_regions.size();
+            signal_geometry_ready->operator()(count);
+        }
+        vlogger::instance().console()->info(" Contractions Analyzed: ");
     };
 
     
@@ -122,7 +124,6 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     boost::signals2::connection results_ready_ = m_main_blob->registerCallback(res_ready_lambda);
     m_main_blob->run_async();
   
-
     
 }
 
@@ -157,6 +158,12 @@ void ssmt_processor::contraction_ready (contractionContainer_t& contractions)
     Affine Window Processing Implementation
 */
 
+
+void ssmt_processor::generate_affine_windows () {
+    
+    int channel_to_use = m_channel_count - 1;
+    internal_generate_affine_windows(m_all_by_channel[channel_to_use]);
+}
 
 void ssmt_processor::internal_generate_affine_windows (const std::vector<roiWindow<P8U>>& rws){
     

@@ -3,7 +3,7 @@
 
 #include "guiContext.h"
 #include "ssmt.hpp"
-#include "algo_Lif.hpp"
+#include "lif_content.hpp"
 #include "clipManager.hpp"
 #include "visible_layout.hpp"
 #include <atomic>
