@@ -37,7 +37,7 @@
 #include "vision/histo.h"
 #include "core/stl_utils.hpp"
 #include "sm_producer.h"
-#include "algo_Lif.hpp"
+#include "lif_content.hpp"
 #include "core/signaler.h"
 #include "contraction.hpp"
 #include "logger/logger.hpp"

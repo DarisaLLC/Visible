@@ -75,7 +75,7 @@
 #include "vision/dense_motion.hpp"
 #include "vision/gradient.h"
 #include "vision/ipUtils.h"
-#include "algo_Lif.hpp"
+#include "lif_content.hpp"
 #include "cinder/PolyLine.h"
 #include "etw_utils.hpp"
 #include "core/lineseg.hpp"

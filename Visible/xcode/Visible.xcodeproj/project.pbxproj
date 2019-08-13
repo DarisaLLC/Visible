@@ -879,7 +879,7 @@
 		C23E346221F254DE00221E68 /* ImCurveEdit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImCurveEdit.cpp; path = ../include/imGuiCustom/ImCurveEdit.cpp; sourceTree = "<group>"; };
 		C240F9FA21E14C8900FBA228 /* sscli-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "sscli-Info.plist"; sourceTree = "<group>"; };
 		C240F9FE21E15ADE00FBA228 /* imguivariouscontrols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imguivariouscontrols.h; path = ../include/imguivariouscontrols.h; sourceTree = "<group>"; };
-		C241BBAA1FB11B51000DE36E /* algo_Lif.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = algo_Lif.hpp; path = ../include/algo_Lif.hpp; sourceTree = "<group>"; };
+		C241BBAA1FB11B51000DE36E /* lif_content.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lif_content.hpp; path = ../include/lif_content.hpp; sourceTree = "<group>"; };
 		C242CCC4217BD30A004F7867 /* ut_units.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ut_units.hpp; sourceTree = "<group>"; };
 		C242CCC6217E93FC004F7867 /* ut_cardio.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_cardio.hpp; sourceTree = "<group>"; };
 		C248D6D92249454900C2C02F /* Visible_Run_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Visible_Run_Prefix.pch; sourceTree = "<group>"; };
@@ -1654,7 +1654,7 @@
 				C219468A1CE4EA4900976025 /* OnImagePlotUtils.h */,
 				C24FC84C1E5E40130071AA1A /* timed_value_containers.h */,
 				C213607821647E4A00F794AB /* cached_results.hpp */,
-				C241BBAA1FB11B51000DE36E /* algo_Lif.hpp */,
+				C241BBAA1FB11B51000DE36E /* lif_content.hpp */,
 				C28B01DB229B210A00B8165D /* segmentation_parameters.hpp */,
 				C22DACF822FF71A500D171EF /* moving_region.h */,
 				C2E02ED2225AB49900AC175D /* ssmt.hpp */,

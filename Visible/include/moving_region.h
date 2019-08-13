@@ -23,7 +23,7 @@ typedef std::pair<vec2,vec2> sides_length_t;
 
 class moving_region : public labelBlob::blob {
 public:
-    moving_region (const labelBlob::blob&);
+    moving_region (const labelBlob::blob&, uint32_t ind);
 
     const cv::RotatedRect& motion_surface () const { return m_rr; };
     const cv::Mat&  surfaceAffine() const { return m_surface_affine; };
@@ -31,6 +31,7 @@ public:
     const fPair& length_range () const;
     const std::vector<sides_length_t>& cell_ends() const;
     const std::vector<float>& cell_lengths () const { return m_cell_lengths; }
+    const uint32_t id () const { return m_id;}
 private:
     cv::Mat m_surface_affine;
     cv::RotatedRect m_rr;
@@ -38,6 +39,7 @@ private:
     Rectf m_measure_area;
     std::vector<sides_length_t> m_cell_ends = {sides_length_t (), sides_length_t()};
     fPair m_ab;
+    uint32_t m_id;
 };
 
 
