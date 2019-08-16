@@ -135,11 +135,11 @@ private:
     // Callbacks
     void signal_content_loaded (int64_t&);
     void signal_flu_stats_ready ();
-    void signal_sm1d_ready (int&);
-    void signal_sm1dmed_ready (int&,int&);
+    void signal_sm1d_ready (input_channel_selector_t&);
+    void signal_sm1dmed_ready (input_channel_selector_t&);
     void signal_contraction_ready (contractionContainer_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
-    void signal_geometry_ready (int&);
+    void signal_geometry_ready (int, const input_channel_selector_t&);
     void signal_segmented_view_ready (cv::Mat&, cv::Mat&);
     
     // Availability

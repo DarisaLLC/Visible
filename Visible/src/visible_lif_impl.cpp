@@ -130,11 +130,11 @@ void lifContext::setup_signals(){
     boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(flu_stats_ready_cb);
     
     // Support lifProcessor::initial ss results available
-    std::function<void (int&)> sm1d_ready_cb = boost::bind (&lifContext::signal_sm1d_ready, shared_from_above(), _1);
+    std::function<void (input_channel_selector_t&)> sm1d_ready_cb = boost::bind (&lifContext::signal_sm1d_ready, shared_from_above(), _1);
     boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_ready_cb);
     
     // Support lifProcessor::median level set ss results available
-    std::function<void (int&,int&)> sm1dmed_ready_cb = boost::bind (&lifContext::signal_sm1dmed_ready, shared_from_above(), _1, _2);
+    std::function<void (input_channel_selector_t&)> sm1dmed_ready_cb = boost::bind (&lifContext::signal_sm1dmed_ready, shared_from_above(), _1);
     boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_ready_cb);
     
     // Support lifProcessor::contraction results available
@@ -142,7 +142,7 @@ void lifContext::setup_signals(){
     boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_ready_cb);
     
     // Support lifProcessor::geometry_ready
-    std::function<void (int&)> geometry_ready_cb = boost::bind (&lifContext::signal_geometry_ready, shared_from_above(), _1);
+    std::function<void (int)> geometry_ready_cb = boost::bind (&lifContext::signal_geometry_ready, shared_from_above(), _1, _2);
     boost::signals2::connection geometry_connection = m_lifProcRef->registerCallback(geometry_ready_cb);
     
     // Support lifProcessor::temporal_image_ready
@@ -199,12 +199,12 @@ void lifContext::setup()
  *
  ************************/
 
-void lifContext::signal_sm1d_ready (int& dummy)
+void lifContext::signal_sm1d_ready (input_channel_selector_t& dummy)
 {
     vlogger::instance().console()->info("self-similarity available: ");
 }
 
-void lifContext::signal_sm1dmed_ready (int& dummy, int& dummy2)
+void lifContext::signal_sm1dmed_ready (input_channel_selector_t& dummy2)
 {
    //@note this is also checked in update. Not sure if this is necessary
    if (haveTracks())
@@ -253,15 +253,11 @@ void lifContext::signal_contraction_ready (ssmt_processor::contractionContainer_
 }
 
 
-void lifContext::signal_geometry_ready(int & count)
+void lifContext::signal_geometry_ready(int count, const input_channel_selector_t& in)
 {
+    assert(m_lifProcRef);
     vlogger::instance().console()->info(" Volume Variance are available ");
-    if (! m_lifProcRef){
-        vlogger::instance().console()->error("Lif Processor Object does not exist ");
-        return;
-    }
-    
-    std::string msg = " lif context thread: " + stl_utils::tostr(std::this_thread::get_id());
+    std::string msg = " Found " + stl_utils::tostr(count) + "Moving Regions";
     vlogger::instance().console()->info(msg);
     //@todo parameterize affine windows generation
     // m_lifProcRef->generate_affine_windows();
@@ -829,7 +825,7 @@ void lifContext::process_async (){
             // note launch mode is std::launch::async
             m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 2);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 2, -1);
             break;
         }
         case 2:
@@ -837,12 +833,12 @@ void lifContext::process_async (){
             // note launch mode is std::launch::async
             m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
                                                     m_lifProcRef.get(), std::vector<int> ({0}) );
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 1);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 1, -1);
             break;
         }
         case 1:
         {
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_channel,m_lifProcRef.get(), 0);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_channel,m_lifProcRef.get(), 0, -1);
             break;
         }
     }
@@ -1172,16 +1168,18 @@ void lifContext::update ()
                 m_lifProcRef->shortterm_pci(1);
 #endif
         auto tracksRef = m_contraction_pci_trackWeakRef.lock();
-        m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], channel_count()-1);
+        if(tracksRef && tracksRef->size() > 0 && ! tracksRef->at(0).second.empty())
+            m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], channel_count()-1);
 
-
+#ifdef SHORTTERM_ON
         // Update shortterm PCI result if ready
         if ( ! m_lifProcRef->shortterm_pci().at(0).second.empty() )
         {
             auto tracksRef = m_lifProcRef->shortterm_pci();
             m_result_seq.m_time_data.load(tracksRef.at(0), named_colors["Short"], 3);
         }
-
+#endif
+        
     }
 
     if(m_result_seq.m_time_data.plotCount() == 4 && ! m_contractions.empty() &&

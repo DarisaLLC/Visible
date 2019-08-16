@@ -146,7 +146,9 @@ public:
     Ref getShared();
     // Load raw entropies and the self-similarity matrix
     // If no self-similarity matrix is given, entropies are assumed to be filtered and used directly
-    void load (const vector<double>& entropies, const vector<vector<double>>& mmatrix = vector<vector<double>>());
+    // // input selector -1 entire index mobj index
+    void load (const vector<double>& entropies, const vector<vector<double>>& mmatrix = vector<vector<double>>(),
+               int input = -1);
 
     // Update with most recent median level set
     void update () const;
@@ -212,8 +214,9 @@ private:
     mutable bool mNoSMatrix;
     mutable std::vector<index_val_t> m_peaks;
     mutable contractionContainer_t m_contractions;
-
+    mutable int m_input; // input source
     mutable std::atomic<bool> m_cached;
+    mutable int m_id;
  
 protected:
     boost::signals2::signal<contractionLocator::sig_cb_cell_length_ready>* cell_length_ready;

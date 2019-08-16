@@ -150,6 +150,10 @@
 		C22DACFA22FF793C00D171EF /* moviong_region.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACF922FF793C00D171EF /* moviong_region.cpp */; };
 		C22DACFB22FF793C00D171EF /* moviong_region.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACF922FF793C00D171EF /* moviong_region.cpp */; };
 		C22DACFC22FF793C00D171EF /* moviong_region.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACF922FF793C00D171EF /* moviong_region.cpp */; };
+		C22DACFF23032E8F00D171EF /* task_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACFD23032E8F00D171EF /* task_manager.cpp */; };
+		C22DAD0023032E8F00D171EF /* task_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACFD23032E8F00D171EF /* task_manager.cpp */; };
+		C22DAD0123032E8F00D171EF /* task_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACFD23032E8F00D171EF /* task_manager.cpp */; };
+		C22DAD0223032E8F00D171EF /* task_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACFD23032E8F00D171EF /* task_manager.cpp */; };
 		C232F00B2296FDCB0075B2EE /* lineseg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696B1CED3E2C0045FF57 /* lineseg.cpp */; };
 		C2342E60227CC45F00D74D80 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2342E5F227CC45F00D74D80 /* GLUT.framework */; };
 		C2398A0921DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
@@ -459,6 +463,10 @@
 		C29DB076212B351200930CBD /* algo_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_ssmt.cpp */; };
 		C29DB077212B351200930CBD /* algo_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_ssmt.cpp */; };
 		C29E1BCE225AA26200CBFFDB /* cvVideoPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BE851F4FAF5C00977307 /* cvVideoPlayer.cpp */; };
+		C2A24FDB2304C7330064DE58 /* result_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2A24FDA2304C7330064DE58 /* result_ssmt.cpp */; };
+		C2A24FDC2304C7330064DE58 /* result_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2A24FDA2304C7330064DE58 /* result_ssmt.cpp */; };
+		C2A24FDD2304C7330064DE58 /* result_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2A24FDA2304C7330064DE58 /* result_ssmt.cpp */; };
+		C2A24FDE2304C7330064DE58 /* result_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2A24FDA2304C7330064DE58 /* result_ssmt.cpp */; };
 		C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611E1F66EA910069F665 /* PlistDate.cpp */; };
 		C2A5DBAD207A003F001C6608 /* Plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611B1F66E95B0069F665 /* Plist.cpp */; };
 		C2AEB73B228CD6E70078E687 /* geom_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AEB73A228CD6E60078E687 /* geom_utils.cpp */; };
@@ -855,6 +863,8 @@
 		C2239AB721922F72007558AB /* cardiomyocyte_model_detail.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model_detail.hpp; sourceTree = "<group>"; };
 		C22DACF822FF71A500D171EF /* moving_region.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = moving_region.h; path = ../include/moving_region.h; sourceTree = "<group>"; };
 		C22DACF922FF793C00D171EF /* moviong_region.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = moviong_region.cpp; path = ../src/moviong_region.cpp; sourceTree = "<group>"; };
+		C22DACFD23032E8F00D171EF /* task_manager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = task_manager.cpp; path = ../src/task_manager.cpp; sourceTree = "<group>"; };
+		C22DAD0323032F1200D171EF /* task_manager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = task_manager.hpp; path = ../include/task_manager.hpp; sourceTree = "<group>"; };
 		C2309DC61F6B4D6500A0E908 /* libcinder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcinder.a; path = ../../externals/Cinder/lib/macosx/Release/libcinder.a; sourceTree = SOURCE_ROOT; };
 		C232F00A229377770075B2EE /* ellipse.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ellipse.hpp; sourceTree = "<group>"; };
 		C2342E5D227CC27300D74D80 /* ps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ps.cpp; sourceTree = "<group>"; };
@@ -1126,6 +1136,7 @@
 		C29C53BF222B58D900D17385 /* dense_motion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dense_motion.cpp; sourceTree = "<group>"; };
 		C29C53C0222B58D900D17385 /* dense_motion.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = dense_motion.hpp; sourceTree = "<group>"; };
 		C29DB075212B351200930CBD /* algo_ssmt.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = algo_ssmt.cpp; path = ../src/algo_ssmt.cpp; sourceTree = "<group>"; };
+		C2A24FDA2304C7330064DE58 /* result_ssmt.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = result_ssmt.cpp; path = ../src/result_ssmt.cpp; sourceTree = "<group>"; };
 		C2AABC1A2221D88E00339675 /* kalman_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = kalman_test.cpp; sourceTree = "<group>"; };
 		C2AABC1E2221E82200339675 /* gtest.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = gtest.xcconfig; path = configs/gtest.xcconfig; sourceTree = "<group>"; };
 		C2AEB739228CD6D00078E687 /* geom_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = geom_utils.hpp; sourceTree = "<group>"; };
@@ -1402,6 +1413,7 @@
 		080E96DDFE201D6D7F000001 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C22DACFD23032E8F00D171EF /* task_manager.cpp */,
 				C22DACF922FF793C00D171EF /* moviong_region.cpp */,
 				C2CD0E9922D7D78700467DD8 /* dbscan.cpp */,
 				C2CE9C7322A48AC5003C479A /* etw_utils.cpp */,
@@ -1413,6 +1425,7 @@
 				C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */,
 				C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */,
 				C29DB075212B351200930CBD /* algo_ssmt.cpp */,
+				C2A24FDA2304C7330064DE58 /* result_ssmt.cpp */,
 				C28B01DA229B210A00B8165D /* voxel_ssmt.cpp */,
 				C28B01D5229B1F8000B8165D /* core_ssmt.cpp */,
 				C28B01CB229B1DE500B8165D /* lif_serie.cpp */,
@@ -1674,6 +1687,7 @@
 				C2601BBE1E6B5C78004415A3 /* algo_runners.hpp */,
 				C2820F3621752E5100DFA7A6 /* VisibleApp.h */,
 				C21A50E022AB4D0C00B0AC7D /* eigen_utils.hpp */,
+				C22DAD0323032F1200D171EF /* task_manager.hpp */,
 			);
 			name = include;
 			sourceTree = "<group>";
@@ -2551,6 +2565,7 @@
 				C23E346321F254DE00221E68 /* ImCurveEdit.cpp in Sources */,
 				C2606DB11CED3E2E0045FF57 /* registration.cpp in Sources */,
 				C2398A0D21DD8D3100B180A0 /* AVReaderWrapper.mm in Sources */,
+				C2A24FDB2304C7330064DE58 /* result_ssmt.cpp in Sources */,
 				C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */,
 				C2AFCF09216F0CF10080462D /* CinderImGui.cpp in Sources */,
 				C2601BB91E69042B004415A3 /* bitvector.cpp in Sources */,
@@ -2561,6 +2576,7 @@
 				C2CD0E9A22D7D78700467DD8 /* dbscan.cpp in Sources */,
 				C21A506922A9835A00B0AC7D /* stats.cpp in Sources */,
 				C23E346021F2511D00221E68 /* ImSequencer.cpp in Sources */,
+				C22DACFF23032E8F00D171EF /* task_manager.cpp in Sources */,
 				C2819ECD2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C2B87C9921D012D700C91E35 /* logger.cpp in Sources */,
 				C248D6D8224939AC00C2C02F /* VisibleApp.cpp in Sources */,
@@ -2665,6 +2681,7 @@
 				C2ED059C22D158ED00314C1B /* labelconnect.cpp in Sources */,
 				C2770659226A402C00215A55 /* cvVideoPlayer.cpp in Sources */,
 				C2AEB73D228CD6E70078E687 /* geom_utils.cpp in Sources */,
+				C2A24FDD2304C7330064DE58 /* result_ssmt.cpp in Sources */,
 				C22DACFB22FF793C00D171EF /* moviong_region.cpp in Sources */,
 				C20EDBB71CEFC2E70074C47A /* rowfunc.cpp in Sources */,
 				C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */,
@@ -2691,6 +2708,7 @@
 				C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */,
 				C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */,
+				C22DAD0123032E8F00D171EF /* task_manager.cpp in Sources */,
 				C2398A1821DE980C00B180A0 /* imgui_widgets.cpp in Sources */,
 				C20EDBB61CEFC2D20074C47A /* registration.cpp in Sources */,
 				C29C53C1222B58D900D17385 /* dense_motion.cpp in Sources */,
@@ -2779,6 +2797,7 @@
 				C26F5FB021B0AA6D00EAE156 /* seq_frame_container.cpp in Sources */,
 				C26F5FB221B0AA6D00EAE156 /* Plist.cpp in Sources */,
 				C26F5FB321B0AA6D00EAE156 /* tinyxmlparser.cpp in Sources */,
+				C2A24FDC2304C7330064DE58 /* result_ssmt.cpp in Sources */,
 				C26F5FB421B0AA6D00EAE156 /* localvariance.cpp in Sources */,
 				C27ED0A3220BB73800B55D65 /* InterfaceUtilities.cpp in Sources */,
 				C20D4DE62208BD34004D9405 /* ellipse_fit.cpp in Sources */,
@@ -2791,6 +2810,7 @@
 				C21E390D228A054C00778A66 /* affine_rectangle.cpp in Sources */,
 				C26F5FB921B0AA6D00EAE156 /* cinder_support.cpp in Sources */,
 				C26F5FBA21B0AA6D00EAE156 /* visible_lif_impl.cpp in Sources */,
+				C22DAD0023032E8F00D171EF /* task_manager.cpp in Sources */,
 				C26F5FBC21B0AA6D00EAE156 /* visible_impl.cpp in Sources */,
 				C2398A8121DF239700B180A0 /* VisibleRunApp.cpp in Sources */,
 				C26F5FBD21B0AA6D00EAE156 /* histo.cpp in Sources */,
@@ -2980,6 +3000,7 @@
 				C2DB72C422591DB700C2B986 /* exception.cpp in Sources */,
 				C2DB72C522591DB700C2B986 /* boost_literals.cpp in Sources */,
 				C2DB72C622591DB700C2B986 /* PlistDate.cpp in Sources */,
+				C22DAD0223032E8F00D171EF /* task_manager.cpp in Sources */,
 				C21A506D22A9835A00B0AC7D /* stats.cpp in Sources */,
 				C2CE9C8A22A97D2D003C479A /* math.cpp in Sources */,
 				C2DB72C722591DB700C2B986 /* imgui.cpp in Sources */,
@@ -2992,6 +3013,7 @@
 				C2DB72CD22591DB700C2B986 /* self_similarity.cpp in Sources */,
 				C2DB72CE22591DB700C2B986 /* onImagePlotUtils.cpp in Sources */,
 				C2DB72CF22591DB700C2B986 /* tinystr.cpp in Sources */,
+				C2A24FDE2304C7330064DE58 /* result_ssmt.cpp in Sources */,
 				C2DB72D022591DB700C2B986 /* matpixel.cpp in Sources */,
 				C2DB72D122591DB700C2B986 /* core_support.cpp in Sources */,
 				C2DB72D222591DB700C2B986 /* opencv_draw.cpp in Sources */,

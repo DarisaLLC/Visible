@@ -27,15 +27,8 @@
 #include "ssmt.hpp"
 #include "logger/logger.hpp"
 #include "result_serialization.h"
-#include "vision/rc_filter1d.h"
+//#include "vision/rc_filter1d.h"
 
-
-// Check if the returned has expired
-std::weak_ptr<contractionLocator> ssmt_processor::contractionWeakRef ()
-{
-    std::weak_ptr<contractionLocator> wp (m_caRef);
-    return wp;
-}
 
 const Rectf& ssmt_processor::measuredArea () const { return m_measured_area; }
 
@@ -79,23 +72,38 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     // Sum variances under each cluster
     // Variances are in m_var_image
     
-    /*
-    * Cluster sim space using aprior knowledge of looking for 2 areas.
-    * @todo add support for general input of number of areas or auto
-    */
+    // Creates Moving_regions from detected blobs in motion_energy space
+    // Creates ssmt results from each.
+    // @todo Add rules such as pick the one most centered to filter the results
+    
     m_main_blob = labelBlob::create(mono,  bi_level, m_params.min_seqmentation_area(), 666);
     auto cache_path = mCurrentSerieCachePath;
-
+    m_regions.clear();
+    
     std::function<labelBlob::results_cb> res_ready_lambda = [=](std::vector<blob>& blobs){
-        for (const blob& bb : blobs)
+        for (const blob& bb : blobs){
             m_regions.emplace_back(bb, (uint32_t(m_regions.size()+1)));
+        }
+        for (const moving_region& mr : m_regions){
+            auto dis = shared_from_this();
+            auto ref = ssmt_result::create (dis, mr, m_regions.size(), m_instant_input);
+            m_results.push_back(ref);
+            
+        }
+        int count = (int) m_regions.size();
+        if (count != create_cache_paths()){
+            std::string msg = " miscount in moving object path creation ";
+            vlogger::instance().console()->error(msg);
+        }
+        
+        std::string msg = " Created " + to_string((int)m_regions.size());
+        vlogger::instance().console()->info(msg);
         
         if (signal_geometry_ready  && signal_geometry_ready->num_slots() > 0)
         {
-            int count = (int) m_regions.size();
-            signal_geometry_ready->operator()(count);
+            signal_geometry_ready->operator()(count, m_instant_input);
         }
-        vlogger::instance().console()->info(" Contractions Analyzed: ");
+     
     };
 
     
@@ -130,27 +138,20 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
 
 
 // Update. Called also when cutoff offset has changed
-void ssmt_processor::update ()
-{
-   // std::lock_guard<std::mutex> lock(m_mutex);
-    if(m_contraction_pci_tracksRef && !m_contraction_pci_tracksRef->empty() && m_caRef && m_caRef->isValid()){
-        m_caRef->update();
-        median_leveled_pci(m_contraction_pci_tracksRef->at(0));
-        m_caRef->find_best ();
-    }
-}
-
-
-void ssmt_processor::contraction_ready (contractionContainer_t& contractions)
+void ssmt_processor::update (const input_channel_selector_t& in)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
-    // Call the contraction available cb if any
-    if (signal_contraction_ready && signal_contraction_ready->num_slots() > 0)
-    {
-        contractionContainer_t copied = m_caRef->contractions();
-        signal_contraction_ready->operator()(copied);
+    if(m_contraction_pci_tracksRef && !m_contraction_pci_tracksRef->empty()){
+    if(in.second != -1){
+        std::weak_ptr<contractionLocator> weakCaPtr (m_results[in.second]->locator());
+        if (weakCaPtr.expired())
+            return;
+        auto caRef = weakCaPtr.lock();
+        caRef->update ();
+        median_leveled_pci(m_contraction_pci_tracksRef->at(0), in);
+        caRef->find_best ();
+        }
     }
-    vlogger::instance().console()->info(" Contractions Analyzed: ");
 }
 
 
@@ -158,7 +159,7 @@ void ssmt_processor::contraction_ready (contractionContainer_t& contractions)
     Affine Window Processing Implementation
 */
 
-
+#if NOT_YET
 void ssmt_processor::generate_affine_windows () {
     
     int channel_to_use = m_channel_count - 1;
@@ -167,78 +168,67 @@ void ssmt_processor::generate_affine_windows () {
 
 void ssmt_processor::internal_generate_affine_windows (const std::vector<roiWindow<P8U>>& rws){
     
-//    std::unique_lock<std::mutex> lock(m_mutex);
-//
-//
-//    // std::string msg = " lproc thread: " + stl_utils::tostr(std::this_thread::get_id());
-//    //  vlogger::instance().console()->info(msg);
-//
-//
-//    auto affineCrop = [] (const vector<roiWindow<P8U> >::const_iterator& rw_src, cv::RotatedRect& rect){
-//
-//
-//        auto matAffineCrop = [] (Mat input, const RotatedRect& box){
-//            double angle = box.angle;
-//            auto size = box.size;
-//
-//            //Adjust the box angle
-//            // Already Done
-//            //   std::string msg =             svl::to_string(box);
-//            //   vlogger::instance().console()->info(msg);
-//
-//            //Rotate the text according to the angle
-//            auto transform = getRotationMatrix2D(box.center, angle, 1.0);
-//            Mat rotated;
-//            warpAffine(input, rotated, transform, input.size(), INTER_CUBIC);
-//
-//            //Crop the result
-//            Mat cropped;
-//            getRectSubPix(rotated, size, box.center, cropped);
-//            copyMakeBorder(cropped,cropped,0,0,0,0,BORDER_CONSTANT,Scalar(0));
-//            return cropped;
-//        };
-//
-//        cvMatRefroiP8U(*rw_src, src, CV_8UC1);
-//        return matAffineCrop(src, rect);
-//
-//    };
-//
-//
-//    auto horizontal_vertical_projections = [](const cv::Mat& mm){
-//        cv::Mat hz (1, mm.cols, CV_32F);
-//        cv::Mat vt (mm.rows, 1, CV_32F);
-//        reduce(mm,vt,1,CV_REDUCE_SUM,CV_32F);
-//        reduce(mm,hz,0,CV_REDUCE_SUM,CV_32F);
-//        std::vector<float> hz_vec(mm.cols);
-//        for (auto ii = 0; ii < mm.cols; ii++) hz_vec[ii] = hz.at<float>(0,ii);
-//        std::vector<float> vt_vec(mm.rows);
-//        for (auto ii = 0; ii < mm.rows; ii++) vt_vec[ii] = vt.at<float>(ii,0);
-//        return std::make_pair(hz_vec, vt_vec);
-//    };
-//
-//    uint32_t count = 0;
-//    uint32_t total = static_cast<uint32_t>(rws.size());
-//    m_affine_windows.clear();
-//    m_hz_profiles.clear();
-//    m_vt_profiles.clear();
-//    vector<roiWindow<P8U> >::const_iterator vitr = rws.begin();
-//    do
-//    {
-//        cv::Mat affine = affineCrop(vitr, m_motion_mass);
-//        auto clone = affine.clone();
-//        auto hvpair = horizontal_vertical_projections(clone);
-//        m_affine_windows.push_back(clone);
-//        m_hz_profiles.push_back(hvpair.first);
-//        m_vt_profiles.push_back(hvpair.second);
-//        count++;
-//    }
-//    while (++vitr != rws.end());
-//    assert(count==total);
-//
-//    internal_generate_affine_translations();
-//    internal_generate_affine_profiles();
-//    save_affine_windows ();
-//    save_affine_profiles();
+    std::unique_lock<std::mutex> lock(m_mutex);
+
+    auto affineCrop = [] (const vector<roiWindow<P8U> >::const_iterator& rw_src, cv::RotatedRect& rect){
+
+
+        auto matAffineCrop = [] (Mat input, const RotatedRect& box){
+            double angle = box.angle;
+            auto size = box.size;
+
+            auto transform = getRotationMatrix2D(box.center, angle, 1.0);
+            Mat rotated;
+            warpAffine(input, rotated, transform, input.size(), INTER_CUBIC);
+
+            //Crop the result
+            Mat cropped;
+            getRectSubPix(rotated, size, box.center, cropped);
+            copyMakeBorder(cropped,cropped,0,0,0,0,BORDER_CONSTANT,Scalar(0));
+            return cropped;
+        };
+
+        cvMatRefroiP8U(*rw_src, src, CV_8UC1);
+        return matAffineCrop(src, rect);
+
+    };
+
+
+    auto horizontal_vertical_projections = [](const cv::Mat& mm){
+        cv::Mat hz (1, mm.cols, CV_32F);
+        cv::Mat vt (mm.rows, 1, CV_32F);
+        reduce(mm,vt,1,CV_REDUCE_SUM,CV_32F);
+        reduce(mm,hz,0,CV_REDUCE_SUM,CV_32F);
+        std::vector<float> hz_vec(mm.cols);
+        for (auto ii = 0; ii < mm.cols; ii++) hz_vec[ii] = hz.at<float>(0,ii);
+        std::vector<float> vt_vec(mm.rows);
+        for (auto ii = 0; ii < mm.rows; ii++) vt_vec[ii] = vt.at<float>(ii,0);
+        return std::make_pair(hz_vec, vt_vec);
+    };
+
+    uint32_t count = 0;
+    uint32_t total = static_cast<uint32_t>(rws.size());
+    m_affine_windows.clear();
+    m_hz_profiles.clear();
+    m_vt_profiles.clear();
+    vector<roiWindow<P8U> >::const_iterator vitr = rws.begin();
+    do
+    {
+        cv::Mat affine = affineCrop(vitr, m_motion_mass);
+        auto clone = affine.clone();
+        auto hvpair = horizontal_vertical_projections(clone);
+        m_affine_windows.push_back(clone);
+        m_hz_profiles.push_back(hvpair.first);
+        m_vt_profiles.push_back(hvpair.second);
+        count++;
+    }
+    while (++vitr != rws.end());
+    assert(count==total);
+
+    internal_generate_affine_translations();
+    internal_generate_affine_profiles();
+    save_affine_windows ();
+    save_affine_profiles();
     
 }
 
@@ -351,6 +341,8 @@ void ssmt_processor::internal_generate_affine_profiles(){
 //        m_cell_lengths.push_back(mm);
  //   }
 }
+
+#endif
 
 #pragma GCC diagnostic pop
 
