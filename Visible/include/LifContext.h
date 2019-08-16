@@ -135,8 +135,8 @@ private:
     // Callbacks
     void signal_content_loaded (int64_t&);
     void signal_flu_stats_ready ();
-    void signal_sm1d_ready (input_channel_selector_t&);
-    void signal_sm1dmed_ready (input_channel_selector_t&);
+    void signal_sm1d_ready (const input_channel_selector_t&);
+    void signal_sm1dmed_ready (const input_channel_selector_t&);
     void signal_contraction_ready (contractionContainer_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
     void signal_geometry_ready (int, const input_channel_selector_t&);
@@ -144,6 +144,8 @@ private:
     
     // Availability
     std::atomic<bool> m_geometry_available;
+    input_channel_selector_t  m_input_selector;
+    mutable std::atomic<int> m_selector_last;
 
     // Clip Processing
     int get_current_clip_index () const;

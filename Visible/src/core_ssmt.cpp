@@ -180,6 +180,7 @@ int ssmt_processor:: create_cache_paths (){
                         return -1;
                 }
             } // tried creatring it if was not already
+            count++; // exists
         }
     }
     return count;
