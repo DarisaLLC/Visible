@@ -77,7 +77,7 @@ m_cached(false),  mValidInput (false)
 {
     m_median_levelset_frac = m_params.median_levelset_fraction();
     m_peaks.resize(0);
-    
+    m_id = -2; 
     // Signals we provide
     signal_contraction_ready = createSignal<contractionLocator::sig_cb_contraction_ready> ();
     signal_pci_available = createSignal<contractionLocator::sig_cb_pci_available> ();
@@ -85,8 +85,9 @@ m_cached(false),  mValidInput (false)
     cell_length_ready = createSignal<contractionLocator::sig_cb_cell_length_ready>();
 }
 
-void contractionLocator::load(const vector<double>& entropies, const vector<vector<double>>& mmatrix)
+void contractionLocator::load(const vector<double>& entropies, const vector<vector<double>>& mmatrix, int input)
 {
+    m_id = input;
     m_entropies = entropies;
     m_SMatrix = mmatrix;
     mNoSMatrix = m_SMatrix.empty();

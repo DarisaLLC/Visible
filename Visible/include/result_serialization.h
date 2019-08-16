@@ -93,7 +93,7 @@ public:
         return ss_ref;
     }
     
-    static bool store (fs::path& filepath, const deque<double>& entropies, const deque<deque<double>>& mmatrix){
+    static bool store (const fs::path& filepath, const deque<double>& entropies, const deque<deque<double>>& mmatrix){
         bool ok = false;
         ssResultContainer ss;
         ss.load(entropies, mmatrix);
@@ -109,7 +109,7 @@ public:
     }
     
     
-    static bool store (fs::path& filepath, const vector<double>& entropies, const vector<vector<double>>& mmatrix){
+    static bool store (const fs::path& filepath, const vector<double>& entropies, const vector<vector<double>>& mmatrix){
         bool ok = false;
         ssResultContainer ss;
         ss.load(entropies, mmatrix);

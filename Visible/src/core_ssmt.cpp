@@ -58,12 +58,8 @@ mCurrentSerieCachePath(serie_cache_folder)
     // std::function<void ()> sm_content_loaded_cb = boost::bind (&ssmt_processor::sm_content_loaded, this);
     // boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
     
-    // Create a contraction object
-    m_caRef = contractionLocator::create ();
-    
-    // Suport lif_processor::Contraction Analyzed
-    std::function<void (contractionContainer_t&)>ca_analyzed_cb = boost::bind (&ssmt_processor::contraction_ready, this, _1);
-    boost::signals2::connection ca_connection = m_caRef->registerCallback(ca_analyzed_cb);
+  
+   
     
     // Signal us when 3d stats are ready
     std::function<void ()>_3dstats_done_cb = boost::bind (&ssmt_processor::stats_3d_computed, this);
@@ -75,9 +71,12 @@ mCurrentSerieCachePath(serie_cache_folder)
     boost::signals2::connection _ss_image_connection = registerCallback(_ss_segmentation_done_cb);
     
     // Signal us when ss segmentation is ready
-    std::function<sig_cb_ss_voxel_ready> _ss_voxel_done_cb = boost::bind (&ssmt_processor::create_voxel_surface, this, _1);
+    std::function<sig_cb_ss_voxel_ready> _ss_voxel_done_cb = boost::bind (&ssmt_processor::create_voxel_surface,this, _1);
     boost::signals2::connection _ss_voxel_connection = registerCallback(_ss_voxel_done_cb);
     
+    // Support lifProcessor::geometry_ready
+    std::function<void (int, const input_channel_selector_t&)> geometry_ready_cb = boost::bind (&ssmt_processor::signal_geometry_done, this, _1, _2);
+    boost::signals2::connection geometry_connection = registerCallback(geometry_ready_cb);
 }
 
 // @note Specific to ID Lab Lif Files
@@ -132,6 +131,60 @@ const smProducerRef ssmt_processor::similarity_producer () const {
     
 }
 
+fs::path ssmt_processor::get_cache_location (const int channel_index,const int input){
+    // Check input
+    bool isEntire = input == -1;
+    bool isMobj = input >= 0 && input < m_results.size();
+    // Check index
+    bool channel_index_ok = channel_index >= 0 && channel_index < channel_count();
+    if (isEntire == isMobj || ! channel_index_ok)
+        return fs::path ();
+    
+    // Get Cache path
+    auto cache_path = mCurrentSerieCachePath;
+    if(isEntire)
+        cache_path = cache_path / m_params.result_container_cache_name ();
+    else{
+        const int count = create_cache_paths();
+        if(count != (int)m_results.size()){
+            vlogger::instance().console()->error(" miscount in cache_path  ");
+        }
+        std::string subdir = to_string(input);
+        cache_path = cache_path / subdir;
+    }
+    return cache_path;
+}
+
+int ssmt_processor:: create_cache_paths (){
+
+    int count = 0;
+    // Create cache directories for each cell off of the top for now (@todo create a cells subdir )
+
+    for(const ssmt_result::ref_t& sr : m_results){
+        if(fs::exists(mCurrentSerieCachePath)){
+            std::string subdir = to_string(sr->id());
+            auto save_path = mCurrentSerieCachePath / subdir;
+            boost::system::error_code ec;
+            if(!fs::exists(save_path)){
+                fs::create_directory(save_path, ec);
+                switch( ec.value() ) {
+                    case boost::system::errc::success: {
+                        count++;
+                        std::string msg = "Created " + save_path.string() ;
+                        vlogger::instance().console()->info(msg);
+                    }
+                        break;
+                    default:
+                        std::string msg = "Failed to create " + save_path.string() + ec.message();
+                        vlogger::instance().console()->info(msg);
+                        return -1;
+                }
+            } // tried creatring it if was not already
+        }
+    }
+    return count;
+    
+}
 //! Load and start async processing of Visible channel
 /*!
  *
@@ -158,20 +211,21 @@ int64_t ssmt_processor::load (const std::shared_ptr<seqFrameContainer>& frames,c
      */
     create_named_tracks(names, plot_names);
     load_channels_from_images(frames);
-    
-    
-    // Call the content loaded cb if any
-    if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
-        signal_content_loaded->operator()(m_frameCount);
-    
     lock.unlock();
     
     int channel_to_use = m_channel_count - 1;
     m_3d_stats_done = false;
     run_volume_variances(m_all_by_channel[channel_to_use]);
     while(!m_3d_stats_done){ std::this_thread::yield();}
+    m_instant_input.second = -1;
+    m_instant_input.first = channel_to_use;
     run_detect_geometry (channel_to_use);
- 
+    
+    
+    // Call the content loaded cb if any
+    if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+        signal_content_loaded->operator()(m_frameCount);
+    
     return m_frameCount;
 }
 
@@ -239,19 +293,19 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_flu_statistics (const std
 
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled
-std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const std::vector<roiWindow<P8U>>& images)
+std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const std::vector<roiWindow<P8U>>& images, const fs::path& cache_path,
+                                                                         const input_channel_selector_t& in)
 {
     bool cache_ok = false;
     size_t dim = images.size();
     std::shared_ptr<ssResultContainer> ssref;
     
-    if(fs::exists(mCurrentSerieCachePath)){
-        auto cache_path = mCurrentSerieCachePath / m_params.result_container_cache_name ();
-        if(fs::exists(cache_path)){
-            ssref = ssResultContainer::create(cache_path);
-        }
-        cache_ok = ssref && ssref->size_check(dim);
+    if(fs::exists(cache_path)){
+        ssref = ssResultContainer::create(cache_path);
     }
+    cache_ok = ssref && ssref->size_check(dim);
+
+    
     
     if(cache_ok){
         vlogger::instance().console()->info(" SS result container cache : Hit ");
@@ -263,12 +317,11 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
             rowv.insert(rowv.end(), row.begin(), row.end());
             m_smat.push_back(rowv);
         }
-        m_caRef->load(m_entropies,m_smat);
-        update ();
+        if(in.second != -1)
+            m_results[in.second]->locator()->load(m_entropies, m_smat);
+        update (in);
         
     }else{
-        
-        auto cache_path = mCurrentSerieCachePath / m_params.result_container_cache_name ();
         auto sp =  similarity_producer();
         sp->load_images (images);
         std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
@@ -284,8 +337,9 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
                 rowv.insert(rowv.end(), row.begin(), row.end());
                 m_smat.push_back(rowv);
             }
-            m_caRef->load(m_entropies,m_smat);
-            update ();
+            if(in.second != -1)
+                m_results[in.second]->locator()->load(m_entropies, m_smat);
+            update (in);
             bool ok = ssResultContainer::store(cache_path, entropies, sm);
             if(ok)
                 vlogger::instance().console()->info(" SS result container cache : filled ");
@@ -295,18 +349,29 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
         }
     }
     // Signal we are done with ACI
-    static int dummy;
     if (signal_sm1d_ready && signal_sm1d_ready->num_slots() > 0)
-        signal_sm1d_ready->operator()(dummy);
+        signal_sm1d_ready->operator()(in);
     
     return m_contraction_pci_tracksRef;
 }
 
-// @todo even though channel index is an argument, but only results for one channel is kept in lif_processor.
-//
-std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci_on_channel (const int channel_index)
-{
-    return run_contraction_pci(std::move(m_all_by_channel[channel_index]));
+
+void ssmt_processor::signal_geometry_done (int count, const input_channel_selector_t& in){
+    std::cout << "ssmt_processor called geom cb " << count << std::endl;
+}
+
+// channel_index which channel of multi-channel input. Usually visible channel is the last one
+// input is -1 for the entire root or index of moving object area in results container
+
+std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci_on_channel (const input_channel_selector_t& in){
+    int channel_index = in.first;
+    int input = in.second;
+    auto cache_path = get_cache_location(channel_index, input);
+    if (cache_path == fs::path()){
+        return std::shared_ptr<vecOfNamedTrack_t> ();
+    }
+    const auto& _content = input == -1 ? content() : m_results[input]->content();
+    return run_contraction_pci(std::move(_content[channel_index]), cache_path, in);
 }
 
 /*
@@ -339,10 +404,6 @@ void ssmt_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
     
 }
 
-const std::vector<Rectf>& ssmt_processor::channel_rois () const { return m_channel_rois; }
-
-
-
 
 // Assumes LIF data -- use multiple window.
 // @todo condider creating cv::Mats and convert to roiWindow when needed.
@@ -353,7 +414,6 @@ void ssmt_processor::load_channels_from_images (const std::shared_ptr<seqFrameCo
     m_all_by_channel.clear();
     m_channel_count = frames->media_info().getNumChannels();
     m_all_by_channel.resize (m_channel_count);
-    m_channel_rois.resize (0);
     std::vector<std::string> names = {"Red", "Green","Blue"};
     
     while (frames->checkFrame(m_frameCount))
@@ -371,15 +431,6 @@ void ssmt_processor::load_channels_from_images (const std::shared_ptr<seqFrameCo
                 auto m3 = roiFixedMultiWindow<P8UP3>(*m1, names, ts);
                 for (auto cc = 0; cc < m3.planes(); cc++)
                     m_all_by_channel[cc].emplace_back(m3.plane(cc));
-                
-                if (m_channel_rois.empty())
-                {
-                    for (auto cc = 0; cc < m3.planes(); cc++)
-                    {
-                        const iRect& ir = m3.roi(cc);
-                        m_channel_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
-                    }
-                }
                 break;
             }
             case 2  :
@@ -387,22 +438,11 @@ void ssmt_processor::load_channels_from_images (const std::shared_ptr<seqFrameCo
                 auto m2 = roiFixedMultiWindow<P8UP2,512,128,2>(*m1, names, ts);
                 for (auto cc = 0; cc < m2.planes(); cc++)
                     m_all_by_channel[cc].emplace_back(m2.plane(cc));
-                
-                if (m_channel_rois.empty())
-                {
-                    for (auto cc = 0; cc < m2.planes(); cc++)
-                    {
-                        const iRect& ir = m2.roi(cc);
-                        m_channel_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
-                    }
-                }
                 break;
             }
             case 1  :
             {
                 m_all_by_channel[0].emplace_back(*m1);
-                const iRect& ir = m1->frame();
-                m_channel_rois.emplace_back(vec2(ir.ul().first, ir.ul().second), vec2(ir.lr().first, ir.lr().second));
                 break;
             }
         }
@@ -420,16 +460,19 @@ void ssmt_processor::load_channels_from_images (const std::shared_ptr<seqFrameCo
  Each call to find_best can be with different median cut-off
  @param track track to be filled
  */
-void ssmt_processor::median_leveled_pci (namedTrack_t& track)
+void ssmt_processor::median_leveled_pci (namedTrack_t& track, const input_channel_selector_t& in)
 {
     try{
-        std::weak_ptr<contractionLocator> weakCaPtr (m_caRef);
-        if (weakCaPtr.expired())
-            return;
-        
-        m_caRef->update ();
-        m_medianLevel = m_caRef->leveled();
-        auto leveled = m_caRef->leveled();
+        vector<double>& leveled = m_entropies;
+        if(in.second != -1)
+        {
+            std::weak_ptr<contractionLocator> weakCaPtr (m_results[in.second]->locator());
+            if (weakCaPtr.expired())
+                return;
+            auto caRef = weakCaPtr.lock();
+            caRef->update ();
+            leveled = caRef->leveled();
+        }
         track.second.clear();
         auto mee = leveled.begin();
         for (auto ss = 0; mee != leveled.end() || ss < frame_count(); ss++, mee++)
@@ -445,11 +488,9 @@ void ssmt_processor::median_leveled_pci (namedTrack_t& track)
         std::cout <<  ex.what() << std::endl;
     }
     // Signal we are done with median level set
-    static int dummy;
     if (signal_sm1dmed_ready && signal_sm1dmed_ready->num_slots() > 0)
-        signal_sm1dmed_ready->operator()(dummy, dummy);
+        signal_sm1dmed_ready->operator()(in);
 }
-
 
 const int64_t& ssmt_processor::frame_count () const
 {
@@ -466,7 +507,7 @@ const int64_t& ssmt_processor::frame_count () const
     return m_frameCount;
 }
 
-const int64_t ssmt_processor::channel_count () const
+const uint32_t ssmt_processor::channel_count () const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     return m_channel_count;
@@ -487,16 +528,29 @@ std::shared_ptr<ioImageWriter>& ssmt_processor::get_csv_writer (){
     return m_csv_writer;
 }
 
-void ssmt_processor::save_channel_images (int channel_index, std::string& dir_fqfn){
+int ssmt_processor::save_channel_images (const input_channel_selector_t& in, const std::string& dir_fqfn){
+    int channel_index = in.first;
+    int input = in.second;
     std::lock_guard<std::mutex> lock(m_mutex);
+    fs::path _path (dir_fqfn);
+    if (! fs::exists(_path)){
+        return -1;
+    }
+    const auto& _content = input == -1 ? content() : m_results[input]->content();
     int channel_to_use = channel_index % m_channel_count;
-    channel_images_t c2 = m_all_by_channel[channel_to_use];
+    channel_images_t c2 = _content[channel_to_use];
     auto writer = get_image_writer();
-    if (writer)
+    if (writer) {
         writer->operator()(dir_fqfn, c2);
-    
+    }
+
+    return -1;
 }
 
 const std::vector<moving_region>& ssmt_processor::moving_regions ()const {
     return m_regions;
+}
+
+const ssmt_processor::channel_vec_t& ssmt_processor::content () const{
+    return m_all_by_channel;
 }

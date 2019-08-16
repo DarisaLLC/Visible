@@ -19,7 +19,7 @@
 #include <sstream>
 #include <map>
 #include "timed_value_containers.h"
-#include "algo_Lif.hpp"
+#include "lif_content.hpp"
 #include "logger/logger.hpp"
 
 using namespace std;
