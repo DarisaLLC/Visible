@@ -99,6 +99,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
         std::string msg = " Created " + to_string((int)m_regions.size());
         vlogger::instance().console()->info(msg);
         
+        
         if (signal_geometry_ready  && signal_geometry_ready->num_slots() > 0)
         {
             signal_geometry_ready->operator()(count, m_instant_input);
