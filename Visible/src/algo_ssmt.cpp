@@ -36,7 +36,7 @@ const Rectf& ssmt_processor::measuredArea () const { return m_measured_area; }
  * 1 monchrome channel. Compute 3D Standard Dev. per pixel
  */
 
-void ssmt_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& images){
+void ssmt_processor::find_moving_regions (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
 
     
@@ -46,8 +46,8 @@ void ssmt_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& images){
 }
 
 
-void ssmt_processor::run_detect_geometry (const int channel_index){
-    return run_detect_geometry(m_all_by_channel[channel_index]);
+void ssmt_processor::find_moving_regions (const int channel_index){
+    return find_moving_regions(m_all_by_channel[channel_index]);
 }
 
 
@@ -82,11 +82,12 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     
     std::function<labelBlob::results_cb> res_ready_lambda = [=](std::vector<blob>& blobs){
         for (const blob& bb : blobs){
-            m_regions.emplace_back(bb, (uint32_t(m_regions.size()+1)));
+            m_regions.emplace_back(bb, (uint32_t(m_regions.size())));
         }
         for (const moving_region& mr : m_regions){
             auto dis = shared_from_this();
-            auto ref = ssmt_result::create (dis, mr, m_regions.size(), m_instant_input);
+            input_channel_selector_t inn ((int) m_results.size(),m_instant_input.channel());
+            auto ref = ssmt_result::create (dis, mr, m_regions.size(), inn);
             m_results.push_back(ref);
             
         }
@@ -96,8 +97,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
             vlogger::instance().console()->error(msg);
         }
         
-        std::string msg = " Created " + to_string((int)m_regions.size());
-        vlogger::instance().console()->info(msg);
+    
         
         
         if (signal_geometry_ready  && signal_geometry_ready->num_slots() > 0)
@@ -107,17 +107,6 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
      
     };
 
-    
-    //  If we are producing affine crops of cell
-    //            cv::Mat affine;
-    //            cv::warpAffine(mono, affine, m_surface_affine,
-    //                           motion_mass.size, INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0,0,0));
-    //            if(fs::exists(mCurrentSerieCachePath)){
-    //                std::string imagename = "voxel_affine_.png";
-    //                auto image_path = cache_path / imagename;
-    //                cv::imwrite(image_path.string(), affine);
-    //            }
-    //
     
     if(fs::exists(mCurrentSerieCachePath)){
         std::string imagename = "voxel_binary_.png";
@@ -141,14 +130,20 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
 // Update. Called also when cutoff offset has changed
 void ssmt_processor::update (const input_channel_selector_t& in)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    if(m_contraction_pci_tracksRef && !m_contraction_pci_tracksRef->empty()){
-    if(in.second != -1){
-        std::weak_ptr<contractionLocator> weakCaPtr (m_results[in.second]->locator());
+    if ( in.isEntire()){
+        if(m_contraction_pci_tracksRef && !m_contraction_pci_tracksRef->empty())
+            median_leveled_pci(m_contraction_pci_tracksRef->at(0), in);
+    }
+    else{
+        if(m_contraction_pci_tracksRef && !m_contraction_pci_tracksRef->empty()){
+
+        std::weak_ptr<contractionLocator> weakCaPtr (m_results[in.region()]->locator());
         if (weakCaPtr.expired())
             return;
+        std::string msg = " processor update called " + to_string(in.region());
+        vlogger::instance().console()->info(msg);
         auto caRef = weakCaPtr.lock();
-        caRef->update ();
+//        caRef->update ();
         median_leveled_pci(m_contraction_pci_tracksRef->at(0), in);
         caRef->find_best ();
         }

@@ -97,7 +97,7 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const f
     vlogger::instance().console()->info(msg);
     m_idlab_defaults.median_level_set_cutoff_fraction = 7;
     m_playback_speed = 1;
-    m_input_selector.second = -1;
+    m_input_selector = input_channel_selector_t(-1,0);
     m_selector_last = -1;
     
     
@@ -426,70 +426,6 @@ void lifContext::update_contraction_selection()
 
 }
 
-void lifContext::add_contractions (bool* p_open)
-{
-    const Rectf& dr = get_image_display_rect();
-    auto pos = ImVec2(dr.getLowerLeft().x, 150 + getWindowHeight()/2.0);
-    ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(ImVec2(dr.getWidth(), 340), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Contractions", p_open, ImGuiWindowFlags_MenuBar))
-    {
-        if (ImGui::BeginMenuBar())
-        {
-            if (ImGui::BeginMenu("File"))
-            {
-                if (ImGui::MenuItem("Close")) *p_open = false;
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
-        
-        // left
-        static int selected = 0;
-        ImGui::BeginChild("left pane", ImVec2(150, 0), true);
-        for (int i = 0; i < m_contraction_names.size(); i++)
-        {
-            char label[128];
-            sprintf(label, "Contraction %d", i);
-            if (ImGui::Selectable(label, selected == i))
-                selected = i;
-        }
-        ImGui::EndChild();
-        ImGui::SameLine();
-        
-        // right
-        ImGui::BeginGroup();
-        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
-        ImGui::Text("Contraction: %d", selected);
-        ImGui::Separator();
-        if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
-        {
-            if (ImGui::BeginTabItem("Description"))
-            {
-                set_current_clip_index(selected);
-                std::string msg = " Entire ";
-                if (selected != 0){
-                const auto& ctr = m_contractions[get_current_clip_index() - 1];
-
-                auto ctr_info = " Contraction: [" + to_string(ctr.contraction_start.first) + "," + to_string(ctr.relaxation_end.first) + "]";
-                msg = " Current Clip " + m_contraction_names[get_current_clip_index()] + " " + ctr_info;
-                }
-                ImGui::TextWrapped("%s", msg.c_str());
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Details"))
-            {
-                ImGui::Text(" Lengths in microns ");
-                ImGui::EndTabItem();
-            }
-            ImGui::EndTabBar();
-        }
-        ImGui::EndChild();
-        if (ImGui::Button("Save")) {}
-        ImGui::EndGroup();
-    }
-    ImGui::End();
-}
 /************************
  *
  *  Seek Processing
@@ -685,33 +621,52 @@ void lifContext::keyDown( KeyEvent event )
 
 void lifContext::setMedianCutOff (int32_t newco)
 {
-    if (! m_lifProcRef || ! m_geometry_available) return;
-    int select_last (m_lifProcRef->moving_bodies().size());
-    assert(select_last > 0);
-    select_last--;
-    const auto& mb = m_lifProcRef->moving_bodies();
-    auto spt = mb[select_last]->locator();
+    if (! m_lifProcRef) return;
+    // Get a shared_ptr from weak and check if it had not expired
+    auto spt = m_lifProcRef->entireContractionWeakRef().lock();
     if (! spt ) return;
-    m_selector_last = select_last;
     uint32_t tmp = newco % 100; // pct
     uint32_t current (spt->get_median_levelset_pct () * 100);
     if (tmp == current) return;
     spt->set_median_levelset_pct (tmp / 100.0f);
     m_lifProcRef->update(m_input_selector);
+    
+//    if (! m_lifProcRef || ! m_geometry_available) return;
+//    int select_last (m_lifProcRef->moving_bodies().size());
+//    assert(select_last > 0);
+//    select_last--;
+//    const auto& mb = m_lifProcRef->moving_bodies();
+//    auto spt = mb[select_last]->locator();
+//    if (! spt ) return;
+//    m_selector_last = select_last;
+//    uint32_t tmp = newco % 100; // pct
+//    uint32_t current (spt->get_median_levelset_pct () * 100);
+//    if (tmp == current) return;
+//    spt->set_median_levelset_pct (tmp / 100.0f);
+
 }
 
 int32_t lifContext::getMedianCutOff () const
 {
-    if (! m_lifProcRef || ! m_geometry_available) return 0;
-    int select_last (m_lifProcRef->moving_bodies().size());
-    assert(select_last > 0);
-    select_last--;
-    const auto& mb = m_lifProcRef->moving_bodies();
-    auto spt = mb[select_last]->locator();
-    if (! spt ) return 0;
-    m_selector_last = select_last;
-    uint32_t current (spt->get_median_levelset_pct () * 100);
-    return current;
+    // Get a shared_ptr from weak and check if it had not expired
+    auto spt = m_lifProcRef->entireContractionWeakRef().lock();
+    if (spt)
+    {
+        uint32_t current (spt->get_median_levelset_pct () * 100);
+        return current;
+    }
+    return 0;
+    
+//    if (! m_lifProcRef || ! m_geometry_available) return 0;
+//    int select_last (m_lifProcRef->moving_bodies().size());
+//    assert(select_last > 0);
+//    select_last--;
+//    const auto& mb = m_lifProcRef->moving_bodies();
+//    auto spt = mb[select_last]->locator();
+//    if (! spt ) return 0;
+//    m_selector_last = select_last;
+//    uint32_t current (spt->get_median_levelset_pct () * 100);
+//    return current;
 
 }
 //
@@ -834,7 +789,8 @@ void lifContext::process_async (){
             // note launch mode is std::launch::async
             m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
-       //     m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 2, -1);
+            input_channel_selector_t in (-1,2);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in);
             break;
         }
         case 2:
@@ -842,12 +798,14 @@ void lifContext::process_async (){
             // note launch mode is std::launch::async
             m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
                                                     m_lifProcRef.get(), std::vector<int> ({0}) );
-         //   m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_channel, m_lifProcRef.get(), 1, -1);
+            input_channel_selector_t in (-1,1);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in);
             break;
         }
         case 1:
         {
-         //   m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_channel,m_lifProcRef.get(), 0, -1);
+            input_channel_selector_t in (-1,0);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in);
             break;
         }
     }
@@ -1046,7 +1004,7 @@ void lifContext::add_motion_profile (){
     ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y);
     m_motion_profile_display = Rectf(pos,frame);
     ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(frame);
+    ImGui::SetNextWindowContentSize(frame);
     
    // const RotatedRect& mt = m_lifProcRef->motion_surface ();
     
@@ -1092,6 +1050,125 @@ void lifContext::add_motion_profile (){
     ImGui::End();
 }
 
+
+
+void lifContext::add_contractions (bool* p_open)
+{
+    const Rectf& dr = get_image_display_rect();
+    auto pos = ImVec2(dr.getLowerLeft().x, 150 + getWindowHeight()/2.0);
+    ImGui::SetNextWindowPos(pos);
+    ImGui::SetNextWindowSize(ImVec2(dr.getWidth(), 340), ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("Contractions", p_open, ImGuiWindowFlags_MenuBar))
+    {
+        if (ImGui::BeginMenuBar())
+        {
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("Close")) *p_open = false;
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+        }
+        
+        // left
+        static int selected = 0;
+        ImGui::BeginChild("left pane", ImVec2(150, 0), true);
+        for (int i = 0; i < m_contraction_names.size(); i++)
+        {
+            char label[128];
+            sprintf(label, "Contraction %d", i);
+            if (ImGui::Selectable(label, selected == i))
+                selected = i;
+        }
+        ImGui::EndChild();
+        ImGui::SameLine();
+        
+        // right
+        ImGui::BeginGroup();
+        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+        ImGui::Text("Contraction: %d", selected);
+        ImGui::Separator();
+        if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
+        {
+            if (ImGui::BeginTabItem("Description"))
+            {
+                set_current_clip_index(selected);
+                std::string msg = " Entire ";
+                if (selected != 0){
+                    const auto& ctr = m_contractions[get_current_clip_index() - 1];
+                    
+                    auto ctr_info = " Contraction: [" + to_string(ctr.contraction_start.first) + "," + to_string(ctr.relaxation_end.first) + "]";
+                    msg = " Current Clip " + m_contraction_names[get_current_clip_index()] + " " + ctr_info;
+                }
+                ImGui::TextWrapped("%s", msg.c_str());
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Details"))
+            {
+                ImGui::Text(" Lengths in microns ");
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+        ImGui::EndChild();
+        if (ImGui::Button("Save")) {}
+        ImGui::EndGroup();
+    }
+    ImGui::End();
+}
+
+
+void lifContext::add_regions (bool* p_open)
+{
+    if (m_lifProcRef->moving_regions().empty()) return;
+    
+    const Rectf& dr = get_image_display_rect();
+    auto pos = ImVec2(150 + dr.getLowerLeft().x, 150 + getWindowHeight()/2.0);
+    ImGui::SetNextWindowPos(pos);
+    ImGui::SetNextWindowSize(ImVec2(dr.getWidth(), 340), ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("Cells", p_open, ImGuiWindowFlags_MenuBar))
+    {
+       
+        
+        // left
+        static int selected = 0;
+        ImGui::BeginChild("left pane", ImVec2(150, 0), true);
+        for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++)
+        {
+            char label[128];
+            sprintf(label, "Cell %d", i);
+            if (ImGui::Selectable(label, selected == i))
+                selected = i;
+        }
+        ImGui::EndChild();
+        ImGui::SameLine();
+        
+        // right
+        ImGui::BeginGroup();
+        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+        ImGui::Text("Contraction: %d", selected);
+        ImGui::Separator();
+        if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
+        {
+            if (ImGui::BeginTabItem("Description"))
+            {
+                auto mr = m_lifProcRef->moving_bodies()[selected];
+                ImGui::TextWrapped("%d", selected);
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Details"))
+            {
+                ImGui::Text(" Lengths in microns ");
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+        ImGui::EndChild();
+//        if (ImGui::Button("Save")) {}
+        ImGui::EndGroup();
+    }
+    ImGui::End();
+}
 void  lifContext::SetupGUIVariables(){
 
   //      ImGuiStyle* st = &ImGui::GetStyle();
@@ -1105,6 +1182,7 @@ void  lifContext::DrawGUI(){
     add_navigation();
     add_result_sequencer();
     add_motion_profile ();
+    add_regions(&m_show_cells);
     add_contractions(&m_show_contractions);
 }
 

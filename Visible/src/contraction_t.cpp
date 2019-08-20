@@ -277,6 +277,7 @@ bool contractionLocator::verify_input () const
         if (!ok) return ok;
         for (int row = 0; row < m_entsize; row++)
         {
+            std::cout << "[" << row << "]" << m_SMatrix[row].size () << std::endl;
             ok &= m_SMatrix[row].size () == m_entsize;
             if (!ok) return ok;
         }

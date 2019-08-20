@@ -58,7 +58,9 @@ mCurrentSerieCachePath(serie_cache_folder)
     // std::function<void ()> sm_content_loaded_cb = boost::bind (&ssmt_processor::sm_content_loaded, this);
     // boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
     
-  
+    // Create a contraction object for entire view processing.
+    // @todo: move median level setting out of cardiac and refactor
+    m_entireCaRef = contractionLocator::create ();
    
     
     // Signal us when 3d stats are ready
@@ -131,6 +133,13 @@ const smProducerRef ssmt_processor::similarity_producer () const {
     
 }
 
+// Check if the returned has expired
+std::weak_ptr<contractionLocator> ssmt_processor::entireContractionWeakRef ()
+{
+    std::weak_ptr<contractionLocator> wp (m_entireCaRef);
+    return wp;
+}
+
 fs::path ssmt_processor::get_cache_location (const int channel_index,const int input){
     // Check input
     bool isEntire = input == -1;
@@ -142,9 +151,7 @@ fs::path ssmt_processor::get_cache_location (const int channel_index,const int i
     
     // Get Cache path
     auto cache_path = mCurrentSerieCachePath;
-    if(isEntire)
-        cache_path = cache_path / m_params.result_container_cache_name ();
-    else{
+    if(! isEntire){
         const int count = create_cache_paths();
         if(count != (int)m_results.size()){
             vlogger::instance().console()->error(" miscount in cache_path  ");
@@ -152,6 +159,7 @@ fs::path ssmt_processor::get_cache_location (const int channel_index,const int i
         std::string subdir = to_string(input);
         cache_path = cache_path / subdir;
     }
+    cache_path = cache_path / m_params.result_container_cache_name ();
     return cache_path;
 }
 
@@ -167,6 +175,7 @@ int ssmt_processor:: create_cache_paths (){
             boost::system::error_code ec;
             if(!fs::exists(save_path)){
                 fs::create_directory(save_path, ec);
+                
                 switch( ec.value() ) {
                     case boost::system::errc::success: {
                         count++;
@@ -179,8 +188,16 @@ int ssmt_processor:: create_cache_paths (){
                         vlogger::instance().console()->info(msg);
                         return -1;
                 }
-            } // tried creatring it if was not already
-            count++; // exists
+            } // tried creating it if was not already
+            else{
+                count++; // exists
+            }
+            // Save path exists, try updating the map
+            int last_count = count-1;
+            assert(last_count >= 0 && last_count < m_results.size());
+            if(m_result_index_to_cache_path.find(last_count) == m_result_index_to_cache_path.end()){
+                m_result_index_to_cache_path[last_count] = save_path;
+            }
         }
     }
     return count;
@@ -218,9 +235,8 @@ int64_t ssmt_processor::load (const std::shared_ptr<seqFrameContainer>& frames,c
     m_3d_stats_done = false;
     run_volume_variances(m_all_by_channel[channel_to_use]);
     while(!m_3d_stats_done){ std::this_thread::yield();}
-    m_instant_input.second = -1;
-    m_instant_input.first = channel_to_use;
-    run_detect_geometry (channel_to_use);
+    m_instant_input = input_channel_selector_t(-1, channel_to_use);
+    find_moving_regions (channel_to_use);
     
     
     // Call the content loaded cb if any
@@ -294,13 +310,13 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_flu_statistics (const std
 
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled
-std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const std::vector<roiWindow<P8U>>& images, const fs::path& cache_path,
+std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const std::vector<roiWindow<P8U>>& images,
                                                                          const input_channel_selector_t& in)
 {
     bool cache_ok = false;
     size_t dim = images.size();
     std::shared_ptr<ssResultContainer> ssref;
-    
+    auto cache_path = get_cache_location(in.channel(), in.region());
     if(fs::exists(cache_path)){
         ssref = ssResultContainer::create(cache_path);
     }
@@ -318,8 +334,11 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
             rowv.insert(rowv.end(), row.begin(), row.end());
             m_smat.push_back(rowv);
         }
-        if(in.second != -1)
-            m_results[in.second]->locator()->load(m_entropies, m_smat);
+        if( ! in.isEntire())
+            m_results[in.region()]->locator()->load(m_entropies, m_smat);
+        else{
+            m_entireCaRef->load(m_entropies, m_smat);
+        }
         update (in);
         
     }else{
@@ -338,10 +357,13 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
                 rowv.insert(rowv.end(), row.begin(), row.end());
                 m_smat.push_back(rowv);
             }
-            if(in.second != -1)
-                m_results[in.second]->locator()->load(m_entropies, m_smat);
+            if(! in.isEntire() )
+                m_results[in.region()]->locator()->load(m_entropies, m_smat);
+            else{
+                m_entireCaRef->load(m_entropies, m_smat);
+            }
             update (in);
-            bool ok = ssResultContainer::store(cache_path, entropies, sm);
+            bool ok = ssResultContainer::store(cache_path,m_entropies, m_smat);
             if(ok)
                 vlogger::instance().console()->info(" SS result container cache : filled ");
             else
@@ -364,15 +386,13 @@ void ssmt_processor::signal_geometry_done (int count, const input_channel_select
 // channel_index which channel of multi-channel input. Usually visible channel is the last one
 // input is -1 for the entire root or index of moving object area in results container
 
-std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci_on_channel (const input_channel_selector_t& in){
-    int channel_index = in.first;
-    int input = in.second;
-    auto cache_path = get_cache_location(channel_index, input);
+std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci_on_selected_input (const input_channel_selector_t& in){
+    auto cache_path = get_cache_location(in.channel(),in.region());
     if (cache_path == fs::path()){
         return std::shared_ptr<vecOfNamedTrack_t> ();
     }
-    const auto& _content = input == -1 ? content() : m_results[input]->content();
-    return run_contraction_pci(std::move(_content[channel_index]), cache_path, in);
+    const auto& _content = in.isEntire() ? content()[in.channel()] : m_results[in.region()]->content()[in.region()];
+    return run_contraction_pci(std::move(_content), in);
 }
 
 /*
@@ -465,15 +485,13 @@ void ssmt_processor::median_leveled_pci (namedTrack_t& track, const input_channe
 {
     try{
         vector<double>& leveled = m_entropies;
-        if(in.second != -1)
-        {
-            std::weak_ptr<contractionLocator> weakCaPtr (m_results[in.second]->locator());
-            if (weakCaPtr.expired())
-                return;
-            auto caRef = weakCaPtr.lock();
-            caRef->update ();
-            leveled = caRef->leveled();
-        }
+        std::weak_ptr<contractionLocator> weakCaPtr (in.isEntire() ? m_entireCaRef : m_results[in.region()]->locator());
+        if (weakCaPtr.expired())
+            return;
+        auto caRef = weakCaPtr.lock();
+        caRef->update ();
+        leveled = caRef->leveled();
+
         track.second.clear();
         auto mee = leveled.begin();
         for (auto ss = 0; mee != leveled.end() || ss < frame_count(); ss++, mee++)
@@ -495,7 +513,7 @@ void ssmt_processor::median_leveled_pci (namedTrack_t& track, const input_channe
 
 const int64_t& ssmt_processor::frame_count () const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+//    std::lock_guard<std::mutex> lock(m_mutex);
     static int64_t inconsistent (0);
     
     if (m_all_by_channel.empty()) return inconsistent;
@@ -510,7 +528,6 @@ const int64_t& ssmt_processor::frame_count () const
 
 const uint32_t ssmt_processor::channel_count () const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
     return m_channel_count;
 }
 
@@ -530,15 +547,13 @@ std::shared_ptr<ioImageWriter>& ssmt_processor::get_csv_writer (){
 }
 
 int ssmt_processor::save_channel_images (const input_channel_selector_t& in, const std::string& dir_fqfn){
-    int channel_index = in.first;
-    int input = in.second;
     std::lock_guard<std::mutex> lock(m_mutex);
     fs::path _path (dir_fqfn);
     if (! fs::exists(_path)){
         return -1;
     }
-    const auto& _content = input == -1 ? content() : m_results[input]->content();
-    int channel_to_use = channel_index % m_channel_count;
+    const auto& _content = in.isEntire() ? content() : m_results[in.region()]->content();
+    int channel_to_use = in.channel() % m_channel_count;
     channel_images_t c2 = _content[channel_to_use];
     auto writer = get_image_writer();
     if (writer) {
