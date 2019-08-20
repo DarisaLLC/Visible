@@ -27,7 +27,7 @@
 #include "ssmt.hpp"
 #include "logger/logger.hpp"
 #include "result_serialization.h"
-#include "vision/rc_filter1d.h"
+
 
 using cc_t = ssmt_processor::contractionContainer_t;
 
@@ -72,6 +72,13 @@ size_t ssmt_result::Id() const { return m_idx; }
 const std::shared_ptr<contractionLocator> & ssmt_result::locator () const { return m_caRef; }
 
 const ssmt_processor::channel_vec_t& ssmt_result::content () const { return m_all_by_channel; }
+
+// @TBD not-used check if this is necessary 
+void ssmt_result::process (){
+    get_channels(m_input.channel());
+    auto parent = m_weak_parent.lock();
+    parent->run_contraction_pci(content()[m_input.channel()],m_input);
+}
 
 bool ssmt_result::get_channels (int channel){
     auto parent = m_weak_parent.lock();

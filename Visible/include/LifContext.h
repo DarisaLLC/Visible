@@ -236,6 +236,7 @@ private:
     void add_navigation ();
     void add_motion_profile ();
     void add_contractions (bool* p_open);
+    void add_regions (bool* p_open);
     // Navigation
     void update_log (const std::string& meg = "") override;
     bool looping () override;
@@ -247,7 +248,7 @@ private:
   
     // UI flags
     bool m_showLog, m_showGUI, m_showHelp;
-    bool m_show_contractions, m_show_playback;
+    bool m_show_contractions, m_show_cells, m_show_playback;
     bool m_median_set_at_default;
     
     

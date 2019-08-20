@@ -31,9 +31,25 @@ class ssmt_result;
 
 // channel_index which channel of multi-channel input. Usually visible channel is the last one
 // input is -1 for the entire root or index of moving object area in results container
-typedef std::pair<int,int> input_channel_selector_t;
 
+class region_and_source{
+public:
+    
+    region_and_source ():m_region(ni()),m_channel(ni()) {}
+    region_and_source (int r, int channel):m_region(r), m_channel(channel) {}
+    inline int entire () { return -1; }
+    inline int ni () { return -2; }
+    bool isChannel() const {return m_channel >= 0;}
+    bool isEntire() const {return m_region == -1; }
+    int region () const { return m_region;}
+    int channel () const { return m_channel; }
+    
+private:
+    mutable int m_region;
+    mutable int m_channel;
+};
 
+typedef region_and_source input_channel_selector_t;
 
 // For base classing
 class ssmtSignaler : public base_signaler
@@ -134,13 +150,14 @@ public:
     // Run accumulator of 3d stats on a channel at index
     svl::stats<int64_t> run_volume_sum_sumsq_count (const int channel_index);
     // Run per pixel stdev accumulator a channel at index
-    void run_detect_geometry (const int channel_index);
+    void find_moving_regions (const int channel_index);
     
  
 
     // Vector of 8bit roiWindows API for IDLab custom organization
     svl::stats<int64_t> run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>&);
-    void run_detect_geometry (std::vector<roiWindow<P8U>>& );
+    void find_moving_regions (std::vector<roiWindow<P8U>>& );
+    
   
     // Run to get Ranks and Median Level Set. Both short term and long term pic
     // Short term is specifically run on the channel contraction pci was run on
@@ -148,11 +165,11 @@ public:
     // args:
     // channel_index which channel of multi-channel input. Usually visible channel is the last one
     // input is -1 for the entire root or index of moving object area in results container
-    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci_on_channel (const input_channel_selector_t& );
+    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci_on_selected_input (const input_channel_selector_t& );
     // 2nd interface is lower level interface
     // args:
     // images: vector of roiWindow<P8U>s. roiWindow<P8U> is a single plane image container.
-    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci (const std::vector<roiWindow<P8U>>& images, const fs::path& cache_destination, const input_channel_selector_t& );
+    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci (const std::vector<roiWindow<P8U>>& images,  const input_channel_selector_t& );
     
     std::vector<float> shortterm_pci (const std::vector<uint32_t>& indices);
     void shortterm_pci (const uint32_t& temporal_window);
@@ -168,6 +185,8 @@ public:
     void finalize_segmentation (cv::Mat& mono, cv::Mat& label);
     const channel_vec_t& content () const;
   
+    std::weak_ptr<contractionLocator> entireContractionWeakRef ();
+    
     
 protected:
     boost::signals2::signal<ssmt_processor::sig_cb_content_loaded>* signal_content_loaded;
@@ -222,6 +241,7 @@ private:
     // path to cache folder for this serie
     fs::path mCurrentSerieCachePath;
     
+    std::shared_ptr<contractionLocator> m_entireCaRef;
   
     // Note tracks contained timed data.
     void median_leveled_pci (namedTrack_t& track, const input_channel_selector_t& in);
@@ -279,6 +299,8 @@ private:
     mutable fPair m_length_range;
     mutable std::vector<roiWindow<P8U>> m_voxels;
     input_channel_selector_t m_instant_input;
+    std::map<uint32_t, fs::path> m_result_index_to_cache_path;
+    
   
     
 };
@@ -296,7 +318,7 @@ public:
     static const ref_t create (std::shared_ptr<ssmt_processor>&, const moving_region&, size_t idx,
                                const input_channel_selector_t& in);
     
-    
+    void process ();
     const trackMap_t& trackBook () const;
     const uint64_t frameCount () const;
     const uint32_t channelCount () const;
