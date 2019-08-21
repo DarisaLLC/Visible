@@ -36,6 +36,10 @@ const ssmt_result::ref_t ssmt_result::create (std::shared_ptr<ssmt_processor>& p
                                               size_t idx,const input_channel_selector_t& in){
     ssmt_result::ref_t this_child (new ssmt_result(child, idx,in ));
     this_child->m_weak_parent = parent;
+
+    // Support lifProcessor::initial ss results available
+    std::function<void (const input_channel_selector_t&)> sm1d_ready_cb = boost::bind (&ssmt_result::signal_sm1d_ready, this_child, _1);
+    boost::signals2::connection nl_connection = parent->registerCallback(sm1d_ready_cb);
     return this_child;
 }
 
@@ -43,6 +47,7 @@ ssmt_result::ssmt_result(const moving_region& mr,size_t idx,const input_channel_
 moving_region(mr), m_idx(idx), m_input(in) {
     // Create a contraction object
     m_caRef = contractionLocator::create ();
+
     
     // Suport lif_processor::Contraction Analyzed
     std::function<void (cc_t&)>ca_analyzed_cb = boost::bind (&ssmt_result::contraction_ready, this, _1);
@@ -65,6 +70,11 @@ void ssmt_result::contraction_ready (ssmt_processor::contractionContainer_t& con
     vlogger::instance().console()->info(" Contractions Analyzed: ");
 }
 
+void ssmt_result::signal_sm1d_ready(const input_channel_selector_t& in){
+    if(m_input.region() != in.region()) return;
+    std::cout << __FILE__ << "::" << __LINE__ << in.region() << "," << in.channel() << std::endl;
+    
+}
 
 const input_channel_selector_t& ssmt_result::input() const { return m_input; }
 
@@ -75,9 +85,11 @@ const ssmt_processor::channel_vec_t& ssmt_result::content () const { return m_al
 
 // @TBD not-used check if this is necessary 
 void ssmt_result::process (){
-    get_channels(m_input.channel());
-    auto parent = m_weak_parent.lock();
-    parent->run_contraction_pci(content()[m_input.channel()],m_input);
+    bool done = get_channels(m_input.channel());
+    if(done){
+        auto parent = m_weak_parent.lock();
+        m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, parent, m_input);
+    }
 }
 
 bool ssmt_result::get_channels (int channel){
@@ -124,9 +136,10 @@ bool ssmt_result::get_channels (int channel){
     {
         const auto& rr = rotated_roi();
         auto affine = affineCrop(vitr, rr);
-        m_all_by_channel[channel].push_back(affine);
+        m_all_by_channel[channel].emplace_back(affine);
         count++;
     }
     while (++vitr != rws.end());
-    return count == total;
+    bool check = m_all_by_channel[channel].size() == total;
+    return check && count == total;
 }

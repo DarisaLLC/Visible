@@ -145,7 +145,7 @@ void lifContext::setup_signals(){
     boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_ready_cb);
     
     // Support lifProcessor::geometry_ready
-    std::function<void (int,const input_channel_selector_t&)> geometry_ready_cb = boost::bind (&lifContext::signal_geometry_ready, shared_from_above(), _1, _2);
+    std::function<void (int,const input_channel_selector_t&)> geometry_ready_cb = boost::bind (&lifContext::signal_regions_ready, shared_from_above(), _1, _2);
     boost::signals2::connection geometry_connection = m_lifProcRef->registerCallback(geometry_ready_cb);
     
     // Support lifProcessor::temporal_image_ready
@@ -255,14 +255,21 @@ void lifContext::signal_contraction_ready (ssmt_processor::contractionContainer_
     
 }
 
-
-void lifContext::signal_geometry_ready(int count, const input_channel_selector_t& in)
+/*
+ * Is called when segmentation is done. The input_selector should have full view (-1) and channel #
+ * count is numner
+*/
+void lifContext::signal_regions_ready(int count, const input_channel_selector_t& in)
 {
     assert(m_lifProcRef);
-    vlogger::instance().console()->info(" Volume Variance are available ");
-    std::string msg = " Found " + stl_utils::tostr(count) + "Moving Regions";
+    std::string mr = " Moving Region";
+    mr += (count > 1) ? "s" : " ";
+    std::string msg = " Found " + stl_utils::tostr(count) + mr;
     vlogger::instance().console()->info(msg);
     m_input_selector = in;
+    for (auto mb : m_lifProcRef->moving_bodies()){
+        mb->process();
+    }
     //@todo parameterize affine windows generation
     // m_lifProcRef->generate_affine_windows();
   

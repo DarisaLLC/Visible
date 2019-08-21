@@ -55,15 +55,15 @@ void ssmt_processor::compute_shortterm (const uint32_t halfWinSz) const{
         std::vector<double> _entropies (tWinSz, 0);
         for (auto row = tl_row; row < br_row; row++){
             auto proj_row = row - tl_row;
-            _sums[proj_row] = m_smat[row][row];
+            _sums[proj_row] = m_smat[-1][row][row];
         }
         
         for (auto row = tl_row; row < br_row; row++)
             for (auto col = (row+1); col < br_col; col++){
                 auto proj_row = row - tl_row;
                 auto proj_col = col - tl_col;
-                _sums[proj_row] += m_smat[row][col];
-                _sums[proj_col] += m_smat[row][col];
+                _sums[proj_row] += m_smat[-1][row][col];
+                _sums[proj_col] += m_smat[-1][row][col];
             }
         
         
@@ -71,11 +71,11 @@ void ssmt_processor::compute_shortterm (const uint32_t halfWinSz) const{
             for (auto col = row; col < br_col; col++){
                 auto proj_row = row - tl_row;
                 auto proj_col = col - tl_col;
-                double rr = m_smat[row][col]/_sums[proj_row]; // Normalize for total energy in samples
+                double rr = m_smat[-1][row][col]/_sums[proj_row]; // Normalize for total energy in samples
                 _entropies[proj_row] += shannon(rr);
                 
                 if ((proj_row) != (proj_col)) {
-                    rr = m_smat[row][col]/_sums[proj_col];//Normalize for total energy in samples
+                    rr = m_smat[-1][row][col]/_sums[proj_col];//Normalize for total energy in samples
                     _entropies[proj_col] += shannon(rr);
                 }
                 _entropies[proj_row] = _entropies[proj_row]/_log2MSz;// Normalize for cnt of samples
