@@ -134,8 +134,8 @@ public:
     const Rectf& measuredArea () const;
     // Update. Called also when cutoff offset has changed
     void update (const input_channel_selector_t&);
-    const vector<vector<double>>& ssMatrix () const { return m_smat; }
-    const vector<double>& entropies () const { return m_entropies; }
+    const vector<vector<double>>& ssMatrix () const { return m_smat[-1]; }
+    const vector<double>& entropies () const { return m_entropies[-1]; }
     
     // Add generate pci and flu for a cell.
     
@@ -260,9 +260,10 @@ private:
     
     // One similarity engine
     mutable smProducerRef m_sm_producer;
-    vector<double> m_entropies;
     vector<float> m_voxel_entropies;
-    mutable vector<vector<double>> m_smat;
+
+    mutable std::unordered_map<int,vector<double>> m_entropies;
+    mutable std::unordered_map<int,vector<vector<double>>> m_smat;
     
     
     // Median Levels
@@ -328,7 +329,7 @@ public:
     const std::shared_ptr<contractionLocator> & locator () const;
 private:
     ssmt_result (const moving_region&,size_t idx,const input_channel_selector_t& in);
-
+    void signal_sm1d_ready (const input_channel_selector_t&);
     void contraction_ready (ssmt_processor::contractionContainer_t& contractions);
     bool get_channels (int channel);
     mutable size_t m_idx;
@@ -337,6 +338,7 @@ private:
     
     mutable trackRef_t m_flurescence_tracksRef;
     mutable trackRef_t m_contraction_pci_tracksRef;
+    async_vecOfNamedTrack_t m_contraction_pci_tracks_asyn;
     
     std::shared_ptr<contractionLocator> m_caRef;
     mutable std::vector<cv::Mat> m_affine_windows;

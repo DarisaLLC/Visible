@@ -96,10 +96,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
             std::string msg = " miscount in moving object path creation ";
             vlogger::instance().console()->error(msg);
         }
-        
-    
-        
-        
+
         if (signal_geometry_ready  && signal_geometry_ready->num_slots() > 0)
         {
             signal_geometry_ready->operator()(count, m_instant_input);
@@ -127,27 +124,16 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
 
 
 
-// Update. Called also when cutoff offset has changed
+// Update. Called when cutoff offset has changed
 void ssmt_processor::update (const input_channel_selector_t& in)
 {
-    if ( in.isEntire()){
-        if(m_contraction_pci_tracksRef && !m_contraction_pci_tracksRef->empty())
-            median_leveled_pci(m_contraction_pci_tracksRef->at(0), in);
-    }
-    else{
-        if(m_contraction_pci_tracksRef && !m_contraction_pci_tracksRef->empty()){
+    std::weak_ptr<contractionLocator> weakCaPtr (in.isEntire() ? m_entireCaRef : m_results[in.region()]->locator());
+    if (weakCaPtr.expired())
+        return;
 
-        std::weak_ptr<contractionLocator> weakCaPtr (m_results[in.region()]->locator());
-        if (weakCaPtr.expired())
-            return;
-        std::string msg = " processor update called " + to_string(in.region());
-        vlogger::instance().console()->info(msg);
-        auto caRef = weakCaPtr.lock();
-//        caRef->update ();
-        median_leveled_pci(m_contraction_pci_tracksRef->at(0), in);
-        caRef->find_best ();
-        }
-    }
+    auto caRef = weakCaPtr.lock();
+    caRef->update ();
+    median_leveled_pci(m_contraction_pci_tracksRef->at(0), in);
 }
 
 

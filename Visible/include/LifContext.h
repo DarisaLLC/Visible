@@ -139,7 +139,7 @@ private:
     void signal_sm1dmed_ready (const input_channel_selector_t&);
     void signal_contraction_ready (contractionContainer_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
-    void signal_geometry_ready (int, const input_channel_selector_t&);
+    void signal_regions_ready (int, const input_channel_selector_t&);
     void signal_segmented_view_ready (cv::Mat&, cv::Mat&);
     
     // Availability

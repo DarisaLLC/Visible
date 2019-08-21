@@ -326,23 +326,30 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
     
     if(cache_ok){
         vlogger::instance().console()->info(" SS result container cache : Hit ");
-        m_entropies.insert(m_entropies.end(), ssref->entropies().begin(),
-                           ssref->entropies().end());
+        std::vector<double> entmp;
+        std::vector<std::vector<double>> smtmp;
+        
+        entmp.insert(entmp.end(), ssref->entropies().begin(),
+                     ssref->entropies().end());
+        m_entropies[in.region()] = entmp;
         const std::deque<deque<double>>& sm = ssref->smatrix();
         for (auto row : sm){
             vector<double> rowv;
             rowv.insert(rowv.end(), row.begin(), row.end());
-            m_smat.push_back(rowv);
+            smtmp.push_back(rowv);
         }
+        m_smat[in.region()] = smtmp;
+
         if( ! in.isEntire())
-            m_results[in.region()]->locator()->load(m_entropies, m_smat);
+            m_results[in.region()]->locator()->load(m_entropies[in.region()], m_smat[in.region()]);
         else{
-            m_entireCaRef->load(m_entropies, m_smat);
+            m_entireCaRef->load(m_entropies[in.region()], m_smat[in.region()]);
         }
         update (in);
         
     }else{
         auto sp =  similarity_producer();
+        vlogger::instance().console()->info(tostr(images.size()));
         sp->load_images (images);
         std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
         std::future<bool>  future_ss = task.get_future();  // get a future
@@ -351,19 +358,28 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
         {
             const deque<double>& entropies = sp->shannonProjection ();
             const std::deque<deque<double>>& sm = sp->similarityMatrix();
-            m_entropies.insert(m_entropies.end(), entropies.begin(), entropies.end());
+            assert(images.size() == entropies.size() && sm.size() == images.size());
+            for (auto row : sm) assert(row.size() == images.size());
+            
+            std::vector<double> entmp;
+            std::vector<std::vector<double>> smtmp;
+            
+            entmp.insert(entmp.end(), entropies.begin(), entropies.end());
+            m_entropies[in.region()] = entmp;
             for (auto row : sm){
                 vector<double> rowv;
                 rowv.insert(rowv.end(), row.begin(), row.end());
-                m_smat.push_back(rowv);
+                smtmp.push_back(rowv);
             }
+            m_smat[in.region()] = smtmp;
+            
             if(! in.isEntire() )
-                m_results[in.region()]->locator()->load(m_entropies, m_smat);
+                m_results[in.region()]->locator()->load(m_entropies[in.region()] , m_smat[in.region()] );
             else{
-                m_entireCaRef->load(m_entropies, m_smat);
+                m_entireCaRef->load(m_entropies[in.region()] , m_smat[in.region()] );
             }
             update (in);
-            bool ok = ssResultContainer::store(cache_path,m_entropies, m_smat);
+            bool ok = ssResultContainer::store(cache_path,m_entropies[in.region()] , m_smat[in.region()] );
             if(ok)
                 vlogger::instance().console()->info(" SS result container cache : filled ");
             else
@@ -391,7 +407,9 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci_on_selec
     if (cache_path == fs::path()){
         return std::shared_ptr<vecOfNamedTrack_t> ();
     }
-    const auto& _content = in.isEntire() ? content()[in.channel()] : m_results[in.region()]->content()[in.region()];
+    // protect fetching image data 
+    std::lock_guard<std::mutex> lock(m_mutex);
+    const auto& _content = in.isEntire() ? content()[in.channel()] : m_results[in.region()]->content()[in.channel()];
     return run_contraction_pci(std::move(_content), in);
 }
 
@@ -484,7 +502,7 @@ void ssmt_processor::load_channels_from_images (const std::shared_ptr<seqFrameCo
 void ssmt_processor::median_leveled_pci (namedTrack_t& track, const input_channel_selector_t& in)
 {
     try{
-        vector<double>& leveled = m_entropies;
+        vector<double>& leveled = m_entropies[in.region()];
         std::weak_ptr<contractionLocator> weakCaPtr (in.isEntire() ? m_entireCaRef : m_results[in.region()]->locator());
         if (weakCaPtr.expired())
             return;
