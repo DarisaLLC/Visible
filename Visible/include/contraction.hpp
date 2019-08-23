@@ -197,7 +197,7 @@ private:
     void clear_outputs () const;
     bool verify_input () const;
     bool savgol_filter () const;
-    bool get_contraction_at_point (const size_t p_index, contraction_t& ) const;
+    bool get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& ) const;
     mutable double m_median_value;
     mutable std::pair<double,double> m_leveled_min_max;
     mutable float m_median_levelset_frac;
