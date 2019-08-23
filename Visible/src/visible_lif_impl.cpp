@@ -95,7 +95,7 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const f
     std::string msg = folder_exists ? " exists " : " does not exist ";
     msg = " folder for " + m_serie.name() + msg;
     vlogger::instance().console()->info(msg);
-    m_idlab_defaults.median_level_set_cutoff_fraction = 7;
+    m_idlab_defaults.median_level_set_cutoff_fraction = 15;
     m_playback_speed = 1;
     m_input_selector = input_channel_selector_t(-1,0);
     m_selector_last = -1;

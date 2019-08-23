@@ -156,6 +156,13 @@
 		C22DAD0223032E8F00D171EF /* task_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACFD23032E8F00D171EF /* task_manager.cpp */; };
 		C232F00B2296FDCB0075B2EE /* lineseg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696B1CED3E2C0045FF57 /* lineseg.cpp */; };
 		C2342E60227CC45F00D74D80 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2342E5F227CC45F00D74D80 /* GLUT.framework */; };
+		C236D345230F488300ED5627 /* pf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C236D344230F488300ED5627 /* pf.cpp */; };
+		C236D346230F489000ED5627 /* pf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C236D344230F488300ED5627 /* pf.cpp */; };
+		C236D347230F489000ED5627 /* pf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C236D344230F488300ED5627 /* pf.cpp */; };
+		C236D348230F489100ED5627 /* pf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C236D344230F488300ED5627 /* pf.cpp */; };
+		C236D349230F489200ED5627 /* pf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C236D344230F488300ED5627 /* pf.cpp */; };
+		C236D34A230F489300ED5627 /* pf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C236D344230F488300ED5627 /* pf.cpp */; };
+		C236D34B230F489400ED5627 /* pf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C236D344230F488300ED5627 /* pf.cpp */; };
 		C2398A0921DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
 		C2398A0A21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
 		C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2398A0821DD8A0A00B180A0 /* file_system.cpp */; };
@@ -870,6 +877,7 @@
 		C2342E5D227CC27300D74D80 /* ps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ps.cpp; sourceTree = "<group>"; };
 		C2342E5F227CC45F00D74D80 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 		C234C57E229EFAF4001EF98B /* rc_filter1d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rc_filter1d.h; sourceTree = "<group>"; };
+		C236D344230F488300ED5627 /* pf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pf.cpp; sourceTree = "<group>"; };
 		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
 		C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleTestApp-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleTestApp-Info.plist"; sourceTree = "<absolute>"; };
 		C23B7CC6220553E1005DE02C /* cpp-perf.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = "cpp-perf.hpp"; path = "../include/cpp-perf.hpp"; sourceTree = "<group>"; };
@@ -2097,6 +2105,7 @@
 		C26069651CED3E2C0045FF57 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C236D344230F488300ED5627 /* pf.cpp */,
 				C21A506822A9835A00B0AC7D /* stats.cpp */,
 				C2CE9C8122A97D2D003C479A /* math.cpp */,
 				C2CE9C7A22A8983F003C479A /* mathBSpline.cpp */,
@@ -2580,6 +2589,7 @@
 				C2819ECD2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C2B87C9921D012D700C91E35 /* logger.cpp in Sources */,
 				C248D6D8224939AC00C2C02F /* VisibleApp.cpp in Sources */,
+				C236D345230F488300ED5627 /* pf.cpp in Sources */,
 				C2618F80217FDA6600FA9F43 /* color.cc in Sources */,
 				C20EDBC21CF277130074C47A /* self_similarity.cpp in Sources */,
 				C2CE9C7B22A8983F003C479A /* mathBSpline.cpp in Sources */,
@@ -2612,6 +2622,7 @@
 				C21A507E22A9A65900B0AC7D /* geom_utils.cpp in Sources */,
 				C21A507F22A9A65900B0AC7D /* rowfunc.cpp in Sources */,
 				C21A508022A9A65900B0AC7D /* opencv_utils.cpp in Sources */,
+				C236D34B230F489400ED5627 /* pf.cpp in Sources */,
 				C21A508122A9A65900B0AC7D /* sm_producer.cpp in Sources */,
 				C21A508222A9A65900B0AC7D /* edgel.cpp in Sources */,
 				C21A508322A9A65900B0AC7D /* csv.cpp in Sources */,
@@ -2694,6 +2705,7 @@
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,
 				C21E390E228A054C00778A66 /* affine_rectangle.cpp in Sources */,
+				C236D347230F489000ED5627 /* pf.cpp in Sources */,
 				C28B01DE229B210A00B8165D /* voxel_ssmt.cpp in Sources */,
 				C2CE9C7D22A8983F003C479A /* mathBSpline.cpp in Sources */,
 				C2618F86217FDA9900FA9F43 /* window.cc in Sources */,
@@ -2770,6 +2782,7 @@
 				C2DA195B1E80E4E200062DBC /* csv.cpp in Sources */,
 				C21A50E422AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
 				C26A05651E777DF300BDC954 /* registration.cpp in Sources */,
+				C236D348230F489100ED5627 /* pf.cpp in Sources */,
 				C26A057D1E77A90600BDC954 /* histo.cpp in Sources */,
 				C26A056B1E777E3A00BDC954 /* rowfunc.cpp in Sources */,
 			);
@@ -2810,6 +2823,7 @@
 				C21E390D228A054C00778A66 /* affine_rectangle.cpp in Sources */,
 				C26F5FB921B0AA6D00EAE156 /* cinder_support.cpp in Sources */,
 				C26F5FBA21B0AA6D00EAE156 /* visible_lif_impl.cpp in Sources */,
+				C236D346230F489000ED5627 /* pf.cpp in Sources */,
 				C22DAD0023032E8F00D171EF /* task_manager.cpp in Sources */,
 				C26F5FBC21B0AA6D00EAE156 /* visible_impl.cpp in Sources */,
 				C2398A8121DF239700B180A0 /* VisibleRunApp.cpp in Sources */,
@@ -2867,6 +2881,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C236D34A230F489300ED5627 /* pf.cpp in Sources */,
 				C28B016F229B182100B8165D /* permutation_entropy.cpp in Sources */,
 				C28B0170229B182100B8165D /* lifFile.cpp in Sources */,
 				C28B01E3229CC66900B8165D /* lif_serie.cpp in Sources */,
@@ -2970,6 +2985,7 @@
 				C2DB72AE22591DB700C2B986 /* Item.cpp in Sources */,
 				C2DB72AF22591DB700C2B986 /* rand_support.cpp in Sources */,
 				C2DB72B022591DB700C2B986 /* lifFile.cpp in Sources */,
+				C236D349230F489200ED5627 /* pf.cpp in Sources */,
 				C2C5CF6A229A0DB0004595C5 /* glmutils.cpp in Sources */,
 				C2DB72B122591DB700C2B986 /* tinyxmlerror.cpp in Sources */,
 				C2DB72B222591DB700C2B986 /* labelBlob.cpp in Sources */,
