@@ -70,9 +70,11 @@ void ssmt_result::contraction_ready (ssmt_processor::contractionContainer_t& con
     vlogger::instance().console()->info(" Contractions Analyzed: ");
 }
 
+//@todo remove this hack as it is to run a particular file and get results.
 void ssmt_result::signal_sm1d_ready(const input_channel_selector_t& in){
     if(m_input.region() != in.region()) return;
-    std::cout << __FILE__ << "::" << __LINE__ << in.region() << "," << in.channel() << std::endl;
+    if (in.region() == 1) m_caRef->find_best();
+    std::cout << __FILE__ << "::" << __LINE__ << " FIX ME " << in.region() << "," << in.channel() << std::endl;
     
 }
 
