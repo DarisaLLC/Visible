@@ -139,7 +139,7 @@ void svl::findPeaks(vector<double> x0, vector<int>& peakInds)
     	vector<int> peakLoc(maxPeaks,0);
     	vector<double> peakMag(maxPeaks,0.0);
     	int cInd = 1;
-    	int tempLoc;
+        int tempLoc = 0;
     
     	while(ii < len)
     	{
