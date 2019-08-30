@@ -210,6 +210,15 @@
 		C24EA2D4207F081000555D16 /* sg_filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24EA2D2207F07EF00555D16 /* sg_filter.cpp */; };
 		C25261211F66EA910069F665 /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611F1F66EA910069F665 /* pugixml.cpp */; };
 		C254BE841F4F912E00977307 /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
+		C258380A231756B40068631C /* imgui_plot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2583809231756B30068631C /* imgui_plot.cpp */; };
+		C258380B231756B40068631C /* imgui_plot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2583809231756B30068631C /* imgui_plot.cpp */; };
+		C258380C231756B40068631C /* imgui_plot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2583809231756B30068631C /* imgui_plot.cpp */; };
+		C258380D231756B40068631C /* imgui_plot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2583809231756B30068631C /* imgui_plot.cpp */; };
+		C25838102318A6A00068631C /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA576122C31F1600AAAF4F /* libswscale.a */; };
+		C25838112318A6B40068631C /* libdc1394.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575D22C31E8A00AAAF4F /* libdc1394.a */; };
+		C25838122318A6C30068631C /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575722C31DFD00AAAF4F /* libavformat.a */; };
+		C25838132318A7010068631C /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575B22C31E2400AAAF4F /* libavcodec.a */; };
+		C25838142318A7240068631C /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575922C31E1900AAAF4F /* libavutil.a */; };
 		C2601BB81E690409004415A3 /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
 		C2601BB91E69042B004415A3 /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
 		C2606DA91CED3E2E0045FF57 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
@@ -406,7 +415,6 @@
 		C28B0196229B182100B8165D /* exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBE1CF277130074C47A /* exception.cpp */; };
 		C28B0197229B182100B8165D /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
 		C28B0198229B182100B8165D /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFD216E79590080462D /* imgui_demo.cpp */; };
-		C28B0199229B182100B8165D /* algo_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_ssmt.cpp */; };
 		C28B019B229B182100B8165D /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
 		C28B019C229B182100B8165D /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBF1CF277130074C47A /* self_similarity.cpp */; };
 		C28B019D229B182100B8165D /* color.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7B217FDA6600FA9F43 /* color.cc */; };
@@ -436,8 +444,6 @@
 		C28B01BB229B182100B8165D /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995591B128DF400A5C623 /* IOSurface.framework */; };
 		C28B01BC229B182100B8165D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731819953389008149E2 /* AVFoundation.framework */; };
 		C28B01BD229B182100B8165D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D731919953389008149E2 /* CoreMedia.framework */; };
-		C28B01BE229B182100B8165D /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693E1CED3E2B0045FF57 /* libgtest_main.a */; };
-		C28B01BF229B182100B8165D /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693D1CED3E2B0045FF57 /* libgtest.a */; };
 		C28B01C7229B1CD900B8165D /* algo_shortterm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01C6229B1CD900B8165D /* algo_shortterm.cpp */; };
 		C28B01C8229B1CD900B8165D /* algo_shortterm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01C6229B1CD900B8165D /* algo_shortterm.cpp */; };
 		C28B01C9229B1CD900B8165D /* algo_shortterm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01C6229B1CD900B8165D /* algo_shortterm.cpp */; };
@@ -459,8 +465,6 @@
 		C28B01DE229B210A00B8165D /* voxel_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* voxel_ssmt.cpp */; };
 		C28B01DF229B210A00B8165D /* voxel_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* voxel_ssmt.cpp */; };
 		C28B01E0229BA8DC00B8165D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
-		C28B01E1229CC66100B8165D /* voxel_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01DA229B210A00B8165D /* voxel_ssmt.cpp */; };
-		C28B01E2229CC66500B8165D /* core_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D5229B1F8000B8165D /* core_ssmt.cpp */; };
 		C28B01E3229CC66900B8165D /* lif_serie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01CB229B1DE500B8165D /* lif_serie.cpp */; };
 		C28B01E4229CC66C00B8165D /* lif_browser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D0229B1E5F00B8165D /* lif_browser.cpp */; };
 		C28F74382236D00B0040890C /* edgel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069661CED3E2C0045FF57 /* edgel.cpp */; };
@@ -753,15 +757,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C28B01C0229B182100B8165D /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
 		C2DB72EF22591DB700C2B986 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -925,6 +920,9 @@
 		C254BE871F4FAF7100977307 /* cvVideoPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cvVideoPlayer.h; path = ../include/cvVideoPlayer.h; sourceTree = "<group>"; };
 		C254BEE01F4FB3D300977307 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
 		C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_mov_impl.cpp; path = ../src/visible_mov_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		C2583808231756A60068631C /* imgui_plot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui_plot.h; sourceTree = "<group>"; };
+		C2583809231756B30068631C /* imgui_plot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_plot.cpp; sourceTree = "<group>"; };
+		C258380F2318A64E0068631C /* affineApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "affineApp-Info.plist"; path = "/Volumes/medvedev/Users/arman/dev/Visible/xcode/affineApp-Info.plist"; sourceTree = "<absolute>"; };
 		C259145F2145BA7500F80D5F /* clipManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = clipManager.hpp; path = ../include/clipManager.hpp; sourceTree = "<group>"; };
 		C259982B1ECF668F0015EE7B /* cardiomyocyte_model.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model.hpp; sourceTree = "<group>"; };
 		C259982C1ECF668F0015EE7B /* cerruti_rectangle_integral.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cerruti_rectangle_integral.hpp; sourceTree = "<group>"; };
@@ -1130,7 +1128,6 @@
 		C2820F3621752E5100DFA7A6 /* VisibleApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VisibleApp.h; path = ../include/VisibleApp.h; sourceTree = "<group>"; };
 		C2820F3721754C3100DFA7A6 /* imGuiLogger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = imGuiLogger.hpp; path = ../include/imGuiLogger.hpp; sourceTree = "<group>"; };
 		C28B01C4229B182100B8165D /* affineApp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = affineApp; sourceTree = BUILT_PRODUCTS_DIR; };
-		C28B01C5229B182300B8165D /* VisibleGtest copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleGtest copy-Info.plist"; path = "/Volumes/medvedev/Users/arman/dev/Visible/xcode/VisibleGtest copy-Info.plist"; sourceTree = "<absolute>"; };
 		C28B01C6229B1CD900B8165D /* algo_shortterm.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = algo_shortterm.cpp; path = ../src/algo_shortterm.cpp; sourceTree = "<group>"; };
 		C28B01CB229B1DE500B8165D /* lif_serie.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = lif_serie.cpp; path = ../src/lif_serie.cpp; sourceTree = "<group>"; };
 		C28B01D0229B1E5F00B8165D /* lif_browser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = lif_browser.cpp; path = ../src/lif_browser.cpp; sourceTree = "<group>"; };
@@ -1369,6 +1366,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C25838142318A7240068631C /* libavutil.a in Frameworks */,
+				C25838112318A6B40068631C /* libdc1394.a in Frameworks */,
+				C25838102318A6A00068631C /* libswscale.a in Frameworks */,
 				C28B01A7229B182100B8165D /* GLUT.framework in Frameworks */,
 				C28B01AD229B182100B8165D /* CoreImage.framework in Frameworks */,
 				C28B01AE229B182100B8165D /* OpenCL.framework in Frameworks */,
@@ -1387,8 +1387,8 @@
 				C28B01BB229B182100B8165D /* IOSurface.framework in Frameworks */,
 				C28B01BC229B182100B8165D /* AVFoundation.framework in Frameworks */,
 				C28B01BD229B182100B8165D /* CoreMedia.framework in Frameworks */,
-				C28B01BE229B182100B8165D /* libgtest_main.a in Frameworks */,
-				C28B01BF229B182100B8165D /* libgtest.a in Frameworks */,
+				C25838122318A6C30068631C /* libavformat.a in Frameworks */,
+				C25838132318A7010068631C /* libavcodec.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1493,9 +1493,9 @@
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				C26F5FFE21B0AA6F00EAE156 /* VisibleRunner-Info.plist */,
 				C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */,
+				C258380F2318A64E0068631C /* affineApp-Info.plist */,
 				C240F9FA21E14C8900FBA228 /* sscli-Info.plist */,
 				C2DB72F622591DBF00C2B986 /* Bina.plist */,
-				C28B01C5229B182300B8165D /* VisibleGtest copy-Info.plist */,
 				C21A50D322A9A65B00B0AC7D /* VisibleGtest copy2-Info.plist */,
 			);
 			name = QuickTimeIteration;
@@ -1711,6 +1711,8 @@
 		C23E346521F254F200221E68 /* imGuiCustom */ = {
 			isa = PBXGroup;
 			children = (
+				C2583809231756B30068631C /* imgui_plot.cpp */,
+				C2583808231756A60068631C /* imgui_plot.h */,
 				C27ED0A0220BB71D00B55D65 /* InterfaceUtilities.cpp */,
 				C27ED0A1220BB71D00B55D65 /* InterfaceUtilities.hpp */,
 				C240F9FE21E15ADE00FBA228 /* imguivariouscontrols.h */,
@@ -2316,7 +2318,6 @@
 			buildPhases = (
 				C28B016E229B182100B8165D /* Sources */,
 				C28B01A6229B182100B8165D /* Frameworks */,
-				C28B01C0229B182100B8165D /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -2541,6 +2542,7 @@
 				C2CE9C7422A48AC5003C479A /* etw_utils.cpp in Sources */,
 				C2606DAE1CED3E2E0045FF57 /* localvariance.cpp in Sources */,
 				C28B01DC229B210A00B8165D /* voxel_ssmt.cpp in Sources */,
+				C258380A231756B40068631C /* imgui_plot.cpp in Sources */,
 				C28B01C7229B1CD900B8165D /* algo_shortterm.cpp in Sources */,
 				C27ED0A2220BB71D00B55D65 /* InterfaceUtilities.cpp in Sources */,
 				C20D4DE52208BD34004D9405 /* ellipse_fit.cpp in Sources */,
@@ -2837,6 +2839,7 @@
 				C28B01CD229B1DE500B8165D /* lif_serie.cpp in Sources */,
 				C22DACFA22FF793C00D171EF /* moviong_region.cpp in Sources */,
 				C28B01D7229B1F8000B8165D /* core_ssmt.cpp in Sources */,
+				C258380B231756B40068631C /* imgui_plot.cpp in Sources */,
 				C210946F223AEC19004E88EE /* imgui_wrapper.cpp in Sources */,
 				C28B01DD229B210A00B8165D /* voxel_ssmt.cpp in Sources */,
 				C21A50E222AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
@@ -2895,6 +2898,7 @@
 				C28B0177229B182100B8165D /* affineApp.cpp in Sources */,
 				C28B0178229B182100B8165D /* geom_utils.cpp in Sources */,
 				C28B0179229B182100B8165D /* rowfunc.cpp in Sources */,
+				C258380D231756B40068631C /* imgui_plot.cpp in Sources */,
 				C28B017A229B182100B8165D /* opencv_utils.cpp in Sources */,
 				C28B017B229B182100B8165D /* sm_producer.cpp in Sources */,
 				C2CE9C7F22A8983F003C479A /* mathBSpline.cpp in Sources */,
@@ -2903,9 +2907,7 @@
 				C28B017E229B182100B8165D /* AVReaderWrapper.mm in Sources */,
 				C28B017F229B182100B8165D /* imgui_wrapper.cpp in Sources */,
 				C28B0180229B182100B8165D /* cinder_support.cpp in Sources */,
-				C28B01E1229CC66100B8165D /* voxel_ssmt.cpp in Sources */,
 				C28B0181229B182100B8165D /* ip_utils.cpp in Sources */,
-				C28B01E2229CC66500B8165D /* core_ssmt.cpp in Sources */,
 				C21A50E622AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
 				C28B0182229B182100B8165D /* matpixel.cpp in Sources */,
 				C28B0183229B182100B8165D /* affine_rectangle.cpp in Sources */,
@@ -2933,7 +2935,6 @@
 				C28B0196229B182100B8165D /* exception.cpp in Sources */,
 				C28B0197229B182100B8165D /* rand_support.cpp in Sources */,
 				C28B0198229B182100B8165D /* imgui_demo.cpp in Sources */,
-				C28B0199229B182100B8165D /* algo_ssmt.cpp in Sources */,
 				C28B01E4229CC66C00B8165D /* lif_browser.cpp in Sources */,
 				C28B019B229B182100B8165D /* opencv_draw.cpp in Sources */,
 				C28B019C229B182100B8165D /* self_similarity.cpp in Sources */,
@@ -2973,6 +2974,7 @@
 				C2DB72A622591DB700C2B986 /* ellipse_fit.cpp in Sources */,
 				C2DB72A722591DB700C2B986 /* pugixml.cpp in Sources */,
 				C2DB72A822591DB700C2B986 /* lineseg.cpp in Sources */,
+				C258380C231756B40068631C /* imgui_plot.cpp in Sources */,
 				C2AEB73E228CD6E70078E687 /* geom_utils.cpp in Sources */,
 				C2CD0E9D22D7D78700467DD8 /* dbscan.cpp in Sources */,
 				C2DB72A922591DB700C2B986 /* cinder_support.cpp in Sources */,
@@ -3747,7 +3749,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = "VisibleGtest copy-Info.plist";
+				INFOPLIST_FILE = "affineApp-Info.plist";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
 				MACH_O_TYPE = mh_execute;
@@ -3802,7 +3804,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = "VisibleGtest copy-Info.plist";
+				INFOPLIST_FILE = "affineApp-Info.plist";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
 				MACH_O_TYPE = mh_execute;
