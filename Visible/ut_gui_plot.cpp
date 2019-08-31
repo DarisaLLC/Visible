@@ -11,7 +11,8 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 
 #include "VisibleApp.h"
-#include "imguivariouscontrols.h"
+#include "imgui_plot.h"
+
 using namespace std;
 
 
@@ -40,6 +41,274 @@ struct MultiplotData_F {
     std::vector<float> X;
 };
 
+
+
+class VisibleTestApp : public App, public gui_base
+{
+public:
+    
+    //   VisibleTestApp();
+    //  ~VisibleTestApp();
+    
+    virtual void SetupGUIVariables() override;
+    virtual void DrawGUI() override;
+    virtual void QuitApp();
+    
+    void prepareSettings( Settings *settings );
+    void setup()override;
+    void mouseDown( MouseEvent event )override;
+    void keyDown( KeyEvent event )override;
+    
+    void update()override;
+    void draw()override;
+    void resize()override;
+    void displayChange();
+    void update_log (const std::string& msg);
+    
+    bool shouldQuit();
+    void draw_multi_plot ();
+private:
+    void generate_data();
+    fs::path getLoggingDirectory ();
+    std::vector<std::string> m_args;
+    vec2                mSize;
+    Font                mFont;
+    std::string            mLog;
+    
+    Rectf                        mGlobalBounds;
+    map<string, boost::any> mPlist;
+    
+    mutable std::unique_ptr<sequencedImageContext> mContext;
+    mutable lif_browser::ref mBrowser;
+    
+    bool showLog = false;
+    bool showHelp = false;
+    bool showOverlay = false;
+    int convergence = 0;
+    std::string         mFileName;
+    std::string         mFileExtension;
+    lifIO::ContentType_t mContentType; // "" denotes canonical LIF file
+    bool m_isIdLabLif = false;
+    void setup_ui ();
+    
+//    imGuiLog visual_log;
+    
+    static constexpr size_t buf_size = 512;
+    std::vector<float> x_data, y_data1, y_data2, y_data3;
+
+    
+    
+};
+
+using namespace ci;
+using namespace ci::app;
+using namespace std;
+
+void VisibleTestApp::QuitApp(){
+    ImGui::DestroyContext();
+    // fg::ThreadsShouldStop = true;
+    quit();
+}
+
+//void VisibleTestApp::prepareSettings( Settings *settings );
+
+void VisibleTestApp::setup(){
+    ui::initialize(ui::Options()
+                   .window(getWindow())
+                   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
+                   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
+                   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
+                   .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
+                   //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
+                   );
+    
+    setFrameRate( 60 );
+    setWindowPos(getWindowSize()/4);
+    getWindow()->setAlwaysOnTop();
+  
+    
+}
+void VisibleTestApp::mouseDown( MouseEvent event ){
+    cinder::app::App::mouseDown(event);
+}
+void VisibleTestApp::keyDown( KeyEvent event ){
+    if( event.getChar() == 'f' ) {
+        // Toggle full screen when the user presses the 'f' key.
+        setFullScreen( ! isFullScreen() );
+    }
+    else if( event.getCode() == KeyEvent::KEY_ESCAPE ) {
+        // Exit full screen, or quit the application, when the user presses the ESC key.
+        if( isFullScreen() )
+            setFullScreen( false );
+        else
+            quit();
+    }
+    else if(event.getCode() == 'd' ) {
+        
+    }
+}
+
+void VisibleTestApp::draw() {
+    gl::clear( Color::gray( 0.5f ) );
+    DrawGUI();
+}
+
+
+void VisibleTestApp::generate_data() {
+    constexpr float sampling_freq = 44100;
+    constexpr float freq = 500;
+    x_data.resize(buf_size);
+    y_data1.resize(buf_size);
+    y_data2.resize(buf_size);
+    y_data3.resize(buf_size);
+    for (size_t i = 0; i < buf_size; ++i) {
+        const float t = i / sampling_freq;
+        x_data[i] = t;
+        const float arg = 2 * M_PI * freq * t;
+        y_data1[i] = sin(arg);
+        y_data2[i] = y_data1[i] * -0.6 + sin(2 * arg) * 0.4;
+        y_data3[i] = y_data2[i] * -0.6 + sin(3 * arg) * 0.4;
+    }
+}
+
+void VisibleTestApp::SetupGUIVariables(){
+    //Set up global preferences for the GUI
+    //http://anttweakbar.sourceforge.net/doc/tools:anttweakbar:twbarparamsyntax
+    GetGUI().DefineGlobal("iconalign=horizontal");
+}
+
+void VisibleTestApp::DrawGUI(){
+    // Draw the menu bar
+    {
+        ui::ScopedMainMenuBar menuBar;
+        
+        if( ui::BeginMenu( "File" ) ){
+            
+            // Not Working Yet
+            //if(ui::MenuItem("Fullscreen")){
+            //    setFullScreen(!isFullScreen());
+            // }
+            
+            ui::MenuItem("Help", nullptr, &showHelp);
+            if(ui::MenuItem("Quit", "ESC")){
+                QuitApp();
+            }
+            ui::EndMenu();
+        }
+        
+        if( ui::BeginMenu( "View" ) ){
+            ui::MenuItem( "General Settings", nullptr, &showGUI );
+            //    ui::MenuItem( "Edge Detection", nullptr, &edgeDetector.showGUI );
+            //    ui::MenuItem( "Face Detection", nullptr, &faceDetector.showGUI );
+            ui::MenuItem( "Log", nullptr, &showLog );
+            //ui::MenuItem( "PS3 Eye Settings", nullptr, &showWindowWithMenu );
+            ui::EndMenu();
+        }
+        
+        ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
+    }
+    
+    generate_data();
+    draw_multi_plot();
+  
+    
+}
+
+bool VisibleTestApp::shouldQuit()
+{
+    return true;
+}
+
+void VisibleTestApp::setup_ui(){
+    ui::initialize(ui::Options()
+                   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
+                   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
+                   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
+                   .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
+                   //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
+                   );
+    float dpiScale = 1.f;
+    auto& style = ImGui::GetStyle();
+    style.WindowBorderSize = 1.f * dpiScale;
+    style.FrameBorderSize = 1.f * dpiScale;
+    style.FrameRounding = 5.f * dpiScale;
+    style.ScrollbarSize *= dpiScale;
+    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4( 1, 1, 1, 0.03f );
+    style.Colors[ImGuiCol_WindowBg] = ImVec4( 0.129f, 0.137f, 0.11f, 1.f );
+    
+    style.AntiAliasedFill = false;
+    style.AntiAliasedLines = false;
+    setWindowPos(getWindowSize()/4);
+}
+
+
+
+
+
+void VisibleTestApp::draw_multi_plot() {
+    const float* y_data[] = { y_data1.data(), y_data2.data(), y_data3.data() };
+    static ImU32 colors[3] = { ImColor(0, 255, 0), ImColor(255, 0, 0), ImColor(0, 0, 255) };
+    static uint32_t selection_start = 0, selection_length = 0;
+    
+    ImGui::Begin("Example plot", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    // Draw first plot with multiple sources
+    ImGui::PlotConfig conf;
+    conf.values.xs = x_data.data();
+    conf.values.count = buf_size;
+    conf.values.ys_list = y_data; // use ys_list to draw several lines simultaneously
+    conf.values.ys_count = 3;
+    conf.values.colors = colors;
+    conf.scale.min = -1;
+    conf.scale.max = 1;
+    conf.tooltip.show = true;
+    conf.grid_x.show = true;
+    conf.grid_x.size = 128;
+    conf.grid_x.subticks = 4;
+    conf.grid_y.show = true;
+    conf.grid_y.size = 0.5f;
+    conf.grid_y.subticks = 5;
+    conf.selection.show = true;
+    conf.selection.start = &selection_start;
+    conf.selection.length = &selection_length;
+    conf.frame_size = ImVec2(buf_size, 200);
+    ImGui::Plot("plot1", conf);
+    
+    // Draw second plot with the selection
+    // reset previous values
+    conf.values.ys_list = nullptr;
+    conf.selection.show = false;
+    // set new ones
+    conf.values.ys = y_data3.data();
+    conf.values.offset = selection_start;
+    conf.values.count = selection_length;
+    conf.line_thickness = 2.f;
+    ImGui::Plot("plot2", conf);
+    
+    ImGui::End();
+}
+
+void VisibleTestApp::update()
+{
+}
+
+void VisibleTestApp::resize ()
+{
+    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+    if (mContext && mContext->is_valid()) mContext->resize ();
+    
+}
+
+
+void prepareSettings( App::Settings *settings )
+{
+    settings->setHighDensityDisplayEnabled();
+    settings->setResizable( true );
+    settings->setWindowSize( 640, 480 );
+}
+
+
+
+#if 0
 class VisibleTestApp : public App, public gui_base
 {
 public:
@@ -292,6 +561,7 @@ private:
     
     
 };
+#endif
 
 
 CINDER_APP( VisibleTestApp, RendererGl( RendererGl::Options().msaa( 4 ) ), []( App::Settings *settings ) {
