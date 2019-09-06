@@ -27,7 +27,7 @@
 #include "ssmt.hpp"
 #include "logger/logger.hpp"
 #include "result_serialization.h"
-//#include "vision/rc_filter1d.h"
+
 
 
 const Rectf& ssmt_processor::measuredArea () const { return m_measured_area; }
@@ -61,6 +61,7 @@ void ssmt_processor::find_moving_regions (const int channel_index){
  @param mono gray scale image
  @param bi_level bi_level ( i.e. binarized image )
  ss_image_available signal calls this function
+ signals geometry_ready with number of moving regions
  */
 void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);

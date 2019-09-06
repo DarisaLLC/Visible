@@ -17,7 +17,7 @@ using namespace std;
  Notes:
  TimeDataCollection supports ImCurveEdit::delegate interface ( from ImGuizmo + modifications ).
  Each time data is is represented by vectors of these attributes at index curveIndex :
-    1. Plot Data vecto<vector<vec2>>
+    1. Plot Data vector<vector<vec2>>
     2. Plot data point counts
     3. Plot Names
     4. Plot Colors

@@ -16,6 +16,7 @@
 #include "time_index.h"
 #include "vision/opencv_utils.hpp"
 
+
 // *****************
 // *                *
 // *  Tracks        *
@@ -78,6 +79,7 @@ void domainFromPairedTracks_D (const namedTrack_t& src, std::vector<T>& times, s
                    std::back_inserter(times),
                    get_first);
 }
+
 
 // *****************
 // *                *

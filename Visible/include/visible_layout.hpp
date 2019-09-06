@@ -15,6 +15,14 @@ using namespace std;
 using namespace ci;
 using namespace ci::signals;
 
+#define STAGE_WIDTH 1300
+#define STAGE_HEIGHT 800
+
+#define TOOLBAR_WIDTH 200
+#define TOOLBAR_HEIGHT 600
+#define TOOLBAR_PADDING 40
+
+
 /*
  *   Visible Layout
  

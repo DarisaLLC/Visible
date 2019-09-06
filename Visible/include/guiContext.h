@@ -168,13 +168,12 @@ protected:
 	async_vecOfNamedTrack_t m_roi_longterm_pci_tracks_async;
 	
 	bool m_have_tracks;
+	bool m_show_display_and_controls, m_show_results;
 	
 	std::vector<size_t> m_spatial_dims;
 	std::vector<std::string> m_perform_names;
 	int  m_selected_perform_index;
 
-//	mutable MarkerSignalInfo_t m_marker_signal;
-//	mutable MarkerSignalInfo_t m_aux_marker_signal;
 	
 	ivec2 m_instant_mouse_image_pos;
 	uint32_t m_instant_channel;
@@ -184,6 +183,7 @@ protected:
 	float m_instant_pixel_Luminance;
 	vec2 m_instant_image_display_scale;
 	std::vector<Rectf> m_instant_channel_display_rects;
+	Rectf m_display_rect;
 	
 	gl::TextureRef		mTextTexture;
 	vec2				mSize;

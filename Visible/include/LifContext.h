@@ -10,6 +10,7 @@
 #include "OnImagePlotUtils.h"
 #include "imGuiCustom/ImSequencer.h"
 #include "imGuiCustom/visibleSequencer.h"
+#include "imGuiCustom/imgui_plot.h"
 
 
 
@@ -232,6 +233,7 @@ private:
     void update_channel_display_rects () override;
     
     vec2 texture_to_display_zoom ();
+    void add_canvas ();
     void add_result_sequencer ();
     void add_navigation ();
     void add_motion_profile ();
@@ -255,6 +257,7 @@ private:
     // imGui
     timeLineSequence m_result_seq;
     void draw_sequencer ();
+ 
     
     // UI instant sub-window rects
     Rectf m_results_browser_display;
