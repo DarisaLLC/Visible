@@ -10,7 +10,7 @@
 #include "imGuiCustom/ImSequencer.h"
 #include "imGuiCustom/visibleSequencer.h"
 #include "cvVideoPlayer.h"
-#include "algo_Mov.hpp"
+#include "ssmt.hpp"
 
 
 using namespace boost;
@@ -187,7 +187,7 @@ private:
     const Rectf& get_channel_display_rect (const int channel_number);
     
     // mov Support
-    std::shared_ptr<sequence_processor> m_movProcRef;
+    std::shared_ptr<ssmt_processor> m_movProcRef;
 	void load_current_sequence ();
 	bool have_sequence ();
     cvVideoPlayer::ref m_sequence_player_ref;

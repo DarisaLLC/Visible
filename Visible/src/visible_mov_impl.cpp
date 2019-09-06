@@ -36,7 +36,7 @@
 #include "vision/histo.h"
 #include "core/stl_utils.hpp"
 #include "sm_producer.h"
-#include "algo_Mov.hpp"
+#include "ssmt.hpp"
 #include "core/signaler.h"
 #include "logger/logger.hpp"
 #include "cinder/Log.h"
@@ -108,7 +108,7 @@ ci::app::WindowRef&  movContext::get_windowRef(){
 void movContext::setup_signals(){
     
     // Create a Processing Object to attach signals to
-    m_movProcRef = std::make_shared<sequence_processor> (mCurrentCachePath);
+    m_movProcRef = std::make_shared<ssmt_processor> (mCurrentCachePath);
     
     // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&movContext::signal_content_loaded, shared_from_above(), _1);
@@ -541,7 +541,7 @@ void movContext::load_current_sequence ()
         m_plot_names.push_back("MisRegister");
         cv::Mat result;
         std::vector<std::thread> threads(1);
-        threads[0] = std::thread(&sequence_processor::load, m_movProcRef.get(), mFrameSet,m_sequence_player_ref->channel_names(), m_plot_names);
+        threads[0] = std::thread(&ssmt_processor::load, m_movProcRef.get(), mFrameSet,m_sequence_player_ref->channel_names(), m_plot_names);
         std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
         
         /*
@@ -586,12 +586,12 @@ void movContext::process_async (){
         case 4:
         {
             // note launch mode is std::launch::async
-            m_longterm_pci_tracks_async = std::async(std::launch::async, &sequence_processor::run_longterm_pci_on_channel, m_movProcRef.get(), 2);
+            m_longterm_pci_tracks_async = std::async(std::launch::async, &ssmt_processor::run_longterm_pci_on_channel, m_movProcRef.get(), 2);
             break;
         }
         case 1:
         {
-            m_longterm_pci_tracks_async = std::async(std::launch::async, &sequence_processor::run_longterm_pci_on_channel,m_movProcRef.get(), 0);
+            m_longterm_pci_tracks_async = std::async(std::launch::async, &ssmt_processor::run_longterm_pci_on_channel,m_movProcRef.get(), 0);
             break;
         }
     }

@@ -191,7 +191,7 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
     
     auto loc_contraction_quadratic = maxima(m_fder.begin()+left_boundary, cpt);
     auto range = std::max(size_t(loc_contraction_quadratic), size_t(loc)) -
-    std::min(size_t(loc_contraction_quadratic), size_t(loc));
+        std::min(size_t(loc_contraction_quadratic), size_t(loc));
     m_contraction.contraction_start.first = range / 2;
     
     /* relaxation End

@@ -52,6 +52,8 @@
 #include "imguivariouscontrols.h"
 #include "imgui_wrapper.h"
 #include <boost/range/irange.hpp>
+#include "imgui_plot.h"
+
 
 using namespace ci;
 using namespace ci::app;
@@ -71,6 +73,13 @@ namespace {
     
     
 }
+
+#define wDisplay "Display"
+#define wResult "Result"
+#define wCells  "Cells"
+#define wContractions  "Contractions"
+#define wNavigator   "Navigator"
+#define wShape "Shape"
 
 
 
@@ -99,8 +108,9 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const f
     m_playback_speed = 1;
     m_input_selector = input_channel_selector_t(-1,0);
     m_selector_last = -1;
-    
-    
+    m_show_display_and_controls = false;
+    m_show_results = false;
+    m_show_playback = false;
     
     m_valid = false;
         m_valid = sd.index() >= 0;
@@ -181,7 +191,7 @@ void lifContext::setup()
     setup_signals();
     assert(is_valid());
     ww->setTitle( m_serie.name());
-    ww->setSize(1280, 768);
+    ww->setSize(1536, 1024);
     mFont = Font( "Menlo", 18 );
     auto ws = ww->getSize();
     mSize = vec2( ws[0], ws[1] / 12);
@@ -637,19 +647,6 @@ void lifContext::setMedianCutOff (int32_t newco)
     if (tmp == current) return;
     spt->set_median_levelset_pct (tmp / 100.0f);
     m_lifProcRef->update(m_input_selector);
-    
-//    if (! m_lifProcRef || ! m_geometry_available) return;
-//    int select_last (m_lifProcRef->moving_bodies().size());
-//    assert(select_last > 0);
-//    select_last--;
-//    const auto& mb = m_lifProcRef->moving_bodies();
-//    auto spt = mb[select_last]->locator();
-//    if (! spt ) return;
-//    m_selector_last = select_last;
-//    uint32_t tmp = newco % 100; // pct
-//    uint32_t current (spt->get_median_levelset_pct () * 100);
-//    if (tmp == current) return;
-//    spt->set_median_levelset_pct (tmp / 100.0f);
 
 }
 
@@ -780,9 +777,11 @@ void lifContext::loadCurrentSerie ()
         mScreenSize = mMediaInfo.getSize();
         
         mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
+        m_show_playback = true;
     }
     catch( const std::exception &ex ) {
         console() << ex.what() << endl;
+        m_show_playback = false;
         return;
     }
 }
@@ -828,7 +827,7 @@ void lifContext::process_async (){
 
 const Rectf& lifContext::get_image_display_rect ()
 {
-    return m_layout->display_frame_rect();
+    return m_display_rect;
 }
 
 void  lifContext::update_channel_display_rects (){
@@ -847,33 +846,164 @@ const Rectf& lifContext::get_channel_display_rect (const int channel_number_zero
     return m_instant_channel_display_rects[channel_number_zero_based];
 }
 
+void lifContext::add_canvas (){
+   
+    
+    auto showImage = [](const char *windowName,bool *open, const gl::Texture2dRef texture){
+        if (open && *open)
+        {
+            ImGuiIO& io = ImGui::GetIO();
+            ImGui::SetNextWindowBgAlpha(0.4f); // Transparent background
+            if (ImGui::Begin(windowName, open, io.ConfigWindowsResizeFromEdges))
+            {
+                ImVec2 pos = ImGui::GetCursorScreenPos(); // actual position
+                ImGui::GetWindowDrawList()->AddImage(  reinterpret_cast<ImTextureID> (texture->getId()), pos, ImVec2(ImGui::GetContentRegionAvail().x + pos.x, ImGui::GetContentRegionAvail().y  + pos.y));
+            }
+            ImGui::End();
+        }
+    };
+    
 
+    if(m_show_playback){
+        ci::vec2 pos (0, 20);
+        ci::vec2 size (getWindowWidth()/2.0, getWindowHeight()/2.0f - 20.0);
+        ui::ScopedWindow utilities(wDisplay);
+        m_navigator_display = Rectf(pos,size);
+        ImGui::SetNextWindowPos(pos);
+        ImGui::SetNextWindowSize(size);
+        ImGui::SameLine();
+        showImage(wDisplay, &m_show_playback, mImage);
+    }
+    
+    
+}
 
+void lifContext::add_navigation(){
+    
+    if(m_show_playback){
+        
+        ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
+        assert(window != nullptr);
+        ImVec2 pos (window->Pos.x , window->Pos.y + window->Size.y );
+        ImGui::SetNextWindowPos(pos);
+        ImVec2 size (getWindowWidth()/2, getWindowHeight()/2);
+        
+        
+        //    Rectf dr = get_image_display_rect();
+      //  ci::vec2 pos (0, -(getWindowHeight() - get_image_display_rect().getHeight()+10));
+      //  ci::vec2 size (getWindowWidth(), std::min(128.0f, getWindowHeight()/2.0f));
+        ui::ScopedWindow utilities(wNavigator);
+        m_navigator_display = Rectf(pos,size);
+        ImGui::SetNextWindowPos(pos);
+        //  ImGui::SetNextWindowSize(size);
+        ImGui::SameLine();
+        ImGui::BeginGroup();
+        //    if (ImGui::Begin("Navigation", &m_show_playback, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::PushItemWidth(40);
+            ImGui::PushID(200);
+            ImGui::InputInt("", &m_result_seq.mFrameMin, 0, 0);
+            ImGui::PopID();
+            ImGui::SameLine();
+            if (ImGui::Button("|<"))
+                seekToStart();
+            ImGui::SameLine();
+            if (ImGui::Button("<"))
+                seekToFrame (getCurrentFrame() - m_playback_speed);
+            ImGui::SameLine();
+            if (ImGui::Button(">"))
+                seekToFrame (getCurrentFrame() + m_playback_speed);
+            ImGui::SameLine();
+            if (ImGui::Button(">|"))
+                seekToEnd();
+            ImGui::SameLine();
+            if (ImGui::Button(m_is_playing ? "Stop" : "Play"))
+            {
+                play_pause_button();
+            }
+            
+            if(mNoLoop == nullptr){
+                mNoLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PNLOOP  )));
+            }
+            if (mLoop == nullptr){
+                mLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PLOOP )));
+            }
+            
+            unsigned int playNoLoopTextureId = mNoLoop->getId();//  evaluation.GetTexture("Stock/PlayNoLoop.png");
+            unsigned int playLoopTextureId = mLoop->getId(); //evaluation.GetTexture("Stock/PlayLoop.png");
+            
+            ImGui::SameLine();
+            if (ImGui::ImageButton((ImTextureID)(uint64_t)(m_is_looping ? playLoopTextureId : playNoLoopTextureId), ImVec2(16.f, 16.f)))
+                loop_no_loop_button();
+            
+            ImGui::SameLine();
+            ImGui::PushID(202);
+            ImGui::InputInt("",  &m_result_seq.mFrameMax, 0, 0);
+            ImGui::PopID();
+            ImGui::SameLine();
+            if (ImGui::Button(m_playback_speed == 10 ? " 1 " : " 10x "))
+            {
+                auto current = m_playback_speed;
+                m_playback_speed = current == 1 ? 10 : 1;
+            }
+            ImGui::SameLine();
+            
+            ui::SameLine(ui::GetWindowWidth() - 160); ui::Text("% 8d\t%4.4f Seconds", getCurrentFrame(), getCurrentTime().secs());
+            
+            if(!m_contraction_pci_trackWeakRef.expired()){
+                if(m_median_set_at_default){
+                    int default_median_cover_pct = m_idlab_defaults.median_level_set_cutoff_fraction;
+                    setMedianCutOff(default_median_cover_pct);
+                    ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, default_median_cover_pct, default_median_cover_pct);
+                }
+                else{
+                    int default_median_cover_pct = getMedianCutOff();
+                    ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, 0, 20);
+                    setMedianCutOff(default_median_cover_pct);
+                }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(m_median_set_at_default ? "Default" : "Not Set"))
+            {
+                m_median_set_at_default = ! m_median_set_at_default;
+            }
+            
+            //   int a = m_current_clip_index;
+            //   ImGui::SliderInt(" Contraction ", &a, 0, m_contraction_names.size());
+            
+            // @todo improve this logic. The moment we are able to set the median cover, set it to the default
+            // of 5 percent
+            // @todo move defaults in general setting
+            
+        }
+        ImGui::EndGroup();
+    }
+}
 /*
  * Result Window, to the right of image display + pad
  * Size width: remainder to the edge of app window in x ( minus a pad )
  * Size height: app window height / 2
  */
 
-void lifContext::add_result_sequencer ()
-{
+void lifContext::add_result_sequencer (){
  
     // let's create the sequencer
     static int selectedEntry = -1;
     static int64 firstFrame = 0;
     static bool expanded = true;
     
-    Rectf dr = get_image_display_rect();
-    auto tr = dr.getUpperRight();
-    auto pos = ImVec2(tr.x+10, tr.y);
-    ImVec2 size (getWindowWidth()-30-pos.x, dr.getHeight());
+    ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
+    assert(window != nullptr);
+    ImVec2 pos (window->Pos.x + window->Size.x, window->Pos.y );
+    ImGui::SetNextWindowPos(pos);
+    ImVec2 size (getWindowWidth()/2, getWindowHeight()/2);
     
     m_results_browser_display = Rectf(pos,size);
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(size);
 
     static bool results_open;
-    if(ImGui::Begin(" Results ", &results_open, ImGuiWindowFlags_AlwaysAutoResize)){
+    if(ImGui::Begin(wResult, &results_open, ImGuiWindowFlags_AlwaysAutoResize)){
         ImGui::PushItemWidth(130);
         ImGui::InputInt("Frame Min", &m_result_seq.mFrameMin);
         ImGui::SameLine();
@@ -898,97 +1028,7 @@ void lifContext::add_result_sequencer ()
                                
 }
 
-void lifContext::add_navigation(){
-   
-    Rectf dr = get_image_display_rect();
-    auto pos = ImVec2(dr.getLowerLeft().x, dr.getLowerLeft().y + 30);
-    ImVec2  size (dr.getWidth(), std::min(128.0, dr.getHeight()/2.0));
-    m_navigator_display = Rectf(pos,size);
-    ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(size);
-    
-    
-    if (ImGui::Begin("Navigation", &m_show_playback, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::PushItemWidth(40);
-        ImGui::PushID(200);
-        ImGui::InputInt("", &m_result_seq.mFrameMin, 0, 0);
-        ImGui::PopID();
-        ImGui::SameLine();
-        if (ImGui::Button("|<"))
-            seekToStart();
-        ImGui::SameLine();
-        if (ImGui::Button("<"))
-            seekToFrame (getCurrentFrame() - m_playback_speed);
-        ImGui::SameLine();
-        if (ImGui::Button(">"))
-            seekToFrame (getCurrentFrame() + m_playback_speed);
-        ImGui::SameLine();
-        if (ImGui::Button(">|"))
-            seekToEnd();
-        ImGui::SameLine();
-        if (ImGui::Button(m_is_playing ? "Stop" : "Play"))
-        {
-            play_pause_button();
-        }
-        
-        if(mNoLoop == nullptr){
-            mNoLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PNLOOP  )));
-        }
-        if (mLoop == nullptr){
-            mLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PLOOP )));
-        }
-        
-        unsigned int playNoLoopTextureId = mNoLoop->getId();//  evaluation.GetTexture("Stock/PlayNoLoop.png");
-        unsigned int playLoopTextureId = mLoop->getId(); //evaluation.GetTexture("Stock/PlayLoop.png");
-        
-        ImGui::SameLine();
-        if (ImGui::ImageButton((ImTextureID)(uint64_t)(m_is_looping ? playLoopTextureId : playNoLoopTextureId), ImVec2(16.f, 16.f)))
-            loop_no_loop_button();
-        
-        ImGui::SameLine();
-        ImGui::PushID(202);
-        ImGui::InputInt("",  &m_result_seq.mFrameMax, 0, 0);
-        ImGui::PopID();
-        ImGui::SameLine();
-        if (ImGui::Button(m_playback_speed == 10 ? " 1 " : " 10x "))
-        {
-            auto current = m_playback_speed;
-            m_playback_speed = current == 1 ? 10 : 1;
-        }
-        ImGui::SameLine();
 
-        ui::SameLine(ui::GetWindowWidth() - 160); ui::Text("% 8d\t%4.4f Seconds", getCurrentFrame(), getCurrentTime().secs());
-        
-        if(!m_contraction_pci_trackWeakRef.expired()){
-            if(m_median_set_at_default){
-                int default_median_cover_pct = m_idlab_defaults.median_level_set_cutoff_fraction;
-                setMedianCutOff(default_median_cover_pct);
-                ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, default_median_cover_pct, default_median_cover_pct);
-            }
-            else{
-                int default_median_cover_pct = getMedianCutOff();
-                ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, 0, 20);
-                setMedianCutOff(default_median_cover_pct);
-            }
-        }
-        ImGui::SameLine();
-        if (ImGui::Button(m_median_set_at_default ? "Default" : "Not Set"))
-        {
-            m_median_set_at_default = ! m_median_set_at_default;
-        }
-        
-        //   int a = m_current_clip_index;
-        //   ImGui::SliderInt(" Contraction ", &a, 0, m_contraction_names.size());
-        
-        // @todo improve this logic. The moment we are able to set the median cover, set it to the default
-        // of 5 percent
-        // @todo move defaults in general setting
-     
-    }
-    ImGui::End();
-
-}
 
 /*
  * Segmentation image is reduced from full resolution. It is exanpanded by displaying it in full res here
@@ -1003,7 +1043,7 @@ void lifContext::add_motion_profile (){
         m_segmented_texture = gl::Texture::create(*m_segmented_surface, texFormat);
     }
     
-    ImGuiWindow* window = ImGui::FindWindowByName(" Results ");
+    ImGuiWindow* window = ImGui::FindWindowByName(wResult);
     assert(window != nullptr);
     
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
@@ -1015,7 +1055,7 @@ void lifContext::add_motion_profile (){
     
    // const RotatedRect& mt = m_lifProcRef->motion_surface ();
     
-    if (ImGui::Begin("Motion Profile", nullptr, ImGuiWindowFlags_NoScrollbar  ))
+    if (ImGui::Begin(wShape, nullptr, ImGuiWindowFlags_NoScrollbar  ))
     {
         if(m_segmented_texture){
             static ImVec2 zoom_center;
@@ -1061,11 +1101,15 @@ void lifContext::add_motion_profile (){
 
 void lifContext::add_contractions (bool* p_open)
 {
-    const Rectf& dr = get_image_display_rect();
-    auto pos = ImVec2(dr.getLowerLeft().x, 150 + getWindowHeight()/2.0);
+    
+    
+    ImGuiWindow* window = ImGui::FindWindowByName(wNavigator);
+    assert(window != nullptr);
+    ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y);
     ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(ImVec2(dr.getWidth(), 340), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Contractions", p_open, ImGuiWindowFlags_MenuBar))
+    
+    ImGui::SetNextWindowSize(ImVec2(getWindowWidth()/2, getWindowHeight()/2), ImGuiCond_FirstUseEver);
+    if (ImGui::Begin(wContractions, p_open, ImGuiWindowFlags_MenuBar))
     {
         if (ImGui::BeginMenuBar())
         {
@@ -1128,15 +1172,17 @@ void lifContext::add_contractions (bool* p_open)
 void lifContext::add_regions (bool* p_open)
 {
     if (m_lifProcRef->moving_regions().empty()) return;
+    ImGuiWindow* window = ImGui::FindWindowByName(wContractions);
+    if (window == nullptr) return;
+    
+    ImVec2 pos (window->Pos.x + window->Size.x, window->Pos.y );
+    ImGui::SetNextWindowPos(pos);
     
     const Rectf& dr = get_image_display_rect();
-    auto pos = ImVec2(150 + dr.getLowerLeft().x, 150 + getWindowHeight()/2.0);
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(ImVec2(dr.getWidth(), 340), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Cells", p_open, ImGuiWindowFlags_MenuBar))
+    if (ImGui::Begin(wCells, p_open, ImGuiWindowFlags_MenuBar))
     {
-       
-        
         // left
         static int selected = 0;
         ImGui::BeginChild("left pane", ImVec2(150, 0), true);
@@ -1186,6 +1232,7 @@ void  lifContext::SetupGUIVariables(){
 
 void  lifContext::DrawGUI(){
     
+    add_canvas();
     add_navigation();
     add_result_sequencer();
     add_motion_profile ();
@@ -1231,6 +1278,7 @@ void lifContext::update ()
 
     ci::app::WindowRef ww = get_windowRef();
     ww->getRenderer()->makeCurrentContext(true);
+    m_display_rect = Rectf(ivec2(0,0),ivec2(getWindowWidth()/2.0,getWindowHeight()/2.0));
     auto ws = ww->getSize();
     m_layout->update_window_size(ws);
     update_channel_display_rects();
@@ -1391,31 +1439,13 @@ void lifContext::draw ()
 {
     if( have_lif_serie()  && mSurface )
     {
-        Rectf dr = get_image_display_rect();
+        // Update the texture.
+        mImage = gl::Texture::create(*mSurface);
         Rectf gdr = get_channel_display_rect(channel_count()-1);
         
-        assert(dr.getWidth() > 0 && dr.getHeight() > 0);
+        assert(gdr.getWidth() > 0 && gdr.getHeight() > 0);
 
         gl::ScopedBlendAlpha blend_;
-        
-        switch(channel_count())
-        {
-            case 1:
-                mImage = gl::Texture::create(*mSurface);
-                mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
-                gl::draw (mImage, dr);
-                break;
-            case 2:
-                mImage = gl::Texture::create(*mSurface);
-                mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
-                gl::draw (mImage, dr);
-                break;
-            case 3:
-                mImage = gl::Texture::create(*mSurface);
-                mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
-                gl::draw (mImage, dr);
-                break;
-        }
         
         {
             //@todo change color to indicate presence in any display area
