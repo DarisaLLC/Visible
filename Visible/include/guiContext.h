@@ -191,7 +191,8 @@ protected:
 	std::string			mLog;
 	index_time_t    mCurrentIndexTime;
 	
-	
+	gl::FboRef mFbo, mFbo2;
+	gl::GlslProgRef mShader;
 	
 };
 

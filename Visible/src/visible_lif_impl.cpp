@@ -777,6 +777,7 @@ void lifContext::loadCurrentSerie ()
         mScreenSize = mMediaInfo.getSize();
         
         mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
+        mFbo = gl::Fbo::create(mSurface->getWidth(), mSurface->getHeight());
         m_show_playback = true;
     }
     catch( const std::exception &ex ) {
@@ -848,7 +849,7 @@ const Rectf& lifContext::get_channel_display_rect (const int channel_number_zero
 
 void lifContext::add_canvas (){
    
-    
+    //@note: In ImGui, AddImage is called with uv parameters to specify a vertical flip.
     auto showImage = [](const char *windowName,bool *open, const gl::Texture2dRef texture){
         if (open && *open)
         {
@@ -857,22 +858,23 @@ void lifContext::add_canvas (){
             if (ImGui::Begin(windowName, open, io.ConfigWindowsResizeFromEdges))
             {
                 ImVec2 pos = ImGui::GetCursorScreenPos(); // actual position
-                ImGui::GetWindowDrawList()->AddImage(  reinterpret_cast<ImTextureID> (texture->getId()), pos, ImVec2(ImGui::GetContentRegionAvail().x + pos.x, ImGui::GetContentRegionAvail().y  + pos.y));
+                ImGui::GetWindowDrawList()->AddImage(  reinterpret_cast<ImTextureID> (texture->getId()), pos, ImVec2(ImGui::GetContentRegionAvail().x + pos.x, ImGui::GetContentRegionAvail().y  + pos.y),
+                                                     ivec2(0,1), ivec2(1,0));
             }
             ImGui::End();
         }
     };
     
-
+    //@note: assumes, next image plus any on image graphics have already been added
+    // offscreen via FBO
     if(m_show_playback){
         ci::vec2 pos (0, 20);
         ci::vec2 size (getWindowWidth()/2.0, getWindowHeight()/2.0f - 20.0);
         ui::ScopedWindow utilities(wDisplay);
-        m_navigator_display = Rectf(pos,size);
         ImGui::SetNextWindowPos(pos);
         ImGui::SetNextWindowSize(size);
         ImGui::SameLine();
-        showImage(wDisplay, &m_show_playback, mImage);
+        showImage(wDisplay, &m_show_playback, mFbo->getColorTexture());
     }
     
     
@@ -1278,7 +1280,7 @@ void lifContext::update ()
 
     ci::app::WindowRef ww = get_windowRef();
     ww->getRenderer()->makeCurrentContext(true);
-    m_display_rect = Rectf(ivec2(0,0),ivec2(getWindowWidth()/2.0,getWindowHeight()/2.0));
+    m_display_rect = Rectf(ivec2(0,0),mFbo->getSize());
     auto ws = ww->getSize();
     m_layout->update_window_size(ws);
     update_channel_display_rects();
@@ -1345,6 +1347,11 @@ void lifContext::update ()
         mCurrentIndexTime = mFrameSet->currentIndexTime();
         if (mCurrentIndexTime.first != m_seek_position){
             vlogger::instance().console()->info(tostr(mCurrentIndexTime.first - m_seek_position));
+        }
+        // Update Fbo with texture.
+        if(mSurface){
+            mFbo->getColorTexture()->update(*mSurface);
+            renderToFbo(mSurface, mFbo);
         }
     }
     
@@ -1433,107 +1440,29 @@ void lifContext::draw_info ()
     }
     
 }
+void  lifContext::renderToFbo (const SurfaceRef&, gl::FboRef& fbo ){
+    // this will restore the old framebuffer binding when we leave this function
+    // on non-OpenGL ES platforms, you can just call mFbo->unbindFramebuffer() at the end of the function
+    // but this will restore the "screen" FBO on OpenGL ES, and does the right thing on both platforms
+    gl::ScopedFramebuffer fbScp( fbo );
+    
+    
+    // setup the viewport to match the dimensions of the FBO
+    gl::ScopedViewport scpVp( ivec2( 0 ), fbo->getSize() );
+    gl::ScopedBlendAlpha blend_;
+    Rectf gdr = get_channel_display_rect(channel_count()-1);
+    assert(gdr.getWidth() > 0 && gdr.getHeight() > 0);
+    
+    gl::drawStrokedRect(gdr, 3.0f);
+    
+}
 
-
-void lifContext::draw ()
-{
-    if( have_lif_serie()  && mSurface )
-    {
-        // Update the texture.
-        mImage = gl::Texture::create(*mSurface);
-        Rectf gdr = get_channel_display_rect(channel_count()-1);
+void lifContext::draw (){
+    if( have_lif_serie()  && mSurface ){
         
-        assert(gdr.getWidth() > 0 && gdr.getHeight() > 0);
-
-        gl::ScopedBlendAlpha blend_;
-        
-        {
-            //@todo change color to indicate presence in any display area
-          //  gl::ScopedColor (getManualEditMode() ? ColorA( 0.25f, 0.5f, 1, 1 ) : ColorA::gray(1.0));
-            gl::drawStrokedRect(get_image_display_rect(), 3.0f);
-        }
-
-       // std::vector<float> test = {0.0,0.1,0.2,1.0,0.2,0.1,0.0};
-       // m_tsPlotter.setBounds(gdr);
-       // m_tsPlotter.draw(test);
-
-        const Rectf& measured_area = m_lifProcRef->measuredArea ();
-        if (m_geometry_available)
-        {
-            for (const moving_region& m_ : m_lifProcRef->moving_regions()){
-                
-
-                float width = measured_area.getWidth();
-                float height = measured_area.getHeight();
-                
-                const cv::RotatedRect& ellipse = m_.motion_surface();
-                const fPair& ab = m_.ellipse_ab();
-                vec2 a_v ((ab.first * gdr.getWidth()) / (2.0 * width), 0.0f );
-                vec2 b_v (0.0f, (ab.second * gdr.getHeight()) / (2.0* height));
-                
-                
-                uDegree da(ellipse.angle + 90.0);
-                uRadian dra (da);
-                vec2 ctr0 ((ellipse.center.x * gdr.getWidth()) / width, (ellipse.center.y * gdr.getHeight()) / height );
-                
-                cinder::gl::ScopedLineWidth( 10.0f );
-                cinder::gl::ScopedColor col (ColorA( 1.0, 0.1, 0.0, 0.8f ) );
-                {
-                    cinder::gl::ScopedModelMatrix _mdl;
-                    auto ctr = ctr0 + gdr.getUpperLeft();
-                    gl::translate(ctr);
-
-                    gl::rotate(dra.Double());
-                    ctr = vec2(0,0);
-                    gl::drawSolidCircle(ctr, 3.0);
-                    gl::drawLine(ctr-b_v, ctr+b_v);
-                    gl::drawLine(ctr-a_v, ctr+a_v);
-              
-                    gl::drawStrokedEllipse(ctr, a_v.x, b_v.y);
-                }
-                
-                if (m_cell_ends.size() == 2)
-                {
-               
-                    glscreen_normalize(m_cell_ends[0], gdr, m_normalized_cell_ends[0]);
-                    glscreen_normalize(m_cell_ends[1], gdr, m_normalized_cell_ends[1]);
-                    m_major_cell_length = distance(m_normalized_cell_ends[0].first,m_normalized_cell_ends[0].second);
-                    m_minor_cell_length = distance(m_normalized_cell_ends[1].first,m_normalized_cell_ends[1].second);
-                    vec2 a_v ( m_major_cell_length / 2.0, 0.0f );
-                    vec2 b_v (0.0f, m_minor_cell_length / 2.0f);
-                    
-                    {
-                        cinder::gl::ScopedModelMatrix _mdl;
-                        auto ctr = ctr0 + gdr.getUpperLeft();
-                        gl::translate(ctr);
-                        
-                        gl::rotate(dra.Double());
-                        ctr = vec2(0,0);
-                        gl::drawSolidCircle(ctr, 3.0);
-                        {
-                            cinder::gl::ScopedColor col (ColorA( 0.1, 1.0, 0.1, 0.8f ) );
-                            gl::drawLine(ctr-b_v, ctr+b_v);
-                            gl::drawSolidCircle(ctr-b_v, 3.0);
-                            gl::drawSolidCircle( ctr+b_v, 3.0);
-                        }
-                        {
-                            cinder::gl::ScopedColor col (ColorA( 0.1, 0.1, 1.0, 0.8f ) );
-                            gl::drawLine(ctr-a_v, ctr+a_v);
-                            gl::drawSolidCircle(ctr-a_v, 3.0);
-                            gl::drawSolidCircle( ctr+a_v, 3.0);
-                        }
-                    }
-                }
-            }
-        }
-        
-
         if(m_showGUI)
             DrawGUI();
-        
     }
-    
-    
 }
     //                {
     //                    cinder::gl::ScopedColor col (ColorA( 1, 0.1, 0.1, 0.8f ) );

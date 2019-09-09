@@ -114,7 +114,7 @@ public:
     void QuitApp();
     
 private:
-
+    void renderToFbo (const SurfaceRef&, gl::FboRef& );
     void setup_signals ();
     void setup_params ();
     ci::app::WindowRef& get_windowRef();
@@ -233,6 +233,7 @@ private:
     void update_channel_display_rects () override;
     
     vec2 texture_to_display_zoom ();
+    void add_main_info ();
     void add_canvas ();
     void add_result_sequencer ();
     void add_navigation ();
