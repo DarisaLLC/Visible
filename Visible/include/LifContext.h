@@ -76,7 +76,8 @@ public:
 	virtual void seekToEnd () override;
 	virtual void seekToFrame (int) override;
 	virtual int getCurrentFrame () override;
-	virtual time_spec_t getCurrentTime () override;
+    virtual time_spec_t getCurrentTime () override;
+    virtual time_spec_t getStartTime () override;
 	virtual int getNumFrames () override;
 	virtual void processDrag (ivec2 pos) override;
     
