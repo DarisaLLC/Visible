@@ -140,6 +140,7 @@ public:
 	virtual void seekToFrame (int) = 0;
 	virtual int getCurrentFrame () = 0;
 	virtual time_spec_t getCurrentTime () = 0;
+	virtual time_spec_t getStartTime () = 0;
 	virtual int getNumFrames () = 0;
 	
 	virtual void draw_info () = 0;

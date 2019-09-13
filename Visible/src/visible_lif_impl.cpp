@@ -480,6 +480,9 @@ time_spec_t lifContext::getCurrentTime ()
     else return -1.0;
 }
 
+time_spec_t lifContext::getStartTime (){
+  return m_serie.timeSpecs()[0];
+}
 
 
 void lifContext::seekToFrame (int mark)
@@ -868,7 +871,7 @@ void lifContext::add_canvas (){
     //@note: assumes, next image plus any on image graphics have already been added
     // offscreen via FBO
     if(m_show_playback){
-        ci::vec2 pos (0, 20);
+        ci::vec2 pos (0,0);
         ci::vec2 size (getWindowWidth()/2.0, getWindowHeight()/2.0f - 20.0);
         ui::ScopedWindow utilities(wDisplay);
         ImGui::SetNextWindowPos(pos);
@@ -886,21 +889,15 @@ void lifContext::add_navigation(){
         
         ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
         assert(window != nullptr);
-        ImVec2 pos (window->Pos.x , window->Pos.y + window->Size.y );
-        ImGui::SetNextWindowPos(pos);
-        ImVec2 size (getWindowWidth()/2, getWindowHeight()/2);
+        ImVec2 pos (0 , window->Pos.y + window->Size.y );
+        ImVec2 size (window->Size.x, 100);
         
-        
-        //    Rectf dr = get_image_display_rect();
-      //  ci::vec2 pos (0, -(getWindowHeight() - get_image_display_rect().getHeight()+10));
-      //  ci::vec2 size (getWindowWidth(), std::min(128.0f, getWindowHeight()/2.0f));
         ui::ScopedWindow utilities(wNavigator);
         m_navigator_display = Rectf(pos,size);
         ImGui::SetNextWindowPos(pos);
-        //  ImGui::SetNextWindowSize(size);
+        ImGui::SetNextWindowSize(size);
         ImGui::SameLine();
         ImGui::BeginGroup();
-        //    if (ImGui::Begin("Navigation", &m_show_playback, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::PushItemWidth(40);
             ImGui::PushID(200);
@@ -950,7 +947,8 @@ void lifContext::add_navigation(){
             }
             ImGui::SameLine();
             
-            ui::SameLine(ui::GetWindowWidth() - 160); ui::Text("% 8d\t%4.4f Seconds", getCurrentFrame(), getCurrentTime().secs());
+            auto dt = getCurrentTime().secs() - getStartTime().secs();
+            ui::SameLine(0,0); ui::Text("% 8d\t%4.4f Seconds", getCurrentFrame(), dt);
             
             if(!m_contraction_pci_trackWeakRef.expired()){
                 if(m_median_set_at_default){
@@ -970,19 +968,12 @@ void lifContext::add_navigation(){
                 m_median_set_at_default = ! m_median_set_at_default;
             }
             
-            //   int a = m_current_clip_index;
-            //   ImGui::SliderInt(" Contraction ", &a, 0, m_contraction_names.size());
-            
-            // @todo improve this logic. The moment we are able to set the median cover, set it to the default
-            // of 5 percent
-            // @todo move defaults in general setting
-            
         }
         ImGui::EndGroup();
     }
 }
 /*
- * Result Window, to the right of image display + pad
+ * Result Window, to below the Display
  * Size width: remainder to the edge of app window in x ( minus a pad )
  * Size height: app window height / 2
  */
@@ -994,12 +985,10 @@ void lifContext::add_result_sequencer (){
     static int64 firstFrame = 0;
     static bool expanded = true;
     
-    ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
+    ImGuiWindow* window = ImGui::FindWindowByName(wNavigator);
     assert(window != nullptr);
-    ImVec2 pos (window->Pos.x + window->Size.x, window->Pos.y );
-    ImGui::SetNextWindowPos(pos);
+    ImVec2 pos (window->Pos.x , window->Pos.y + window->Size.y);
     ImVec2 size (getWindowWidth()/2, getWindowHeight()/2);
-    
     m_results_browser_display = Rectf(pos,size);
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(size);
@@ -1045,7 +1034,7 @@ void lifContext::add_motion_profile (){
         m_segmented_texture = gl::Texture::create(*m_segmented_surface, texFormat);
     }
     
-    ImGuiWindow* window = ImGui::FindWindowByName(wResult);
+    ImGuiWindow* window = ImGui::FindWindowByName(wContractions);
     assert(window != nullptr);
     
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
@@ -1054,8 +1043,6 @@ void lifContext::add_motion_profile (){
     m_motion_profile_display = Rectf(pos,frame);
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowContentSize(frame);
-    
-   // const RotatedRect& mt = m_lifProcRef->motion_surface ();
     
     if (ImGui::Begin(wShape, nullptr, ImGuiWindowFlags_NoScrollbar  ))
     {
@@ -1103,14 +1090,13 @@ void lifContext::add_motion_profile (){
 
 void lifContext::add_contractions (bool* p_open)
 {
-    
-    
-    ImGuiWindow* window = ImGui::FindWindowByName(wNavigator);
+
+    ImGuiWindow* window = ImGui::FindWindowByName(wCells);
     assert(window != nullptr);
-    ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y);
+    ImVec2 pos (window->Pos.x , window->Pos.y + window->Size.y);
     ImGui::SetNextWindowPos(pos);
     
-    ImGui::SetNextWindowSize(ImVec2(getWindowWidth()/2, getWindowHeight()/2), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(getWindowWidth()/2, getWindowHeight()/4), ImGuiCond_FirstUseEver);
     if (ImGui::Begin(wContractions, p_open, ImGuiWindowFlags_MenuBar))
     {
         if (ImGui::BeginMenuBar())
@@ -1170,19 +1156,19 @@ void lifContext::add_contractions (bool* p_open)
     ImGui::End();
 }
 
+// Right Hand Size:
+// Cells
+// Contractions
+// Shape
 
 void lifContext::add_regions (bool* p_open)
 {
     if (m_lifProcRef->moving_regions().empty()) return;
-    ImGuiWindow* window = ImGui::FindWindowByName(wContractions);
-    if (window == nullptr) return;
-    
+    ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
+    assert(window != nullptr);
     ImVec2 pos (window->Pos.x + window->Size.x, window->Pos.y );
     ImGui::SetNextWindowPos(pos);
-    
-    const Rectf& dr = get_image_display_rect();
-    ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(ImVec2(dr.getWidth(), 340), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(getWindowWidth()/2, getWindowHeight()/4), ImGuiCond_FirstUseEver);
     if (ImGui::Begin(wCells, p_open, ImGuiWindowFlags_MenuBar))
     {
         // left
@@ -1237,9 +1223,9 @@ void  lifContext::DrawGUI(){
     add_canvas();
     add_navigation();
     add_result_sequencer();
-    add_motion_profile ();
     add_regions(&m_show_cells);
     add_contractions(&m_show_contractions);
+    add_motion_profile ();
 }
 
 void  lifContext::update_log (const std::string& msg)
