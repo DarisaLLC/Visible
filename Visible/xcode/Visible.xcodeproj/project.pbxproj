@@ -859,6 +859,8 @@
 		C21A50DE22A9FFA800B0AC7D /* contraction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = contraction.hpp; path = ../include/contraction.hpp; sourceTree = "<group>"; };
 		C21A50DF22AB4D0C00B0AC7D /* eigen_utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = eigen_utils.cpp; path = ../src/eigen_utils.cpp; sourceTree = "<group>"; };
 		C21A50E022AB4D0C00B0AC7D /* eigen_utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = eigen_utils.hpp; path = ../include/eigen_utils.hpp; sourceTree = "<group>"; };
+		C21AB38E232E04F600D1C529 /* CinderImGuiExports.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CinderImGuiExports.h; path = "../../externals/Cinder-ImGui/include/CinderImGuiExports.h"; sourceTree = "<group>"; };
+		C21AB38F232E04F700D1C529 /* CinderImGui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CinderImGui.h; path = "../../externals/Cinder-ImGui/include/CinderImGui.h"; sourceTree = "<group>"; };
 		C21E390B228A054C00778A66 /* affine_rectangle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = affine_rectangle.cpp; sourceTree = "<group>"; };
 		C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer_impl.h; path = ../include/sm_producer_impl.h; sourceTree = "<group>"; };
 		C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer.h; path = ../include/sm_producer.h; sourceTree = "<group>"; };
@@ -2203,6 +2205,8 @@
 		C29C726F216FC7340028AED1 /* imgui */ = {
 			isa = PBXGroup;
 			children = (
+				C21AB38F232E04F700D1C529 /* CinderImGui.h */,
+				C21AB38E232E04F600D1C529 /* CinderImGuiExports.h */,
 				C2E5AD85227A5C7000A7AAD3 /* imconfig.h */,
 				C2819EC721FA94F000183E44 /* imgui.ini */,
 				C23E343421F1477D00221E68 /* imgui_module */,

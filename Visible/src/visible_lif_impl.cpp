@@ -850,6 +850,12 @@ const Rectf& lifContext::get_channel_display_rect (const int channel_number_zero
     return m_instant_channel_display_rects[channel_number_zero_based];
 }
 
+#ifndef IMGUI_DEFINE_MATH_OPERATORS
+static ImVec2 operator+(const ImVec2 &a, const ImVec2 &b) {
+    return ImVec2(a.x + b.x, a.y + b.y);
+}
+#endif
+
 void lifContext::add_canvas (){
    
     //@note: In ImGui, AddImage is called with uv parameters to specify a vertical flip.
@@ -858,11 +864,20 @@ void lifContext::add_canvas (){
         {
             ImGuiIO& io = ImGui::GetIO();
             ImGui::SetNextWindowBgAlpha(0.4f); // Transparent background
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
             if (ImGui::Begin(windowName, open, io.ConfigWindowsResizeFromEdges))
             {
                 ImVec2 pos = ImGui::GetCursorScreenPos(); // actual position
-                ImGui::GetWindowDrawList()->AddImage(  reinterpret_cast<ImTextureID> (texture->getId()), pos, ImVec2(ImGui::GetContentRegionAvail().x + pos.x, ImGui::GetContentRegionAvail().y  + pos.y),
+                draw_list->AddImage(  reinterpret_cast<ImTextureID> (texture->getId()), pos, ImVec2(ImGui::GetContentRegionAvail().x + pos.x, ImGui::GetContentRegionAvail().y  + pos.y),
                                                      ivec2(0,1), ivec2(1,0));
+                ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
+                ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
+                ImRect regionRect(canvas_pos, canvas_pos + canvas_size);
+                ImVec2 midv(canvas_pos.x, canvas_pos.y + canvas_size.y / 2);
+                ImVec2 midh(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y / 2);
+                draw_list->AddLine(midv, midh, IM_COL32(0,0,128,128), 3.0f);
+         
+                
             }
             ImGui::End();
         }
@@ -892,7 +907,7 @@ void lifContext::add_navigation(){
         ImVec2 pos (0 , window->Pos.y + window->Size.y );
         ImVec2 size (window->Size.x, 100);
         
-        ui::ScopedWindow utilities(wNavigator);
+        ui::ScopedWindow utilities(wNavigator, ImGuiWindowFlags_NoResize);
         m_navigator_display = Rectf(pos,size);
         ImGui::SetNextWindowPos(pos);
         ImGui::SetNextWindowSize(size);
@@ -985,7 +1000,7 @@ void lifContext::add_result_sequencer (){
     static int64 firstFrame = 0;
     static bool expanded = true;
     
-    ImGuiWindow* window = ImGui::FindWindowByName(wNavigator);
+    ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
     assert(window != nullptr);
     ImVec2 pos (window->Pos.x , window->Pos.y + window->Size.y);
     ImVec2 size (getWindowWidth()/2, getWindowHeight()/2);
@@ -1056,31 +1071,7 @@ void lifContext::add_motion_profile (){
             ImGui::EndChild();
             
             // Second Child
-//            ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
-//            ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
- //           ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
-//            auto cell_ends = m_cell_ends;
-//
-//            auto draw_cell_ends = [cell_ends,pp](int ee, uint32_t color){
-//                auto pt = cell_ends[ee].first;
-//                pt.x += (pp.x );
-//                pt.y += (pp.y+128 );
-//                if (pt.x >=5 && pt.y >=5){
-//                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), color, 3.0f);
-//                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), color,  3.0f);
-//                }
-//                pt = cell_ends[ee].second;
-//                pt.x += (pp.x );
-//                pt.y += (pp.y+128 );
-//                if (pt.x >=5 && pt.y >=5){
-//                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), color, 3.0f);
-//                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), color, 3.0f);
-//                }
-//            };
-//
-//            draw_cell_ends(0,IM_COL32(0, 255, 0, 255));
-//            draw_cell_ends(1,IM_COL32(255, 128, 0, 255));
- //           ImGui::EndChild();
+      
         }
     }
     ImGui::End();
@@ -1266,7 +1257,6 @@ void lifContext::update ()
 
     ci::app::WindowRef ww = get_windowRef();
     ww->getRenderer()->makeCurrentContext(true);
-    m_display_rect = Rectf(ivec2(0,0),mFbo->getSize());
     auto ws = ww->getSize();
     m_layout->update_window_size(ws);
     update_channel_display_rects();
@@ -1431,15 +1421,6 @@ void  lifContext::renderToFbo (const SurfaceRef&, gl::FboRef& fbo ){
     // on non-OpenGL ES platforms, you can just call mFbo->unbindFramebuffer() at the end of the function
     // but this will restore the "screen" FBO on OpenGL ES, and does the right thing on both platforms
     gl::ScopedFramebuffer fbScp( fbo );
-    
-    
-    // setup the viewport to match the dimensions of the FBO
-    gl::ScopedViewport scpVp( ivec2( 0 ), fbo->getSize() );
-    gl::ScopedBlendAlpha blend_;
-    Rectf gdr = get_channel_display_rect(channel_count()-1);
-    assert(gdr.getWidth() > 0 && gdr.getHeight() > 0);
-    
-    gl::drawStrokedRect(gdr, 3.0f);
     
 }
 
