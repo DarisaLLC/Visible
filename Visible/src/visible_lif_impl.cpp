@@ -50,7 +50,6 @@
 #include "Resources.h"
 #include "cinder_opencv.h"
 #include "imguivariouscontrols.h"
-#include "imgui_wrapper.h"
 #include <boost/range/irange.hpp>
 #include "imgui_plot.h"
 
@@ -115,7 +114,7 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const f
     m_valid = false;
         m_valid = sd.index() >= 0;
         if (m_valid){
-            m_layout = std::make_shared<layoutManager>  ( ivec2 (10, 30) );
+            m_layout = std::make_shared<imageDisplayMapper>  ();
             if (auto lifRef = m_serie.readerWeakRef().lock()){
                 m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&lifRef->getSerie(sd.index()), stl_utils::null_deleter());
                 setup();
@@ -238,9 +237,7 @@ void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
 }
 void lifContext::signal_flu_stats_ready ()
 {
-    update();
     vlogger::instance().console()->info(" Flu Stats Available ");
-
 }
 
 void lifContext::signal_contraction_ready (ssmt_processor::contractionContainer_t& contras)
@@ -370,7 +367,7 @@ void lifContext::clear_playback_params ()
 
 bool lifContext::have_lif_serie ()
 {
-    bool have =   m_serie.readerWeakRef().lock() && m_cur_lif_serie_ref  && mFrameSet && m_layout->isSet();
+    bool have =   m_serie.readerWeakRef().lock() && m_cur_lif_serie_ref  && mFrameSet ;
     return have;
 }
 
@@ -564,14 +561,7 @@ void lifContext::update_with_mouse_position ( MouseEvent event )
         update_instant_image_mouse ();
     }
     
-    if (m_layout->display_plots_rect().contains(event.getPos()))
-    {
-        std::vector<float> dds (m_layout->plot_rects().size());
-        for (auto pp = 0; pp < m_layout->plot_rects().size(); pp++) dds[pp] = m_layout->plot_rects()[pp].distanceSquared(event.getPos());
-        
-        auto min_iter = std::min_element(dds.begin(),dds.end());
-        mMouseInGraphs = int(min_iter - dds.begin());
-    }
+
     
   
 }
@@ -742,7 +732,7 @@ void lifContext::loadCurrentSerie ()
             return;
         }
 
-        m_layout->init (getWindowSize() , mFrameSet->media_info(), channel_count());
+        m_layout->init ( mFrameSet->media_info());
 
         /*
          * Create the frameset and assign the channel namesStart Loading Images on async on a different thread
@@ -859,7 +849,7 @@ static ImVec2 operator+(const ImVec2 &a, const ImVec2 &b) {
 void lifContext::add_canvas (){
    
     //@note: In ImGui, AddImage is called with uv parameters to specify a vertical flip.
-    auto showImage = [](const char *windowName,bool *open, const gl::Texture2dRef texture){
+    auto showImage = [&](const char *windowName,bool *open, const gl::Texture2dRef texture){
         if (open && *open)
         {
             ImGuiIO& io = ImGui::GetIO();
@@ -873,9 +863,18 @@ void lifContext::add_canvas (){
                 ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
                 ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
                 ImRect regionRect(canvas_pos, canvas_pos + canvas_size);
-                ImVec2 midv(canvas_pos.x, canvas_pos.y + canvas_size.y / 2);
-                ImVec2 midh(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y / 2);
+                m_layout->update_display_rect(canvas_pos, canvas_pos + canvas_size);
+                ImVec2 midv = m_layout->image2display(ivec2(0,128));
+                ImVec2 midh = m_layout->image2display(ivec2(512,128));
+//                ImVec2 midv(canvas_pos.x, canvas_pos.y + canvas_size.y / 2);
+//                ImVec2 midh(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y / 2);
                 draw_list->AddLine(midv, midh, IM_COL32(0,0,128,128), 3.0f);
+                for (const auto& mb : m_lifProcRef->moving_bodies()){
+                    const Point2f& pc = mb->motion_surface().center;
+                    ivec2 iv(pc.x, pc.y);
+                    ImVec2 ic = m_layout->image2display(iv, 1, true);
+                    draw_list->AddCircle(ic, 16.0,  IM_COL32(0,0,128,128), 16, 3.0);
+                }
          
                 
             }
@@ -1234,14 +1233,6 @@ void  lifContext::update_log (const std::string& msg)
 void lifContext::resize ()
 {
     if (! have_lif_serie () || ! mSurface ) return;
-    if (! m_layout->isSet()) return;
-    auto ww = get_windowRef();
-    auto ws = ww->getSize();
-    m_layout->update_window_size(ws);
-    mSize = vec2(ws[0], ws[1] / 12);
-  //  mMainTimeLineSlider.setBounds (m_layout->display_timeline_rect());
-
-
 }
 
 bool lifContext::haveTracks()
@@ -1255,19 +1246,10 @@ void lifContext::update ()
     
     if (! have_lif_serie() ) return;
 
-    ci::app::WindowRef ww = get_windowRef();
-    ww->getRenderer()->makeCurrentContext(true);
-    auto ws = ww->getSize();
-    m_layout->update_window_size(ws);
-    update_channel_display_rects();
-    
 
     if ( is_ready (m_fluorescense_tracks_aync) )
         m_flurescence_trackWeakRef = m_fluorescense_tracks_aync.get();
     
-    if ( is_ready (m_contraction_pci_tracks_asyn)){
-        m_contraction_pci_trackWeakRef = m_contraction_pci_tracks_asyn.get();
-    }
 
     auto flu_cnt = channel_count() - 1;
     // Update Fluorescence results if ready
@@ -1280,7 +1262,12 @@ void lifContext::update ()
         }
     }
 
+    
     // Update PCI result if ready
+    if ( is_ready (m_contraction_pci_tracks_asyn)){
+        m_contraction_pci_trackWeakRef = m_contraction_pci_tracks_asyn.get();
+    }
+    
     if ( ! m_contraction_pci_trackWeakRef.expired())
     {
 #ifdef SHORTTERM_ON
@@ -1325,9 +1312,12 @@ void lifContext::update ()
             vlogger::instance().console()->info(tostr(mCurrentIndexTime.first - m_seek_position));
         }
         // Update Fbo with texture.
-        if(mSurface){
-            mFbo->getColorTexture()->update(*mSurface);
-            renderToFbo(mSurface, mFbo);
+        {
+            lock_guard<mutex> scopedLock(m_update_mutex);
+            if(mSurface){
+                mFbo->getColorTexture()->update(*mSurface);
+                renderToFbo(mSurface, mFbo);
+            }
         }
     }
     

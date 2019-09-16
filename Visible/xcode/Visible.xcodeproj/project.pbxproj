@@ -32,9 +32,6 @@
 		C21094682239D1C8004E88EE /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
 		C21094692239D1C8004E88EE /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
 		C210946A2239D1C8004E88EE /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
-		C210946E223AEC19004E88EE /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
-		C210946F223AEC19004E88EE /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
-		C2109470223AEC19004E88EE /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
 		C2109476223F4CFE004E88EE /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
 		C2109477223F4CFE004E88EE /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
 		C2109478223F4CFE004E88EE /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
@@ -65,7 +62,6 @@
 		C21A508222A9A65900B0AC7D /* edgel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069661CED3E2C0045FF57 /* edgel.cpp */; };
 		C21A508322A9A65900B0AC7D /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C21A508422A9A65900B0AC7D /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
-		C21A508522A9A65900B0AC7D /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
 		C21A508622A9A65900B0AC7D /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C21A508722A9A65900B0AC7D /* ip_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069691CED3E2C0045FF57 /* ip_utils.cpp */; };
 		C21A508822A9A65900B0AC7D /* matpixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696D1CED3E2C0045FF57 /* matpixel.cpp */; };
@@ -397,7 +393,6 @@
 		C28B017C229B182100B8165D /* edgel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069661CED3E2C0045FF57 /* edgel.cpp */; };
 		C28B017D229B182100B8165D /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C28B017E229B182100B8165D /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
-		C28B017F229B182100B8165D /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
 		C28B0180229B182100B8165D /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C28B0181229B182100B8165D /* ip_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069691CED3E2C0045FF57 /* ip_utils.cpp */; };
 		C28B0182229B182100B8165D /* matpixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696D1CED3E2C0045FF57 /* matpixel.cpp */; };
@@ -587,7 +582,6 @@
 		C2DB72B222591DB700C2B986 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
 		C2DB72B322591DB700C2B986 /* ip_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069691CED3E2C0045FF57 /* ip_utils.cpp */; };
 		C2DB72B422591DB700C2B986 /* window.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7E217FDA6600FA9F43 /* window.cc */; };
-		C2DB72B522591DB700C2B986 /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
 		C2DB72B622591DB700C2B986 /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
 		C2DB72B722591DB700C2B986 /* rowfunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069701CED3E2C0045FF57 /* rowfunc.cpp */; };
 		C2DB72B822591DB700C2B986 /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
@@ -2577,7 +2571,6 @@
 				C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */,
 				C2606DAB1CED3E2E0045FF57 /* ip_utils.cpp in Sources */,
 				C2618F82217FDA6600FA9F43 /* window.cc in Sources */,
-				C210946E223AEC19004E88EE /* imgui_wrapper.cpp in Sources */,
 				C2C5CF67229A0DB0004595C5 /* glmutils.cpp in Sources */,
 				C2AFCEFF216E79590080462D /* imgui_draw.cpp in Sources */,
 				C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */,
@@ -2645,7 +2638,6 @@
 				C21A508222A9A65900B0AC7D /* edgel.cpp in Sources */,
 				C21A508322A9A65900B0AC7D /* csv.cpp in Sources */,
 				C21A508422A9A65900B0AC7D /* AVReaderWrapper.mm in Sources */,
-				C21A508522A9A65900B0AC7D /* imgui_wrapper.cpp in Sources */,
 				C21A508622A9A65900B0AC7D /* cinder_support.cpp in Sources */,
 				C21A508722A9A65900B0AC7D /* ip_utils.cpp in Sources */,
 				C21A508822A9A65900B0AC7D /* matpixel.cpp in Sources */,
@@ -2721,7 +2713,6 @@
 				C28F74382236D00B0040890C /* edgel.cpp in Sources */,
 				C2DA195A1E80E4E100062DBC /* csv.cpp in Sources */,
 				C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */,
-				C2109470223AEC19004E88EE /* imgui_wrapper.cpp in Sources */,
 				C2D86DF91E5A4FCE007492D4 /* cinder_support.cpp in Sources */,
 				C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */,
 				C20EDBB41CEFBB070074C47A /* matpixel.cpp in Sources */,
@@ -2859,7 +2850,6 @@
 				C22DACFA22FF793C00D171EF /* moviong_region.cpp in Sources */,
 				C28B01D7229B1F8000B8165D /* core_ssmt.cpp in Sources */,
 				C26223B32318B1DC006D9045 /* imgui_plot.cpp in Sources */,
-				C210946F223AEC19004E88EE /* imgui_wrapper.cpp in Sources */,
 				C28B01DD229B210A00B8165D /* voxel_ssmt.cpp in Sources */,
 				C21A50E222AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
 				C26F5FC321B0AA6D00EAE156 /* ip_utils.cpp in Sources */,
@@ -2925,7 +2915,6 @@
 				C28B017C229B182100B8165D /* edgel.cpp in Sources */,
 				C28B017D229B182100B8165D /* csv.cpp in Sources */,
 				C28B017E229B182100B8165D /* AVReaderWrapper.mm in Sources */,
-				C28B017F229B182100B8165D /* imgui_wrapper.cpp in Sources */,
 				C28B0180229B182100B8165D /* cinder_support.cpp in Sources */,
 				C28B0181229B182100B8165D /* ip_utils.cpp in Sources */,
 				C21A50E622AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
@@ -3017,7 +3006,6 @@
 				C2DB72B422591DB700C2B986 /* window.cc in Sources */,
 				C28B01CF229B1DE500B8165D /* lif_serie.cpp in Sources */,
 				C28B01D9229B1F8000B8165D /* core_ssmt.cpp in Sources */,
-				C2DB72B522591DB700C2B986 /* imgui_wrapper.cpp in Sources */,
 				C28B01DF229B210A00B8165D /* voxel_ssmt.cpp in Sources */,
 				C21A50E522AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
 				C2DB72B622591DB700C2B986 /* imgui_draw.cpp in Sources */,
