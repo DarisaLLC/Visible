@@ -157,6 +157,7 @@ private:
     mutable volatile int m_current_clip_index;
     mutable std::vector<clip> m_clips;
     mutable std::mutex m_clip_mutex;
+    mutable std::mutex m_update_mutex;
     
     // Async Processing
     void process_async ();
@@ -248,7 +249,7 @@ private:
 
     
     // Layout Manager
-    std::shared_ptr<layoutManager> m_layout;
+    std::shared_ptr<imageDisplayMapper> m_layout;
   
     // UI flags
     bool m_showLog, m_showGUI, m_showHelp;

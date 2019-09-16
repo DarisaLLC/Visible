@@ -295,8 +295,9 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_flu_statistics (const std
     std::vector<std::thread> threads(channels.size());
     for (auto tt = 0; tt < channels.size(); tt++)
     {
+        auto channel = channels[tt];
         threads[tt] = std::thread(IntensityStatisticsRunner(),
-                                  std::ref(m_all_by_channel[tt]), std::ref(m_flurescence_tracksRef->at(tt).second));
+                                  std::ref(m_all_by_channel[channel]), std::ref(m_flurescence_tracksRef->at(channel).second));
     }
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     

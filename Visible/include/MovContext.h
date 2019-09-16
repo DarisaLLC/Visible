@@ -285,7 +285,7 @@ private:
 
 	
     // Layout Manager
-    std::shared_ptr<layoutManager> m_layout;
+    std::shared_ptr<imageDisplayMapper> m_layout;
   
     // UI flags
     bool m_showLog, m_showGUI, m_showHelp;

@@ -48,7 +48,7 @@
 #include "Resources.h"
 #include "cinder_opencv.h"
 #include "imguivariouscontrols.h"
-#include "imgui_wrapper.h"
+
 
 
 using namespace ci;
@@ -94,7 +94,7 @@ movContext::movContext(ci::app::WindowRef& ww, const cvVideoPlayer::ref& sd, con
     
     m_valid = m_sequence_player_ref->isLoaded();
     if (m_valid){
-        m_layout = std::make_shared<layoutManager>  ( ivec2 (10, 30) );
+        m_layout = std::make_shared<imageDisplayMapper>  ( ivec2 (10, 30) );
             setup();
             ww->getRenderer()->makeCurrentContext(true);
         }
@@ -416,15 +416,7 @@ void movContext::update_with_mouse_position ( MouseEvent event )
         update_instant_image_mouse ();
     }
     
-    if (m_layout->display_plots_rect().contains(event.getPos()))
-    {
-        std::vector<float> dds (m_layout->plot_rects().size());
-        for (auto pp = 0; pp < m_layout->plot_rects().size(); pp++) dds[pp] = m_layout->plot_rects()[pp].distanceSquared(event.getPos());
-        
-        auto min_iter = std::min_element(dds.begin(),dds.end());
-        mMouseInGraphs = int(min_iter - dds.begin());
-    }
-    
+  
     
 }
 
