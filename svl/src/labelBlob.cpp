@@ -57,9 +57,10 @@ void momento::run(const cv::Mat& image, bool not_binary) const
     std::cout << "  s  " << s << std::endl;
     m_is_loaded = true;
     m_eigen_ok = false;
+    
 }
 
-momento::momento(): m_is_loaded (false), m_eigen_done(false), m_is_nan(true) {
+momento::momento(): m_is_loaded (false), m_eigen_done(false), m_is_nan(true), m_contour_ok(false) {
     m_rotation =  cv::Mat::eye(3, 3, CV_32F);
     m_scale =  cv::Mat::eye(3, 3, CV_32F);
     m_translation =  cv::Mat::eye(3, 3, CV_32F);
@@ -91,6 +92,16 @@ uRadian momento::getOrientation () const
     return m_theta;
 }
 
+void momento::update_contours(const cv::Mat& image){
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    findContours(image, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, m_offset);
+    if (contours.size() >= 0){
+        approxPolyDP(contours[0], m_poly, 7, true);
+        m_perimeter = arcLength(contours[0], close);
+        m_contour_ok = true;
+    }
+}
 /*
  If using Eigen:
  Eigen::Matrix2d covariance;
@@ -179,6 +190,19 @@ svl::labelBlob::labelBlob() : m_results_ready(false){
     
 }
 
+const std::vector<cv::Point>& svl::labelBlob::blob::poly() const {
+    return m_moments.polygon();
+}
+
+const double& svl::labelBlob::blob::perimeter() const {
+    return m_moments.perimeter();
+}
+
+
+void svl::labelBlob::blob::update_contours(const cv::Mat& image) const {
+    std::lock_guard<std::mutex> lock( m_mutex );
+    m_moments.update_contours(image);
+}
 
 svl::labelBlob::labelBlob(const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id, const int minAreaPixelCount) : m_results_ready(false){
     // Signals we provide
@@ -355,10 +379,10 @@ void  labelBlob::run() const {
     {
         int area = m_stats.at<int>(i, cv::CC_STAT_AREA);
         if( area < m_min_area) continue;
-        int x = m_stats.at<int>(Point(0, i));
-        int y = m_stats.at<int>(Point(1, i));
-        int w = m_stats.at<int>(Point(2, i));
-        int h = m_stats.at<int>(Point(3, i));
+        int x = m_stats.at<int>(Point( CC_STAT_LEFT, i));
+        int y = m_stats.at<int>(Point( CC_STAT_TOP, i));
+        int w = m_stats.at<int>(Point(CC_STAT_WIDTH, i));
+        int h = m_stats.at<int>(Point(CC_STAT_HEIGHT, i));
         auto roi = cv::Rect2f (x,y,w,h);
         if(!check(m_threshold_out.cols, m_threshold_out.rows, roi)) continue;
         auto end = std::chrono::high_resolution_clock::now();
@@ -366,6 +390,8 @@ void  labelBlob::run() const {
         auto id = std::chrono::duration_cast<std::chrono::microseconds>(diff).count();
         m_blobs.emplace_back(i, id, roi, area);
         m_blobs.back().update_moments(m_grey);
+        cv::Mat window = m_threshold_out(roi);
+        m_blobs.back().update_contours(window);
         m_blobs.back().update_points(lablemap[i]);
     }
     std::sort (m_blobs.begin(), m_blobs.end(),[](const blob&a, const blob&b){

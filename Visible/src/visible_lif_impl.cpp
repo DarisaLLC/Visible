@@ -840,11 +840,6 @@ const Rectf& lifContext::get_channel_display_rect (const int channel_number_zero
     return m_instant_channel_display_rects[channel_number_zero_based];
 }
 
-#ifndef IMGUI_DEFINE_MATH_OPERATORS
-static ImVec2 operator+(const ImVec2 &a, const ImVec2 &b) {
-    return ImVec2(a.x + b.x, a.y + b.y);
-}
-#endif
 
 void lifContext::add_canvas (){
    
@@ -873,7 +868,21 @@ void lifContext::add_canvas (){
                     const Point2f& pc = mb->motion_surface().center;
                     ivec2 iv(pc.x, pc.y);
                     ImVec2 ic = m_layout->image2display(iv, 1, true);
+                    auto roi = mb->roi();
+                    auto tl = m_layout->image2display(ivec2(roi.x, roi.y), 1);
                     draw_list->AddCircle(ic, 16.0,  IM_COL32(0,0,128,128), 16, 3.0);
+                    draw_list->AddCircle(tl, 16.0,  IM_COL32(128,0,128,128), 16, 3.0);
+                    const std::vector<cv::Point>& cvpts = mb->poly();
+                    if(! cvpts.empty()){
+                        std::vector<ImVec2> impts;
+                        std::transform(cvpts.begin(), cvpts.end(), back_inserter(impts), [&](const cv::Point& f)->ImVec2
+                                       { ivec2 v(f.x,f.y); return m_layout->image2display(v, 1); });
+                        
+                        ImGui::VerticalGradient gradient (impts[0], impts[0]+ImVec2(0,mb->roi().height), ImVec4(0.1f,0.1f, 1.0f, 1.0f),
+                                                          ImVec4(0.1f, 0.1f, 0.1f, 0.0f));
+                        AddConvexPolyFilled(draw_list, impts.data(), impts.size(), gradient);
+                    }
+
                 }
          
                 
