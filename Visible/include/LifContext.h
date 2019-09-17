@@ -176,6 +176,10 @@ private:
     std::weak_ptr<vecOfNamedTrack_t> m_flurescence_trackWeakRef;
     std::weak_ptr<vecOfNamedTrack_t> m_contraction_pci_trackWeakRef;
 
+    // Selection -1 means none selected
+    mutable std::atomic<int> m_selected_cell;
+    mutable std::atomic<int> m_selected_contraction;
+    
     // Contraction
     ssmt_processor::contractionContainer_t m_contractions;
     std::vector<std::string> m_contraction_none = {" Entire "};

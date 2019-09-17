@@ -101,7 +101,6 @@
 		C21A50AB22A9A65900B0AC7D /* core_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01D5229B1F8000B8165D /* core_ssmt.cpp */; };
 		C21A50AC22A9A65900B0AC7D /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C21A50AD22A9A65900B0AC7D /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
-		C21A50AE22A9A65900B0AC7D /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
 		C21A50AF22A9A65900B0AC7D /* highgui.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7F217FDA6600FA9F43 /* highgui.cc */; };
 		C21A50B022A9A65900B0AC7D /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
 		C21A50B122A9A65900B0AC7D /* lineseg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696B1CED3E2C0045FF57 /* lineseg.cpp */; };
@@ -207,6 +206,11 @@
 		C24EA2D3207F07EF00555D16 /* sg_filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24EA2D2207F07EF00555D16 /* sg_filter.cpp */; };
 		C24EA2D4207F081000555D16 /* sg_filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24EA2D2207F07EF00555D16 /* sg_filter.cpp */; };
 		C25261211F66EA910069F665 /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611F1F66EA910069F665 /* pugixml.cpp */; };
+		C253337E233149ED003B3212 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C253337D233149ED003B3212 /* ImGuiExtensions.cpp */; };
+		C253337F233149ED003B3212 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C253337D233149ED003B3212 /* ImGuiExtensions.cpp */; };
+		C2533380233149ED003B3212 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C253337D233149ED003B3212 /* ImGuiExtensions.cpp */; };
+		C2533381233149ED003B3212 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C253337D233149ED003B3212 /* ImGuiExtensions.cpp */; };
+		C2533382233149ED003B3212 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C253337D233149ED003B3212 /* ImGuiExtensions.cpp */; };
 		C254BE841F4F912E00977307 /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C25838102318A6A00068631C /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA576122C31F1600AAAF4F /* libswscale.a */; };
 		C25838112318A6B40068631C /* libdc1394.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575D22C31E8A00AAAF4F /* libdc1394.a */; };
@@ -370,9 +374,6 @@
 		C2819EB121F7E98A00183E44 /* PlayNoLoop.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */; };
 		C2819EC821FA94F000183E44 /* imgui.ini in Resources */ = {isa = PBXBuildFile; fileRef = C2819EC721FA94F000183E44 /* imgui.ini */; };
 		C2819EC921FA94F000183E44 /* imgui.ini in Resources */ = {isa = PBXBuildFile; fileRef = C2819EC721FA94F000183E44 /* imgui.ini */; };
-		C2819ECD2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
-		C2819ECE2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
-		C2819ECF2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
 		C2819ED52201287900183E44 /* visible_scope.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2819ED42201287900183E44 /* visible_scope.png */; };
 		C2820F302175298F00DFA7A6 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
 		C2820F3521752CB000DFA7A6 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
@@ -423,7 +424,6 @@
 		C28B019D229B182100B8165D /* color.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7B217FDA6600FA9F43 /* color.cc */; };
 		C28B019E229B182100B8165D /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C28B019F229B182100B8165D /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
-		C28B01A0229B182100B8165D /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
 		C28B01A1229B182100B8165D /* highgui.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7F217FDA6600FA9F43 /* highgui.cc */; };
 		C28B01A2229B182100B8165D /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
 		C28B01A3229B182100B8165D /* lineseg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696B1CED3E2C0045FF57 /* lineseg.cpp */; };
@@ -601,7 +601,6 @@
 		C2DB72C622591DB700C2B986 /* PlistDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611E1F66EA910069F665 /* PlistDate.cpp */; };
 		C2DB72C722591DB700C2B986 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
 		C2DB72C822591DB700C2B986 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E345F21F2511D00221E68 /* ImSequencer.cpp */; };
-		C2DB72C922591DB700C2B986 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */; };
 		C2DB72CA22591DB700C2B986 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
 		C2DB72CB22591DB700C2B986 /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */; };
 		C2DB72CC22591DB700C2B986 /* color.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7B217FDA6600FA9F43 /* color.cc */; };
@@ -920,6 +919,7 @@
 		C252611E1F66EA910069F665 /* PlistDate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlistDate.cpp; path = ../src/PlistDate.cpp; sourceTree = "<group>"; };
 		C252611F1F66EA910069F665 /* pugixml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pugixml.cpp; path = ../src/pugixml.cpp; sourceTree = "<group>"; };
 		C253337C233053B6003B3212 /* imgui_common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = imgui_common.h; path = ../include/imGuiCustom/imgui_common.h; sourceTree = "<group>"; };
+		C253337D233149ED003B3212 /* ImGuiExtensions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ImGuiExtensions.cpp; path = ../include/imGuiCustom/ImGuiExtensions.cpp; sourceTree = "<group>"; };
 		C254BE851F4FAF5C00977307 /* cvVideoPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cvVideoPlayer.cpp; path = ../src/cvVideoPlayer.cpp; sourceTree = "<group>"; };
 		C254BE871F4FAF7100977307 /* cvVideoPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cvVideoPlayer.h; path = ../include/cvVideoPlayer.h; sourceTree = "<group>"; };
 		C254BEE01F4FB3D300977307 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
@@ -1116,7 +1116,6 @@
 		C2819EAE21F4457800183E44 /* visibleSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = visibleSequencer.h; path = ../include/imGuiCustom/visibleSequencer.h; sourceTree = "<group>"; };
 		C2819EC721FA94F000183E44 /* imgui.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = imgui.ini; path = ../assets/imgui.ini; sourceTree = "<group>"; };
 		C2819ECB2200D3F300183E44 /* ImGuiExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImGuiExtensions.h; path = ../include/imGuiCustom/ImGuiExtensions.h; sourceTree = "<group>"; };
-		C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImGuiExtensions.cpp; path = ../include/imGuiCustom/ImGuiExtensions.cpp; sourceTree = "<group>"; };
 		C2819ED42201287900183E44 /* visible_scope.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = visible_scope.png; path = data/visible_scope.png; sourceTree = "<group>"; };
 		C2819ED622012DE800183E44 /* Resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../include/Resources.h; sourceTree = "<group>"; };
 		C2819ED722015B5700183E44 /* FieldController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FieldController.h; sourceTree = "<group>"; };
@@ -1730,7 +1729,7 @@
 				C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */,
 				C2819EAD21F4457800183E44 /* ImCurveEdit.h */,
 				C2819ECB2200D3F300183E44 /* ImGuiExtensions.h */,
-				C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */,
+				C253337D233149ED003B3212 /* ImGuiExtensions.cpp */,
 				C2819EAC21F4457800183E44 /* ImSequencer.h */,
 				C2819EAE21F4457800183E44 /* visibleSequencer.h */,
 				C253337C233053B6003B3212 /* imgui_common.h */,
@@ -2599,8 +2598,8 @@
 				C21A506922A9835A00B0AC7D /* stats.cpp in Sources */,
 				C23E346021F2511D00221E68 /* ImSequencer.cpp in Sources */,
 				C22DACFF23032E8F00D171EF /* task_manager.cpp in Sources */,
-				C2819ECD2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C2B87C9921D012D700C91E35 /* logger.cpp in Sources */,
+				C253337E233149ED003B3212 /* ImGuiExtensions.cpp in Sources */,
 				C248D6D8224939AC00C2C02F /* VisibleApp.cpp in Sources */,
 				C236D345230F488300ED5627 /* pf.cpp in Sources */,
 				C2618F80217FDA6600FA9F43 /* color.cc in Sources */,
@@ -2679,7 +2678,6 @@
 				C21A50AB22A9A65900B0AC7D /* core_ssmt.cpp in Sources */,
 				C21A50AC22A9A65900B0AC7D /* AVReader.mm in Sources */,
 				C21A50AD22A9A65900B0AC7D /* labelBlob.cpp in Sources */,
-				C21A50AE22A9A65900B0AC7D /* ImGuiExtensions.cpp in Sources */,
 				C21A50AF22A9A65900B0AC7D /* highgui.cc in Sources */,
 				C21A50B022A9A65900B0AC7D /* tinystr.cpp in Sources */,
 				C21A50B122A9A65900B0AC7D /* lineseg.cpp in Sources */,
@@ -2757,13 +2755,13 @@
 				C28B01D8229B1F8000B8165D /* core_ssmt.cpp in Sources */,
 				C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */,
 				C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */,
-				C2819ECF2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C26E558F231C883D00010169 /* imgui_visible_widgets.cpp in Sources */,
 				C2618F85217FDA8F00FA9F43 /* highgui.cc in Sources */,
 				C20BBC031E4E33CE002C7D68 /* tinystr.cpp in Sources */,
 				C232F00B2296FDCB0075B2EE /* lineseg.cpp in Sources */,
 				C2BDEFF021C8237B00A8CB94 /* core_support.cpp in Sources */,
 				C2606E721CED44370045FF57 /* seq_frame_container.cpp in Sources */,
+				C2533380233149ED003B3212 /* ImGuiExtensions.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2868,6 +2866,7 @@
 				C2398A0E21DD8D3100B180A0 /* AVReaderWrapper.mm in Sources */,
 				C26F5FCB21B0AA6D00EAE156 /* labelconnect.cpp in Sources */,
 				C26F5FCC21B0AA6D00EAE156 /* registration.cpp in Sources */,
+				C253337F233149ED003B3212 /* ImGuiExtensions.cpp in Sources */,
 				C26F5FCD21B0AA6D00EAE156 /* sm_producer.cpp in Sources */,
 				C26F5FCE21B0AA6D00EAE156 /* CinderImGui.cpp in Sources */,
 				C26F5FCF21B0AA6D00EAE156 /* bitvector.cpp in Sources */,
@@ -2878,7 +2877,6 @@
 				C26F5FD221B0AA6D00EAE156 /* PlistDate.cpp in Sources */,
 				C23E346121F2511D00221E68 /* ImSequencer.cpp in Sources */,
 				C2CE9C7C22A8983F003C479A /* mathBSpline.cpp in Sources */,
-				C2819ECE2200D60A00183E44 /* ImGuiExtensions.cpp in Sources */,
 				C26F5FD321B0AA6D00EAE156 /* imgui.cpp in Sources */,
 				C26F5FD521B0AA6D00EAE156 /* color.cc in Sources */,
 				C26F5FD621B0AA6D00EAE156 /* self_similarity.cpp in Sources */,
@@ -2949,10 +2947,10 @@
 				C28B01E4229CC66C00B8165D /* lif_browser.cpp in Sources */,
 				C28B019B229B182100B8165D /* opencv_draw.cpp in Sources */,
 				C28B019C229B182100B8165D /* self_similarity.cpp in Sources */,
+				C2533382233149ED003B3212 /* ImGuiExtensions.cpp in Sources */,
 				C28B019D229B182100B8165D /* color.cc in Sources */,
 				C28B019E229B182100B8165D /* AVReader.mm in Sources */,
 				C28B019F229B182100B8165D /* labelBlob.cpp in Sources */,
-				C28B01A0229B182100B8165D /* ImGuiExtensions.cpp in Sources */,
 				C28B01A1229B182100B8165D /* highgui.cc in Sources */,
 				C28B01A2229B182100B8165D /* tinystr.cpp in Sources */,
 				C28B01A3229B182100B8165D /* lineseg.cpp in Sources */,
@@ -2977,6 +2975,7 @@
 				C2DB729D22591DB700C2B986 /* imgui_widgets.cpp in Sources */,
 				C2DB729E22591DB700C2B986 /* Swatch.cpp in Sources */,
 				C2DB729F22591DB700C2B986 /* time_spec.cpp in Sources */,
+				C2533381233149ED003B3212 /* ImGuiExtensions.cpp in Sources */,
 				C2DB72A022591DB700C2B986 /* algo_ssmt.cpp in Sources */,
 				C2DB72A122591DB700C2B986 /* seq_frame_container.cpp in Sources */,
 				C2DB72A222591DB700C2B986 /* Plist.cpp in Sources */,
@@ -3035,7 +3034,6 @@
 				C2CE9C8A22A97D2D003C479A /* math.cpp in Sources */,
 				C2DB72C722591DB700C2B986 /* imgui.cpp in Sources */,
 				C2DB72C822591DB700C2B986 /* ImSequencer.cpp in Sources */,
-				C2DB72C922591DB700C2B986 /* ImGuiExtensions.cpp in Sources */,
 				C2DB72CA22591DB700C2B986 /* logger.cpp in Sources */,
 				C2CE9C7E22A8983F003C479A /* mathBSpline.cpp in Sources */,
 				C2DB72CB22591DB700C2B986 /* VisibleApp.cpp in Sources */,

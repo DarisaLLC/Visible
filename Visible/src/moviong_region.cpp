@@ -83,9 +83,9 @@ void pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints, cv::RotatedRect
             return a.second > b.second;
         });
         results = ds;
-        auto print = [](std::pair<std::pair<int,int>,float>& vv) { std::cout << "::" << vv.second; };
-        std::for_each(ds.begin(), ds.end(), print);
-        std::cout << '\n';
+    //    auto print = [](std::pair<std::pair<int,int>,float>& vv) { std::cout << "::" << vv.second; };
+     //   std::for_each(ds.begin(), ds.end(), print);
+    //    std::cout << '\n';
     };
     
     std::vector<std::pair<std::pair<int,int>,float>> ranked_corners;
@@ -110,8 +110,8 @@ void pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints, cv::RotatedRect
     float dTB = sideTwo.length();
     rotated_rect.size.width = dTB;
     rotated_rect.size.height = dLR;
-    std::cout << toDegrees(sideOne.angle().Double()) << " Side One " << sideOne.length() << std::endl;
-    std::cout << toDegrees(sideTwo.angle().Double()) << " Side Two " << sideTwo.length() << std::endl;
+   // std::cout << toDegrees(sideOne.angle().Double()) << " Side One " << sideOne.length() << std::endl;
+   // std::cout << toDegrees(sideTwo.angle().Double()) << " Side Two " << sideTwo.length() << std::endl;
     
     uDegree angle = sideTwo.angle();
     if (angle.Double() < -45.0){
