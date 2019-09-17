@@ -341,6 +341,7 @@ private:
     async_vecOfNamedTrack_t m_contraction_pci_tracks_asyn;
     
     std::shared_ptr<contractionLocator> m_caRef;
+    
     mutable std::vector<cv::Mat> m_affine_windows;
     mutable std::vector<float> m_affine_translations;
     mutable std::vector<float> m_norm_affine_translations;
