@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <algorithm>
+#include <cmath>
 #include "contraction.hpp"
 #include "sg_filter.h"
 #include "core/core.hpp"
@@ -34,8 +35,8 @@ namespace anonymous
             dst[ii] = pow (dd, 1.0 / pw);
         }
     }
-
-
+    
+    
     void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
     {
         vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
@@ -70,7 +71,7 @@ std::shared_ptr<contractionLocator> contractionLocator::create()
 }
 
 std::shared_ptr<contractionLocator> contractionLocator::getShared () {
-        return shared_from_this();
+    return shared_from_this();
 }
 
 contractionLocator::contractionLocator() :
@@ -78,7 +79,7 @@ m_cached(false),  mValidInput (false)
 {
     m_median_levelset_frac = m_params.median_levelset_fraction();
     m_peaks.resize(0);
-    m_id = -2; 
+    m_id = -2;
     // Signals we provide
     signal_contraction_ready = createSignal<contractionLocator::sig_cb_contraction_ready> ();
     signal_pci_available = createSignal<contractionLocator::sig_cb_pci_available> ();
@@ -146,7 +147,7 @@ size_t contractionLocator::recompute_signal () const
         val = val / count;
         m_signal[ii] = val;
     }
-      stl_utils::save_csv(m_signal,"/Volumes/medvedev/Users/arman/tmp/signal.csv");
+    stl_utils::save_csv(m_signal,"/Volumes/medvedev/Users/arman/tmp/signal.csv");
     return count;
 }
 void contractionLocator::update() const{
@@ -158,7 +159,7 @@ void contractionLocator::update() const{
 }
 
 bool contractionLocator::get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& m_contraction) const{
- 
+    
     if (! mValidInput) return false;
     contraction_t::clear(m_contraction);
     
@@ -170,7 +171,7 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
         return (-coeffs[1] / (2 * coeffs[2]));
     };
     const sigContainer_t& m_fder = m_signal;
-
+    
     // Find distance between this peak and its previous and next peak or the begining or the end of the signal
     
     /* Contraction Start
@@ -180,9 +181,13 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
      *    dy = y(x-1) - y(x). x at minimum dy
      *
      */
+    bool edge_case = peak_indices[src_peak_index] < 16 || (m_fder.size() - peak_indices[src_peak_index]) < 16;
+    if (edge_case) return false;
+    
     m_contraction.contraction_peak.first = peak_indices[src_peak_index];
     std::vector<double>::const_iterator cpt = m_fder.begin() + peak_indices[src_peak_index];
     std::vector<double> results;
+    // Left Boundary: If there is a peak behind us, use that other wise signal start
     auto left_boundary = src_peak_index > 0 ? peak_indices[src_peak_index - 1] : 0;
     results.reserve(m_contraction.contraction_peak.first - left_boundary);
     std::adjacent_difference (m_fder.begin()+left_boundary, cpt, std::back_inserter(results));
@@ -190,28 +195,31 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
     auto loc = std::distance(results.begin(), min_elem);
     
     auto loc_contraction_quadratic = maxima(m_fder.begin()+left_boundary, cpt);
-    auto range = std::max(size_t(loc_contraction_quadratic), size_t(loc)) -
-        std::min(size_t(loc_contraction_quadratic), size_t(loc));
-    m_contraction.contraction_start.first = range / 2;
+    auto value = (! std::signbit(loc_contraction_quadratic))
+        ? std::max(size_t(loc_contraction_quadratic), size_t(loc)) - std::min(size_t(loc_contraction_quadratic), size_t(loc)) / 2
+        : loc;
+    m_contraction.contraction_start.first = value;
     
+    auto right_boundary = (src_peak_index == (peak_indices.size() - 1))
+        ? m_fder.size() - 1
+        : peak_indices[src_peak_index + 1];
     /* relaxation End
      * 1. Find the location of maxima of a quadratic fit to the data before
      *    Maxima is at -b / 2c (y = a + bx + cx^2 => dy/dx = b + 2cx at Maxima dy/dx = 0 -> x = -b/2c
      */
-    auto loc_relaxation_quadratic = maxima(cpt, m_fder.end());
+    auto loc_relaxation_quadratic = maxima(cpt, m_fder.begin()+right_boundary);
     m_contraction.relaxation_end.first =  m_contraction.contraction_peak.first + loc_relaxation_quadratic;
     
     /*
      * Use Median visual rank value for relaxation visual rank
      */
     m_contraction.relaxation_visual_rank = svl::Median(m_fder);
-
+    
     return true;
 }
-    
+
 // @todo: add multi-contraction
-bool contractionLocator::find_best ()
-{
+bool contractionLocator::find_best (){
     assert(verify_input());
     if(! isPreProcessed())
         update ();
@@ -241,21 +249,18 @@ bool contractionLocator::find_best ()
     
     svl::findPeaks(valleys, peaks_idx);
     stringstream ss;
-    for (auto idx : peaks_idx){
-        ss << idx << ",";
-    }
+    for (auto idx : peaks_idx) ss << idx << ",";
     vlogger::instance().console()->info(ss.str());
-
+    
     auto save_csv = [](const std::shared_ptr<contractionProfile>& cp, fs::path& root_path){
-        
         auto folder = stl_utils::now_string();
         auto folder_path = root_path / folder;
         boost::system::error_code ec;
         if(!fs::exists(folder_path)){
             fs::create_directory(folder_path, ec);
             if (ec != boost::system::errc::success){
-            std::string msg = "Could not create " + folder_path.string() ;
-            vlogger::instance().console()->error(msg);
+                std::string msg = "Could not create " + folder_path.string() ;
+                vlogger::instance().console()->error(msg);
                 return false;
             }
             std::string basefilename = folder_path.string() + boost::filesystem::path::preferred_separator;
@@ -271,24 +276,29 @@ bool contractionLocator::find_best ()
     };
     
     assert(lowest.first < invalid);
-    m_peaks.emplace_back(peaks_idx[0], m_signal[peaks_idx[0]]);
-    contraction_t ct;
- //   ct.first = 0;ct.second = size();
-    if(get_contraction_at_point(0, peaks_idx, ct)){
-        auto profile = std::make_shared<contractionProfile>(ct);
-        profile->compute_interpolated_geometries_and_force(m_signal);
-        m_contractions.emplace_back(profile->contraction());
-
-        //@todo use cache_root for this
-        fs::path sp ("/Volumes/medvedev/Users/arman/tmp/");
-        save_csv(profile, sp);
-        
-        if (signal_contraction_ready && signal_contraction_ready->num_slots() > 0)
-            signal_contraction_ready->operator()(m_contractions);
-        std::string c0("Contraction Detected @ ");
-        c0 = c0 + to_string(ct.contraction_peak.first);
-        mValidOutput = true;
+    for (auto pp = 0; pp < peaks_idx.size(); pp++){
+        m_peaks.emplace_back(peaks_idx[pp], m_signal[peaks_idx[pp]]);
     }
+    
+    for (auto pp = 0; pp < peaks_idx.size(); pp++){
+        
+        contraction_t ct;
+        if(get_contraction_at_point(pp, peaks_idx, ct)){
+            
+            auto profile = std::make_shared<contractionProfile>(ct);
+            profile->compute_interpolated_geometries_and_force(m_signal);
+            m_contractions.emplace_back(profile->contraction());
+            
+            //@todo use cache_root for this
+            fs::path sp ("/Volumes/medvedev/Users/arman/tmp/");
+            save_csv(profile, sp);
+        }
+    }
+    
+    if (signal_contraction_ready && signal_contraction_ready->num_slots() > 0)
+        signal_contraction_ready->operator()(m_contractions);
+
+    
     return true;
 }
 
@@ -310,7 +320,7 @@ bool contractionLocator::verify_input () const
 {
     bool ok = ! m_entropies.empty();
     if (!ok)return false;
-
+    
     if ( ! m_SMatrix.empty () ){
         ok = m_entropies.size() == m_entsize;
         if (!ok) return ok;
@@ -318,7 +328,7 @@ bool contractionLocator::verify_input () const
         if (!ok) return ok;
         for (int row = 0; row < m_entsize; row++)
         {
-      //      std::cout << "[" << row << "]" << m_SMatrix[row].size () << std::endl;
+            //      std::cout << "[" << row << "]" << m_SMatrix[row].size () << std::endl;
             ok &= m_SMatrix[row].size () == m_entsize;
             if (!ok) return ok;
         }
@@ -336,7 +346,7 @@ template boost::signals2::connection contractionLocator::registerCallback(const 
 contractionProfile::contractionProfile (contraction_t& ct/*, const contractionLocator::Ref & cl */ ):
 m_ctr(ct) /*, m_connect(cl) */
 {
-
+    
 }
 
 
@@ -348,7 +358,7 @@ m_ctr(ct) /*, m_connect(cl) */
  */
 
 void contractionProfile::compute_interpolated_geometries_and_force(const std::vector<double>& signal){
-
+    
     const double relaxed_length = contraction().relaxation_visual_rank;
     m_fder = signal;
     /*
@@ -358,7 +368,7 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
     auto c_end = m_ctr.relaxation_end.first;
     assert(!m_fder.empty());
     assert(c_start >= 0 && c_start < c_end && c_end < m_fder.size());
-
+    
     // Compute force using cardio model
     m_elongation.clear();
     m_interpolated_length.clear();
@@ -383,14 +393,14 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
         m_interpolated_length.push_back(linMul);
         m_elongation.push_back(elon);
     }
-
+    
     // Copy Results Out.
     m_ctr.force = m_force;
     m_ctr.elongation = m_elongation;
     m_ctr.interpolated_length = m_interpolated_length;
- 
     
     
-
+    
+    
 }
 

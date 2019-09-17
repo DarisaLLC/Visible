@@ -73,10 +73,8 @@ void ssmt_result::contraction_ready (ssmt_processor::contractionContainer_t& con
 //@todo remove this hack as it is to run a particular file and get results.
 void ssmt_result::signal_sm1d_ready(const input_channel_selector_t& in){
     if(m_input.region() != in.region()) return;
-    if (in.region() == 1) m_caRef->find_best();
-    std::stringstream ss;
-    ss << __FILE__ << "::" << __LINE__ << " FIX ME " << in.region() << "," << in.channel() << std::endl;
-     vlogger::instance().console()->info(ss.str());
+    m_caRef->find_best();
+    
     
 }
 
