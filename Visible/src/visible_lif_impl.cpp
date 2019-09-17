@@ -13,46 +13,40 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 
 #include "opencv2/stitching.hpp"
+#include <strstream>
+#include <algorithm>
+#include <future>
+#include <mutex>
 #include <stdio.h>
 #include "guiContext.h"
 #include "LifContext.h"
 #include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
-#include "cinder/Timeline.h"
 #include "cinder/Timer.h"
-#include "cinder/params/Params.h"
 #include "cinder/ImageIo.h"
 #include "cinder/ip/Blend.h"
 #include "opencv2/highgui.hpp"
 #include "cinder/ip/Flip.h"
 #include "otherIO/lifFile.hpp"
-#include <strstream>
-#include <algorithm>
-#include <future>
-#include <mutex>
+
 #include "timed_value_containers.h"
 #include "cinder_xchg.hpp"
 #include "visible_layout.hpp"
 #include "vision/opencv_utils.hpp"
-#include "vision/histo.h"
 #include "core/stl_utils.hpp"
-#include "sm_producer.h"
 #include "lif_content.hpp"
 #include "core/signaler.h"
 #include "contraction.hpp"
 #include "logger/logger.hpp"
 #include "cinder/Log.h"
 #include "CinderImGui.h"
-#include "gui_handler.hpp"
-#include "gui_base.hpp"
-#include <boost/any.hpp>
-#include "ImGuiExtensions.h"
+#include "ImGuiExtensions.h" // for 64bit count support
 #include "Resources.h"
 #include "cinder_opencv.h"
 #include "imguivariouscontrols.h"
 #include <boost/range/irange.hpp>
-#include "imgui_plot.h"
-
+//#include "imgui_plot.h"
+#include "imgui_visible_widgets.hpp"
 
 using namespace ci;
 using namespace ci::app;
@@ -107,6 +101,8 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const f
     m_playback_speed = 1;
     m_input_selector = input_channel_selector_t(-1,0);
     m_selector_last = -1;
+    m_selected_cell = -1;
+    m_selected_contraction = -1;
     m_show_display_and_controls = false;
     m_show_results = false;
     m_show_playback = false;
@@ -858,30 +854,36 @@ void lifContext::add_canvas (){
                 ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
                 ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
                 ImRect regionRect(canvas_pos, canvas_pos + canvas_size);
+                // Update image/display coordinate transformer
                 m_layout->update_display_rect(canvas_pos, canvas_pos + canvas_size);
-                ImVec2 midv = m_layout->image2display(ivec2(0,128));
-                ImVec2 midh = m_layout->image2display(ivec2(512,128));
-//                ImVec2 midv(canvas_pos.x, canvas_pos.y + canvas_size.y / 2);
-//                ImVec2 midh(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y / 2);
+                // Draw Divider between channels
+                ImVec2 midv = m_layout->image2display(ivec2(0,mMediaInfo.channel_size.height));
+                ImVec2 midh = m_layout->image2display(ivec2(mMediaInfo.channel_size.width, mMediaInfo.channel_size.height));
                 draw_list->AddLine(midv, midh, IM_COL32(0,0,128,128), 3.0f);
+                int index = 0;
                 for (const auto& mb : m_lifProcRef->moving_bodies()){
                     const Point2f& pc = mb->motion_surface().center;
                     ivec2 iv(pc.x, pc.y);
                     ImVec2 ic = m_layout->image2display(iv, 1, true);
                     auto roi = mb->roi();
                     auto tl = m_layout->image2display(ivec2(roi.x, roi.y), 1);
-                    draw_list->AddCircle(ic, 16.0,  IM_COL32(0,0,128,128), 16, 3.0);
-                    draw_list->AddCircle(tl, 16.0,  IM_COL32(128,0,128,128), 16, 3.0);
+                    DrawCross(draw_list, ImVec4(0.0f, 1.0f, 0.0f, 0.5f), ImVec2(16,16), false, tl);
+                    auto selected = DrawCross(draw_list, ImVec4(1.0f, 0.0f, 0.0f, 0.5f), ImVec2(16,16),
+                                              m_selected_cell == index, ic);
+                    if(selected == 2){
+                        m_selected_cell = index;
+                        std::cout << " Cell " << index << " is Selected" << std::endl;
+                    }
+
                     const std::vector<cv::Point>& cvpts = mb->poly();
                     if(! cvpts.empty()){
                         std::vector<ImVec2> impts;
                         std::transform(cvpts.begin(), cvpts.end(), back_inserter(impts), [&](const cv::Point& f)->ImVec2
                                        { ivec2 v(f.x,f.y); return m_layout->image2display(v, 1); });
                         
-                        ImGui::VerticalGradient gradient (impts[0], impts[0]+ImVec2(0,mb->roi().height), ImVec4(0.1f,0.1f, 1.0f, 1.0f),
-                                                          ImVec4(0.1f, 0.1f, 0.1f, 0.0f));
-                        AddConvexPolyFilled(draw_list, impts.data(), impts.size(), gradient);
+                        draw_list->AddConvexPolyFilled( impts.data(), impts.size(), IM_COL32(128, 0, 128,128));
                     }
+                    index++;
 
                 }
          
@@ -1171,14 +1173,13 @@ void lifContext::add_regions (bool* p_open)
     if (ImGui::Begin(wCells, p_open, ImGuiWindowFlags_MenuBar))
     {
         // left
-        static int selected = 0;
         ImGui::BeginChild("left pane", ImVec2(150, 0), true);
         for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++)
         {
             char label[128];
             sprintf(label, "Cell %d", i);
-            if (ImGui::Selectable(label, selected == i))
-                selected = i;
+            if (ImGui::Selectable(label, m_selected_cell == i))
+                m_selected_cell = i;
         }
         ImGui::EndChild();
         ImGui::SameLine();
@@ -1186,14 +1187,19 @@ void lifContext::add_regions (bool* p_open)
         // right
         ImGui::BeginGroup();
         ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
-        ImGui::Text("Contraction: %d", selected);
+        if (m_selected_cell >= 0)
+            ImGui::Text(" Cell : %d", (int)m_selected_cell);
+        else
+            ImGui::Text(" None Selected ");
+            
         ImGui::Separator();
-        if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
+        if (m_selected_cell >= 0 && ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None) )
         {
             if (ImGui::BeginTabItem("Description"))
             {
-                auto mr = m_lifProcRef->moving_bodies()[selected];
-                ImGui::TextWrapped("%d", selected);
+                auto mr = m_lifProcRef->moving_bodies()[m_selected_cell];
+                int tmp = m_selected_cell;
+                ImGui::TextWrapped("%d", tmp);
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Details"))

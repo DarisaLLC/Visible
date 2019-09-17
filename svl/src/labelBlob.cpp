@@ -44,7 +44,7 @@ void momento::run(const cv::Mat& image, bool not_binary) const
     mc.y += m_offset.y;
 
     m_theta = (mu11p != 0) ? 0.5 * std::atan((2 * mu11p) / (mu20p - mu02p)) : 0.0;
-   
+#if 0
     double u30 = m30 - 3.0*mc.x*m20 + 2.0*mc.x*mc.x*m10;
     double u21 = m21 - 2.0*mc.x*m11 - mc.y*m20 + 2.0*mc.x*mc.x*m01;
     double u12 = m12 - 2.0*mc.y*m11 - mc.x*m02 + 2.0*mc.y*mc.y*m10;
@@ -55,6 +55,8 @@ void momento::run(const cv::Mat& image, bool not_binary) const
     double s = u30*qx*qx*qx + 3.0*u21*qx*qx*qy + 3.0*u12*qx*qy*qy + u03*qy*qy*qy;
  
     std::cout << "  s  " << s << std::endl;
+#endif
+    
     m_is_loaded = true;
     m_eigen_ok = false;
     
@@ -120,16 +122,18 @@ void momento::getDirectionals () const
     if (m_eigen_done) return;
     
 
-    auto printMat = [](Mat& A){
-        for(int r=0; r<A.rows; r++)
-        {
-            for(int c=0; c<A.cols; c++)
-            {
-                cout<<A.at<double>(r,c)<<'\t';
-            }
-            cout<<endl;
-        }
-    };
+//    auto stringifyMat = [](Mat& A){
+//        std::stringstream ss;
+//        for(int r=0; r<A.rows; r++)
+//        {
+//            for(int c=0; c<A.cols; c++)
+//            {
+//                ss <<A.at<double>(r,c)<<'\t';
+//            }
+//            ss <<endl;
+//        }
+//        return ss.str();
+//    };
 
 
     // Compute the covariance matrix in order to determine scaling matrix
@@ -153,13 +157,13 @@ void momento::getDirectionals () const
             m_scale.at<float>(1, 1) = std::pow(e_vals.at<float>(0, 0) * e_vals.at<float>(1, 0), 0.25) / std::sqrt(e_vals.at<float>(0, 0));
         }
         
-        printMat(m_scale);
+       // auto msg = stringifyMat(m_scale);
+        
     }
     if (eigenok){
         int ev = (e_vals.at<float>(0,0) > e_vals.at<float>(0,1)) ? 0 : 1;
         double angle = atan2 (e_vects.at<float>(ev, 0),e_vects.at<float>(ev, 1));
-        double asr = e_vals.at<float>(0,0) / e_vals.at<float>(1,0);
-          std::cout << "  asr  " << asr << std::endl;
+        m_asr = e_vals.at<float>(0,0) / e_vals.at<float>(1,0);
         
         double mm2 = mu20p - mu02p;
         auto tana = mm2 + std::sqrt (4*mu11p*mu11p + mm2*mm2);

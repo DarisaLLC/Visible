@@ -397,7 +397,8 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
 
 
 void ssmt_processor::signal_geometry_done (int count, const input_channel_selector_t& in){
-    std::cout << "ssmt_processor called geom cb " << count << std::endl;
+    auto msg = "ssmt_processor called geom cb " + toString(count);
+    vlogger::instance().console()->info(msg);
 }
 
 // channel_index which channel of multi-channel input. Usually visible channel is the last one
@@ -523,7 +524,9 @@ void ssmt_processor::median_leveled_pci (namedTrack_t& track, const input_channe
     }
     catch(const std::exception & ex)
     {
-        std::cout <<  ex.what() << std::endl;
+        stringstream ss;
+        ss << __FILE__  << ":::" << __LINE__ << ex.what();
+        vlogger::instance().console()->info(ss.str());
     }
     // Signal we are done with median level set
     if (signal_sm1dmed_ready && signal_sm1dmed_ready->num_slots() > 0)

@@ -506,7 +506,7 @@ void VisibleApp::draw()
 void VisibleApp::update_log (const std::string& msg)
 {
     if (msg.length() > 2)
-        std::cout << msg.c_str ();
+        vlogger::instance().console()->info(msg);
 }
 
 void VisibleApp::displayChange()

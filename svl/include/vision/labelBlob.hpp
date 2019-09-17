@@ -60,6 +60,8 @@ namespace svl
         const cv::Mat& biLevel () const { return m_bilevel; }
         const std::vector<cv::Point>& polygon () const { return m_poly; }
         const double& perimeter () const { return m_perimeter; }
+        const float& asr () const { return m_asr; }
+        
         
     private:
         mutable cv::Mat m_bilevel;
@@ -70,6 +72,7 @@ namespace svl
         mutable double  mu11p,mu20p,mu02p;
         mutable std::vector<cv::Point> m_poly;
         mutable double m_perimeter;
+        mutable float m_asr;
         mutable cv::Point m_offset;
         mutable cv::Size m_size;
         mutable double m_a;

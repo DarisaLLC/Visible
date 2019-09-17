@@ -240,9 +240,11 @@ bool contractionLocator::find_best ()
     std::transform(m_signal.begin(), m_signal.end(), valleys.begin(), [](double f)->double { return 1.0 - f; });
     
     svl::findPeaks(valleys, peaks_idx);
+    stringstream ss;
     for (auto idx : peaks_idx){
-        std::cout << idx << std::endl;
+        ss << idx << ",";
     }
+    vlogger::instance().console()->info(ss.str());
 
     auto save_csv = [](const std::shared_ptr<contractionProfile>& cp, fs::path& root_path){
         
