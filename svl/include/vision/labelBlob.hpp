@@ -28,6 +28,16 @@ using namespace cv;
 namespace svl
 {
     
+
+    struct component_stats{
+        int index;
+        cv::Rect r;
+        int area, bb_area;
+        double density, hwratio;
+        component_stats(cv::Rect r, int area, int i);
+    };
+
+    
     class momento : CvMoments
     {
     public:
@@ -38,6 +48,7 @@ namespace svl
         momento(const cv::Mat&, bool not_binary = false);
         
         void run (const cv::Mat&, bool not_binary = false) const;
+        void update_contours (const cv::Mat&);
         const Point2f& com () const { return mc; }
         fPair getEllipseAspect () const;
         uRadian getOrientation () const;
@@ -47,6 +58,8 @@ namespace svl
         bool isNotBinary () const { return m_not_binary; }
         bool isEigenDone () const { return m_eigen_done; }
         const cv::Mat& biLevel () const { return m_bilevel; }
+        const std::vector<cv::Point>& polygon () const { return m_poly; }
+        const double& perimeter () const { return m_perimeter; }
         
     private:
         mutable cv::Mat m_bilevel;
@@ -55,7 +68,8 @@ namespace svl
         mutable cv::Mat m_translation;
         mutable cv::Mat m_covar;
         mutable double  mu11p,mu20p,mu02p;
-        
+        mutable std::vector<cv::Point> m_poly;
+        mutable double m_perimeter;
         mutable cv::Point m_offset;
         mutable cv::Size m_size;
         mutable double m_a;
@@ -69,6 +83,7 @@ namespace svl
         mutable bool m_eigen_done;
         mutable bool m_is_nan;
         mutable bool m_not_binary;
+        mutable bool m_contour_ok;
         void getDirectionals () const;
         
     };
@@ -130,13 +145,15 @@ public:
         bool operator < (const blob& rhs) const { return m_iarea < rhs.iarea(); }
         
         void update_moments (const cv::Mat& image) const;
+        void update_contours (const cv::Mat& image) const;
         void update_points (const std::vector<cv::Point>& ) const;
         bool moments_ready () const { return m_moments_ready; }
         const cv::Rect2f& roi () const { return m_roi; }
         const svl::momento& moments () const { return m_moments; }
         float extend () const { return m_extend;}
         int iarea () const { return m_iarea; }
-        
+        const std::vector<cv::Point>& poly () const;
+        const double& perimeter () const;
         
         cv::RotatedRect rotated_roi () const;
         cv::RotatedRect rotated_roi_PCA () const;

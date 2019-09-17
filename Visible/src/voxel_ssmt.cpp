@@ -124,6 +124,7 @@ void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
     auto hm = std::max_element(hist.begin(), hist.end());
     if(hm == hist.end()){
         vlogger::instance().console()->error("motion signal error");
+        return;
     }
 
     double motion_peak(std::distance(hist.begin(), hm));
@@ -131,38 +132,28 @@ void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
     // Median Blur before up sizeing.
     cv::medianBlur(ftmp, ftmp, 5);
     
-    // Stright resize. Add pads afterwards
+    // Straight resize. Add pads afterwar
     cv::Size bot(ftmp.cols * m_voxel_sample.first,ftmp.rows * m_voxel_sample.second);
     cv::Mat f_temporal (bot, CV_32F);
     cv::resize(ftmp, f_temporal, bot, 0, 0, INTER_NEAREST);
     ftmp = getPadded(f_temporal, half_offset, 0.0);
 
-    std::vector<DBSCAN::Point> ps;
-    for (cv::Point& pt : m_var_peaks){
-        DBSCAN::Point p;
-        p.x = pt.x;p.y = pt.y; p.z = ftmp.at<float>(pt.y,pt.x);
-        p.clusterID = UNCLASSIFIED;
-        ps.push_back(p);
-    }
-
     ftmp = ftmp * 255.0f;
     ftmp.convertTo(m_temporal_ss, CV_8U);
     
-    assert(ps.size() == m_var_peaks.size());
-//    DBSCAN ds(4, 10.0 , ps);
-//    ds.run();
-//
-//    auto pspts = ds.points();
-//    DBSCAN::dbHist_t ch = ds.cluster_hist();
-//    std::cout << ch << std::endl;
-
+    if(m_var_peaks.size() == 0){
+        vlogger::instance().console()->error("motion space flat" );
+        return;
+    }
     // Sum sim under the var peaks
+    // @note: Temporal Info is collected at full res. Voxel segmentation is done at reduce res
     float peaks_sums = 0.0f;
     for (cv::Point& pt : m_var_peaks)
         peaks_sums += m_temporal_ss.at<uint8_t>(pt.y,pt.x);
     auto peaks_average = peaks_sums / int(m_var_peaks.size());
     
-    std::cout << "peaks_average: " << peaks_average << " Global Peak " << motion_peak << std::endl;
+    msg = " Temporal Peak Average  @ (" + to_string(peaks_average) + ", Motion Peak " + to_string(motion_peak) + ")";
+    vlogger::instance().console()->info("starting " + msg);
     
     m_measured_area = Rectf(0,0,bot.width, bot.height);
     assert(m_temporal_ss.cols == m_measured_area.getWidth() + size_diff.first);

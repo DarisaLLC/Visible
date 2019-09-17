@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "ImCurveEdit.h"
 #include "imgui_internal.h"
+#include "imgui_common.h"
 #include "timed_value_containers.h"
 
 #include <cstddef>
@@ -38,7 +39,7 @@ using namespace std;
  @param rhs ImVec2
  @return lhs - rhs
  */
-static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
+//static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
 
 
 class TimeDataCollection : public ImCurveEdit::Delegate

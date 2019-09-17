@@ -919,6 +919,7 @@
 		C252611B1F66E95B0069F665 /* Plist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Plist.cpp; path = ../src/Plist.cpp; sourceTree = "<group>"; };
 		C252611E1F66EA910069F665 /* PlistDate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlistDate.cpp; path = ../src/PlistDate.cpp; sourceTree = "<group>"; };
 		C252611F1F66EA910069F665 /* pugixml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pugixml.cpp; path = ../src/pugixml.cpp; sourceTree = "<group>"; };
+		C253337C233053B6003B3212 /* imgui_common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = imgui_common.h; path = ../include/imGuiCustom/imgui_common.h; sourceTree = "<group>"; };
 		C254BE851F4FAF5C00977307 /* cvVideoPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cvVideoPlayer.cpp; path = ../src/cvVideoPlayer.cpp; sourceTree = "<group>"; };
 		C254BE871F4FAF7100977307 /* cvVideoPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cvVideoPlayer.h; path = ../include/cvVideoPlayer.h; sourceTree = "<group>"; };
 		C254BEE01F4FB3D300977307 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
@@ -1732,6 +1733,7 @@
 				C2819ECC2200D60A00183E44 /* ImGuiExtensions.cpp */,
 				C2819EAC21F4457800183E44 /* ImSequencer.h */,
 				C2819EAE21F4457800183E44 /* visibleSequencer.h */,
+				C253337C233053B6003B3212 /* imgui_common.h */,
 				C23E346221F254DE00221E68 /* ImCurveEdit.cpp */,
 				C23E345F21F2511D00221E68 /* ImSequencer.cpp */,
 			);
