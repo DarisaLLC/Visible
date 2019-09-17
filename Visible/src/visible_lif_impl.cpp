@@ -209,7 +209,9 @@ void lifContext::setup()
 
 void lifContext::signal_sm1d_ready (const input_channel_selector_t& dummy)
 {
-    vlogger::instance().console()->info("self-similarity available: ");
+    stringstream ss;
+    ss << svl::toString(dummy.region()) << " self-similarity available ";
+    vlogger::instance().console()->info(ss.str());
 }
 
 void lifContext::signal_sm1dmed_ready (const input_channel_selector_t& dummy2)
