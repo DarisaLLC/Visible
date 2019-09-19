@@ -138,7 +138,7 @@ void lifContext::setup_signals(){
     boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(flu_stats_ready_cb);
     
     // Support lifProcessor::initial ss results available
-    std::function<void (const input_channel_selector_t&)> sm1d_ready_cb = boost::bind (&lifContext::signal_sm1d_ready, shared_from_above(), _1);
+    std::function<void (std::vector<float> &, const input_channel_selector_t&)> sm1d_ready_cb = boost::bind (&lifContext::signal_sm1d_ready, shared_from_above(), _1, _2);
     boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_ready_cb);
     
     // Support lifProcessor::median level set ss results available
@@ -146,7 +146,8 @@ void lifContext::setup_signals(){
     boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_ready_cb);
     
     // Support lifProcessor::contraction results available
-    std::function<void (ssmt_processor::contractionContainer_t&)> contraction_ready_cb = boost::bind (&lifContext::signal_contraction_ready, shared_from_above(), _1);
+    std::function<void (ssmt_processor::contractionContainer_t&,const input_channel_selector_t&)> contraction_ready_cb =
+        boost::bind (&lifContext::signal_contraction_ready, shared_from_above(), _1, _2);
     boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_ready_cb);
     
     // Support lifProcessor::geometry_ready
@@ -207,7 +208,7 @@ void lifContext::setup()
  *
  ************************/
 
-void lifContext::signal_sm1d_ready (const input_channel_selector_t& dummy)
+void lifContext::signal_sm1d_ready (std::vector<float> & signal, const input_channel_selector_t& dummy)
 {
     stringstream ss;
     ss << svl::toString(dummy.region()) << " self-similarity available ";
@@ -238,12 +239,14 @@ void lifContext::signal_flu_stats_ready ()
     vlogger::instance().console()->info(" Flu Stats Available ");
 }
 
-void lifContext::signal_contraction_ready (ssmt_processor::contractionContainer_t& contras)
+void lifContext::signal_contraction_ready (ssmt_processor::contractionContainer_t& contras, const input_channel_selector_t& in)
 {
     // Pauses playback if playing and restore it at scope's end
     scopedPause sp(std::shared_ptr<lifContext>(shared_from_above(), stl_utils::null_deleter () ));
     
     if (contras.empty()) return;
+    
+    m_cell2contractions_map[in.region()] = contras;
     
     // @note: We are handling one contraction for now.
     m_contractions = contras;
@@ -256,7 +259,7 @@ void lifContext::signal_contraction_ready (ssmt_processor::contractionContainer_
                          ctr.relaxation_end.first,
                          ctr.contraction_peak.first);
 
-    update_contraction_selection();
+    update_sequencer();
     
 }
 
@@ -425,7 +428,7 @@ void lifContext::play_pause_button ()
 
 
 
-void lifContext::update_contraction_selection()
+void lifContext::update_sequencer()
 {
     m_show_contractions = true;
     m_result_seq.items.resize(1);

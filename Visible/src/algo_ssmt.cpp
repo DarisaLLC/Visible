@@ -85,10 +85,11 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
         for (const blob& bb : blobs){
             m_regions.emplace_back(bb, (uint32_t(m_regions.size())));
         }
+        int idx = 0;
         for (const moving_region& mr : m_regions){
             auto dis = shared_from_this();
-            input_channel_selector_t inn ((int) m_results.size(),m_instant_input.channel());
-            auto ref = ssmt_result::create (dis, mr, m_regions.size(), inn);
+            input_channel_selector_t inn (idx++,m_instant_input.channel());
+            auto ref = ssmt_result::create (dis, mr,  inn);
             m_results.push_back(ref);
             
         }

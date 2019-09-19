@@ -58,11 +58,7 @@ mCurrentSerieCachePath(serie_cache_folder)
     // std::function<void ()> sm_content_loaded_cb = boost::bind (&ssmt_processor::sm_content_loaded, this);
     // boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
     
-    // Create a contraction object for entire view processing.
-    // @todo: move median level setting out of cardiac and refactor
-    m_entireCaRef = contractionLocator::create ();
    
-    
     // Signal us when 3d stats are ready
     std::function<void ()>_3dstats_done_cb = boost::bind (&ssmt_processor::stats_3d_computed, this);
     boost::signals2::connection _3d_stats_connection = registerCallback(_3dstats_done_cb);
@@ -308,7 +304,8 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_flu_statistics (const std
     return m_flurescence_tracksRef;
 }
 
-
+// This is called from GUI side.
+// @todo add params
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled
 std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const std::vector<roiWindow<P8U>>& images,
@@ -323,7 +320,10 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
     }
     cache_ok = ssref && ssref->size_check(dim);
 
-    
+    // Create a contraction object for entire view processing.
+    // @todo: add params
+    m_entireCaRef = contractionLocator::create (in);
+    std::vector<float> fout;
     
     if(cache_ok){
         vlogger::instance().console()->info(" SS result container cache : Hit ");
@@ -332,6 +332,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
         
         entmp.insert(entmp.end(), ssref->entropies().begin(),
                      ssref->entropies().end());
+        fout.insert(fout.end(), entmp.begin(), entmp.end());
         m_entropies[in.region()] = entmp;
         const std::deque<deque<double>>& sm = ssref->smatrix();
         for (auto row : sm){
@@ -355,6 +356,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
         std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
         std::future<bool>  future_ss = task.get_future();  // get a future
         std::thread(std::move(task)).join(); // Finish on a thread
+  
         if (future_ss.get())
         {
             const deque<double>& entropies = sp->shannonProjection ();
@@ -366,6 +368,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
             std::vector<std::vector<double>> smtmp;
             
             entmp.insert(entmp.end(), entropies.begin(), entropies.end());
+            fout.insert(fout.end(), entmp.begin(), entmp.end());
             m_entropies[in.region()] = entmp;
             for (auto row : sm){
                 vector<double> rowv;
@@ -389,8 +392,9 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
         }
     }
     // Signal we are done with ACI
-    if (signal_sm1d_ready && signal_sm1d_ready->num_slots() > 0)
-        signal_sm1d_ready->operator()(in);
+    if (signal_sm1d_ready && signal_sm1d_ready->num_slots() > 0){
+        signal_sm1d_ready->operator()(fout, in);
+    }
     
     return m_contraction_pci_tracksRef;
 }

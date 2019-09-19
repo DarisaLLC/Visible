@@ -86,7 +86,7 @@
 #include <gsl/gsl_sf_bessel.h>
 #include "core/moreMath.h"
 #include "eigen_utils.hpp"
-#include "contraction_geometry.hpp"
+#include "cluster_geometry.hpp"
 
 using namespace etw_utils;
 using namespace cgeom;

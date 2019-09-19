@@ -8,6 +8,10 @@
 #include <stdio.h>
 #include <algorithm>
 #include <cmath>
+#include <vector>
+#include "cinder_cv/cinder_opencv.h"
+#include "vision/opencv_utils.hpp"
+
 #include "contraction.hpp"
 #include "sg_filter.h"
 #include "core/core.hpp"
@@ -18,6 +22,9 @@
 #include "core/simple_timing.hpp"
 #include "core/moreMath.h"
 #include "core/pf.h"
+#include "vision/correlation1d.hpp"
+#include "core/boost_stats.hpp"
+
 
 namespace anonymous
 {
@@ -65,17 +72,16 @@ namespace anonymous
 
 
 
-std::shared_ptr<contractionLocator> contractionLocator::create()
-{
-    return std::shared_ptr<contractionLocator>(new contractionLocator());
+std::shared_ptr<contractionLocator> contractionLocator::create(const input_channel_selector_t& in, const contractionLocator::params& params){
+    return std::shared_ptr<contractionLocator>(new contractionLocator(in, params));
 }
 
 std::shared_ptr<contractionLocator> contractionLocator::getShared () {
     return shared_from_this();
 }
 
-contractionLocator::contractionLocator() :
-m_cached(false),  mValidInput (false)
+contractionLocator::contractionLocator(const input_channel_selector_t& in, const contractionLocator::params& params) :
+m_cached(false),  m_in(in), mValidInput (false), m_params(params)
 {
     m_median_levelset_frac = m_params.median_levelset_fraction();
     m_peaks.resize(0);
@@ -132,7 +138,6 @@ double contractionLocator::Median_levelsets (const vector<double>& entropies,  s
 
 size_t contractionLocator::recompute_signal () const
 {
-    // If the fraction of entropies values expected is zero, then just find the minimum and call it contraction
     size_t count = std::floor (m_entropies.size () * m_median_levelset_frac);
     assert(count < m_ranks.size());
     m_signal.resize(m_entropies.size (), 0.0);
@@ -147,7 +152,6 @@ size_t contractionLocator::recompute_signal () const
         val = val / count;
         m_signal[ii] = val;
     }
-    stl_utils::save_csv(m_signal,"/Volumes/medvedev/Users/arman/tmp/signal.csv");
     return count;
 }
 void contractionLocator::update() const{
@@ -181,7 +185,8 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
      *    dy = y(x-1) - y(x). x at minimum dy
      *
      */
-    bool edge_case = peak_indices[src_peak_index] < 16 || (m_fder.size() - peak_indices[src_peak_index]) < 16;
+    bool edge_case = peak_indices[src_peak_index] < m_params.minimum_contraction_frames() ||
+        (m_fder.size() - peak_indices[src_peak_index]) < m_params.minimum_contraction_frames() ;
     if (edge_case) return false;
     
     m_contraction.contraction_peak.first = peak_indices[src_peak_index];
@@ -218,30 +223,37 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
     return true;
 }
 
-// @todo: add multi-contraction
-bool contractionLocator::find_best (){
+
+
+bool contractionLocator::locate_contractions (){
     assert(verify_input());
     if(! isPreProcessed())
         update ();
     
-    auto invalid = m_entropies.size ();
-    index_val_t lowest;
-    lowest.first = invalid;
-    lowest.second = std::numeric_limits<double>::max ();
-    auto result = std::minmax_element(m_signal.begin(), m_signal.end() );
-    m_leveled_min_max.first = *result.first;
-    m_leveled_min_max.second = *result.second;
-    auto min_itr = result.first;
-    if (min_itr != m_signal.end())
-    {
-        auto min_index = std::distance(m_signal.begin(), min_itr);
-        if (min_index >= 0){
-            lowest.first = static_cast<size_t>(min_index);
-            lowest.second = *min_itr;
-        }
-    }
+    //
+    m_ac.resize(0);
+    f1dAutoCorr(m_signal.begin(), m_signal.end(), m_ac);
+//    stl_utils::save_csv(cp->elongation(), fn);
     
-    //@todo: multiple contractions
+    m_bac.resize(m_ac.size());
+    cv::GaussianBlur(m_ac,m_bac,cv::Size(0,0), 4.0);
+    svl::boostStatistics bstats;
+    for (const auto& val : m_bac) bstats.update(val);
+    std::cout << std::endl
+    << "(time in ms)" << std::endl
+    << "Count:  " << bstats.get_n() << std::endl
+    << "Min:    " << bstats.get_min() << std::endl
+    << "Max:    " << bstats.get_max() << std::endl
+    << "Med:    " << bstats.get_median() << std::endl
+    << "x75:    " << bstats.get_quantile(0.75) << std::endl
+    << "x85:    " << bstats.get_quantile(0.85) << std::endl
+    << "x95:    " << bstats.get_quantile(0.95) << std::endl
+    << "x99:    " << bstats.get_quantile(0.99) << std::endl
+    << "x99.9:  " << bstats.get_quantile(0.999) << std::endl
+    << "x99.99: " << bstats.get_quantile(0.9999) << std::endl
+    
+    
+    << std::endl;
     clear_outputs ();
     std::vector<int> peaks_idx;
     std::vector<double> valleys(m_signal.size());
@@ -270,12 +282,11 @@ bool contractionLocator::find_best (){
             stl_utils::save_csv(cp->interpolatedLength(), fn);
             fn = basefilename + "elongation.csv";
             stl_utils::save_csv(cp->elongation(), fn);
-            return true;
+              return true;
         }
         return false;
     };
     
-    assert(lowest.first < invalid);
     for (auto pp = 0; pp < peaks_idx.size(); pp++){
         m_peaks.emplace_back(peaks_idx[pp], m_signal[peaks_idx[pp]]);
     }

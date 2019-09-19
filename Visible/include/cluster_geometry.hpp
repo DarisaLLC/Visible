@@ -1,12 +1,12 @@
 //
-//  contraction_geometry.hpp
+//  cluster_geometry.hpp
 //  Visible
 //
 //  Created by Arman Garakani on 7/22/19.
 //
 
-#ifndef contraction_geometry_h
-#define contraction_geometry_h
+#ifndef cluster_geometry_h
+#define cluster_geometry_h
 
 
 #include <boost/geometry.hpp>
