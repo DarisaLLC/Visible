@@ -18,6 +18,7 @@
 #include "core/signaler.h"
 #include "core/lineseg.hpp"
 #include "eigen_utils.hpp"
+#include "input_selector.hpp"
 
 using namespace std;
 using namespace boost;
@@ -119,11 +120,32 @@ public:
     
     class params{
     public:
-        params ():m_median_levelset_fraction(0.07) {}
+        params ():m_median_levelset_fraction(0.07), m_minimum_contraction_time (0.32), m_frame_duration(0.020){
+            update ();
+        }
         float median_levelset_fraction()const {return m_median_levelset_fraction; }
+        void median_levelset_fraction(const float newval)const {m_median_levelset_fraction = newval; }
+        float minimum_contraction_time () const { return m_minimum_contraction_time; }
+        void minimum_contraction_time (const float newval) const {
+            m_minimum_contraction_time = newval;
+            update ();
+        }
+        float frame_duration () const { return m_frame_duration; }
+        void frame_duration (float newval) const {
+            m_frame_duration = newval;
+            update ();
+        }
+        
+        uint32_t minimum_contraction_frames () const { return m_pad_frames; }
         
     private:
-        float m_median_levelset_fraction;
+        void update () const {
+            m_pad_frames = m_minimum_contraction_time / m_frame_duration;
+        }
+        mutable float m_median_levelset_fraction;
+        mutable float m_minimum_contraction_time;
+        mutable float m_frame_duration;
+        mutable uint32_t m_pad_frames;
     };
     
     using contraction_t = contractionMesh;
@@ -142,7 +164,7 @@ public:
     typedef void (sig_cb_force_ready) (sigContainer_t&);
     
     // Factory create method
-    static Ref create();
+    static Ref create(const input_channel_selector_t&, const contractionLocator::params& params = contractionLocator::params());
     Ref getShared();
     // Load raw entropies and the self-similarity matrix
     // If no self-similarity matrix is given, entropies are assumed to be filtered and used directly
@@ -154,7 +176,7 @@ public:
     void update () const;
     
     // @todo: add multi-contraction
-    bool find_best () ;
+    bool locate_contractions () ;
     
     bool isValid () const { return mValidInput; }
     bool isOutputValid () const { return mValidOutput; }
@@ -188,7 +210,7 @@ public:
     // Static public functions. Enabling testing @todo move out of here
     static double Median_levelsets (const vector<double>& entropies,  std::vector<int>& ranks );
 private:
-    contractionLocator();
+    contractionLocator(const input_channel_selector_t&, const contractionLocator::params& params = contractionLocator::params ());
     contractionLocator::params m_params;
     
 
@@ -217,6 +239,9 @@ private:
     mutable int m_input; // input source
     mutable std::atomic<bool> m_cached;
     mutable int m_id;
+    mutable std::vector<double> m_ac;
+    mutable std::vector<double> m_bac;
+    input_channel_selector_t m_in;
  
 protected:
     boost::signals2::signal<contractionLocator::sig_cb_cell_length_ready>* cell_length_ready;
@@ -258,6 +283,7 @@ private:
     mutable contraction_t m_ctr;
     double m_relaxed_length;
     mutable std::vector<double> m_fder;
+ 
     mutable sigContainer_t m_interpolated_length;
     mutable sigContainer_t m_elongation;
     mutable sigContainer_t m_force;

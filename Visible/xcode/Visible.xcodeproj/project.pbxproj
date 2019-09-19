@@ -900,6 +900,9 @@
 		C248D6D92249454900C2C02F /* Visible_Run_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Visible_Run_Prefix.pch; sourceTree = "<group>"; };
 		C24C0953214A1ED5004C8002 /* palette.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = palette.png; path = ../assets/palette.png; sourceTree = "<group>"; };
 		C24C095A214B3291004C8002 /* cinder_opencv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cinder_opencv.h; sourceTree = "<group>"; };
+		C24C6E2F23329D4800A118AC /* correlation1d.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = correlation1d.hpp; sourceTree = "<group>"; };
+		C24C6E302332CFC400A118AC /* boost_stats.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = boost_stats.hpp; sourceTree = "<group>"; };
+		C24C6E312332EF3500A118AC /* input_selector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = input_selector.hpp; path = ../include/input_selector.hpp; sourceTree = "<group>"; };
 		C24CB5922187D16700142667 /* persistence1d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = persistence1d.hpp; path = ../time_series/persistence1d.hpp; sourceTree = "<group>"; };
 		C24CB5932187D16900142667 /* basicTimeSeries.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basicTimeSeries.h; path = ../time_series/basicTimeSeries.h; sourceTree = "<group>"; };
 		C24CD87C1CEA5B1B0008C72B /* VisibleGtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VisibleGtest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1223,7 +1226,7 @@
 		C2EF8D2021498C8D00A5D3D6 /* ut_lif.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ut_lif.hpp; sourceTree = "<group>"; };
 		C2F1B6211FB13FE600DDD7DB /* LifContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LifContext.h; path = ../include/LifContext.h; sourceTree = "<group>"; };
 		C2F7C47B22DFD21B00E28521 /* convex_hull.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = convex_hull.hpp; sourceTree = "<group>"; };
-		C2F7C47C22E65A2900E28521 /* contraction_geometry.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = contraction_geometry.hpp; path = ../include/contraction_geometry.hpp; sourceTree = "<group>"; };
+		C2F7C47C22E65A2900E28521 /* cluster_geometry.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = cluster_geometry.hpp; path = ../include/cluster_geometry.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1653,7 +1656,7 @@
 			children = (
 				C2CD0E9822D7D77200467DD8 /* dbscan.h */,
 				C21A50DE22A9FFA800B0AC7D /* contraction.hpp */,
-				C2F7C47C22E65A2900E28521 /* contraction_geometry.hpp */,
+				C2F7C47C22E65A2900E28521 /* cluster_geometry.hpp */,
 				C2CE9C7922A49833003C479A /* etw_utils.hpp */,
 				C210946B2239D1F3004E88EE /* permutation_entropy.h */,
 				C296BFD722A0A5D80072BF80 /* iowriter.hpp */,
@@ -1681,6 +1684,7 @@
 				C24FC84C1E5E40130071AA1A /* timed_value_containers.h */,
 				C213607821647E4A00F794AB /* cached_results.hpp */,
 				C241BBAA1FB11B51000DE36E /* lif_content.hpp */,
+				C24C6E312332EF3500A118AC /* input_selector.hpp */,
 				C28B01DB229B210A00B8165D /* segmentation_parameters.hpp */,
 				C22DACF822FF71A500D171EF /* moving_region.h */,
 				C2E02ED2225AB49900AC175D /* ssmt.hpp */,
@@ -1941,6 +1945,7 @@
 		C26009EA1CED3E010045FF57 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				C24C6E302332CFC400A118AC /* boost_stats.hpp */,
 				C21A507022A98AE800B0AC7D /* mathBSpline.h */,
 				C21A506F22A9895C00B0AC7D /* moreMath.h */,
 				C2CE9C8C22A97E8E003C479A /* gen_utils.hpp */,
@@ -2015,6 +2020,7 @@
 				C2600A161CED3E010045FF57 /* sparsehist.h */,
 				C2600A171CED3E010045FF57 /* ss_segmenter.hpp */,
 				C202D9721D18427800AA8951 /* bit_chrome.hpp */,
+				C24C6E2F23329D4800A118AC /* correlation1d.hpp */,
 			);
 			path = vision;
 			sourceTree = "<group>";

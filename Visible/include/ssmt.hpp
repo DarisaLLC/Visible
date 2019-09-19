@@ -23,33 +23,13 @@
 #include "segmentation_parameters.hpp"
 #include "iowriter.hpp"
 #include "moving_region.h"
-
+#include "input_selector.hpp"
 using namespace cv;
 using blob = svl::labelBlob::blob;
 
 class ssmt_result;
 
-// channel_index which channel of multi-channel input. Usually visible channel is the last one
-// input is -1 for the entire root or index of moving object area in results container
 
-class region_and_source{
-public:
-    
-    region_and_source ():m_region(ni()),m_channel(ni()) {}
-    region_and_source (int r, int channel):m_region(r), m_channel(channel) {}
-    inline int entire () { return -1; }
-    inline int ni () { return -2; }
-    bool isChannel() const {return m_channel >= 0;}
-    bool isEntire() const {return m_region == -1; }
-    int region () const { return m_region;}
-    int channel () const { return m_channel; }
-    
-private:
-    mutable int m_region;
-    mutable int m_channel;
-};
-
-typedef region_and_source input_channel_selector_t;
 
 // For base classing
 class ssmtSignaler : public base_signaler
@@ -96,9 +76,9 @@ public:
     typedef void (sig_cb_frame_loaded) (int&, double&); // a frame is loaded
     
     typedef void (sig_cb_flu_stats_ready) (); // Fluorescense stats are done
-    typedef void (sig_cb_contraction_ready) (contractionContainer_t &); // Scene Contraction is ready
+    typedef void (sig_cb_contraction_ready) (contractionContainer_t &,const input_channel_selector_t& in); // Scene Contraction is ready
 
-    typedef void (sig_cb_sm1d_ready) (const input_channel_selector_t&); // Scene self_similarity is done
+    typedef void (sig_cb_sm1d_ready) (std::vector<float> &, const input_channel_selector_t&); // Scene self_similarity is done
     typedef void (sig_cb_sm1dmed_ready) (const input_channel_selector_t&);// regularization via median level sets are done -1 or mobj index
 
     typedef void (sig_cb_3dstats_ready) (); // Scene Image Volume stats are done
@@ -316,7 +296,7 @@ public:
     typedef std::shared_ptr<vecOfNamedTrack_t> trackRef_t;
     typedef std::unordered_map<std::string, trackRef_t> trackMap_t;
     
-    static const ref_t create (std::shared_ptr<ssmt_processor>&, const moving_region&, size_t idx,
+    static const ref_t create (std::shared_ptr<ssmt_processor>&, const moving_region&,
                                const input_channel_selector_t& in);
     
     void process ();
@@ -328,11 +308,10 @@ public:
     const input_channel_selector_t& input() const;
     const std::shared_ptr<contractionLocator> & locator () const;
 private:
-    ssmt_result (const moving_region&,size_t idx,const input_channel_selector_t& in);
-    void signal_sm1d_ready (const input_channel_selector_t&);
-    void contraction_ready (ssmt_processor::contractionContainer_t& contractions);
+    ssmt_result (const moving_region&,const input_channel_selector_t& in);
+    void signal_sm1d_ready (vector<float>&, const input_channel_selector_t&);
+    void contraction_ready (ssmt_processor::contractionContainer_t& contractions, const input_channel_selector_t&);
     bool get_channels (int channel);
-    mutable size_t m_idx;
     input_channel_selector_t m_input;
     mutable trackMap_t m_trackBook;
     

@@ -33,30 +33,29 @@ using cc_t = ssmt_processor::contractionContainer_t;
 
 ////////// ssmt_result Implementataion //////////////////
 const ssmt_result::ref_t ssmt_result::create (std::shared_ptr<ssmt_processor>& parent, const moving_region& child,
-                                              size_t idx,const input_channel_selector_t& in){
-    ssmt_result::ref_t this_child (new ssmt_result(child, idx,in ));
+                                              const input_channel_selector_t& in){
+    ssmt_result::ref_t this_child (new ssmt_result(child, in ));
     this_child->m_weak_parent = parent;
-
+    
     // Support lifProcessor::initial ss results available
-    std::function<void (const input_channel_selector_t&)> sm1d_ready_cb = boost::bind (&ssmt_result::signal_sm1d_ready, this_child, _1);
+    std::function<void (std::vector<float> &, const input_channel_selector_t&)> sm1d_ready_cb = boost::bind (&ssmt_result::signal_sm1d_ready, this_child, _1, _2);
     boost::signals2::connection nl_connection = parent->registerCallback(sm1d_ready_cb);
     return this_child;
 }
 
-ssmt_result::ssmt_result(const moving_region& mr,size_t idx,const input_channel_selector_t& in):
-moving_region(mr), m_idx(idx), m_input(in) {
+ssmt_result::ssmt_result(const moving_region& mr,const input_channel_selector_t& in):moving_region(mr),  m_input(in) {
     // Create a contraction object
-    m_caRef = contractionLocator::create ();
-
+    m_caRef = contractionLocator::create (in);
+    
     
     // Suport lif_processor::Contraction Analyzed
-    std::function<void (cc_t&)>ca_analyzed_cb = boost::bind (&ssmt_result::contraction_ready, this, _1);
+    std::function<void (cc_t&,const input_channel_selector_t& in)>ca_analyzed_cb = boost::bind (&ssmt_result::contraction_ready, this, _1, _2);
     boost::signals2::connection ca_connection = m_caRef->registerCallback(ca_analyzed_cb);
     
 }
 
-
-void ssmt_result::contraction_ready (ssmt_processor::contractionContainer_t& contractions)
+// When contraction is ready, signal a copy
+void ssmt_result::contraction_ready (ssmt_processor::contractionContainer_t& contractions,const input_channel_selector_t& in)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     
@@ -65,22 +64,22 @@ void ssmt_result::contraction_ready (ssmt_processor::contractionContainer_t& con
     if (shared_parent && shared_parent->signal_contraction_ready && shared_parent->signal_contraction_ready->num_slots() > 0)
     {
         cc_t copied = m_caRef->contractions();
-        shared_parent->signal_contraction_ready->operator()(copied);
+        shared_parent->signal_contraction_ready->operator()(copied, in);
     }
     vlogger::instance().console()->info(" Contractions Analyzed: ");
 }
 
-//@todo remove this hack as it is to run a particular file and get results.
-void ssmt_result::signal_sm1d_ready(const input_channel_selector_t& in){
+// When pci is available. Start contraction processing
+void ssmt_result::signal_sm1d_ready(vector<float>& signal, const input_channel_selector_t& in){
     if(m_input.region() != in.region()) return;
-    m_caRef->find_best();
+    m_caRef->locate_contractions();
     
     
 }
 
 const input_channel_selector_t& ssmt_result::input() const { return m_input; }
 
-size_t ssmt_result::Id() const { return m_idx; }
+size_t ssmt_result::Id() const { return id(); }
 const std::shared_ptr<contractionLocator> & ssmt_result::locator () const { return m_caRef; }
 
 const ssmt_processor::channel_vec_t& ssmt_result::content () const { return m_all_by_channel; }
@@ -130,7 +129,7 @@ bool ssmt_result::get_channels (int channel){
         
     };
     
-
+    
     vector<roiWindow<P8U> >::const_iterator vitr = rws.begin();
     uint32_t count = 0;
     uint32_t total = static_cast<uint32_t>(rws.size());

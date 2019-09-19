@@ -98,7 +98,7 @@ public:
 	void play_pause_button ();
 	void loop_no_loop_button ();
     void edit_no_edit_button ();
-    void update_contraction_selection ();
+    void update_sequencer ();
 	
 	const tiny_media_info& media () const { return mMediaInfo; }
     const uint32_t& channel_count () const { return mChannelCount; }
@@ -137,9 +137,9 @@ private:
     // Callbacks
     void signal_content_loaded (int64_t&);
     void signal_flu_stats_ready ();
-    void signal_sm1d_ready (const input_channel_selector_t&);
+    void signal_sm1d_ready (std::vector<float> &, const input_channel_selector_t&);
     void signal_sm1dmed_ready (const input_channel_selector_t&);
-    void signal_contraction_ready (contractionContainer_t&);
+    void signal_contraction_ready (contractionContainer_t&,const input_channel_selector_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
     void signal_regions_ready (int, const input_channel_selector_t&);
     void signal_segmented_view_ready (cv::Mat&, cv::Mat&);
@@ -177,6 +177,7 @@ private:
     std::weak_ptr<vecOfNamedTrack_t> m_contraction_pci_trackWeakRef;
 
     // Selection -1 means none selected
+    bool change_current_cell ();
     mutable std::atomic<int> m_selected_cell;
     mutable std::atomic<int> m_selected_contraction;
     
@@ -186,6 +187,10 @@ private:
     mutable std::vector<std::string> m_contraction_names;
     float m_major_cell_length, m_minor_cell_length;
     std::vector<cv::Point2f> m_mid_points;
+
+    // Directory of Cells / Contractions and SS
+    std::unordered_map<int,contractionContainer_t>m_cell2contractions_map;
+    std::unordered_map<int,vector<float>>m_cells2pci_map;
     
     
     // Folder for Per user result / content caching
