@@ -33,7 +33,7 @@ class lifContext : public sequencedImageContext
 {
 public:
     
-    using contractionContainer_t = ssmt_processor::contractionContainer_t;
+  //  using contractionContainer_t = ssmt_processor::contractionContainer_t;
     
   
     enum Side_t : uint32_t
@@ -139,13 +139,13 @@ private:
     void signal_flu_stats_ready ();
     void signal_sm1d_ready (std::vector<float> &, const input_channel_selector_t&);
     void signal_sm1dmed_ready (const input_channel_selector_t&);
-    void signal_contraction_ready (contractionContainer_t&,const input_channel_selector_t&);
+    void signal_contraction_ready (contractionLocator::contractionContainer_t&,const input_channel_selector_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
     void signal_regions_ready (int, const input_channel_selector_t&);
     void signal_segmented_view_ready (cv::Mat&, cv::Mat&);
     
     // Availability
-    std::atomic<bool> m_geometry_available;
+    std::atomic<bool> m_voxel_view_available;
     input_channel_selector_t  m_input_selector;
     mutable std::atomic<int> m_selector_last;
 
@@ -182,14 +182,14 @@ private:
     mutable std::atomic<int> m_selected_contraction;
     
     // Contraction
-    ssmt_processor::contractionContainer_t m_contractions;
+    contractionLocator::contractionContainer_t m_contractions;
     std::vector<std::string> m_contraction_none = {" Entire "};
     mutable std::vector<std::string> m_contraction_names;
     float m_major_cell_length, m_minor_cell_length;
     std::vector<cv::Point2f> m_mid_points;
 
     // Directory of Cells / Contractions and SS
-    std::unordered_map<int,contractionContainer_t>m_cell2contractions_map;
+    std::unordered_map<int,contractionLocator::contractionContainer_t>m_cell2contractions_map;
     std::unordered_map<int,vector<float>>m_cells2pci_map;
     
     

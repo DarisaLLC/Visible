@@ -29,7 +29,7 @@
 #include "result_serialization.h"
 
 
-using cc_t = ssmt_processor::contractionContainer_t;
+using cc_t = contractionLocator::contractionContainer_t;
 
 ////////// ssmt_result Implementataion //////////////////
 const ssmt_result::ref_t ssmt_result::create (std::shared_ptr<ssmt_processor>& parent, const moving_region& child,
@@ -47,15 +47,14 @@ ssmt_result::ssmt_result(const moving_region& mr,const input_channel_selector_t&
     // Create a contraction object
     m_caRef = contractionLocator::create (in);
     
-    
     // Suport lif_processor::Contraction Analyzed
-    std::function<void (cc_t&,const input_channel_selector_t& in)>ca_analyzed_cb = boost::bind (&ssmt_result::contraction_ready, this, _1, _2);
+    std::function<void (contractionLocator::contractionContainer_t&,const input_channel_selector_t& in)>ca_analyzed_cb =
+        boost::bind (&ssmt_result::contraction_ready, this, _1, _2);
     boost::signals2::connection ca_connection = m_caRef->registerCallback(ca_analyzed_cb);
-    
 }
 
 // When contraction is ready, signal a copy
-void ssmt_result::contraction_ready (ssmt_processor::contractionContainer_t& contractions,const input_channel_selector_t& in)
+void ssmt_result::contraction_ready (contractionLocator::contractionContainer_t& contractions,const input_channel_selector_t& in)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     
@@ -63,7 +62,7 @@ void ssmt_result::contraction_ready (ssmt_processor::contractionContainer_t& con
     auto shared_parent = m_weak_parent.lock();
     if (shared_parent && shared_parent->signal_contraction_ready && shared_parent->signal_contraction_ready->num_slots() > 0)
     {
-        cc_t copied = m_caRef->contractions();
+        contractionLocator::contractionContainer_t copied = m_caRef->contractions();
         shared_parent->signal_contraction_ready->operator()(copied, in);
     }
     vlogger::instance().console()->info(" Contractions Analyzed: ");
@@ -71,10 +70,9 @@ void ssmt_result::contraction_ready (ssmt_processor::contractionContainer_t& con
 
 // When pci is available. Start contraction processing
 void ssmt_result::signal_sm1d_ready(vector<float>& signal, const input_channel_selector_t& in){
-    if(m_input.region() != in.region()) return;
+    assert(m_input.channel() == in.channel());
+//    while(! is_ready(m_contraction_pci_tracks_asyn)) std::this_thread::yield();
     m_caRef->locate_contractions();
-    
-    
 }
 
 const input_channel_selector_t& ssmt_result::input() const { return m_input; }
@@ -84,16 +82,17 @@ const std::shared_ptr<contractionLocator> & ssmt_result::locator () const { retu
 
 const ssmt_processor::channel_vec_t& ssmt_result::content () const { return m_all_by_channel; }
 
-// @TBD not-used check if this is necessary 
+
 void ssmt_result::process (){
     bool done = get_channels(m_input.channel());
     if(done){
-        auto parent = m_weak_parent.lock();
-        m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, parent, m_input);
+        auto pci_done = run_contraction_pci(m_all_by_channel[m_input.channel()]);
+        if(pci_done) m_caRef->locate_contractions();
     }
 }
 
 bool ssmt_result::get_channels (int channel){
+    
     auto parent = m_weak_parent.lock();
     if (parent.get() == 0) return false;
     m_channel_count = parent->channel_count();
@@ -143,4 +142,38 @@ bool ssmt_result::get_channels (int channel){
     while (++vitr != rws.end());
     bool check = m_all_by_channel[channel].size() == total;
     return check && count == total;
+}
+
+
+// Run to get Entropies and Median Level Set
+// PCI track is being used for initial emtropy and median leveled
+bool ssmt_result::run_contraction_pci (const std::vector<roiWindow<P8U>>& images)
+{
+  
+    auto sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
+    
+    vlogger::instance().console()->info(tostr(images.size()));
+    sp->load_images (images);
+    std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
+    std::future<bool>  future_ss = task.get_future();  // get a future
+    std::thread(std::move(task)).join(); // Finish on a thread
+    
+    if (future_ss.get())
+    {
+        const deque<double>& entropies = sp->shannonProjection ();
+        const std::deque<deque<double>>& sm = sp->similarityMatrix();
+        assert(images.size() == entropies.size() && sm.size() == images.size());
+        for (auto row : sm) assert(row.size() == images.size());
+        
+        m_entropies.insert(m_entropies.end(), entropies.begin(), entropies.end());
+        for (auto row : sm){
+            vector<double> rowv;
+            rowv.insert(rowv.end(), row.begin(), row.end());
+            m_smat.push_back(rowv);
+        }
+        
+        m_caRef->load(m_entropies, m_smat);
+        return true;
+    }
+    return false;
 }
