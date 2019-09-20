@@ -307,7 +307,7 @@ bool contractionLocator::locate_contractions (){
     }
     
     if (signal_contraction_ready && signal_contraction_ready->num_slots() > 0)
-        signal_contraction_ready->operator()(m_contractions);
+        signal_contraction_ready->operator()(m_contractions, m_in);
 
     
     return true;

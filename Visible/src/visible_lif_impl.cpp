@@ -88,7 +88,7 @@ namespace {
 // @ todo setup default repository
 // default median cover pct is 5% (0.05)
 
-lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const fs::path& cache_path) :sequencedImageContext(ww), m_serie(sd), m_geometry_available(false), mUserStorageDirPath (cache_path) {
+lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const fs::path& cache_path) :sequencedImageContext(ww), m_serie(sd), m_voxel_view_available(false), mUserStorageDirPath (cache_path) {
     m_type = guiContext::Type::lif_file_viewer;
     m_show_contractions = false;
     // Create an invisible folder for storage
@@ -146,7 +146,7 @@ void lifContext::setup_signals(){
     boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_ready_cb);
     
     // Support lifProcessor::contraction results available
-    std::function<void (ssmt_processor::contractionContainer_t&,const input_channel_selector_t&)> contraction_ready_cb =
+    std::function<void (contractionLocator::contractionContainer_t&,const input_channel_selector_t&)> contraction_ready_cb =
         boost::bind (&lifContext::signal_contraction_ready, shared_from_above(), _1, _2);
     boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_ready_cb);
     
@@ -239,12 +239,16 @@ void lifContext::signal_flu_stats_ready ()
     vlogger::instance().console()->info(" Flu Stats Available ");
 }
 
-void lifContext::signal_contraction_ready (ssmt_processor::contractionContainer_t& contras, const input_channel_selector_t& in)
+void lifContext::signal_contraction_ready (contractionLocator::contractionContainer_t& contras, const input_channel_selector_t& in)
 {
     // Pauses playback if playing and restore it at scope's end
     scopedPause sp(std::shared_ptr<lifContext>(shared_from_above(), stl_utils::null_deleter () ));
     
     if (contras.empty()) return;
+    
+    stringstream ss;
+    ss << " Region: " << svl::toString(in.region()) << " " << svl::toString(contras.size());
+    vlogger::instance().console()->info(ss.str());
     
     m_cell2contractions_map[in.region()] = contras;
     
@@ -293,13 +297,13 @@ void lifContext::glscreen_normalize (const sides_length_t& src, const Rectf& gdr
                                      
 void lifContext::signal_segmented_view_ready (cv::Mat& image, cv::Mat& label)
 {
-    vlogger::instance().console()->info(" SS Image Available  ");
+    vlogger::instance().console()->info(" Voxel View Available  ");
     if (! m_lifProcRef){
         vlogger::instance().console()->error("Lif Processor Object does not exist ");
         return;
     }
     m_segmented_image = image.clone();
-    m_geometry_available = true;
+    m_voxel_view_available = true;
     
     if (! m_segmented_texture ){
         m_segmented_surface = Surface8u::create(cinder::fromOcv(m_segmented_image));
@@ -742,7 +746,7 @@ void lifContext::loadCurrentSerie ()
         m_plot_names.clear();
         m_plot_names = m_serie.channel_names();
         m_plot_names.push_back("MisRegister");
-        cv::Mat result;
+//        cv::Mat result;
         std::vector<std::thread> threads(1);
         threads[0] = std::thread(&ssmt_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names(), m_plot_names);
         std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
@@ -797,10 +801,10 @@ void lifContext::process_async (){
         case 2:
         {
             // note launch mode is std::launch::async
-            m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
-                                                    m_lifProcRef.get(), std::vector<int> ({0}) );
-            input_channel_selector_t in (-1,1);
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in);
+         //   m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
+          //                                          m_lifProcRef.get(), std::vector<int> ({0}) );
+         //   input_channel_selector_t in (-1,1);
+          //  m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in);
             break;
         }
         case 1:
@@ -1056,7 +1060,7 @@ void lifContext::add_result_sequencer (){
  */
 void lifContext::add_motion_profile (){
     
-    if (! m_geometry_available ) return;
+    if (! m_voxel_view_available ) return;
     if (! m_segmented_texture && m_segmented_surface){
         // Create a texcture for display
         Surface8uRef sur = Surface8u::create(cinder::fromOcv(m_segmented_image));

@@ -67,7 +67,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
     assert(mono.cols == bi_level.cols && mono.rows == bi_level.rows);
     assert(m_3d_stats_done);
-    
+    vlogger::instance().console()->info("Locating moving regions");
     cv::Rect padded_rect, image_rect;
 
     // Sum variances under each cluster
@@ -82,6 +82,12 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     m_regions.clear();
     
     std::function<labelBlob::results_cb> res_ready_lambda = [=](std::vector<blob>& blobs){
+
+        std::string msg = toString(blobs.size());
+        auto tid = std::this_thread::get_id();
+        msg = toString(tid) + " Moving regions: " + msg;
+        vlogger::instance().console()->info(msg);
+        
         for (const blob& bb : blobs){
             m_regions.emplace_back(bb, (uint32_t(m_regions.size())));
         }
@@ -91,14 +97,17 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
             input_channel_selector_t inn (idx++,m_instant_input.channel());
             auto ref = ssmt_result::create (dis, mr,  inn);
             m_results.push_back(ref);
-            
         }
+        msg = toString(m_results.size());
+        msg = " Results created: " + msg;
+        vlogger::instance().console()->info(msg);
         int count = (int) m_regions.size();
         if (count != create_cache_paths()){
             std::string msg = " miscount in moving object path creation ";
             vlogger::instance().console()->error(msg);
         }
 
+        
         if (signal_geometry_ready  && signal_geometry_ready->num_slots() > 0)
         {
             signal_geometry_ready->operator()(count, m_instant_input);

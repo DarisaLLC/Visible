@@ -70,13 +70,13 @@ public:
         voxel_params_t m_vparams;
     };
     
-    using contractionContainer_t = contractionLocator::contractionContainer_t;
+  //  using contractionContainer_t = contractionLocator::contractionContainer_t;
     
     typedef void (sig_cb_content_loaded) (int64_t&); // Content is loaded and Voxel Processing is initiated
     typedef void (sig_cb_frame_loaded) (int&, double&); // a frame is loaded
     
     typedef void (sig_cb_flu_stats_ready) (); // Fluorescense stats are done
-    typedef void (sig_cb_contraction_ready) (contractionContainer_t &,const input_channel_selector_t& in); // Scene Contraction is ready
+    typedef void (sig_cb_contraction_ready) (contractionLocator::contractionContainer_t&,const input_channel_selector_t& in); // Scene Contraction is ready
 
     typedef void (sig_cb_sm1d_ready) (std::vector<float> &, const input_channel_selector_t&); // Scene self_similarity is done
     typedef void (sig_cb_sm1dmed_ready) (const input_channel_selector_t&);// regularization via median level sets are done -1 or mobj index
@@ -200,7 +200,7 @@ private:
     
     void compute_shortterm (const uint32_t halfWinSz) const;
     
-    void contraction_ready (contractionContainer_t&);
+    void contraction_ready (contractionLocator::contractionContainer_t&);
     void stats_3d_computed ();
     void pci_done ();
     void sm_content_loaded ();
@@ -308,9 +308,10 @@ public:
     const input_channel_selector_t& input() const;
     const std::shared_ptr<contractionLocator> & locator () const;
 private:
+    bool run_contraction_pci (const std::vector<roiWindow<P8U>>& images);
     ssmt_result (const moving_region&,const input_channel_selector_t& in);
     void signal_sm1d_ready (vector<float>&, const input_channel_selector_t&);
-    void contraction_ready (ssmt_processor::contractionContainer_t& contractions, const input_channel_selector_t&);
+    void contraction_ready (contractionLocator::contractionContainer_t& contractions, const input_channel_selector_t&);
     bool get_channels (int channel);
     input_channel_selector_t m_input;
     mutable trackMap_t m_trackBook;
@@ -318,6 +319,9 @@ private:
     mutable trackRef_t m_flurescence_tracksRef;
     mutable trackRef_t m_contraction_pci_tracksRef;
     async_vecOfNamedTrack_t m_contraction_pci_tracks_asyn;
+    
+    vector<double> m_entropies;
+    std::vector<std::vector<double>> m_smat;
     
     std::shared_ptr<contractionLocator> m_caRef;
     
