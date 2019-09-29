@@ -192,8 +192,8 @@ public:
     
     
     // Support moving
-    labelBlob(labelBlob&&) = default;
-    labelBlob& operator=(labelBlob&&) = default;
+   // labelBlob(labelBlob&&) = default;
+  //  labelBlob& operator=(labelBlob&&) = default;
     
     
     typedef void (results_ready_cb) (int64_t&);

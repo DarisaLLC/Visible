@@ -138,21 +138,22 @@ namespace lifIO
     {
         
     public:
-        explicit LifHeader(TiXmlDocument &header);
-        explicit LifHeader(std::string &header);
+        explicit LifHeader(TiXmlDocument &);
+        explicit LifHeader(std::string &);
         
-        const TiXmlDocument& getXMLHeader() const{return this->header;};
+        const TiXmlDocument& getXMLHeader() const{return this->m_xmldoc;};
         std::string getName() const {return this->name;};
         const int& getVersion() const {return this->lifVersion;};
-        size_t getNbSeries() const {return this->series.size();}
-        bool contains(size_t s) const {return s<this->series.size();}
-        LifSerieHeader& getSerieHeader(size_t s){return this->series[s];};
-        const LifSerieHeader& getSerieHeader(size_t s) const {return this->series[s];};
+        size_t getNbSeries() const {return this->m_series.size();}
+        bool contains(size_t s) const {return s<this->m_series.size();}
+        LifSerieHeader& getSerieHeader(size_t s){return *this->m_series[s];};
+        const LifSerieHeader& getSerieHeader(size_t s) const {return *this->m_series[s];};
         
         
     protected:
-        TiXmlDocument header;
-        boost::ptr_vector<LifSerieHeader> series;
+        TiXmlDocument m_xmldoc;
+//        boost::ptr_vector<LifSerieHeader> m_series;
+        std::vector<std::unique_ptr<LifSerieHeader>> m_series;
         
     private:
         void parseHeader();
@@ -177,15 +178,15 @@ namespace lifIO
         }
         
         const ContentType_t& getContentType () const { return m_content_type; }
-        const LifHeader& getLifHeader() const {return *this->header;};
+        const LifHeader& getLifHeader() const {return *this->m_header;};
         const TiXmlDocument& getXMLHeader() const{return getLifHeader().getXMLHeader();};
         std::string getName() const {return getLifHeader().getName();};
         const int& getVersion() const {return getLifHeader().getVersion();};
-        size_t getNbSeries() const {return this->series.size();}
+        size_t getNbSeries() const {return this->m_series.size();}
         bool contains(size_t s) const {return getLifHeader().contains(s);}
         
-        LifSerie& getSerie(size_t s){return series[s];};
-        const LifSerie& getSerie(size_t s) const {return series[s];};
+        LifSerie& getSerie(size_t s){return *m_series[s];};
+        const LifSerie& getSerie(size_t s) const {return *m_series[s];};
         const std::string& file_path () const { return m_path; }
         size_t file_size () const { return m_lif_file_size; }
         
@@ -204,10 +205,11 @@ namespace lifIO
         int readInt();
         unsigned int readUnsignedInt();
         unsigned long long readUnsignedLongLong();
-        std::auto_ptr<LifHeader> header;
+        std::shared_ptr<LifHeader> m_header;
         std::shared_ptr<std::ifstream> m_fileRef;
         std::streampos fileSize;
-        boost::ptr_vector<LifSerie> series;
+        std::vector<std::unique_ptr<LifSerie>> m_series;
+//        boost::ptr_vector<LifSerie> series;
         mutable bool m_Valid;
         mutable std::mutex m_mutex;
         std::string m_path;

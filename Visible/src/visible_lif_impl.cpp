@@ -279,9 +279,9 @@ void lifContext::signal_regions_ready(int count, const input_channel_selector_t&
     std::string msg = " Found " + stl_utils::tostr(count) + mr;
     vlogger::instance().console()->info(msg);
     m_input_selector = in;
-    for (auto mb : m_lifProcRef->moving_bodies()){
-        mb->process();
-    }
+ //   for (auto mb : m_lifProcRef->moving_bodies()){
+ //       mb->process();
+ //   }
     //@todo parameterize affine windows generation
     // m_lifProcRef->generate_affine_windows();
   
@@ -858,8 +858,9 @@ void lifContext::add_canvas (){
             if (ImGui::Begin(windowName, open, io.ConfigWindowsResizeFromEdges))
             {
                 ImVec2 pos = ImGui::GetCursorScreenPos(); // actual position
-                draw_list->AddImage(  reinterpret_cast<ImTextureID> (texture->getId()), pos, ImVec2(ImGui::GetContentRegionAvail().x + pos.x, ImGui::GetContentRegionAvail().y  + pos.y),
-                                                     ivec2(0,1), ivec2(1,0));
+                draw_list->AddImage(  reinterpret_cast<ImTextureID> (texture->getId()), pos,
+                                    ImVec2(ImGui::GetContentRegionAvail().x + pos.x, ImGui::GetContentRegionAvail().y  + pos.y),
+                                    ivec2(0,1), ivec2(1,0));
                 ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
                 ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
                 ImRect regionRect(canvas_pos, canvas_pos + canvas_size);
@@ -1179,51 +1180,26 @@ void lifContext::add_regions (bool* p_open)
     ImVec2 pos (window->Pos.x + window->Size.x, window->Pos.y );
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(ImVec2(getWindowWidth()/2, getWindowHeight()/4), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin(wCells, p_open, ImGuiWindowFlags_MenuBar))
-    {
-        // left
-        ImGui::BeginChild("left pane", ImVec2(150, 0), true);
+    if (ImGui::Begin(wCells, p_open, ImGuiWindowFlags_MenuBar)){
         for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++)
         {
-            char label[128];
-            sprintf(label, "Cell %d", i);
-            if (ImGui::Selectable(label, m_selected_cell == i))
-                m_selected_cell = i;
-        }
-        ImGui::EndChild();
-        ImGui::SameLine();
-        
-        // right
-        ImGui::BeginGroup();
-        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
-        if (m_selected_cell >= 0)
-            ImGui::Text(" Cell : %d", (int)m_selected_cell);
-        else
-            ImGui::Text(" None Selected ");
+            // Use SetNextItemOpen() so set the default state of a node to be open.
+            // We could also use TreeNodeEx() with the ImGuiTreeNodeFlags_DefaultOpen flag to achieve the same thing!
+            //if (i == 0)
+             //   ImGui::SetNextItemOpen(true, ImGuiCond_Once);
             
-        ImGui::Separator();
-        if (m_selected_cell >= 0 && ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None) )
-        {
-            if (ImGui::BeginTabItem("Description"))
+            if (ImGui::TreeNode((void*)(intptr_t)i, "Child %d", i))
             {
-                auto mr = m_lifProcRef->moving_bodies()[m_selected_cell];
-                int tmp = m_selected_cell;
-                ImGui::TextWrapped("%d", tmp);
-                ImGui::EndTabItem();
+                ImGui::Text("blah blah");
+                ImGui::SameLine();
+                if (ImGui::SmallButton("button")) {};
+                ImGui::TreePop();
             }
-            if (ImGui::BeginTabItem("Details"))
-            {
-                ImGui::Text(" Lengths in microns ");
-                ImGui::EndTabItem();
-            }
-            ImGui::EndTabBar();
         }
-        ImGui::EndChild();
-//        if (ImGui::Button("Save")) {}
-        ImGui::EndGroup();
     }
     ImGui::End();
 }
+
 void  lifContext::SetupGUIVariables(){
 
   //      ImGuiStyle* st = &ImGui::GetStyle();
