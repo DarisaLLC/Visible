@@ -359,7 +359,7 @@ unsigned long long lifIO::LifSerie::getOffset(size_t t) const
 /** @brief LifHeader constructor  */
  lifIO::LifHeader::LifHeader(TiXmlDocument &header)
 {
-    this->header = header;
+    this->m_xmldoc = header;
     parseHeader();
     return;
 }
@@ -370,7 +370,7 @@ unsigned long long lifIO::LifSerie::getOffset(size_t t) const
   */
  lifIO::LifHeader::LifHeader(std::string &header)
 {
-    this->header.Parse(header.c_str(),0);
+    this->m_xmldoc.Parse(header.c_str(),0);
     parseHeader();
     return;
 }
@@ -380,9 +380,9 @@ unsigned long long lifIO::LifSerie::getOffset(size_t t) const
 /** @brief parse the XML header  */
 void lifIO::LifHeader::parseHeader()
 {
-    header.RootElement()->QueryIntAttribute("Version", &lifVersion);
+    m_xmldoc.RootElement()->QueryIntAttribute("Version", &lifVersion);
 
-    TiXmlElement *elementElement = header.RootElement()->FirstChildElement();
+    TiXmlElement *elementElement = m_xmldoc.RootElement()->FirstChildElement();
     if (!elementElement)
         throw logic_error("No element Element found after root element.");
 
@@ -397,7 +397,7 @@ void lifIO::LifHeader::parseHeader()
         //have to remove some nodes also named "Element" introduced in later versions of LIF
         std::string elname(serieNode->ToElement()->Attribute("Name"));
         if (elname == "BleachPointROISet") continue;
-        series.push_back(new LifSerieHeader(serieNode->ToElement()));
+        m_series.push_back(std::make_unique<LifSerieHeader>(serieNode->ToElement()));
     }
 }
 
@@ -462,7 +462,7 @@ lifIO::LifReader::LifReader(const string &filename, const std::string& ct)
     }
 
 
-    header.reset(new LifHeader(xmlString));
+    m_header = std::shared_ptr<LifHeader>(new LifHeader(xmlString));
 
 
     size_t s = 0;
@@ -509,8 +509,8 @@ lifIO::LifReader::LifReader(const string &filename, const std::string& ct)
                 break;
             }
 
-            series.push_back(new LifSerie(
-                    this->header->getSerieHeader(s),
+            m_series.push_back(std::make_unique<LifSerie>(
+                    this->m_header->getSerieHeader(s),
                     filename,
                                           m_fileRef->tellg(),
                     memorySize, m_content_type)
@@ -627,11 +627,8 @@ ostream &lifIO::operator<<(ostream& out, const LifSerieHeader &s)
             cout<<s.getVoxelSize(it->second.dimID-1)*1E9<<"\t";
     out<<endl;
     const vector<ChannelData> &channels = s.getChannels();
-    transform(
-        channels.begin(), channels.end(),
-        ostream_iterator<string>(out, "\t"),
-        mem_fun_ref(&ChannelData::getName)
-        );
+    for( const auto& cc : channels) out << cc.getName() << "\t" << std::endl;
+
     return out;
 }
 
