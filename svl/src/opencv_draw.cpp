@@ -5,6 +5,7 @@
 #include "vision/ellipse.hpp"
 #include "core/angle_units.h"
 #include "core/lineseg.hpp"
+#include <boost/math/special_functions/round.hpp>
 
 using namespace svl;
 using namespace cv;
