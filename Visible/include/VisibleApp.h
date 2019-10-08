@@ -47,6 +47,7 @@
 #include "visible_logger_macro.h"
 #include "imGuiCustom/ImSequencer.h"
 #include "imGuiCustom/visibleSequencer.h"
+#include "imGuiCustom/imgui_wrapper.h"
 #include "Resources.h"
 
 
