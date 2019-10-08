@@ -494,6 +494,9 @@
 		C2AFCF00216E79590080462D /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
 		C2AFCF09216F0CF10080462D /* CinderImGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCF08216F0CF10080462D /* CinderImGui.cpp */; };
 		C2B005821CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
+		C2B2F207234D1C2C0026ADDB /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
+		C2B2F208234D1C2D0026ADDB /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
+		C2B2F209234D1E6B0026ADDB /* moviong_region.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACF922FF793C00D171EF /* moviong_region.cpp */; };
 		C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2B87C9921D012D700C91E35 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
@@ -2597,6 +2600,7 @@
 				C2AFCF09216F0CF10080462D /* CinderImGui.cpp in Sources */,
 				C2601BB91E69042B004415A3 /* bitvector.cpp in Sources */,
 				C20EDBC11CF277130074C47A /* exception.cpp in Sources */,
+				C2B2F208234D1C2D0026ADDB /* imgui_wrapper.cpp in Sources */,
 				C2239AB4218B6270007558AB /* boost_literals.cpp in Sources */,
 				C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */,
 				C2AFCF00216E79590080462D /* imgui.cpp in Sources */,
@@ -2614,6 +2618,7 @@
 				C248DD2C1F64601A00FF72B1 /* onImagePlotUtils.cpp in Sources */,
 				C23D0F501E298CE50049ADDB /* tinystr.cpp in Sources */,
 				C2606DAF1CED3E2E0045FF57 /* matpixel.cpp in Sources */,
+				C2B2F209234D1E6B0026ADDB /* moviong_region.cpp in Sources */,
 				C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */,
 				C2109476223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
 				C28B01CC229B1DE500B8165D /* lif_serie.cpp in Sources */,
@@ -2883,6 +2888,7 @@
 				C26F5FD221B0AA6D00EAE156 /* PlistDate.cpp in Sources */,
 				C23E346121F2511D00221E68 /* ImSequencer.cpp in Sources */,
 				C2CE9C7C22A8983F003C479A /* mathBSpline.cpp in Sources */,
+				C2B2F207234D1C2C0026ADDB /* imgui_wrapper.cpp in Sources */,
 				C26F5FD321B0AA6D00EAE156 /* imgui.cpp in Sources */,
 				C26F5FD521B0AA6D00EAE156 /* color.cc in Sources */,
 				C26F5FD621B0AA6D00EAE156 /* self_similarity.cpp in Sources */,
@@ -3120,11 +3126,14 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
-				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-v",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Browser;
 				PRODUCT_NAME = Visible;
 				PROVISIONING_PROFILE = "";
@@ -3170,11 +3179,14 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
-				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-v",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Browser;
 				PRODUCT_NAME = Visible;
 				PROVISIONING_PROFILE = "";
@@ -3290,7 +3302,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "VisibleGtest copy2-Info.plist";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -3344,7 +3356,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "VisibleGtest copy2-Info.plist";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -3403,12 +3415,15 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-v",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
@@ -3456,12 +3471,15 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-v",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
@@ -3654,7 +3672,7 @@
 				INFOPLIST_FILE = "VisibleRunner-Info.plist";
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_LDFLAGS = "$(inherited)";
@@ -3705,7 +3723,7 @@
 				INFOPLIST_FILE = "VisibleRunner-Info.plist";
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_LDFLAGS = "$(inherited)";
@@ -3767,7 +3785,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "affineApp-Info.plist";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -3822,7 +3840,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "affineApp-Info.plist";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -3867,7 +3885,7 @@
 				INFOPLIST_FILE = Bina.plist;
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
@@ -3916,7 +3934,7 @@
 				INFOPLIST_FILE = Bina.plist;
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				LOCAL_BOOST = /usr/local/boost/1.67.0_1;
+				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
