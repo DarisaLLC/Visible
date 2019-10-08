@@ -233,7 +233,6 @@ bool contractionLocator::locate_contractions (){
     //
     m_ac.resize(0);
     f1dAutoCorr(m_signal.begin(), m_signal.end(), m_ac);
-//    stl_utils::save_csv(cp->elongation(), fn);
     
     m_bac.resize(m_ac.size());
     cv::GaussianBlur(m_ac,m_bac,cv::Size(0,0), 4.0);

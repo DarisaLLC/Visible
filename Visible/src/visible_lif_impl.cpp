@@ -279,9 +279,9 @@ void lifContext::signal_regions_ready(int count, const input_channel_selector_t&
     std::string msg = " Found " + stl_utils::tostr(count) + mr;
     vlogger::instance().console()->info(msg);
     m_input_selector = in;
- //   for (auto mb : m_lifProcRef->moving_bodies()){
- //       mb->process();
- //   }
+    for (auto mb : m_lifProcRef->moving_bodies()){
+        mb->process();
+    }
     //@todo parameterize affine windows generation
     // m_lifProcRef->generate_affine_windows();
   
@@ -1190,7 +1190,7 @@ void lifContext::add_regions (bool* p_open)
             
             if (ImGui::TreeNode((void*)(intptr_t)i, "Child %d", i))
             {
-                ImGui::Text("blah blah");
+                ImGui::Text(" %d Contraction(s)", (int) m_cell2contractions_map[i].size());
                 ImGui::SameLine();
                 if (ImGui::SmallButton("button")) {};
                 ImGui::TreePop();
