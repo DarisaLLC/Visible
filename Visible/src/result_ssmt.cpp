@@ -65,6 +65,7 @@ void ssmt_result::contraction_ready (contractionLocator::contractionContainer_t&
         contractionLocator::contractionContainer_t copied = m_caRef->contractions();
         shared_parent->signal_contraction_ready->operator()(copied, in);
     }
+
     vlogger::instance().console()->info(" Contractions Analyzed: ");
 }
 
@@ -160,8 +161,8 @@ bool ssmt_result::run_contraction_pci (const std::vector<roiWindow<P8U>>& images
     
     if (future_ss.get())
     {
-        const deque<double>& entropies = sp->shannonProjection ();
-        const std::deque<deque<double>>& sm = sp->similarityMatrix();
+        const deque<double> entropies = sp->shannonProjection ();
+        const std::deque<deque<double>> sm = sp->similarityMatrix();
         assert(images.size() == entropies.size() && sm.size() == images.size());
         for (auto row : sm) assert(row.size() == images.size());
         
