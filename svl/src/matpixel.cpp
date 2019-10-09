@@ -677,6 +677,7 @@ namespace svl
     template class roiFixedMultiWindow<P8UP2,512,128,2>;
     template class roiFixedMultiWindow<P8UP2,512,256,2>;
     template class roiFixedMultiWindow<P8UP3>;
+     template class roiMultiWindow<P8UP2>;
      template class roiMultiWindow<P8UP3>;
      template class roiMultiWindow<P8UP4>;
 }

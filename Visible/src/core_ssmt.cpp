@@ -455,6 +455,10 @@ void ssmt_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
 
 void ssmt_processor::load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames)
 {
+    // Copy deep time / index maps from seqFrameContainer 
+    m_2TimeMap = indexToTime_t (frames->index2TimeMap());
+    m_2IndexMap = timeToIndex_t (frames->time2IndexMap());
+    
     m_frameCount = 0;
     m_all_by_channel.clear();
     m_channel_count = frames->media_info().getNumChannels();

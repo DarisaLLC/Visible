@@ -19,6 +19,7 @@
 #include "core/lineseg.hpp"
 #include "eigen_utils.hpp"
 #include "input_selector.hpp"
+#include "time_index.h"
 
 using namespace std;
 using namespace boost;

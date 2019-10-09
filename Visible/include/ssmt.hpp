@@ -165,6 +165,9 @@ public:
     void finalize_segmentation (cv::Mat& mono, cv::Mat& label);
     const channel_vec_t& content () const;
   
+    const timeToIndex_t& time2IndexMap () const { return m_2IndexMap; }
+    const indexToTime_t& index2TimeMap () const { return m_2TimeMap; }
+    
     std::weak_ptr<contractionLocator> entireContractionWeakRef ();
     
     
@@ -183,7 +186,8 @@ protected:
 private:
     // Default params. @place_holder for increasing number of params
     ssmt_processor::params m_params;
-
+    indexToTime_t m_2TimeMap;
+    timeToIndex_t m_2IndexMap;
     
     void run_volume_variances (std::vector<roiWindow<P8U>>& images);
     
@@ -314,7 +318,6 @@ private:
     void contraction_ready (contractionLocator::contractionContainer_t& contractions, const input_channel_selector_t&);
     bool get_channels (int channel);
     input_channel_selector_t m_input;
-    mutable trackMap_t m_trackBook;
     
     mutable trackRef_t m_flurescence_tracksRef;
     mutable trackRef_t m_contraction_pci_tracksRef;
