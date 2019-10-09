@@ -34,8 +34,6 @@ class seqFrameContainer : public tiny_media_info, public std::enable_shared_from
 public:
     typedef std::shared_ptr<seqFrameContainer> ref;
     typedef std::weak_ptr<seqFrameContainer> weak_ref;
-    typedef std::map<time_spec_t, int64_t> timeToIndex;
-    typedef std::map<int64_t, time_spec_t> indexToTime;
     typedef std::vector<SurTiIndexRef_t> container_t;
     typedef typename container_t::size_type container_index_t;
     typedef std::map<int64_t, container_index_t > indexToContainer;
@@ -84,6 +82,9 @@ public:
      */
     std::string getName () const;
 
+    const timeToIndex_t& time2IndexMap () const { return m_tti; }
+    const indexToTime_t& index2TimeMap () const { return m_itt; }
+    
     
 private:
     // Initializes for the movie. Frame indices are generated for unique increasing time stamps.
@@ -99,8 +100,8 @@ private:
     mutable bool                mValid;
     mutable container_t      mFrames;
     mutable index_time_t     mCurrentIndexTime;
-    timeToIndex m_tti;
-    indexToTime m_itt;
+    timeToIndex_t m_tti;
+    indexToTime_t m_itt;
     indexToContainer m_itIter;
     std::vector<time_spec_t> m_time_hist;
     mutable progress_callback_t m_progress_cb;

@@ -78,6 +78,15 @@ namespace
         cm_time ts((*time_iter)/(10000.0));
         iPair size(tm.getWidth(), tm.getHeight());
         switch(tm.getNumChannels()){
+        case 2:
+             {
+                 roiMultiWindow<P8UP2> oneBy2 (size, ts.getValue());
+                 lifserie.fill2DBuffer(oneBy2.rowPointer(0), frameCount);
+                 std::shared_ptr<Channel8u> cref = newCiChannel(oneBy2);
+                 Surface8uRef chsurface = Surface8u::create(*cref);
+                 out.push_back(chsurface);
+                 break;
+             }
             case 3:
             {
                 roiMultiWindow<P8UP3> oneBy3 (size, ts.getValue());
@@ -471,7 +480,7 @@ seqFrameContainer::indexToContainer::const_iterator seqFrameContainer::_checkFra
     std::unique_lock<std::mutex> lock( mMutex, std::try_to_lock );
     
     // First see if this time exist in time index maps
-    timeToIndex::const_iterator low, prev;
+    timeToIndex_t::const_iterator low, prev;
     low = m_tti.lower_bound(query_time);
     if (low == m_tti.end()) {
         return m_itIter.end();

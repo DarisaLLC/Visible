@@ -36,10 +36,6 @@ const ssmt_result::ref_t ssmt_result::create (std::shared_ptr<ssmt_processor>& p
                                               const input_channel_selector_t& in){
     ssmt_result::ref_t this_child (new ssmt_result(child, in ));
     this_child->m_weak_parent = parent;
-    
-    // Support lifProcessor::initial ss results available
-    std::function<void (std::vector<float> &, const input_channel_selector_t&)> sm1d_ready_cb = boost::bind (&ssmt_result::signal_sm1d_ready, this_child, _1, _2);
-    boost::signals2::connection nl_connection = parent->registerCallback(sm1d_ready_cb);
     return this_child;
 }
 
@@ -67,13 +63,6 @@ void ssmt_result::contraction_ready (contractionLocator::contractionContainer_t&
     }
 
     vlogger::instance().console()->info(" Contractions Analyzed: ");
-}
-
-// When pci is available. Start contraction processing
-void ssmt_result::signal_sm1d_ready(vector<float>& signal, const input_channel_selector_t& in){
-    assert(m_input.channel() == in.channel());
-//    while(! is_ready(m_contraction_pci_tracks_asyn)) std::this_thread::yield();
-    m_caRef->locate_contractions();
 }
 
 const input_channel_selector_t& ssmt_result::input() const { return m_input; }
