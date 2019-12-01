@@ -211,7 +211,7 @@ void lifContext::setup()
 void lifContext::signal_sm1d_ready (std::vector<float> & signal, const input_channel_selector_t& dummy)
 {
     stringstream ss;
-    ss << svl::toString(dummy.region()) << " self-similarity available ";
+    ss << dummy.region() << " self-similarity available ";
     vlogger::instance().console()->info(ss.str());
 }
 
@@ -279,9 +279,9 @@ void lifContext::signal_regions_ready(int count, const input_channel_selector_t&
     std::string msg = " Found " + stl_utils::tostr(count) + mr;
     vlogger::instance().console()->info(msg);
     m_input_selector = in;
- //   for (auto mb : m_lifProcRef->moving_bodies()){
- //       mb->process();
- //   }
+    for (auto mb : m_lifProcRef->moving_bodies()){
+        mb->process();
+    }
     //@todo parameterize affine windows generation
     // m_lifProcRef->generate_affine_windows();
   

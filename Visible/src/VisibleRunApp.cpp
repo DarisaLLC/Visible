@@ -195,12 +195,12 @@ void VisibleRunApp::setup()
     std::string extension = fs::path(bpath).extension().string();
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
     bool is_valid_extension = std::find( supported_mov_extensions.begin(), supported_mov_extensions.end(), extension) != supported_mov_extensions.end();
-    bool is_lif_content = extension == ".lif";
+    bool is_video_content = extension == ".mov" || extension == ".mp4";
 
  
-    if(exists_with_extenstion && is_valid_extension && is_lif_content){
+    if(exists_with_extenstion && is_valid_extension && is_video_content){
         
-        bool just_list_chapters = m_args.size() == 3 && is_lif_content && m_args[2] == "list";
+        bool just_list_chapters = m_args.size() == 3 && is_video_content && m_args[2] == "list";
         bool selected_by_dialog_no_custom_content_no_chapter = m_args.size() == 2;
         bool chapter_ok =  m_args.size() >= 3;
         bool custom_id_exists = m_args.size() == 4;
@@ -299,7 +299,7 @@ void VisibleRunApp::setup()
     }
     else if (exists_with_extenstion && is_valid_extension){
      
-#if 0
+#if 1
         VisibleAppControl::setup_loggers(root_output_dir, visual_log, fs::path(bpath).filename().string());
         
         cvVideoPlayer::ref vref = cvVideoPlayer::create(fs::path(bpath));

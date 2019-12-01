@@ -27,85 +27,6 @@ namespace fs = boost::filesystem;
 typedef std::shared_ptr<class movContext> movContextRef;
 
 
-/* Context specific items
- input channels   processing channels display channels. 
-	example: LIF three channels custom for IDLab:		3 input [1], [2], [3].  Each, Axxx or xxxA 
-	example: LIF 1 channel custom for IDLab:		1 input [1].  Each, Axxx or xxxA 
-
-	example: mov 3 channels:				3 inputs [1,2,3] * [1,2,3]T, Axxx, xxxA
-	example: directory of images:			3 inputs [1,2,3] * [1,2,3]T, Axxx, xxxA
-
- base implementation processing:
-		ingest and display in Axxx or xxxA
-
- 	image_sequence is struct similar to lif serie
-
-
-*/
-
-
-template<typename T, typename C>
-class image_sequence_data
-{
-public:
-    image_sequence_data ();
-    std::shared_ptr<T>& create (const T& m_lifRef);
-	
-    int index () const { return m_index; }
-    const std::string name () const { return m_name; }
-   
-    float seconds () const { return m_length_in_seconds; }
-    uint32_t timesteps () const { return m_timesteps; }
-    uint32_t channelCount () const { return m_channelCount; }
-    const std::vector<size_t>& dimensions () const { return m_dimensions; }
-
-    const std::vector<C>& channels () const { return m_channels; }
-	
-    const std::vector<std::string>& channel_names () const { return m_channel_names; }
-    const std::vector<time_spec_t>& timeSpecs () const { return  m_timeSpecs; }
-	
-    const std::weak_ptr<T>& readerWeakRef () const;
-	
-    const cv::Mat& poster () const { return m_poster; }
-    const std::string& custom_identifier () const { return m_contentType; }
- 
-
-private:
-    mutable int32_t m_index;
-    mutable std::string m_name;
-    uint32_t    m_timesteps;
-    uint32_t    m_pixelsInOneTimestep;
-    uint32_t    m_channelCount;
-    std::vector<size_t> m_dimensions;
-    std::vector<C> m_channels;
-    std::vector<std::string> m_channel_names;
-    std::vector<time_spec_t> m_timeSpecs;
-    cv::Mat m_poster;
-
-    
-    mutable float  m_length_in_seconds;
-    mutable std::string m_contentType; // "" denostes canonical LIF
-    
-    
-    friend std::ostream& operator<< (std::ostream& out, const image_sequence_data& se)
-    {
-        out << "Serie:    " << se.name() << std::endl;
-        out << "Channels: " << se.channelCount() << std::endl;
-        out << "TimeSteps  " << se.timesteps() << std::endl;
-        out << "Dimensions:" << se.dimensions()[0]  << " x " << se.dimensions()[1] << std::endl;
-        out << "Time Length:" << se.seconds()    << std::endl;
-        return out;
-    }
-    
-    std::string info ()
-    {
-        std::ostringstream osr;
-        osr << *this << std::endl;
-        return osr.str();
-    }
-    
-};
-
 
 class movContext : public sequencedImageContext
 {
@@ -145,6 +66,7 @@ public:
 	virtual void seekToFrame (int) override;
 	virtual int getCurrentFrame () override;
 	virtual time_spec_t getCurrentTime () override;
+    virtual time_spec_t getStartTime () override;
 	virtual int getNumFrames () override;
 	virtual void processDrag (ivec2 pos) override;
     
@@ -180,11 +102,13 @@ public:
     void QuitApp();
     
 private:
-
+    void  movContext::renderToFbo (const SurfaceRef&, gl::FboRef& fbo );
+    void add_canvas ();
     void setup_signals ();
     void setup_params ();
     ci::app::WindowRef& get_windowRef();
     const Rectf& get_channel_display_rect (const int channel_number);
+    void glscreen_normalize (const sides_length_t& src, const Rectf& gdr, sides_length_t& dst);
     
     // mov Support
     std::shared_ptr<ssmt_processor> m_movProcRef;
@@ -197,12 +121,18 @@ private:
     
     // Callbacks
     void signal_content_loaded (int64_t&);
-    void signal_sm1d_available (int&);
-    void signal_sm1dmed_available (int&,int&);
+    void signal_sm1d_ready (std::vector<float> &, const input_channel_selector_t&);
+    void signal_sm1dmed_ready (const input_channel_selector_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
+    void signal_segmented_view_ready (cv::Mat& image, cv::Mat& label);
     
     // Availability
     std::atomic<bool> m_geometry_available;
+    // Availability
+      std::atomic<bool> m_voxel_view_available;
+      input_channel_selector_t  m_input_selector;
+      mutable std::atomic<int> m_selector_last;
+
 
     // Clip Processing
     int get_current_clip_index () const;
@@ -217,15 +147,14 @@ private:
     void process_async ();
     void process_window(int);
     
-    
+     
     // Frame Cache and frame store
     std::shared_ptr<seqFrameContainer> mFrameSet;
     SurfaceRef  mSurface;
-  
-    
-    // Variance Image & Texture
+  // Variance Image & Texture
     cv::Mat m_segmented_image;
     ci::gl::TextureRef m_segmented_texture;
+    SurfaceRef m_segmented_surface;
     
     // Tracks of frame associated results
     std::weak_ptr<vecOfNamedTrack_t> m_basic_trackWeakRef;

@@ -19,6 +19,10 @@ cvVideoPlayer::~cvVideoPlayer()
 	unload();
 }
 
+const ci::ivec2& cvVideoPlayer::size () const { return mSize; }
+const double& cvVideoPlayer::format () const { return mFormat; }
+
+
 cvVideoPlayer& cvVideoPlayer::operator=( const cvVideoPlayer& rhs )
 {
 	mCapture		= rhs.mCapture;
@@ -34,9 +38,11 @@ cvVideoPlayer& cvVideoPlayer::operator=( const cvVideoPlayer& rhs )
 	mLoop			= rhs.mLoop;
 	mPlaying		= rhs.mPlaying;
 	mNumFrames		= rhs.mNumFrames;
-	mPosition		= rhs.mPosition;
+	mCurrentRatio	= rhs.mCurrentRatio;
 	mSize			= rhs.mSize;
 	mSpeed			= rhs.mSpeed;
+    mName           = rhs.mName;
+    mChannelNames   = rhs.mChannelNames;
 	return *this;
 }
 
@@ -80,6 +86,18 @@ Surface8uRef cvVideoPlayer::createSurface(int idx)
     return nullptr;
 }
 
+/**
+double dWidth = cap.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
+double dHeight = cap.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
+double dPositionMS = cap.get(CV_CAP_PROP_POS_MSEC); //Current position of the video file in milliseconds
+double dFrameIndex = cap.get(CV_CAP_PROP_POS_FRAMES); //0-based index of the frame to be decoded/captured next
+double dPositionVideo = cap.get(CV_CAP_PROP_POS_AVI_RATIO); //Relative position of the video file: 0 - start of the film, 1 - end of the film
+double dFPS = cap.get(CV_CAP_PROP_FPS); //Frame rate
+double dCodec = cap.get(CV_CAP_PROP_FOURCC); //4-character code of codec
+double dFrameCount = cap.get(CV_CAP_PROP_FRAME_COUNT); //Number of frames in the video file
+double dFormat = cap.get(CV_CAP_PROP_FORMAT); //Format of the Mat objects returned by retrieve()
+**/
+
 cvVideoPlayer::ref cvVideoPlayer::create( const fs::path& filepath )
 {
     ref dref = std::make_shared<cvVideoPlayer>();
@@ -106,14 +124,14 @@ cvVideoPlayer::ref cvVideoPlayer::create( const fs::path& filepath )
 		dref->mNumFrames	= (uint32_t)dref->mCapture->get( CV_CAP_PROP_FRAME_COUNT );
 		dref->mSize.x		= (int32_t)dref->mCapture->get( CV_CAP_PROP_FRAME_WIDTH );
 		dref->mSize.y		= (int32_t)dref->mCapture->get( CV_CAP_PROP_FRAME_HEIGHT );
+        dref->mChannelNames = {"Blue", "Green", "Red", "Alpha"};
 
-		if ( dref->mFrameRate > 0.0 ) {
+        dref->mLoaded = dref->mFrameRate > 0.0;
+		if (dref->mLoaded ) {
 			dref->mDuration		= (double) dref->mNumFrames / dref->mFrameRate;
 			dref->mFrameDuration	= 1.0 / dref->mFrameRate;
 		}
-        dref->mChannelNames = {"Blue", "Green", "Red", "Alpha"};
-        
-		dref->mLoaded = true;
+
 	}
     return dref;
 }
@@ -132,8 +150,8 @@ void cvVideoPlayer::seek( double seconds )
 		double millis	= math<double>::clamp( seconds, 0.0, mDuration ) * 1000.0;
 		mCapture->set( CV_CAP_PROP_POS_MSEC, millis );
 		mGrabTime		= chrono::high_resolution_clock::now();
-		mPosition		= millis / mDuration;
-		mElapsedFrames	= (uint32_t)( mPosition * (double)mNumFrames );
+		mCurrentRatio		= millis / mDuration;
+		mElapsedFrames	= (uint32_t)( mCurrentRatio * (double)mNumFrames );
 		mElapsedSeconds	= millis * 0.001;
 	}
 }
@@ -143,7 +161,7 @@ void cvVideoPlayer::seekFrame( uint32_t frameNum )
 	seek( (double)frameNum * mFrameDuration );
 }
 
-void cvVideoPlayer::seekPosition( float ratio )
+void cvVideoPlayer::seekTime( float ratio )
 {
 	seek( (double)ratio * mDuration );
 }
@@ -182,7 +200,7 @@ bool cvVideoPlayer::update()
 			mElapsedFrames		= (uint32_t)nextFrame;
 			mElapsedSeconds		= mCapture->get( CV_CAP_PROP_POS_MSEC ) * 0.001;
 			mGrabTime			= now;
-			mPosition			= mCapture->get( CV_CAP_PROP_POS_AVI_RATIO );
+			mCurrentRatio			= mCapture->get( CV_CAP_PROP_POS_AVI_RATIO );
 			if ( loop ) {
 				seek( 0.0 );
 			}
@@ -229,7 +247,7 @@ uint32_t cvVideoPlayer::getNumFrames() const
 
 double cvVideoPlayer::getPosition() const
 {
-	return mPosition;
+	return mCurrentRatio;
 }
 
 const ivec2& cvVideoPlayer::getSize() const

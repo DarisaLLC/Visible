@@ -5,9 +5,9 @@
 //  Created by Arman Garakani on 8/20/18.
 //
 
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomma"
-#pragma GCC diagnostic ignored "-Wunused-private-field"
 
 #include <stdio.h>
 #include <iostream>
@@ -16,7 +16,7 @@
 #include <deque>
 #include <sstream>
 #include <map>
-#include "timed_value_containers.h"
+#include "async_tracks.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
 #include "cinder_xchg.hpp"
@@ -24,7 +24,8 @@
 #include "vision/opencv_utils.hpp"
 #include "vision/localvariance.h"
 #include "algo_Mov.hpp"
-#include "logger/logger.hpp"
+#include "logger.hpp"
+//#include "cpp-perf.hpp"
 #include "vision/localvariance.h"
 #include "vision/labelBlob.hpp"
 #include "result_serialization.h"
@@ -54,7 +55,7 @@ mCurrentCachePath(serie_cache_folder)
     signal_sm1d_available = createSignal<sequence_processor::sig_cb_sm1d_available>();
     signal_3dstats_available = createSignal<sequence_processor::sig_cb_3dstats_available>();
     signal_geometry_available = createSignal<sequence_processor::sig_cb_geometry_available>();
-    _segmented_view_ready_ = createSignal<sequence_processor::sig_cb_ss_image_available>();
+    signal_ss_image_available = createSignal<sequence_processor::sig_cb_ss_image_available>();
     
     // semilarity producer
     m_sm_producer = std::shared_ptr<sm_producer> ( new sm_producer () );
@@ -114,8 +115,8 @@ int64_t sequence_processor::load (const std::shared_ptr<seqFrameContainer>& fram
     create_named_tracks(names, plot_names);
     load_channels_from_images(frames);
     lock.unlock();
-    int channel_to_use = m_channel_count - 1;
-    run_detect_geometry (channel_to_use);
+   // int channel_to_use = m_channel_count - 1;
+  //  run_detect_geometry (channel_to_use);
     
     // Call the content loaded cb if any
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
@@ -134,8 +135,7 @@ void sequence_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& image
     m_3d_stats_done = false;
     
     std::vector<std::thread> threads(1);
-    threads[0] = std::thread(&sequence_processor::generateVoxelSelfSimilarities_on_channel, this, 2,
-                             m_params.voxel_sample().first, m_params.voxel_sample().second);
+    threads[0] = std::thread(&sequence_processor::generateVoxelSelfSimilarities_on_channel, this, 2, 3, 3);
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 }
 
@@ -143,7 +143,7 @@ void sequence_processor::finalize_segmentation (cv::Mat& space){
     
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
     
-    cv::Point replicated_pad (m_params.voxel_pad().first, m_params.voxel_pad().second);
+    cv::Point replicated_pad (5,5);
     cv::Mat mono, bi_level;
     copyMakeBorder(space,mono, replicated_pad.x,replicated_pad.y,
                    replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);
@@ -152,17 +152,20 @@ void sequence_processor::finalize_segmentation (cv::Mat& space){
     std::function<labelBlob::results_ready_cb> res_ready_lambda = [this](int64_t& cbi)
     {
         const std::vector<labelBlob::blob>& blobs = m_main_blob->results();
+        
+        
+        
         if (! blobs.empty()){
-            m_motion_mass_bottom = blobs[0].rotated_roi();
-            auto tmp = m_motion_mass_bottom;
-            tmp.center.x -= m_params.voxel_pad().first;
-            tmp.center.y -= m_params.voxel_pad().second;
-            tmp.center.x *= m_params.voxel_sample().first;
-            tmp.center.y *= m_params.voxel_sample().second;
-            tmp.size.width *= m_voxel_sample.first;
-            tmp.size.height *= m_voxel_sample.second;
             
-            m_motion_mass = cv::RotatedRect(tmp.center, tmp.size, tmp.angle);
+            
+            m_motion_mass_bottom = blobs[0].rotated_roi();
+            m_motion_mass = blobs[0].rotated_roi();
+            m_motion_mass.center.x -= 5.0;
+            m_motion_mass.center.y -= 5.0;
+            m_motion_mass.center.x *= m_voxel_sample.first;
+            m_motion_mass.center.y *= m_voxel_sample.second;
+            m_motion_mass.size.width *= m_voxel_sample.first;
+            m_motion_mass.size.height *= m_voxel_sample.second;
             
             m_ab = blobs[0].moments().getEllipseAspect ();
             
@@ -173,11 +176,11 @@ void sequence_processor::finalize_segmentation (cv::Mat& space){
         
         
     };
-    
+ 
     boost::signals2::connection results_ready_ = m_main_blob->registerCallback(res_ready_lambda);
     m_main_blob->run_async();
-    
-    
+  
+
     
 }
 
@@ -342,7 +345,7 @@ void  sequence_processor::fill_longterm_pci (namedTrack_t& track)
     static int dummy;
     if (signal_sm1d_available && signal_sm1d_available->num_slots() > 0)
         signal_sm1d_available->operator()(dummy);
-    
+
 }
 
 
@@ -405,7 +408,7 @@ std::shared_ptr<vecOfNamedTrack_t>  sequence_processor::run_longterm_pci (const 
             });
         }
     }
-    
+ 
     return m_longterm_pci_tracksRef;
 }
 
@@ -427,8 +430,8 @@ const cv::RotatedRect& sequence_processor::motion_surface_bottom() const { retur
 // Update.
 void sequence_processor::update ()
 {
-    if(m_longterm_pci_tracksRef && !m_longterm_pci_tracksRef->empty())
-        fill_longterm_pci(m_longterm_pci_tracksRef->at(0));
+  if(m_longterm_pci_tracksRef && !m_longterm_pci_tracksRef->empty())
+   fill_longterm_pci(m_longterm_pci_tracksRef->at(0));
 }
 
 
@@ -456,7 +459,7 @@ void sequence_processor::load_channels_from_images (const std::shared_ptr<seqFra
         m_all_by_channel[1].emplace_back(red);
         m_all_by_channel[2].emplace_back(red);
         m_all_by_channel[3].emplace_back(red);
-        
+
         if (m_channel_rois.empty())
         {
             for (auto cc = 0; cc < 4; cc++)
@@ -484,9 +487,9 @@ const int64_t sequence_processor::channel_count () const
     return m_channel_count;
 }
 
-std::shared_ptr<ioImageWriter>& sequence_processor::get_image_writer (){
+std::shared_ptr<OCVImageWriter>& sequence_processor::get_image_writer (){
     if (! m_writer){
-        m_writer = std::make_shared<ioImageWriter>();
+        m_writer = std::make_shared<OCVImageWriter>();
     }
     return m_writer;
 }
@@ -504,7 +507,7 @@ void sequence_processor::save_channel_images (int channel_index, std::string& di
 
 // Return 2D latice of pixels over time
 void sequence_processor::generateVoxels_on_channel (const int channel_index, std::vector<std::vector<roiWindow<P8U>>>& rvs,
-                                                    uint32_t sample_x, uint32_t sample_y){
+                                                     uint32_t sample_x, uint32_t sample_y){
     std::lock_guard<std::mutex> lock(m_mutex);
     generateVoxels(m_all_by_channel[channel_index], rvs, sample_x, sample_y);
 }
@@ -537,13 +540,13 @@ void sequence_processor::generateVoxelSelfSimilarities_on_channel (const int cha
     }
     if ( cache_ok ){
         // Call the content loaded cb if any
-        if (_segmented_view_ready_ && _segmented_view_ready_->num_slots() > 0)
-            _segmented_view_ready_->operator()(m_temporal_ss);
+        if (signal_ss_image_available && signal_ss_image_available->num_slots() > 0)
+            signal_ss_image_available->operator()(m_temporal_ss);
     }
     else {
         std::vector<std::vector<roiWindow<P8U>>> rvs;
         std::string msg = " Generating Voxels @ (" + to_string(sample_x) + "," + to_string(sample_y) + ")";
-        //   vlogger::instance().console()->info("starting " + msg);
+     //   vlogger::instance().console()->info("starting " + msg);
         generateVoxels(m_all_by_channel[channel_index], rvs, sample_x, sample_y);
         vlogger::instance().console()->info("finished " + msg);
         generateVoxelSelfSimilarities(rvs);
@@ -554,8 +557,8 @@ void sequence_processor::generateVoxelSelfSimilarities_on_channel (const int cha
 
 
 void sequence_processor::generateVoxels (const std::vector<roiWindow<P8U>>& images,
-                                         std::vector<std::vector<roiWindow<P8U>>>& output,
-                                         uint32_t sample_x, uint32_t sample_y){
+                                          std::vector<std::vector<roiWindow<P8U>>>& output,
+                                          uint32_t sample_x, uint32_t sample_y){
     output.resize(0);
     size_t t_d = images.size();
     uint32_t width = images[0].width();
@@ -625,7 +628,7 @@ void sequence_processor::generateVoxelSelfSimilarities (std::vector<std::vector<
             cv::imwrite(image_path.string(), m_temporal_ss);
         }
         
-        
+   
         
         
     }
