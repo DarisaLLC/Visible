@@ -102,7 +102,7 @@ public:
     void QuitApp();
     
 private:
-    void  movContext::renderToFbo (const SurfaceRef&, gl::FboRef& fbo );
+    void renderToFbo (const SurfaceRef&, gl::FboRef& fbo );
     void add_canvas ();
     void setup_signals ();
     void setup_params ();
@@ -142,6 +142,7 @@ private:
     mutable volatile int m_current_clip_index;
     mutable std::vector<clip> m_clips;
     mutable std::mutex m_clip_mutex;
+    mutable std::mutex m_update_mutex;
     
     // Async Processing
     void process_async ();
@@ -239,6 +240,8 @@ private:
     
     // Resource Icons
     ci::gl::TextureRef    mNoLoop, mLoop;
+    
+
     
 	static size_t Normal2Index (const Rectf& box, const size_t& pos, const size_t& wave)
 	{

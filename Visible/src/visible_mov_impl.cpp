@@ -88,7 +88,7 @@ namespace {
 // default median cover pct is 5% (0.05)
 
 movContext::movContext(ci::app::WindowRef& ww, const cvVideoPlayer::ref& sd, const fs::path& cache_path) :sequencedImageContext(ww), m_sequence_player_ref(sd), m_voxel_view_available(false), mUserStorageDirPath (cache_path) {
-    m_type = guiContext::Type::lif_file_viewer;
+    m_type = guiContext::Type::cv_video_viewer;
     m_show_contractions = false;
     // Create an invisible folder for storage
     mCurrentCachePath = mUserStorageDirPath / sd->name();
@@ -120,7 +120,8 @@ ci::app::WindowRef&  movContext::get_windowRef(){
 void movContext::setup_signals(){
 
     // Create a Processing Object to attach signals to
-    m_movProcRef = std::make_shared<ssmt_processor> (mCurrentCachePath);
+    ssmt_processor::params bgra_params(ssmt_processor::params::ContentType::bgra);
+    m_movProcRef = std::make_shared<ssmt_processor> (mCurrentCachePath, bgra_params );
     
     // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&movContext::signal_content_loaded, shared_from_above(), _1);
@@ -169,7 +170,7 @@ void movContext::setup()
     mSize = vec2( ws[0], ws[1] / 12);
   //  m_contraction_names = m_contraction_none;
     clear_playback_params();
-   // loadCurrentSerie();
+    load_current_sequence();
     shared_from_above()->update();
     
     ww->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
@@ -196,7 +197,7 @@ void movContext::signal_sm1dmed_ready (const input_channel_selector_t& dummy2)
    //@note this is also checked in update. Not sure if this is necessary
 //   if (haveTracks())
 //    {
-//        auto tracksRef = m_contraction_pci_trackWeakRef.lock();
+//        auto tracksRef = m_longterm_pci_trackWeakRef.lock();
 //        if ( tracksRef && !tracksRef->at(0).second.empty()){
 //            m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
 //        }
@@ -295,7 +296,8 @@ void movContext::clear_playback_params ()
 }
 
 
-bool movContext::is_valid () const { return m_valid && is_context_type(guiContext::cv_video_viewer); }
+bool movContext::is_valid () const {
+    return m_valid && is_context_type(guiContext::cv_video_viewer); }
 
 
 
@@ -349,19 +351,6 @@ void movContext::play_pause_button ()
 }
 
 
-
-void movContext::update_sequencer()
-{
-    m_show_contractions = true;
-    m_result_seq.items.resize(1);
-    auto ctr = m_contractions[0];
-
-    m_result_seq.items.push_back(timeLineSequence::timeline_item{ 0,
-        (int) ctr.contraction_start.first,
-        (int) ctr.relaxation_end.first , true});
-
-
-}
 
 /************************
  *
@@ -623,9 +612,9 @@ int32_t movContext::getMedianCutOff () const
 //  2
 //  3
 
-void movContext::loadCurrentSerie ()
+void movContext::load_current_sequence ()
 {
-    if ( ! is_valid() || ! m_cur_lif_serie_ref)
+    if ( ! is_valid() || ! m_sequence_player_ref)
         return;
     
     try {
@@ -640,7 +629,7 @@ void movContext::loadCurrentSerie ()
          * Create the frameset and assign the channel names
          * Fetch the media info
          */
-        mFrameSet = seqFrameContainer::create (*m_cur_lif_serie_ref);
+        mFrameSet = seqFrameContainer::create (m_sequence_player_ref);
         if (! mFrameSet || ! mFrameSet->isValid())
         {
             vlogger::instance().console()->debug("Serie had 1 or no frames ");
@@ -650,7 +639,7 @@ void movContext::loadCurrentSerie ()
         mChannelCount = (uint32_t) mMediaInfo.getNumChannels();
         m_instant_channel_display_rects.resize(mChannelCount);
         
-        if (!(mChannelCount > 0 && mChannelCount < 4)){
+        if (!(mChannelCount > 0 && mChannelCount <= 4)){
             vlogger::instance().console()->debug("Expected 1 or 2 or 3 channels ");
             return;
         }
@@ -1012,27 +1001,27 @@ void movContext::resize ()
 
 bool movContext::haveTracks()
 {
-    return ! m_flurescence_trackWeakRef.expired() && ! m_contraction_pci_trackWeakRef.expired();
+    return ! m_basic_trackWeakRef.expired() && ! m_longterm_pci_trackWeakRef.expired();
 }
 
 
 void movContext::update ()
 {
     
-    if (! is_valid () ) return;
+    if (! is_valid () || ! mFrameSet || ! mFrameSet->isValid()) return;
 
     // Update PCI result if ready
     if ( is_ready (m_contraction_pci_tracks_asyn)){
-        m_contraction_pci_trackWeakRef = m_contraction_pci_tracks_asyn.get();
+        m_longterm_pci_trackWeakRef = m_contraction_pci_tracks_asyn.get();
     }
     
-    if ( ! m_contraction_pci_trackWeakRef.expired())
+    if ( ! m_longterm_pci_trackWeakRef.expired())
     {
 #ifdef SHORTTERM_ON
         if (m_movProcRef->shortterm_pci().at(0).second.empty())
                 m_movProcRef->shortterm_pci(1);
 #endif
-        auto tracksRef = m_contraction_pci_trackWeakRef.lock();
+        auto tracksRef = m_longterm_pci_trackWeakRef.lock();
         if(tracksRef && tracksRef->size() > 0 && ! tracksRef->at(0).second.empty())
             m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], channel_count()-1);
 

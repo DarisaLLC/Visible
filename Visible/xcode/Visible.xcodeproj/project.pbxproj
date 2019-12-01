@@ -604,7 +604,6 @@
 		C2DB72C722591DB700C2B986 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
 		C2DB72C822591DB700C2B986 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E345F21F2511D00221E68 /* ImSequencer.cpp */; };
 		C2DB72CA22591DB700C2B986 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
-		C2DB72CB22591DB700C2B986 /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */; };
 		C2DB72CC22591DB700C2B986 /* color.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7B217FDA6600FA9F43 /* color.cc */; };
 		C2DB72CD22591DB700C2B986 /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBF1CF277130074C47A /* self_similarity.cpp */; };
 		C2DB72CE22591DB700C2B986 /* onImagePlotUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* onImagePlotUtils.cpp */; };
@@ -3048,7 +3047,6 @@
 				C2DB72C822591DB700C2B986 /* ImSequencer.cpp in Sources */,
 				C2DB72CA22591DB700C2B986 /* logger.cpp in Sources */,
 				C2CE9C7E22A8983F003C479A /* mathBSpline.cpp in Sources */,
-				C2DB72CB22591DB700C2B986 /* VisibleApp.cpp in Sources */,
 				C2DB72CC22591DB700C2B986 /* color.cc in Sources */,
 				C2DB72CD22591DB700C2B986 /* self_similarity.cpp in Sources */,
 				C27AB56F238F34BF00D03929 /* main.cpp in Sources */,
