@@ -46,7 +46,13 @@ public:
     
     class params{
     public:
-        params (const voxel_params_t voxel_params = voxel_params_t()): m_vparams(voxel_params) {}
+        enum ContentType {
+            lif = 0,
+            bgra = lif+1,
+        };
+        params (const ContentType ct = ContentType::lif, const voxel_params_t voxel_params = voxel_params_t()): m_content(ct), m_vparams(voxel_params) {}
+        
+        const ContentType& content_type () { return m_content; }
         
         const std::pair<uint32_t,uint32_t>& voxel_sample () {return m_vparams.voxel_sample(); }
         const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_vparams.voxel_sample_half(); }
@@ -68,6 +74,7 @@ public:
         
     private:
         voxel_params_t m_vparams;
+        ContentType m_content;
     };
     
   //  using contractionContainer_t = contractionLocator::contractionContainer_t;
@@ -93,7 +100,7 @@ public:
     /*
        ssmt_processor constructor (takes an optional path to cache to be used or constructed )
     */
-    ssmt_processor (const fs::path& = fs::path());
+    ssmt_processor (const fs::path& = fs::path(), const ssmt_processor::params& = ssmt_processor::params () );
     
     // Assumes LIF data -- use multiple window.
     void load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames);
@@ -219,7 +226,7 @@ private:
     void save_affine_profiles ();
     
     // path to cache folder for this serie
-    fs::path mCurrentSerieCachePath;
+    fs::path mCurrentCachePath;
     
     std::shared_ptr<contractionLocator> m_entireCaRef;
   
@@ -256,8 +263,8 @@ private:
     Rectf m_measured_area;
     Rectf m_all;
     
-    mutable std::shared_ptr<vecOfNamedTrack_t> m_flurescence_tracksRef;
-    mutable std::shared_ptr<vecOfNamedTrack_t> m_contraction_pci_tracksRef;
+    mutable std::shared_ptr<vecOfNamedTrack_t> m_moment_tracksRef;
+    mutable std::shared_ptr<vecOfNamedTrack_t> m_longterm_pci_tracksRef;
 
     mutable  vecOfNamedTrack_t m_shortterm_pci_tracks;
     mutable std::queue<float> m_shortterms;
