@@ -313,6 +313,8 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
 {
     bool cache_ok = false;
     size_t dim = images.size();
+    std::string ss = "Contraction PCI started on " + toString(in.region());
+    vlogger::instance().console()->info(ss);
     std::shared_ptr<ssResultContainer> ssref;
     auto cache_path = get_cache_location(in.channel(), in.region());
     if(fs::exists(cache_path)){

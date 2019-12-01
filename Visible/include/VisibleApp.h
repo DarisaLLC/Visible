@@ -41,6 +41,7 @@
 #endif
 
 #include "LifContext.h"
+#include "MovContext.h"
 #include "gui_handler.hpp"
 #include "gui_base.hpp"
 #include "imGuiLogger.hpp"

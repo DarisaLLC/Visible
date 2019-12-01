@@ -31,6 +31,8 @@ public:
 
     const std::string& name() const { return mName; }
     const std::vector<std::string>& channel_names() const { return mChannelNames; }
+    const ci::ivec2& size () const;
+    const double& format () const;
     
 	cvVideoPlayer&			operator=( const cvVideoPlayer& rhs );
 
@@ -45,7 +47,7 @@ public:
 	void					play();
 	void					seek( double seconds );
 	void					seekFrame( uint32_t frameNum );
-	void					seekPosition( float ratio );
+	void					seekTime( float ratio );
 	void					stop();
 	void					unload();
 	bool					update();
@@ -71,6 +73,7 @@ protected:
 	VideoCaptureRef			mCapture		= nullptr;
 	std::string				mCodec;
 	double					mDuration		= 0.0;
+    double                  mFormat;
 	uint32_t				mElapsedFrames	= 0;
 	double					mElapsedSeconds	= 0.0;
 	ci::fs::path 			mFilePath;
@@ -81,7 +84,7 @@ protected:
 	bool					mLoop			= true;
 	bool					mPlaying		= false;
 	uint32_t				mNumFrames		= 0;
-	double					mPosition		= 0.0;
+	double					mCurrentRatio		= 0.0;
 	ci::ivec2				mSize;
 	float					mSpeed			= 1.0f;
     std::string                  mName;

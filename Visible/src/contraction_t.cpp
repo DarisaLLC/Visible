@@ -263,7 +263,8 @@ bool contractionLocator::locate_contractions (){
     stringstream ss;
     for (auto idx : peaks_idx) ss << idx << ",";
     vlogger::instance().console()->info(ss.str());
-    
+  
+#if 0
     auto save_csv = [](const std::shared_ptr<contractionProfile>& cp, fs::path& root_path){
         auto folder = stl_utils::now_string();
         auto folder_path = root_path / folder;
@@ -286,6 +287,7 @@ bool contractionLocator::locate_contractions (){
         }
         return false;
     };
+#endif
     
     for (auto pp = 0; pp < peaks_idx.size(); pp++){
         m_peaks.emplace_back(peaks_idx[pp], m_signal[peaks_idx[pp]]);
@@ -301,8 +303,8 @@ bool contractionLocator::locate_contractions (){
             m_contractions.emplace_back(profile->contraction());
             
             //@todo use cache_root for this
-            fs::path sp ("/Volumes/medvedev/Users/arman/tmp/");
-            save_csv(profile, sp);
+            fs::path sp ("/Users/arman/tmp/");
+            //save_csv(profile, sp);
         }
     }
     

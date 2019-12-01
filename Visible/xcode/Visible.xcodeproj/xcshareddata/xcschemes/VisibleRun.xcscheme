@@ -27,8 +27,6 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
-      <Testables>
-      </Testables>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
@@ -38,8 +36,8 @@
             ReferencedContainer = "container:Visible.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
-      <AdditionalOptions>
-      </AdditionalOptions>
+      <Testables>
+      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -67,8 +65,8 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Users/arman/Pictures/lif/ArmanVideosPart3.lif"
-            isEnabled = "YES">
+            argument = "/Users/arman/dev/lif/idlab/ArmanVideosPart3.lif"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "&quot;/Volumes/medvedev/Users/arman/Downloads/190724 Action Potential_Single island.lif&quot;"
@@ -76,7 +74,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Volumes/datastore/arman/Movies/testpattern.mov"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Volumes/datastore/arman/development/projects/parking_spot/__down_loads__/1538078190.ts"
@@ -112,7 +110,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "AP2"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "&quot;AP SingleConcractHDCell&quot;"
@@ -122,13 +120,7 @@
             argument = "IDLab_0"
             isEnabled = "YES">
          </CommandLineArgument>
-         <CommandLineArgument
-            argument = "list"
-            isEnabled = "NO">
-         </CommandLineArgument>
       </CommandLineArguments>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
