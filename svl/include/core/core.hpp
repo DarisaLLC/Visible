@@ -60,6 +60,7 @@ while ( 0 )
         static const double pi   = boost::math::constants::pi<double> () ;   // pi
         static const double two_pi  = boost::math::constants::two_pi<double> ();   // 2*pi
         static const double pi_2  = pi / 2. ;   // pi/2
+        static const double e = boost::math::constants::e<double> () ; // e 
     }
     
 #define _TINY               1e-49

@@ -10,7 +10,6 @@
 #include <cmath>
 #include <vector>
 #include "cinder_cv/cinder_opencv.h"
-#include "vision/opencv_utils.hpp"
 
 #include "contraction.hpp"
 #include "sg_filter.h"

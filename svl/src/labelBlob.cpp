@@ -100,7 +100,7 @@ void momento::update_contours(const cv::Mat& image){
     findContours(image, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, m_offset);
     if (contours.size() >= 0){
         approxPolyDP(contours[0], m_poly, 7, true);
-        m_perimeter = arcLength(contours[0], close);
+        m_perimeter = arcLength(contours[0], true);
         m_contour_ok = true;
     }
 }

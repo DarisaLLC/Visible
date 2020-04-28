@@ -86,7 +86,6 @@
 		C21A509B22A9A65900B0AC7D /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
 		C21A509C22A9A65900B0AC7D /* math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C8122A97D2D003C479A /* math.cpp */; };
 		C21A509D22A9A65900B0AC7D /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
-		C21A509E22A9A65900B0AC7D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
 		C21A509F22A9A65900B0AC7D /* contraction_t.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction_t.cpp */; };
 		C21A50A022A9A65900B0AC7D /* bitvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2601BB71E690409004415A3 /* bitvector.cpp */; };
 		C21A50A122A9A65900B0AC7D /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
@@ -183,7 +182,6 @@
 		C23E346121F2511D00221E68 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E345F21F2511D00221E68 /* ImSequencer.cpp */; };
 		C23E346321F254DE00221E68 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
 		C23E346421F254DE00221E68 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
-		C241B5F72319E87C00514F57 /* ut_gui_plot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23CFBDA21E6C3D700C1DF16 /* ut_gui_plot.cpp */; };
 		C241B5F82319F04700514F57 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
 		C242CCC5217E76D8004F7867 /* contraction_t.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction_t.cpp */; };
 		C248D6D8224939AC00C2C02F /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */; };
@@ -287,6 +285,7 @@
 		C26E558F231C883D00010169 /* imgui_visible_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26E558B231C883D00010169 /* imgui_visible_widgets.cpp */; };
 		C26E5590231C883D00010169 /* imgui_visible_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26E558B231C883D00010169 /* imgui_visible_widgets.cpp */; };
 		C26E5591231C883D00010169 /* imgui_visible_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26E558B231C883D00010169 /* imgui_visible_widgets.cpp */; };
+		C26F49082458D4A40043952A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C24CD87E1CEA5B1B0008C72B /* main.cpp */; };
 		C26F5F9921B0AA6D00EAE156 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
 		C26F5F9C21B0AA6D00EAE156 /* palette.png in Resources */ = {isa = PBXBuildFile; fileRef = C24C0953214A1ED5004C8002 /* palette.png */; };
 		C26F5F9E21B0AA6D00EAE156 /* swatchSmall.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD9215154A9004315C0 /* swatchSmall.png */; };
@@ -2674,7 +2673,6 @@
 				C21A509B22A9A65900B0AC7D /* imgui_draw.cpp in Sources */,
 				C21A509C22A9A65900B0AC7D /* math.cpp in Sources */,
 				C21A509D22A9A65900B0AC7D /* localvariance.cpp in Sources */,
-				C21A509E22A9A65900B0AC7D /* main.cpp in Sources */,
 				C21A509F22A9A65900B0AC7D /* contraction_t.cpp in Sources */,
 				C21A50A022A9A65900B0AC7D /* bitvector.cpp in Sources */,
 				C21A50A122A9A65900B0AC7D /* boost_literals.cpp in Sources */,
@@ -2707,7 +2705,6 @@
 				C28B01CE229B1DE500B8165D /* lif_serie.cpp in Sources */,
 				C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */,
 				C2CE9C7622A48AC5003C479A /* etw_utils.cpp in Sources */,
-				C241B5F72319E87C00514F57 /* ut_gui_plot.cpp in Sources */,
 				C20BBC041E4E33D3002C7D68 /* tinyxml.cpp in Sources */,
 				C2869C5A2319F47E00F04C0A /* imgui_plot.cpp in Sources */,
 				C24EA2D4207F081000555D16 /* sg_filter.cpp in Sources */,
@@ -2740,6 +2737,7 @@
 				C2618F87217FDA9E00FA9F43 /* figure.cc in Sources */,
 				C2C5CF69229A0DB0004595C5 /* glmutils.cpp in Sources */,
 				C21A50E322AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
+				C26F49082458D4A40043952A /* main.cpp in Sources */,
 				C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */,
 				C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C21FFE6A1CFCF81F00C97013 /* gradient.cpp in Sources */,
