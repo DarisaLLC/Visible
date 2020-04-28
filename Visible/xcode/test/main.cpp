@@ -45,7 +45,7 @@
 #include "vision/colorhistogram.hpp"
 #include "cinder_opencv.h"
 #include "ut_util.hpp"
-#include "algo_cardiac.hpp"
+//#include "algo_cardiac.hpp"
 #include "core/csv.hpp"
 #include "core/kmeans1d.hpp"
 #include "core/stl_utils.hpp"
@@ -80,8 +80,8 @@
 #include "etw_utils.hpp"
 #include "core/lineseg.hpp"
 #include "vision/ellipse.hpp"
-
-
+#include "moving_region.h"
+#include "algo_runners.hpp"
 #include <stdio.h>
 #include <gsl/gsl_sf_bessel.h>
 #include "core/moreMath.h"

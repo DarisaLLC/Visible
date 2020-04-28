@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "core/lineseg.hpp"
 #include "vision/opencv_utils.hpp"
-#include "cinder_cv/cinder_opencv.h"
+//#include "cinder_cv/cinder_opencv.h"
 #include "moving_region.h"
 
 using labelBlob=svl::labelBlob;
@@ -62,6 +62,7 @@ moving_region::moving_region (const labelBlob::blob& bb, uint32_t ind): labelBlo
 
 }
 
+#define fOCV(a) vec2((a).x, (a).y )
 
 void pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints, cv::RotatedRect& rotated_rect ){
     // get the left most
@@ -73,10 +74,12 @@ void pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints, cv::RotatedRect
         return a.y < b.y;
     });
     
+    // @note using cinder::fromOCV in lambda generated unpredictable results. Moving to macro resolved them.
+    // @note not clear exactly what the issue was. But fromOCV would geneated illegal access exception
     auto cwOrder = [&] (std::vector<cv::Point2f>& cc, std::vector<std::pair<std::pair<int,int>,float>>& results) {
-        const float d01 = glm::distance( fromOcv(cc[0]), fromOcv(cc[1]) );
-        const float d02 = glm::distance( fromOcv(cc[0]), fromOcv(cc[2]) );
-        const float d03 = glm::distance( fromOcv(cc[0]), fromOcv(cc[3]) );
+        const float d01 = glm::distance( fOCV(cc[0]), fOCV(cc[1]) );
+        const float d02 = glm::distance( fOCV(cc[0]), fOCV(cc[2]) );
+        const float d03 = glm::distance( fOCV(cc[0]), fOCV(cc[3]) );
         
         std::vector<std::pair<std::pair<int,int>,float>> ds = {{{0,1},d01}, {{0,2},d02}, {{0,3},d03}};
         std::sort (ds.begin(), ds.end(),[](std::pair<std::pair<int,int>,float>&a, const std::pair<std::pair<int,int>,float>&b){

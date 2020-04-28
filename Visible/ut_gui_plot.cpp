@@ -92,7 +92,7 @@ private:
     lifIO::ContentType_t mContentType; // "" denotes canonical LIF file
     bool m_isIdLabLif = false;
     void setup_ui ();
-    vWidget vw;
+//    vWidget vw;
 
     contractionLocator::contraction_t ctr;
     typedef vector<float>::iterator dItr_t;
@@ -122,8 +122,7 @@ void VisibleTestApp::run_cardiac (){
     fder.pop_back();
     std::transform(fder.begin(), fder.end(), fder2.begin(), [](double f)->double { return f * f; });
     // find first element greater than 0.1
-    auto pos = find_if (fder2.begin(), fder2.end(),    // range
-                        std::bind2nd(greater<double>(),0.1));  // criterion
+    auto pos = find_if (fder2.begin(), fder2.end(),  [&](double const& elem){ return elem > 0.1; });
     
     ctr.contraction_start.first = std::distance(fder2.begin(),pos);
     auto max_accel = std::min_element(fder.begin()+ ctr.contraction_start.first ,fder.begin()+ctr.contraction_peak.first);
@@ -136,8 +135,8 @@ void VisibleTestApp::run_cardiac (){
     // Initialize rpos to point to the element following the last occurance of a value greater than 0.1
     // If there is no such value, initialize rpos = to begin
     // If the last occurance is the last element, initialize this it to end
-    dItr_t rpos = find_if (fder2.rbegin(), fder2.rend(),    // range
-                           std::bind2nd(greater<double>(),0.1)).base();  // criterion
+    dItr_t rpos = find_if (fder2.rbegin(), fder2.rend(),  [&](double const& elem){ return elem > 0.1; }).base();
+
     ctr.relaxation_end.first = std::distance (fder2.begin(), rpos);
     
     //    EXPECT_EQ(ctr.contraction_start.first,16);
