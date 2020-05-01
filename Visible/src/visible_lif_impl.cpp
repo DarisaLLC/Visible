@@ -36,6 +36,7 @@
 #include "core/stl_utils.hpp"
 #include "lif_content.hpp"
 #include "core/signaler.h"
+#include "core/core.hpp"
 #include "contraction.hpp"
 #include "logger/logger.hpp"
 #include "cinder/Log.h"
@@ -45,7 +46,7 @@
 #include "cinder_opencv.h"
 #include "imguivariouscontrols.h"
 #include <boost/range/irange.hpp>
-//#include "imgui_plot.h"
+#include "core/stl_utils.hpp"
 #include "imgui_visible_widgets.hpp"
 
 using namespace ci;
@@ -274,12 +275,15 @@ void lifContext::signal_contraction_ready (contractionLocator::contractionContai
 void lifContext::signal_regions_ready(int count, const input_channel_selector_t& in)
 {
     assert(m_lifProcRef);
-    std::string mr = " Moving Region";
+    std::string mr = " Regions Ready: Moving Region";
     mr += (count > 1) ? "s" : " ";
     std::string msg = " Found " + stl_utils::tostr(count) + mr;
     vlogger::instance().console()->info(msg);
+    
     m_input_selector = in;
     for (auto mb : m_lifProcRef->moving_bodies()){
+        auto roi = mb->roi();
+        vlogger::instance().console()->info(" @ " + svl::toString(roi.tl())+"::"+ svl::toString(roi.size()));
         mb->process();
     }
     //@todo parameterize affine windows generation
@@ -747,9 +751,12 @@ void lifContext::loadCurrentSerie ()
         m_plot_names = m_serie.channel_names();
         m_plot_names.push_back("MisRegister");
 //        cv::Mat result;
-        std::vector<std::thread> threads(1);
-        threads[0] = std::thread(&ssmt_processor::load, m_lifProcRef.get(), mFrameSet, m_serie.channel_names(), m_plot_names);
-        std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+        
+        std::async(std::launch::async,&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie.channel_names(), m_plot_names);
+        
+//        std::vector<std::thread> threads(1);
+//        threads[0] = std::thread(&ssmt_processor::load, m_lifProcRef.get(),
+//        std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 
         /*
          * Fetch length and channel names
@@ -762,7 +769,7 @@ void lifContext::loadCurrentSerie ()
         // Initialize Sequencer
         m_result_seq.mFrameMin = 0;
         m_result_seq.mFrameMax = (int) mFrameSet->count() - 1;
-        m_result_seq.mSequencerItemTypeNames = {"All", "Contractions", "Length"};
+        m_result_seq.mSequencerItemTypeNames = {"All", "Contractions"};
         m_result_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         
         m_title = m_serie.name() + " @ " + mPath.filename().string();
@@ -800,11 +807,11 @@ void lifContext::process_async (){
         }
         case 2:
         {
-            // note launch mode is std::launch::async
-         //   m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
-          //                                          m_lifProcRef.get(), std::vector<int> ({0}) );
-         //   input_channel_selector_t in (-1,1);
-          //  m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in);
+             //note launch mode is std::launch::async
+            m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
+                                                    m_lifProcRef.get(), std::vector<int> ({0}) );
+            input_channel_selector_t in (-1,1);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in);
             break;
         }
         case 1:
@@ -881,8 +888,11 @@ void lifContext::add_canvas (){
                     auto selected = DrawCross(draw_list, ImVec4(1.0f, 0.0f, 0.0f, 0.5f), ImVec2(16,16),
                                               m_selected_cell == index, ic);
                     if(selected == 2){
-                        m_selected_cell = index;
-                        std::cout << " Cell " << index << " is Selected" << std::endl;
+                        if (m_selected_cell < 0)m_selected_cell = index;
+                        else m_selected_cell = -1;
+                        auto sel_string = m_selected_cell < 0 ? " is deselected " : " is selected";
+                        auto msg = " Cell " + tostr(index) + sel_string;
+                        vlogger::instance().console()->info(msg);
                     }
 
                     const std::vector<cv::Point>& cvpts = mb->poly();
@@ -1289,18 +1299,18 @@ void lifContext::update ()
         
     }
 
-    if(m_result_seq.m_time_data.plotCount() == 4 && ! m_contractions.empty() &&
-       contractionLocator::contraction_t::selfCheck(m_contractions[0])){
+    if(m_result_seq.m_time_data.plotCount() > 0  && ! m_contractions.empty() && m_selected_cell >= 0 &&
+       contractionLocator::contraction_t::selfCheck(m_contractions[m_selected_cell])){
         timedVecOfVals_t ll;
         timedVecOfVals_t el;
         timedVecOfVals_t force;
-        contractionTrackMaker sp (m_contractions[0], ll, el, force);
+        contractionTrackMaker sp (m_contractions[m_selected_cell], ll, el, force);
         namedTrack_t force_track, length_track, elongation_track;
         force_track.first = " Force "; length_track.first = " Interpolated Length "; elongation_track.first = " Elongation ";
         force_track.second = force;length_track.second = ll;elongation_track.second = el;
-        m_result_seq.m_time_data.load(force_track,named_colors["Force"], -1);
-        m_result_seq.m_time_data.load(length_track,named_colors["Length"], -1);
-        m_result_seq.m_time_data.load(elongation_track,named_colors["Elongation"], -1);
+        m_result_seq.m_time_data.load(force_track,named_colors["Force"], m_selected_cell);
+        m_result_seq.m_time_data.load(length_track,named_colors["Length"], m_selected_cell);
+        m_result_seq.m_time_data.load(elongation_track,named_colors["Elongation"], m_selected_cell);
     }
 
     

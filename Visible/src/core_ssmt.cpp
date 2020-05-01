@@ -351,7 +351,6 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
         
     }else{
         auto sp =  similarity_producer();
-        vlogger::instance().console()->info(tostr(images.size()));
         sp->load_images (images);
         std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
         std::future<bool>  future_ss = task.get_future();  // get a future
@@ -436,7 +435,7 @@ void ssmt_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_var_image);
     /*
-     * Collect local maximas of var field
+     * Save Only local maximas in the var field
      */
     m_var_peaks.resize(0);
     svl::PeakDetect(m_var_image, m_var_peaks);
@@ -446,6 +445,7 @@ void ssmt_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
         tmp.at<float>(peak.y,peak.x) = m_var_image.at<float>(peak.y,peak.x);
     }
     cv::normalize(tmp, m_var_image, 0, 255, NORM_MINMAX, CV_8UC1);
+    m_3d_stats_done = true;
     
 }
 

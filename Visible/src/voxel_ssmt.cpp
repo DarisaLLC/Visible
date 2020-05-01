@@ -27,7 +27,6 @@
 #include "vision/labelconnect.hpp"
 #include "ssmt.hpp"
 #include "logger/logger.hpp"
-#include "cpp-perf.hpp"
 #include "result_serialization.h"
 #include "dbscan.h"
 #include "segmentation_parameters.hpp"
@@ -132,7 +131,7 @@ void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
     // Median Blur before up sizeing.
     cv::medianBlur(ftmp, ftmp, 5);
     
-    // Straight resize. Add pads afterwar
+    // Straight resize. Add pads afterwards
     cv::Size bot(ftmp.cols * m_voxel_sample.first,ftmp.rows * m_voxel_sample.second);
     cv::Mat f_temporal (bot, CV_32F);
     cv::resize(ftmp, f_temporal, bot, 0, 0, INTER_NEAREST);

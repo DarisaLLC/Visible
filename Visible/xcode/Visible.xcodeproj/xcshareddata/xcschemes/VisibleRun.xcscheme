@@ -61,12 +61,12 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Volumes/datastore/arman/Pictures/lif/3_channels/Series007_chan02.mov"
+            argument = "/Volumes/medvedev/Users/arman/Pictures/lif/3_channels/Series007_chan02.mov"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Users/arman/Pictures/lif/ArmanVideosPart3.lif"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "&quot;/Volumes/medvedev/Users/arman/Downloads/190724 Action Potential_Single island.lif&quot;"
@@ -86,7 +86,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Users/arman/Pictures/lif/3channels.lif"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Users/arman/Pictures/lif/ArmanVideosVerapamil.lif"
@@ -94,7 +94,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "Series014"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "Series018"
@@ -110,7 +110,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "AP2"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "&quot;AP SingleConcractHDCell&quot;"

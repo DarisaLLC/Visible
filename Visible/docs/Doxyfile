@@ -58,7 +58,7 @@ PROJECT_LOGO           =
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = /Volumes/medvedev/Users/arman/dev/Visible/docs
+OUTPUT_DIRECTORY       = /Volumes/medvedev/Users/arman/XcodeProjects/dev/Visible/docs
 
 # If the CREATE_SUBDIRS tag is set to YES then doxygen will create 4096 sub-
 # directories (in 2 levels) under the output directory of each output format and
@@ -162,7 +162,7 @@ FULL_PATH_NAMES        = YES
 # will be relative from the directory where doxygen is started.
 # This tag requires that the tag FULL_PATH_NAMES is set to YES.
 
-STRIP_FROM_PATH        = /Volumes/medvedev/Users/arman/dev
+STRIP_FROM_PATH        = /Volumes/medvedev/Users/arman/XcodeProjects/dev
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of the
 # path mentioned in the documentation of a class, which tells the reader which
@@ -791,10 +791,10 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = /Volumes/medvedev/Users/arman/dev/svl/src \
-                         /Volumes/medvedev/Users/arman/dev/Visible/src \
-                         /Volumes/medvedev/Users/arman/dev/svl/include \
-                         /Volumes/medvedev/Users/arman/dev/Visible/include
+INPUT                  = /Volumes/medvedev/Users/arman/XcodeProjects/dev/svl/src \
+                         /Volumes/medvedev/Users/arman/XcodeProjects/dev/Visible/src \
+                         /Volumes/medvedev/Users/arman/dev/XcodeProjects/svl/include \
+                         /Volumes/medvedev/Users/arman/XcodeProjects/dev/Visible/include
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -877,17 +877,11 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = /Volumes/medvedev/Users/arman/dev/projects \
-                         /Volumes/medvedev/Users/arman/dev/xcode \
-                         /Volumes/medvedev/Users/arman/dev/xcode_ios \
-                         /Volumes/medvedev/Users/arman/dev/boost \
-                         /Volumes/medvedev/Users/arman/dev/svl/build \
-                         /Volumes/medvedev/Users/arman/dev/svl/local \
-                         /Volumes/medvedev/Users/arman/dev/Visible/xcode \
-                         /Volumes/medvedev/Users/arman/dev/Visible/assets \
-                         /Volumes/medvedev/Users/arman/dev/Visible/build \
-                         /Volumes/medvedev/Users/arman/dev/Visible/docs \
-                         /Volumes/medvedev/Users/arman/dev/Visible/resources
+EXCLUDE                = /Volumes/medvedev/Users/arman/XcodeProjects/dev/projects \
+                         /Volumes/medvedev/Users/arman/XcodeProjects/dev/xcode \
+                         /Volumes/medvedev/Users/arman/XcodeProjects/dev/xcode_ios \
+                         /Volumes/medvedev/Users/arman/XcodeProjects/dev/svl/build \
+                         /Volumes/medvedev/Users/arman/XcodeProjects/dev/svl/local
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -1182,7 +1176,7 @@ HTML_FILE_EXTENSION    = .html
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_HEADER            = header.html.in
+HTML_HEADER            = 
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard
@@ -1192,7 +1186,7 @@ HTML_HEADER            = header.html.in
 # that doxygen normally uses.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_FOOTER            = footer.html
+HTML_FOOTER            = 
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1204,7 +1198,7 @@ HTML_FOOTER            = footer.html
 # obsolete.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_STYLESHEET        = doxygen.css
+HTML_STYLESHEET        = 
 
 # The HTML_EXTRA_STYLESHEET tag can be used to specify additional user-defined
 # cascading style sheets that are included after the standard style sheets
@@ -1511,7 +1505,7 @@ DISABLE_INDEX          = NO
 # The default value is: NO.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-GENERATE_TREEVIEW      = NO
+GENERATE_TREEVIEW      = YES
 
 # The ENUM_VALUES_PER_LINE tag can be used to set the number of enum values that
 # doxygen will group on one line in the generated HTML documentation.
@@ -1979,7 +1973,7 @@ MAN_LINKS              = NO
 # captures the structure of the code including all documentation.
 # The default value is: NO.
 
-GENERATE_XML           = YES
+GENERATE_XML           = NO
 
 # The XML_OUTPUT tag is used to specify where the XML pages will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of

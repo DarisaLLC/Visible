@@ -38,11 +38,8 @@ const Rectf& ssmt_processor::measuredArea () const { return m_measured_area; }
 
 void ssmt_processor::find_moving_regions (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
+    generateVoxelsAndSelfSimilarities (images);
 
-    
-    std::vector<std::thread> threads(1);
-    threads[0] = std::thread(&ssmt_processor::generateVoxelsAndSelfSimilarities, this, images);
-    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 }
 
 
