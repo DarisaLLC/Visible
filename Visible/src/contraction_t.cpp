@@ -23,7 +23,9 @@
 #include "core/pf.h"
 #include "vision/correlation1d.hpp"
 #include "core/boost_stats.hpp"
-
+#include "logger/logger.hpp"
+#include "cpp-perf.hpp"
+using namespace perf;
 
 namespace anonymous
 {
@@ -107,6 +109,8 @@ void contractionLocator::load(const vector<double>& entropies, const vector<vect
     }
     m_peaks.resize(0);
     mValidInput = verify_input ();
+    auto msg = "Contraction Locator Initialized For " + to_string(m_id);
+    vlogger::instance().console()->info(msg);
 }
 
 /* Compute rank for all entropies
@@ -118,6 +122,7 @@ void contractionLocator::load(const vector<double>& entropies, const vector<vect
  */
 double contractionLocator::Median_levelsets (const vector<double>& entropies,  std::vector<int>& ranks )
 {
+ 
     vector<double> entcpy;
     
     for (const auto val : entropies)
@@ -137,6 +142,7 @@ double contractionLocator::Median_levelsets (const vector<double>& entropies,  s
 
 size_t contractionLocator::recompute_signal () const
 {
+
     size_t count = std::floor (m_entropies.size () * m_median_levelset_frac);
     assert(count < m_ranks.size());
     m_signal.resize(m_entropies.size (), 0.0);
@@ -151,18 +157,28 @@ size_t contractionLocator::recompute_signal () const
         val = val / count;
         m_signal[ii] = val;
     }
+    
     return count;
 }
 void contractionLocator::update() const{
+    perf::timer timeit;
+    timeit.start();
+     
     // Cache Rank Calculations
     compute_median_levelsets ();
     // If the fraction of entropies values expected is zero, then just find the minimum and call it contraction
     size_t count = recompute_signal();
     if (count == 0) m_signal = m_entropies;
+    timeit.stop();
+    auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
+    vlogger::instance().console()->info("Update (ms): " + timestr);
+    vlogger::instance().console()->info("count " + toString(count));
 }
 
 bool contractionLocator::get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& m_contraction) const{
-    
+    perf::timer timeit;
+    timeit.start();
+      
     if (! mValidInput) return false;
     contraction_t::clear(m_contraction);
     
@@ -218,6 +234,10 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
      * Use Median visual rank value for relaxation visual rank
      */
     m_contraction.relaxation_visual_rank = svl::Median(m_fder);
+    timeit.stop();
+    auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
+    vlogger::instance().console()->info("get_contraction_at_point (ms): " + timestr);
+    vlogger::instance().console()->info(" Peak Index: " + toString(src_peak_index));
     
     return true;
 }
@@ -225,6 +245,9 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
 
 
 bool contractionLocator::locate_contractions (){
+    perf::timer timeit;
+    timeit.start();
+     
     assert(verify_input());
     if(! isPreProcessed())
         update ();
@@ -301,12 +324,19 @@ bool contractionLocator::locate_contractions (){
             //@todo use cache_root for this
             fs::path sp ("/Volumes/medvedev/Users/arman/tmp/");
             save_csv(profile, sp);
+            auto msg = "Stored " + stl_utils::tostr(pp);
+            vlogger::instance().console()->info(msg);
+            break;
         }
     }
     
     if (signal_contraction_ready && signal_contraction_ready->num_slots() > 0)
         signal_contraction_ready->operator()(m_contractions, m_in);
 
+    timeit.stop();
+    auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
+    vlogger::instance().console()->info("Update (ms): " + timestr);
+    vlogger::instance().console()->info(" Number of Peaks: " + toString(peaks_idx.size()));
     
     return true;
 }
@@ -367,7 +397,9 @@ m_ctr(ct) /*, m_connect(cl) */
  */
 
 void contractionProfile::compute_interpolated_geometries_and_force(const std::vector<double>& signal){
-    
+    perf::timer timeit;
+    timeit.start();
+     
     const double relaxed_length = contraction().relaxation_visual_rank;
     m_fder = signal;
     /*
@@ -408,7 +440,13 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
     m_ctr.elongation = m_elongation;
     m_ctr.interpolated_length = m_interpolated_length;
     
+    // Add uid
+    m_ctr.m_uid = (uint32_t)random();
     
+    timeit.stop();
+    auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
+    vlogger::instance().console()->info("Force (ms): " + timestr);
+    vlogger::instance().console()->info("Id " + toString(m_ctr.m_uid));
     
     
 }

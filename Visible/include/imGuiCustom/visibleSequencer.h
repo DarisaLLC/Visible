@@ -54,18 +54,13 @@ class TimeDataCollection : public ImCurveEdit::Delegate
     ImVec2 mMax;
     
 public:
-    TimeDataCollection(size_t plot_count)
-    {
-        mPts.resize(plot_count);
-        mPointCount.resize(plot_count);
-        mbVisible.resize(plot_count);
-        mPlotNames.resize(plot_count);
-        mPlotColors.resize(plot_count);
-        
-        mMax = ImVec2(1.f, 1.f);
-        mMin = ImVec2(0.f, 0.f);
+    TimeDataCollection(size_t plot_count){
+        init(plot_count);
     }
 
+    void resize (size_t plot_count){
+        init(plot_count);
+    }
     //
     /**
      load
@@ -178,6 +173,17 @@ public:
     virtual unsigned int GetBackgroundColor() { return 0; }
  
 private:
+    void init (size_t plot_count)
+     {
+         mPts.resize(plot_count);
+         mPointCount.resize(plot_count);
+         mbVisible.resize(plot_count);
+         mPlotNames.resize(plot_count);
+         mPlotColors.resize(plot_count);
+         
+         mMax = ImVec2(1.f, 1.f);
+         mMin = ImVec2(0.f, 0.f);
+     }
     void SortValues(size_t curveIndex)
     {
         auto b = std::begin(mPts[curveIndex]);

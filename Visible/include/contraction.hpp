@@ -45,7 +45,7 @@ struct contractionMesh : public std::pair<size_t,size_t>
     
     double relaxation_visual_rank;
     double max_length;
- 
+    uint32_t m_uid;
  
    sigContainer_t             elongation;
    sigContainer_t             interpolated_length;
@@ -243,7 +243,7 @@ private:
     mutable std::vector<double> m_ac;
     mutable std::vector<double> m_bac;
     input_channel_selector_t m_in;
- 
+    
 protected:
     boost::signals2::signal<contractionLocator::sig_cb_cell_length_ready>* cell_length_ready;
     boost::signals2::signal<contractionLocator::sig_cb_force_ready>* total_reactive_force_ready;

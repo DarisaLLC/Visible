@@ -880,7 +880,7 @@
 		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
 		C2398A7F21DF224C00B180A0 /* VisibleTestApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleTestApp-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleTestApp-Info.plist"; sourceTree = "<absolute>"; };
 		C23B7CC6220553E1005DE02C /* cpp-perf.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = "cpp-perf.hpp"; path = "../include/cpp-perf.hpp"; sourceTree = "<group>"; };
-		C23CFBDA21E6C3D700C1DF16 /* ut_gui_plot.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ut_gui_plot.cpp; path = ../ut_gui_plot.cpp; sourceTree = "<group>"; };
+		C23CFBDA21E6C3D700C1DF16 /* ut_gui_plot.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ut_gui_plot.cpp; path = ../test/ut_gui_plot.cpp; sourceTree = "<group>"; };
 		C23CFBE321E96D6700C1DF16 /* Resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../test/Resources.h; sourceTree = "<group>"; };
 		C23CFBE521E9785000C1DF16 /* PlayLoop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PlayLoop.png; path = data/PlayLoop.png; sourceTree = "<group>"; };
 		C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PlayNoLoop.png; path = data/PlayNoLoop.png; sourceTree = "<group>"; };
