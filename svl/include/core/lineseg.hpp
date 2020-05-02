@@ -1,7 +1,6 @@
 #ifndef _LINE_H_
 #define _LINE_H_
 
-#include <vector>
 #include "angle_units.h"
 #include "vector2d.hpp"
 #include "core/core.hpp"

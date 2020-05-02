@@ -295,7 +295,6 @@ private:
     
     // imGui
     timeLineSequence m_result_seq;
-    void draw_sequencer ();
     
     // UI instant sub-window rects
     Rectf m_results_browser_display;

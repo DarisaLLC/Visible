@@ -20,6 +20,7 @@
 #include "eigen_utils.hpp"
 #include "input_selector.hpp"
 #include "time_index.h"
+#include "timed_value_containers.h"
 
 using namespace std;
 using namespace boost;
@@ -45,7 +46,7 @@ struct contractionMesh : public std::pair<size_t,size_t>
     
     double relaxation_visual_rank;
     double max_length;
-    uint32_t m_uid;
+    cell_id_t m_uid;
  
    sigContainer_t             elongation;
    sigContainer_t             interpolated_length;
@@ -165,13 +166,12 @@ public:
     typedef void (sig_cb_force_ready) (sigContainer_t&);
     
     // Factory create method
-    static Ref create(const input_channel_selector_t&, const contractionLocator::params& params = contractionLocator::params());
+    static Ref create(const input_channel_selector_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params());
     Ref getShared();
     // Load raw entropies and the self-similarity matrix
     // If no self-similarity matrix is given, entropies are assumed to be filtered and used directly
     // // input selector -1 entire index mobj index
-    void load (const vector<double>& entropies, const vector<vector<double>>& mmatrix = vector<vector<double>>(),
-               int input = -1);
+    void load (const vector<double>& entropies, const vector<vector<double>>& mmatrix = vector<vector<double>>());
 
     // Update with most recent median level set
     void update () const;
@@ -183,6 +183,8 @@ public:
     bool isOutputValid () const { return mValidOutput; }
     bool isPreProcessed () const { return mNoSMatrix; }
     size_t size () const { return m_entsize; }
+    const uint32_t id () const { return m_id; }
+    const input_channel_selector_t& input () const { return m_in; }
     
     // Original
     const vector<double>& entropies () { return m_entropies; }
@@ -211,7 +213,7 @@ public:
     // Static public functions. Enabling testing @todo move out of here
     static double Median_levelsets (const vector<double>& entropies,  std::vector<int>& ranks );
 private:
-    contractionLocator(const input_channel_selector_t&, const contractionLocator::params& params = contractionLocator::params ());
+    contractionLocator(const input_channel_selector_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params ());
     contractionLocator::params m_params;
     
 

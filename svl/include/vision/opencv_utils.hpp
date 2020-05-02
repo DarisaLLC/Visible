@@ -137,7 +137,6 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     
     float orintedAngle (const cv::Point2f &a, const cv::Point2f &b, const cv::Point2f &c);
     
-    void skinMaskYCrCb (const cv::Mat &src, cv::Mat &dst);
     void drawPolygon( cv::Mat &im,const std::vector<cv::Point> &pts,const cv::Scalar &color=cv::Scalar(255, 255, 255),
                      int thickness=1,
                      int lineType=8,
@@ -152,8 +151,6 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     
     
     void compute2DRectCorners(const cv::RotatedRect rect, std::vector<cv::Point2f> & corners);
-    
-   // bool direction_moments (cv::Mat image, momento& res);
     
     float Median1dF (const cv::Mat& fmat, size_t& loc);
     
@@ -197,18 +194,7 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
         return out << r.x << " y=" << r.y << " width=" << r.width << " height=" << r.height << ">";
     }
  
-    struct ssBlob
-    {
-        cv::Point loc;
-        float radius;
-        float ss_val;
-    };
-    
-    void CreateGaussSpace(const cv::Mat& img, std::vector<cv::Mat>& blured, float tmin, float tmax, float tdelta);
-    
-    void CreateScaleSpace(const cv::Mat& img, std::vector<cv::Mat>& blured, float tmin, float tmax, float tdelta,
-                          std::vector<cv::Mat>& scaled,
-                          std::vector<ssBlob>& blobs);
+ 
     
     cv::Mat gaussianTemplate(const std::pair<uint32_t,uint32_t>& dims, const vec2& sigma = vec2(1.0, 1.0), const vec2& center = vec2(0.5,0.5));
     

@@ -42,7 +42,7 @@ mCurrentSerieCachePath(serie_cache_folder)
     signal_content_loaded = createSignal<ssmt_processor::sig_cb_content_loaded>();
     signal_flu_ready = createSignal<ssmt_processor::sig_cb_flu_stats_ready>();
     signal_frame_loaded = createSignal<ssmt_processor::sig_cb_frame_loaded>();
-    signal_sm1d_ready = createSignal<ssmt_processor::sig_cb_sm1d_ready>();
+    signal_contraction_pci_ready = createSignal<ssmt_processor::sig_cb_sm1d_ready>();
     signal_sm1dmed_ready = createSignal<ssmt_processor::sig_cb_sm1dmed_ready>();
     signal_contraction_ready = createSignal<ssmt_processor::sig_cb_contraction_ready>();
     signal_3dstats_ready = createSignal<ssmt_processor::sig_cb_3dstats_ready>();
@@ -322,7 +322,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
 
     // Create a contraction object for entire view processing.
     // @todo: add params
-    m_entireCaRef = contractionLocator::create (in);
+    m_entireCaRef = contractionLocator::create (in, -1);
     std::vector<float> fout;
     
     if(cache_ok){
@@ -391,8 +391,8 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
         }
     }
     // Signal we are done with ACI
-    if (signal_sm1d_ready && signal_sm1d_ready->num_slots() > 0){
-        signal_sm1d_ready->operator()(fout, in);
+    if (signal_contraction_pci_ready && signal_contraction_pci_ready->num_slots() > 0){
+        signal_contraction_pci_ready->operator()(fout, in);
     }
     
     return m_contraction_pci_tracksRef;

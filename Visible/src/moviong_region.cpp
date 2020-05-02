@@ -5,29 +5,31 @@
 //  Created by Arman Garakani on 8/10/19.
 //
 
-#include <stdio.h>
+#include "core/GLMmath.h"
 #include "core/lineseg.hpp"
-#include "vision/opencv_utils.hpp"
-//#include "cinder_cv/cinder_opencv.h"
 #include "moving_region.h"
 
 using labelBlob=svl::labelBlob;
+using namespace svl;
 
-moving_region::moving_region (const labelBlob::blob& bb, uint32_t ind): labelBlob::blob (bb), m_id(ind){
+moving_region::moving_region (const labelBlob::blob& bb, cell_id_t ind): labelBlob::blob (bb), m_id(ind){
+    
+     auto get_mid_points = [] (const cv::RotatedRect& rotrect, std::vector<cv::Point2f>& mids) {
+         //Draws a rectangle
+         cv::Point2f rect_points[4];
+         rotrect.points( &rect_points[0] );
+         for( int j = 0; j < 4; j++ ) {
+             mids.emplace_back ((rect_points[j].x + rect_points[(j + 1) % 4].x)/2.0f,
+                         (rect_points[j].y + rect_points[(j + 1) % 4].y)/2.0f);
+         }
+     };
+     
     m_rr = bb.rotated_roi();
     std::vector<cv::Point2f> corners(4);
-    //     std::string msg = svl::to_string(m_rr);
-    //      msg = " < " + msg;
-    //      vlogger::instance().console()->info(msg);
     m_rr.points(corners.data());
     pointsToRotatedRect(corners, m_rr);
-//    m_rr.center.x += pad_trans.first;
-//    m_rr.center.y += pad_trans.second;
-    //   msg = svl::to_string(m_rr);
-    //   msg = " > " + msg;
-    //   vlogger::instance().console()->info(msg);
     std::vector<cv::Point2f> mid_points;
-    svl::get_mid_points(m_rr, mid_points);
+    get_mid_points(m_rr, mid_points);
     auto surface_affine = cv::getRotationMatrix2D(m_rr.center,m_rr.angle, 1);
     surface_affine.at<double>(0,2) -= (m_rr.center.x - m_rr.size.width/2);
     surface_affine.at<double>(1,2) -= (m_rr.center.y - m_rr.size.height/2);
