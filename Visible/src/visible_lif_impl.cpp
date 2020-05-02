@@ -139,8 +139,8 @@ void lifContext::setup_signals(){
     boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(flu_stats_ready_cb);
     
     // Support lifProcessor::initial ss results available
-    std::function<void (std::vector<float> &, const input_channel_selector_t&)> sm1d_ready_cb = boost::bind (&lifContext::signal_sm1d_ready, shared_from_above(), _1, _2);
-    boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(sm1d_ready_cb);
+    std::function<void (std::vector<float> &, const input_channel_selector_t&)> root_pci_ready_cb = boost::bind (&lifContext::signal_root_pci_ready, shared_from_above(), _1, _2);
+    boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(root_pci_ready_cb);
     
     // Support lifProcessor::median level set ss results available
     std::function<void (const input_channel_selector_t&)> sm1dmed_ready_cb = boost::bind (&lifContext::signal_sm1dmed_ready, shared_from_above(), _1);
@@ -209,10 +209,10 @@ void lifContext::setup()
  *
  ************************/
 
-void lifContext::signal_sm1d_ready (std::vector<float> & signal, const input_channel_selector_t& dummy)
+void lifContext::signal_root_pci_ready (std::vector<float> & signal, const input_channel_selector_t& dummy)
 {
     stringstream ss;
-    ss << svl::toString(dummy.region()) << " self-similarity available ";
+    ss << svl::toString(dummy.region()) << " contraction self-similarity available ";
     vlogger::instance().console()->info(ss.str());
 }
 
@@ -221,9 +221,9 @@ void lifContext::signal_sm1dmed_ready (const input_channel_selector_t& dummy2)
    //@note this is also checked in update. Not sure if this is necessary
    if (haveTracks())
     {
-        auto tracksRef = m_contraction_pci_trackWeakRef.lock();
+        auto tracksRef = m_root_pci_trackWeakRef.lock();
         if ( tracksRef && !tracksRef->at(0).second.empty()){
-            m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
+            m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
         }
     }
     vlogger::instance().console()->info("self-similarity available: ");
@@ -248,11 +248,12 @@ void lifContext::signal_contraction_ready (contractionLocator::contractionContai
     if (contras.empty()) return;
     
     stringstream ss;
-    ss << " Region: " << svl::toString(in.region()) << " " << svl::toString(contras.size());
+    ss << " Moving Region: " << svl::toString(in.region()) << " " << svl::toString(contras.size());
     vlogger::instance().console()->info(ss.str());
+    m_cell2contractions_map[contras[0].m_uid] = contras;
     
-    m_cell2contractions_map[in.region()] = contras;
-    
+// redesign of graphic output
+#if NOTYET
     // @note: We are handling one contraction for now.
     m_contractions = contras;
     reset_entire_clip(mMediaInfo.count);
@@ -265,6 +266,7 @@ void lifContext::signal_contraction_ready (contractionLocator::contractionContai
                          ctr.contraction_peak.first);
 
     update_sequencer();
+#endif
     
 }
 
@@ -439,10 +441,10 @@ void lifContext::play_pause_button ()
 void lifContext::update_sequencer()
 {
     m_show_contractions = true;
-    m_result_seq.items.resize(1);
+    m_main_seq.items.resize(1);
     auto ctr = m_contractions[0];
 
-    m_result_seq.items.push_back(timeLineSequence::timeline_item{ 0,
+    m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0,
         (int) ctr.contraction_start.first,
         (int) ctr.relaxation_end.first , true});
 
@@ -766,11 +768,11 @@ void lifContext::loadCurrentSerie ()
         m_minFrame = 0;
         m_maxFrame =  mFrameSet->count() - 1;
         
-        // Initialize Sequencer
-        m_result_seq.mFrameMin = 0;
-        m_result_seq.mFrameMax = (int) mFrameSet->count() - 1;
-        m_result_seq.mSequencerItemTypeNames = {"All", "Contractions"};
-        m_result_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
+        // Initialize The Main Sequencer
+        m_main_seq.mFrameMin = 0;
+        m_main_seq.mFrameMax = (int) mFrameSet->count() - 1;
+        m_main_seq.mSequencerItemTypeNames = {"RGG"};
+        m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         
         m_title = m_serie.name() + " @ " + mPath.filename().string();
         
@@ -946,7 +948,7 @@ void lifContext::add_navigation(){
         {
             ImGui::PushItemWidth(40);
             ImGui::PushID(200);
-            ImGui::InputInt("", &m_result_seq.mFrameMin, 0, 0);
+            ImGui::InputInt("", &m_main_seq.mFrameMin, 0, 0);
             ImGui::PopID();
             ImGui::SameLine();
             if (ImGui::Button("|<"))
@@ -982,7 +984,7 @@ void lifContext::add_navigation(){
             
             ImGui::SameLine();
             ImGui::PushID(202);
-            ImGui::InputInt("",  &m_result_seq.mFrameMax, 0, 0);
+            ImGui::InputInt("",  &m_main_seq.mFrameMax, 0, 0);
             ImGui::PopID();
             ImGui::SameLine();
             if (ImGui::Button(m_playback_speed == 10 ? " 1 " : " 10x "))
@@ -995,7 +997,7 @@ void lifContext::add_navigation(){
             auto dt = getCurrentTime().secs() - getStartTime().secs();
             ui::SameLine(0,0); ui::Text("% 8d\t%4.4f Seconds", getCurrentFrame(), dt);
             
-            if(!m_contraction_pci_trackWeakRef.expired()){
+            if(!m_root_pci_trackWeakRef.expired()){
                 if(m_median_set_at_default){
                     int default_median_cover_pct = m_idlab_defaults.median_level_set_cutoff_fraction;
                     setMedianCutOff(default_median_cover_pct);
@@ -1041,22 +1043,22 @@ void lifContext::add_result_sequencer (){
     static bool results_open;
     if(ImGui::Begin(wResult, &results_open, ImGuiWindowFlags_AlwaysAutoResize)){
         ImGui::PushItemWidth(130);
-        ImGui::InputInt("Frame Min", &m_result_seq.mFrameMin);
+        ImGui::InputInt("Frame Min", &m_main_seq.mFrameMin);
         ImGui::SameLine();
         ImGui::InputInt64("Frame ", &m_seek_position);
         ImGui::SameLine();
-        ImGui::InputInt("Frame Max", &m_result_seq.mFrameMax);
+        ImGui::InputInt("Frame Max", &m_main_seq.mFrameMax);
         ImGui::PopItemWidth();
         
 
-        Sequencer(&m_result_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
+        Sequencer(&m_main_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
 
         
         // add a UI to edit that particular item
         if (selectedEntry != -1)
         {
-            const timeLineSequence::timeline_item &item = m_result_seq.items[selectedEntry];
-            ImGui::Text("I am a %s, please edit me", m_result_seq.mSequencerItemTypeNames[item.mType].c_str());
+            const timeLineSequence::timeline_item &item = m_main_seq.items[selectedEntry];
+            ImGui::Text("I am a %s, please edit me", m_main_seq.mSequencerItemTypeNames[item.mType].c_str());
             // switch (type) ....
         }
     }
@@ -1079,7 +1081,7 @@ void lifContext::add_motion_profile (){
         m_segmented_texture = gl::Texture::create(*m_segmented_surface, texFormat);
     }
     
-    ImGuiWindow* window = ImGui::FindWindowByName(wContractions);
+    ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
     assert(window != nullptr);
     
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
@@ -1224,7 +1226,7 @@ void  lifContext::DrawGUI(){
     add_navigation();
     add_result_sequencer();
     add_regions(&m_show_cells);
-    add_contractions(&m_show_contractions);
+//    add_contractions(&m_show_contractions);
     add_motion_profile ();
 }
 
@@ -1247,7 +1249,7 @@ void lifContext::resize ()
 
 bool lifContext::haveTracks()
 {
-    return ! m_flurescence_trackWeakRef.expired() && ! m_contraction_pci_trackWeakRef.expired();
+    return ! m_flurescence_trackWeakRef.expired() && ! m_root_pci_trackWeakRef.expired();
 }
 
 
@@ -1268,25 +1270,25 @@ void lifContext::update ()
         // Number of Flu runs is channel count - 1
         auto tracksRef = m_flurescence_trackWeakRef.lock();
         for (auto cc = 0; cc < flu_cnt; cc++){
-            m_result_seq.m_time_data.load(tracksRef->at(cc), named_colors[tracksRef->at(cc).first], cc);
+            m_main_seq.m_time_data.load(tracksRef->at(cc), named_colors[tracksRef->at(cc).first], cc);
         }
     }
 
     
     // Update PCI result if ready
     if ( is_ready (m_contraction_pci_tracks_asyn)){
-        m_contraction_pci_trackWeakRef = m_contraction_pci_tracks_asyn.get();
+        m_root_pci_trackWeakRef = m_contraction_pci_tracks_asyn.get();
     }
     
-    if ( ! m_contraction_pci_trackWeakRef.expired())
+    if ( ! m_root_pci_trackWeakRef.expired())
     {
 #ifdef SHORTTERM_ON
         if (m_lifProcRef->shortterm_pci().at(0).second.empty())
                 m_lifProcRef->shortterm_pci(1);
 #endif
-        auto tracksRef = m_contraction_pci_trackWeakRef.lock();
+        auto tracksRef = m_root_pci_trackWeakRef.lock();
         if(tracksRef && tracksRef->size() > 0 && ! tracksRef->at(0).second.empty())
-            m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], channel_count()-1);
+            m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], channel_count()-1);
 
 #ifdef SHORTTERM_ON
         // Update shortterm PCI result if ready
@@ -1299,8 +1301,10 @@ void lifContext::update ()
         
     }
 
-    if(m_result_seq.m_time_data.plotCount() > 0  && ! m_contractions.empty() && m_selected_cell >= 0 &&
-       contractionLocator::contraction_t::selfCheck(m_contractions[m_selected_cell])){
+#ifdef NOTYET
+    auto current_contraction = m_cell2contractions[m_selected_cell];
+    if(m_main_seq.m_time_data.plotCount() > 0  && ! m_contractions.empty() && m_selected_cell >= 0 &&
+       contractionLocator::contraction_t::selfCheck(
         timedVecOfVals_t ll;
         timedVecOfVals_t el;
         timedVecOfVals_t force;
@@ -1312,7 +1316,8 @@ void lifContext::update ()
         m_result_seq.m_time_data.load(length_track,named_colors["Length"], m_selected_cell);
         m_result_seq.m_time_data.load(elongation_track,named_colors["Elongation"], m_selected_cell);
     }
-
+#endif
+                                                    
     
     // Fetch Next Frame
     if (have_lif_serie ()){

@@ -8,20 +8,22 @@
 #ifndef labelBlob_hpp
 #define labelBlob_hpp
 
-
+#include "opencv2/opencv.hpp"
 #include <algorithm>
 #include <iostream>
 #include <typeinfo>
 #include <vector>
-#include "opencv2/opencv.hpp"
 #include <stdio.h>
-#include "core/signaler.h"
-#include <cstdint>
-#include "core/pair.hpp"
-#include <atomic>
-#include "angle_units.h"
 #include <memory>
+#include <cstdint>
 #include <atomic>
+
+#include "core/pair.hpp"
+
+#include "angle_units.h"
+#include "core/signaler.h"
+
+
 
 using namespace cv;
 

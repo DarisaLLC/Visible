@@ -73,20 +73,21 @@ namespace anonymous
 
 
 
-std::shared_ptr<contractionLocator> contractionLocator::create(const input_channel_selector_t& in, const contractionLocator::params& params){
-    return std::shared_ptr<contractionLocator>(new contractionLocator(in, params));
+std::shared_ptr<contractionLocator> contractionLocator::create(const input_channel_selector_t& in, const uint32_t& body_id, const contractionLocator::params& params){
+    return std::shared_ptr<contractionLocator>(new contractionLocator(in, body_id, params));
 }
 
 std::shared_ptr<contractionLocator> contractionLocator::getShared () {
     return shared_from_this();
 }
 
-contractionLocator::contractionLocator(const input_channel_selector_t& in, const contractionLocator::params& params) :
+contractionLocator::contractionLocator(const input_channel_selector_t& in,  const uint32_t& body_id, const contractionLocator::params& params) :
 m_cached(false),  m_in(in), mValidInput (false), m_params(params)
 {
     m_median_levelset_frac = m_params.median_levelset_fraction();
     m_peaks.resize(0);
-    m_id = -2;
+    m_id = body_id;
+    m_in = in;
     // Signals we provide
     signal_contraction_ready = createSignal<contractionLocator::sig_cb_contraction_ready> ();
     signal_pci_available = createSignal<contractionLocator::sig_cb_pci_available> ();
@@ -94,9 +95,8 @@ m_cached(false),  m_in(in), mValidInput (false), m_params(params)
     cell_length_ready = createSignal<contractionLocator::sig_cb_cell_length_ready>();
 }
 
-void contractionLocator::load(const vector<double>& entropies, const vector<vector<double>>& mmatrix, int input)
+void contractionLocator::load(const vector<double>& entropies, const vector<vector<double>>& mmatrix)
 {
-    m_id = input;
     m_entropies = entropies;
     m_SMatrix = mmatrix;
     mNoSMatrix = m_SMatrix.empty();
@@ -316,7 +316,7 @@ bool contractionLocator::locate_contractions (){
         
         contraction_t ct;
         if(get_contraction_at_point(pp, peaks_idx, ct)){
-            
+            ct.m_uid = m_id;
             auto profile = std::make_shared<contractionProfile>(ct);
             profile->compute_interpolated_geometries_and_force(m_signal);
             m_contractions.emplace_back(profile->contraction());

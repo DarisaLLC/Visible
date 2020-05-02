@@ -137,7 +137,7 @@ private:
     // Callbacks
     void signal_content_loaded (int64_t&);
     void signal_flu_stats_ready ();
-    void signal_sm1d_ready (std::vector<float> &, const input_channel_selector_t&);
+    void signal_root_pci_ready (std::vector<float> &, const input_channel_selector_t&);
     void signal_sm1dmed_ready (const input_channel_selector_t&);
     void signal_contraction_ready (contractionLocator::contractionContainer_t&,const input_channel_selector_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
@@ -174,7 +174,7 @@ private:
     
     // Tracks of frame associated results
     std::weak_ptr<vecOfNamedTrack_t> m_flurescence_trackWeakRef;
-    std::weak_ptr<vecOfNamedTrack_t> m_contraction_pci_trackWeakRef;
+    std::weak_ptr<vecOfNamedTrack_t> m_root_pci_trackWeakRef;
 
     // Selection -1 means none selected
     bool change_current_cell ();
@@ -189,8 +189,7 @@ private:
     std::vector<cv::Point2f> m_mid_points;
 
     // Directory of Cells / Contractions and SS
-    std::unordered_map<int,contractionLocator::contractionContainer_t>m_cell2contractions_map;
-    std::unordered_map<int,vector<float>>m_cells2pci_map;
+    std::unordered_map<cell_id_t,contractionLocator::contractionContainer_t>m_cell2contractions_map;
     
     
     // Folder for Per user result / content caching
@@ -267,8 +266,8 @@ private:
     
     
     // imGui
-    timeLineSequence m_result_seq;
-    void draw_sequencer ();
+    timeLineSequence m_main_seq;
+    std::unordered_map<uint32_t, timeLineSequence> cell2Sequence;
  
     
     // UI instant sub-window rects

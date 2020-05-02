@@ -85,6 +85,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
         msg = toString(tid) + " Moving regions: " + msg;
         vlogger::instance().console()->info(msg);
         
+        // @note: moving_region's id is the size of the container before it is added, i.e. sequential
         for (const blob& bb : blobs){
             m_regions.emplace_back(bb, (uint32_t(m_regions.size())));
         }

@@ -41,7 +41,7 @@ const ssmt_result::ref_t ssmt_result::create (std::shared_ptr<ssmt_processor>& p
 
 ssmt_result::ssmt_result(const moving_region& mr,const input_channel_selector_t& in):moving_region(mr),  m_input(in) {
     // Create a contraction object
-    m_caRef = contractionLocator::create (in);
+    m_caRef = contractionLocator::create (in, mr.id());
     
     // Suport lif_processor::Contraction Analyzed
     std::function<void (contractionLocator::contractionContainer_t&,const input_channel_selector_t& in)>ca_analyzed_cb =
@@ -81,6 +81,7 @@ void ssmt_result::process (){
     }
 }
 
+// Crops the moving body accross the sequence
 bool ssmt_result::get_channels (int channel){
     
     auto parent = m_weak_parent.lock();

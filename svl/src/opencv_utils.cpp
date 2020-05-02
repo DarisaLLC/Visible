@@ -3,14 +3,12 @@
 #include <algorithm>
 #include "vision/opencv_utils.hpp"
 #include "vision/gradient.h"
-#include "boost/variant.hpp"
 #include <cstdio>
 #include <iostream>
 
 
 using namespace std;
 using namespace cv;
-using namespace ci;
 using namespace svl;
 
 namespace svl
@@ -216,32 +214,7 @@ namespace svl
         }
     }
     
-    
-#if NOTYET
-    double angle(cv::Point2f origin, cv::Point2f a){
-        auto v = a - origin;
-        double out = atan2(v.x,v.y) * 180.0 / svl::constants::pi;
-        if (out<0) {out+=360.0;}
-        return out;
-    }
 
-    void sortCorners(std::vector<Point2f>& corners, Point2f& center, std::vector<Point2f>& out) {
-        
-        
-        // Calculate all the angles from the centroid, maintaining index
-        for (Point p : corners) {polar.push_back(angle(p, cent));}
-        vector<double> sorted = polar;
-        sort(sorted.begin(), sorted.end());
-        
-        // Sort "corners" by the order of sorted "polar"
-        for (double d : sorted) {
-            n = index(polar, d);
-            out.push_back(corners[n]);  // Return sorted corners
-        }
-        return out;
-    }
-
-#endif
 
     cv::Point2f rotate2d(const cv::Point2f& pt_in, const double& angle_rad) {
         cv::Point2f pt_out;
@@ -395,97 +368,7 @@ namespace svl
         cv::bilateralFilter(src, dst, neighbourhood, sigma_colour, sigma_space);
     }
     
-    //Function used to perform Wiener Denoising. Note that this function does not reverse the blur
-    //Input: src image, constant to multiply with (inverse of PSNR)
-    //Output: filtered image
-    void Wiener_Denoising(const cv::Mat &src, cv::Mat &dst, double PSNR_inverse)
-    {
-        cv::Mat src_dft;
-        
-        //Obtain the DFT of the src image
-        Complex_Gray_DFT(src, src_dft);
-        
-        //Multiply it by the constant
-        cv::Mat output_dft;
-        output_dft = (PSNR_inverse)*src_dft;
-        
-        //Perform the inverse PSNR to get the filtered output
-        Real_Gray_IDFT(output_dft, dst);
-    }
-    
-    //Function used to perform anisotropic diffusion
-    //Input: src image, lambda (used for converance), number of iterations that should run,
-    //         k values to define what is an edge and what is not (x2: one for north/south, one for east/west)
-    //Output: filtered image
-    void Anisotrpic_Diffusion(const cv::Mat& src, cv::Mat& dst, double lambda, int iterations, float k_ns, float k_we)
-    {
-        //copy the src to dst as initilisation and convert dst to a 32 bit float mat, for accuracy when processing
-        dst = src.clone();
-        dst.convertTo(dst, CV_32F);
-        
-        //Create the kernels to be used to calculate edges in North, South, East and West directions
-        //These are similar to Laplacian kernels
-        cv::Mat_<int> kernel_n = cv::Mat::zeros(3, 3, CV_8U);
-        kernel_n(1, 1) = -1;
-        cv::Mat_<int> kernel_s, kernel_w, kernel_e;
-        kernel_s = kernel_n.clone();
-        kernel_w = kernel_n.clone();
-        kernel_e = kernel_n.clone();
-        
-        kernel_n(0, 1) = 1;
-        kernel_s(2, 1) = 1;
-        kernel_w(1, 0) = 1;
-        kernel_e(1, 2) = 1;
-        
-        //Create the parameters that will be used in the loop:
-        
-        // grad_x = gradient obtained by using the directional edge detection kernel defined above
-        
-        // param_x = mat which containes the parameter to be fed to the exp function, used when calculating the conduction coefficient value (c_x)
-        
-        // c_x = conduction coefficient values which help to control the amount of diffusion
-        
-        // k_ns and k_we are gradient magnitude parameters - they serve as thresholds to define what is a gradient and what is noise.
-        // therefore, they are used in the function to define the c_x values (one for north and south directions, the other fo west and east)
-        
-        cv::Mat_<float> grad_n, grad_s, grad_w, grad_e;
-        cv::Mat_<float> param_n, param_s, param_w, param_e;
-        cv::Mat_<float> c_n, c_s, c_w, c_e;
-        
-        //perform the number of iterations requested
-        for (int time = 0; time < iterations; time++)
-        {
-            //perform the filtering
-            cv::filter2D(dst, grad_n, -1, kernel_n);
-            cv::filter2D(dst, grad_s, -1, kernel_s);
-            cv::filter2D(dst, grad_w, -1, kernel_w);
-            cv::filter2D(dst, grad_e, -1, kernel_e);
-            
-            //obtain the iteration values as per the conduction function used
-            //in this case, the conduction function is found in [52], eq 11
-            param_n = (std::sqrt(5) / k_ns) * grad_n;
-            cv::pow(param_n, 2, param_n);
-            cv::exp(-(param_n), c_n);
-            
-            param_s = (std::sqrt(5) / k_ns) * grad_s;
-            cv::pow(param_s, 2, param_s);
-            cv::exp(-(param_s), c_s);
-            
-            param_w = (std::sqrt(5) / k_we) * grad_w;
-            cv::pow(param_w, 2, param_w);
-            cv::exp(-(param_w), c_w);
-            
-            param_e = (std::sqrt(5) / k_we) * grad_e;
-            cv::pow(param_e, 2, param_e);
-            cv::exp(-(param_e), c_e);
-            
-            //update the image
-            dst = dst + lambda*(c_n.mul(grad_n) + c_s.mul(grad_s) + c_w.mul(grad_w) + c_e.mul(grad_e));
-        }
-        //convert the output to 8 bits
-        dst.convertTo(dst, CV_8U);
-    }
-    
+   
     //Function used to perform Gamma correction
     //Input:  NORMALISED src image, gamma
     //Output: Modified image
@@ -608,23 +491,6 @@ namespace svl
         }
     }
     
-    void skinMaskYCrCb (const cv::Mat &src, cv::Mat &dst)
-    {
-        Mat m;
-        cvtColor(src, m, CV_BGR2YCrCb);
-        std::vector<Mat> mv;
-        split(m, mv);
-        Mat mask = Mat(m.rows, m.cols, CV_8UC1);
-        
-        for (int i=0; i<m.rows; i++) {
-            for (int j=0; j<m.cols; j++) {
-                int Cr= mv[1].at<uint8_t>(i,j);
-                int Cb =mv[2].at<uint8_t>(i,j);
-                mask.at<uint8_t>(i, j) = (Cr>130 && Cr<170) && (Cb>70 && Cb<125) ? 255 : 0;
-            }
-        }
-        dst = mask;
-    }
 
     double correlation (cv::Mat &image_1, cv::Mat &image_2)
     {
@@ -721,64 +587,7 @@ namespace svl
         return prepare_acf(space,precision);
     }
     
-    void cumani_opencv (const cv::Mat& input_bgr, cv::Mat& gradAbs, cv::Mat& orientation, float& maxVal)
-    {
-        
-        // compute the gradients on both directions x and y
-        Mat grad_x, grad_y;
-        Mat abs_grad_x, abs_grad_y;
-        int ddepth = CV_32F; // use 16 bits unsigned to avoid overflow
-        std::vector<Mat> mv;
-        std::vector<Mat> gradXs(3);
-        std::vector<Mat> gradYs(3);
-        split(input_bgr, mv);
-        gradAbs = Mat::zeros(input_bgr.rows,input_bgr.cols, CV_32F);
-        orientation = Mat::zeros(input_bgr.rows,input_bgr.cols, CV_32F);
-
-        for (auto cc = 0; cc < 3; cc++)
-        {
-            gradXs[cc] = Mat::zeros(input_bgr.rows,input_bgr.cols, CV_32F);
-            gradYs[cc] = Mat::zeros(input_bgr.rows,input_bgr.cols, CV_32F);
-            Sobel( mv[cc], gradXs[cc], ddepth, 1, 0); //kx, scale, delta, BORDER_DEFAULT );
-            Sobel( mv[cc], gradYs[cc], ddepth, 0, 1); // , ky, scale, delta, BORDER_DEFAULT );
-        }
-        Mat dfdx = Mat::zeros(1, 3, CV_32FC1);
-        Mat dfdy = Mat::zeros(1, 3, CV_32FC1);
-        float E,F,G,EpG,EmG,a;
-        
-        for (auto y = 0; y < input_bgr.rows; y++)
-            for (auto x = 0; x < input_bgr.cols; x++)
-            {
-                dfdx.at<float>(0,0) = gradXs[0].at<float>(y,x);
-                dfdx.at<float>(0,1) = gradXs[1].at<float>(y,x);
-                dfdx.at<float>(0,2) = gradXs[2].at<float>(y,x);
-                
-                dfdy.at<float>(0,0) = gradYs[0].at<float>(y,x);
-                dfdy.at<float>(0,1) = gradYs[1].at<float>(y,x);
-                dfdy.at<float>(0,2) = gradYs[2].at<float>(y,x);
-
-                E = dfdx.dot(dfdx);
-                F = dfdx.dot(dfdy);
-                G = dfdy.dot(dfdy);
-                
-                // the vector of maximal contrast is given by the eigenvalues of
-                // the tensor matrix lambda = (E+G) +/- sqrt((E-G)^2+4F^2)/2;
-                EpG=E+G;
-                if (EpG<=std::numeric_limits<float>::epsilon()) {
-                    gradAbs.at<float>(y,x)=0.0f;
-                    orientation.at<float>(y,x)=0.0f;
-                } else {
-                    EmG=E-G;
-                    a = sqrt(EmG*EmG+4.0f*F*F);
-                    // maximum directional derivative -> lambda_max
-                    maxVal=max((gradAbs.at<float>(y,x)=sqrt((EpG + a)*0.5f)),maxVal);
-                    a = 0.5f*atan2(2.0f*F,EmG);
-                    orientation.at<float>(y,x)=a;
-                }
-            }
-        
-    }
-   
+  
     
     bool matIsEqual(const cv::Mat mat1, const cv::Mat mat2){
         // treat two empty mat as identical as well
@@ -1171,190 +980,5 @@ namespace svl
         }
     }
     
-    void CreateGaussSpace(const cv::Mat& img, std::vector<cv::Mat>& blured, float tmin, float tmax, float tdelta)
-    {
-        int L = (int)((tmax - tmin) / tdelta) + 1;
-        std::string displayName ("Gauss Space");
-        
-        cv::namedWindow(displayName, CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED);
-        
-        blured.resize(0);
-        
-        // create level-1 image
-        double tI = tmin;
-        float sigmaI = exp(tI);
-        
-        cv::Mat tmp = img.clone ();
-        cv::GaussianBlur(img, tmp, cv::Size(0,0), sigmaI);
-        
-        blured.push_back(tmp);
-        tI += tdelta;
-        
-        for(int i = 1; i < L; i++)
-        {
-            float sigmaI_tmp = exp(tI);
-            float sigmaI_new = sqrt(sigmaI_tmp*sigmaI_tmp - sigmaI*sigmaI);
-            cv::Mat next = img.clone ();
-            std::cout << sigmaI_new << std::endl;
-            
-            cv::GaussianBlur(img, next, cv::Size(0,0), sigmaI_new);
-            blured.push_back(next);
-            sigmaI = sigmaI_tmp;
-            tI += tdelta;
-        }
-    }
-    
-    void CreateScaleSpace(const cv::Mat& img, std::vector<cv::Mat>& blured, float tmin, float tmax, float tdelta,
-                          std::vector<cv::Mat>& scaled,
-                          std::vector<ssBlob>& blobs)
-    {
-        
-        CreateGaussSpace(img,blured,tmin,tmax,tdelta);
-        
-        scaled.resize (0);
-        // apply laplacian filter
-        for(int i = 0; i < blured.size(); i++)
-        {
-            cv::Mat laplace;
-            cv::Laplacian(blured[i],laplace, CV_32F);
-            scaled.push_back(laplace);
-        }
-        
-        // find maxima - detect blobs
-        blobs.resize (0);
-        
-        // traverse the scale space
-        for(int s = 0; s < blured.size(); s++)
-        {
-            const cv::Mat& imgS = blured[s];
-            for(int j = 4; j < imgS.cols-4; j++)
-            {
-                for(int i = 4; i < imgS.rows-4; i++)
-                {
-                    float lum = imgS.at<float>(i,j);
-                    
-                    if (isnan(lum))
-                        continue;
-                    
-                    if(lum < 0.75f) continue;
-                    
-                    int w = 5;
-                    bool max = true;
-                    for(int k = 0; k < w; k++)
-                    {
-                        for(int l=0; l < w; l++)
-                        {
-                            if(k - w/2 == 0 && l - w/2 == 0) continue;
-                            if(lum <= imgS.at<float>(i + k - w/2, j + l - w/2))
-                            {
-                                max = false;
-                                break;
-                            }
-                        }
-                        if(!max) break;
-                    }
-                    
-                    if(max)
-                    {
-                        if(s != 0)
-                        {
-                            if(lum <= scaled[s-1].at<float>(i,j) ||
-                               lum <= scaled[s-1].at<float>(i-1,j) ||
-                               lum <= scaled[s-1].at<float>(i+1,j) ||
-                               lum <= scaled[s-1].at<float>(i,j-1) ||
-                               lum <= scaled[s-1].at<float>(i,j+1) ||
-                               lum <= scaled[s-1].at<float>(i-1,j-1) ||
-                               lum <= scaled[s-1].at<float>(i+1,j+1) ||
-                               lum <= scaled[s-1].at<float>(i-1,j+1) ||
-                               lum <= scaled[s-1].at<float>(i+1,j-1))
-                            {
-                                max = false;
-                                continue;
-                            }
-                        }
-                        
-                        if(s != scaled.size()-1)
-                        {
-                            if(lum <= scaled[s+1].at<float>(i,j) ||
-                               lum <= scaled[s+1].at<float>(i-1,j) ||
-                               lum <= scaled[s+1].at<float>(i+1,j) ||
-                               lum <= scaled[s+1].at<float>(i,j-1) ||
-                               lum <= scaled[s+1].at<float>(i,j+1) ||
-                               lum <= scaled[s+1].at<float>(i-1,j-1) ||
-                               lum <= scaled[s+1].at<float>(i+1,j+1) ||
-                               lum <= scaled[s+1].at<float>(i-1,j+1) ||
-                               lum <= scaled[s+1].at<float>(i+1,j-1))
-                            {
-                                max = false;
-                                continue;
-                            }
-                        }
-                        
-                        ssBlob sb;
-                        sb.loc.x = j; sb.loc.y = i;
-                        sb.radius = 1.41f * (exp(tmin) + s*tdelta);
-                        sb.ss_val = s;
-                        blobs.push_back(sb);
-                    }
-                }
-            }
-        }
-        
-    }
-    
-    
 }
-
-
-
-
-#if 0
-template <typename ElemT, int cn>
-inline float vecNormSqrd(const cv::Vec<ElemT, cn> &v)
-{
-    float s = 0;
-    for (int i = 0; i < cn; i++) {
-        s += float(v[i] * v[i]);
-    }
-    return s;
-}
-
-float vecAngle(const Vec2f &a, const Vec2f &b)
-{
-    float dp = float(a.dot(b));
-    float cross = float(b[1] * a[0] - b[0] * a[1]);
-    dp /= sqrt(float((vecNormSqrd(a) * vecNormSqrd(b))));
-    
-    return acos(dp) * float(std::signbit(cross));
-}
-
-float orintedAngle (const cv::Point2f &a, const cv::Point2f &b, const cv::Point2f &c) {
-    return vecAngle((a - b), (c - b));
-}
-
-
-Mat &svl::getRotatedROI(const Mat &src, const RotatedRect &r, Mat &dest)
-{
-    Mat transMat;
-    xformMat(src, dest, r.angle, 1.0, &transMat);
-    cv::Point newPt = svl::warpAffinePt(transMat, r.center);
-    dest = dest(cv::Rect(Point2f(float(newPt.x) - r.size.width * 0.5f, float(newPt.y) - r.size.height * 0.5f), r.size));
-    return dest;
-}
-
-
-
-
-{
-    ostream &cv::operator<<(ostream &out, const Scalar s) {
-        out << "<Scalar (" << s[0] << ", " << s[1] << ", " << s[2] << ", " << s[3] << ")>";
-        return out;
-    }
-    
-    ostream &cv::operator<<(ostream &out, const uchar c) {
-        out << unsigned(c);
-        return out;
-    }
-}
-#endif
 

@@ -175,7 +175,7 @@ protected:
     boost::signals2::signal<ssmt_processor::sig_cb_content_loaded>* signal_content_loaded;
     boost::signals2::signal<ssmt_processor::sig_cb_flu_stats_ready>* signal_flu_ready;
     boost::signals2::signal<ssmt_processor::sig_cb_frame_loaded>* signal_frame_loaded;
-    boost::signals2::signal<ssmt_processor::sig_cb_sm1d_ready>* signal_sm1d_ready;
+    boost::signals2::signal<ssmt_processor::sig_cb_sm1d_ready>* signal_contraction_pci_ready;
     boost::signals2::signal<ssmt_processor::sig_cb_sm1dmed_ready>* signal_sm1dmed_ready;
     boost::signals2::signal<ssmt_processor::sig_cb_contraction_ready>* signal_contraction_ready;
     boost::signals2::signal<ssmt_processor::sig_cb_3dstats_ready>* signal_3dstats_ready;
