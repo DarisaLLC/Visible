@@ -263,10 +263,10 @@ public:
     using index_val_t = contractionMesh::index_val_t;
     using sigContainer_t = contractionMesh::sigContainer_t;
     
-    contractionProfile (contraction_t&);
+    contractionProfile (contraction_t&, cell_id_t cid);
 
-    static profileRef create(contraction_t& ct){
-        return profileRef(new contractionProfile(ct));
+    static profileRef create(contraction_t& ct, cell_id_t cid){
+        return profileRef(new contractionProfile(ct, cid));
     }
     // Compute Length Interpolation for measured contraction
     void compute_interpolated_geometries_and_force(const std::vector<double>& );
@@ -286,7 +286,7 @@ private:
     mutable contraction_t m_ctr;
     double m_relaxed_length;
     mutable std::vector<double> m_fder;
- 
+    cell_id_t m_id;
     mutable sigContainer_t m_interpolated_length;
     mutable sigContainer_t m_elongation;
     mutable sigContainer_t m_force;
