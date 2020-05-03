@@ -315,9 +315,10 @@ bool contractionLocator::locate_contractions (){
     for (auto pp = 0; pp < peaks_idx.size(); pp++){
         
         contraction_t ct;
+        
+        // Contraction gets a unique id by contraction profiler
         if(get_contraction_at_point(pp, peaks_idx, ct)){
-            ct.m_uid = m_id;
-            auto profile = std::make_shared<contractionProfile>(ct);
+            auto profile = std::make_shared<contractionProfile>(ct, m_id);
             profile->compute_interpolated_geometries_and_force(m_signal);
             m_contractions.emplace_back(profile->contraction());
             
@@ -382,8 +383,8 @@ bool contractionLocator::verify_input () const
 
 template boost::signals2::connection contractionLocator::registerCallback(const std::function<contractionLocator::sig_cb_contraction_ready>&);
 
-contractionProfile::contractionProfile (contraction_t& ct/*, const contractionLocator::Ref & cl */ ):
-m_ctr(ct) /*, m_connect(cl) */
+contractionProfile::contractionProfile (contraction_t& ct, cell_id_t cid ):
+m_ctr(ct), m_id(cid)
 {
     
 }
@@ -440,8 +441,8 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
     m_ctr.elongation = m_elongation;
     m_ctr.interpolated_length = m_interpolated_length;
     
-    // Add uid
-    m_ctr.m_uid = (uint32_t)random();
+    // Add uid for this contraction
+    m_ctr.m_uid = m_id;
     
     timeit.stop();
     auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());

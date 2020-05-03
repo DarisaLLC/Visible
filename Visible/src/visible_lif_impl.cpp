@@ -1187,29 +1187,33 @@ void lifContext::add_contractions (bool* p_open)
 void lifContext::add_regions (bool* p_open)
 {
     if (m_lifProcRef->moving_regions().empty()) return;
+    
     ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
     assert(window != nullptr);
     ImVec2 pos (window->Pos.x + window->Size.x, window->Pos.y );
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(ImVec2(getWindowWidth()/2, getWindowHeight()/4), ImGuiCond_FirstUseEver);
     if (ImGui::Begin(wCells, p_open, ImGuiWindowFlags_MenuBar)){
-        for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++)
-        {
-            // Use SetNextItemOpen() so set the default state of a node to be open.
-            // We could also use TreeNodeEx() with the ImGuiTreeNodeFlags_DefaultOpen flag to achieve the same thing!
-            //if (i == 0)
-             //   ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+        for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++){
+            const ssmt_result::ref_t& mb = m_lifProcRef->moving_bodies()[i];
+            auto contractions = m_cell2contractions_map[mb->id()];
             
-            if (ImGui::TreeNode((void*)(intptr_t)i, "Child %d", i))
-            {
-                ImGui::Text(" %d Contraction(s)", (int) m_cell2contractions_map[i].size());
-                ImGui::SameLine();
-                if (ImGui::SmallButton("button")) {};
+            if (ImGui::TreeNode((void*)(intptr_t)i, "Cell/Tissue %d", i)){
+                
+                for (int cc = 0; cc < contractions.size(); cc++){
+                    const auto ct = contractions[cc];
+                    ImGui::Text(" Contraction Peak : %d", int(ct.contraction_peak.first));
+                    ImGui::Text(" Contraction Start : %ul", int(ct.contraction_start.first));
+                    ImGui::Text(" Relaxation End : %d", int(ct.contraction_start.first));
+                }
                 ImGui::TreePop();
             }
+      //      ImGui::SameLine();
+       //     if (ImGui::SmallButton("button")) {};
+
         }
+        ImGui::End();
     }
-    ImGui::End();
 }
 
 void  lifContext::SetupGUIVariables(){
@@ -1225,8 +1229,10 @@ void  lifContext::DrawGUI(){
     add_canvas();
     add_navigation();
     add_result_sequencer();
+    m_show_cells = true;
     add_regions(&m_show_cells);
 //    add_contractions(&m_show_contractions);
+    
     add_motion_profile ();
 }
 

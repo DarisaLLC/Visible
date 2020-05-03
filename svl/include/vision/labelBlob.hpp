@@ -113,13 +113,13 @@ class labelBlob : public lblMgr
 public:
     typedef std::shared_ptr<labelBlob> ref;
     typedef std::weak_ptr<labelBlob> weak_ref;
-    static ref create(const cv::Mat& gray, const cv::Mat& threshold_out,  const int64_t client_id = 0, const int minAreaPixelCount = 10);
+    static ref create(const cv::Mat& gray, const cv::Mat& threshold_out,  const int32_t client_id = 0, const int minAreaPixelCount = 10);
     labelBlob ();
     labelBlob (const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id = 0, const int minAreaPixelCount = 10);
     
     class blob {
     public:
-        blob ( const uint32_t label, const int64_t id, const cv::Rect2f& roi, const int& iarea) :
+        blob ( const uint32_t label, const int32_t id, const cv::Rect2f& roi, const int& iarea) :
             m_id(id), m_label(label), m_roi (roi), m_moments_ready(false), m_iarea(iarea)
         {
             m_extend = std::sqrt(roi.width*roi.width+roi.height*roi.height);
@@ -159,13 +159,15 @@ public:
         int iarea () const { return m_iarea; }
         const std::vector<cv::Point>& poly () const;
         const double& perimeter () const;
+        const int32_t& id () const { return m_id; }
+        
         
         cv::RotatedRect rotated_roi () const;
         cv::RotatedRect rotated_roi_PCA () const;
    
         
     private:
-        int64_t m_id;
+        int32_t m_id;
         uint32_t m_label;
         int32_t m_iarea;
         mutable svl::momento m_moments;

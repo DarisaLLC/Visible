@@ -216,7 +216,7 @@ svl::labelBlob::labelBlob(const cv::Mat& gray, const cv::Mat& threshold_out, con
     reload(gray, threshold_out, client_id,  minAreaPixelCount);
 }
 
-svl::labelBlob::ref labelBlob::create(const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id, const int minAreaPixelCount) {
+svl::labelBlob::ref labelBlob::create(const cv::Mat& gray, const cv::Mat& threshold_out, const int32_t client_id, const int minAreaPixelCount) {
     auto reff = std::make_shared<labelBlob> (gray, threshold_out, minAreaPixelCount, client_id);
     return reff;
 }
