@@ -17,7 +17,7 @@
 #include <deque>
 #include <sstream>
 #include <map>
-#include "timed_value_containers.h"
+#include "timed_types.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
 #include "cinder_cv/cinder_xchg.hpp"

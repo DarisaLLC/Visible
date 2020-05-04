@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <future>
 #include <mutex>
-#include "timed_value_containers.h"
+#include "timed_types.h"
 #include "cinder_xchg.hpp"
 #include "visible_layout.hpp"
 #include "vision/opencv_utils.hpp"

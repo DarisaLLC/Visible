@@ -3,10 +3,19 @@
 
 
 #include <future>
-#include "time_index.h"
-
+#include <map>
+#include "core/timestamp.h"
 
 typedef int cell_id_t;
+
+using namespace std;
+
+typedef std::pair<int64_t, time_spec_t> index_time_t;
+typedef std::pair<index_time_t, index_time_t> duration_time_t;
+typedef std::map<time_spec_t, int64_t> timeToIndex_t;
+typedef std::map<int64_t, time_spec_t> indexToTime_t;
+
+
 
 // *****************
 // *                *
@@ -29,6 +38,18 @@ using timed_vec_t = CONT<timed_t<T>>;
 // pair [ name, vector of timed values ]
 template<class T>
 using track_t = std::pair<std::string, timed_vec_t<T>>;
+
+template<class T>
+constexpr const std::string& named_track_get_name (const track_t<T>& tt){
+    return tt.name;
+}
+
+template<class T>
+constexpr const timed_vec_t<T>& named_track_get_name (const track_t<T>& tt){
+    return tt.first;
+}
+
+
 
 template<class T,template<typename ELEM, typename ALLOC = std::allocator<ELEM>> class CONT = std::vector >
 using tracks_vec_t = CONT<track_t<T>>;

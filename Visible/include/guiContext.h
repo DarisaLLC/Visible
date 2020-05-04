@@ -16,30 +16,23 @@
 #include "cinder/Surface.h"
 #include "cinder/Text.h"
 #include "cinder_cv/cinder_opencv.h"
-#include "gui_base.hpp"
-
 #include <memory>
 #include <utility>
 #include <boost/integer_traits.hpp>
 // use int64_t instead of long long for better portability
 #include <boost/filesystem.hpp>
 #include <boost/cstdint.hpp>
+#include <sstream>
 
 #include "core/timestamp.h"
 #include "seq_frame_container.hpp"
 
-#include "roiWindow.h"
-#include "otherIO/lifFile.hpp"
 #include "core/stl_utils.hpp"
-#include "timed_value_containers.h"
-#include "directoryPlayer.h"
-#include "hockey_etc_cocoa_wrappers.h"
+#include "timed_types.h"
 #include "timeMarker.h"
-#include "cvVideoPlayer.h"
-#include <sstream>
-
+#include "visible_types.h"
 #include "DisplayObjectContainer.h"
-
+#include "gui_base.hpp"
 
 
 

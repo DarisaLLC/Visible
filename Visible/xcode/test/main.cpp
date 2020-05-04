@@ -67,7 +67,7 @@
 #include "result_serialization.h"
 #include "cvplot/cvplot.h"
 #include "time_series/persistence1d.hpp"
-#include "timed_value_containers.h"
+#include "timed_types.h"
 #include "CinderImGui.h"
 #include "logger/logger.hpp"
 #include "vision/opencv_utils.hpp"

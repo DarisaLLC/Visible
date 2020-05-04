@@ -297,7 +297,6 @@
 		C26F5FA721B0AA6D00EAE156 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
 		C26F5FA821B0AA6D00EAE156 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
 		C26F5FA921B0AA6D00EAE156 /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
-		C26F5FAB21B0AA6D00EAE156 /* Swatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */; };
 		C26F5FAD21B0AA6D00EAE156 /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C26F5FAF21B0AA6D00EAE156 /* algo_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_ssmt.cpp */; };
 		C26F5FB021B0AA6D00EAE156 /* seq_frame_container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* seq_frame_container.cpp */; };
@@ -561,7 +560,6 @@
 		C2DB729B22591DB700C2B986 /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
 		C2DB729C22591DB700C2B986 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
 		C2DB729D22591DB700C2B986 /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
-		C2DB729E22591DB700C2B986 /* Swatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */; };
 		C2DB729F22591DB700C2B986 /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C2DB72A022591DB700C2B986 /* algo_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_ssmt.cpp */; };
 		C2DB72A122591DB700C2B986 /* seq_frame_container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* seq_frame_container.cpp */; };
@@ -657,7 +655,6 @@
 		C2ED5BB62209F67600EE52B3 /* imguivariouscontrols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */; };
 		C2ED5BB72209F79B00EE52B3 /* imguivariouscontrols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */; };
 		C2EF8D1E2148768800A5D3D6 /* Item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0D2148709300A5D3D6 /* Item.cpp */; };
-		C2EF8D1F2148768D00A5D3D6 /* Swatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */; };
 		C2FB69D92134C3E800DDEFCA /* visible_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946761CE4DC7100976025 /* visible_impl.cpp */; };
 		C2FC7DAF1CF4F46100D18193 /* seq_frame_container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946741CE4DC7100976025 /* seq_frame_container.cpp */; };
 /* End PBXBuildFile section */
@@ -808,6 +805,8 @@
 		C20BBC181E5271C5002C7D68 /* opencv_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = opencv_utils.hpp; sourceTree = "<group>"; };
 		C20D4DE32208BD34004D9405 /* ellipse_fit.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ellipse_fit.cpp; sourceTree = "<group>"; };
 		C20D4DE42208BD34004D9405 /* ellipse_fit.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ellipse_fit.hpp; sourceTree = "<group>"; };
+		C20E6F5F2460ABEE005B5DC9 /* timed_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timed_types.h; path = ../include/timed_types.h; sourceTree = "<group>"; };
+		C20E6F602460AD7E005B5DC9 /* visible_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = visible_types.h; path = ../include/visible_types.h; sourceTree = "<group>"; };
 		C20EDBBE1CF277130074C47A /* exception.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = exception.cpp; sourceTree = "<group>"; };
 		C20EDBBF1CF277130074C47A /* self_similarity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = self_similarity.cpp; sourceTree = "<group>"; };
 		C20EDBC01CF277130074C47A /* time_spec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = time_spec.cpp; sourceTree = "<group>"; };
@@ -916,7 +915,6 @@
 		C24CD88D1CEA91910008C72B /* libgtest_main.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest_main.a; path = ../../svl/local/gtest/lib/Release/libgtest_main.a; sourceTree = "<group>"; };
 		C24CD88E1CEA91910008C72B /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = ../../svl/local/gtest/lib/Release/libgtest.a; sourceTree = "<group>"; };
 		C24EA2D2207F07EF00555D16 /* sg_filter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sg_filter.cpp; path = ../src/sg_filter.cpp; sourceTree = "<group>"; };
-		C24FC84C1E5E40130071AA1A /* timed_value_containers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = timed_value_containers.h; path = ../include/timed_value_containers.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		C24FC84D1E5E56960071AA1A /* roiMultiWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = roiMultiWindow.h; sourceTree = "<group>"; };
 		C25261191F66E8F40069F665 /* Plist.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Plist.hpp; path = ../include/Plist.hpp; sourceTree = "<group>"; };
 		C252611A1F66E8F40069F665 /* PlistDate.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PlistDate.hpp; path = ../include/PlistDate.hpp; sourceTree = "<group>"; };
@@ -1179,8 +1177,6 @@
 		C2BA576122C31F1600AAAF4F /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswscale.a; path = ../../../../../../../usr/local/lib/libswscale.a; sourceTree = "<group>"; };
 		C2BB4DED21384F970002AECE /* ut_localvar.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_localvar.hpp; sourceTree = "<group>"; };
 		C2BDEFED21C8232300A8CB94 /* core_support.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = core_support.cpp; sourceTree = "<group>"; };
-		C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AccordionItem.cpp; path = ../src/AccordionItem.cpp; sourceTree = "<group>"; };
-		C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccordionItem.h; path = ../include/AccordionItem.h; sourceTree = "<group>"; };
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
 		C2C5CF612299E4C7004595C5 /* ut_rotated_rect.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ut_rotated_rect.hpp; sourceTree = "<group>"; };
 		C2C5CF622299E959004595C5 /* Visible_GTest_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Visible_GTest_Prefix.pch; sourceTree = "<group>"; };
@@ -1210,7 +1206,6 @@
 		C2E02ED2225AB49900AC175D /* ssmt.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ssmt.hpp; path = ../include/ssmt.hpp; sourceTree = "<group>"; };
 		C2E321FE1D038B16006DFE5E /* AVReader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AVReader.hpp; path = ../include/AVReader.hpp; sourceTree = "<group>"; };
 		C2E321FF1D0480E4006DFE5E /* mediaInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mediaInfo.h; path = ../include/mediaInfo.h; sourceTree = "<group>"; };
-		C2E322001D05B90C006DFE5E /* time_index.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time_index.h; path = ../include/time_index.h; sourceTree = "<group>"; };
 		C2E3F55C213D9408007B1088 /* labelBlob.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = labelBlob.cpp; sourceTree = "<group>"; };
 		C2E3F560213D9483007B1088 /* labelBlob.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = labelBlob.hpp; sourceTree = "<group>"; };
 		C2E469CE1D07718B0066B811 /* cm_time.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cm_time.hpp; sourceTree = "<group>"; };
@@ -1220,10 +1215,8 @@
 		C2ED05A122D1778B00314C1B /* main_linker.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = main_linker.xcconfig; path = configs/include/main_linker.xcconfig; sourceTree = "<group>"; };
 		C2ED05A522D1780600314C1B /* main_header_paths.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = main_header_paths.xcconfig; path = configs/include/main_header_paths.xcconfig; sourceTree = "<group>"; };
 		C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imguivariouscontrols.cpp; path = ../include/imGuiCustom/imguivariouscontrols.cpp; sourceTree = "<group>"; };
-		C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Swatch.cpp; path = ../src/Swatch.cpp; sourceTree = "<group>"; };
 		C2EF8D0D2148709300A5D3D6 /* Item.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Item.cpp; path = ../src/Item.cpp; sourceTree = "<group>"; };
 		C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VisibleApp.cpp; path = ../src/VisibleApp.cpp; sourceTree = "<group>"; };
-		C2EF8D19214873E600A5D3D6 /* Swatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Swatch.h; path = ../include/Swatch.h; sourceTree = "<group>"; };
 		C2EF8D1B214873E700A5D3D6 /* Item.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Item.h; path = ../include/Item.h; sourceTree = "<group>"; };
 		C2EF8D2021498C8D00A5D3D6 /* ut_lif.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ut_lif.hpp; sourceTree = "<group>"; };
 		C2F1B6211FB13FE600DDD7DB /* LifContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LifContext.h; path = ../include/LifContext.h; sourceTree = "<group>"; };
@@ -1441,7 +1434,6 @@
 				C2820F3121752BF600DFA7A6 /* gui_handler.cpp */,
 				C2EF8D0D2148709300A5D3D6 /* Item.cpp */,
 				C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */,
-				C2EF8D0C2148709300A5D3D6 /* Swatch.cpp */,
 				C29DB075212B351200930CBD /* algo_ssmt.cpp */,
 				C2A24FDA2304C7330064DE58 /* result_ssmt.cpp */,
 				C28B01DA229B210A00B8165D /* voxel_ssmt.cpp */,
@@ -1454,7 +1446,6 @@
 				C252611F1F66EA910069F665 /* pugixml.cpp */,
 				C252611B1F66E95B0069F665 /* Plist.cpp */,
 				C254BE851F4FAF5C00977307 /* cvVideoPlayer.cpp */,
-				C2BECED01DD6D8BA0001E2BA /* AccordionItem.cpp */,
 				C2B38A4F1D022D2A00C70872 /* AVReader.mm */,
 				C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */,
 				C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */,
@@ -1656,6 +1647,8 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C20E6F602460AD7E005B5DC9 /* visible_types.h */,
+				C20E6F5F2460ABEE005B5DC9 /* timed_types.h */,
 				C2CD0E9822D7D77200467DD8 /* dbscan.h */,
 				C21A50DE22A9FFA800B0AC7D /* contraction.hpp */,
 				C2F7C47C22E65A2900E28521 /* cluster_geometry.hpp */,
@@ -1672,18 +1665,15 @@
 				C2DB59B221557CF800750C2E /* result_serialization.h */,
 				C2DB59B121557C0C00750C2E /* app_core.h */,
 				C2EF8D1B214873E700A5D3D6 /* Item.h */,
-				C2EF8D19214873E600A5D3D6 /* Swatch.h */,
 				C25261191F66E8F40069F665 /* Plist.hpp */,
 				C252611A1F66E8F40069F665 /* PlistDate.hpp */,
 				C254BE871F4FAF7100977307 /* cvVideoPlayer.h */,
-				C2BECED31DD6DD1D0001E2BA /* AccordionItem.h */,
 				C2B38A541D022E9D00C70872 /* AVReader.h */,
 				C2E321FE1D038B16006DFE5E /* AVReader.hpp */,
 				C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */,
 				C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */,
 				C259145F2145BA7500F80D5F /* clipManager.hpp */,
 				C219468A1CE4EA4900976025 /* OnImagePlotUtils.h */,
-				C24FC84C1E5E40130071AA1A /* timed_value_containers.h */,
 				C213607821647E4A00F794AB /* cached_results.hpp */,
 				C241BBAA1FB11B51000DE36E /* lif_content.hpp */,
 				C24C6E312332EF3500A118AC /* input_selector.hpp */,
@@ -1702,7 +1692,6 @@
 				C296BFD622A0A55E0072BF80 /* iowriter.hpp */,
 				C2601BB41E674F88004415A3 /* visible_layout.hpp */,
 				C21946AC1CE4EA4900976025 /* seq_frame_container.hpp */,
-				C2E322001D05B90C006DFE5E /* time_index.h */,
 				C2601BBE1E6B5C78004415A3 /* algo_runners.hpp */,
 				C2820F3621752E5100DFA7A6 /* VisibleApp.h */,
 				C21A50E022AB4D0C00B0AC7D /* eigen_utils.hpp */,
@@ -2550,7 +2539,6 @@
 				C2AFCEFE216E79590080462D /* imgui_widgets.cpp in Sources */,
 				C2770658226A402B00215A55 /* cvVideoPlayer.cpp in Sources */,
 				C2AEB73B228CD6E70078E687 /* geom_utils.cpp in Sources */,
-				C2EF8D1F2148768D00A5D3D6 /* Swatch.cpp in Sources */,
 				C20EDBC31CF277130074C47A /* time_spec.cpp in Sources */,
 				C29DB076212B351200930CBD /* algo_ssmt.cpp in Sources */,
 				C2FC7DAF1CF4F46100D18193 /* seq_frame_container.cpp in Sources */,
@@ -2824,7 +2812,6 @@
 				C26F5FA821B0AA6D00EAE156 /* opencv_utils.cpp in Sources */,
 				C27DB8B4225BDE37002AE43D /* cvVideoPlayer.cpp in Sources */,
 				C26F5FA921B0AA6D00EAE156 /* imgui_widgets.cpp in Sources */,
-				C26F5FAB21B0AA6D00EAE156 /* Swatch.cpp in Sources */,
 				C26F5FAD21B0AA6D00EAE156 /* time_spec.cpp in Sources */,
 				C2B87C9A21D012DA00C91E35 /* logger.cpp in Sources */,
 				C26F5FAF21B0AA6D00EAE156 /* algo_ssmt.cpp in Sources */,
@@ -2983,7 +2970,6 @@
 				C2DB729B22591DB700C2B986 /* permutation_entropy.cpp in Sources */,
 				C2DB729C22591DB700C2B986 /* opencv_utils.cpp in Sources */,
 				C2DB729D22591DB700C2B986 /* imgui_widgets.cpp in Sources */,
-				C2DB729E22591DB700C2B986 /* Swatch.cpp in Sources */,
 				C2DB729F22591DB700C2B986 /* time_spec.cpp in Sources */,
 				C2533381233149ED003B3212 /* ImGuiExtensions.cpp in Sources */,
 				C2DB72A022591DB700C2B986 /* algo_ssmt.cpp in Sources */,
