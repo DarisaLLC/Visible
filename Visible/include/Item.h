@@ -103,6 +103,7 @@ class Item {
 	static ci::Font sSmallFont, sBigFont;	// small and large fonts for Text textures
 };
 
+#include "cinder/Easing.h"
 
 class AccordionItem {
   public:

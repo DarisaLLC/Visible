@@ -19,8 +19,9 @@
 #include "core/lineseg.hpp"
 #include "eigen_utils.hpp"
 #include "input_selector.hpp"
-#include "time_index.h"
-#include "timed_value_containers.h"
+#include "timed_types.h"
+#include "visible_types.h"
+
 
 using namespace std;
 using namespace boost;

@@ -8,7 +8,7 @@
 #include "ImCurveEdit.h"
 #include "imgui_internal.h"
 #include "imgui_common.h"
-#include "timed_value_containers.h"
+#include "timed_types.h"
 
 #include <cstddef>
 

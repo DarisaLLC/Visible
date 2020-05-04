@@ -8,7 +8,6 @@
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
-#include "time_index.h"
 #include "mediaInfo.h"
 #include <cinder/Cinder.h>
 #include <cinder/Surface.h>

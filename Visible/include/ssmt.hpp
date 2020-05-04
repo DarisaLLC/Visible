@@ -11,7 +11,7 @@
 #include <typeindex>
 #include <map>
 #include <future>
-#include "timed_value_containers.h"
+#include "timed_types.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
 #include "cinder_xchg.hpp"

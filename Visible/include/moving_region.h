@@ -7,7 +7,7 @@
 
 #ifndef moving_region_h
 #define moving_region_h
-#include "timed_value_containers.h"
+#include "timed_types.h"
 #include <vector>
 #include "cinder/Rect.h"
 #include "core/pair.hpp"

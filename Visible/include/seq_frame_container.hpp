@@ -17,7 +17,7 @@
 #include <map>
 #include "core/timestamp.h"
 #include "mediaInfo.h"
-#include "time_index.h"
+#include "timed_types.h"
 #include "AVReader.hpp"
 #include "lifFile.hpp"
 
