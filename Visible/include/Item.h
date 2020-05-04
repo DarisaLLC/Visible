@@ -14,8 +14,28 @@
 #include "cinder/Surface.h"
 #include "cinder/Font.h"
 #include "cinder/Text.h"
-#include "Swatch.h"
 
+class Swatch {
+  public:
+    Swatch( ci::Color color, ci::vec2 pos, ci::Rectf rect );
+    
+    void mouseOver( ci::Timeline &timeline );
+    void mouseOff( ci::Timeline &timeline );
+    void scatter( ci::Timeline &timeline, float width, float height );
+    void assemble( ci::Timeline &timeline );
+    void draw() const;
+    void setSelected(){ mIsSelected = true; };
+    void setDeselected(){ mIsSelected = false; };
+
+    ci::vec2 mAnchorPos;
+    ci::Anim<ci::vec2> mPos;
+    ci::Anim<ci::Color> mColor;
+    ci::Anim<float> mScale;
+    ci::Anim<float> mAlpha;
+    ci::Rectf mRect;
+    
+    bool mIsSelected;
+};
 
 class Item {
   public:
@@ -81,4 +101,33 @@ class Item {
 	bool				mIsSelected, mIsBeingSelected;
 	
 	static ci::Font sSmallFont, sBigFont;	// small and large fonts for Text textures
+};
+
+
+class AccordionItem {
+  public:
+    AccordionItem( ci::Timeline &timeline, float x, float y, float height,
+                    float contractedWidth, float expandedWidth, ci::gl::TextureRef image,
+                    std::string title, std::string subtitle );
+    void update();
+    void draw();
+    
+    bool isPointIn( const ci::vec2 &pt );
+    void animTo( float newX, float newWidth, bool revealText = false );
+
+  private:
+    ci::Anim<float>    mX, mWidth;
+    float            mY, mHeight;
+//    float            mExpandedWidth;
+    ci::Anim<float>    mTextAlpha;
+    
+    std::string        mTitle, mSubtitle;
+    
+    ci::gl::TextureRef    mImage, mText;
+    ci::Rectf            mTextRect;
+    ci::Area            mImageArea,  mTextArea;
+    
+    ci::Timeline    &mTimeline;
+    float            mAnimDuration;
+    ci::EaseFn        mAnimEase;
 };
