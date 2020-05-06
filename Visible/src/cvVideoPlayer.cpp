@@ -1,6 +1,6 @@
 
 #include "cvVideoPlayer.h"
-#include "cinder_opencv.h"
+#include "cinder_cv/cinder_opencv.h"
 using namespace ci;
 using namespace std;
 
@@ -92,7 +92,7 @@ cvVideoPlayer::ref cvVideoPlayer::create( const fs::path& filepath )
 		dref->mCapture = VideoCaptureRef( new cv::VideoCapture() );
 	}
 	if ( dref->mCapture != nullptr && dref->mCapture->open( filepath.string() ) && dref->mCapture->isOpened() ) {
-		int32_t cc		= static_cast<int32_t>( dref->mCapture->get( CV_CAP_PROP_FOURCC ) );
+        int32_t cc		= static_cast<int32_t>( dref->mCapture->get( cv::CAP_PROP_FOURCC ) );
 		char codec[]	= {
 			(char)(		cc & 0X000000FF ), 
 			(char)( (	cc & 0X0000FF00 ) >> 8 ),
@@ -102,10 +102,10 @@ cvVideoPlayer::ref cvVideoPlayer::create( const fs::path& filepath )
 		dref->mCodec			= string( codec );
 
 		dref->mFilePath	= filepath;
-		dref->mFrameRate	= dref->mCapture->get( CV_CAP_PROP_FPS );
-		dref->mNumFrames	= (uint32_t)dref->mCapture->get( CV_CAP_PROP_FRAME_COUNT );
-		dref->mSize.x		= (int32_t)dref->mCapture->get( CV_CAP_PROP_FRAME_WIDTH );
-		dref->mSize.y		= (int32_t)dref->mCapture->get( CV_CAP_PROP_FRAME_HEIGHT );
+        dref->mFrameRate	= dref->mCapture->get( cv::CAP_PROP_FPS );
+        dref->mNumFrames	= (uint32_t)dref->mCapture->get( cv::CAP_PROP_FRAME_COUNT );
+        dref->mSize.x		= (int32_t)dref->mCapture->get( cv::CAP_PROP_FRAME_WIDTH );
+        dref->mSize.y		= (int32_t)dref->mCapture->get( cv::CAP_PROP_FRAME_HEIGHT );
 
 		if ( dref->mFrameRate > 0.0 ) {
 			dref->mDuration		= (double) dref->mNumFrames / dref->mFrameRate;
@@ -130,7 +130,7 @@ void cvVideoPlayer::seek( double seconds )
 {
 	if ( mCapture != nullptr && mLoaded ) {
 		double millis	= math<double>::clamp( seconds, 0.0, mDuration ) * 1000.0;
-		mCapture->set( CV_CAP_PROP_POS_MSEC, millis );
+        mCapture->set( cv::CAP_PROP_POS_MSEC, millis );
 		mGrabTime		= chrono::high_resolution_clock::now();
 		mPosition		= millis / mDuration;
 		mElapsedFrames	= (uint32_t)( mPosition * (double)mNumFrames );
@@ -176,13 +176,13 @@ bool cvVideoPlayer::update()
 	if ( mCapture != nullptr && mLoaded && mPlaying && mNumFrames > 0 && mDuration > 0.0 ) {
 		auto now				= chrono::high_resolution_clock::now();
 		double d				= chrono::duration_cast<chrono::duration<double>>( now - mGrabTime ).count();
-		double nextFrame		= mCapture->get( CV_CAP_PROP_POS_FRAMES );
+        double nextFrame		= mCapture->get( cv::CAP_PROP_POS_FRAMES );
 		bool loop = mLoop && (uint32_t)nextFrame == mNumFrames - 1;
 		if ( d >= mFrameDuration / mSpeed && mCapture->grab() ) {
 			mElapsedFrames		= (uint32_t)nextFrame;
-			mElapsedSeconds		= mCapture->get( CV_CAP_PROP_POS_MSEC ) * 0.001;
+            mElapsedSeconds		= mCapture->get( cv::CAP_PROP_POS_MSEC ) * 0.001;
 			mGrabTime			= now;
-			mPosition			= mCapture->get( CV_CAP_PROP_POS_AVI_RATIO );
+            mPosition			= mCapture->get( cv::CAP_PROP_POS_AVI_RATIO );
 			if ( loop ) {
 				seek( 0.0 );
 			}

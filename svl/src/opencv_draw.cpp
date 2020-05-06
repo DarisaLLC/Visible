@@ -1,5 +1,5 @@
 
-#include <opencv2/highgui/highgui.hpp>
+#include "opencv2/highgui/highgui.hpp"
 #include "vision/opencv_utils.hpp"
 #include "core/core.hpp"
 #include "vision/ellipse.hpp"
@@ -17,7 +17,7 @@ void svl::drawEllipse(cv::Mat& dst, svl::ellipseShape& ellipse, const cv::Scalar
     
     cv::RotatedRect rr;
     ellipse.get(rr);
-    cv::ellipse(dst, rr, colourEllipse, 1, CV_AA);
+    cv::ellipse(dst, rr, colourEllipse, 1);
     cv::Point cver(ellipse.x,ellipse.y);
     uRadian ur(ellipse.ccwRotationXtoMajor());
     ur.norm();
@@ -111,12 +111,12 @@ void svl::drawArrow(cv::Mat& dst,
     // first draw a line connecting p1 to p2:
     svl::drawLine(dst, p1, p2, color, thickness);
     // second, draw an arrow:
-    CvPoint pm; pm.x = (p1.x + p2.x) / 2; pm.y = (p1.y + p2.y) / 2;
+    cv::Point pm; pm.x = (p1.x + p2.x) / 2; pm.y = (p1.y + p2.y) / 2;
     int maxd = std::max (dst.cols, dst.rows);
     float norm = float(maxd) / 30.0F; // arrow size
     float angle = atan2((float)(p2.y - p1.y), (float)(p2.x - p1.x));
     float arrow_angle = 20.0F * svl::constants::pi / 180.0F;
-    CvPoint pp;
+    cv::Point pp;
     pp.x = pm.x - int(norm * cos(angle + arrow_angle));
     pp.y = pm.y - int(norm * sin(angle + arrow_angle));
     svl::drawLine(dst, pm, pp, color, thickness);
@@ -131,7 +131,7 @@ void svl::drawCrossOR(cv::Mat& dst,
                       const cv::Point& p, const cv::Scalar & color, const int siz,
                       const int thickness, const float ori)
 {
-  CvPoint p1, p2;
+  cv::Point p1, p2;
 
   // compute new X and Y given rotation
   const float newX = siz * sin(ori);
@@ -161,7 +161,7 @@ svl::drawLine(dst, p1, p2, color, thickness);
 
 void svl::drawCross(cv::Mat& dst, const cv::Point& p, const cv::Scalar & color,  int siz,  int thickness)
 {
-    CvPoint p1, p2;
+    cv::Point p1, p2;
     
     p1.x = clampValue(p.x - siz, 0, dst.cols - 1);
     p1.y = clampValue(p.y, 0, dst.rows - 1);
@@ -214,10 +214,10 @@ void svl::drawRectOR(cv::Mat& dst,
     const float Ytr    = r.y  + distY - Ynew2;
     
     // set up points
-    CvPoint p1; p1.x=boost::math::iround(Xbr);p1.y=boost::math::iround(Ybr);
-    CvPoint p2; p2.x=boost::math::iround(Xtl);p2.y=boost::math::iround(Ytl);
-    CvPoint p3; p3.x=boost::math::iround(Xbl);p3.y=boost::math::iround(Ybl);
-    CvPoint p4; p4.x=boost::math::iround(Xtr);p4.y=boost::math::iround(Ytr);
+    cv::Point p1; p1.x=boost::math::iround(Xbr);p1.y=boost::math::iround(Ybr);
+    cv::Point p2; p2.x=boost::math::iround(Xtl);p2.y=boost::math::iround(Ytl);
+    cv::Point p3; p3.x=boost::math::iround(Xbl);p3.y=boost::math::iround(Ybl);
+    cv::Point p4; p4.x=boost::math::iround(Xtr);p4.y=boost::math::iround(Ytr);
     
     // draw lines
     svl::drawLine(dst, p1, p3, color, thickness);
@@ -230,10 +230,10 @@ void svl::drawRect(cv::Mat& dst,
                    const cv::Rect& r, const cv::Scalar & color, const int thickness)
 {
     
-    CvPoint p1;p1.x=r.x;p1.y= r.y;
-    CvPoint p2;p2.x=r.x+r.width; p2.y=r.y;
-    CvPoint p3;p3.x=p1.x;p3.y=r.y+r.height;
-    CvPoint p4;p4.x=p2.x;p4.y=p3.y;
+    cv::Point p1;p1.x=r.x;p1.y= r.y;
+    cv::Point p2;p2.x=r.x+r.width; p2.y=r.y;
+    cv::Point p3;p3.x=p1.x;p3.y=r.y+r.height;
+    cv::Point p4;p4.x=p2.x;p4.y=p3.y;
     
     svl::drawLine(dst, p1, p2, color, thickness);
     svl::drawLine(dst, p1, p3, color, thickness);
@@ -249,8 +249,8 @@ void svl::drawLine(cv::Mat& dst, const cv::Point& pos, float ori, float len, con
     int x1 = int(cos(ori)*len/2);
     int y1 = int(sin(ori)*len/2);
     
-    CvPoint p1; p1.x=pos.x-x1; p1.y=pos.y+y1;
-    CvPoint p2; p2.x=pos.x+x1; p2.y=pos.y-y1;
+    cv::Point p1; p1.x=pos.x-x1; p1.y=pos.y+y1;
+    cv::Point p2; p2.x=pos.x+x1; p2.y=pos.y-y1;
     
     svl::drawLine(dst, p1, p2, color, thickness);
     

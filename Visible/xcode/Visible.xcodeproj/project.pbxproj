@@ -495,13 +495,6 @@
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2B87C9921D012D700C91E35 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
 		C2B87C9A21D012DA00C91E35 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
-		C2BA575622C31DE900AAAF4F /* libavresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575522C31DE900AAAF4F /* libavresample.a */; };
-		C2BA575822C31DFD00AAAF4F /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575722C31DFD00AAAF4F /* libavformat.a */; };
-		C2BA575A22C31E1900AAAF4F /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575922C31E1900AAAF4F /* libavutil.a */; };
-		C2BA575C22C31E2400AAAF4F /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575B22C31E2400AAAF4F /* libavcodec.a */; };
-		C2BA575E22C31E8A00AAAF4F /* libdc1394.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575D22C31E8A00AAAF4F /* libdc1394.a */; };
-		C2BA576022C31EB500AAAF4F /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575F22C31EB500AAAF4F /* libswresample.a */; };
-		C2BA576222C31F1600AAAF4F /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA576122C31F1600AAAF4F /* libswscale.a */; };
 		C2BA576322C31F8500AAAF4F /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA576122C31F1600AAAF4F /* libswscale.a */; };
 		C2BA576422C31F8500AAAF4F /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575F22C31EB500AAAF4F /* libswresample.a */; };
 		C2BA576522C31F8500AAAF4F /* libdc1394.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575D22C31E8A00AAAF4F /* libdc1394.a */; };
@@ -1338,13 +1331,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C2BA575822C31DFD00AAAF4F /* libavformat.a in Frameworks */,
-				C2BA575622C31DE900AAAF4F /* libavresample.a in Frameworks */,
-				C2BA575A22C31E1900AAAF4F /* libavutil.a in Frameworks */,
-				C2BA575C22C31E2400AAAF4F /* libavcodec.a in Frameworks */,
-				C2BA575E22C31E8A00AAAF4F /* libdc1394.a in Frameworks */,
-				C2BA576022C31EB500AAAF4F /* libswresample.a in Frameworks */,
-				C2BA576222C31F1600AAAF4F /* libswscale.a in Frameworks */,
 				C26F5FDF21B0AA6D00EAE156 /* IOKit.framework in Frameworks */,
 				C26F5FEA21B0AA6D00EAE156 /* OpenCL.framework in Frameworks */,
 				C26F5FEB21B0AA6D00EAE156 /* CoreGraphics.framework in Frameworks */,

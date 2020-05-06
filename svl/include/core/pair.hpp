@@ -45,20 +45,20 @@ public:
 
     
 #if defined (_OPENCV_INC_)
-	tpair (const CvPoint& r)
+	tpair (const cv::Point& r)
 	{
 		tpair ((T) r.x, (T) r.y);
 	}
-	tpair& operator=(const CvPoint& r)
+	tpair& operator=(const cv::Point& r)
 	{
 		pair<T,T>::first = (T) r.x;
 		pair<T,T>::second = (T) r.y;
 		return *this;
 	}
 	
-	CvPoint to_cv ()
+	cv::Point to_cv ()
 	{
-		CvPoint r;
+		cv::Point r;
 		r.x = (int) x();
 		r.y = (int) y();            
 		return r;

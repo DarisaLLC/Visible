@@ -156,7 +156,7 @@ namespace svl
         cv::Mat src_f, dest;
         cv::Mat src = image.clone();
         if(image.channels() > 1)
-            cv::cvtColor(image, src, CV_BGR2GRAY);
+            cv::cvtColor(image, src, COLOR_BGR2GRAY);
         src.convertTo(src_f, CV_32F, 1.0/255, 0);
         cv::filter2D(src_f, dest, CV_32F, kernel);
         return dest;
@@ -313,7 +313,7 @@ namespace svl
         
         //Obtain the log and normalise it between 0 and 1. +1 since log(0) is undefined.
         cv::log(dft_magnitude + cv::Scalar::all(1), dft_magnitude);
-        cv::normalize(dft_magnitude, dft_magnitude, 0, 1, CV_MINMAX);
+        cv::normalize(dft_magnitude, dft_magnitude, 0, 1, cv::NORM_MINMAX);
     }
     
     //Function used to re-centre the Magnitude of the DFT, such that the centre shows the low frequencies
@@ -357,7 +357,7 @@ namespace svl
         //Note that for consistency purpose, it is recomended to convert the dst to the original image's type and normalise it
         //Here, it is assumed that the image is 8 bits and unsigned
         dst.convertTo(dst, CV_8U, 255);
-        cv::normalize(dst, dst, 0, 255, CV_MINMAX);
+        cv::normalize(dst, dst, 0, 255, cv::NORM_MINMAX);
     }
     
     //Function used to perform bilateral Filtering
@@ -527,7 +527,7 @@ namespace svl
         int result_cols =  img.cols - model.cols + 1;
         int result_rows = img.rows - model.rows + 1;
         space.create(result_rows, result_cols, CV_32FC1);
-        cv::matchTemplate ( img, model, space, CV_TM_CCOEFF_NORMED);
+        cv::matchTemplate ( img, model, space, TM_CCOEFF_NORMED);
         if (squareit)
             space.mul(space);
         return space.at<float>(0,0);
@@ -834,8 +834,8 @@ namespace svl
     {
 //        @param dim dimension index along which the matrix is reduced. 0 means that the matrix is reduced to
 //        a single row. 1 means that the matrix is reduced to a single column.
-        reduce(mat,vt,1,CV_REDUCE_SUM,CV_32F);
-        reduce(mat,hz,0,CV_REDUCE_SUM,CV_32F);
+        reduce(mat,vt,1,REDUCE_SUM,CV_32F);
+        reduce(mat,hz,0,REDUCE_SUM,CV_32F);
     }
     
     std::pair<size_t, size_t> medianPoint (const cv::Mat& mat)

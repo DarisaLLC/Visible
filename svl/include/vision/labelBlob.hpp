@@ -20,7 +20,7 @@
 
 #include "core/pair.hpp"
 
-#include "angle_units.h"
+#include "core/angle_units.h"
 #include "core/signaler.h"
 
 
@@ -40,7 +40,7 @@ namespace svl
     };
 
     
-    class momento : CvMoments
+class momento : Moments
     {
     public:
         momento();
