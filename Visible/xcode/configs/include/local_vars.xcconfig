@@ -18,7 +18,7 @@ VISIBLE_ROOT = $(PROJECT_DIR)/../../Visible
 
 TEST_DATA = $(SVL_ROOT)/Assets
 LOCAL_CINDER = $(EXTERNALS)/cinder
-LOCAL_OCV = /usr/local/opencv-3.4.3
+LOCAL_OCV = /usr/local/opencv-4.3.0
 LOCAL_GSL = /usr/local/
 LOCAL_CIMG = $(EXTERNALS)/CImg
 LOCAL_SPDLOG = $(EXTERNALS)/spdlog
