@@ -127,8 +127,8 @@ namespace svl
     double getPSNR(const cv::Mat& I1, const cv::Mat& I2);
     
 #define cv_drawCross( img, center, color, d )\
-cv::line( img, cv::Point( center.x - d, center.y), cv::Point( center.x + d, center.y), color, 1, CV_AA, 0); \
-cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center.y + d ), color, 1, CV_AA, 0 )
+cv::line( img, cv::Point( center.x - d, center.y), cv::Point( center.x + d, center.y), color, 1, LINE_AA, 0); \
+cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center.y + d ), color, 1, LINE_AA, 0 )
     
     template <typename ElemT, int cn>
     inline float vecNormSqrd(const cv::Vec<ElemT, cn> &v);

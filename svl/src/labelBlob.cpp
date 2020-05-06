@@ -5,12 +5,13 @@
 //  Created by Arman Garakani on 9/3/18.
 //
 
-#include "labelBlob.hpp"
+#include "vision/labelBlob.hpp"
 #include "core/stl_utils.hpp"
 #include <chrono>
-
+#include "opencv2/features2d.hpp"
 
 using namespace svl;
+using namespace cv;
 
 /***************
  #define CV_8U   0
@@ -32,13 +33,13 @@ void momento::run(const cv::Mat& image, bool not_binary) const
     
     // Get the basic moments from Cv::Moments. It does respect ROI
     // Fill up the base and only the base.
-    CvMoments mu =  cv::moments(image, m_not_binary);
-    *((CvMoments*)this) = mu;
+    Moments mu =  cv::moments(image, m_not_binary);
+    *((Moments*)this) = mu;
     mu11p = mu11 / m00;
     mu20p = mu20 / m00;
     mu02p = mu02 / m00;
 
-    inv_m00 = mu.inv_sqrt_m00 * mu.inv_sqrt_m00;
+    inv_m00 = 1.0 / mu.m00;
     mc = Point2f ((m10 * inv_m00), m01 * inv_m00);
     mc.x += m_offset.x;
     mc.y += m_offset.y;
@@ -267,7 +268,7 @@ cv::RotatedRect svl::labelBlob::blob::rotated_roi_PCA() const {
     
     //2. perform PCA
     const int maxComponents = 1;
-    cv::PCA pca(data, cv::Mat() /*mean*/, CV_PCA_DATA_AS_COL, maxComponents);
+    cv::PCA pca(data, cv::Mat() /*mean*/, cv::PCA::DATA_AS_COL, maxComponents);
     //result is contained in pca.eigenvectors (as row vectors)
     //std::cout << pca.eigenvectors << std::endl;
     
@@ -283,7 +284,7 @@ cv::RotatedRect svl::labelBlob::blob::rotated_roi_PCA() const {
     cv::Mat rotationMatrixInverse = cv::getRotationMatrix2D(center, angle, 1);
     
     std::vector<std::vector<cv::Point> > contours;
-    cv::findContours(binaryImg, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    cv::findContours(binaryImg, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
     if (contours.size() != 1) {
         std::cout << "Warning: found " << contours.size() << " contours in binaryImg (expected one)" << std::endl;
         return result;

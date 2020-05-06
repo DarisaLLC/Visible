@@ -929,9 +929,9 @@ TEST (ut_rotated_rect, basic){
     
     std::vector<vec2> points = {{5.5f,3.5f},{7.5f,2.5f},{9.5f,3.5f},{5.5f,6.5f}};
     Point2f center_gold (11.5,2.5);
-    std::vector<Point2f> cvpoints = {{5.5f,2.5f},{7.5f,2.5f},{9.5f,2.5f},{5.5f,6.5f}};
-    std::vector<Point2f> cvpoints2 = {{5.5f,6.5f},{7.5f,6.5f},{9.5f,6.5f},{5.5f,3.5f}};
-    std::vector<Point2f> cvpoints3 = {{5.5f,6.5f},{7.5f,6.5f},{7.5f,8.5f},{7.5f,12.5f}};
+    std::vector<Point2f> cv::Points = {{5.5f,2.5f},{7.5f,2.5f},{9.5f,2.5f},{5.5f,6.5f}};
+    std::vector<Point2f> cv::Points2 = {{5.5f,6.5f},{7.5f,6.5f},{9.5f,6.5f},{5.5f,3.5f}};
+    std::vector<Point2f> cv::Points3 = {{5.5f,6.5f},{7.5f,6.5f},{7.5f,8.5f},{7.5f,12.5f}};
     Point2f cvcenter_gold (11.5,2.5);
     
     ci::PolyLine2 pl(points);
@@ -945,7 +945,7 @@ TEST (ut_rotated_rect, basic){
     
     {
         cv::RotatedRect rr;
-        pointsToRotatedRect(cvpoints, rr);
+        pointsToRotatedRect(cv::Points, rr);
         std::cout << rr.angle << std::endl;
         std::cout << rr.center << std::endl;
         std::cout << rr.size << std::endl;
@@ -953,7 +953,7 @@ TEST (ut_rotated_rect, basic){
     
     {
         cv::RotatedRect rr;
-        pointsToRotatedRect(cvpoints2, rr);
+        pointsToRotatedRect(cv::Points2, rr);
         std::cout << rr.angle << std::endl;
         std::cout << rr.center << std::endl;
         std::cout << rr.size << std::endl;
@@ -962,7 +962,7 @@ TEST (ut_rotated_rect, basic){
     
     {
         cv::RotatedRect rr;
-        pointsToRotatedRect(cvpoints3, rr);
+        pointsToRotatedRect(cv::Points3, rr);
         std::cout << rr.angle << std::endl;
         std::cout << rr.center << std::endl;
         std::cout << rr.size << std::endl;

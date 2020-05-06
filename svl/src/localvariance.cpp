@@ -9,7 +9,6 @@
 
 #include "vision/localvariance.h"
 #include <opencv2/imgproc/imgproc.hpp>  // cvtColor
-#include "opencv2/core/core_c.h"
 using namespace cv;
 
 
@@ -25,21 +24,17 @@ namespace svl
 
     void localVAR::convert_or_not (const cv::Mat& _image) const
     {
-        IplImage img = _image;
-        IplImage single = m_single;
         switch (_image.channels ())
         {
             case 3: // RGB only for now
-                cv::cvtColor(_image, m_single,CV_BGR2GRAY);
+                cv::cvtColor(_image, m_single,cv::COLOR_BGR2GRAY);
                 break;
             case 1:
-                cvCopy (&img, &single);
+                m_single = _image.clone();
                 break;
             default:
                 CV_Assert (false);
-
         }
-
     }
 
     void localVAR::clear_cache () const
@@ -108,24 +103,20 @@ namespace svl
         int w = m_fsize.width; int h = m_fsize.height;
         int n = w * h;
         int n_n_1 = n > 1 ? n * (n - 1) : 1; // handle the 1x1 case for completeness
-        int half_k_w = w / 2;
-        int half_k_h = h / 2;
-        IplImage I = m_s;
-        IplImage S = m_ss;
-        IplImage V2 = m_var;
+        auto I = m_s;
+        auto S = m_ss;
+        auto V2 = m_var;
 
-        int32_t* sumptr = (int32_t *) I.imageData;
-        double* sqptr = (double *) S.imageData;
-        float* varPtr = (float *) V2.imageData;
+        int32_t* sumptr = (int32_t *) I.ptr();
+        double* sqptr = (double *) S.ptr();
         int processed_h = m_isize.height - h + 1;
         int processed_w = m_isize.width - w + 1;
-        int v2_wspixels = V2.widthStep / sizeof(float);
-        int s_wspixels = I.widthStep / sizeof(int32_t);
-        int ss_wspixels = S.widthStep / sizeof(double);
+        int s_wspixels = I.cols; //I.widthStep / sizeof(int32_t);
+        int ss_wspixels = S.cols; //S.widthStep / sizeof(double);
 
         for (int y = 0; y < processed_h; y++)
         {
-            float* outPtr = varPtr + (y+half_k_h)*v2_wspixels + (half_k_w);
+            float* outPtr = (float*)V2.ptr (y); //varPtr + (y+half_k_h)*v2_wspixels + (half_k_w);
 
             for (int x = 0; x < processed_w; x++)
             {

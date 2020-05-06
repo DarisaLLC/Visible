@@ -23,7 +23,7 @@ cv::Vec3b etw_utils::randomColor() {
 
 int cv::rectshow(const std::string &name, const cv::Mat &img) {
     static cv::Mat bigImg;
-    cv::namedWindow(name, CV_WINDOW_NORMAL);
+    cv::namedWindow(name, WINDOW_NORMAL);
     
     for (int tmp = cv::waitKey(1); cv::waitKey(1) != tmp;)
         ;
