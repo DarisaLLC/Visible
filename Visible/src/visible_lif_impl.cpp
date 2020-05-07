@@ -1184,6 +1184,48 @@ void lifContext::add_contractions (bool* p_open)
 // Contractions
 // Shape
 
+void lifContext::draw_contraction_plots(const contractionLocator::contraction_t& ct){
+    
+    auto force = ct.force;
+    auto elon = ct.elongation;
+    auto elen = ct.interpolated_length;
+    svl::norm_min_max (force.begin(), force.end(), true);
+    svl::norm_min_max (elon.begin(), elon.end(), true);
+    svl::norm_min_max (elen.begin(), elen.end(), true);
+    
+    static const float* y_data[] = { force.data(), elon.data(), elen.data() };
+    static ImU32 colors[3] = { ImColor(0, 255, 0), ImColor(255, 0, 0), ImColor(0, 0, 255) };
+    static uint32_t selection_start = 0, selection_length = 0;
+    std::vector<float> x_data;
+    std::generate(x_data.begin(), x_data.end(), [] {
+        static int i = 0;
+        return i++;
+    });
+    ImGui::Begin("Example plot", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    // Draw first plot with multiple sources
+    ImGui::PlotConfig conf;
+    conf.values.xs = x_data.data();
+    conf.values.count = ct.force.size();
+    conf.values.ys_list = y_data; // use ys_list to draw several lines simultaneously
+    conf.values.ys_count = 3;
+    conf.values.colors = colors;
+    conf.scale.min = -1;
+    conf.scale.max = 1;
+    conf.tooltip.show = true;
+    conf.grid_x.show = true;
+    conf.grid_x.size = ct.force.size()/4;
+    conf.grid_x.subticks = 4;
+    conf.grid_y.show = true;
+    conf.grid_y.size = 0.5f;
+    conf.grid_y.subticks = 5;
+    conf.selection.show = true;
+    conf.selection.start = &selection_start;
+    conf.selection.length = &selection_length;
+    conf.frame_size = ImVec2(ct.force.size(), 200);
+    ImGui::Plot("plot1", conf);
+
+    ImGui::End();
+}
 void lifContext::add_regions (bool* p_open)
 {
     if (m_lifProcRef->moving_regions().empty()) return;
@@ -1208,11 +1250,16 @@ void lifContext::add_regions (bool* p_open)
                 }
                 ImGui::TreePop();
             }
-      //      ImGui::SameLine();
-       //     if (ImGui::SmallButton("button")) {};
-
         }
         ImGui::End();
+    }
+    for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++){
+         const ssmt_result::ref_t& mb = m_lifProcRef->moving_bodies()[i];
+         auto contractions = m_cell2contractions_map[mb->id()];
+         for (int cc = 0; cc < contractions.size(); cc++){
+                        const auto ct = contractions[cc];
+             draw_contraction_plots(ct);
+         }
     }
 }
 

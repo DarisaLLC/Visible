@@ -171,8 +171,6 @@ void contractionLocator::update() const{
     if (count == 0) m_signal = m_entropies;
     timeit.stop();
     auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
-    vlogger::instance().console()->info("Update (ms): " + timestr);
-    vlogger::instance().console()->info("count " + toString(count));
 }
 
 bool contractionLocator::get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& m_contraction) const{
@@ -182,14 +180,14 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
     if (! mValidInput) return false;
     contraction_t::clear(m_contraction);
     
-    auto maxima = [](sigContainer_t::const_iterator a,
-                     sigContainer_t::const_iterator b){
+    auto maxima = [](std::vector<double>::const_iterator a,
+                     std::vector<double>::const_iterator b){
         std::vector<double> coeffs;
         polyfit(a, b, 1.0, coeffs, 2);
         assert(coeffs.size() == 3);
         return (-coeffs[1] / (2 * coeffs[2]));
     };
-    const sigContainer_t& m_fder = m_signal;
+    const std::vector<double>& m_fder = m_signal;
     
     // Find distance between this peak and its previous and next peak or the begining or the end of the signal
     
@@ -402,7 +400,8 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
     timeit.start();
      
     const double relaxed_length = contraction().relaxation_visual_rank;
-    m_fder = signal;
+    for (auto dd : signal) m_fder.push_back((float)dd);
+
     /*
      * Compute everything within contraction interval
      */

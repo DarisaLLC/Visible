@@ -37,7 +37,7 @@ struct contractionMesh : public std::pair<size_t,size_t>
     //@note: pair representing frame number and frame time
     typedef std::pair<size_t,double> index_val_t;
     // container
-    typedef std::vector<double> sigContainer_t;
+    typedef std::vector<float> sigContainer_t;
 
     index_val_t contraction_start;
     index_val_t contraction_max_acceleration;
@@ -286,7 +286,7 @@ private:
     std::pair<uRadian,double> m_ls_result;
     mutable contraction_t m_ctr;
     double m_relaxed_length;
-    mutable std::vector<double> m_fder;
+    mutable std::vector<float> m_fder;
     cell_id_t m_id;
     mutable sigContainer_t m_interpolated_length;
     mutable sigContainer_t m_elongation;
