@@ -48,6 +48,7 @@
 #include <boost/range/irange.hpp>
 #include "core/stl_utils.hpp"
 #include "imgui_visible_widgets.hpp"
+#include "imguifilesystem.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -75,7 +76,7 @@ namespace {
 #define wNavigator   "Navigator"
 #define wShape "Shape"
 
-
+using contraction_t = contractionLocator::contraction_t;
 
                     /************************
                      *
@@ -1111,122 +1112,54 @@ void lifContext::add_motion_profile (){
 
 
 
-void lifContext::add_contractions (bool* p_open)
-{
-
-    ImGuiWindow* window = ImGui::FindWindowByName(wCells);
-    assert(window != nullptr);
-    ImVec2 pos (window->Pos.x , window->Pos.y + window->Size.y);
-    ImGui::SetNextWindowPos(pos);
-    
-    ImGui::SetNextWindowSize(ImVec2(getWindowWidth()/2, getWindowHeight()/4), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin(wContractions, p_open, ImGuiWindowFlags_MenuBar))
-    {
-        if (ImGui::BeginMenuBar())
-        {
-            if (ImGui::BeginMenu("File"))
-            {
-                if (ImGui::MenuItem("Close")) *p_open = false;
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
-        
-        // left
-        static int selected = 0;
-        ImGui::BeginChild("left pane", ImVec2(150, 0), true);
-        for (int i = 0; i < m_contraction_names.size(); i++)
-        {
-            char label[128];
-            sprintf(label, "Contraction %d", i);
-            if (ImGui::Selectable(label, selected == i))
-                selected = i;
-        }
-        ImGui::EndChild();
-        ImGui::SameLine();
-        
-        // right
-        ImGui::BeginGroup();
-        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
-        ImGui::Text("Contraction: %d", selected);
-        ImGui::Separator();
-        if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
-        {
-            if (ImGui::BeginTabItem("Description"))
-            {
-                set_current_clip_index(selected);
-                std::string msg = " Entire ";
-                if (selected != 0){
-                    const auto& ctr = m_contractions[get_current_clip_index() - 1];
-                    
-                    auto ctr_info = " Contraction: [" + to_string(ctr.contraction_start.first) + "," + to_string(ctr.relaxation_end.first) + "]";
-                    msg = " Current Clip " + m_contraction_names[get_current_clip_index()] + " " + ctr_info;
-                }
-                ImGui::TextWrapped("%s", msg.c_str());
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Details"))
-            {
-                ImGui::Text(" Lengths in microns ");
-                ImGui::EndTabItem();
-            }
-            ImGui::EndTabBar();
-        }
-        ImGui::EndChild();
-        if (ImGui::Button("Save")) {}
-        ImGui::EndGroup();
-    }
-    ImGui::End();
-}
-
 // Right Hand Size:
 // Cells
 // Contractions
 // Shape
 
 void lifContext::draw_contraction_plots(const contractionLocator::contraction_t& ct){
-    
-    auto force = ct.force;
+    contraction_t::sigContainer_t force = ct.force;
     auto elon = ct.elongation;
     auto elen = ct.interpolated_length;
     svl::norm_min_max (force.begin(), force.end(), true);
     svl::norm_min_max (elon.begin(), elon.end(), true);
     svl::norm_min_max (elen.begin(), elen.end(), true);
     
-    static const float* y_data[] = { force.data(), elon.data(), elen.data() };
+//    static const float* y_data[] = force.data();
     static ImU32 colors[3] = { ImColor(0, 255, 0), ImColor(255, 0, 0), ImColor(0, 0, 255) };
-    static uint32_t selection_start = 0, selection_length = 0;
     std::vector<float> x_data;
     std::generate(x_data.begin(), x_data.end(), [] {
         static int i = 0;
         return i++;
     });
-    ImGui::Begin("Example plot", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    // Draw first plot with multiple sources
-    ImGui::PlotConfig conf;
-    conf.values.xs = x_data.data();
-    conf.values.count = ct.force.size();
-    conf.values.ys_list = y_data; // use ys_list to draw several lines simultaneously
-    conf.values.ys_count = 3;
-    conf.values.colors = colors;
-    conf.scale.min = -1;
-    conf.scale.max = 1;
-    conf.tooltip.show = true;
-    conf.grid_x.show = true;
-    conf.grid_x.size = ct.force.size()/4;
-    conf.grid_x.subticks = 4;
-    conf.grid_y.show = true;
-    conf.grid_y.size = 0.5f;
-    conf.grid_y.subticks = 5;
-    conf.selection.show = true;
-    conf.selection.start = &selection_start;
-    conf.selection.length = &selection_length;
-    conf.frame_size = ImVec2(ct.force.size(), 200);
-    ImGui::Plot("plot1", conf);
+    std::string names [] = { " Force ", " Elongation ", " Interpolated Length " };
 
-    ImGui::End();
+    auto plot = [=](const contraction_t::sigContainer_t& values, std::string& name, ImU32 color, int x_scale_mul, int framewidth){
+        static uint32_t selection_start = 0, selection_length = 0;
+        ImGui::Begin(name.c_str(), nullptr, 0); //ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::PlotConfig conf;
+        conf.values.xs = nullptr; //x_data.data();
+        conf.values.ys = values.data();
+        conf.values.count = values.size();
+        conf.values.color = colors[0];
+        conf.scale.min = 0;
+        conf.scale.max = 1;
+        conf.tooltip.show = true;
+        conf.selection.show = true;
+        conf.selection.start = &selection_start;
+        conf.selection.length = &selection_length;
+        conf.frame_size = ImVec2(values.size()* x_scale_mul, framewidth);
+        conf.skip_small_lines = false;
+        ImGui::Plot(name.c_str(), conf);
+        ImGui::End();
+    };
+    plot(force, names[0], colors[0], 10, 200);
+    plot(elon, names[1], colors[1], 10, 200);
+    plot(elen, names[2], colors[2], 10, 200);
+    
+
 }
-void lifContext::add_regions (bool* p_open)
+void lifContext::add_contractions (bool* p_open)
 {
     if (m_lifProcRef->moving_regions().empty()) return;
     
@@ -1239,6 +1172,23 @@ void lifContext::add_regions (bool* p_open)
         for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++){
             const ssmt_result::ref_t& mb = m_lifProcRef->moving_bodies()[i];
             auto contractions = m_cell2contractions_map[mb->id()];
+            static ImGuiFs::Dialog* dialog = nullptr;
+             const bool browseButtonPressed = ImGui::Button(" Export CSV ");
+                 if (browseButtonPressed) {
+                    if (dialog != nullptr)
+                         delete dialog;
+                     dialog = new ImGuiFs::Dialog();
+                 }
+                 if (dialog) {
+                     dialog->chooseFileDialog(browseButtonPressed,mCurrentSerieCachePath.c_str() ,
+                                              ".phd;.psx;.tub;.tr2", nullptr, ImVec2(400, 300), ImGui::GetMousePos());
+//                     std::string selectedFile = dialog->getChosenPath();
+//                     if (selectedFile.length() > 0) {
+//                         Game::loadLevel(selectedFile);
+//                         delete dialog;
+//                         dialog = nullptr;
+//                     }
+                 }
             
             if (ImGui::TreeNode((void*)(intptr_t)i, "Cell/Tissue %d", i)){
                 
@@ -1277,9 +1227,7 @@ void  lifContext::DrawGUI(){
     add_navigation();
     add_result_sequencer();
     m_show_cells = true;
-    add_regions(&m_show_cells);
-//    add_contractions(&m_show_contractions);
-    
+    add_contractions(&m_show_cells);
     add_motion_profile ();
 }
 

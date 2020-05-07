@@ -250,7 +250,7 @@ private:
     void add_navigation ();
     void add_motion_profile ();
     void add_contractions (bool* p_open);
-    void add_regions (bool* p_open);
+
     // Navigation
     void update_log (const std::string& meg = "") override;
     bool looping () override;
