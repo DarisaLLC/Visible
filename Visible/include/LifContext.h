@@ -187,7 +187,7 @@ private:
     mutable std::vector<std::string> m_contraction_names;
     float m_major_cell_length, m_minor_cell_length;
     std::vector<cv::Point2f> m_mid_points;
-    void draw_contraction_plots(const contractionLocator::contraction_t&);
+    void draw_contraction_plots(const contractionLocator::contraction_t&, int id);
 
     // Directory of Cells / Contractions and SS
     std::unordered_map<cell_id_t,contractionLocator::contractionContainer_t>m_cell2contractions_map;
