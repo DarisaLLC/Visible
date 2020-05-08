@@ -227,7 +227,6 @@ void lifContext::signal_sm1dmed_ready (const input_channel_selector_t& dummy2)
             m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
         }
     }
-    vlogger::instance().console()->info("self-similarity available: ");
 }
 
 void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
@@ -1117,7 +1116,7 @@ void lifContext::add_motion_profile (){
 // Contractions
 // Shape
 
-void lifContext::draw_contraction_plots(const contractionLocator::contraction_t& ct){
+void lifContext::draw_contraction_plots(const contractionLocator::contraction_t& ct, int id){
     contraction_t::sigContainer_t force = ct.force;
     auto elon = ct.elongation;
     auto elen = ct.interpolated_length;
@@ -1134,9 +1133,9 @@ void lifContext::draw_contraction_plots(const contractionLocator::contraction_t&
     });
     std::string names [] = { " Force ", " Elongation ", " Interpolated Length " };
 
-    auto plot = [=](const contraction_t::sigContainer_t& values, std::string& name, ImU32 color, int x_scale_mul, int framewidth){
+    auto plot = [=](const contraction_t::sigContainer_t& values, std::string& name, ImU32 color,int framewidth, int frameheight){
         static uint32_t selection_start = 0, selection_length = 0;
-        ImGui::Begin(name.c_str(), nullptr, 0); //ImGuiWindowFlags_AlwaysAutoResize);
+
         ImGui::PlotConfig conf;
         conf.values.xs = nullptr; //x_data.data();
         conf.values.ys = values.data();
@@ -1148,14 +1147,20 @@ void lifContext::draw_contraction_plots(const contractionLocator::contraction_t&
         conf.selection.show = true;
         conf.selection.start = &selection_start;
         conf.selection.length = &selection_length;
-        conf.frame_size = ImVec2(values.size()* x_scale_mul, framewidth);
+        conf.frame_size = ImVec2(framewidth, frameheight);
         conf.skip_small_lines = false;
+        conf.overlay_text = name.c_str();
         ImGui::Plot(name.c_str(), conf);
-        ImGui::End();
+        
     };
-    plot(force, names[0], colors[0], 10, 200);
-    plot(elon, names[1], colors[1], 10, 200);
-    plot(elen, names[2], colors[2], 10, 200);
+    std::string title = " Cell/Tissue " + stl_utils::tostr(id) + " ";
+    ImGui::Begin(title.c_str(), nullptr, 0); //ImGuiWindowFlags_AlwaysAutoResize);
+    plot(force, names[0], colors[0], 128, 200);
+    ImGui::SameLine();
+    plot(elon, names[1], colors[1], 128,200);
+    ImGui::SameLine();
+    plot(elen, names[2], colors[2], 128, 200);
+    ImGui::End();
     
 
 }
@@ -1180,23 +1185,18 @@ void lifContext::add_contractions (bool* p_open)
                      dialog = new ImGuiFs::Dialog();
                  }
                  if (dialog) {
-                     dialog->chooseFileDialog(browseButtonPressed,mCurrentSerieCachePath.c_str() ,
-                                              ".phd;.psx;.tub;.tr2", nullptr, ImVec2(400, 300), ImGui::GetMousePos());
-//                     std::string selectedFile = dialog->getChosenPath();
-//                     if (selectedFile.length() > 0) {
-//                         Game::loadLevel(selectedFile);
-//                         delete dialog;
-//                         dialog = nullptr;
-//                     }
+                     static std::string title = " Cell / Contraction Info ";
+                     dialog->chooseFolderDialog(browseButtonPressed,mCurrentSerieCachePath.c_str(), title.c_str());
+                     // @note Export CSV
                  }
             
-            if (ImGui::TreeNode((void*)(intptr_t)i, "Cell/Tissue %d", i)){
+            if (ImGui::TreeNode((void*)(intptr_t)i, "Cell/Tissue %d", mb->id())){
                 
                 for (int cc = 0; cc < contractions.size(); cc++){
                     const auto ct = contractions[cc];
-                    ImGui::Text(" Contraction Peak : %d", int(ct.contraction_peak.first));
-                    ImGui::Text(" Contraction Start : %ul", int(ct.contraction_start.first));
-                    ImGui::Text(" Relaxation End : %d", int(ct.contraction_start.first));
+                    ImGui::Text(" Contraction Peak : %d", int(ct.contraction_start.first));
+                    ImGui::Text(" Contraction Start : %d", int(ct.contraction_peak.first));
+                    ImGui::Text(" Relaxation End : %d", int(ct.relaxation_end.first));
                 }
                 ImGui::TreePop();
             }
@@ -1208,7 +1208,7 @@ void lifContext::add_contractions (bool* p_open)
          auto contractions = m_cell2contractions_map[mb->id()];
          for (int cc = 0; cc < contractions.size(); cc++){
                         const auto ct = contractions[cc];
-             draw_contraction_plots(ct);
+             draw_contraction_plots(ct, mb->id());
          }
     }
 }
@@ -1301,24 +1301,6 @@ void lifContext::update ()
 #endif
         
     }
-
-#ifdef NOTYET
-    auto current_contraction = m_cell2contractions[m_selected_cell];
-    if(m_main_seq.m_time_data.plotCount() > 0  && ! m_contractions.empty() && m_selected_cell >= 0 &&
-       contractionLocator::contraction_t::selfCheck(
-        timedVecOfVals_t ll;
-        timedVecOfVals_t el;
-        timedVecOfVals_t force;
-        contractionTrackMaker sp (m_contractions[m_selected_cell], ll, el, force);
-        namedTrack_t force_track, length_track, elongation_track;
-        force_track.first = " Force "; length_track.first = " Interpolated Length "; elongation_track.first = " Elongation ";
-        force_track.second = force;length_track.second = ll;elongation_track.second = el;
-        m_result_seq.m_time_data.load(force_track,named_colors["Force"], m_selected_cell);
-        m_result_seq.m_time_data.load(length_track,named_colors["Length"], m_selected_cell);
-        m_result_seq.m_time_data.load(elongation_track,named_colors["Elongation"], m_selected_cell);
-    }
-#endif
-                                                    
     
     // Fetch Next Frame
     if (have_lif_serie ()){
