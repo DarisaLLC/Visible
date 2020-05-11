@@ -95,15 +95,32 @@ uRadian momento::getOrientation () const
     return m_theta;
 }
 
+struct AreaCmp
+{
+    AreaCmp(const vector<float>& _areas) : areas(&_areas) {}
+    bool operator()(int a, int b) const { return (*areas)[a] > (*areas)[b]; }
+    const vector<float>* areas;
+};
+
 void momento::update_contours(const cv::Mat& image){
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
-    findContours(image, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, m_offset);
-    if (contours.size() >= 0){
-        approxPolyDP(contours[0], m_poly, 7, true);
-        m_perimeter = arcLength(contours[0], true);
-        m_contour_ok = true;
-    }
+    findContours(image, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, m_offset);
+    if (contours.size() == 0) return;
+    
+    // Pick the largest one @todo parameterize this
+    vector<int> sortIdx(contours.size());
+     vector<float> areas(contours.size());
+     for( int n = 0; n < (int)contours.size(); n++ ) {
+         sortIdx[n] = n;
+         areas[n] = contourArea(contours[n], false);
+     }
+     // sort contours so that largest contours go first
+     std::sort(sortIdx.begin(), sortIdx.end(), AreaCmp(areas));
+       
+     approxPolyDP(contours[sortIdx[0]], m_poly, 1.0, true);
+     m_perimeter = arcLength(contours[0], true);
+     m_contour_ok = true;
 }
 /*
  If using Eigen:

@@ -63,7 +63,7 @@ public:
     const source_type type () const { return m_source_type; }
     
     bool done_grabbing () const;
-    bool generate_ssm (int frames);
+    bool generate_ssm (int frames, const sm_producer::progress_fn_t& reporter = nullptr);
     int64_t frame_count () { return m_frameCount; }
     bool image_file_entropy_result_ok () const;
     

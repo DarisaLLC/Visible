@@ -89,6 +89,7 @@ _depth (P::depth()),  _notify(NULL), _finished(true), _tiny(1e-10)
 template<typename P>
 self_similarity_producer<P>::self_similarity_producer(uint32_t matrixSz,
                                                       uint32_t cacheSz,
+                                                      const progress_fn_t& progFunc,
                                                       const similarity_fn_t& simFunc,
                                                       bool notify,
                                                       double tiny)
@@ -102,6 +103,9 @@ _tiny(tiny)
     
     _depth = P::depth();
     _log2MSz = log2(_matrixSz);
+    auto total = (_matrixSz * _matrixSz + _matrixSz) / 2;
+    _single_weight = 1.0f / total;
+    _fraction_done = 0;
 }
 
 
@@ -384,6 +388,7 @@ bool self_similarity_producer<P>::ssMatrixFill(deque<image_t >& tWin)
         if (firstUncachedFrame > tWinSz)
             firstUncachedFrame = tWinSz;
         
+        
         /* Step 1 - Fill cache.
          */
         for (int32_t j = i + 1; j < firstUncachedFrame; j++) {
@@ -393,20 +398,17 @@ bool self_similarity_producer<P>::ssMatrixFill(deque<image_t >& tWin)
             else {
                 cacheIncr = 1;	cacheBegin = i; cacheEnd = j;
             }
+
+            if (_progress_fn != nullptr) _progress_fn(_fraction_done);
             
             for (int32_t k = cacheBegin; k != cacheEnd; k += cacheIncr) {
                 assert((j >= 0) && (j < tWinSz));
                 assert((k >= 0) && (k < tWinSz));
                 chronometer timeit;
                 const double r = _corr_fn (tWin[j], tWin[k]);
+                _fraction_done += _single_weight;
                 _corrTimes.add((float) timeit.getTime ());
                 _SMatrix[j][k] = _SMatrix[k][j] = r;
-                //	tWin[k].frameBuf().unlock();
-                //	if (progress && progress->update()) {
-                //	  tWin[j].frameBuf().unlock();
-                //	  delete progress;
-                //	  return false;
-                //	}
             } // End of: for ( k = cacheBegin; k != cacheEnd; k += cacheIncr)
               //  tWin[j].frameBuf().unlock();
         } // End of: for (int32_t j = i + 1; j < firstUncachedFrame; j++)
@@ -426,15 +428,9 @@ bool self_similarity_producer<P>::ssMatrixFill(deque<image_t >& tWin)
                 assert((k >= 0) && (k < tWinSz));
                 chronometer timeit;
                 const double r = _corr_fn(tWin[j], tWin[k]);
+                _fraction_done += _single_weight;
                 _corrTimes.add((float) timeit.getTime ());
-                
                 _SMatrix[j][k] = _SMatrix[k][j] = r;
-                //tWin[k].frameBuf().unlock();
-                //	if (progress && progress->update()) {
-                //	  tWin[j].frameBuf().unlock();
-                //	  delete progress;
-                //	  return false;
-                //	}
             } // End of: for (k = cacheBegin; k != cacheEnd; k += cacheIncr)
               // tWin[j].frameBuf().unlock();
         } // End of: for (int32_t j = i + 1; j < firstUncachedFrame; j++)
@@ -513,21 +509,14 @@ bool self_similarity_producer<P>::ssMatrixUpdate(deque<image_t>& tWin)
     const auto lastImgIndex = tWin.size() - 1;
     assert(lastImgIndex < _matrixSz);
     
-    //  progressNotification* progress = 0;
-    //  if (_notify) progress =
-    //    new progressNotification(lastImgIndex, _guiUpdate);
-    
+    if (_progress_fn != nullptr) _progress_fn(_fraction_done);
+
     _SMatrix[lastImgIndex][lastImgIndex] = 1.0 + _tiny;
     
     for (uint32_t i = 0; i < lastImgIndex; i++) {
         _SMatrix[i][lastImgIndex] = _SMatrix[lastImgIndex][i] =
         _corr_fn (tWin[i], tWin[lastImgIndex]);
-        //   tWin[i].frameBuf().unlock();
-        //    if (progress && progress->update()) {
-        //      tWin[lastImgIndex].frameBuf().unlock();
-        //      delete progress;
-        //      return false;
-        //    }
+        _fraction_done += _single_weight;
     }
     
     // tWin[lastImgIndex].frameBuf().unlock();

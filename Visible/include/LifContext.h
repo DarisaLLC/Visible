@@ -143,6 +143,7 @@ private:
     void signal_frame_loaded (int& findex, double& timestamp);
     void signal_regions_ready (int, const input_channel_selector_t&);
     void signal_segmented_view_ready (cv::Mat&, cv::Mat&);
+    void fraction_reporter(float);
     
     // Availability
     std::atomic<bool> m_voxel_view_available;
@@ -196,7 +197,7 @@ private:
     // Folder for Per user result / content caching
     boost::filesystem::path mUserStorageDirPath;
     boost::filesystem::path mCurrentSerieCachePath;
-    
+
   
         
     // Content Info
@@ -209,6 +210,7 @@ private:
     
     
     // Instant information
+    float m_fraction_done;
     int64_t m_seek_position;
     bool m_is_playing, m_is_looping;
     bool m_is_editing, m_show_probe;

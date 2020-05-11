@@ -65,8 +65,12 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "AP1"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "/Users/arman/Pictures/lif/ArmanVideosPart3.lif"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "&quot;/Volumes/medvedev/Users/arman/Downloads/190724 Action Potential_Single island.lif&quot;"
@@ -77,20 +81,12 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/datastore/arman/development/projects/parking_spot/__down_loads__/1538078190.ts"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "/Volumes/datastore/arman/Pictures/1538076003.ts"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
             argument = "/Users/arman/Pictures/lif/3channels.lif"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Users/arman/Pictures/lif/ArmanVideosVerapamil.lif"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "Series014"
@@ -110,6 +106,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "AP2"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "CTRL10"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

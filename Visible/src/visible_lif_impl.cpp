@@ -65,8 +65,7 @@ namespace {
         { "Synth", 0xFFFB4551}, { "synth", 0xFFFB4551},{ "Length", 0xFFFFFF3E}, { "length", 0xFFFFFF3E},
         { "Force", 0xFFFB4551}, { "force", 0xFFFB4551}, { "Elongation", 0xFF00FF00}, { "elongation", 0xFF00FF00}
     };
-    
-    
+    std::map<unsigned int, unsigned int> numbered_half_colors = {{0, 0x330000FF },{1, 0x3300FF00},{2, 0x33FF0000} };
 }
 
 #define wDisplay "Display"
@@ -227,6 +226,7 @@ void lifContext::signal_sm1dmed_ready (const input_channel_selector_t& dummy2)
             m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
         }
     }
+
 }
 
 void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
@@ -327,6 +327,10 @@ void lifContext::signal_frame_loaded (int& findex, double& timestamp)
     //     std::cout << frame_indices.size() << std::endl;
 }
 
+void lifContext::fraction_reporter(float f){
+    m_fraction_done = f;
+    std::cout << (int)(f * 100) << std::endl;
+}
 /************************
  *
  *  CLIP Processing
@@ -797,6 +801,7 @@ void lifContext::loadCurrentSerie ()
 void lifContext::process_async (){
     
     // @note: ID_LAB  specific. @todo general LIF / TIFF support
+    progress_fn_t pf = std::bind(&lifContext::fraction_reporter, this, std::placeholders::_1);
     switch(channel_count()){
         case 3:
         {
@@ -804,7 +809,7 @@ void lifContext::process_async (){
             m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
             input_channel_selector_t in (-1,2);
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
         case 2:
@@ -813,13 +818,13 @@ void lifContext::process_async (){
             m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
                                                     m_lifProcRef.get(), std::vector<int> ({0}) );
             input_channel_selector_t in (-1,1);
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
         case 1:
         {
             input_channel_selector_t in (-1,0);
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in);
+            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
     }
@@ -880,12 +885,14 @@ void lifContext::add_canvas (){
                 ImVec2 midh = m_layout->image2display(ivec2(mMediaInfo.channel_size.width, mMediaInfo.channel_size.height));
                 draw_list->AddLine(midv, midh, IM_COL32(0,0,128,128), 3.0f);
                 int index = 0;
+                auto d_channel = channel_count() - 1;
                 for (const auto& mb : m_lifProcRef->moving_bodies()){
                     const Point2f& pc = mb->motion_surface().center;
                     ivec2 iv(pc.x, pc.y);
-                    ImVec2 ic = m_layout->image2display(iv, 1, true);
+                    
+                    ImVec2 ic = m_layout->image2display(iv, d_channel, true);
                     auto roi = mb->roi();
-                    auto tl = m_layout->image2display(ivec2(roi.x, roi.y), 1);
+                    auto tl = m_layout->image2display(ivec2(roi.x, roi.y),  d_channel);
                     DrawCross(draw_list, ImVec4(0.0f, 1.0f, 0.0f, 0.5f), ImVec2(16,16), false, tl);
                     auto selected = DrawCross(draw_list, ImVec4(1.0f, 0.0f, 0.0f, 0.5f), ImVec2(16,16),
                                               m_selected_cell == index, ic);
@@ -897,13 +904,12 @@ void lifContext::add_canvas (){
                         vlogger::instance().console()->info(msg);
                     }
 
-                    const std::vector<cv::Point>& cvpts = mb->poly();
-                    if(! cvpts.empty()){
+                    if(! mb->poly().empty()){
                         std::vector<ImVec2> impts;
-                        std::transform(cvpts.begin(), cvpts.end(), back_inserter(impts), [&](const cv::Point& f)->ImVec2
-                                       { ivec2 v(f.x,f.y); return m_layout->image2display(v, 1); });
-                        
-                        draw_list->AddConvexPolyFilled( impts.data(), impts.size(), IM_COL32(128, 0, 128,128));
+                        std::transform(mb->poly().begin(), mb->poly().end(), back_inserter(impts), [&](const cv::Point& f)->ImVec2
+                                       { ivec2 v(f.x,f.y); return m_layout->image2display(v, d_channel); });
+                        auto nc = numbered_half_colors[index];
+                        draw_list->AddConvexPolyFilled( impts.data(), impts.size(), nc);
                     }
                     index++;
 
@@ -1194,8 +1200,8 @@ void lifContext::add_contractions (bool* p_open)
                 
                 for (int cc = 0; cc < contractions.size(); cc++){
                     const auto ct = contractions[cc];
-                    ImGui::Text(" Contraction Peak : %d", int(ct.contraction_start.first));
-                    ImGui::Text(" Contraction Start : %d", int(ct.contraction_peak.first));
+                    ImGui::Text(" Contraction Start : %d", int(ct.contraction_start.first));
+                    ImGui::Text(" Contraction Peak : %d", int(ct.contraction_peak.first));
                     ImGui::Text(" Relaxation End : %d", int(ct.relaxation_end.first));
                 }
                 ImGui::TreePop();

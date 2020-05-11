@@ -12,6 +12,7 @@
 #include <string>
 #include <tuple>
 #include "core/signaler.h"
+#include "core/progress_fn.h"
 #include "roiWindow.h"
 #include <chrono>
 //#include "core/singleton.hpp"
@@ -37,6 +38,7 @@ public:
     typedef std::deque< std::deque<double> > sMatrix_t;
     typedef std::tuple<size_t, double, fs::path, image_t> outuple_t;
     typedef std::vector<outuple_t> ordered_outuple_t;
+    using progress_fn_t = svl::progress_fn_t;
     
     typedef void (sig_cb_content_loaded) ();
     typedef void (sig_cb_frame_loaded) (int, double);
@@ -50,10 +52,10 @@ public:
     void load_images (const images_vector_t&);
 
     // launch async Will assert if not has_content
-    std::future<bool> launch_async (int frames) const;
+    std::future<bool> launch_async (int frames, const progress_fn_t& reporter=nullptr) const;
     
     // blocking call. Will not assert
-    bool operator () ( int frames = 0) const;
+    bool operator () ( int frames = 0, const progress_fn_t& reporter=nullptr) const;
     
     bool has_content () const;
     int bytes_per_pixel () const;

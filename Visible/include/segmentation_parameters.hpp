@@ -14,7 +14,7 @@ class fynSegmenter{
 public:
     class params{
     public:
-        params ():m_voxel_sample(3,3), m_min_segmentation_area(10),
+        params ():m_voxel_sample(3,3), m_min_segmentation_area(1000),
             m_half(m_voxel_sample.first / 2,m_voxel_sample.second / 2) {}
         
         const std::pair<uint32_t,uint32_t>& voxel_sample ()const {return m_voxel_sample; }
