@@ -309,7 +309,7 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_flu_statistics (const std
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled
 std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const std::vector<roiWindow<P8U>>& images,
-                                                                         const input_channel_selector_t& in)
+                                                                         const input_channel_selector_t& in, const progress_fn_t& reporter)
 {
     bool cache_ok = false;
     size_t dim = images.size();
@@ -352,9 +352,10 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
     }else{
         auto sp =  similarity_producer();
         sp->load_images (images);
-        std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
-        std::future<bool>  future_ss = task.get_future();  // get a future
-        std::thread(std::move(task)).join(); // Finish on a thread
+//        std::packaged_task<bool(int,sm_producer::progress_fn_t)> task([sp](int a, const sm_producer::progress_fn_t& reporter){ return sp->operator()(a, reporter);}); // wrap the function
+        
+        std::future<bool>  future_ss = sp->launch_async(0, reporter);
+//        std::thread(std::move(task)).join(); // Finish on a thread
   
         if (future_ss.get())
         {
@@ -399,15 +400,10 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
 }
 
 
-void ssmt_processor::signal_geometry_done (int count, const input_channel_selector_t& in){
-    auto msg = "ssmt_processor called geom cb " + toString(count);
-    vlogger::instance().console()->info(msg);
-}
-
 // channel_index which channel of multi-channel input. Usually visible channel is the last one
 // input is -1 for the entire root or index of moving object area in results container
 
-std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci_on_selected_input (const input_channel_selector_t& in){
+std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci_on_selected_input (const input_channel_selector_t& in, const progress_fn_t& reporter){
     auto cache_path = get_cache_location(in.channel(),in.region());
     if (cache_path == fs::path()){
         return std::shared_ptr<vecOfNamedTrack_t> ();
@@ -415,7 +411,13 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci_on_selec
     // protect fetching image data 
     std::lock_guard<std::mutex> lock(m_mutex);
     const auto& _content = in.isEntire() ? content()[in.channel()] : m_results[in.region()]->content()[in.channel()];
-    return run_contraction_pci(std::move(_content), in);
+    return run_contraction_pci(std::move(_content), in, reporter);
+}
+
+
+void ssmt_processor::signal_geometry_done (int count, const input_channel_selector_t& in){
+    auto msg = "ssmt_processor called geom cb " + toString(count);
+    vlogger::instance().console()->info(msg);
 }
 
 /*

@@ -927,6 +927,7 @@
 		C25BCA4E2464BB9C003386B6 /* imguifilesystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imguifilesystem.cpp; path = ../include/imGuiCustom/imguifilesystem/imguifilesystem.cpp; sourceTree = "<group>"; };
 		C25BCA4F2464BB9C003386B6 /* imguifilesystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imguifilesystem.h; path = ../include/imGuiCustom/imguifilesystem/imguifilesystem.h; sourceTree = "<group>"; };
 		C25BCA502464BB9C003386B6 /* dirent_portable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dirent_portable.h; path = ../include/imGuiCustom/imguifilesystem/dirent_portable.h; sourceTree = "<group>"; };
+		C25BCA5524661A12003386B6 /* progress_fn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = progress_fn.h; sourceTree = "<group>"; };
 		C260099D1CED3E010045FF57 /* check_rgb8.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = check_rgb8.jpg; sourceTree = "<group>"; };
 		C260099E1CED3E010045FF57 /* check_u8.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = check_u8.jpg; sourceTree = "<group>"; };
 		C260099F1CED3E010045FF57 /* check_u8.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = check_u8.png; sourceTree = "<group>"; };
@@ -1963,6 +1964,7 @@
 				C26009FE1CED3E010045FF57 /* vector2d.hpp */,
 				C2CD0EA722DD3D5600467DD8 /* geometry.hpp */,
 				C2F7C47B22DFD21B00E28521 /* convex_hull.hpp */,
+				C25BCA5524661A12003386B6 /* progress_fn.h */,
 			);
 			path = core;
 			sourceTree = "<group>";

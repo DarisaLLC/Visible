@@ -89,17 +89,17 @@ bool sm_producer::load_image_directory (const std::string& dir_fqfn, sm_producer
     return false;
 }
 
-std::future<bool> sm_producer::launch_async (int frames)const {
+std::future<bool> sm_producer::launch_async (int frames, const progress_fn_t& reporter)const {
     assert(has_content());
     
     auto fcnt = (frames == 0) ? _impl-> m_frameCount : frames;
-    return std::async(std::launch::async, &sm_producer::spImpl::generate_ssm, _impl, fcnt);
+    return std::async(std::launch::async, &sm_producer::spImpl::generate_ssm, _impl, fcnt, reporter);
 }
 
-bool sm_producer::operator() (int frames ) const
+bool sm_producer::operator() (int frames,  const progress_fn_t& reporter ) const
 {
     if(has_content()){
-        std::future<bool> bright = launch_async(frames);
+        std::future<bool> bright = launch_async(frames, reporter);
         bright.wait();
         return bright.get();
     }
@@ -418,23 +418,23 @@ bool sm_producer::spImpl::setup_image_directory_result_repo () const
 
 // @todo add sampling and offset
 // @todo direct shortterm generation. 
-bool sm_producer::spImpl::generate_ssm ( int frames)
+bool sm_producer::spImpl::generate_ssm ( int frames, const sm_producer::progress_fn_t& reporter)
 {
     std::unique_lock<std::mutex> lock( m_mutex, std::try_to_lock );
     
     // Get a new similarity engine
     // Note: get execution times with   svl::stats<float>::PrintTo(simi->timeStats(), & std::cout);
-    self_similarity_producerRef simi = std::make_shared<self_similarity_producer<P8U> > (frames, 0);
+    self_similarity_producerRef simi = std::make_shared<self_similarity_producer<P8U> > (frames, 0, reporter);
     
     // Invalidate last results map
     m_output_repo.clear();
-    
+
+    // This is a blocking call
     simi->fill(m_loaded_ref);
     
     m_entropies.resize (0);
     m_SMatrix.resize (0);
-    
-    // This is a blocking call
+
     bool ok = simi->entropies (m_entropies);
     // Fetch the SS matrix and verify
     simi->selfSimilarityMatrix(m_SMatrix);

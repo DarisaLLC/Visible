@@ -101,7 +101,7 @@ class lblMgr : public base_signaler
     getName () const { return "LabelManager"; }
 };
 
-    /* @todo: add filters
+    /* @todo: add filters. contours are returned largest area first
  * labelBlob generates label regions from an image ( @todo add color )
  * it handles filtering the result and support signals 
  * It can run async and report results via signals

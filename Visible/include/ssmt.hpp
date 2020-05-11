@@ -145,11 +145,11 @@ public:
     // args:
     // channel_index which channel of multi-channel input. Usually visible channel is the last one
     // input is -1 for the entire root or index of moving object area in results container
-    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci_on_selected_input (const input_channel_selector_t& );
+    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci_on_selected_input (const input_channel_selector_t&,const progress_fn_t& reporter );
     // 2nd interface is lower level interface
     // args:
     // images: vector of roiWindow<P8U>s. roiWindow<P8U> is a single plane image container.
-    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci (const std::vector<roiWindow<P8U>>& images,  const input_channel_selector_t& );
+    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci (const std::vector<roiWindow<P8U>>& images,  const input_channel_selector_t&,const progress_fn_t& reporter);
     
     std::vector<float> shortterm_pci (const std::vector<uint32_t>& indices);
     void shortterm_pci (const uint32_t& temporal_window);
