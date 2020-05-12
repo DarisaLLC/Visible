@@ -24,7 +24,6 @@
 #include "cinder_cv/cinder_opencv.h"
 #include "vision/histo.h"
 #include "vision/opencv_utils.hpp"
-#include "vision/labelconnect.hpp"
 #include "ssmt.hpp"
 #include "logger/logger.hpp"
 #include "result_serialization.h"
@@ -164,9 +163,9 @@ void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
     threshold(m_temporal_ss, bi_level, peaks_average, 255, THRESH_BINARY);
     
     vlogger::instance().console()->info("finished voxel surface");
-    if(fs::exists(mCurrentSerieCachePath)){
+    if(fs::exists(mCurrentCachePath)){
         std::string imagename = "voxel_ss_.png";
-        auto image_path = mCurrentSerieCachePath / imagename;
+        auto image_path = mCurrentCachePath / imagename;
         cv::imwrite(image_path.string(), m_temporal_ss);
     }
     
@@ -183,8 +182,8 @@ void ssmt_processor::generateVoxelSelfSimilarities (){
     bool cache_ok = false;
     std::shared_ptr<internalContainer> ssref;
     
-    if(fs::exists(mCurrentSerieCachePath)){
-        auto cache_path = mCurrentSerieCachePath / m_params.internal_container_cache_name ();
+    if(fs::exists(mCurrentCachePath)){
+        auto cache_path = mCurrentCachePath / m_params.internal_container_cache_name ();
         if(fs::exists(cache_path)){
             ssref = internalContainer::create(cache_path);
         }
@@ -201,7 +200,7 @@ void ssmt_processor::generateVoxelSelfSimilarities (){
         
     }else{
         
-        auto cache_path = mCurrentSerieCachePath / m_params.internal_container_cache_name ();
+        auto cache_path = mCurrentCachePath / m_params.internal_container_cache_name ();
         
         vlogger::instance().console()->info("starting generating voxel self-similarity");
         auto sp =  similarity_producer();
@@ -230,3 +229,4 @@ void ssmt_processor::generateVoxelSelfSimilarities (){
         }
     }
 }
+#pragma GCC diagnostic pop

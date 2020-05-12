@@ -9,6 +9,10 @@
 #ifndef _CORE_HPP
 #define _CORE_HPP
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
 #include <memory>
 #include <atomic>
 #include <cmath>
@@ -22,9 +26,6 @@
 #include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <boost/math/special_functions/fpclassify.hpp> // isnan
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcomma"
 
 namespace svl // protection from unintended ADL
 {

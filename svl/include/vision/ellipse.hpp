@@ -56,7 +56,7 @@ public:
     }
 
     void setEllipse(const double &_x, const double &_y, const double &_a, const double &_b, const double &_phi){
-        x = _x, y = _y, a = _a, b = _b, phi = _phi;
+        x = _x; y = _y; a = _a; b = _b; phi = _phi;
         a2 = a*a;
         a4 = a2*a2;
         b2 = b*b;
@@ -94,8 +94,8 @@ public:
     }
     
     void get(cv::RotatedRect &r){
-        r.center.x = x, r.center.y = y;
-        r.size.width = a*2., r.size.height = b*2.;
+        r.center.x = x; r.center.y = y;
+        r.size.width = a*2.; r.size.height = b*2.;
         r.angle = phi*180./M_PI;
         
         

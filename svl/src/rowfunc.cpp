@@ -1,4 +1,7 @@
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
 #include "vision/rowfunc.h"
 
 SINGLETON_FCN(sSqrTable<uint8_t>, square_table);
@@ -20,7 +23,7 @@ CorrelationParts::CorrelationParts (double tiny): m_tiny(tiny){
 
 
 void CorrelationParts::clear (){
-    mR=0.0,  mSi=0,mSm=0,  mCosine=0, mEi=0,mEm=0,mSii=0, mSmm=0,mSim=0,  mN=0, mRp=0;
+    mR=0.0;  mSi=0;mSm=0;  mCosine=0; mEi=0;mEm=0;mSii=0; mSmm=0;mSim=0;  mN=0; mRp=0;
 }
 
 
@@ -238,4 +241,5 @@ template class pixelMap<uint8_t, uint8_t>;
 template class pixelMap<uint16_t, uint8_t>;
 
 
+#pragma GCC diagnostic pop
 

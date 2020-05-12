@@ -75,7 +75,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     // @todo Add rules such as pick the one most centered to filter the results
     
     m_main_blob = labelBlob::create(mono,  bi_level, m_params.min_seqmentation_area(), 666);
-    auto cache_path = mCurrentSerieCachePath;
+    auto cache_path = mCurrentCachePath;
     m_regions.clear();
     
     std::function<labelBlob::results_cb> res_ready_lambda = [=](std::vector<blob>& blobs){
@@ -114,7 +114,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     };
 
     
-    if(fs::exists(mCurrentSerieCachePath)){
+    if(fs::exists(mCurrentCachePath)){
         std::string imagename = "voxel_binary_.png";
         auto image_path = cache_path / imagename;
         cv::imwrite(image_path.string(), bi_level);
@@ -142,7 +142,7 @@ void ssmt_processor::update (const input_channel_selector_t& in)
 
     auto caRef = weakCaPtr.lock();
     caRef->update ();
-    median_leveled_pci(m_contraction_pci_tracksRef->at(0), in);
+    median_leveled_pci(m_longterm_pci_tracksRef->at(0), in);
 }
 
 

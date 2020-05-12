@@ -1,3 +1,7 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
+
 
 #include "core/angle_units.h"
 #include "vision/gradient.h"
@@ -591,4 +595,6 @@ void DirectionSignal (const roiWindow<P8U>& ang, const roiWindow<P8U>& mask, vec
     signal.clear ();
     swap (signal, histogram);
 }
+
+#pragma GCC diagnostic pop
 

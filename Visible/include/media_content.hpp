@@ -1,5 +1,5 @@
-#ifndef __ALGO_LIF__
-#define __ALGO_LIF__
+#ifndef __MEDIA_CONTENT__
+#define __MEDIA_CONTENT__
 
 
 #include <iostream>
@@ -10,10 +10,11 @@
 #include <sstream>
 #include <typeindex>
 #include <map>
-#include "timed_types.h"
+#include "timed_value_containers.h"
 #include "core/signaler.h"
 #include "vision/opencv_utils.hpp"
 #include "sm_producer.h"
+#include "vision/labelBlob.hpp"
 #include <boost/foreach.hpp>
 #include "seq_frame_container.hpp"
 #include <boost/filesystem.hpp>
@@ -35,7 +36,6 @@ namespace fs = boost::filesystem;
 
 
 
-using MappedMat = Eigen::Map<Eigen::MatrixXf, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, 1>>;
 
 #if 0
 // Default logger factory-  creates synchronous loggers
@@ -62,11 +62,11 @@ using default_factory = synchronous_factory;
  * if index is -1, data is not valid 
  */
 
-class lif_serie_data
+class media_data
 {
 public:
-    lif_serie_data ();
-    lif_serie_data (const lifIO::LifReader::ref& m_lifRef, const unsigned index, const lifIO::ContentType_t& ct = "");
+    media_data ();
+    media_data (const MediaIO::MediaReader::ref& m_MediaRef, const unsigned index, const MediaIO::ContentType_t& ct = "");
     int index () const { return m_index; }
     const std::string name () const { return m_name; }
    
@@ -75,10 +75,10 @@ public:
     uint32_t pixelsInOneTimestep () const { return m_pixelsInOneTimestep; }
     uint32_t channelCount () const { return m_channelCount; }
     const std::vector<size_t>& dimensions () const { return m_dimensions; }
-    const std::vector<lifIO::ChannelData>& channels () const { return m_channels; }
+    const std::vector<MediaIO::ChannelData>& channels () const { return m_channels; }
     const std::vector<std::string>& channel_names () const { return m_channel_names; }
     const std::vector<time_spec_t>& timeSpecs () const { return  m_timeSpecs; }
-    const lifIO::LifReader::weak_ref& readerWeakRef () const;
+    const MediaIO::MediaReader::weak_ref& readerWeakRef () const;
     const cv::Mat& poster () const { return m_poster; }
     const std::string& custom_identifier () const { return m_contentType; }
  
@@ -90,17 +90,17 @@ private:
     uint32_t    m_pixelsInOneTimestep;
     uint32_t    m_channelCount;
     std::vector<size_t> m_dimensions;
-    std::vector<lifIO::ChannelData> m_channels;
+    std::vector<MediaIO::ChannelData> m_channels;
     std::vector<std::string> m_channel_names;
     std::vector<time_spec_t> m_timeSpecs;
     cv::Mat m_poster;
-    mutable lifIO::LifReader::weak_ref m_lifWeakRef;
+    mutable MediaIO::MediaReader::weak_ref m_MediaWeakRef;
     
     mutable float  m_length_in_seconds;
-    mutable std::string m_contentType; // "" denostes canonical LIF
+    mutable std::string m_contentType; // "" denostes canonical Media
     
     
-    friend std::ostream& operator<< (std::ostream& out, const lif_serie_data& se)
+    friend std::ostream& operator<< (std::ostream& out, const media_data& se)
     {
         out << "Serie:    " << se.name() << std::endl;
         out << "Channels: " << se.channelCount() << std::endl;
@@ -122,30 +122,30 @@ private:
 
 
 // For base classing
-class LifBrowser : public base_signaler
+class MediaBrowser : public base_signaler
 {
-    virtual std::string getName () const { return "LifBrowser"; }
+    virtual std::string getName () const { return "MediaBrowser"; }
 };
 
-class lif_browser : public LifBrowser
+class Media_browser : public MediaBrowser
 {
 public:
     
-    typedef std::shared_ptr<class lif_browser> ref;
+    typedef std::shared_ptr<class Media_browser> ref;
     
     // @todo move ctor to private
-    lif_browser(const std::string&  fqfn_path, const lifIO::ContentType_t& ct);
+    Media_browser(const std::string&  fqfn_path, const MediaIO::ContentType_t& ct);
     
-    static lif_browser::ref create (const std::string&  fqfn_path,
-                                    const lifIO::ContentType_t& ct = ""){
-        return std::shared_ptr<lif_browser> ( new lif_browser (fqfn_path, ct));
+    static Media_browser::ref create (const std::string&  fqfn_path,
+                                    const MediaIO::ContentType_t& ct = ""){
+        return std::shared_ptr<Media_browser> ( new Media_browser (fqfn_path, ct));
     }
     
-    const lifIO::LifReader::ref& reader () const { return m_lifRef; }
-    const lifIO::ContentType_t& content_type () const { return m_content_type; }
+    const MediaIO::MediaReader::ref& reader () const { return m_MediaRef; }
+    const MediaIO::ContentType_t& content_type () const { return m_content_type; }
     
-    const lif_serie_data get_serie_by_index (unsigned index);
-    const std::vector<lif_serie_data>& get_all_series  () const;
+    const media_data get_serie_by_index (unsigned index);
+    const std::vector<media_data>& get_all_series  () const;
     const std::string& path () const { return mFqfnPath; }
     const std::vector<std::string>& names () const;
     const std::map<std::string,int>& name_to_index_map () const { return m_name_to_index; }
@@ -154,17 +154,17 @@ public:
 private:
     void  get_series_info () const;
     void  internal_get_series_info () const;
-    mutable lifIO::LifReader::ref m_lifRef;
-    mutable std::vector<lif_serie_data> m_series_book;
+    mutable MediaIO::MediaReader::ref m_MediaRef;
+    mutable std::vector<media_data> m_series_book;
     std::vector<cv::Mat> m_series_posters;
     mutable std::vector<std::string> m_series_names;
     mutable std::map<std::string,int> m_name_to_index;
     mutable std::map<int,std::string> m_index_to_name;
     mutable std::mutex m_mutex;
     mutable std::atomic<bool> m_data_ready;
-    lifIO::ContentType_t m_content_type;
+    MediaIO::ContentType_t m_content_type;
     std::string mFqfnPath;
-    void get_first_frame (lif_serie_data& si,  const int frameCount, cv::Mat& out);
+    void get_first_frame (media_data& si,  const int frameCount, cv::Mat& out);
 };
 
 
