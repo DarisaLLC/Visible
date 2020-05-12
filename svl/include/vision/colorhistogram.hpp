@@ -72,10 +72,10 @@ public:
     
     void check_against (const cv::SparseMat& other)
     {
-        double correlation = compareHist(_currentHist,  other,CV_COMP_CORREL);
-        double chisquared = compareHist(_currentHist,  other,CV_COMP_CHISQR);
-        double intersect = compareHist(_currentHist,  other,CV_COMP_INTERSECT);
-        double bhattacharyya = compareHist(_currentHist, other,CV_COMP_BHATTACHARYYA);
+        double correlation = compareHist(_currentHist,  other,HISTCMP_CORREL);
+        double chisquared = compareHist(_currentHist,  other,HISTCMP_CHISQR);
+        double intersect = compareHist(_currentHist,  other,HISTCMP_INTERSECT);
+        double bhattacharyya = compareHist(_currentHist, other,HISTCMP_BHATTACHARYYA);
         
         std::cout <<  "Comparison Results " << " Corr: " <<
         correlation << " ChiSq: " << chisquared <<
