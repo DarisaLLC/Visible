@@ -1,6 +1,10 @@
 #ifndef _STL_UTILS_HPP
 #define _STL_UTILS_HPP
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
 #include <map>
 #include <set>
 #include <algorithm>
@@ -1103,4 +1107,8 @@ namespace gen_filename
 
 #endif
 
+#pragma GCC diagnostic pop
+
 #endif
+
+

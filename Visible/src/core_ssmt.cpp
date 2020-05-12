@@ -35,8 +35,8 @@
  @param path to the Cache Folder
 
  */
-ssmt_processor::ssmt_processor (const fs::path& serie_cache_folder):
-mCurrentSerieCachePath(serie_cache_folder)
+ssmt_processor::ssmt_processor (const fs::path& serie_cache_folder, const ssmt_processor::params& params):
+mCurrentCachePath(serie_cache_folder), m_params(params)
 {
     // Signals we provide
     signal_content_loaded = createSignal<ssmt_processor::sig_cb_content_loaded>();
@@ -86,41 +86,62 @@ mCurrentSerieCachePath(serie_cache_folder)
 
  @param names <#names description#>
  @param plot_names <#plot_names description#>
+  // Consider just creating a vector of tracks and leave the population and selection dynamic
  */
 void ssmt_processor::create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
 {
-    m_flurescence_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
-    m_contraction_pci_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
+    m_moment_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
+    m_longterm_pci_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
     
-    switch(names.size()){
-        case 2:
-            m_flurescence_tracksRef->resize (1);
-            m_contraction_pci_tracksRef->resize (1);
-            m_shortterm_pci_tracks.resize (1);
-            for (auto tt = 0; tt < names.size()-1; tt++)
-                m_flurescence_tracksRef->at(tt).first = plot_names[tt];
-            m_contraction_pci_tracksRef->at(0).first = plot_names[1];
-            m_shortterm_pci_tracks.at(0).first = plot_names[2];
-            break;
-        case 3:
-            m_flurescence_tracksRef->resize (2);
-            m_contraction_pci_tracksRef->resize (1);
-            m_shortterm_pci_tracks.resize (1);
-            for (auto tt = 0; tt < names.size()-1; tt++)
-                m_flurescence_tracksRef->at(tt).first = plot_names[tt];
-            m_contraction_pci_tracksRef->at(0).first = plot_names[2];
-            m_shortterm_pci_tracks.at(0).first = plot_names[3];
-            break;
-        case 1:
-            m_contraction_pci_tracksRef->resize (1);
-            m_shortterm_pci_tracks.resize (1);
-            m_contraction_pci_tracksRef->at(0).first = plot_names[0];
-            m_shortterm_pci_tracks.at(0).first = plot_names[1];
-            break;
-        default:
-            assert(false);
+    switch(m_params.content_type()){
             
+        case ssmt_processor::params::ContentType::lif:
+            switch(names.size()){
+                case 2:
+                    m_moment_tracksRef->resize (1);
+                    m_longterm_pci_tracksRef->resize (1);
+                    m_shortterm_pci_tracks.resize (1);
+                    for (auto tt = 0; tt < names.size()-1; tt++)
+                        m_moment_tracksRef->at(tt).first = plot_names[tt];
+                    m_longterm_pci_tracksRef->at(0).first = plot_names[1];
+                    m_shortterm_pci_tracks.at(0).first = plot_names[2];
+                    break;
+                case 3:
+                    m_moment_tracksRef->resize (2);
+                    m_longterm_pci_tracksRef->resize (1);
+                    m_shortterm_pci_tracks.resize (1);
+                    for (auto tt = 0; tt < names.size()-1; tt++)
+                        m_moment_tracksRef->at(tt).first = plot_names[tt];
+                    m_longterm_pci_tracksRef->at(0).first = plot_names[2];
+                    m_shortterm_pci_tracks.at(0).first = plot_names[3];
+                    break;
+                case 1:
+                    m_longterm_pci_tracksRef->resize (1);
+                    m_shortterm_pci_tracks.resize (1);
+                    m_longterm_pci_tracksRef->at(0).first = plot_names[0];
+                    m_shortterm_pci_tracks.at(0).first = plot_names[1];
+                    break;
+                default:
+                    assert(false);
+            
+            }
+            break;
+        case ssmt_processor::params::ContentType::bgra:
+            
+              switch(names.size()){
+                  case 3:
+                  case 4:
+                  case 1:
+                      m_longterm_pci_tracksRef->resize (1);
+                      m_shortterm_pci_tracks.resize (1);
+                      m_longterm_pci_tracksRef->at(0).first = "Long Term"; // plot_names[2];
+                      m_shortterm_pci_tracks.at(0).first = "Short Term"; // plot_names[3];
+                      break;
+                  default:
+                      assert(false);
+              }
     }
+            
 }
 
 
@@ -146,7 +167,7 @@ fs::path ssmt_processor::get_cache_location (const int channel_index,const int i
         return fs::path ();
     
     // Get Cache path
-    auto cache_path = mCurrentSerieCachePath;
+    auto cache_path = mCurrentCachePath;
     if(! isEntire){
         const int count = create_cache_paths();
         if(count != (int)m_results.size()){
@@ -165,9 +186,9 @@ int ssmt_processor:: create_cache_paths (){
     // Create cache directories for each cell off of the top for now (@todo create a cells subdir )
 
     for(const ssmt_result::ref_t& sr : m_results){
-        if(fs::exists(mCurrentSerieCachePath)){
+        if(fs::exists(mCurrentCachePath)){
             std::string subdir = to_string(sr->id());
-            auto save_path = mCurrentSerieCachePath / subdir;
+            auto save_path = mCurrentCachePath / subdir;
             boost::system::error_code ec;
             if(!fs::exists(save_path)){
                 fs::create_directory(save_path, ec);
@@ -293,7 +314,7 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_flu_statistics (const std
     {
         auto channel = channels[tt];
         threads[tt] = std::thread(IntensityStatisticsRunner(),
-                                  std::ref(m_all_by_channel[channel]), std::ref(m_flurescence_tracksRef->at(channel).second));
+                                  std::ref(m_all_by_channel[channel]), std::ref(m_moment_tracksRef->at(channel).second));
     }
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     
@@ -301,7 +322,7 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_flu_statistics (const std
     if (signal_flu_ready && signal_flu_ready->num_slots() > 0)
         signal_flu_ready->operator()();
     
-    return m_flurescence_tracksRef;
+    return m_moment_tracksRef;
 }
 
 // This is called from GUI side.
@@ -313,6 +334,8 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
 {
     bool cache_ok = false;
     size_t dim = images.size();
+    std::string ss = "Contraction PCI started on " + toString(in.region());
+    vlogger::instance().console()->info(ss);
     std::shared_ptr<ssResultContainer> ssref;
     auto cache_path = get_cache_location(in.channel(), in.region());
     if(fs::exists(cache_path)){
@@ -396,7 +419,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
         signal_contraction_pci_ready->operator()(fout, in);
     }
     
-    return m_contraction_pci_tracksRef;
+    return m_longterm_pci_tracksRef;
 }
 
 
@@ -467,40 +490,61 @@ void ssmt_processor::load_channels_from_images (const std::shared_ptr<seqFrameCo
     m_all_by_channel.resize (m_channel_count);
     std::vector<std::string> names = {"Red", "Green","Blue"};
     
-    while (frames->checkFrame(m_frameCount))
-    {
-        auto su8 = frames->getFrame(m_frameCount);
-        auto ts = m_frameCount;
-        std::shared_ptr<roiWindow<P8U>> m1 = svl::NewRefSingleFromSurface (su8, names, ts);
-        
-        switch (m_channel_count)
-        {
-                // @todo support general case
-                // ID Lab 3 vertical roi 512 x (128x3)
-            case 3  :
-            {
-                auto m3 = roiFixedMultiWindow<P8UP3>(*m1, names, ts);
-                for (auto cc = 0; cc < m3.planes(); cc++)
-                    m_all_by_channel[cc].emplace_back(m3.plane(cc));
-                break;
-            }
-            case 2  :
-            {
-                auto m2 = roiFixedMultiWindow<P8UP2,512,128,2>(*m1, names, ts);
-                for (auto cc = 0; cc < m2.planes(); cc++)
-                    m_all_by_channel[cc].emplace_back(m2.plane(cc));
-                break;
-            }
-            case 1  :
-            {
-                m_all_by_channel[0].emplace_back(*m1);
-                break;
-            }
+    switch(m_params.content_type()){
+              
+        case ssmt_processor::params::ContentType::lif:{
+                while (frames->checkFrame(m_frameCount))
+                {
+                    auto su8 = frames->getFrame(m_frameCount);
+                    auto ts = m_frameCount;
+                    std::shared_ptr<roiWindow<P8U>> m1 = svl::NewRefSingleFromSurface (su8, names, ts);
+                    
+                    switch (m_channel_count)
+                    {
+                            // @todo support general case
+                            // ID Lab 3 vertical roi 512 x (128x3)
+                        case 3  :
+                        {
+                            auto m3 = roiFixedMultiWindow<P8UP3>(*m1, names, ts);
+                            for (auto cc = 0; cc < m3.planes(); cc++)
+                                m_all_by_channel[cc].emplace_back(m3.plane(cc));
+                            break;
+                        }
+                        case 2  :
+                        {
+                            auto m2 = roiFixedMultiWindow<P8UP2,512,128,2>(*m1, names, ts);
+                            for (auto cc = 0; cc < m2.planes(); cc++)
+                                m_all_by_channel[cc].emplace_back(m2.plane(cc));
+                            break;
+                        }
+                        case 1  :
+                        {
+                            m_all_by_channel[0].emplace_back(*m1);
+                            break;
+                        }
+                    }
+                    m_frameCount++;
+                }
+            break;
         }
-        m_frameCount++;
+        case ssmt_processor::params::ContentType::bgra:{
+              m_all_by_channel.resize(4); // surface always has 4 channels
+              while (frames->checkFrame(m_frameCount))
+              {
+                  auto su8 = frames->getFrame(m_frameCount);
+                  auto gray = svl::NewGrayFromSurface(su8);
+                  auto red = svl::NewRedFromSurface(su8);
+                  auto green = svl::NewGreenFromSurface(su8);
+                  auto blue = svl::NewBlueFromSurface(su8);
+                  m_all_by_channel[0].emplace_back(blue);
+                  m_all_by_channel[1].emplace_back(green);
+                  m_all_by_channel[2].emplace_back(red);
+                  m_all_by_channel[3].emplace_back(gray);
+                  m_frameCount++;
+              }
+            break;
+          }
     }
-    
-    
 }
 
 

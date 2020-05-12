@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <future>
 #include <mutex>
+#include "movContext.h"
 #include "timed_types.h"
 #include "cinder_xchg.hpp"
 #include "visible_layout.hpp"
@@ -115,8 +116,8 @@ void movContext::setup_signals(){
     boost::signals2::connection ml_connection = m_movProcRef->registerCallback(content_loaded_cb);
     
     // Support movProcessor::initial ss results available
-    std::function<void (int&)> sm1d_ready_cb = boost::bind (&movContext::signal_sm1d_available, shared_from_above(), _1);
-    boost::signals2::connection nl_connection = m_movProcRef->registerCallback(sm1d_ready_cb);
+  //  std::function<void (int&)> sm1d_ready_cb = boost::bind (&movContext::signal_sm1d_available, shared_from_above(), _1);
+  //  boost::signals2::connection nl_connection = m_movProcRef->registerCallback(sm1d_ready_cb);
     
  
     
@@ -169,10 +170,10 @@ void movContext::setup()
  *
  ************************/
 
-void movContext::signal_sm1d_available (int& dummy)
-{
-    vlogger::instance().console()->info("self-similarity available: ");
-}
+//void movContext::signal_sm1d_available (int& dummy)
+//{
+//    vlogger::instance().console()->info("self-similarity available: ");
+//}
 
 void movContext::signal_content_loaded (int64_t& loaded_frame_count )
 {
@@ -239,7 +240,7 @@ void movContext::clear_playback_params ()
 bool movContext::have_sequence ()
 {
     cvVideoPlayer::weak_ref wr(m_sequence_player_ref);
-    bool have =   wr.lock() && m_sequence_player_ref && mFrameSet && m_layout->isSet();
+    bool have =   wr.lock() && m_sequence_player_ref && mFrameSet;
     return have;
 }
 
@@ -332,7 +333,7 @@ int movContext::getCurrentFrame ()
 
 time_spec_t movContext::getCurrentTime ()
 {
-    return time_spec_t (m_sequence_player_ref->getElapsedSeconds());
+    return time_spec_t (m_sequence_player_ref->getCurrentFrameTime());
 }
 
 
@@ -522,7 +523,7 @@ void movContext::load_current_sequence ()
             return;
         }
         
-        m_layout->init (getWindowSize() , mFrameSet->media_info(), channel_count());
+        m_layout->init ( mFrameSet->media_info());
         
         /*
          * Create the frameset and assign the channel namesStart Loading Images on async on a different thread
@@ -571,23 +572,33 @@ void movContext::process_window(int window_id){
     
 }
 
+
 void movContext::process_async (){
     
+    // @note: ID_LAB  specific. @todo general LIF / TIFF support
+    progress_fn_t pf = std::bind(&movContext::fraction_reporter, this, std::placeholders::_1);
     switch(channel_count()){
         case 3:
-        case 4:
         {
-            // note launch mode is std::launch::async
-            m_longterm_pci_tracks_async = std::async(std::launch::async, &ssmt_processor::run_longterm_pci_on_channel, m_movProcRef.get(), 2);
+            input_channel_selector_t in (-1,2);
+            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_movProcRef.get(), in, pf);
+            break;
+        }
+        case 2:
+        {
+            input_channel_selector_t in (-1,1);
+            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_movProcRef.get(), in, pf);
             break;
         }
         case 1:
         {
-            m_longterm_pci_tracks_async = std::async(std::launch::async, &ssmt_processor::run_longterm_pci_on_channel,m_movProcRef.get(), 0);
+            input_channel_selector_t in (-1,0);
+            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_movProcRef.get(), in, pf);
             break;
         }
     }
 }
+
 
 
 /************************
@@ -810,17 +821,17 @@ void  movContext::update_log (const std::string& msg)
     mTextTexture = gl::Texture2d::create( tbox.render() );
 }
 
-
+//@todo implement
 void movContext::resize ()
 {
-    if (! have_sequence () || ! mSurface ) return;
-    if (! m_layout->isSet()) return;
-    auto ww = get_windowRef();
-    auto ws = ww->getSize();
-    m_layout->update_window_size(ws);
-    mSize = vec2(ws[0], ws[1] / 12);
-    //  mMainTimeLineSlider.setBounds (m_layout->display_timeline_rect());
-    
+//    if (! have_sequence () || ! mSurface ) return;
+//    if (! m_layout->isSet()) return;
+//    auto ww = get_windowRef();
+//    auto ws = ww->getSize();
+//    m_layout->update_window_size(ws);
+//    mSize = vec2(ws[0], ws[1] / 12);
+//    //  mMainTimeLineSlider.setBounds (m_layout->display_timeline_rect());
+//
     
 }
 
@@ -831,35 +842,49 @@ bool movContext::haveTracks()
 
 void movContext::update ()
 {
-    ci::app::WindowRef ww = get_windowRef();
-    ww->getRenderer()->makeCurrentContext(true);
     if (! have_sequence() ) return;
-    auto ws = ww->getSize();
-    m_layout->update_window_size(ws);
-    
-    // If Plots are ready, set them up It is ready only for new data
-    // @todo replace with signal
-    //@todo switch to using weak_ptr all together
-    if ( is_ready (m_longterm_pci_tracks_async)){
-        m_longterm_pci_trackWeakRef = m_longterm_pci_tracks_async.get();
-    }
+
+//
+//    if ( is_ready (m_fluorescense_tracks_aync) )
+//        m_flurescence_trackWeakRef = m_fluorescense_tracks_aync.get();
+//
+//
+//    auto flu_cnt = channel_count() - 1;
+//    // Update Fluorescence results if ready
+//    if (flu_cnt > 0 && ! m_flurescence_trackWeakRef.expired())
+//    {
+//        // Number of Flu runs is channel count - 1
+//        auto tracksRef = m_flurescence_trackWeakRef.lock();
+//        for (auto cc = 0; cc < flu_cnt; cc++){
+//            m_main_seq.m_time_data.load(tracksRef->at(cc), named_colors[tracksRef->at(cc).first], cc);
+//        }
+//    }
+
     
     // Update PCI result if ready
-    if ( ! m_longterm_pci_trackWeakRef.expired())
+    if ( is_ready (m_root_pci_tracks_asyn)){
+        m_root_pci_trackWeakRef = m_root_pci_tracks_asyn.get();
+    }
+    
+    if ( ! m_root_pci_trackWeakRef.expired())
     {
 #ifdef SHORTTERM_ON
         if (m_movProcRef->shortterm_pci().at(0).second.empty())
-              m_movProcRef->shortterm_pci(1);
+                m_movProcRef->shortterm_pci(1);
 #endif
-        auto tracksRef = m_longterm_pci_trackWeakRef.lock();
-        m_result_seq.m_time_data.load(tracksRef->at(0), named_colors["Long"], 2);
-        
+        auto tracksRef = m_root_pci_trackWeakRef.lock();
+        if(tracksRef && tracksRef->size() > 0 && ! tracksRef->at(0).second.empty())
+            m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], channel_count()-1);
+
+#ifdef SHORTTERM_ON
         // Update shortterm PCI result if ready
         if ( ! m_movProcRef->shortterm_pci().at(0).second.empty() )
         {
             auto tracksRef = m_movProcRef->shortterm_pci();
             m_result_seq.m_time_data.load(tracksRef.at(0), named_colors["Short"], 3);
         }
+#endif
+        
     }
     
     // Fetch Next Frame
@@ -869,9 +894,16 @@ void movContext::update ()
         if (mCurrentIndexTime.first != m_seek_position){
             vlogger::instance().console()->info(tostr(mCurrentIndexTime.first - m_seek_position));
         }
+        // Update Fbo with texture.
+        {
+            lock_guard<mutex> scopedLock(m_update_mutex);
+            if(mSurface){
+                mFbo->getColorTexture()->update(*mSurface);
+                renderToFbo(mSurface, mFbo);
+            }
+        }
     }
     
-    //@todo: Playback rate versus realtime processing rate 
     if (m_is_playing )
     {
         update_instant_image_mouse ();

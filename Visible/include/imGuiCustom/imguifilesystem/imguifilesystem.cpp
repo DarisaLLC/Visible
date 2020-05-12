@@ -854,7 +854,7 @@ public:
         }
     }
     bool switchTo(const FolderInfo& fi) {
-        if (!fi.currentFolder || strlen(fi.currentFolder)==0) return false;
+        if (strlen(fi.currentFolder)==0) return false;
         if (currentInfoIndex>=0) {
             const FolderInfo& lastInfo = info[currentInfoIndex];
             if (lastInfo.isEqual(fi)) return false;

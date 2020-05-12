@@ -195,6 +195,7 @@ void VisibleRunApp::setup()
     std::string extension = fs::path(bpath).extension().string();
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
     bool is_valid_extension = std::find( supported_mov_extensions.begin(), supported_mov_extensions.end(), extension) != supported_mov_extensions.end();
+    bool is_video_content = extension == ".mov" || extension == ".mp4";
     bool is_lif_content = extension == ".lif";
 
  
@@ -297,7 +298,7 @@ void VisibleRunApp::setup()
             ADD_ERR_AND_RETURN(cmds, " No Chapters or Series ")
         }
     }
-    else if (exists_with_extenstion && is_valid_extension){
+    else if (exists_with_extenstion && is_valid_extension && is_video_content){
      
 #if 0
         VisibleAppControl::setup_loggers(root_output_dir, visual_log, fs::path(bpath).filename().string());
@@ -309,10 +310,7 @@ void VisibleRunApp::setup()
         auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
         mContext = std::unique_ptr<sequencedImageContext>(new movContext (ww, vref, cache_path));
         
-        if (mContext->is_valid()){
-            cmds += " [ " + m_args[1] + " ] ";
-            cmds += "  Ok ";
-        }
+        if (mContext->is_valid()){ cmds += " [ " + m_args[1] + " ] ";cmds += "  Ok ";}
         setup_ui();
         
         VAPPLOG_INFO(cmds.c_str());

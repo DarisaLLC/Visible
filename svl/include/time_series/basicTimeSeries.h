@@ -244,7 +244,7 @@ public:
 //\param os output stream to send result to.
 //\param y BasicTimeSeries to be dumped.
 **/
-	friend ostream& operator<<(ostream& os,BasicTimeSeries& y);
+    friend ostream& operator<<(ostream& os,BasicTimeSeries& y);
 
 protected:
 /*! Holds data gap definitions.

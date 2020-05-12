@@ -2,6 +2,9 @@
 #define _RAND_SUPPORT_
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
 #include <random>
 #include "core/GLMmath.h"
 
@@ -304,3 +307,5 @@ inline vec2 randVec2() { return Rand::randVec2(); }
 inline float randGaussian() { return Rand::randGaussian(); }    
 
 }
+
+#pragma GCC diagnostic pop

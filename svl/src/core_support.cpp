@@ -5,6 +5,10 @@
 //  Created by Arman Garakani on 12/17/18.
 //
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+
+
 #include <stdexcept>
 #include <sys/stat.h>
 #include <string>
@@ -69,3 +73,5 @@ namespace stl_utils{
     }
     
 }
+
+#pragma GCC diagnostic pop

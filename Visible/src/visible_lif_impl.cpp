@@ -668,39 +668,7 @@ int32_t lifContext::getMedianCutOff () const
         return current;
     }
     return 0;
-    
-//    if (! m_lifProcRef || ! m_geometry_available) return 0;
-//    int select_last (m_lifProcRef->moving_bodies().size());
-//    assert(select_last > 0);
-//    select_last--;
-//    const auto& mb = m_lifProcRef->moving_bodies();
-//    auto spt = mb[select_last]->locator();
-//    if (! spt ) return 0;
-//    m_selector_last = select_last;
-//    uint32_t current (spt->get_median_levelset_pct () * 100);
-//    return current;
-
 }
-//
-//void lifContext::setCellLength (uint32_t newco){
-//    if (! m_lifProcRef) return;
-//    // Get a shared_ptr from weak and check if it had not expired
-//    auto spt = m_lifProcRef->contractionWeakRef().lock();
-//    if (! spt ) return;
-//    m_cell_length = newco;
-//}
-//uint32_t lifContext::getCellLength () const{
-//    if (! m_cur_lif_serie_ref) return 0;
-//
-//    // Get a shared_ptr from weak and check if it had not expired
-//    auto spt = m_lifProcRef->contractionWeakRef().lock();
-//    if (spt)
-//    {
-//        return m_cell_length;
-//    }
-//    return 0;
-//}
-//
 
 
 /************************
@@ -809,7 +777,7 @@ void lifContext::process_async (){
             m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
             input_channel_selector_t in (-1,2);
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in, pf);
+            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
         case 2:
@@ -818,13 +786,13 @@ void lifContext::process_async (){
             m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
                                                     m_lifProcRef.get(), std::vector<int> ({0}) );
             input_channel_selector_t in (-1,1);
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in, pf);
+            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
         case 1:
         {
             input_channel_selector_t in (-1,0);
-            m_contraction_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in, pf);
+            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
     }
@@ -1079,7 +1047,7 @@ void lifContext::add_result_sequencer (){
  */
 void lifContext::add_motion_profile (){
     
-    if (! m_voxel_view_available ) return;
+ if (! m_voxel_view_available ) return;
     if (! m_segmented_texture && m_segmented_surface){
         // Create a texcture for display
         Surface8uRef sur = Surface8u::create(cinder::fromOcv(m_segmented_image));
@@ -1114,6 +1082,7 @@ void lifContext::add_motion_profile (){
     }
     ImGui::End();
 }
+
 
 
 
@@ -1248,7 +1217,7 @@ void  lifContext::update_log (const std::string& msg)
     mTextTexture = gl::Texture2d::create( tbox.render() );
 }
 
-
+//@todo implement
 void lifContext::resize ()
 {
     if (! have_lif_serie () || ! mSurface ) return;
@@ -1283,29 +1252,15 @@ void lifContext::update ()
 
     
     // Update PCI result if ready
-    if ( is_ready (m_contraction_pci_tracks_asyn)){
-        m_root_pci_trackWeakRef = m_contraction_pci_tracks_asyn.get();
+    if ( is_ready (m_root_pci_tracks_asyn)){
+        m_root_pci_trackWeakRef = m_root_pci_tracks_asyn.get();
     }
     
     if ( ! m_root_pci_trackWeakRef.expired())
     {
-#ifdef SHORTTERM_ON
-        if (m_lifProcRef->shortterm_pci().at(0).second.empty())
-                m_lifProcRef->shortterm_pci(1);
-#endif
         auto tracksRef = m_root_pci_trackWeakRef.lock();
         if(tracksRef && tracksRef->size() > 0 && ! tracksRef->at(0).second.empty())
             m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], channel_count()-1);
-
-#ifdef SHORTTERM_ON
-        // Update shortterm PCI result if ready
-        if ( ! m_lifProcRef->shortterm_pci().at(0).second.empty() )
-        {
-            auto tracksRef = m_lifProcRef->shortterm_pci();
-            m_result_seq.m_time_data.load(tracksRef.at(0), named_colors["Short"], 3);
-        }
-#endif
-        
     }
     
     // Fetch Next Frame

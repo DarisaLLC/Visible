@@ -3,6 +3,7 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wcomma"
 
 #include <algorithm>   //Needed for std::reverse.
 #include <cmath>       //Needed for fabs, signbit, sqrt, etc...

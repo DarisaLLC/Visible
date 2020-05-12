@@ -79,6 +79,8 @@ public:
     virtual time_spec_t getCurrentTime () override;
     virtual time_spec_t getStartTime () override;
 	virtual int getNumFrames () override;
+    
+    
 	virtual void processDrag (ivec2 pos) override;
     
     bool haveTracks();
@@ -129,6 +131,8 @@ private:
 	bool have_lif_serie ();
     std::shared_ptr<lifIO::LifSerie> m_cur_lif_serie_ref;
     lif_serie_data m_serie;
+    
+    
     boost::filesystem::path mPath;
     std::vector<std::string> m_plot_names;
     idlab_cardiac_defaults m_idlab_defaults;

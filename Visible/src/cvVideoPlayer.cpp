@@ -24,17 +24,13 @@ cvVideoPlayer& cvVideoPlayer::operator=( const cvVideoPlayer& rhs )
 	mCapture		= rhs.mCapture;
 	mCodec			= rhs.mCodec;
 	mDuration		= rhs.mDuration;
-	mElapsedFrames	= rhs.mElapsedFrames;
-	mElapsedSeconds	= rhs.mElapsedSeconds;
 	mFilePath		= rhs.mFilePath;
 	mFrameDuration	= rhs.mFrameDuration;
 	mFrameRate		= rhs.mFrameRate;
-	mGrabTime		= rhs.mGrabTime;
 	mLoaded			= rhs.mLoaded;
 	mLoop			= rhs.mLoop;
 	mPlaying		= rhs.mPlaying;
 	mNumFrames		= rhs.mNumFrames;
-	mPosition		= rhs.mPosition;
 	mSize			= rhs.mSize;
 	mSpeed			= rhs.mSpeed;
 	return *this;
@@ -80,6 +76,18 @@ Surface8uRef cvVideoPlayer::createSurface(int idx)
     return nullptr;
 }
 
+/**
+double dWidth = cap.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
+double dHeight = cap.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
+double dPositionMS = cap.get(CV_CAP_PROP_POS_MSEC); //Current position of the video file in milliseconds
+double dFrameIndex = cap.get(CV_CAP_PROP_POS_FRAMES); //0-based index of the frame to be decoded/captured next
+double dPositionVideo = cap.get(CV_CAP_PROP_POS_AVI_RATIO); //Relative position of the video file: 0 - start of the film, 1 - end of the film
+double dFPS = cap.get(CV_CAP_PROP_FPS); //Frame rate
+double dCodec = cap.get(CV_CAP_PROP_FOURCC); //4-character code of codec
+double dFrameCount = cap.get(CV_CAP_PROP_FRAME_COUNT); //Number of frames in the video file
+double dFormat = cap.get(CV_CAP_PROP_FORMAT); //Format of the Mat objects returned by retrieve()
+**/
+
 cvVideoPlayer::ref cvVideoPlayer::create( const fs::path& filepath )
 {
     ref dref = std::make_shared<cvVideoPlayer>();
@@ -112,7 +120,6 @@ cvVideoPlayer::ref cvVideoPlayer::create( const fs::path& filepath )
 			dref->mFrameDuration	= 1.0 / dref->mFrameRate;
 		}
         dref->mChannelNames = {"Blue", "Green", "Red", "Alpha"};
-        
 		dref->mLoaded = true;
 	}
     return dref;
@@ -126,32 +133,32 @@ void cvVideoPlayer::play()
 	}
 }
 
-void cvVideoPlayer::seek( double seconds )
+bool cvVideoPlayer::seekToTime( double seconds )
 {
-	if ( mCapture != nullptr && mLoaded ) {
-		double millis	= math<double>::clamp( seconds, 0.0, mDuration ) * 1000.0;
-        mCapture->set( cv::CAP_PROP_POS_MSEC, millis );
-		mGrabTime		= chrono::high_resolution_clock::now();
-		mPosition		= millis / mDuration;
-		mElapsedFrames	= (uint32_t)( mPosition * (double)mNumFrames );
-		mElapsedSeconds	= millis * 0.001;
-	}
+    assert( mCapture != nullptr && mLoaded );
+    double millis	= math<double>::clamp( seconds, 0.0, mDuration ) * 1000.0;
+    return mCapture->set( cv::CAP_PROP_POS_MSEC, millis );
 }
 
-void cvVideoPlayer::seekFrame( uint32_t frameNum )
+bool cvVideoPlayer::seekToFrame(size_t frameNum )
 {
-	seek( (double)frameNum * mFrameDuration );
+    assert( mCapture != nullptr && mLoaded );
+    auto count = frameNum % mNumFrames;
+	return mCapture->set(cv::CAP_PROP_POS_FRAMES, static_cast<double>(count));
 }
 
-void cvVideoPlayer::seekPosition( float ratio )
+bool cvVideoPlayer::seekToRatio( double ratio )
 {
-	seek( (double)ratio * mDuration );
+    assert( mCapture != nullptr && mLoaded );
+    assert(ratio >= 0.0 && ratio <= 1.0);
+    const size_t frameIdx = static_cast<size_t>(std::floor(ratio * mNumFrames));
+    return seekToFrame(frameIdx);
 }
 
 void cvVideoPlayer::stop()
 {
 	pause();
-	seek( 0.0 );
+	seekToTime( 0.0 );
 }
 
 void cvVideoPlayer::unload()
@@ -174,20 +181,10 @@ void cvVideoPlayer::unload()
 bool cvVideoPlayer::update()
 {
 	if ( mCapture != nullptr && mLoaded && mPlaying && mNumFrames > 0 && mDuration > 0.0 ) {
-		auto now				= chrono::high_resolution_clock::now();
-		double d				= chrono::duration_cast<chrono::duration<double>>( now - mGrabTime ).count();
-        double nextFrame		= mCapture->get( cv::CAP_PROP_POS_FRAMES );
-		bool loop = mLoop && (uint32_t)nextFrame == mNumFrames - 1;
-		if ( d >= mFrameDuration / mSpeed && mCapture->grab() ) {
-			mElapsedFrames		= (uint32_t)nextFrame;
-            mElapsedSeconds		= mCapture->get( cv::CAP_PROP_POS_MSEC ) * 0.001;
-			mGrabTime			= now;
-            mPosition			= mCapture->get( cv::CAP_PROP_POS_AVI_RATIO );
-			if ( loop ) {
-				seek( 0.0 );
-			}
-			return true;
-		}
+        auto current = getCurrentFrameCount();
+		bool loop = mLoop && current == mNumFrames - 1;
+        if ( loop ) return seekToTime( 0.0 );
+        return seekToFrame(current+1);
 	}
 	return false;
 }
@@ -202,14 +199,14 @@ double cvVideoPlayer::getDuration() const
 	return mDuration;
 }
 
-uint32_t cvVideoPlayer::getElapsedFrames() const
+size_t cvVideoPlayer::getCurrentFrameCount() const
 {
-	return mElapsedFrames;
+    return static_cast<size_t>(mCapture->get(cv::CAP_PROP_POS_FRAMES));
 }
  
-double cvVideoPlayer::getElapsedSeconds() const
+double cvVideoPlayer::getCurrentFrameTime() const
 {
-	return mElapsedSeconds;
+	return mCapture->get(cv::CAP_PROP_POS_MSEC);
 }
  
 const fs::path& cvVideoPlayer::getFilePath() const
@@ -225,11 +222,6 @@ double cvVideoPlayer::getFrameRate() const
 uint32_t cvVideoPlayer::getNumFrames() const
 {
 	return mNumFrames;
-}
-
-double cvVideoPlayer::getPosition() const
-{
-	return mPosition;
 }
 
 const ivec2& cvVideoPlayer::getSize() const

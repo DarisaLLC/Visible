@@ -115,8 +115,8 @@ void VisibleApp::setup()
                    //  .color(ImGuiCol_TooltipBg, ImVec4(0.27f, 0.57f, 0.63f, 0.95f))
                    );
     
-    ImGuiStyle* st = &ImGui::GetStyle();
-    ImGui::StyleColorsLightGreen(st);
+    // StyleColorsLightGreenImGuiStyle* st = &ImGui::GetStyle();
+    // ImGui::StyleColorsLightGreen(st);
     
     fs::path root_output_dir = VisibleAppControl::get_visible_app_support_directory();
     VisibleAppControl::setup_loggers( root_output_dir, app_log, mFileName);
