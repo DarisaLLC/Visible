@@ -1,16 +1,15 @@
-#ifndef __IO_GRABBER__
-#define __IO_GRABBER__
+#ifndef __IO_base_signaler__
+#define __IO_base_signaler__
 
 #include "core/svl_exception.hpp"
 #include <map>
 #include <iostream>
 #include <string>
-#include <boost/signals2.hpp>
-#include <boost/signals2/slot.hpp>
 #include <typeinfo>
 #include <vector>
 #include <sstream>
-
+#include <boost/signals2.hpp>
+#include <boost/signals2/slot.hpp>
 
 
   /** \brief signaler interface for 
@@ -27,10 +26,29 @@
     public:
 
       /** \brief Constructor. */
-      base_signaler () : signals_ (), connections_ (), shared_connections_ () {}
+      base_signaler () = default;
 
-      /** \brief virtual desctructor. */
-      virtual inline ~base_signaler () throw ();
+      virtual inline ~base_signaler () noexcept = default;
+      
+      /**
+          * \brief No copy ctor since base_signaler can't be copied
+          */
+         base_signaler(const base_signaler&) = delete;
+
+         /**
+          * \brief No copy assign operator since base_signaler can't be copied
+          */
+         base_signaler& operator=(const base_signaler&) = delete;
+
+         /**
+          * \brief Move ctor
+          */
+         base_signaler(base_signaler&&) = default;
+
+         /**
+          * \brief Move assign operator
+          */
+         base_signaler& operator=(base_signaler&&) = default;
 
       /** \brief registers a callback function/method to a signal with the corresponding signature
         * \param[in] callback: the callback function/method
@@ -86,18 +104,14 @@
       std::map<std::string, std::vector<boost::signals2::shared_connection_block> > shared_connections_;
   } ;
 
-  base_signaler::~base_signaler () throw ()
-  {
-    for (std::map<std::string, boost::signals2::signal_base*>::iterator signal_it = signals_.begin (); signal_it != signals_.end (); ++signal_it)
-      delete signal_it->second;
-  }
+
 
   template<typename T> boost::signals2::signal<T>*
   base_signaler::find_signal () const
   {
     typedef boost::signals2::signal<T> Signal;
 
-    std::map<std::string, boost::signals2::signal_base*>::const_iterator signal_it = signals_.find (typeid (T).name ());
+    const auto signal_it = signals_.find (typeid (T).name ());
     if (signal_it != signals_.end ())
       return (dynamic_cast<Signal*> (signal_it->second));
 
@@ -107,102 +121,93 @@
   template<typename T> void
   base_signaler::disconnect_all_slots ()
   {
-    typedef boost::signals2::signal<T> Signal;
+      const auto signal = find_signal<T> ();
+       if (signal != nullptr)
+       {
+         signal->disconnect_all_slots ();
+       }
 
-    if (signals_.find (typeid (T).name ()) != signals_.end ())
-    {
-      Signal* signal = dynamic_cast<Signal*> (signals_[typeid (T).name ()]);
-      signal->disconnect_all_slots ();
-    }
   }
 
   template<typename T> void
   base_signaler::block_signal ()
   {
-    if (connections_.find (typeid (T).name ()) != connections_.end ())
-      for (std::vector<boost::signals2::shared_connection_block>::iterator cIt = shared_connections_[typeid (T).name ()].begin (); cIt != shared_connections_[typeid (T).name ()].end (); ++cIt)
-        cIt->block ();
+      if (connections_.find (typeid (T).name ()) != connections_.end ())
+          for (auto &connection : shared_connections_[typeid (T).name ()])
+            connection.block ();
   }
 
   template<typename T> void
   base_signaler::unblock_signal ()
   {
     if (connections_.find (typeid (T).name ()) != connections_.end ())
-      for (std::vector<boost::signals2::shared_connection_block>::iterator cIt = shared_connections_[typeid (T).name ()].begin (); cIt != shared_connections_[typeid (T).name ()].end (); ++cIt)
-        cIt->unblock ();
+        for (auto &connection : shared_connections_[typeid (T).name ()])
+          connection.unblock ();
   }
 
   void
   base_signaler::block_signals ()
   {
-    for (std::map<std::string, boost::signals2::signal_base*>::iterator signal_it = signals_.begin (); signal_it != signals_.end (); ++signal_it)
-      for (std::vector<boost::signals2::shared_connection_block>::iterator cIt = shared_connections_[signal_it->first].begin (); cIt != shared_connections_[signal_it->first].end (); ++cIt)
-        cIt->block ();
+      for (const auto &signal : signals_)
+          for (auto &connection : shared_connections_[signal.first])
+            connection.block ();
   }
 
   void
   base_signaler::unblock_signals ()
   {
-    for (std::map<std::string, boost::signals2::signal_base*>::iterator signal_it = signals_.begin (); signal_it != signals_.end (); ++signal_it)
-      for (std::vector<boost::signals2::shared_connection_block>::iterator cIt = shared_connections_[signal_it->first].begin (); cIt != shared_connections_[signal_it->first].end (); ++cIt)
-        cIt->unblock ();
+      for (const auto &signal : signals_)
+         for (auto &connection : shared_connections_[signal.first])
+           connection.unblock ();
   }
 
   template<typename T> int
   base_signaler::num_slots () const
   {
-    typedef boost::signals2::signal<T> Signal;
-
-    // see if we have a signal for this type
-    std::map<std::string, boost::signals2::signal_base*>::const_iterator signal_it = signals_.find (typeid (T).name ());
-    if (signal_it != signals_.end ())
-    {
-      Signal* signal = dynamic_cast<Signal*> (signal_it->second);
-      return (static_cast<int> (signal->num_slots ()));
-    }
-    return (0);
+   const auto signal = find_signal<T> ();
+      if (signal != nullptr)
+      {
+        return static_cast<int> (signal->num_slots ());
+      }
+      return 0;
   }
 
   template<typename T> boost::signals2::signal<T>*
   base_signaler::createSignal ()
   {
-    typedef boost::signals2::signal<T> Signal;
+  typedef boost::signals2::signal<T> Signal;
 
-    if (signals_.find (typeid (T).name ()) == signals_.end ())
-    {
-      Signal* signal = new Signal ();
-      signals_[typeid (T).name ()] = signal;
-      return (signal);
-    }
-    return (0);
+     if (signals_.find (typeid (T).name ()) == signals_.end ())
+     {
+       Signal* signal = new Signal ();
+       signals_[typeid (T).name ()] = signal;
+       return (signal);
+     }
+     return (0);
   }
 
   template<typename T> boost::signals2::connection
   base_signaler::registerCallback (const std::function<T> & callback)
   {
-    typedef boost::signals2::signal<T> Signal;
-    if (signals_.find (typeid (T).name ()) == signals_.end ())
-    {
-      std::stringstream sstream;
-
-      sstream << "no callback for type:" << typeid (T).name ();
+     const auto signal = find_signal<T> ();
+      if (signal == nullptr)
+      {
+        std::stringstream sstream;
+        sstream << "no callback for type:" << typeid (T).name ();
         throw svl::type_error (sstream.str () );
-    }
-    Signal* signal = dynamic_cast<Signal*> (signals_[typeid (T).name ()]);
-    boost::signals2::connection ret = signal->connect (callback);
+      }
+      boost::signals2::connection ret = signal->connect (callback);
 
-    connections_[typeid (T).name ()].push_back (ret);
-    shared_connections_[typeid (T).name ()].push_back (boost::signals2::shared_connection_block (connections_[typeid (T).name ()].back (), false));
-    signalsChanged ();
-    return (ret);
+      connections_[typeid (T).name ()].push_back (ret);
+      shared_connections_[typeid (T).name ()].push_back (boost::signals2::shared_connection_block (connections_[typeid (T).name ()].back (), false));
+      signalsChanged ();
+      return (ret);
   }
 
   template<typename T> bool
   base_signaler::providesCallback () const
   {
-    if (signals_.find (typeid (T).name ()) == signals_.end ())
-      return (false);
-    return (true);
+    return find_signal<T> ();
   }
 
 
