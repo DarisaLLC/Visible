@@ -1106,6 +1106,7 @@
 		C26F5FFE21B0AA6F00EAE156 /* VisibleRunner-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VisibleRunner-Info.plist"; path = "/Users/arman/dev/Visible/xcode/VisibleRunner-Info.plist"; sourceTree = "<absolute>"; };
 		C276EC841C72988200242CDB /* cp-visible_release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "cp-visible_release.xcconfig"; path = "configs/cp-visible_release.xcconfig"; sourceTree = "<group>"; };
 		C276ECA81C72B5D900242CDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		C2792DA4246D0276004FD947 /* signaler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = signaler.h; sourceTree = "<group>"; };
 		C27DB8AF225BBAA1002AE43D /* algo_Mov.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = algo_Mov.cpp; path = ../src/algo_Mov.cpp; sourceTree = "<group>"; };
 		C27ED0A0220BB71D00B55D65 /* InterfaceUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InterfaceUtilities.cpp; path = ../include/imGuiCustom/InterfaceUtilities.cpp; sourceTree = "<group>"; };
 		C27ED0A1220BB71D00B55D65 /* InterfaceUtilities.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = InterfaceUtilities.hpp; path = ../include/imGuiCustom/InterfaceUtilities.hpp; sourceTree = "<group>"; };
@@ -1927,6 +1928,7 @@
 		C26009EA1CED3E010045FF57 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				C2792DA4246D0276004FD947 /* signaler.h */,
 				C24C6E302332CFC400A118AC /* boost_stats.hpp */,
 				C21A507022A98AE800B0AC7D /* mathBSpline.h */,
 				C21A506F22A9895C00B0AC7D /* moreMath.h */,
@@ -3650,6 +3652,7 @@
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_LDFLAGS = "$(inherited)";
+				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Runner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -3701,6 +3704,7 @@
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_LDFLAGS = "$(inherited)";
+				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Runner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
