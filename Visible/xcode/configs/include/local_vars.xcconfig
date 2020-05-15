@@ -23,8 +23,7 @@ LOCAL_GSL = /usr/local/
 LOCAL_CIMG = $(EXTERNALS)/CImg
 LOCAL_SPDLOG = $(EXTERNALS)/spdlog
 LOCAL_FMT = $(EXTERNALS)/fmt
-LOCAL_IMGUI = $(EXTERNALS)/imgui_module
-LOCAL_CIIMGUI = $(EXTERNALS)/Cinder-ImGui
+LOCAL_CIIMGUI = $(VISIBLE_ROOT)/local_cinder_imgui
 
 LOCAL_3rdParty = $(SVL_ROOT)/local
 LOCAL_BOOST = /usr/local

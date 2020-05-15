@@ -9,4 +9,4 @@
 // https://help.apple.com/xcode/#/dev745c5c974
 
 
-HEADER_SEARCH_PATHS = $(VISIBLE_ROOT)/include $(VISIBLE_ROOT)/include/plistcpp $(SVL_ROOT)/include $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(LOCAL_gtest)/include  $(LOCAL_TINYXML) $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG)  $(LOCAL_CIMG)/plugins $(LOCAL_SPDLOG)/include $(LOCAL_IMGUI) $(LOCAL_CIIMGUI)/include  $(LOCAL_FMT)/include $(LOCAL_GSL)/include /usr/local/opt/libffi/include /usr/local/include/opencv4 
+HEADER_SEARCH_PATHS = $(VISIBLE_ROOT)/include $(VISIBLE_ROOT)/include/plistcpp $(SVL_ROOT)/include $(LOCAL_CINDER)/include $(LOCAL_BOOST)/include $(LOCAL_gtest)/include  $(LOCAL_TINYXML) $(LOCAL_EIGEN) $(LOCAL_CEREAL) $(LOCAL_TINYXML) $(LOCAL_CIMG)  $(LOCAL_CIMG)/plugins $(LOCAL_SPDLOG)/include  $(LOCAL_CIIMGUI)/lib/imgui  $(LOCAL_CIIMGUI)/include $(LOCAL_FMT)/include $(LOCAL_GSL)/include /usr/local/opt/libffi/include /usr/local/include/opencv4 
