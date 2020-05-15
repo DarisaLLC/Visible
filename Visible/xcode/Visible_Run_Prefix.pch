@@ -5,8 +5,6 @@
 #include "cinder/Matrix.h"
 #include "cinder/Vector.h"
 #include "cinder/Quaternion.h"
-#include "imconfig.h"
-#include "imgui.h"
 #include "mediainfo.h"
 #include "lifContext.h"
 #include "vision/roiWindow.h"
