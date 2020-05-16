@@ -194,11 +194,11 @@ guiContext::guiContext (ci::app::WindowRef& ww)
     if (ww)
         ww->setUserData (this);
 }
-
-guiContext::~guiContext ()
-{
-    // std::cout << " guiContext Dtor called " << std::endl;
-}
+//
+//guiContext::~guiContext ()
+//{
+//    // std::cout << " guiContext Dtor called " << std::endl;
+//}
 
 // u implementation does nothing
 void guiContext::mouseDown( MouseEvent event ) {}

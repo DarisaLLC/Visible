@@ -64,7 +64,7 @@ public:
         return ((int)iloc.y) / m_channel_size.second;
     }
     
-    inline const ImVec2 image2display (const ivec2& image_pixel_loc, int channel = -1, bool bottom_left_origin = false){
+    inline ImVec2 image2display (const ivec2& image_pixel_loc, int channel = -1, bool bottom_left_origin = false){
         assert(channel < m_cc);
         ivec2 all_loc = image_pixel_loc;
         if(channel >= 0){
@@ -74,9 +74,13 @@ public:
             all_loc.x = x;
             all_loc.y = y+yoffset;
         }
-        if(m_image_rect.contains(all_loc))
-            return m_image2display.map(all_loc);
-        return image_pixel_loc;
+        
+        ImVec2 rtn(image_pixel_loc.x, image_pixel_loc.y);
+        if(m_image_rect.contains(all_loc)){
+            auto iv2 = m_image2display.map(all_loc);
+            rtn = ImVec2(iv2.x, iv2.y);
+        }
+        return rtn;
     }
   
     // Mutators

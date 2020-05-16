@@ -51,8 +51,7 @@ public:
     //   VisibleTestApp();
     //  ~VisibleTestApp();
     
-    virtual void SetupGUIVariables() override;
-    virtual void DrawGUI() override;
+    virtual void DrawGUI() ;
     virtual void QuitApp();
     
     void prepareSettings( Settings *settings );
@@ -156,8 +155,6 @@ using namespace ci::app;
 using namespace std;
 
 void VisibleTestApp::QuitApp(){
-    ImGui::DestroyContext();
-    // fg::ThreadsShouldStop = true;
     quit();
 }
 
@@ -376,8 +373,6 @@ public:
     }
     
     virtual void QuitApp(){
-        ImGui::DestroyContext();
-        // fg::ThreadsShouldStop = true;
         quit();
     }
     

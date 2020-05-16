@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include "guiContext.h"
 #include "LifContext.h"
-#include "cinder/app/App.h"
+
 #include "cinder/gl/gl.h"
 #include "cinder/Timer.h"
 #include "cinder/ImageIo.h"
@@ -243,7 +243,7 @@ void lifContext::signal_flu_stats_ready ()
 void lifContext::signal_contraction_ready (contractionLocator::contractionContainer_t& contras, const input_channel_selector_t& in)
 {
     // Pauses playback if playing and restore it at scope's end
-    scopedPause sp(std::shared_ptr<lifContext>(shared_from_above(), stl_utils::null_deleter () ));
+    scopedPause sp(std::shared_ptr<lifContext>(shared_from_above().get(), stl_utils::null_deleter () ));
     
     if (contras.empty()) return;
     
@@ -880,10 +880,7 @@ void lifContext::add_canvas (){
                         draw_list->AddConvexPolyFilled( impts.data(), impts.size(), nc);
                     }
                     index++;
-
                 }
-         
-                
             }
             ImGui::End();
         }
@@ -892,7 +889,7 @@ void lifContext::add_canvas (){
     //@note: assumes, next image plus any on image graphics have already been added
     // offscreen via FBO
     if(m_show_playback){
-        ci::vec2 pos (0,0);
+        ci::vec2 pos (0,20);
         ci::vec2 size (getWindowWidth()/2.0, getWindowHeight()/2.0f - 20.0);
         ui::ScopedWindow utilities(wDisplay);
         ImGui::SetNextWindowPos(pos);
@@ -900,17 +897,63 @@ void lifContext::add_canvas (){
         ImGui::SameLine();
         showImage(wDisplay, &m_show_playback, mFbo->getColorTexture());
     }
-    
-    
 }
+
+/*
+ * Result Window, to below the Display
+ * Size width: remainder to the edge of app window in x ( minus a pad )
+ * Size height: app window height / 2
+ */
+
+void lifContext::add_result_sequencer (){
+ 
+    // let's create the sequencer
+    static int selectedEntry = -1;
+    static int64 firstFrame = 0;
+    static bool expanded = true;
+    
+    ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
+    assert(window != nullptr);
+    ImVec2 pos (window->Pos.x , window->Pos.y + window->Size.y);
+    ImVec2 size (window->Size.x, window->Size.y);
+    m_results_browser_display = Rectf(pos,size);
+    ImGui::SetNextWindowPos(pos);
+    ImGui::SetNextWindowSize(size);
+
+    static bool results_open;
+    if(ImGui::Begin(wResult, &results_open, ImGuiWindowFlags_AlwaysAutoResize)){
+//        ImGui::PushItemWidth(130);
+//        ImGui::InputInt("Frame Min", &m_main_seq.mFrameMin);
+//        ImGui::SameLine();
+//        ImGui::InputInt64("Frame ", &m_seek_position);
+//        ImGui::SameLine();
+//        ImGui::InputInt("Frame Max", &m_main_seq.mFrameMax);
+//        ImGui::PopItemWidth();
+        
+
+        Sequencer(&m_main_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
+
+        
+        // add a UI to edit that particular item
+        if (selectedEntry != -1)
+        {
+            const timeLineSequence::timeline_item &item = m_main_seq.items[selectedEntry];
+            ImGui::Text("I am a %s, please edit me", m_main_seq.mSequencerItemTypeNames[item.mType].c_str());
+            // switch (type) ....
+        }
+    }
+    ImGui::End();
+                               
+}
+
 
 void lifContext::add_navigation(){
     
     if(m_show_playback){
         
-        ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
+        ImGuiWindow* window = ImGui::FindWindowByName(wResult);
         assert(window != nullptr);
-        ImVec2 pos (0 , window->Pos.y + window->Size.y );
+        ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y );
         ImVec2 size (window->Size.x, 100);
         
         ui::ScopedWindow utilities(wNavigator, ImGuiWindowFlags_NoResize);
@@ -993,53 +1036,6 @@ void lifContext::add_navigation(){
         ImGui::EndGroup();
     }
 }
-/*
- * Result Window, to below the Display
- * Size width: remainder to the edge of app window in x ( minus a pad )
- * Size height: app window height / 2
- */
-
-void lifContext::add_result_sequencer (){
- 
-    // let's create the sequencer
-    static int selectedEntry = -1;
-    static int64 firstFrame = 0;
-    static bool expanded = true;
-    
-    ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
-    assert(window != nullptr);
-    ImVec2 pos (window->Pos.x , window->Pos.y + window->Size.y);
-    ImVec2 size (getWindowWidth()/2, getWindowHeight()/2);
-    m_results_browser_display = Rectf(pos,size);
-    ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(size);
-
-    static bool results_open;
-    if(ImGui::Begin(wResult, &results_open, ImGuiWindowFlags_AlwaysAutoResize)){
-        ImGui::PushItemWidth(130);
-        ImGui::InputInt("Frame Min", &m_main_seq.mFrameMin);
-        ImGui::SameLine();
-        ImGui::InputInt64("Frame ", &m_seek_position);
-        ImGui::SameLine();
-        ImGui::InputInt("Frame Max", &m_main_seq.mFrameMax);
-        ImGui::PopItemWidth();
-        
-
-        Sequencer(&m_main_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
-
-        
-        // add a UI to edit that particular item
-        if (selectedEntry != -1)
-        {
-            const timeLineSequence::timeline_item &item = m_main_seq.items[selectedEntry];
-            ImGui::Text("I am a %s, please edit me", m_main_seq.mSequencerItemTypeNames[item.mType].c_str());
-            // switch (type) ....
-        }
-    }
-    ImGui::End();
-                               
-}
-
 
 
 /*
@@ -1060,7 +1056,7 @@ void lifContext::add_motion_profile (){
     
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
     ImVec2  frame (mMediaInfo.channel_size.width, mMediaInfo.channel_size.height);
-    ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y);
+    ImVec2 pos (getWindowWidth() - sz.x, GetWindowHeight() - sz.y);
     m_motion_profile_display = Rectf(pos,frame);
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowContentSize(frame);
@@ -1071,13 +1067,8 @@ void lifContext::add_motion_profile (){
             static ImVec2 zoom_center;
             // First Child
             ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
-        //    ImVec2 pp = ImGui::GetCursorScreenPos();
-       //     ImVec2 p (pp.x + mt.center.x, pp.y  + mt.center.y+128);
             ImGui::Image( (void*)(intptr_t) m_segmented_texture->getId(), frame);
             ImGui::EndChild();
-            
-            // Second Child
-      
         }
     }
     ImGui::End();
@@ -1188,19 +1179,13 @@ void lifContext::add_contractions (bool* p_open)
     }
 }
 
-void  lifContext::SetupGUIVariables(){
-
-  //      ImGuiStyle* st = &ImGui::GetStyle();
-  //      ImGui::StyleColorsLightGreen(st);
-
-}
 
 
 void  lifContext::DrawGUI(){
     
     add_canvas();
-    add_navigation();
     add_result_sequencer();
+    add_navigation();
     m_show_cells = true;
     add_contractions(&m_show_cells);
     add_motion_profile ();
@@ -1380,20 +1365,6 @@ void lifContext::draw (){
             DrawGUI();
     }
 }
-    //                {
-    //                    cinder::gl::ScopedColor col (ColorA( 1, 0.1, 0.1, 0.8f ) );
-    //                    gl::drawSolidCircle(length.first, 3.0);
-    //                    gl::drawSolidCircle(length.second, 3.0);
-    //                    gl::translate (gdr.getUpperLeft() + length.first);
-    //                    vec2 ctr (0,0);
-    //                    gl::drawLine(ctr, length.second - length.first);
-    //
-    //                }
-    //                {
-    //                    cinder::gl::ScopedColor col (ColorA( 0.1, 1.0, 0.1, 0.8f ) );
-    //                    gl::drawLine(width.first, width.second);
-    //                    gl::drawSolidCircle(width.first, 3.0);
-    //                    gl::drawSolidCircle(width.second, 3.0);
-    //                }
+ 
     
 #pragma GCC diagnostic pop
