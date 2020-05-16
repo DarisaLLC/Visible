@@ -29,17 +29,21 @@ using namespace std;
 
 
 void VisibleRunApp::QuitApp(){
-    ImGui::DestroyContext();
-    // fg::ThreadsShouldStop = true;
     quit();
 }
 
 
-
-void VisibleRunApp::SetupGUIVariables(){
-    //Set up global preferences for the GUI
-    //http://anttweakbar.sourceforge.net/doc/tools:anttweakbar:twbarparamsyntax
-    GetGUI().DefineGlobal("iconalign=horizontal");
+static void ShowHelpMarker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(450.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 }
 
 void VisibleRunApp::DrawGUI(){
@@ -195,7 +199,7 @@ void VisibleRunApp::setup()
     std::string extension = fs::path(bpath).extension().string();
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
     bool is_valid_extension = std::find( supported_mov_extensions.begin(), supported_mov_extensions.end(), extension) != supported_mov_extensions.end();
-    bool is_video_content = extension == ".mov" || extension == ".mp4";
+//    bool is_video_content = extension == ".mov" || extension == ".mp4";
     bool is_lif_content = extension == ".lif";
 
  
@@ -273,7 +277,7 @@ void VisibleRunApp::setup()
         if (indexItr != mBrowser->name_to_index_map().end()){
             auto serie = mBrowser->get_serie_by_index(indexItr->second);
             WindowRef ww = getWindow ();
-            mContext = std::unique_ptr<lifContext>(new lifContext (ww,serie, cache_path));
+            mContext = std::make_shared<lifContext>(ww,serie,cache_path);
             
             if (mContext->is_valid()){
                 cmds += " [ " + m_args[2] + " ] ";
@@ -298,9 +302,10 @@ void VisibleRunApp::setup()
             ADD_ERR_AND_RETURN(cmds, " No Chapters or Series ")
         }
     }
+#if 0
     else if (exists_with_extenstion && is_valid_extension && is_video_content){
      
-#if 0
+
         VisibleAppControl::setup_loggers(root_output_dir, visual_log, fs::path(bpath).filename().string());
         
         cvVideoPlayer::ref vref = cvVideoPlayer::create(fs::path(bpath));
@@ -325,9 +330,11 @@ void VisibleRunApp::setup()
         getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
         getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
         gl::enableVerticalSync();
-#endif
+
+    }else{
+        ADD_ERR_AND_RETURN(cmds, " Path not valid ");
     }
-    ADD_ERR_AND_RETURN(cmds, " Path not valid ");
+#endif
     
 }
     

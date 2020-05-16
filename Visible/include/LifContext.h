@@ -20,8 +20,6 @@ using namespace ci;
 using namespace ci::app;
 using namespace ci::signals;
 
-using namespace params;
-
 using namespace std;
 namespace fs = boost::filesystem;
 
@@ -48,11 +46,14 @@ public:
     lifContext(ci::app::WindowRef& ww, const lif_serie_data&, const fs::path&  );
     
     // shared_from_this() through base class
-    lifContext* shared_from_above () {
-        return static_cast<lifContext*>(((guiContext*)this)->shared_from_this().get());
+//    lifContext* shared_from_above () {
+//        return static_cast<lifContext*>(((guiContext*)this)->shared_from_this().get());
+//    }
+    
+    std::shared_ptr<lifContext> shared_from_above(){
+        return std::dynamic_pointer_cast<lifContext>(shared_from_this ());
     }
 
-    
 
 	
 	static const std::string& caption () { static std::string cp ("Lif Viewer # "); return cp; }
@@ -112,9 +113,7 @@ public:
     bool isEditing () const { return m_is_editing; }
     
     // Supporting gui_base
-    void SetupGUIVariables() override;
-    void DrawGUI() override;
-    void QuitApp();
+    void DrawGUI();
     
 private:
     void renderToFbo (const SurfaceRef&, gl::FboRef& );

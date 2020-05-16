@@ -5,9 +5,6 @@
 #include "cinder/gl/Vbo.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rect.h"
-#include "cinder/qtime/QuickTimeGl.h"
-#include "cinder/CameraUi.h"
-#include "cinder/params/Params.h"
 #include "cinder/Timeline.h"
 #include "cinder/ImageIo.h"
 #include "cinder/Thread.h"
@@ -32,7 +29,7 @@
 #include "timeMarker.h"
 #include "visible_types.h"
 #include "DisplayObjectContainer.h"
-#include "gui_base.hpp"
+
 
 
 
@@ -41,8 +38,6 @@ using namespace boost::filesystem;
 using namespace ci;
 using namespace ci::app;
 using namespace ci::signals;
-
-using namespace params;
 
 using namespace std;
 namespace fs = boost::filesystem;
@@ -70,7 +65,6 @@ public:
 	
 	
 	guiContext (ci::app::WindowRef& ww);
-	virtual ~guiContext ();
 	
 	virtual const std::string & getName() const ;
 	virtual void setName (const std::string& name);
@@ -118,7 +112,7 @@ public:
 
 ///////////////////   Visual Browsing Contexts
 
-class sequencedImageContext : public guiContext, public gui_base
+class sequencedImageContext : public guiContext
 {
 public:
 	

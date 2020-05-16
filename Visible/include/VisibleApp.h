@@ -42,8 +42,6 @@
 
 #include "LifContext.h"
 #include "MovContext.h"
-#include "gui_handler.hpp"
-#include "gui_base.hpp"
 #include "imGuiLogger.hpp"
 #include "visible_logger_macro.h"
 #include "imGuiCustom/ImSequencer.h"
@@ -84,11 +82,10 @@ namespace VisibleAppControl{
 
 namespace vac = VisibleAppControl;
 
-class VisibleApp : public App, public gui_base {
+class VisibleApp : public App {
 public:
     
-    virtual void SetupGUIVariables() override;
-    virtual void DrawGUI() override;
+    virtual void DrawGUI();
     virtual void QuitApp();
     //   void prepareSettings( Settings *settings );
     void setup() override;
@@ -156,6 +153,7 @@ private:
     bool showLog = false;
     bool showHelp = false;
     bool showOverlay = false;
+    bool showGUI = false;
     
     imGuiLog app_log;
     
@@ -163,15 +161,12 @@ private:
     
 };
 
-class VisibleRunApp : public App, public gui_base
+class VisibleRunApp : public App
 {
 public:
 
- //   VisibleRunApp();
-  //  ~VisibleRunApp();
 
-    virtual void SetupGUIVariables() override;
-    virtual void DrawGUI() override;
+    virtual void DrawGUI();
     virtual void QuitApp();
 
     void prepareSettings( Settings *settings );
@@ -197,12 +192,13 @@ private:
     Rectf                        mGlobalBounds;
     map<string, boost::any> mPlist;
 
-    mutable std::unique_ptr<sequencedImageContext> mContext;
+    mutable std::shared_ptr<sequencedImageContext> mContext;
     mutable lif_browser::ref mBrowser;
     
     bool showLog = false;
     bool showHelp = false;
     bool showOverlay = false;
+    bool showGUI = false;
     int convergence = 0;
     std::string         mFileName;
     std::string         mFileExtension;

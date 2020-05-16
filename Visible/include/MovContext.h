@@ -19,8 +19,6 @@ using namespace ci;
 using namespace ci::app;
 using namespace ci::signals;
 
-using namespace params;
-
 using namespace std;
 namespace fs = boost::filesystem;
 
@@ -97,9 +95,7 @@ public:
     bool isPlaying () const { return m_is_playing; }
     
     // Supporting gui_base
-    void SetupGUIVariables() override;
-    void DrawGUI() override;
-    void QuitApp();
+    void DrawGUI();
     
 private:
     void renderToFbo (const SurfaceRef&, gl::FboRef& fbo );

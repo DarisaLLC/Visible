@@ -18,9 +18,21 @@ namespace VisibleAppControl{
     /**
      When this is set to false the threads managed by this program will stop and join the main thread.
      */
-    bool ThreadsShouldStop = false;
+   // bool ThreadsShouldStop = false;
 }
 
+static void ShowHelpMarker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(450.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
 
 void prepareSettings( App::Settings *settings )
 {
@@ -79,7 +91,6 @@ void VisibleApp::fileDrop( FileDropEvent event )
     }
 }
 
-void VisibleApp::SetupGUIVariables(){}
 
 bool VisibleApp::shouldQuit()
 {
@@ -232,8 +243,6 @@ void VisibleApp::setup()
 }
 
 void VisibleApp::QuitApp(){
-    ImGui::DestroyContext();
-    // fg::ThreadsShouldStop = true;
     quit();
 }
 
@@ -255,10 +264,8 @@ void VisibleApp::DrawGUI(){
             ui::MenuItem("Help", nullptr, &showHelp);
             if(ui::MenuItem("Quit", "ESC")){
                 QuitApp();
-                return;
             }
-            else
-                ui::EndMenu();
+            ui::EndMenu();
         }
         
         if( ui::BeginMenu( "View" ) ){

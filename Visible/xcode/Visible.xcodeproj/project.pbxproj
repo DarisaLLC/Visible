@@ -182,7 +182,6 @@
 		C23E346121F2511D00221E68 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E345F21F2511D00221E68 /* ImSequencer.cpp */; };
 		C23E346321F254DE00221E68 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
 		C23E346421F254DE00221E68 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
-		C241B5F82319F04700514F57 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
 		C242CCC5217E76D8004F7867 /* contraction_t.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction_t.cpp */; };
 		C248D6D8224939AC00C2C02F /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */; };
 		C248DD2C1F64601A00FF72B1 /* onImagePlotUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* onImagePlotUtils.cpp */; };
@@ -294,7 +293,6 @@
 		C26F5F9F21B0AA6D00EAE156 /* Visible.icns in Resources */ = {isa = PBXBuildFile; fileRef = C264F94B215F0B6D00AF3130 /* Visible.icns */; };
 		C26F5FA021B0AA6D00EAE156 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
 		C26F5FA221B0AA6D00EAE156 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
-		C26F5FA521B0AA6D00EAE156 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
 		C26F5FA621B0AA6D00EAE156 /* contraction_t.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction_t.cpp */; };
 		C26F5FA721B0AA6D00EAE156 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
 		C26F5FA821B0AA6D00EAE156 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
@@ -372,7 +370,6 @@
 		C2819EC921FA94F000183E44 /* imgui.ini in Resources */ = {isa = PBXBuildFile; fileRef = C2819EC721FA94F000183E44 /* imgui.ini */; };
 		C2819ED52201287900183E44 /* visible_scope.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2819ED42201287900183E44 /* visible_scope.png */; };
 		C2820F302175298F00DFA7A6 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
-		C2820F3521752CB000DFA7A6 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
 		C2869C5A2319F47E00F04C0A /* imgui_plot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26223B12318B1DC006D9045 /* imgui_plot.cpp */; };
 		C28B016F229B182100B8165D /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
 		C28B0170229B182100B8165D /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
@@ -544,7 +541,6 @@
 		C2DB729422591DB700C2B986 /* imgui.ini in Resources */ = {isa = PBXBuildFile; fileRef = C2819EC721FA94F000183E44 /* imgui.ini */; };
 		C2DB729522591DB700C2B986 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
 		C2DB729722591DB700C2B986 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
-		C2DB729822591DB700C2B986 /* gui_handler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2820F3121752BF600DFA7A6 /* gui_handler.cpp */; };
 		C2DB729922591DB700C2B986 /* contraction_t.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction_t.cpp */; };
 		C2DB729A22591DB700C2B986 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
 		C2DB729B22591DB700C2B986 /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
@@ -843,8 +839,8 @@
 		C21A50DE22A9FFA800B0AC7D /* contraction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = contraction.hpp; path = ../include/contraction.hpp; sourceTree = "<group>"; };
 		C21A50DF22AB4D0C00B0AC7D /* eigen_utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = eigen_utils.cpp; path = ../src/eigen_utils.cpp; sourceTree = "<group>"; };
 		C21A50E022AB4D0C00B0AC7D /* eigen_utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = eigen_utils.hpp; path = ../include/eigen_utils.hpp; sourceTree = "<group>"; };
-		C21AB38E232E04F600D1C529 /* CinderImGuiExports.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CinderImGuiExports.h; path = "../../externals/Cinder-ImGui/include/CinderImGuiExports.h"; sourceTree = "<group>"; };
-		C21AB38F232E04F700D1C529 /* CinderImGui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CinderImGui.h; path = "../../externals/Cinder-ImGui/include/CinderImGui.h"; sourceTree = "<group>"; };
+		C21AB38E232E04F600D1C529 /* CinderImGuiExports.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CinderImGuiExports.h; path = ../local_cinder_imgui/include/CinderImGuiExports.h; sourceTree = "<group>"; };
+		C21AB38F232E04F700D1C529 /* CinderImGui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CinderImGui.h; path = ../local_cinder_imgui/include/CinderImGui.h; sourceTree = "<group>"; };
 		C21E390B228A054C00778A66 /* affine_rectangle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = affine_rectangle.cpp; sourceTree = "<group>"; };
 		C21FFE6D1CFD1D9B00C97013 /* sm_producer_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer_impl.h; path = ../include/sm_producer_impl.h; sourceTree = "<group>"; };
 		C21FFE6E1CFD1D9B00C97013 /* sm_producer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sm_producer.h; path = ../include/sm_producer.h; sourceTree = "<group>"; };
@@ -1124,9 +1120,6 @@
 		C2820F272175249F00DFA7A6 /* libconfig.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libconfig.a; path = ../../../../../../../usr/local/Cellar/libconfig/1.7.2/lib/libconfig.a; sourceTree = "<group>"; };
 		C2820F2B217527DB00DFA7A6 /* Visible.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Visible.cfg; path = ../resources/config/Visible.cfg; sourceTree = "<group>"; };
 		C2820F2E217528CF00DFA7A6 /* libconfig++.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libconfig++.a"; path = "../../../../../../../usr/local/Cellar/libconfig/1.7.2/lib/libconfig++.a"; sourceTree = "<group>"; };
-		C2820F3121752BF600DFA7A6 /* gui_handler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gui_handler.cpp; path = ../src/gui_handler.cpp; sourceTree = "<group>"; };
-		C2820F3321752C1100DFA7A6 /* gui_base.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = gui_base.hpp; path = ../include/gui_base.hpp; sourceTree = "<group>"; };
-		C2820F3421752C1100DFA7A6 /* gui_handler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = gui_handler.hpp; path = ../include/gui_handler.hpp; sourceTree = "<group>"; };
 		C2820F3621752E5100DFA7A6 /* VisibleApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VisibleApp.h; path = ../include/VisibleApp.h; sourceTree = "<group>"; };
 		C2820F3721754C3100DFA7A6 /* imGuiLogger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = imGuiLogger.hpp; path = ../include/imGuiLogger.hpp; sourceTree = "<group>"; };
 		C28B01C4229B182100B8165D /* affineApp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = affineApp; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1204,7 +1197,7 @@
 		C2E3F560213D9483007B1088 /* labelBlob.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = labelBlob.hpp; sourceTree = "<group>"; };
 		C2E469CE1D07718B0066B811 /* cm_time.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cm_time.hpp; sourceTree = "<group>"; };
 		C2E5AD832279DE2000A7AAD3 /* affineApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = affineApp.cpp; sourceTree = "<group>"; };
-		C2E5AD85227A5C7000A7AAD3 /* imconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imconfig.h; path = ../include/imGuiCustom/imconfig.h; sourceTree = "<group>"; };
+		C2E5AD85227A5C7000A7AAD3 /* imconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imconfig.h; path = ../local_cinder_imgui/lib/imgui/imconfig.h; sourceTree = "<group>"; };
 		C2ED059D22D176F500314C1B /* local_vars.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = local_vars.xcconfig; path = configs/include/local_vars.xcconfig; sourceTree = "<group>"; };
 		C2ED05A122D1778B00314C1B /* main_linker.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = main_linker.xcconfig; path = configs/include/main_linker.xcconfig; sourceTree = "<group>"; };
 		C2ED05A522D1780600314C1B /* main_header_paths.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = main_header_paths.xcconfig; path = configs/include/main_header_paths.xcconfig; sourceTree = "<group>"; };
@@ -1216,6 +1209,7 @@
 		C2F1B6211FB13FE600DDD7DB /* LifContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LifContext.h; path = ../include/LifContext.h; sourceTree = "<group>"; };
 		C2F7C47B22DFD21B00E28521 /* convex_hull.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = convex_hull.hpp; sourceTree = "<group>"; };
 		C2F7C47C22E65A2900E28521 /* cluster_geometry.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = cluster_geometry.hpp; path = ../include/cluster_geometry.hpp; sourceTree = "<group>"; };
+		C2FC528A246F2E1F00B1030D /* CinderImGuiConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CinderImGuiConfig.h; path = ../local_cinder_imgui/include/CinderImGuiConfig.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1418,7 +1412,6 @@
 				C21094662239D1C8004E88EE /* permutation_entropy.cpp */,
 				C27DB8AF225BBAA1002AE43D /* algo_Mov.cpp */,
 				C260AFCE21ED0691003B0FF0 /* sg_filter.cpp */,
-				C2820F3121752BF600DFA7A6 /* gui_handler.cpp */,
 				C2EF8D0D2148709300A5D3D6 /* Item.cpp */,
 				C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */,
 				C29DB075212B351200930CBD /* algo_ssmt.cpp */,
@@ -1647,8 +1640,6 @@
 				C260AFCF21ED076F003B0FF0 /* sg_filter.h */,
 				C2B87C9721CEE27500C91E35 /* visible_cli.hpp */,
 				C2B87C9821D008AC00C91E35 /* visible_logger_macro.h */,
-				C2820F3321752C1100DFA7A6 /* gui_base.hpp */,
-				C2820F3421752C1100DFA7A6 /* gui_handler.hpp */,
 				C2DB59B221557CF800750C2E /* result_serialization.h */,
 				C2DB59B121557C0C00750C2E /* app_core.h */,
 				C2EF8D1B214873E700A5D3D6 /* Item.h */,
@@ -2189,6 +2180,7 @@
 		C29C726F216FC7340028AED1 /* imgui */ = {
 			isa = PBXGroup;
 			children = (
+				C2FC528A246F2E1F00B1030D /* CinderImGuiConfig.h */,
 				C21AB38F232E04F700D1C529 /* CinderImGui.h */,
 				C21AB38E232E04F600D1C529 /* CinderImGuiExports.h */,
 				C2E5AD85227A5C7000A7AAD3 /* imconfig.h */,
@@ -2521,7 +2513,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C2606DA91CED3E2E0045FF57 /* gradient.cpp in Sources */,
-				C2820F3521752CB000DFA7A6 /* gui_handler.cpp in Sources */,
 				C242CCC5217E76D8004F7867 /* contraction_t.cpp in Sources */,
 				C2B005821CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C21094672239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
@@ -2681,7 +2672,6 @@
 			files = (
 				C21094692239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
 				C20BBC071E4E34C3002C7D68 /* lifFile.cpp in Sources */,
-				C241B5F82319F04700514F57 /* gui_handler.cpp in Sources */,
 				C28B01CE229B1DE500B8165D /* lif_serie.cpp in Sources */,
 				C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */,
 				C2CE9C7622A48AC5003C479A /* etw_utils.cpp in Sources */,
@@ -2795,7 +2785,6 @@
 			files = (
 				C2BDEFEF21C8237A00A8CB94 /* core_support.cpp in Sources */,
 				C26F5FA221B0AA6D00EAE156 /* gradient.cpp in Sources */,
-				C26F5FA521B0AA6D00EAE156 /* gui_handler.cpp in Sources */,
 				C28B01C8229B1CD900B8165D /* algo_shortterm.cpp in Sources */,
 				C26F5FA621B0AA6D00EAE156 /* contraction_t.cpp in Sources */,
 				C21094682239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
@@ -2950,7 +2939,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C2DB729722591DB700C2B986 /* gradient.cpp in Sources */,
-				C2DB729822591DB700C2B986 /* gui_handler.cpp in Sources */,
 				C28B01C9229B1CD900B8165D /* algo_shortterm.cpp in Sources */,
 				C2DB729922591DB700C2B986 /* contraction_t.cpp in Sources */,
 				C2DB729A22591DB700C2B986 /* hockey_etc_cocoa_wrappers.mm in Sources */,
@@ -3092,7 +3080,6 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
-				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "IMGUI_USER_CONFIG=<$(LOCAL_CIIMGUI)/imgui/imconfig.h>";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Info.plist;
@@ -3145,7 +3132,6 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Visible_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
-				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "IMGUI_USER_CONFIG=<$(LOCAL_CIIMGUI)/imgui/imconfig.h>";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Info.plist;
@@ -3375,11 +3361,6 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Visible_GTest_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"IMGUI_USER_CONFIG=<$(SRCROOT)/include/imGuiCustom/imconfig.h>",
-					"DEBUG=1",
-					"$(inherited)",
-				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -3853,7 +3834,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bina_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "IMGUI_USER_CONFIG=<$(LOCAL_CIIMGUI)/imgui/imconfig.h>";
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Bina.plist;
@@ -3902,7 +3883,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bina_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "IMGUI_USER_CONFIG=<$(LOCAL_CIIMGUI)/imgui/imconfig.h>";
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Bina.plist;
