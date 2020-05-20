@@ -878,6 +878,7 @@
 		C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
 		C23E345F21F2511D00221E68 /* ImSequencer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImSequencer.cpp; path = ../include/imGuiCustom/ImSequencer.cpp; sourceTree = "<group>"; };
 		C23E346221F254DE00221E68 /* ImCurveEdit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImCurveEdit.cpp; path = ../include/imGuiCustom/ImCurveEdit.cpp; sourceTree = "<group>"; };
+		C2409B2F2475CCBE003CF7BC /* VisibleRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = VisibleRelease.entitlements; path = Visible/VisibleRelease.entitlements; sourceTree = "<group>"; };
 		C240F9FA21E14C8900FBA228 /* sscli-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "sscli-Info.plist"; sourceTree = "<group>"; };
 		C240F9FE21E15ADE00FBA228 /* imguivariouscontrols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imguivariouscontrols.h; path = ../include/imguivariouscontrols.h; sourceTree = "<group>"; };
 		C241BBAA1FB11B51000DE36E /* lif_content.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lif_content.hpp; path = ../include/lif_content.hpp; sourceTree = "<group>"; };
@@ -1459,6 +1460,7 @@
 		29B97314FDCFA39411CA2CEA /* QuickTimeIteration */ = {
 			isa = PBXGroup;
 			children = (
+				C2409B2F2475CCBE003CF7BC /* VisibleRelease.entitlements */,
 				C2175DD22150B779004315C0 /* Visible.entitlements */,
 				C21946891CE4DC9700976025 /* xconfs */,
 				C260099A1CED3E010045FF57 /* svl */,
@@ -2348,7 +2350,7 @@
 				TargetAttributes = {
 					8D1107260486CEB800E47090 = {
 						DevelopmentTeam = W4F7HL2GN5;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
 								enabled = 1;
@@ -2371,7 +2373,7 @@
 					};
 					C26F5F9721B0AA6D00EAE156 = {
 						DevelopmentTeam = W4F7HL2GN5;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					C28B016D229B182100B8165D = {
 						DevelopmentTeam = W4F7HL2GN5;
@@ -3062,8 +3064,8 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_ENTITLEMENTS = Visible/Visible.entitlements;
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Arman Garakani (W4F7HL2GN5)";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 2;
@@ -3087,16 +3089,18 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 0.33;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-v",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Browser;
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = NO;
 				USER_HEADER_SEARCH_PATHS = include;
 				VALID_ARCHS = "i386 x86_64";
@@ -3113,15 +3117,16 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
-				CODE_SIGN_ENTITLEMENTS = Visible/Visible.entitlements;
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = Visible/VisibleRelease.entitlements;
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Arman Garakani (W4F7HL2GN5)";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = NO;
 				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = W4F7HL2GN5;
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_ON_DEMAND_RESOURCES = NO;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_FAST_MATH = YES;
@@ -3139,16 +3144,18 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 0.33;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-v",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Browser;
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = include;
 				VALID_ARCHS = "i386 x86_64";
@@ -3166,8 +3173,8 @@
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
-				CODE_SIGN_IDENTITY = "Developer ID Application";
-				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Arman Garakani (W4F7HL2GN5)";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = W4F7HL2GN5;
 				ENABLE_TESTABILITY = YES;
@@ -3178,7 +3185,7 @@
 				INFOPLIST_FILE = "$(PROJECT_DIR)/Info.plist";
 				LIBRARY_SEARCH_PATHS = "";
 				MACH_O_TYPE = mh_bundle;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "";
 				SDKROOT = macosx;
@@ -3196,8 +3203,8 @@
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
-				CODE_SIGN_IDENTITY = "Developer ID Application";
-				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Arman Garakani (W4F7HL2GN5)";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = W4F7HL2GN5;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -3206,7 +3213,7 @@
 				INFOPLIST_FILE = "$(PROJECT_DIR)/Info.plist";
 				LIBRARY_SEARCH_PATHS = "";
 				MACH_O_TYPE = mh_bundle;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_LDFLAGS = "";
 				SDKROOT = macosx;
 				SHARED_PRECOMPS_DIR = "";
@@ -3598,8 +3605,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Arman Garakani (W4F7HL2GN5)";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 2;
@@ -3627,13 +3634,15 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 0.33;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Runner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = NO;
 				USER_HEADER_SEARCH_PATHS = include;
 				VALID_ARCHS = "i386 x86_64";
@@ -3650,8 +3659,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Arman Garakani (W4F7HL2GN5)";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = NO;
 				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
@@ -3679,13 +3688,15 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 0.33;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Runner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = include;
 				VALID_ARCHS = "i386 x86_64";
