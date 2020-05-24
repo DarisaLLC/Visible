@@ -275,13 +275,7 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     //Output: filtered image
     void Wiener_Denoising(const cv::Mat &src, cv::Mat &dst, double PSNR_inverse);
   
-    
-    //Function used to perform anisotropic diffusion
-    //Input: src image, lambda (used for converance), number of iterations that should run,
-    //         k values to define what is an edge and what is not (x2: one for north/south, one for east/west)
-    //Output: filtered image
-    void Anisotrpic_Diffusion(const cv::Mat& src, cv::Mat& dst, double lambda, int iterations, float k_ns, float k_we);
- 
+   
     
     //Function used to perform Gamma correction
     //Input:  NORMALISED src image, gamma
