@@ -3,9 +3,9 @@
 //
 //  @inherited reflects these in the UI
 
+#include "include/local_vars.xcconfig"
 #include "include/macos.xcconfig"
 #include "include/appstore.xcconfig"
-#include "include/local_vars.xcconfig"
 #include "include/main_linker.xcconfig"
 #include "include/main_header_paths.xcconfig"
 

@@ -337,7 +337,7 @@ TEST(zscore, basic){
     auto res = dgenv_ptr->asset_path("voxel_ss_.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
-    cv::Mat src = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat src = cv::imread(res.first.c_str(), cv::ImreadModes::IMREAD_GRAYSCALE);
 
     roiWindow<P8U> r8(src.cols, src.rows);
     cpCvMatToRoiWindow8U (src, r8);
@@ -364,7 +364,7 @@ TEST(ut_labelBlob, mult_level)
     auto res = dgenv_ptr->asset_path("voxel_ss_.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
-    cv::Mat src = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat src = cv::imread(res.first.c_str(), cv::ImreadModes::IMREAD_GRAYSCALE);
     EXPECT_EQ(src.channels() , 1);
     EXPECT_EQ(src.cols , 510);
     EXPECT_EQ(src.rows , 126);
@@ -392,7 +392,7 @@ TEST(ut_labelBlob, mult_level)
     // Start at mid point between 0000 and 1111
     std::vector<uint8_t>::const_iterator pmMid = backtoback.begin();
     std::advance(pmMid, 256);
-    namedWindow( " Multi Label ", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+    namedWindow( " Multi Label ", WINDOW_AUTOSIZE | WINDOW_OPENGL);
     
     for (unsigned tt = 0; tt < valid_bins.size(); tt++)
     {
@@ -771,7 +771,7 @@ TEST(ut_ransac, plane){
     auto res = dgenv_ptr->asset_path("checkerboard_u8.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
-    cv::Mat image = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat image = cv::imread(res.first.c_str(), cv::ImreadModes::IMREAD_GRAYSCALE);
     cv::Size iSize(image.cols,image.rows);
     
     std::vector<Eigen::Vector3d> normals;
@@ -793,7 +793,7 @@ TEST (ut_affine_translation, basic){
     auto res = dgenv_ptr->asset_path("affine_translation.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
-    cv::Mat image = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat image = cv::imread(res.first.c_str(), cv::ImreadModes::IMREAD_GRAYSCALE);
     cv::Size iSize(image.cols,image.rows);
     
     auto trans = [] (const cv::Mat& minus, const cv::Mat& plus){
@@ -825,7 +825,7 @@ TEST (ut_affine_translation, basic){
     res = dgenv_ptr->asset_path("affine_translation_close.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
-    cv::Mat close_image = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat close_image = cv::imread(res.first.c_str(), cv::ImreadModes::IMREAD_GRAYSCALE);
     cv::Size icSize(close_image.cols,close_image.rows);
     auto d1 = trans(image, close_image);
     std::cout << d0 - d1 << std::endl;
@@ -838,7 +838,7 @@ TEST (ut_algo_lif, segment){
     auto res = dgenv_ptr->asset_path("voxel_ss_.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
-    cv::Mat image = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat image = cv::imread(res.first.c_str(), cv::ImreadModes::IMREAD_GRAYSCALE);
     cv::Size iSize(image.cols,image.rows);
     cv::Size plusOne(iSize.width+1,iSize.height+1);
     
@@ -929,9 +929,9 @@ TEST (ut_rotated_rect, basic){
     
     std::vector<vec2> points = {{5.5f,3.5f},{7.5f,2.5f},{9.5f,3.5f},{5.5f,6.5f}};
     Point2f center_gold (11.5,2.5);
-    std::vector<Point2f> cv::Points = {{5.5f,2.5f},{7.5f,2.5f},{9.5f,2.5f},{5.5f,6.5f}};
-    std::vector<Point2f> cv::Points2 = {{5.5f,6.5f},{7.5f,6.5f},{9.5f,6.5f},{5.5f,3.5f}};
-    std::vector<Point2f> cv::Points3 = {{5.5f,6.5f},{7.5f,6.5f},{7.5f,8.5f},{7.5f,12.5f}};
+    std::vector<Point2f> Points = {{5.5f,2.5f},{7.5f,2.5f},{9.5f,2.5f},{5.5f,6.5f}};
+    std::vector<Point2f> Points2 = {{5.5f,6.5f},{7.5f,6.5f},{9.5f,6.5f},{5.5f,3.5f}};
+    std::vector<Point2f> Points3 = {{5.5f,6.5f},{7.5f,6.5f},{7.5f,8.5f},{7.5f,12.5f}};
     Point2f cvcenter_gold (11.5,2.5);
     
     ci::PolyLine2 pl(points);
@@ -945,7 +945,7 @@ TEST (ut_rotated_rect, basic){
     
     {
         cv::RotatedRect rr;
-        pointsToRotatedRect(cv::Points, rr);
+        pointsToRotatedRect(Points, rr);
         std::cout << rr.angle << std::endl;
         std::cout << rr.center << std::endl;
         std::cout << rr.size << std::endl;
@@ -953,7 +953,7 @@ TEST (ut_rotated_rect, basic){
     
     {
         cv::RotatedRect rr;
-        pointsToRotatedRect(cv::Points2, rr);
+        pointsToRotatedRect(Points2, rr);
         std::cout << rr.angle << std::endl;
         std::cout << rr.center << std::endl;
         std::cout << rr.size << std::endl;
@@ -962,7 +962,7 @@ TEST (ut_rotated_rect, basic){
     
     {
         cv::RotatedRect rr;
-        pointsToRotatedRect(cv::Points3, rr);
+        pointsToRotatedRect(Points3, rr);
         std::cout << rr.angle << std::endl;
         std::cout << rr.center << std::endl;
         std::cout << rr.size << std::endl;
@@ -1227,32 +1227,7 @@ void done_callback (void)
     std::cout << "Done"  << std::endl;
 }
 
-TEST (ut_opencvutils, anistropic_diffusion){
-    
-    double endtime;
-    std::clock_t start;
-    
-    
-    auto res = dgenv_ptr->asset_path("image230.png");
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    cv::Mat image = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
-    EXPECT_EQ(image.channels() , 1);
-    EXPECT_EQ(image.cols , 512);
-    EXPECT_EQ(image.rows , 128);
-    cv::Mat image_anisotropic;
-    start = std::clock();
-    Anisotrpic_Diffusion(image, image_anisotropic, 0.25, 10, 45, 45);
-    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
-    std::cout << " Anisotrpic Diffusion " << endtime  << " Seconds " << std::endl;
-    
-#ifdef INTERACTIVE
-    std::string file_path = "/Users/arman/tmp/simple_aniso.png";
-    cv::imwrite(file_path, image_anisotropic);
-    cv::imshow("Anistorpic", image_anisotropic);
-    cv::waitKey();
-#endif
-}
+
 
 cv::Mat show_cv_angle (const cv::Mat& src, const std::string& name){
     cv::Mat mag, ang;
@@ -1307,7 +1282,7 @@ TEST (ut_opencvutils, difference){
     auto res = dgenv_ptr->asset_path("image230.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
-    cv::Mat fixed = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat fixed = cv::imread(res.first.c_str(), cv::ImreadModes::IMREAD_GRAYSCALE);
     EXPECT_EQ(fixed.channels() , 1);
     EXPECT_EQ(fixed.cols , 512);
     EXPECT_EQ(fixed.rows , 128);
@@ -1315,7 +1290,7 @@ TEST (ut_opencvutils, difference){
     auto res2 = dgenv_ptr->asset_path("image262.png");
     EXPECT_TRUE(res2.second);
     EXPECT_TRUE(boost::filesystem::exists(res2.first));
-    cv::Mat moving = cv::imread(res2.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat moving = cv::imread(res2.first.c_str(),cv::ImreadModes::IMREAD_GRAYSCALE);
     EXPECT_EQ(moving.channels() , 1);
     EXPECT_EQ(moving.cols , 512);
     EXPECT_EQ(moving.rows , 128);
@@ -1650,7 +1625,7 @@ TEST(timing8, corr_ocv)
     start = std::clock();
     for (l = 0; l < num_loops; ++l)
     {
-        cv::matchTemplate (mat1, mat2, space, CV_TM_CCOEFF_NORMED);
+        cv::matchTemplate (mat1, mat2, space, TM_CCOEFF_NORMED);
     }
     
     endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
@@ -1701,7 +1676,7 @@ TEST(ut_localvar, basic)
     auto res = dgenv_ptr->asset_path("out0.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
-    cv::Mat out0 = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat out0 = cv::imread(res.first.c_str(),cv::ImreadModes::IMREAD_GRAYSCALE);
     std::cout << out0.channels() << std::endl;
     EXPECT_EQ(out0.channels() , 1);
     EXPECT_EQ(out0.cols , 512);
@@ -1728,7 +1703,7 @@ TEST(ut_labelBlob, basic)
     auto res = dgenv_ptr->asset_path("out0.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
-    cv::Mat out0 = cv::imread(res.first.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat out0 = cv::imread(res.first.c_str(), cv::ImreadModes::IMREAD_GRAYSCALE);
     EXPECT_EQ(out0.channels() , 1);
     EXPECT_EQ(out0.cols , 512);
     EXPECT_EQ(out0.rows , 128);
@@ -2291,7 +2266,7 @@ void finalize_segmentation (cv::Mat& space){
     EXPECT_EQ(true, s_graphics_ready);
 //#ifdef INTERACTIVE
     /// Show in a window
-    namedWindow( "LabelBlob ", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+    namedWindow( "LabelBlob ", WINDOW_AUTOSIZE | WINDOW_OPENGL);
     //    std::vector<cv::KeyPoint> one;
     //    one.push_back(lbr->keyPoints()[1]);
     cv::drawKeypoints(mono, lbr->keyPoints(),bi_level, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
