@@ -91,7 +91,6 @@
 		C21A50A122A9A65900B0AC7D /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
 		C21A50A222A9A65900B0AC7D /* exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBE1CF277130074C47A /* exception.cpp */; };
 		C21A50A322A9A65900B0AC7D /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
-		C21A50A422A9A65900B0AC7D /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFD216E79590080462D /* imgui_demo.cpp */; };
 		C21A50A522A9A65900B0AC7D /* algo_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_ssmt.cpp */; };
 		C21A50A722A9A65900B0AC7D /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
 		C21A50A822A9A65900B0AC7D /* algo_shortterm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28B01C6229B1CD900B8165D /* algo_shortterm.cpp */; };
@@ -141,6 +140,10 @@
 		C21FFE731CFE0E1D00C97013 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2606EA41CEE0E660045FF57 /* OpenCL.framework */; };
 		C2239AB4218B6270007558AB /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
 		C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
+		C2266A0C247DBBEF000F4FBF /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFD216E79590080462D /* imgui_demo.cpp */; };
+		C2266A0D247DBBEF000F4FBF /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFD216E79590080462D /* imgui_demo.cpp */; };
+		C2266A0E247DBBF3000F4FBF /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFD216E79590080462D /* imgui_demo.cpp */; };
+		C2266A0F247DBBF3000F4FBF /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFD216E79590080462D /* imgui_demo.cpp */; };
 		C22DACFA22FF793C00D171EF /* moviong_region.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACF922FF793C00D171EF /* moviong_region.cpp */; };
 		C22DACFB22FF793C00D171EF /* moviong_region.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACF922FF793C00D171EF /* moviong_region.cpp */; };
 		C22DACFC22FF793C00D171EF /* moviong_region.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACF922FF793C00D171EF /* moviong_region.cpp */; };
@@ -166,7 +169,6 @@
 		C2398A0F21DD8D3600B180A0 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2398A1021DD8D3600B180A0 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2398A1521DE980C00B180A0 /* CinderImGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCF08216F0CF10080462D /* CinderImGui.cpp */; };
-		C2398A1621DE980C00B180A0 /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFD216E79590080462D /* imgui_demo.cpp */; };
 		C2398A1721DE980C00B180A0 /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
 		C2398A1821DE980C00B180A0 /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
 		C2398A1921DE980C00B180A0 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
@@ -411,7 +413,6 @@
 		C28B0195229B182100B8165D /* boost_literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2239AB3218B6270007558AB /* boost_literals.cpp */; };
 		C28B0196229B182100B8165D /* exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBE1CF277130074C47A /* exception.cpp */; };
 		C28B0197229B182100B8165D /* rand_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */; };
-		C28B0198229B182100B8165D /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFD216E79590080462D /* imgui_demo.cpp */; };
 		C28B019B229B182100B8165D /* opencv_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2109475223F4CFE004E88EE /* opencv_draw.cpp */; };
 		C28B019C229B182100B8165D /* self_similarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBBF1CF277130074C47A /* self_similarity.cpp */; };
 		C28B019D229B182100B8165D /* color.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2618F7B217FDA6600FA9F43 /* color.cc */; };
@@ -487,20 +488,12 @@
 		C2AFCF00216E79590080462D /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
 		C2AFCF09216F0CF10080462D /* CinderImGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCF08216F0CF10080462D /* CinderImGui.cpp */; };
 		C2B005821CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
-		C2B1EB8E247849FB007F8445 /* VisibleRun.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = C26F5FFD21B0AA6D00EAE156 /* VisibleRun.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C2B2F208234D1C2D0026ADDB /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
 		C2B2F209234D1E6B0026ADDB /* moviong_region.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACF922FF793C00D171EF /* moviong_region.cpp */; };
 		C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
 		C2B38A591D037FFF00C70872 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C2B87C9921D012D700C91E35 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
 		C2B87C9A21D012DA00C91E35 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
-		C2BA576322C31F8500AAAF4F /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA576122C31F1600AAAF4F /* libswscale.a */; };
-		C2BA576422C31F8500AAAF4F /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575F22C31EB500AAAF4F /* libswresample.a */; };
-		C2BA576522C31F8500AAAF4F /* libdc1394.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575D22C31E8A00AAAF4F /* libdc1394.a */; };
-		C2BA576622C31F8500AAAF4F /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575B22C31E2400AAAF4F /* libavcodec.a */; };
-		C2BA576722C31F8500AAAF4F /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575922C31E1900AAAF4F /* libavutil.a */; };
-		C2BA576822C31F8500AAAF4F /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575722C31DFD00AAAF4F /* libavformat.a */; };
-		C2BA576922C31F8500AAAF4F /* libavresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575522C31DE900AAAF4F /* libavresample.a */; };
 		C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
 		C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
 		C2BDEFEF21C8237A00A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
@@ -711,16 +704,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
-		C273E5C621B5D6360045969C /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 8;
-			dstPath = "";
-			dstSubfolderSpec = 6;
-			files = (
-				C2B1EB8E247849FB007F8445 /* VisibleRun.app in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
 		C2819EAF21F7E97600183E44 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -852,6 +835,7 @@
 		C2239AB3218B6270007558AB /* boost_literals.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = boost_literals.cpp; sourceTree = "<group>"; };
 		C2239AB6218B6F30007558AB /* boost_units.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = boost_units.hpp; sourceTree = "<group>"; };
 		C2239AB721922F72007558AB /* cardiomyocyte_model_detail.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model_detail.hpp; sourceTree = "<group>"; };
+		C2266A0B247DA94C000F4FBF /* imgui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imgui.h; path = ../local_cinder_imgui/lib/imgui/imgui.h; sourceTree = "<group>"; };
 		C22DACF822FF71A500D171EF /* moving_region.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = moving_region.h; path = ../include/moving_region.h; sourceTree = "<group>"; };
 		C22DACF922FF793C00D171EF /* moviong_region.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = moviong_region.cpp; path = ../src/moviong_region.cpp; sourceTree = "<group>"; };
 		C22DACFD23032E8F00D171EF /* task_manager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = task_manager.cpp; path = ../src/task_manager.cpp; sourceTree = "<group>"; };
@@ -1151,6 +1135,7 @@
 		C2AFCF08216F0CF10080462D /* CinderImGui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CinderImGui.cpp; path = ../local_cinder_imgui/src/CinderImGui.cpp; sourceTree = "<group>"; };
 		C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = hockey_etc_cocoa_wrappers.mm; path = ../src/hockey_etc_cocoa_wrappers.mm; sourceTree = "<group>"; };
 		C2B005861CFF8FE100AC2E64 /* hockey_etc_cocoa_wrappers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hockey_etc_cocoa_wrappers.h; path = ../include/hockey_etc_cocoa_wrappers.h; sourceTree = "<group>"; };
+		C2B1EB8F247876C8007F8445 /* VisibleRunRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VisibleRunRelease.entitlements; sourceTree = "<group>"; };
 		C2B38A4F1D022D2A00C70872 /* AVReader.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = AVReader.mm; path = ../src/AVReader.mm; sourceTree = "<group>"; };
 		C2B38A541D022E9D00C70872 /* AVReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AVReader.h; path = ../include/AVReader.h; sourceTree = "<group>"; };
 		C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AVReaderWrapper.mm; path = ../src/AVReaderWrapper.mm; sourceTree = "<group>"; };
@@ -1218,13 +1203,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C2BA576322C31F8500AAAF4F /* libswscale.a in Frameworks */,
-				C2BA576422C31F8500AAAF4F /* libswresample.a in Frameworks */,
-				C2BA576522C31F8500AAAF4F /* libdc1394.a in Frameworks */,
-				C2BA576622C31F8500AAAF4F /* libavcodec.a in Frameworks */,
-				C2BA576722C31F8500AAAF4F /* libavutil.a in Frameworks */,
-				C2BA576822C31F8500AAAF4F /* libavformat.a in Frameworks */,
-				C2BA576922C31F8500AAAF4F /* libavresample.a in Frameworks */,
 				C2AFAD882252E2950038AF5B /* CoreImage.framework in Frameworks */,
 				C203D2FB21714D6D00B6B4A8 /* IOKit.framework in Frameworks */,
 				C2606EA51CEE0E660045FF57 /* OpenCL.framework in Frameworks */,
@@ -1460,6 +1438,7 @@
 		29B97314FDCFA39411CA2CEA /* QuickTimeIteration */ = {
 			isa = PBXGroup;
 			children = (
+				C2B1EB8F247876C8007F8445 /* VisibleRunRelease.entitlements */,
 				C2409B2F2475CCBE003CF7BC /* VisibleRelease.entitlements */,
 				C2175DD22150B779004315C0 /* Visible.entitlements */,
 				C21946891CE4DC9700976025 /* xconfs */,
@@ -2182,6 +2161,7 @@
 		C29C726F216FC7340028AED1 /* imgui */ = {
 			isa = PBXGroup;
 			children = (
+				C2266A0B247DA94C000F4FBF /* imgui.h */,
 				C2FC528A246F2E1F00B1030D /* CinderImGuiConfig.h */,
 				C21AB38F232E04F700D1C529 /* CinderImGui.h */,
 				C21AB38E232E04F600D1C529 /* CinderImGuiExports.h */,
@@ -2214,7 +2194,6 @@
 				8D1107290486CEB800E47090 /* Resources */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
-				C273E5C621B5D6360045969C /* CopyFiles */,
 				C2819ED12201271A00183E44 /* CopyFiles */,
 				C25261131F66D7BF0069F665 /* Build Number */,
 			);
@@ -2540,6 +2519,7 @@
 				C2606DAD1CED3E2E0045FF57 /* lineseg.cpp in Sources */,
 				C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */,
 				C2ED5BB62209F67600EE52B3 /* imguivariouscontrols.cpp in Sources */,
+				C2266A0C247DBBEF000F4FBF /* imgui_demo.cpp in Sources */,
 				C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */,
 				C2FB69D92134C3E800DDEFCA /* visible_impl.cpp in Sources */,
 				C2606DAA1CED3E2E0045FF57 /* histo.cpp in Sources */,
@@ -2651,7 +2631,6 @@
 				C21A50A122A9A65900B0AC7D /* boost_literals.cpp in Sources */,
 				C21A50A222A9A65900B0AC7D /* exception.cpp in Sources */,
 				C21A50A322A9A65900B0AC7D /* rand_support.cpp in Sources */,
-				C21A50A422A9A65900B0AC7D /* imgui_demo.cpp in Sources */,
 				C21A50A522A9A65900B0AC7D /* algo_ssmt.cpp in Sources */,
 				C21A50A722A9A65900B0AC7D /* opencv_draw.cpp in Sources */,
 				C21A50A822A9A65900B0AC7D /* algo_shortterm.cpp in Sources */,
@@ -2727,7 +2706,6 @@
 				C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */,
 				C20EDBC81CF277740074C47A /* exception.cpp in Sources */,
 				C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */,
-				C2398A1621DE980C00B180A0 /* imgui_demo.cpp in Sources */,
 				C29DB077212B351200930CBD /* algo_ssmt.cpp in Sources */,
 				C2109478223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
 				C28B01CA229B1D7900B8165D /* algo_shortterm.cpp in Sources */,
@@ -2808,6 +2786,7 @@
 				C2AEB73C228CD6E70078E687 /* geom_utils.cpp in Sources */,
 				C2CD0E9B22D7D78700467DD8 /* dbscan.cpp in Sources */,
 				C26F5FB621B0AA6D00EAE156 /* pugixml.cpp in Sources */,
+				C2266A0D247DBBEF000F4FBF /* imgui_demo.cpp in Sources */,
 				C28B01D2229B1E5F00B8165D /* lif_browser.cpp in Sources */,
 				C26F5FB821B0AA6D00EAE156 /* lineseg.cpp in Sources */,
 				C2ED5BB72209F79B00EE52B3 /* imguivariouscontrols.cpp in Sources */,
@@ -2896,6 +2875,7 @@
 				C28B0182229B182100B8165D /* matpixel.cpp in Sources */,
 				C28B0183229B182100B8165D /* affine_rectangle.cpp in Sources */,
 				C28B0184229B182100B8165D /* window.cc in Sources */,
+				C2266A0F247DBBF3000F4FBF /* imgui_demo.cpp in Sources */,
 				C28B0185229B182100B8165D /* ellipse_fit.cpp in Sources */,
 				C28B0186229B182100B8165D /* tinyxmlparser.cpp in Sources */,
 				C28B0187229B182100B8165D /* logger.cpp in Sources */,
@@ -2918,7 +2898,6 @@
 				C28B0195229B182100B8165D /* boost_literals.cpp in Sources */,
 				C28B0196229B182100B8165D /* exception.cpp in Sources */,
 				C28B0197229B182100B8165D /* rand_support.cpp in Sources */,
-				C28B0198229B182100B8165D /* imgui_demo.cpp in Sources */,
 				C28B01E4229CC66C00B8165D /* lif_browser.cpp in Sources */,
 				C28B019B229B182100B8165D /* opencv_draw.cpp in Sources */,
 				C28B019C229B182100B8165D /* self_similarity.cpp in Sources */,
@@ -2979,6 +2958,7 @@
 				C29E1BCE225AA26200CBFFDB /* cvVideoPlayer.cpp in Sources */,
 				C2DB72B322591DB700C2B986 /* ip_utils.cpp in Sources */,
 				C2DB72B422591DB700C2B986 /* window.cc in Sources */,
+				C2266A0E247DBBF3000F4FBF /* imgui_demo.cpp in Sources */,
 				C28B01CF229B1DE500B8165D /* lif_serie.cpp in Sources */,
 				C28B01D9229B1F8000B8165D /* core_ssmt.cpp in Sources */,
 				C28B01DF229B210A00B8165D /* voxel_ssmt.cpp in Sources */,
@@ -3090,7 +3070,7 @@
 				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.33;
+				MARKETING_VERSION = 1.01;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -3099,8 +3079,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = Visible;
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Mac-dev-laptop-bina-production";
-				SKIP_INSTALL = YES;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = NO;
 				USER_HEADER_SEARCH_PATHS = include;
 				VALID_ARCHS = "i386 x86_64";
@@ -3127,7 +3107,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = W4F7HL2GN5;
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_ON_DEMAND_RESOURCES = NO;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_FAST_MATH = YES;
@@ -3146,7 +3126,7 @@
 				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.33;
+				MARKETING_VERSION = 1.01;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -3156,7 +3136,7 @@
 				PRODUCT_NAME = Visible;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SKIP_INSTALL = YES;
+				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = include;
 				VALID_ARCHS = "i386 x86_64";
@@ -3639,10 +3619,10 @@
 				MARKETING_VERSION = 0.33;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Runner;
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Mac-dev-installer-production";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = NO;
 				USER_HEADER_SEARCH_PATHS = include;
@@ -3660,6 +3640,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
+				CODE_SIGN_ENTITLEMENTS = VisibleRunRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = NO;
@@ -3693,7 +3674,7 @@
 				MARKETING_VERSION = 0.33;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Runner;
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -3857,7 +3838,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
 				OTHER_LDFLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Browser;
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -3906,7 +3887,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
 				OTHER_LDFLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible.Browser;
+				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";

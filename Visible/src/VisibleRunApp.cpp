@@ -21,7 +21,7 @@
 bool VisibleAppControl::ThreadsShouldStop = false;
 
 namespace {
-    const std::vector<std::string>& supported_mov_extensions = { ".lif", ".mov", ".mp4", ".ts", ".avi"};
+const std::vector<std::string>& supported_mov_extensions = { ".lif", ".mov", ".mp4", ".ts", ".avi"};
 }
 using namespace ci;
 using namespace ci::app;
@@ -32,7 +32,7 @@ void VisibleRunApp::QuitApp(){
     quit();
 }
 
-
+#if 0
 static void ShowHelpMarker(const char* desc)
 {
     ImGui::TextDisabled("(?)");
@@ -45,68 +45,179 @@ static void ShowHelpMarker(const char* desc)
         ImGui::EndTooltip();
     }
 }
+#endif
+
+static ImGuiDockNodeFlags opt_flags = ImGuiDockNodeFlags_None;
+
+
+float VisibleRunApp::DrawMainMenu() {
+  auto menu_height = 0.0f;
+
+  if (ImGui::BeginMainMenuBar()) {
+    // todo: Call the derived class to draw the application specific menus inside the
+    // menu bar
+//    DrawInsideMainMenu();
+
+    // Last menu bar items are the ones we create as baseline (i.e. the docking
+    // control menu and the debug menu)
+
+    if (ImGui::BeginMenu("Docking")) {
+      // Disabling fullscreen would allow the window to be moved to the front of
+      // other windows, which we can't undo at the moment without finer window
+      // depth/z control.
+      // ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
+
+      if (ImGui::MenuItem("Flag: NoSplit", "",
+                          (opt_flags & ImGuiDockNodeFlags_NoSplit) != 0))
+        opt_flags ^= ImGuiDockNodeFlags_NoSplit;
+      if (ImGui::MenuItem(
+              "Flag: NoDockingInCentralNode", "",
+              (opt_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0))
+        opt_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode;
+      if (ImGui::MenuItem(
+              "Flag: PassthruDockspace", "",
+              (opt_flags & ImGuiDockNodeFlags_PassthruDockspace) != 0))
+        opt_flags ^= ImGuiDockNodeFlags_PassthruDockspace;
+
+      ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Debug")) {
+      if (ImGui::MenuItem("Show Logs", "CTRL+SHIFT+L", &show_logs_)) {
+   //     DrawLogView();
+      }
+      if (ImGui::MenuItem("Show Docks Debug", "CTRL+SHIFT+D",
+                          &show_docks_debug_)) {
+        DrawDocksDebug();
+      }
+      if (ImGui::MenuItem("Show Settings", "CTRL+SHIFT+S", &show_settings_)) {
+ //       DrawSettings();
+      }
+
+      ImGui::Separator();
+
+      if (ImGui::MenuItem("Show ImGui Metrics", "CTRL+SHIFT+M",
+                          &show_imgui_metrics_)) {
+        DrawImGuiMetrics();
+      }
+      if (ImGui::MenuItem("Show ImGui Demos", "CTRL+SHIFT+G",
+                          &show_imgui_demos_)) {
+        DrawImGuiDemos();
+      }
+
+      ImGui::EndMenu();
+    }
+    menu_height = ImGui::GetWindowSize().y;
+
+    ImGui::EndMainMenuBar();
+  }
+
+  return menu_height;
+}
+
+
+void VisibleRunApp::DrawDocksDebug() {
+  if (ImGui::Begin("Docks", &show_docks_debug_)) {
+    ImGui::LabelText(
+        "TODO",
+        "Get docking information from ImGui and populate this once the ImGui "
+        "programmatic access to docking is published as a stable API");
+    // TODO: generate docking information
+  }
+  ImGui::End();
+}
+
+void VisibleRunApp::DrawImGuiMetrics() { ImGui::ShowMetricsWindow(); }
+
+void VisibleRunApp::DrawImGuiDemos() {
+  ImGui::ShowDemoWindow(&show_imgui_demos_);
+}
+
+
+void VisibleRunApp::DrawStatusBar(float width, float height, float pos_x,
+                                    float pos_y) {
+  // Draw status bar (no docking)
+  ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiSetCond_Always);
+  ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiSetCond_Always);
+  ImGui::Begin("statusbar", nullptr,
+               ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings |
+                   ImGuiWindowFlags_NoBringToFrontOnFocus |
+                   ImGuiWindowFlags_NoResize);
+
+  // Call the derived class to add stuff to the status bar
+ // DrawInsideStatusBar(width - 45.0f, height);
+
+ // ImGui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
+  // Draw the common stuff
+  ImGui::SameLine(width - 45.0f);
+// Font = Font( "Menlo", 18 ); //font(Font::FAMILY_PROPORTIONAL);
+//  font.Normal().Regular().SmallSize();
+//  ImGui::PushFont(font.ImGuiFont());
+  ImGui::Text("FPS: %ld", std::lround(ImGui::GetIO().Framerate));
+  ImGui::End();
+}
 
 void VisibleRunApp::DrawGUI(){
-    // Draw the menu bar
-    {
-        ui::ScopedMainMenuBar menuBar;
-        
-        if( ui::BeginMenu( "File" ) ){
-            
-            // Not Working Yet
-            //if(ui::MenuItem("Fullscreen")){
-            //    setFullScreen(!isFullScreen());
-           // }
+     ImGuiViewport *viewport = ImGui::GetMainViewport();
 
-            ui::MenuItem("Help", nullptr, &showHelp);
-            if(ui::MenuItem("Quit", "ESC")){
-                QuitApp();
-            }
-            ui::EndMenu();
-        }
-        
-        if( ui::BeginMenu( "View" ) ){
-            ui::MenuItem( "General Settings", nullptr, &showGUI );
-            //    ui::MenuItem( "Edge Detection", nullptr, &edgeDetector.showGUI );
-            //    ui::MenuItem( "Face Detection", nullptr, &faceDetector.showGUI );
-            ui::MenuItem( "Log", nullptr, &showLog );
-            //ui::MenuItem( "PS3 Eye Settings", nullptr, &showWindowWithMenu );
-            ui::EndMenu();
-        }
-        
-        ui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
-    }
-    
-  
-    
-    //Draw general settings window
-    if(showGUI)
-    {
-//        ui::Begin("General Settings", &showGUI, ImGuiWindowFlags_AlwaysAutoResize);
-//        ui::End();
-    }
-    
-    //Draw the log if desired
-    if(showLog){
-        visual_log.Draw("Log", &showLog);
-    }
-    
-    if(showHelp) ui::OpenPopup("Help");
-    //ui::ScopedWindow window( "Help", ImGuiWindowFlags_AlwaysAutoResize );
-    std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
-    buildN = "Visible ( build: " + buildN + " ) ";
-    if(ui::BeginPopupModal("Help", &showHelp)){
-        ui::TextColored(ImVec4(0.92f, 0.18f, 0.29f, 1.00f), "%s", buildN.c_str());
-        ui::Text("Arman Garakani, Darisa LLC");
-        if(ui::Button("Copy")) ui::LogToClipboard();
-        ui::SameLine();
-        //  ui::Text("github.com/");
-        ui::LogFinish();
-        ui::Text("");
-        ui::Text("Mouse over any"); ShowHelpMarker("We did it!"); ui::SameLine(); ui::Text("to show help.");
-        ui::Text("Ctrl+Click any slider to set its value manually.");
-        ui::EndPopup();
-    }
+     if (ImGui::GetIO().DisplaySize.y > 0) {
+       auto menu_height = DrawMainMenu();
+
+       bool opt_fullscreen = isFullScreen();
+       // We are using the ImGuiWindowFlags_NoDocking flag to make the parent
+       // window not dockable into, because it would be confusing to have two
+       // docking targets within each others.
+       ImGuiWindowFlags window_flags =
+           ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+       if (opt_fullscreen) {
+         auto dockSpaceSize = viewport->Size;
+         dockSpaceSize.y -= 16.0f;  // remove the status bar
+         ImGui::SetNextWindowPos(viewport->Pos);
+         ImGui::SetNextWindowSize(dockSpaceSize);
+         ImGui::SetNextWindowViewport(viewport->ID);
+         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+         window_flags |= ImGuiWindowFlags_NoTitleBar |
+                         ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                         ImGuiWindowFlags_NoMove;
+         window_flags |=
+             ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+       }
+
+       // When using ImGuiDockNodeFlags_PassthruDockspace, DockSpace() will render
+       // our background and handle the pass-thru hole, so we ask Begin() to not
+       // render a background.
+       if (opt_flags & ImGuiDockNodeFlags_PassthruDockspace)
+         window_flags |= ImGuiWindowFlags_NoBackground;
+
+       ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+       ImGui::Begin("DockSpace Demo", nullptr, window_flags);
+       ImGui::PopStyleVar();
+
+       if (opt_fullscreen) ImGui::PopStyleVar(2);
+
+       // Dockspace
+       ImGuiIO &io = ImGui::GetIO();
+       if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+         ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
+         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), opt_flags);
+       } else {
+         // TODO: emit a log message
+       }
+
+       //
+       // Status bar
+       //
+       DrawStatusBar(viewport->Size.x, 16.0f, 0.0f, viewport->Size.y - menu_height);
+
+   //    if (show_logs_) DrawLogView();
+   //    if (show_settings_) DrawSettings();
+   //    if (show_docks_debug_) DrawDocksDebug();
+       if (show_imgui_metrics_) DrawImGuiMetrics();
+       if (show_imgui_demos_) DrawImGuiDemos();
+     }
+
+     ImGui::End();
     
 }
 
@@ -135,6 +246,27 @@ void VisibleRunApp::setup_ui(){
     style.AntiAliasedFill = false;
     style.AntiAliasedLines = false;
     setWindowPos(getWindowSize()/4);
+    
+    ImGuiIO &io = ImGui::GetIO();
+    //    static auto imguiSettingsPath =
+    //        asap::fs::GetPathFor(asap::fs::Location::F_IMGUI_SETTINGS).string();
+    //    io.IniFilename = imguiSettingsPath.c_str();
+    
+    //
+    // Various flags controlling ImGui IO behavior
+    //
+    
+    // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    // Enable Gamepad Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    // Enable Multi-Viewport
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    // NOTE: Platform Windows
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 }
 /*
  * Browse the LIF file and dispatch VisibleRun with the selected chapter
@@ -192,17 +324,17 @@ void VisibleRunApp::setup()
     
     bool exists_with_extenstion = exists(bpath) && fs::path(bpath).has_extension();
     if (! exists_with_extenstion){
-         ADD_ERR_AND_RETURN(cmds, " Path not valid or missing extension ");
+        ADD_ERR_AND_RETURN(cmds, " Path not valid or missing extension ");
     }
     // @todo enumerate args and implement in JSON
     // Custom Content for LIF files is only IDLab
     std::string extension = fs::path(bpath).extension().string();
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
     bool is_valid_extension = std::find( supported_mov_extensions.begin(), supported_mov_extensions.end(), extension) != supported_mov_extensions.end();
-//    bool is_video_content = extension == ".mov" || extension == ".mp4";
+    //    bool is_video_content = extension == ".mov" || extension == ".mp4";
     bool is_lif_content = extension == ".lif";
-
- 
+    
+    
     if(exists_with_extenstion && is_valid_extension && is_lif_content){
         
         bool just_list_chapters = m_args.size() == 3 && is_lif_content && m_args[2] == "list";
@@ -215,7 +347,7 @@ void VisibleRunApp::setup()
         mContentType  = "";
         
         if (just_list_chapters)
-              VisibleAppControl::setup_text_loggers(root_output_dir, fs::path(bpath).filename().string());
+            VisibleAppControl::setup_text_loggers(root_output_dir, fs::path(bpath).filename().string());
         else
             VisibleAppControl::setup_loggers(root_output_dir, visual_log, fs::path(bpath).filename().string());
         
@@ -252,7 +384,7 @@ void VisibleRunApp::setup()
             }
         }
         if(just_list_chapters){
-           std::strstream msg;
+            std::strstream msg;
             for (auto & se : mBrowser->get_all_series  ()){
                 msg << se << std::endl;
                 std::cout << se << std::endl;
@@ -287,7 +419,7 @@ void VisibleRunApp::setup()
             
             VAPPLOG_INFO(cmds.c_str());
             update();
-
+            
             ww->setTitle ( cmds + " Visible build: " + buildN);
             mFont = Font( "Menlo", 18 );
             mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
@@ -297,15 +429,15 @@ void VisibleRunApp::setup()
             getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
             getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
             gl::enableVerticalSync();
-
+            
         }else{
             ADD_ERR_AND_RETURN(cmds, " No Chapters or Series ")
         }
     }
 #if 0
     else if (exists_with_extenstion && is_valid_extension && is_video_content){
-     
-
+        
+        
         VisibleAppControl::setup_loggers(root_output_dir, visual_log, fs::path(bpath).filename().string());
         
         cvVideoPlayer::ref vref = cvVideoPlayer::create(fs::path(bpath));
@@ -330,14 +462,14 @@ void VisibleRunApp::setup()
         getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
         getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
         gl::enableVerticalSync();
-
+        
     }else{
         ADD_ERR_AND_RETURN(cmds, " Path not valid ");
     }
 #endif
     
 }
-    
+
 
 
 void VisibleRunApp::update_log (const std::string& msg)
@@ -359,7 +491,7 @@ void VisibleRunApp::displayChange()
 {
     update_log ( "window display changed: " + to_string(getWindow()->getDisplay()->getBounds()));
     update_log ( "ContentScale = " + to_string(getWindowContentScale()));
-                update_log ( "getWindowCenter = " + to_string(getWindowCenter()));
+    update_log ( "getWindowCenter = " + to_string(getWindowCenter()));
 }
 
 
@@ -401,7 +533,7 @@ void VisibleRunApp::draw ()
         mContext->draw ();
         DrawGUI();
     }
-
+    
 }
 
 

@@ -183,6 +183,15 @@ public:
     bool shouldQuit();
 
 private:
+    float DrawMainMenu ();
+    void DrawImGuiMetrics();
+    void DrawImGuiDemos ();
+    void DrawStatusBar(float width, float height, float pos_x, float pos_y);
+     void DrawLogView();
+     void DrawSettings();
+     void DrawDocksDebug();
+
+    void setup_media_file(const fs::path&);
     fs::path getLoggingDirectory ();
     std::vector<std::string> m_args;
     vec2                mSize;
@@ -195,11 +204,13 @@ private:
     mutable std::shared_ptr<sequencedImageContext> mContext;
     mutable lif_browser::ref mBrowser;
     
-    bool showLog = false;
-    bool showHelp = false;
-    bool showOverlay = false;
-    bool showGUI = false;
-    int convergence = 0;
+    bool show_docks_debug_{false};
+    bool show_logs_{true};
+    bool show_settings_{true};
+    bool show_imgui_metrics_{false};
+    bool show_imgui_demos_{false};
+    
+
     std::string         mFileName;
     std::string         mFileExtension;
     lifIO::ContentType_t mContentType; // "" denotes canonical LIF file
