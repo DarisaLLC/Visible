@@ -368,6 +368,78 @@ namespace svl
         cv::bilateralFilter(src, dst, neighbourhood, sigma_colour, sigma_space);
     }
     
+   //Function used to perform anisotropic diffusion
+   //Input: src image, lambda (used for converance), number of iterations that should run,
+   //         k values to define what is an edge and what is not (x2: one for north/south, one for east/west)
+   //Output: filtered image
+   void Anisotrpic_Diffusion(const cv::Mat& src, cv::Mat& dst, double lambda, int iterations, float k_ns, float k_we)
+   {
+       //copy the src to dst as initilisation and convert dst to a 32 bit float mat, for accuracy when processing
+       dst = src.clone();
+       dst.convertTo(dst, CV_32F);
+       
+       //Create the kernels to be used to calculate edges in North, South, East and West directions
+       //These are similar to Laplacian kernels
+       cv::Mat_<int> kernel_n = cv::Mat::zeros(3, 3, CV_8U);
+       kernel_n(1, 1) = -1;
+       cv::Mat_<int> kernel_s, kernel_w, kernel_e;
+       kernel_s = kernel_n.clone();
+       kernel_w = kernel_n.clone();
+       kernel_e = kernel_n.clone();
+       
+       kernel_n(0, 1) = 1;
+       kernel_s(2, 1) = 1;
+       kernel_w(1, 0) = 1;
+       kernel_e(1, 2) = 1;
+       
+       //Create the parameters that will be used in the loop:
+       
+       // grad_x = gradient obtained by using the directional edge detection kernel defined above
+       
+       // param_x = mat which containes the parameter to be fed to the exp function, used when calculating the conduction coefficient value (c_x)
+       
+       // c_x = conduction coefficient values which help to control the amount of diffusion
+       
+       // k_ns and k_we are gradient magnitude parameters - they serve as thresholds to define what is a gradient and what is noise.
+       // therefore, they are used in the function to define the c_x values (one for north and south directions, the other fo west and east)
+       
+       cv::Mat_<float> grad_n, grad_s, grad_w, grad_e;
+       cv::Mat_<float> param_n, param_s, param_w, param_e;
+       cv::Mat_<float> c_n, c_s, c_w, c_e;
+       
+       //perform the number of iterations requested
+       for (int time = 0; time < iterations; time++)
+       {
+           //perform the filtering
+           cv::filter2D(dst, grad_n, -1, kernel_n);
+           cv::filter2D(dst, grad_s, -1, kernel_s);
+           cv::filter2D(dst, grad_w, -1, kernel_w);
+           cv::filter2D(dst, grad_e, -1, kernel_e);
+           
+           //obtain the iteration values as per the conduction function used
+           //in this case, the conduction function is found in [52], eq 11
+           param_n = (std::sqrt(5) / k_ns) * grad_n;
+           cv::pow(param_n, 2, param_n);
+           cv::exp(-(param_n), c_n);
+           
+           param_s = (std::sqrt(5) / k_ns) * grad_s;
+           cv::pow(param_s, 2, param_s);
+           cv::exp(-(param_s), c_s);
+           
+           param_w = (std::sqrt(5) / k_we) * grad_w;
+           cv::pow(param_w, 2, param_w);
+           cv::exp(-(param_w), c_w);
+           
+           param_e = (std::sqrt(5) / k_we) * grad_e;
+           cv::pow(param_e, 2, param_e);
+           cv::exp(-(param_e), c_e);
+           
+           //update the image
+           dst = dst + lambda*(c_n.mul(grad_n) + c_s.mul(grad_s) + c_w.mul(grad_w) + c_e.mul(grad_e));
+       }
+       //convert the output to 8 bits
+       dst.convertTo(dst, CV_8U);
+   }
    
     //Function used to perform Gamma correction
     //Input:  NORMALISED src image, gamma
