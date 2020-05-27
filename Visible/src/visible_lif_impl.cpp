@@ -837,7 +837,7 @@ void lifContext::add_canvas (){
             ImGuiIO& io = ImGui::GetIO();
             ImGui::SetNextWindowBgAlpha(0.4f); // Transparent background
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
-            if (ImGui::Begin(windowName, open, io.ConfigWindowsResizeFromEdges))
+            if (ImGui::Begin(windowName, open, io.ConfigResizeWindowsFromEdges))
             {
                 ImVec2 pos = ImGui::GetCursorScreenPos(); // actual position
                 draw_list->AddImage(  reinterpret_cast<ImTextureID> (texture->getId()), pos,
