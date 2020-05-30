@@ -6,7 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include "ImCurveEdit.h"
-#include "imgui_internal.h"
+#include "imgui/imgui_internal.h"
 #include "imgui_common.h"
 #include "timed_types.h"
 

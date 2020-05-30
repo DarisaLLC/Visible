@@ -40,7 +40,7 @@
 #include "contraction.hpp"
 #include "logger/logger.hpp"
 #include "cinder/Log.h"
-#include "CinderImGui.h"
+#include "cinder/CinderImGui.h"
 #include "ImGuiExtensions.h" // for 64bit count support
 #include "Resources.h"
 #include "cinder_opencv.h"
@@ -48,12 +48,16 @@
 #include <boost/range/irange.hpp>
 #include "core/stl_utils.hpp"
 #include "imgui_visible_widgets.hpp"
-#include "imguifilesystem.h"
+//#include "imguifilesystem.h"
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
 using namespace svl;
+using namespace boost;
+namespace bfs=boost::filesystem;
+namespace ui=ImGui;
+
 
 // #define SHORTTERM_ON
 
@@ -89,12 +93,12 @@ using contraction_t = contractionLocator::contraction_t;
 // @ todo setup default repository
 // default median cover pct is 5% (0.05)
 
-lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const fs::path& cache_path) :sequencedImageContext(ww), m_serie(sd), m_voxel_view_available(false), mUserStorageDirPath (cache_path) {
+lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const bfs::path& cache_path) :sequencedImageContext(ww), m_serie(sd), m_voxel_view_available(false), mUserStorageDirPath (cache_path) {
     m_type = guiContext::Type::lif_file_viewer;
     m_show_contractions = false;
     // Create an invisible folder for storage
     mCurrentSerieCachePath = mUserStorageDirPath / m_serie.name();
-    bool folder_exists = fs::exists(mCurrentSerieCachePath);
+    bool folder_exists = bfs::exists(mCurrentSerieCachePath);
     std::string msg = folder_exists ? " exists " : " does not exist ";
     msg = " folder for " + m_serie.name() + msg;
     vlogger::instance().console()->info(msg);
@@ -172,13 +176,7 @@ void lifContext::setup_params () {
 void lifContext::setup()
 {
     ci::app::WindowRef ww = get_windowRef();
-    ui::initialize(ui::Options()
-                   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
-                   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
-                   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
-                   .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
-                   .window(ww)
-                   );
+    ImGui::Initialize();
 
     m_showGUI = true;
     m_showLog = true;
@@ -834,15 +832,15 @@ void lifContext::add_canvas (){
     auto showImage = [&](const char *windowName,bool *open, const gl::Texture2dRef texture){
         if (open && *open)
         {
-            ImGuiIO& io = ImGui::GetIO();
+          //  ImGuiIO& io = ImGui::GetIO();
             ImGui::SetNextWindowBgAlpha(0.4f); // Transparent background
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
-            if (ImGui::Begin(windowName, open, io.ConfigResizeWindowsFromEdges))
+            if (ImGui::Begin(windowName, open)) //, io.ConfigResizeWindowsFromEdges))
             {
                 ImVec2 pos = ImGui::GetCursorScreenPos(); // actual position
                 draw_list->AddImage(  reinterpret_cast<ImTextureID> (texture->getId()), pos,
                                     ImVec2(ImGui::GetContentRegionAvail().x + pos.x, ImGui::GetContentRegionAvail().y  + pos.y),
-                                    ivec2(0,1), ivec2(1,0));
+                                    ImVec2(0,1), ImVec2(1,0));
                 ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
                 ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
                 ImRect regionRect(canvas_pos, canvas_pos + canvas_size);
@@ -889,8 +887,8 @@ void lifContext::add_canvas (){
     //@note: assumes, next image plus any on image graphics have already been added
     // offscreen via FBO
     if(m_show_playback){
-        ci::vec2 pos (0,20);
-        ci::vec2 size (getWindowWidth()/2.0, getWindowHeight()/2.0f - 20.0);
+        ImVec2 pos (0,20);
+        ImVec2 size (getWindowWidth()/2.0, getWindowHeight()/2.0f - 20.0);
         ui::ScopedWindow utilities(wDisplay);
         ImGui::SetNextWindowPos(pos);
         ImGui::SetNextWindowSize(size);
@@ -916,7 +914,7 @@ void lifContext::add_result_sequencer (){
     assert(window != nullptr);
     ImVec2 pos (window->Pos.x , window->Pos.y + window->Size.y);
     ImVec2 size (window->Size.x, window->Size.y);
-    m_results_browser_display = Rectf(pos,size);
+    m_results_browser_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(size);
 
@@ -956,8 +954,8 @@ void lifContext::add_navigation(){
         ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y );
         ImVec2 size (window->Size.x, 100);
         
-        ui::ScopedWindow utilities(wNavigator, ImGuiWindowFlags_NoResize);
-        m_navigator_display = Rectf(pos,size);
+        ui::ScopedWindow utilities(wNavigator); //, ImGuiWindowFlags_NoResize);
+        m_navigator_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
         ImGui::SetNextWindowPos(pos);
         ImGui::SetNextWindowSize(size);
         ImGui::SameLine();
@@ -1057,7 +1055,7 @@ void lifContext::add_motion_profile (){
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
     ImVec2  frame (mMediaInfo.channel_size.width, mMediaInfo.channel_size.height);
     ImVec2 pos (getWindowWidth() - sz.x, GetWindowHeight() - sz.y);
-    m_motion_profile_display = Rectf(pos,frame);
+    m_motion_profile_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(frame.x,frame.y));
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowContentSize(frame);
     
@@ -1143,19 +1141,20 @@ void lifContext::add_contractions (bool* p_open)
         for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++){
             const ssmt_result::ref_t& mb = m_lifProcRef->moving_bodies()[i];
             auto contractions = m_cell2contractions_map[mb->id()];
-            static ImGuiFs::Dialog* dialog = nullptr;
+#ifdef NotYet
+            static ImGuibfs::Dialog* dialog = nullptr;
              const bool browseButtonPressed = ImGui::Button(" Export CSV ");
                  if (browseButtonPressed) {
                     if (dialog != nullptr)
                          delete dialog;
-                     dialog = new ImGuiFs::Dialog();
+                     dialog = new ImGuibfs::Dialog();
                  }
                  if (dialog) {
                      static std::string title = " Cell / Contraction Info ";
                      dialog->chooseFolderDialog(browseButtonPressed,mCurrentSerieCachePath.c_str(), title.c_str());
                      // @note Export CSV
                  }
-            
+#endif
             if (ImGui::TreeNode((void*)(intptr_t)i, "Cell/Tissue %d", mb->id())){
                 
                 for (int cc = 0; cc < contractions.size(); cc++){

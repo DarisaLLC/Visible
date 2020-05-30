@@ -99,7 +99,7 @@ namespace svl
         anonymous::cinder_startup::instance();
         const std::string extension = pp.extension().string();
         ImageSource::Options opt;
-        auto ir = loadImage (pp, opt, extension );
+        auto ir = loadImage (ci::fs::path(pp.string()), opt, extension );
         std::pair<Surface8uRef, Channel8uRef> wp;
         
         

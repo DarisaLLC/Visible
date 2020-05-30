@@ -10,6 +10,7 @@
 #include "VisibleApp.h"
 
 using namespace boost;
+namespace bfs=boost::filesystem;
 
 
 std::ostream& operator<<(std::ostream& std_stream, const tiny_media_info& t)
@@ -30,16 +31,16 @@ std::ostream& operator<<(std::ostream& std_stream, const tiny_media_info& t)
 // Utils for both apps
 namespace {
     
-    fs::path get_app_directory_exists (const fs::path&& user_app_support){
+    bfs::path get_app_directory_exists (const bfs::path&& user_app_support){
         auto platform = ci::app::Platform::get();
-        auto home_path = platform->getHomeDirectory();
-        fs::path app_support = home_path / user_app_support;
+        auto home_path = bfs::path(platform->getHomeDirectory().string());
+        bfs::path app_support = home_path / user_app_support;
         
         bool success = exists (app_support);
         if (! success )
-            success = fs::create_directories (app_support);
+            success = bfs::create_directories (app_support);
         if (success) return app_support;
-        return fs::path ();
+        return bfs::path ();
     }
     
 }
@@ -57,18 +58,18 @@ bool VisibleAppControl::check_input (const string &filename){
 }
 
 
-fs::path  VisibleAppControl::get_visible_app_support_directory () { return get_app_directory_exists (fs::path(c_visible_app_support));}
-fs::path  VisibleAppControl::get_runner_app_support_directory () { return get_app_directory_exists (fs::path(c_visible_runner_app_support));}
-fs::path VisibleAppControl::get_visible_cache_directory () {
+bfs::path  VisibleAppControl::get_visible_app_support_directory () { return get_app_directory_exists (bfs::path(c_visible_app_support));}
+bfs::path  VisibleAppControl::get_runner_app_support_directory () { return get_app_directory_exists (bfs::path(c_visible_runner_app_support));}
+bfs::path VisibleAppControl::get_visible_cache_directory () {
     // Create an invisible folder for storage
     auto visiblePath = getHomeDirectory()/c_visible_cache_folder_name;
-    if (!fs::exists( visiblePath)) fs::create_directories(visiblePath);
-    return visiblePath;
+    if (!ci::fs::exists( visiblePath)) bfs::create_directories(bfs::path(visiblePath.string()));
+    return bfs::path(visiblePath.string());
 }
 
-fs::path VisibleAppControl::make_result_cache_entry_for_content_file (const boost::filesystem::path& path){
+bfs::path VisibleAppControl::make_result_cache_entry_for_content_file (const boost::filesystem::path& path){
 
-    fs::path ret_path;
+    bfs::path ret_path;
     if(! exists(path)) return ret_path;
     
     try{
@@ -77,12 +78,12 @@ fs::path VisibleAppControl::make_result_cache_entry_for_content_file (const boos
         // Create a directory for this lif file if it does not exist
         std::string filestem = path.stem().string();
         auto cachePath = visiblePath/filestem;
-        if (!fs::exists( cachePath)) fs::create_directories(cachePath);
+        if (!bfs::exists( cachePath)) bfs::create_directories(cachePath);
         ret_path = cachePath;
     }
     catch (const std::exception & ex)
     {
-        fs::path null_path;
+        bfs::path null_path;
         std::cout << "Creating cache directories failed: " << ex.what() << std::endl;
         return null_path;
     }
@@ -93,7 +94,7 @@ bool  VisibleAppControl::make_result_cache_directory_for_lif (const boost::files
     
     if(! exists(path) || ! lif_ref) return false;
     
-    fs::path cache_path = make_result_cache_entry_for_content_file(path);
+    bfs::path cache_path = make_result_cache_entry_for_content_file(path);
 
     if (cache_path.empty()) return false;
     
@@ -103,7 +104,7 @@ bool  VisibleAppControl::make_result_cache_directory_for_lif (const boost::files
         
             for( vector<lif_serie_data>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt ){
                 auto serie_cache_path = cache_path/serieIt->name();
-                if (!fs::exists( serie_cache_path)) fs::create_directories(serie_cache_path);
+                if (!bfs::exists( serie_cache_path)) bfs::create_directories(serie_cache_path);
             }
         }
     }
@@ -115,7 +116,7 @@ bool  VisibleAppControl::make_result_cache_directory_for_lif (const boost::files
     return true;
 }
 
-bool VisibleAppControl::setup_text_loggers (const fs::path app_support_dir, std::string id_name){
+bool VisibleAppControl::setup_text_loggers (const bfs::path app_support_dir, std::string id_name){
     
     // Check app support directory
     bool app_support_ok = exists(app_support_dir);
@@ -149,7 +150,7 @@ bool VisibleAppControl::setup_text_loggers (const fs::path app_support_dir, std:
 }
 
 
-bool VisibleAppControl::setup_loggers (const fs::path app_support_dir,  imGuiLog& visualLog, std::string id_name){
+bool VisibleAppControl::setup_loggers (const bfs::path app_support_dir,  imGuiLog& visualLog, std::string id_name){
     using imgui_sink_mt = spdlog::sinks::imGuiLogSink<std::mutex> ;
     
     // Check app support directory

@@ -23,7 +23,7 @@
 using namespace std;
 using namespace boost;
 using namespace svl;
-
+namespace bfs=boost::filesystem;
 
 class sm_producer
 {
@@ -36,7 +36,7 @@ public:
     typedef std::vector<image_t> images_vector_t;
     typedef std::deque<double> sMatrixProjection_t;
     typedef std::deque< std::deque<double> > sMatrix_t;
-    typedef std::tuple<size_t, double, fs::path, image_t> outuple_t;
+    typedef std::tuple<size_t, double, bfs::path, image_t> outuple_t;
     typedef std::vector<outuple_t> ordered_outuple_t;
     using progress_fn_t = svl::progress_fn_t;
     
@@ -88,7 +88,7 @@ public:
      *
      */
     images_vector_t& images () const;
-    const std::vector<fs::path >& paths () const;
+    const std::vector<bfs::path >& paths () const;
     const ordered_outuple_t& ordered_input_output (const outputOrderOption) const;
     
     /**

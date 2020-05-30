@@ -71,7 +71,7 @@ public:
     
     // They always return the input order. To get other orders use the Tuple Interface
     images_vector_t& images () const { return m_loaded_ref; }
-    const std::vector<fs::path >& frame_paths () const { return m_framePaths; }
+    const std::vector<bfs::path >& frame_paths () const { return m_framePaths; }
     const ordered_outuple_t& ordered_input_output (const outputOrderOption) const;
     
     const sm_producer::sMatrixProjection_t& shortterm (const uint32_t tWinSz) const;
@@ -93,7 +93,7 @@ private:
     
     void get_next_frame ();
 
-    typedef std::vector<fs::path > paths_vector_t;
+    typedef std::vector<bfs::path > paths_vector_t;
   
     std::chrono::milliseconds m_frame_time;
 

@@ -26,6 +26,9 @@
 #include "input_selector.hpp"
 using namespace cv;
 using blob = svl::labelBlob::blob;
+using namespace boost;
+namespace bfs=boost::filesystem;
+
 
 class ssmt_result;
 
@@ -100,7 +103,7 @@ public:
     /*
        ssmt_processor constructor (takes an optional path to cache to be used or constructed )
     */
-    ssmt_processor (const fs::path& = fs::path(), const ssmt_processor::params& = ssmt_processor::params () );
+    ssmt_processor (const bfs::path& = bfs::path(), const ssmt_processor::params& = ssmt_processor::params () );
     
     // Assumes LIF data -- use multiple window.
     void load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames);
@@ -205,7 +208,7 @@ private:
     int create_cache_paths ();
     // channel_index which channel of multi-channel input. Usually visible channel is the last one
     // input is -1 for the entire root or index of moving object area in results container
-    fs::path get_cache_location (const int channel_index,const int input);
+    bfs::path get_cache_location (const int channel_index,const int input);
     
     const std::vector<blob>& blobs () const { return m_blobs; }
     
@@ -230,7 +233,7 @@ private:
     void save_affine_profiles ();
     
     // path to cache folder for this serie
-    fs::path mCurrentCachePath;
+    bfs::path mCurrentCachePath;
     
     std::shared_ptr<contractionLocator> m_entireCaRef;
   
@@ -291,7 +294,7 @@ private:
     mutable fPair m_length_range;
     mutable std::vector<roiWindow<P8U>> m_voxels;
     input_channel_selector_t m_instant_input;
-    std::map<uint32_t, fs::path> m_result_index_to_cache_path;
+    std::map<uint32_t, bfs::path> m_result_index_to_cache_path;
     
   
     

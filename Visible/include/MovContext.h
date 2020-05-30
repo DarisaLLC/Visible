@@ -20,7 +20,7 @@ using namespace ci::app;
 using namespace ci::signals;
 
 using namespace std;
-namespace fs = boost::filesystem;
+namespace bfs = boost::filesystem;
 
 typedef std::shared_ptr<class movContext> movContextRef;
 
@@ -34,7 +34,7 @@ public:
   
     
     // From a image_sequence_data
-    movContext(ci::app::WindowRef& ww, const cvVideoPlayer::ref&, const fs::path&  );
+    movContext(ci::app::WindowRef& ww, const cvVideoPlayer::ref&, const bfs::path&  );
     
     // shared_from_this() through base class
     movContext* shared_from_above () {

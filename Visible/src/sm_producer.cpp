@@ -27,7 +27,7 @@ using namespace std::chrono;
 
 using namespace boost;
 
-namespace fs=boost::filesystem;
+namespace bfs=boost::filesystem;
 
 using namespace ci;
 
@@ -139,7 +139,7 @@ std::vector<roiWindow<P8U>>& sm_producer::images () const
     return _impl->images ();
 }
 
-const std::vector< fs::path >& sm_producer::paths () const
+const std::vector< bfs::path >& sm_producer::paths () const
 {
     return _impl->frame_paths();
 }
