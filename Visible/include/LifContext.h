@@ -21,7 +21,7 @@ using namespace ci::app;
 using namespace ci::signals;
 
 using namespace std;
-namespace fs = boost::filesystem;
+namespace bfs = boost::filesystem;
 
 typedef std::shared_ptr<class lifContext> lifContextRef;
 
@@ -43,7 +43,7 @@ public:
   
     
     // From a lif_serie_data
-    lifContext(ci::app::WindowRef& ww, const lif_serie_data&, const fs::path&  );
+    lifContext(ci::app::WindowRef& ww, const lif_serie_data&, const bfs::path&  );
     
     // shared_from_this() through base class
 //    lifContext* shared_from_above () {

@@ -114,7 +114,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     };
 
     
-    if(fs::exists(mCurrentCachePath)){
+    if(bfs::exists(mCurrentCachePath)){
         std::string imagename = "voxel_binary_.png";
         auto image_path = cache_path / imagename;
         cv::imwrite(image_path.string(), bi_level);
@@ -225,12 +225,12 @@ void ssmt_processor::internal_generate_affine_windows (const std::vector<roiWind
 
 void ssmt_processor::save_affine_windows (){
     
-    if(fs::exists(mCurrentSerieCachePath)){
+    if(bfs::exists(mCurrentSerieCachePath)){
         std::string subdir ("affine_cell_images");
         auto save_path = mCurrentSerieCachePath / subdir;
         boost::system::error_code ec;
-        if(!fs::exists(save_path)){
-            fs::create_directory(save_path, ec);
+        if(!bfs::exists(save_path)){
+            bfs::create_directory(save_path, ec);
             switch( ec.value() ) {
                 case boost::system::errc::success: {
                     std::string msg = "Created " + save_path.string() ;
@@ -242,7 +242,7 @@ void ssmt_processor::save_affine_windows (){
                     vlogger::instance().console()->info(msg);
             }
         } // tried creatring it if was not already
-        if(fs::exists(save_path)){
+        if(bfs::exists(save_path)){
             std::lock_guard<std::mutex> process_lock(m_io_mutex);
             auto writer = get_image_writer();
             writer->operator()(save_path.string(), m_affine_windows);
@@ -253,12 +253,12 @@ void ssmt_processor::save_affine_windows (){
 
 void ssmt_processor::save_affine_profiles (){
     
-    if(fs::exists(mCurrentSerieCachePath)){
+    if(bfs::exists(mCurrentSerieCachePath)){
         std::string subdir ("affine_cell_profiles");
         auto save_path = mCurrentSerieCachePath / subdir;
         boost::system::error_code ec;
-        if(!fs::exists(save_path)){
-            fs::create_directory(save_path, ec);
+        if(!bfs::exists(save_path)){
+            bfs::create_directory(save_path, ec);
             switch( ec.value() ) {
                 case boost::system::errc::success: {
                     std::string msg = "Created " + save_path.string() ;
@@ -270,7 +270,7 @@ void ssmt_processor::save_affine_profiles (){
                     vlogger::instance().console()->info(msg);
             }
         } // tried creatring it if was not already
-        if(fs::exists(save_path)){
+        if(bfs::exists(save_path)){
             std::lock_guard<std::mutex> process_lock(m_io_mutex);
             auto this_csv_writer = std::make_shared<ioImageWriter>("hp");
             this_csv_writer->operator()(save_path.string(), m_hz_profiles);

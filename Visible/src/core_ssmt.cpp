@@ -35,7 +35,7 @@
  @param path to the Cache Folder
 
  */
-ssmt_processor::ssmt_processor (const fs::path& serie_cache_folder, const ssmt_processor::params& params):
+ssmt_processor::ssmt_processor (const bfs::path& serie_cache_folder, const ssmt_processor::params& params):
 mCurrentCachePath(serie_cache_folder), m_params(params)
 {
     // Signals we provide
@@ -157,14 +157,14 @@ std::weak_ptr<contractionLocator> ssmt_processor::entireContractionWeakRef ()
     return wp;
 }
 
-fs::path ssmt_processor::get_cache_location (const int channel_index,const int input){
+bfs::path ssmt_processor::get_cache_location (const int channel_index,const int input){
     // Check input
     bool isEntire = input == -1;
     bool isMobj = input >= 0 && input < m_results.size();
     // Check index
     bool channel_index_ok = channel_index >= 0 && channel_index < channel_count();
     if (isEntire == isMobj || ! channel_index_ok)
-        return fs::path ();
+        return bfs::path ();
     
     // Get Cache path
     auto cache_path = mCurrentCachePath;
@@ -186,12 +186,12 @@ int ssmt_processor:: create_cache_paths (){
     // Create cache directories for each cell off of the top for now (@todo create a cells subdir )
 
     for(const ssmt_result::ref_t& sr : m_results){
-        if(fs::exists(mCurrentCachePath)){
+        if(bfs::exists(mCurrentCachePath)){
             std::string subdir = to_string(sr->id());
             auto save_path = mCurrentCachePath / subdir;
             boost::system::error_code ec;
-            if(!fs::exists(save_path)){
-                fs::create_directory(save_path, ec);
+            if(!bfs::exists(save_path)){
+                bfs::create_directory(save_path, ec);
                 
                 switch( ec.value() ) {
                     case boost::system::errc::success: {
@@ -338,7 +338,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
     vlogger::instance().console()->info(ss);
     std::shared_ptr<ssResultContainer> ssref;
     auto cache_path = get_cache_location(in.channel(), in.region());
-    if(fs::exists(cache_path)){
+    if(bfs::exists(cache_path)){
         ssref = ssResultContainer::create(cache_path);
     }
     cache_ok = ssref && ssref->size_check(dim);
@@ -428,7 +428,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
 
 std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci_on_selected_input (const input_channel_selector_t& in, const progress_fn_t& reporter){
     auto cache_path = get_cache_location(in.channel(),in.region());
-    if (cache_path == fs::path()){
+    if (cache_path == bfs::path()){
         return std::shared_ptr<vecOfNamedTrack_t> ();
     }
     // protect fetching image data 
@@ -624,8 +624,8 @@ std::shared_ptr<ioImageWriter>& ssmt_processor::get_csv_writer (){
 
 int ssmt_processor::save_channel_images (const input_channel_selector_t& in, const std::string& dir_fqfn){
     std::lock_guard<std::mutex> lock(m_mutex);
-    fs::path _path (dir_fqfn);
-    if (! fs::exists(_path)){
+    bfs::path _path (dir_fqfn);
+    if (! bfs::exists(_path)){
         return -1;
     }
     const auto& _content = in.isEntire() ? content() : m_results[in.region()]->content();

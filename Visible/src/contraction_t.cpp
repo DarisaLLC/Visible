@@ -25,7 +25,12 @@
 #include "core/boost_stats.hpp"
 #include "logger/logger.hpp"
 #include "cpp-perf.hpp"
+#include "boost/filesystem.hpp"
+
 using namespace perf;
+using namespace boost;
+
+namespace bfs=boost::filesystem;
 
 namespace anonymous
 {
@@ -283,12 +288,12 @@ bool contractionLocator::locate_contractions (){
     for (auto idx : peaks_idx) ss << idx << ",";
     vlogger::instance().console()->info(ss.str());
     
-    auto save_csv = [](const std::shared_ptr<contractionProfile>& cp, fs::path& root_path){
+    auto save_csv = [](const std::shared_ptr<contractionProfile>& cp, bfs::path& root_path){
         auto folder = stl_utils::now_string();
         auto folder_path = root_path / folder;
         boost::system::error_code ec;
-        if(!fs::exists(folder_path)){
-            fs::create_directory(folder_path, ec);
+        if(!bfs::exists(folder_path)){
+            bfs::create_directory(folder_path, ec);
             if (ec != boost::system::errc::success){
                 std::string msg = "Could not create " + folder_path.string() ;
                 vlogger::instance().console()->error(msg);
@@ -321,7 +326,7 @@ bool contractionLocator::locate_contractions (){
             m_contractions.emplace_back(profile->contraction());
             
             //@todo use cache_root for this
-            fs::path sp ("/Volumes/medvedev/Users/arman/tmp/");
+            bfs::path sp ("/Volumes/medvedev/Users/arman/tmp/");
             save_csv(profile, sp);
             auto msg = "Stored " + stl_utils::tostr(pp);
             vlogger::instance().console()->info(msg);

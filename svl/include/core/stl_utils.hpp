@@ -44,7 +44,7 @@
 
 using namespace std;
 using namespace boost;
-namespace fs=boost::filesystem;
+namespace bfs=boost::filesystem;
 namespace stl_utils
 {
     /*********
@@ -523,9 +523,9 @@ namespace stl_utils
     template<class T, template<typename ELEM, typename ALLOC = std::allocator<ELEM>> class CONT = std::vector >
     static void save_csv (const CONT<T>& data, const std::string& output_file){
         std::string delim (",");
-        fs::path opath (output_file);
+        bfs::path opath (output_file);
         auto papa = opath.parent_path ();
-        if (fs::exists(papa))
+        if (bfs::exists(papa))
         {
             std::shared_ptr<std::ofstream> myfile = make_shared_ofstream(output_file);
             auto cnt = 0;

@@ -31,6 +31,8 @@
 #include "segmentation_parameters.hpp"
 
 using namespace stl_utils;
+using namespace boost;
+namespace bfs=boost::filesystem;
 
 
 // Return 2D latice of pixels over time
@@ -163,7 +165,7 @@ void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
     threshold(m_temporal_ss, bi_level, peaks_average, 255, THRESH_BINARY);
     
     vlogger::instance().console()->info("finished voxel surface");
-    if(fs::exists(mCurrentCachePath)){
+    if(bfs::exists(mCurrentCachePath)){
         std::string imagename = "voxel_ss_.png";
         auto image_path = mCurrentCachePath / imagename;
         cv::imwrite(image_path.string(), m_temporal_ss);
@@ -182,9 +184,9 @@ void ssmt_processor::generateVoxelSelfSimilarities (){
     bool cache_ok = false;
     std::shared_ptr<internalContainer> ssref;
     
-    if(fs::exists(mCurrentCachePath)){
+    if(bfs::exists(mCurrentCachePath)){
         auto cache_path = mCurrentCachePath / m_params.internal_container_cache_name ();
-        if(fs::exists(cache_path)){
+        if(bfs::exists(cache_path)){
             ssref = internalContainer::create(cache_path);
         }
         cache_ok = ssref && ssref->size_check(m_expected_segmented_size.first*m_expected_segmented_size.second);

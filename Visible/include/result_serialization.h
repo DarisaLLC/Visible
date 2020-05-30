@@ -27,7 +27,7 @@
 
 
 using namespace boost;
-namespace fs=boost::filesystem;
+namespace bfs=boost::filesystem;
 
 namespace cereal{
     
@@ -79,10 +79,10 @@ public:
     }
     
     
-    static std::shared_ptr<ssResultContainer> create(const fs::path& filepath){
+    static std::shared_ptr<ssResultContainer> create(const bfs::path& filepath){
         std::shared_ptr<ssResultContainer> ss_ref = std::make_shared<ssResultContainer> ();
         
-        if(fs::exists(filepath)){
+        if(bfs::exists(filepath)){
             try{
                 std::ifstream file(filepath.c_str(), std::ios::binary);
                 cereal::PortableBinaryInputArchive ar(file);
@@ -93,7 +93,7 @@ public:
         return ss_ref;
     }
     
-    static bool store (const fs::path& filepath, const deque<double>& entropies, const deque<deque<double>>& mmatrix){
+    static bool store (const bfs::path& filepath, const deque<double>& entropies, const deque<deque<double>>& mmatrix){
         bool ok = false;
         ssResultContainer ss;
         ss.load(entropies, mmatrix);
@@ -109,7 +109,7 @@ public:
     }
     
     
-    static bool store (const fs::path& filepath, const vector<double>& entropies, const vector<vector<double>>& mmatrix){
+    static bool store (const bfs::path& filepath, const vector<double>& entropies, const vector<vector<double>>& mmatrix){
         bool ok = false;
         ssResultContainer ss;
         ss.load(entropies, mmatrix);
@@ -210,10 +210,10 @@ public:
         m_data = entropies;
     }
     
-    static std::shared_ptr<internalContainer> create(const fs::path& filepath){
+    static std::shared_ptr<internalContainer> create(const bfs::path& filepath){
         std::shared_ptr<internalContainer> ic_ref = std::make_shared<internalContainer> ();
         
-        if(fs::exists(filepath)){
+        if(bfs::exists(filepath)){
             try{
                 std::ifstream file(filepath.c_str(), std::ios::binary);
                 cereal::PortableBinaryInputArchive ar(file);
@@ -224,7 +224,7 @@ public:
         return ic_ref;
     }
     
-    static bool store (fs::path& filepath, const vector<float>& entropies){
+    static bool store (bfs::path& filepath, const vector<float>& entropies){
         bool ok = false;
         internalContainer ic;
         ic.load(entropies);
