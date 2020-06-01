@@ -51,10 +51,10 @@ static void ShowHelpMarker(const char* desc)
 
 
 
-float VisibleRunApp::DrawMainMenu() {
-    auto menu_height = 0.0f;
+void VisibleRunApp::DrawMainMenu() {
+
     std::vector<std::string> names;
-    ScopedMainMenuBar mainmenu;
+//    ScopedMainMenuBar mainmenu;
      if (ImGui::BeginMenu("File"))
      {
          if (ImGui::Button("Select "))
@@ -101,7 +101,7 @@ float VisibleRunApp::DrawMainMenu() {
          if (ImGui::MenuItem("Paste", "CTRL+V")) {}
          ImGui::EndMenu();
      }
-  return menu_height;
+
 }
 
 
@@ -169,7 +169,16 @@ bool VisibleRunApp::shouldQuit()
 }
 
 void VisibleRunApp::setup_ui(){
-    ImGui::Initialize();
+    WindowRef ww = getWindow ();
+    m_imgui_options = ImGui::Options();
+    ImGui::initialize(m_imgui_options
+                   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
+                   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
+                   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
+                   .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
+                   .window(ww)
+                   );
+
     float dpiScale = 1.f;
     auto& style = ImGui::GetStyle();
     style.WindowBorderSize = 1.f * dpiScale;
@@ -207,7 +216,7 @@ void VisibleRunApp::setup()
     }
     
     VisibleAppControl::setup_text_loggers(mRootOutputDir, "Visible Log " );
-    VisibleAppControl::setup_loggers(mRootOutputDir, visual_log, " Visible Log ");
+//    VisibleAppControl::setup_loggers(mRootOutputDir, visual_log, " Visible Log ");
     
     //   if(mVisibleScope== nullptr){
     mVisibleScope = gl::Texture::create( loadImage( loadResource(VISIBLE_SCOPE  )));
@@ -238,7 +247,7 @@ void VisibleRunApp::setup()
      mUserStorageDirPath = getHomeDirectory()/".Visible";
      if (!bfs::exists( mUserStorageDirPath)) bfs::create_directories(mUserStorageDirPath);
     
-    DrawMainMenu();
+
 }
     
 static std::string cok = "chapter_ok";
@@ -449,12 +458,11 @@ void VisibleRunApp::update()
 //static float minRadius = 1;
 void VisibleRunApp::draw ()
 {
-    DrawGUI();
     gl::clear( Color::gray( 0.67f ) );
     if (mContext && mContext->is_valid()){
         mContext->draw ();
     }
-
+    DrawImGuiDemos();
 }
 
 
