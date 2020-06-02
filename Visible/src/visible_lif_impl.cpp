@@ -176,11 +176,11 @@ void lifContext::setup_params () {
 void lifContext::setup()
 {
     ci::app::WindowRef ww = get_windowRef();
-    ui::initialize(ui::Options()
-                   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
-                   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
-                   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
-                   .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
+    ui::Initialize(ui::Options()
+                //   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
+                //   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
+                //   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
+               //    .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
                    .window(ww)
                    );
 
