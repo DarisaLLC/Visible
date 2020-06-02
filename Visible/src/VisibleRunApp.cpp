@@ -8,7 +8,7 @@
 
 
 #include "VisibleApp.h"
-
+#include "visible_imgui.h"
 
 #define APP_WIDTH 1024
 #define APP_HEIGHT 768
@@ -16,318 +16,20 @@
 #pragma GCC diagnostic pop
 
 
+//
+//static void HelpMarker(const char* desc)
+//{
+//    ImGui::TextDisabled("(?)");
+//    if (ImGui::IsItemHovered())
+//    {
+//        ImGui::BeginTooltip();
+//        ImGui::PushTextWrapPos(450.0f);
+//        ImGui::TextUnformatted(desc);
+//        ImGui::PopTextWrapPos();
+//        ImGui::EndTooltip();
+//    }
+//}
 
-static void HelpMarker(const char* desc)
-{
-    ImGui::TextDisabled("(?)");
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::PushTextWrapPos(450.0f);
-        ImGui::TextUnformatted(desc);
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
-}
-
-// Note that shortcuts are currently provided for display only (future version will add flags to BeginMenu to process shortcuts)
-static void ShowExampleMenuFile()
-{
-    ImGui::MenuItem("(dummy menu)", NULL, false, false);
-    if (ImGui::MenuItem("New")) {}
-    if (ImGui::MenuItem("Open", "Ctrl+O")) {}
-    if (ImGui::BeginMenu("Open Recent"))
-    {
-        ImGui::MenuItem("fish_hat.c");
-        ImGui::MenuItem("fish_hat.inl");
-        ImGui::MenuItem("fish_hat.h");
-        if (ImGui::BeginMenu("More.."))
-        {
-            ImGui::MenuItem("Hello");
-            ImGui::MenuItem("Sailor");
-            if (ImGui::BeginMenu("Recurse.."))
-            {
-                ShowExampleMenuFile();
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenu();
-        }
-        ImGui::EndMenu();
-    }
-    if (ImGui::MenuItem("Save", "Ctrl+S")) {}
-    if (ImGui::MenuItem("Save As..")) {}
-
-    ImGui::Separator();
-    if (ImGui::BeginMenu("Options"))
-    {
-        static bool enabled = true;
-        ImGui::MenuItem("Enabled", "", &enabled);
-        ImGui::BeginChild("child", ImVec2(0, 60), true);
-        for (int i = 0; i < 10; i++)
-            ImGui::Text("Scrolling Text %d", i);
-        ImGui::EndChild();
-        static float f = 0.5f;
-        static int n = 0;
-        ImGui::SliderFloat("Value", &f, 0.0f, 1.0f);
-        ImGui::InputFloat("Input", &f, 0.1f);
-        ImGui::Combo("Combo", &n, "Yes\0No\0Maybe\0\0");
-        ImGui::EndMenu();
-    }
-
-    if (ImGui::BeginMenu("Colors"))
-    {
-        float sz = ImGui::GetTextLineHeight();
-        for (int i = 0; i < ImGuiCol_COUNT; i++)
-        {
-            const char* name = ImGui::GetStyleColorName((ImGuiCol)i);
-            ImVec2 p = ImGui::GetCursorScreenPos();
-            ImGui::GetWindowDrawList()->AddRectFilled(p, ImVec2(p.x+sz, p.y+sz), ImGui::GetColorU32((ImGuiCol)i));
-            ImGui::Dummy(ImVec2(sz, sz));
-            ImGui::SameLine();
-            ImGui::MenuItem(name);
-        }
-        ImGui::EndMenu();
-    }
-
-    // Here we demonstrate appending again to the "Options" menu (which we already created above)
-    // Of course in this demo it is a little bit silly that this function calls BeginMenu("Options") twice.
-    // In a real code-base using it would make senses to use this feature from very different code locations.
-    if (ImGui::BeginMenu("Options")) // <-- Append!
-    {
-        static bool b = true;
-        ImGui::Checkbox("SomeOption", &b);
-        ImGui::EndMenu();
-    }
-
-    if (ImGui::BeginMenu("Disabled", false)) // Disabled
-    {
-        IM_ASSERT(0);
-    }
-    if (ImGui::MenuItem("Checked", NULL, true)) {}
-    if (ImGui::MenuItem("Quit", "Alt+F4")) {}
-}
-
-// /Users/arman/Library/Application Support
-// Demonstrate most Dear ImGui features (this is big function!)
-// You may execute this function to experiment with the UI and understand what it does. You may then search for keywords in the code when you are interested by a specific feature.
-void __ShowDemoWindow(bool* p_open)
-{
-    IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
-
-    // Examples Apps (accessible from the "Examples" menu)
-    static bool show_app_documents = false;
-    static bool show_app_main_menu_bar = false;
-    static bool show_app_console = false;
-    static bool show_app_log = false;
-    static bool show_app_layout = false;
-    static bool show_app_property_editor = false;
-    static bool show_app_long_text = false;
-    static bool show_app_auto_resize = false;
-    static bool show_app_constrained_resize = false;
-    static bool show_app_simple_overlay = false;
-    static bool show_app_window_titles = false;
-    static bool show_app_custom_rendering = false;
-
-   
-
-    // Dear ImGui Apps (accessible from the "Tools" menu)
-    static bool show_app_metrics = false;
-    static bool show_app_style_editor = false;
-    static bool show_app_about = false;
-
-    if (show_app_metrics)             { ImGui::ShowMetricsWindow(&show_app_metrics); }
-    if (show_app_style_editor)        { ImGui::Begin("Style Editor", &show_app_style_editor); ImGui::ShowStyleEditor(); ImGui::End(); }
-    if (show_app_about)               { ImGui::ShowAboutWindow(&show_app_about); }
-
-    // Demonstrate the various window flags. Typically you would just use the default!
-    static bool no_titlebar = false;
-    static bool no_scrollbar = false;
-    static bool no_menu = false;
-    static bool no_move = false;
-    static bool no_resize = false;
-    static bool no_collapse = false;
-    static bool no_close = false;
-    static bool no_nav = false;
-    static bool no_background = false;
-    static bool no_bring_to_front = false;
-
-    ImGuiWindowFlags window_flags = 0;
-    if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
-    if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
-    if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
-    if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
-    if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
-    if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
-    if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
-    if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
-    if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
-    if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
-
-    // We specify a default position/size in case there's no data in the .ini file. Typically this isn't required! We only do it to make the Demo applications a little more welcoming.
-    ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
-
-    // Main body of the Demo window starts here.
-    if (!ImGui::Begin(" Visible ", p_open, window_flags))
-    {
-        // Early out if the window is collapsed, as an optimization.
-        ImGui::End();
-        return;
-    }
-
-    // Most "big" widgets share a common width settings by default.
-    //ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);    // Use 2/3 of the space for widgets and 1/3 for labels (default)
-    ImGui::PushItemWidth(ImGui::GetFontSize() * -12);           // Use fixed width for labels (by passing a negative value), the rest goes to widgets. We choose a width proportional to our font size.
-
-    // Menu Bar
-    if (ImGui::BeginMenuBar())
-    {
-        if (ImGui::BeginMenu("File"))
-        {
-            ShowExampleMenuFile();
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Examples"))
-        {
-            ImGui::MenuItem("Main menu bar", NULL, &show_app_main_menu_bar);
-            ImGui::MenuItem("Console", NULL, &show_app_console);
-            ImGui::MenuItem("Log", NULL, &show_app_log);
-            ImGui::MenuItem("Simple layout", NULL, &show_app_layout);
-            ImGui::MenuItem("Property editor", NULL, &show_app_property_editor);
-            ImGui::MenuItem("Long text display", NULL, &show_app_long_text);
-            ImGui::MenuItem("Auto-resizing window", NULL, &show_app_auto_resize);
-            ImGui::MenuItem("Constrained-resizing window", NULL, &show_app_constrained_resize);
-            ImGui::MenuItem("Simple overlay", NULL, &show_app_simple_overlay);
-            ImGui::MenuItem("Manipulating window titles", NULL, &show_app_window_titles);
-            ImGui::MenuItem("Custom rendering", NULL, &show_app_custom_rendering);
-            ImGui::MenuItem("Documents", NULL, &show_app_documents);
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Tools"))
-        {
-            ImGui::MenuItem("Metrics", NULL, &show_app_metrics);
-            ImGui::MenuItem("Style Editor", NULL, &show_app_style_editor);
-            ImGui::MenuItem("About Dear ImGui", NULL, &show_app_about);
-            ImGui::EndMenu();
-        }
-        ImGui::EndMenuBar();
-    }
-
-    ImGui::Text("dear imgui says hello. (%s)", IMGUI_VERSION);
-    ImGui::Spacing();
-
-    if (ImGui::CollapsingHeader("Help"))
-    {
-        ImGui::Text("ABOUT THIS DEMO:");
-        ImGui::BulletText("Sections below are demonstrating many aspects of the library.");
-        ImGui::BulletText("The \"Examples\" menu above leads to more demo contents.");
-        ImGui::BulletText("The \"Tools\" menu above gives access to: About Box, Style Editor,\n"
-                          "and Metrics (general purpose Dear ImGui debugging tool).");
-        ImGui::Separator();
-
-        ImGui::Text("PROGRAMMER GUIDE:");
-        ImGui::BulletText("See the ShowDemoWindow() code in imgui_demo.cpp. <- you are here!");
-        ImGui::BulletText("See comments in imgui.cpp.");
-        ImGui::BulletText("See example applications in the examples/ folder.");
-        ImGui::BulletText("Read the FAQ at http://www.dearimgui.org/faq/");
-        ImGui::BulletText("Set 'io.ConfigFlags |= NavEnableKeyboard' for keyboard controls.");
-        ImGui::BulletText("Set 'io.ConfigFlags |= NavEnableGamepad' for gamepad controls.");
-        ImGui::Separator();
-
-        ImGui::Text("USER GUIDE:");
-        ImGui::ShowUserGuide();
-    }
-
-    if (ImGui::CollapsingHeader("Configuration"))
-    {
-        ImGuiIO& io = ImGui::GetIO();
-
-        if (ImGui::TreeNode("Configuration##2"))
-        {
-            ImGui::CheckboxFlags("io.ConfigFlags: NavEnableKeyboard", (unsigned int *)&io.ConfigFlags, ImGuiConfigFlags_NavEnableKeyboard);
-            ImGui::CheckboxFlags("io.ConfigFlags: NavEnableGamepad", (unsigned int *)&io.ConfigFlags, ImGuiConfigFlags_NavEnableGamepad);
-            ImGui::SameLine(); HelpMarker("Required back-end to feed in gamepad inputs in io.NavInputs[] and set io.BackendFlags |= ImGuiBackendFlags_HasGamepad.\n\nRead instructions in imgui.cpp for details.");
-            ImGui::CheckboxFlags("io.ConfigFlags: NavEnableSetMousePos", (unsigned int *)&io.ConfigFlags, ImGuiConfigFlags_NavEnableSetMousePos);
-            ImGui::SameLine(); HelpMarker("Instruct navigation to move the mouse cursor. See comment for ImGuiConfigFlags_NavEnableSetMousePos.");
-            ImGui::CheckboxFlags("io.ConfigFlags: NoMouse", (unsigned int *)&io.ConfigFlags, ImGuiConfigFlags_NoMouse);
-            if (io.ConfigFlags & ImGuiConfigFlags_NoMouse) // Create a way to restore this flag otherwise we could be stuck completely!
-            {
-                if (fmodf((float)ImGui::GetTime(), 0.40f) < 0.20f)
-                {
-                    ImGui::SameLine();
-                    ImGui::Text("<<PRESS SPACE TO DISABLE>>");
-                }
-                if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Space)))
-                    io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
-            }
-            ImGui::CheckboxFlags("io.ConfigFlags: NoMouseCursorChange", (unsigned int *)&io.ConfigFlags, ImGuiConfigFlags_NoMouseCursorChange);
-            ImGui::SameLine(); HelpMarker("Instruct back-end to not alter mouse cursor shape and visibility.");
-            ImGui::Checkbox("io.ConfigInputTextCursorBlink", &io.ConfigInputTextCursorBlink);
-            ImGui::SameLine(); HelpMarker("Set to false to disable blinking cursor, for users who consider it distracting");
-            ImGui::Checkbox("io.ConfigWindowsResizeFromEdges", &io.ConfigWindowsResizeFromEdges);
-            ImGui::SameLine(); HelpMarker("Enable resizing of windows from their edges and from the lower-left corner.\nThis requires (io.BackendFlags & ImGuiBackendFlags_HasMouseCursors) because it needs mouse cursor feedback.");
-            ImGui::Checkbox("io.ConfigWindowsMoveFromTitleBarOnly", &io.ConfigWindowsMoveFromTitleBarOnly);
-            ImGui::Checkbox("io.MouseDrawCursor", &io.MouseDrawCursor);
-            ImGui::SameLine(); HelpMarker("Instruct Dear ImGui to render a mouse cursor for you. Note that a mouse cursor rendered via your application GPU rendering path will feel more laggy than hardware cursor, but will be more in sync with your other visuals.\n\nSome desktop applications may use both kinds of cursors (e.g. enable software cursor only when resizing/dragging something).");
-            ImGui::TreePop();
-            ImGui::Separator();
-        }
-
-        if (ImGui::TreeNode("Backend Flags"))
-        {
-            HelpMarker("Those flags are set by the back-ends (imgui_impl_xxx files) to specify their capabilities.\nHere we expose then as read-only fields to avoid breaking interactions with your back-end.");
-            ImGuiBackendFlags backend_flags = io.BackendFlags; // Make a local copy to avoid modifying actual back-end flags.
-            ImGui::CheckboxFlags("io.BackendFlags: HasGamepad", (unsigned int *)&backend_flags, ImGuiBackendFlags_HasGamepad);
-            ImGui::CheckboxFlags("io.BackendFlags: HasMouseCursors", (unsigned int *)&backend_flags, ImGuiBackendFlags_HasMouseCursors);
-            ImGui::CheckboxFlags("io.BackendFlags: HasSetMousePos", (unsigned int *)&backend_flags, ImGuiBackendFlags_HasSetMousePos);
-            ImGui::CheckboxFlags("io.BackendFlags: RendererHasVtxOffset", (unsigned int *)&backend_flags, ImGuiBackendFlags_RendererHasVtxOffset);
-            ImGui::TreePop();
-            ImGui::Separator();
-        }
-
-        if (ImGui::TreeNode("Style"))
-        {
-            HelpMarker("The same contents can be accessed in 'Tools->Style Editor' or by calling the ShowStyleEditor() function.");
-            ImGui::ShowStyleEditor();
-            ImGui::TreePop();
-            ImGui::Separator();
-        }
-
-        if (ImGui::TreeNode("Capture/Logging"))
-        {
-            ImGui::TextWrapped("The logging API redirects all text output so you can easily capture the content of a window or a block. Tree nodes can be automatically expanded.");
-            HelpMarker("Try opening any of the contents below in this window and then click one of the \"Log To\" button.");
-            ImGui::LogButtons();
-            ImGui::TextWrapped("You can also call ImGui::LogText() to output directly to the log without a visual output.");
-            if (ImGui::Button("Copy \"Hello, world!\" to clipboard"))
-            {
-                ImGui::LogToClipboard();
-                ImGui::LogText("Hello, world!");
-                ImGui::LogFinish();
-            }
-            ImGui::TreePop();
-        }
-    }
-
-    if (ImGui::CollapsingHeader("Window options"))
-    {
-        ImGui::Checkbox("No titlebar", &no_titlebar); ImGui::SameLine(150);
-        ImGui::Checkbox("No scrollbar", &no_scrollbar); ImGui::SameLine(300);
-        ImGui::Checkbox("No menu", &no_menu);
-        ImGui::Checkbox("No move", &no_move); ImGui::SameLine(150);
-        ImGui::Checkbox("No resize", &no_resize); ImGui::SameLine(300);
-        ImGui::Checkbox("No collapse", &no_collapse);
-        ImGui::Checkbox("No close", &no_close); ImGui::SameLine(150);
-        ImGui::Checkbox("No nav", &no_nav); ImGui::SameLine(300);
-        ImGui::Checkbox("No background", &no_background);
-        ImGui::Checkbox("No bring to front", &no_bring_to_front);
-    }
-
-    // All demo contents
-
-    // End of ShowDemoWindow()
-    ImGui::End();
-}
 
 
 
@@ -347,59 +49,59 @@ void VisibleRunApp::QuitApp(){
     quit();
 }
 
-
-
-void VisibleRunApp::DrawMainMenu() {
-
+void VisibleRunApp::DrawMainMenu(){
     std::vector<std::string> names;
-    ScopedMainMenuBar mainmenu;
-     if (ImGui::BeginMenu("File"))
-     {
-         if (ImGui::Button("Select "))
-         {
-             nfdchar_t *outPath = NULL;
-             nfdresult_t result = NFD_OpenDialog("lif;mov,mp4", NULL, &outPath);
-             if (result == NFD_OKAY) {
-                 bfs::path fout(outPath);
-                 auto dotext = identify_file(fout, "");
-                 if(m_is_lif_file){
-                     auto num = list_lif_series(names);
-                     m_selected_lif_serie_index = -1;
-                     m_custom_type = false;
-                     
-                     if (ImGui::TreeNode("Select Serie")) {
-                         for (int i = 0; i < (int)num; i++)
-                         {
-                             if (ImGui::Selectable(names[i].c_str(), m_selected_lif_serie_index == i))
-                             {
-                                 m_selected_lif_serie_index = i;
-                                 m_selected_lif_serie_name = names[m_selected_lif_serie_index];
-                             }
-                         }
-                         ImGui::TreePop();
-                     }
-                     ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
-                 }
-                 free(outPath);
-             }
-             else if (result == NFD_CANCEL) {
-             }
-             else {
-             }
-         }
-         ImGui::EndMenu();
-     }
-     if (ImGui::BeginMenu("Edit"))
-     {
-         if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-         if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-         ImGui::Separator();
-         if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-         if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-         if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-         ImGui::EndMenu();
-     }
-
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::Button("Select "))
+            {
+                nfdchar_t *outPath = NULL;
+                nfdresult_t result = NFD_OpenDialog("lif;mov,mp4", NULL, &outPath);
+                if (result == NFD_OKAY) {
+                    bfs::path fout(outPath);
+                    auto dotext = identify_file(fout, "");
+                    if(m_is_lif_file){
+                        auto num = list_lif_series(names);
+                        m_selected_lif_serie_index = -1;
+                        m_custom_type = false;
+                        
+                        if (ImGui::TreeNode("Select Serie")) {
+                            for (int i = 0; i < (int)num; i++)
+                            {
+                                if (ImGui::Selectable(names[i].c_str(), m_selected_lif_serie_index == i))
+                                {
+                                    m_selected_lif_serie_index = i;
+                                    m_selected_lif_serie_name = names[m_selected_lif_serie_index];
+                                }
+                            }
+                            ImGui::TreePop();
+                        }
+                        ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
+                    }
+                    free(outPath);
+                }
+                else if (result == NFD_CANCEL) {
+                }
+                else {
+                }
+            }
+            ImGui::EndMenu();
+        }
+        
+        if (ImGui::BeginMenu("Edit"))
+        {
+            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+            ImGui::Separator();
+            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+            ImGui::EndMenu();
+        }
+    }
+    ImGui::EndMainMenuBar();
 }
 
 
@@ -413,51 +115,51 @@ void VisibleRunApp::windowClose()
 
 
 void VisibleRunApp::DrawDocksDebug() {
-  if (ImGui::Begin("Docks", &show_docks_debug_)) {
-    ImGui::LabelText(
-        "TODO",
-        "Get docking information from ImGui and populate this once the ImGui "
-        "programmatic access to docking is published as a stable API");
-    // TODO: generate docking information
-  }
-  ImGui::End();
+    if (ImGui::Begin("Docks", &show_docks_debug_)) {
+        ImGui::LabelText(
+                         "TODO",
+                         "Get docking information from ImGui and populate this once the ImGui "
+                         "programmatic access to docking is published as a stable API");
+        // TODO: generate docking information
+    }
+    ImGui::End();
 }
 
 void VisibleRunApp::DrawImGuiMetrics() { ImGui::ShowMetricsWindow(); }
 
 void VisibleRunApp::DrawImGuiDemos() {
-  ImGui::ShowDemoWindow(&show_imgui_demos_);
+    ImGui::ShowDemoWindow(&show_imgui_demos_);
 }
 
 
 void VisibleRunApp::DrawStatusBar(float width, float height, float pos_x,
-                                    float pos_y) {
-  // Draw status bar (no docking)
+                                  float pos_y) {
+    // Draw status bar (no docking)
     ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Always);
-  ImGui::Begin("statusbar", nullptr,
-               ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings |
-                   ImGuiWindowFlags_NoBringToFrontOnFocus |
-                   ImGuiWindowFlags_NoResize);
-
-  // Call the derived class to add stuff to the status bar
- // DrawInsideStatusBar(width - 45.0f, height);
-
- // ImGui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
-  // Draw the common stuff
-  ImGui::SameLine(width - 45.0f);
-// Font = Font( "Menlo", 18 ); //font(Font::FAMILY_PROPORTIONAL);
-//  font.Normal().Regular().SmallSize();
-//  ImGui::PushFont(font.ImGuiFont());
-  ImGui::Text("FPS: %ld", std::lround(ImGui::GetIO().Framerate));
-  ImGui::End();
+    ImGui::Begin("statusbar", nullptr,
+                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings |
+                 ImGuiWindowFlags_NoBringToFrontOnFocus |
+                 ImGuiWindowFlags_NoResize);
+    
+    // Call the derived class to add stuff to the status bar
+    // DrawInsideStatusBar(width - 45.0f, height);
+    
+    // ImGui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
+    // Draw the common stuff
+    ImGui::SameLine(width - 45.0f);
+    // Font = Font( "Menlo", 18 ); //font(Font::FAMILY_PROPORTIONAL);
+    //  font.Normal().Regular().SmallSize();
+    //  ImGui::PushFont(font.ImGuiFont());
+    ImGui::Text("FPS: %ld", std::lround(ImGui::GetIO().Framerate));
+    ImGui::End();
 }
 
 void VisibleRunApp::DrawGUI(){
     DrawMainMenu();
     if (show_imgui_metrics_) DrawImGuiMetrics();
     if (show_imgui_demos_) DrawImGuiDemos();
-
+    
     
 }
 
@@ -469,14 +171,10 @@ bool VisibleRunApp::shouldQuit()
 void VisibleRunApp::setup_ui(){
     WindowRef ww = getWindow ();
     m_imgui_options = ImGui::Options();
-    ImGui::initialize(m_imgui_options
-                   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
-                   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
-                   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
-                   .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
-                   .window(ww)
-                   );
-
+    ImGui::Initialize(m_imgui_options
+                      .window(ww)
+                      );
+    
     float dpiScale = 1.f;
     auto& style = ImGui::GetStyle();
     style.WindowBorderSize = 1.f * dpiScale;
@@ -514,77 +212,93 @@ void VisibleRunApp::setup()
     }
     
     VisibleAppControl::setup_text_loggers(mRootOutputDir, "Visible Log " );
-//    VisibleAppControl::setup_loggers(mRootOutputDir, visual_log, " Visible Log ");
+    //    VisibleAppControl::setup_loggers(mRootOutputDir, visual_log, " Visible Log ");
     
     //   if(mVisibleScope== nullptr){
     mVisibleScope = gl::Texture::create( loadImage( loadResource(VISIBLE_SCOPE  )));
-
-
+    
+    
     setWindowSize(APP_WIDTH/2,APP_HEIGHT/2);
     setFrameRate( 60 );
     setWindowPos(getWindowSize()/4);
-
+    
     WindowRef ww = getWindow ();
     if( mVisibleScope ){
         gl::draw( mVisibleScope, getWindowBounds() );
     }
-
+    
     getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
-     
-     getWindow()->getSignalMove().connect( std::bind( &VisibleRunApp::windowMove, this ) );
-     getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
-     getWindow()->getSignalDraw().connect([&]{draw();});
-     getWindow()->getSignalClose().connect(std::bind( &VisibleRunApp::windowClose, this) );
-     getWindow()->getSignalResize().connect(std::bind( &VisibleRunApp::resize, this) );
-     
-     getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
-     getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
-     
-     
-     // Create an invisible folder for storage
-     mUserStorageDirPath = getHomeDirectory()/".Visible";
-     if (!bfs::exists( mUserStorageDirPath)) bfs::create_directories(mUserStorageDirPath);
     
-
+    getWindow()->getSignalMove().connect( std::bind( &VisibleRunApp::windowMove, this ) );
+    getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
+    getWindow()->getSignalDraw().connect([&]{draw();});
+    getWindow()->getSignalClose().connect(std::bind( &VisibleRunApp::windowClose, this) );
+    getWindow()->getSignalResize().connect(std::bind( &VisibleRunApp::resize, this) );
+    
+    getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
+    getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
+    
+    
+    // Create an invisible folder for storage
+    mUserStorageDirPath = getHomeDirectory()/".Visible";
+    if (!bfs::exists( mUserStorageDirPath)) bfs::create_directories(mUserStorageDirPath);
+    
+    
 }
-    
+
 static std::string cok = "chapter_ok";
 static std::string ccok = "chapter_ok_custom_content_ok";
 static std::string cokcnk = "chapter_ok_custom_content_not_recognized";
 static std::string used_dialog = "selected_by_dialog_using first_chapter";
 static std::string list_chapters = "listing chapters";
-    
+
 //    for( auto display : Display::getDisplays() )
 //     {
 //         mGlobalBounds.include(display->getBounds());
 //     }
-    
-std::string VisibleRunApp::identify_file(const bfs::path& bpath, const std::string& custom_type){
 
+std::string identify_extension(const bfs::path& bpath){
+    
     if (bpath.empty() || exists(bpath) == false || bpath.filename_is_dot() || bpath.filename_is_dot()){
         std::string msg = bpath.string() + " is not a valid path to a file ";
         vlogger::instance().console()->info(msg);
         return "";
     }
-
+    
     auto extension = bfs::path(bpath).extension().string();
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-    mDotExtension = extension;
-    m_is_valid_file = std::find( supported_mov_extensions.begin(), supported_mov_extensions.end(), mDotExtension) != supported_mov_extensions.end();
-    m_is_lif_file = m_is_valid_file && extension == ".lif";
-    m_is_mov_file = m_is_valid_file && (extension == ".mov" || extension == ".mp4");
-    if (m_is_valid_file){
-        mCurrentContent = bpath;
-        mCurrentContentName = bpath.filename().string();
-    }
-
- 
-    mContentType  = lifIO::isKnownCustomContent(custom_type) ? custom_type : "";
-        
-    return mDotExtension;
- 
+    return extension;
 }
+
+
+std::string VisibleRunApp::identify_file(const bfs::path& bpath, const std::string& custom_type){
     
+    if (bpath.empty() || exists(bpath) == false || bpath.filename_is_dot() || bpath.filename_is_dot()){
+        std::string msg = bpath.string() + " is not a valid path to a file ";
+        vlogger::instance().console()->info(msg);
+        return "";
+    }
+    
+    auto extension = bfs::path(bpath).extension().string();
+    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+    mDotExtension = identify_extension(bpath);
+    if (mDotExtension != ""){
+        m_is_valid_file = std::find( supported_mov_extensions.begin(), supported_mov_extensions.end(), mDotExtension) != supported_mov_extensions.end();
+        m_is_lif_file = m_is_valid_file && extension == ".lif";
+        m_is_mov_file = m_is_valid_file && (extension == ".mov" || extension == ".mp4");
+        if (m_is_valid_file){
+            mCurrentContent = bpath;
+            mCurrentContentName = bpath.filename().string();
+        }
+        mContentType = "";
+        if(m_is_lif_file)
+            mContentType  = lifIO::isKnownCustomContent(custom_type) ? custom_type : "";
+    }
+    
+    return mDotExtension;
+    
+}
+
 size_t VisibleRunApp::list_lif_series(std::vector<std::string>& names){
     assert(m_is_lif_file);
     assert(exists(mCurrentContent));
@@ -592,17 +306,17 @@ size_t VisibleRunApp::list_lif_series(std::vector<std::string>& names){
     mBrowser =  lif_browser::create(mCurrentContent.string());
     std::strstream msg;
     names = mBrowser->names ();
-
+    
     for (auto & se : names){
-            msg << se << std::endl;
-            std::cout << se << std::endl;
-       }
-         std::string tmp = msg.str();
-         VAPPLOG_INFO(tmp.c_str());
+        msg << se << std::endl;
+        std::cout << se << std::endl;
+    }
+    std::string tmp = msg.str();
+    VAPPLOG_INFO(tmp.c_str());
     
     return names.size();
 }
-    
+
 bool VisibleRunApp::load_lif_serie(const std::string& serie){
     
     auto bpath_path = mCurrentContent;
@@ -618,7 +332,7 @@ bool VisibleRunApp::load_lif_serie(const std::string& serie){
         auto serie = mBrowser->get_serie_by_index(indexItr->second);
         WindowRef ww = getWindow ();
         mContext = std::make_shared<lifContext>(ww,serie,cache_path);
-
+        
         if (mContext->is_valid()){
             cmds += "  Ok ";
         }
@@ -639,41 +353,41 @@ bool VisibleRunApp::load_lif_serie(const std::string& serie){
     }
     ADD_ERR_AND_RETURN(cmds, " Serie Not Found ")
 }
-    
+
 #if 0
-    else if (exists_with_extenstion && is_valid_extension && is_video_content){
-        
-        
-        VisibleAppControl::setup_loggers(root_output_dir, visual_log, bfs::path(bpath).filename().string());
-        
-        cvVideoPlayer::ref vref = cvVideoPlayer::create(bfs::path(bpath));
-        WindowRef ww = getWindow ();
-        
-        auto bpath_path = bfs::path(bpath);
-        auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
-        mContext = std::unique_ptr<sequencedImageContext>(new movContext (ww, vref, cache_path));
-        
-        if (mContext->is_valid()){ cmds += " [ " + m_args[1] + " ] ";cmds += "  Ok ";}
-        setup_ui();
-        
-        VAPPLOG_INFO(cmds.c_str());
-        update();
-        
-        ww->setTitle ( cmds + " Visible build: " + buildN);
-        mFont = Font( "Menlo", 18 );
-        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-        // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
-        getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
-        getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
-        getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
-        getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
-        gl::enableVerticalSync();
-        
-    }else{
-        ADD_ERR_AND_RETURN(cmds, " Path not valid ");
-    }
-#endif
+else if (exists_with_extenstion && is_valid_extension && is_video_content){
     
+    
+    VisibleAppControl::setup_loggers(root_output_dir, visual_log, bfs::path(bpath).filename().string());
+    
+    cvVideoPlayer::ref vref = cvVideoPlayer::create(bfs::path(bpath));
+    WindowRef ww = getWindow ();
+    
+    auto bpath_path = bfs::path(bpath);
+    auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
+    mContext = std::unique_ptr<sequencedImageContext>(new movContext (ww, vref, cache_path));
+    
+    if (mContext->is_valid()){ cmds += " [ " + m_args[1] + " ] ";cmds += "  Ok ";}
+    setup_ui();
+    
+    VAPPLOG_INFO(cmds.c_str());
+    update();
+    
+    ww->setTitle ( cmds + " Visible build: " + buildN);
+    mFont = Font( "Menlo", 18 );
+    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+    // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
+    getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
+    getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
+    getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
+    getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
+    gl::enableVerticalSync();
+    
+}else{
+    ADD_ERR_AND_RETURN(cmds, " Path not valid ");
+}
+#endif
+
 
 
 void VisibleRunApp::windowMove()
@@ -749,19 +463,20 @@ void VisibleRunApp::keyDown( KeyEvent event )
 void VisibleRunApp::update()
 {
     if (mContext && mContext->is_valid()) mContext->update ();
-    
+    DrawMainMenu();
+ 
 }
 
-//static int n = 0;
-//static float minRadius = 1;
+
 void VisibleRunApp::draw ()
 {
     gl::clear( Color::gray( 0.67f ) );
     if (mContext && mContext->is_valid()){
         mContext->draw ();
     }
-    static bool sOpen;
-    __ShowDemoWindow(& sOpen);
+    
+    
+    
 }
 
 

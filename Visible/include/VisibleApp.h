@@ -25,21 +25,17 @@
 #include <string>
 #include <map>
 
-//#include "MovContext.h"
-#include "lif_content.hpp"
-//#include "algo_Mov.hpp"
+
 #include "Item.h"
 #include "logger/logger.hpp"
 #include "core/core.hpp"
 #include "core/singleton.hpp"
 #include "core/file_system.hpp"
-#include "otherIO/lifFile.hpp"
+
 #include "Plist.hpp"
 
-#if defined (  HOCKEY_SUPPORT )
-#include "hockey_etc_cocoa_wrappers.h"
-#endif
-
+#include "lif_content.hpp"
+#include "otherIO/lifFile.hpp"
 #include "LifContext.h"
 #include "MovContext.h"
 #include "imGuiLogger.hpp"
@@ -236,7 +232,7 @@ private:
     bool show_logs_{true};
     bool show_settings_{true};
     bool show_imgui_metrics_{false};
-    bool show_imgui_demos_{false};
+    bool show_imgui_demos_{true};
     
     gl::Texture2dRef mVisibleScope;
     

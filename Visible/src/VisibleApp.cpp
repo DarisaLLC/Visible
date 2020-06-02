@@ -115,9 +115,7 @@ void VisibleApp::fileOpen (){
 //
 void VisibleApp::setup()
 {
-#if defined (  HOCKEY_SUPPORT )
-    hockeyAppSetup hockey;
-#endif
+
     ui::initialize(ui::Options()
                    .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
                    .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget

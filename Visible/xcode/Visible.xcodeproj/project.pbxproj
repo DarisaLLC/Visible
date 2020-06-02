@@ -245,7 +245,6 @@
 		C26A055D1E77759D00BDC954 /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
 		C26A055E1E7775A700BDC954 /* AVReader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A4F1D022D2A00C70872 /* AVReader.mm */; };
 		C26A055F1E7775A700BDC954 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
-		C26A05601E7775A700BDC954 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
 		C26A05651E777DF300BDC954 /* registration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696F1CED3E2C0045FF57 /* registration.cpp */; };
 		C26A05661E777E1000BDC954 /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C26A05671E777E2100BDC954 /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
@@ -271,7 +270,6 @@
 		C26F5FA021B0AA6D00EAE156 /* swatchLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = C2175DD8215154A9004315C0 /* swatchLarge.png */; };
 		C26F5FA221B0AA6D00EAE156 /* gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069671CED3E2C0045FF57 /* gradient.cpp */; };
 		C26F5FA621B0AA6D00EAE156 /* contraction_t.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction_t.cpp */; };
-		C26F5FA721B0AA6D00EAE156 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
 		C26F5FA821B0AA6D00EAE156 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
 		C26F5FAD21B0AA6D00EAE156 /* time_spec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C20EDBC01CF277130074C47A /* time_spec.cpp */; };
 		C26F5FAF21B0AA6D00EAE156 /* algo_ssmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29DB075212B351200930CBD /* algo_ssmt.cpp */; };
@@ -353,25 +351,12 @@
 		C28596022484690300C9CCFB /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
 		C28596032484690300C9CCFB /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
 		C28596042484690300C9CCFB /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
-		C285960D2485BE0F00C9CCFB /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C285960C2485BE0F00C9CCFB /* AppDelegate.m */; };
-		C28596152485BE1100C9CCFB /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C28596142485BE1100C9CCFB /* main.m */; };
-		C285961A2485C4EB00C9CCFB /* CoreMediaIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C203D2E221713E0B00B6B4A8 /* CoreMediaIO.framework */; };
-		C285961B2485C4F000C9CCFB /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C203D2E621714A6000B6B4A8 /* AVKit.framework */; };
-		C285961E2485C54000C9CCFB /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C285961C2485C54000C9CCFB /* MetalKit.framework */; };
-		C285961F2485C54000C9CCFB /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C285961D2485C54000C9CCFB /* Metal.framework */; };
-		C28596212485C5FB00C9CCFB /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = C28596202485C5FB00C9CCFB /* ViewController.mm */; };
-		C28596232485C60E00C9CCFB /* Renderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = C28596222485C60E00C9CCFB /* Renderer.mm */; };
-		C285962A2485CC4300C9CCFB /* imgui_impl_osx.mm in Sources */ = {isa = PBXBuildFile; fileRef = C28596272485CC4300C9CCFB /* imgui_impl_osx.mm */; };
-		C285962B2485CC4300C9CCFB /* imgui_impl_metal.mm in Sources */ = {isa = PBXBuildFile; fileRef = C28596282485CC4300C9CCFB /* imgui_impl_metal.mm */; };
-		C285962C2485CD0400C9CCFB /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
-		C285962D2485CD1C00C9CCFB /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
-		C285962E2485CD2600C9CCFB /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
-		C285962F2485CD4200C9CCFB /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFD216E79590080462D /* imgui_demo.cpp */; };
-		C28596322485CEC400C9CCFB /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C28596302485CEC400C9CCFB /* Main.storyboard */; };
-		C28596342485D47D00C9CCFB /* Info-macOS.plist in Resources */ = {isa = PBXBuildFile; fileRef = C28596332485D47D00C9CCFB /* Info-macOS.plist */; };
-		C28596382485DD6300C9CCFB /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C294B11F2152D22C00C916B1 /* Media.xcassets */; };
-		C28596392485DE1400C9CCFB /* Visible.icns in Resources */ = {isa = PBXBuildFile; fileRef = C264F94B215F0B6D00AF3130 /* Visible.icns */; };
 		C285963D2485DF1400C9CCFB /* VisibleRunner-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C285963C2485DF1400C9CCFB /* VisibleRunner-Info.plist */; };
+		C28596432486E28100C9CCFB /* visible_imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2859640248623A100C9CCFB /* visible_imgui.cpp */; };
+		C2859646248709EB00C9CCFB /* imgui_impl_opengl3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28596442487048700C9CCFB /* imgui_impl_opengl3.cpp */; };
+		C2859647248709EC00C9CCFB /* imgui_impl_opengl3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28596442487048700C9CCFB /* imgui_impl_opengl3.cpp */; };
+		C285964B24870EF100C9CCFB /* imgui_stdlib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C285964924870EF000C9CCFB /* imgui_stdlib.cpp */; };
+		C285964C24870EF100C9CCFB /* imgui_stdlib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C285964924870EF000C9CCFB /* imgui_stdlib.cpp */; };
 		C2869C5A2319F47E00F04C0A /* imgui_plot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26223B12318B1DC006D9045 /* imgui_plot.cpp */; };
 		C28B016F229B182100B8165D /* permutation_entropy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21094662239D1C8004E88EE /* permutation_entropy.cpp */; };
 		C28B0170229B182100B8165D /* lifFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4A1E298C9D0049ADDB /* lifFile.cpp */; };
@@ -482,7 +467,6 @@
 		C2AF87FB1CFCB7A500CFC191 /* opencv_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696E1CED3E2C0045FF57 /* opencv_utils.cpp */; };
 		C2AFAD882252E2950038AF5B /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AFAD872252E2950038AF5B /* CoreImage.framework */; };
 		C2AFAD892252E2AE0038AF5B /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AFAD872252E2950038AF5B /* CoreImage.framework */; };
-		C2B005821CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */; };
 		C2B2F208234D1C2D0026ADDB /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
 		C2B2F209234D1E6B0026ADDB /* moviong_region.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACF922FF793C00D171EF /* moviong_region.cpp */; };
 		C2B38A581D02950B00C70872 /* AVReaderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */; };
@@ -987,24 +971,16 @@
 		C2820F2E217528CF00DFA7A6 /* libconfig++.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libconfig++.a"; path = "../../../../../../../usr/local/Cellar/libconfig/1.7.2/lib/libconfig++.a"; sourceTree = "<group>"; };
 		C2820F3621752E5100DFA7A6 /* VisibleApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VisibleApp.h; path = ../include/VisibleApp.h; sourceTree = "<group>"; };
 		C2820F3721754C3100DFA7A6 /* imGuiLogger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = imGuiLogger.hpp; path = ../include/imGuiLogger.hpp; sourceTree = "<group>"; };
-		C28596092485BE0F00C9CCFB /* VisibleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VisibleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C285960B2485BE0F00C9CCFB /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		C285960C2485BE0F00C9CCFB /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		C28596142485BE1100C9CCFB /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		C28596162485BE1100C9CCFB /* VisibleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VisibleApp.entitlements; sourceTree = "<group>"; };
 		C285961C2485C54000C9CCFB /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		C285961D2485C54000C9CCFB /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
-		C28596202485C5FB00C9CCFB /* ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
-		C28596222485C60E00C9CCFB /* Renderer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Renderer.mm; sourceTree = "<group>"; };
-		C28596262485CC4300C9CCFB /* imgui_impl_metal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui_impl_metal.h; sourceTree = "<group>"; };
-		C28596272485CC4300C9CCFB /* imgui_impl_osx.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = imgui_impl_osx.mm; sourceTree = "<group>"; };
-		C28596282485CC4300C9CCFB /* imgui_impl_metal.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = imgui_impl_metal.mm; sourceTree = "<group>"; };
-		C28596292485CC4300C9CCFB /* imgui_impl_osx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui_impl_osx.h; sourceTree = "<group>"; };
-		C28596312485CEC400C9CCFB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		C28596332485D47D00C9CCFB /* Info-macOS.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Info-macOS.plist"; sourceTree = "<group>"; };
 		C285963B2485DEEA00C9CCFB /* affineApp-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "affineApp-Info.plist"; sourceTree = "<group>"; };
 		C285963C2485DF1400C9CCFB /* VisibleRunner-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "VisibleRunner-Info.plist"; sourceTree = "<group>"; };
 		C285963E2485DF3200C9CCFB /* VisibleGtest-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "VisibleGtest-Info.plist"; sourceTree = "<group>"; };
+		C285963F248623A100C9CCFB /* visible_imgui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = visible_imgui.h; sourceTree = "<group>"; };
+		C2859640248623A100C9CCFB /* visible_imgui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = visible_imgui.cpp; sourceTree = "<group>"; };
+		C28596442487048700C9CCFB /* imgui_impl_opengl3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_impl_opengl3.cpp; path = ../local_cinder_imgui/lib/imgui/imgui_impl_opengl3.cpp; sourceTree = "<group>"; };
+		C285964824870C6300C9CCFB /* imgui_impl_opengl3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imgui_impl_opengl3.h; path = ../local_cinder_imgui/lib/imgui/imgui_impl_opengl3.h; sourceTree = "<group>"; };
+		C285964924870EF000C9CCFB /* imgui_stdlib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_stdlib.cpp; path = ../local_cinder_imgui/lib/imgui/imgui_stdlib.cpp; sourceTree = "<group>"; };
 		C28B01C4229B182100B8165D /* affineApp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = affineApp; sourceTree = BUILT_PRODUCTS_DIR; };
 		C28B01C6229B1CD900B8165D /* algo_shortterm.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = algo_shortterm.cpp; path = ../src/algo_shortterm.cpp; sourceTree = "<group>"; };
 		C28B01CB229B1DE500B8165D /* lif_serie.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = lif_serie.cpp; path = ../src/lif_serie.cpp; sourceTree = "<group>"; };
@@ -1034,8 +1010,6 @@
 		C2AFCEFC216E79580080462D /* imgui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui.cpp; path = ../local_cinder_imgui/lib/imgui/imgui.cpp; sourceTree = "<group>"; };
 		C2AFCEFD216E79590080462D /* imgui_demo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_demo.cpp; path = ../local_cinder_imgui/lib/imgui/imgui_demo.cpp; sourceTree = "<group>"; };
 		C2AFCF08216F0CF10080462D /* CinderImGui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CinderImGui.cpp; path = ../local_cinder_imgui/src/CinderImGui.cpp; sourceTree = "<group>"; };
-		C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = hockey_etc_cocoa_wrappers.mm; path = ../src/hockey_etc_cocoa_wrappers.mm; sourceTree = "<group>"; };
-		C2B005861CFF8FE100AC2E64 /* hockey_etc_cocoa_wrappers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hockey_etc_cocoa_wrappers.h; path = ../include/hockey_etc_cocoa_wrappers.h; sourceTree = "<group>"; };
 		C2B1EB8F247876C8007F8445 /* VisibleRunRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VisibleRunRelease.entitlements; sourceTree = "<group>"; };
 		C2B38A4F1D022D2A00C70872 /* AVReader.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = AVReader.mm; path = ../src/AVReader.mm; sourceTree = "<group>"; };
 		C2B38A541D022E9D00C70872 /* AVReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AVReader.h; path = ../include/AVReader.h; sourceTree = "<group>"; };
@@ -1220,17 +1194,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C28596062485BE0F00C9CCFB /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C285961E2485C54000C9CCFB /* MetalKit.framework in Frameworks */,
-				C285961B2485C4F000C9CCFB /* AVKit.framework in Frameworks */,
-				C285961F2485C54000C9CCFB /* Metal.framework in Frameworks */,
-				C285961A2485C4EB00C9CCFB /* CoreMediaIO.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		C28B01A6229B182100B8165D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1292,7 +1255,6 @@
 				C254BE851F4FAF5C00977307 /* cvVideoPlayer.cpp */,
 				C2B38A4F1D022D2A00C70872 /* AVReader.mm */,
 				C2B38A561D02950B00C70872 /* AVReaderWrapper.mm */,
-				C2B005811CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm */,
 				C2677584212A325F00B5E080 /* contraction_t.cpp */,
 				C21A50DF22AB4D0C00B0AC7D /* eigen_utils.cpp */,
 				C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */,
@@ -1302,6 +1264,7 @@
 				C21946761CE4DC7100976025 /* visible_impl.cpp */,
 				C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */,
 				C21946771CE4DC7100976025 /* VisibleRunApp.cpp */,
+				C2859640248623A100C9CCFB /* visible_imgui.cpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -1315,7 +1278,6 @@
 				C26F5FFD21B0AA6D00EAE156 /* VisibleRun.app */,
 				C28B01C4229B182100B8165D /* affineApp */,
 				C21A50D222A9A65900B0AC7D /* All */,
-				C28596092485BE0F00C9CCFB /* VisibleApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1335,7 +1297,6 @@
 				C240F9F921E1466D00FBA228 /* VisibleTestApp */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				C26A053B1E771CCF00BDC954 /* sscli */,
-				C285960A2485BE0F00C9CCFB /* VisibleApp */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				C240F9FA21E14C8900FBA228 /* sscli-Info.plist */,
@@ -1526,7 +1487,6 @@
 				C21946A31CE4EA4900976025 /* guiContext.h */,
 				C2F1B6211FB13FE600DDD7DB /* LifContext.h */,
 				C2E02ED1225AB45E00AC175D /* MovContext.h */,
-				C2B005861CFF8FE100AC2E64 /* hockey_etc_cocoa_wrappers.h */,
 				C2E321FF1D0480E4006DFE5E /* mediaInfo.h */,
 				C2BF1A671E71D12200A30407 /* timeMarker.h */,
 				C2C68C3B1ED9F9440095FFC4 /* tracker.h */,
@@ -1537,6 +1497,7 @@
 				C2820F3621752E5100DFA7A6 /* VisibleApp.h */,
 				C21A50E022AB4D0C00B0AC7D /* eigen_utils.hpp */,
 				C22DAD0323032F1200D171EF /* task_manager.hpp */,
+				C285963F248623A100C9CCFB /* visible_imgui.h */,
 			);
 			name = include;
 			sourceTree = "<group>";
@@ -2040,28 +2001,12 @@
 			name = Config;
 			sourceTree = "<group>";
 		};
-		C285960A2485BE0F00C9CCFB /* VisibleApp */ = {
-			isa = PBXGroup;
-			children = (
-				C28596262485CC4300C9CCFB /* imgui_impl_metal.h */,
-				C28596282485CC4300C9CCFB /* imgui_impl_metal.mm */,
-				C28596292485CC4300C9CCFB /* imgui_impl_osx.h */,
-				C28596272485CC4300C9CCFB /* imgui_impl_osx.mm */,
-				C28596222485C60E00C9CCFB /* Renderer.mm */,
-				C28596202485C5FB00C9CCFB /* ViewController.mm */,
-				C285960B2485BE0F00C9CCFB /* AppDelegate.h */,
-				C285960C2485BE0F00C9CCFB /* AppDelegate.m */,
-				C28596302485CEC400C9CCFB /* Main.storyboard */,
-				C28596332485D47D00C9CCFB /* Info-macOS.plist */,
-				C28596142485BE1100C9CCFB /* main.m */,
-				C28596162485BE1100C9CCFB /* VisibleApp.entitlements */,
-			);
-			path = VisibleApp;
-			sourceTree = "<group>";
-		};
 		C29C726F216FC7340028AED1 /* imgui */ = {
 			isa = PBXGroup;
 			children = (
+				C285964924870EF000C9CCFB /* imgui_stdlib.cpp */,
+				C285964824870C6300C9CCFB /* imgui_impl_opengl3.h */,
+				C28596442487048700C9CCFB /* imgui_impl_opengl3.cpp */,
 				C2266A0B247DA94C000F4FBF /* imgui.h */,
 				C2FC528A246F2E1F00B1030D /* CinderImGuiConfig.h */,
 				C21AB38F232E04F700D1C529 /* CinderImGui.h */,
@@ -2175,24 +2120,6 @@
 			productReference = C26F5FFD21B0AA6D00EAE156 /* VisibleRun.app */;
 			productType = "com.apple.product-type.application";
 		};
-		C28596082485BE0F00C9CCFB /* VisibleApp */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C28596172485BE1100C9CCFB /* Build configuration list for PBXNativeTarget "VisibleApp" */;
-			buildPhases = (
-				C28596052485BE0F00C9CCFB /* Sources */,
-				C28596062485BE0F00C9CCFB /* Frameworks */,
-				C28596072485BE0F00C9CCFB /* Resources */,
-				C28596372485D7F600C9CCFB /* Build Number */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = VisibleApp;
-			productName = VisibleApp;
-			productReference = C28596092485BE0F00C9CCFB /* VisibleApp.app */;
-			productType = "com.apple.product-type.application";
-		};
 		C28B016D229B182100B8165D /* affineApp */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C28B01C1229B182100B8165D /* Build configuration list for PBXNativeTarget "affineApp" */;
@@ -2244,11 +2171,6 @@
 						DevelopmentTeam = W4F7HL2GN5;
 						ProvisioningStyle = Manual;
 					};
-					C28596082485BE0F00C9CCFB = {
-						CreatedOnToolsVersion = 11.4.1;
-						DevelopmentTeam = W4F7HL2GN5;
-						ProvisioningStyle = Manual;
-					};
 					C28B016D229B182100B8165D = {
 						DevelopmentTeam = W4F7HL2GN5;
 						ProvisioningStyle = Automatic;
@@ -2272,7 +2194,6 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C28596082485BE0F00C9CCFB /* VisibleApp */,
 				8D1107260486CEB800E47090 /* Visible */,
 				C26F5F9721B0AA6D00EAE156 /* VisibleRun */,
 				C24CD87B1CEA5B1B0008C72B /* VisibleGtest */,
@@ -2317,17 +2238,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C28596072485BE0F00C9CCFB /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C28596382485DD6300C9CCFB /* Media.xcassets in Resources */,
-				C28596392485DE1400C9CCFB /* Visible.icns in Resources */,
-				C28596342485D47D00C9CCFB /* Info-macOS.plist in Resources */,
-				C28596322485CEC400C9CCFB /* Main.storyboard in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -2359,24 +2269,6 @@
 			shellPath = /bin/sh;
 			shellScript = "#Update build number with number of git commits if in release mode\nbuildNumber=$(git rev-list HEAD | wc -l | tr -d ' ')\necho $buildNumber\n#if [ ${CONFIGURATION} == \"Release\" ]; then\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n#fi;\n";
 		};
-		C28596372485D7F600C9CCFB /* Build Number */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Build Number";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "#Update build number with number of git commits if in release mode\nbuildNumber=$(git rev-list HEAD | wc -l | tr -d ' ')\necho $buildNumber\n#if [ ${CONFIGURATION} == \"Release\" ]; then\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n#fi;\n";
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -2386,7 +2278,6 @@
 			files = (
 				C2606DA91CED3E2E0045FF57 /* gradient.cpp in Sources */,
 				C242CCC5217E76D8004F7867 /* contraction_t.cpp in Sources */,
-				C2B005821CFF7F7000AC2E64 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C21094672239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
 				C28B01D1229B1E5F00B8165D /* lif_browser.cpp in Sources */,
 				C2606DB01CED3E2E0045FF57 /* opencv_utils.cpp in Sources */,
@@ -2402,6 +2293,7 @@
 				C2606DAE1CED3E2E0045FF57 /* localvariance.cpp in Sources */,
 				C28B01DC229B210A00B8165D /* voxel_ssmt.cpp in Sources */,
 				C26223B22318B1DC006D9045 /* imgui_plot.cpp in Sources */,
+				C2859646248709EB00C9CCFB /* imgui_impl_opengl3.cpp in Sources */,
 				C28B01C7229B1CD900B8165D /* algo_shortterm.cpp in Sources */,
 				C27ED0A2220BB71D00B55D65 /* InterfaceUtilities.cpp in Sources */,
 				C20D4DE52208BD34004D9405 /* ellipse_fit.cpp in Sources */,
@@ -2455,6 +2347,7 @@
 				C2B87C9921D012D700C91E35 /* logger.cpp in Sources */,
 				C253337E233149ED003B3212 /* ImGuiExtensions.cpp in Sources */,
 				C248D6D8224939AC00C2C02F /* VisibleApp.cpp in Sources */,
+				C285964B24870EF100C9CCFB /* imgui_stdlib.cpp in Sources */,
 				C236D345230F488300ED5627 /* pf.cpp in Sources */,
 				C2618F80217FDA6600FA9F43 /* color.cc in Sources */,
 				C20EDBC21CF277130074C47A /* self_similarity.cpp in Sources */,
@@ -2637,7 +2530,6 @@
 				C2AC7A7224808ABB00853219 /* nfd_cocoa.m in Sources */,
 				C21A506C22A9835A00B0AC7D /* stats.cpp in Sources */,
 				C26A055D1E77759D00BDC954 /* lifFile.cpp in Sources */,
-				C26A05601E7775A700BDC954 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C2DA195B1E80E4E200062DBC /* csv.cpp in Sources */,
 				C21A50E422AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
 				C26A05651E777DF300BDC954 /* registration.cpp in Sources */,
@@ -2658,7 +2550,6 @@
 				C21094682239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
 				C28596012484690300C9CCFB /* imgui_demo.cpp in Sources */,
 				C2CE9C7522A48AC5003C479A /* etw_utils.cpp in Sources */,
-				C26F5FA721B0AA6D00EAE156 /* hockey_etc_cocoa_wrappers.mm in Sources */,
 				C26F5FA821B0AA6D00EAE156 /* opencv_utils.cpp in Sources */,
 				C27DB8B4225BDE37002AE43D /* cvVideoPlayer.cpp in Sources */,
 				C26F5FAD21B0AA6D00EAE156 /* time_spec.cpp in Sources */,
@@ -2677,9 +2568,11 @@
 				C28B01D2229B1E5F00B8165D /* lif_browser.cpp in Sources */,
 				C26F5FB821B0AA6D00EAE156 /* lineseg.cpp in Sources */,
 				C2ED5BB72209F79B00EE52B3 /* imguivariouscontrols.cpp in Sources */,
+				C2859647248709EC00C9CCFB /* imgui_impl_opengl3.cpp in Sources */,
 				C2AC7A6F24808AB500853219 /* nfd_cocoa.m in Sources */,
 				C21E390D228A054C00778A66 /* affine_rectangle.cpp in Sources */,
 				C2AC7A7424808AC000853219 /* nfd_common.c in Sources */,
+				C28596432486E28100C9CCFB /* visible_imgui.cpp in Sources */,
 				C26F5FB921B0AA6D00EAE156 /* cinder_support.cpp in Sources */,
 				C26F5FBA21B0AA6D00EAE156 /* visible_lif_impl.cpp in Sources */,
 				C236D346230F489000ED5627 /* pf.cpp in Sources */,
@@ -2731,23 +2624,7 @@
 				C2109477223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
 				C2398A0A21DD8A0A00B180A0 /* file_system.cpp in Sources */,
 				C28F74392236DD6E0040890C /* edgel.cpp in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C28596052485BE0F00C9CCFB /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C285962A2485CC4300C9CCFB /* imgui_impl_osx.mm in Sources */,
-				C285962B2485CC4300C9CCFB /* imgui_impl_metal.mm in Sources */,
-				C28596232485C60E00C9CCFB /* Renderer.mm in Sources */,
-				C28596212485C5FB00C9CCFB /* ViewController.mm in Sources */,
-				C28596152485BE1100C9CCFB /* main.m in Sources */,
-				C285962C2485CD0400C9CCFB /* imgui.cpp in Sources */,
-				C285960D2485BE0F00C9CCFB /* AppDelegate.m in Sources */,
-				C285962E2485CD2600C9CCFB /* imgui_widgets.cpp in Sources */,
-				C285962F2485CD4200C9CCFB /* imgui_demo.cpp in Sources */,
-				C285962D2485CD1C00C9CCFB /* imgui_draw.cpp in Sources */,
+				C285964C24870EF100C9CCFB /* imgui_stdlib.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2842,17 +2719,6 @@
 			targetProxy = C21A50DA22A9A67300B0AC7D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		C28596302485CEC400C9CCFB /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				C28596312485CEC400C9CCFB /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		C01FCF4B08A954540054247B /* Debug */ = {
@@ -3506,142 +3372,6 @@
 			};
 			name = Release;
 		};
-		C28596182485BE1100C9CCFB /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSET_PACK_MANIFEST_URL_PREFIX = assets;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = VisibleApp/VisibleApp.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
-				COMBINE_HIDPI_IMAGES = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEPLOYMENT_POSTPROCESSING = NO;
-				DEVELOPMENT_TEAM = W4F7HL2GN5;
-				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
-				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				INFOPLIST_FILE = "VisibleApp/Info-macOS.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACH_O_TYPE = mh_execute;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-			};
-			name = Debug;
-		};
-		C28596192485BE1100C9CCFB /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSET_PACK_MANIFEST_URL_PREFIX = assets;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = VisibleApp/VisibleApp.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
-				COMBINE_HIDPI_IMAGES = YES;
-				COPY_PHASE_STRIP = NO;
-				DEPLOYMENT_POSTPROCESSING = NO;
-				DEVELOPMENT_TEAM = W4F7HL2GN5;
-				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
-				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				INFOPLIST_FILE = "VisibleApp/Info-macOS.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACH_O_TYPE = mh_execute;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = net.darisallc.Visible;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-			};
-			name = Release;
-		};
 		C28B01C2229B182100B8165D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
@@ -3810,15 +3540,6 @@
 			buildConfigurations = (
 				C26F5FFB21B0AA6D00EAE156 /* Debug */,
 				C26F5FFC21B0AA6D00EAE156 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C28596172485BE1100C9CCFB /* Build configuration list for PBXNativeTarget "VisibleApp" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C28596182485BE1100C9CCFB /* Debug */,
-				C28596192485BE1100C9CCFB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
