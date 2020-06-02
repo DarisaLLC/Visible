@@ -11,7 +11,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 
-#include "imgui/imgui.h"
+#include "imgui.h"
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 static ImVec2 operator+(const ImVec2 &a, const ImVec2 &b) {

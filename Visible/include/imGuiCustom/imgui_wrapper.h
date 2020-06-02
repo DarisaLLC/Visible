@@ -4,7 +4,7 @@
 // These wrapper functions exist solely to circumvent a current bug
 // somewhere in the interface between C++ and D
 
-#include "imgui/imgui.h"
+#include "imgui.h"
 
 // ImGui end-user API
 // In a namespace so that user can add extra functions in a separate file (e.g. Value() helpers for your vector or common types)

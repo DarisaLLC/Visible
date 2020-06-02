@@ -165,7 +165,8 @@ private:
 class VisibleRunApp : public App
 {
 public:
-    
+    VisibleRunApp() { ImGui::CreateContext(); }
+    ~VisibleRunApp() { ImGui::DestroyContext (); }
     
     virtual void DrawGUI();
     virtual void QuitApp();
@@ -196,7 +197,7 @@ private:
     bool load_lif_serie(const std::string& serie);
     size_t list_lif_series(std::vector<std::string>& names);
     
-    float DrawMainMenu ();
+    void DrawMainMenu ();
     void DrawImGuiMetrics();
     void DrawImGuiDemos ();
     void DrawStatusBar(float width, float height, float pos_x, float pos_y);
@@ -247,7 +248,7 @@ private:
     void setup_ui ();
     
     imGuiLog visual_log;
-    
+    ImGui::Options m_imgui_options;
     
     
     
