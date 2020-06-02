@@ -7,8 +7,8 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include "imgui/imgui.h"
-#include "cinder/CinderImGui.h"
+#include "imgui.h"
+#include "CinderImGui.h"
 
 using namespace std;
 using namespace ci;

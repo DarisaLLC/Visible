@@ -8,7 +8,7 @@
 #ifndef app_logger_h
 #define app_logger_h
 
-#include "cinder/CinderImGui.h"
+#include "CinderImGui.h"
 #include <mutex>
 
 #include "spdlog/spdlog.h"

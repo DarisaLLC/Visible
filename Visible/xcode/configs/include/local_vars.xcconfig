@@ -17,13 +17,13 @@ VISIBLE_ROOT = $(PROJECT_DIR)/../../Visible
 
 
 TEST_DATA = $(SVL_ROOT)/Assets
-LOCAL_CINDER = $(SRCROOT)/../../Cinder
+LOCAL_CINDER = $(EXTERNALS)/cinder
 LOCAL_OCV = /usr/local/opencv-4.3.0
 LOCAL_GSL = /usr/local/
 LOCAL_CIMG = $(EXTERNALS)/CImg
 LOCAL_SPDLOG = $(EXTERNALS)/spdlog
 LOCAL_FMT = $(EXTERNALS)/fmt
-LOCAL_CIIMGUI = $(LOCAL_CINDER)/include/imgui
+LOCAL_CIIMGUI = $(VISIBLE_ROOT)/local_cinder_imgui
 
 LOCAL_3rdParty = $(SVL_ROOT)/local
 LOCAL_BOOST = /usr/local
