@@ -176,13 +176,13 @@ void lifContext::setup_params () {
 void lifContext::setup()
 {
     ci::app::WindowRef ww = get_windowRef();
-    ui::Initialize(ui::Options()
-                //   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
-                //   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
-                //   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
-               //    .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
-                   .window(ww)
-                   );
+//    ui::Initialize(ui::Options()
+//                //   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
+//                //   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
+//                //   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
+//               //    .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
+//                   .window(ww)
+//                   );
 
     m_showGUI = true;
     m_showLog = true;
@@ -192,7 +192,7 @@ void lifContext::setup()
     setup_signals();
     assert(is_valid());
     ww->setTitle( m_serie.name());
-    ww->setSize(1536, 1024);
+//    ww->setSize(1536, 1024);
     mFont = Font( "Menlo", 18 );
     auto ws = ww->getSize();
     mSize = vec2( ws[0], ws[1] / 12);
@@ -614,10 +614,10 @@ void lifContext::keyDown( KeyEvent event )
         setFullScreen( ! isFullScreen() );
     }
     else if( event.getChar() == 'b' ) {
-        getWindow()->setBorderless( ! getWindow()->isBorderless() );
+        ww->setBorderless( ! ww->isBorderless() );
     }
     else if( event.getChar() == 't' ) {
-        getWindow()->setAlwaysOnTop( ! getWindow()->isAlwaysOnTop() );
+        ww->setAlwaysOnTop( ! ww->isAlwaysOnTop() );
     }
     
     
@@ -894,7 +894,8 @@ void lifContext::add_canvas (){
     // offscreen via FBO
     if(m_show_playback){
         ImVec2 pos (0,20);
-        ImVec2 size (getWindowWidth()/2.0, getWindowHeight()/2.0f - 20.0);
+        auto ww = get_windowRef();
+        ImVec2 size (ww->getSize().x/2.0, ww->getSize().y - 20.0);
         ui::ScopedWindow utilities(wDisplay);
         ImGui::SetNextWindowPos(pos);
         ImGui::SetNextWindowSize(size);
@@ -1057,10 +1058,10 @@ void lifContext::add_motion_profile (){
     
     ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
     assert(window != nullptr);
-    
+    auto ww = get_windowRef();
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
     ImVec2  frame (mMediaInfo.channel_size.width, mMediaInfo.channel_size.height);
-    ImVec2 pos (getWindowWidth() - sz.x, GetWindowHeight() - sz.y);
+    ImVec2 pos (ww->getSize().x - sz.x, ww->getSize().y - sz.y);
     m_motion_profile_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(frame.x,frame.y));
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowContentSize(frame);
@@ -1142,7 +1143,8 @@ void lifContext::add_contractions (bool* p_open)
     assert(window != nullptr);
     ImVec2 pos (window->Pos.x + window->Size.x, window->Pos.y );
     ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(ImVec2(getWindowWidth()/2, getWindowHeight()/4), ImGuiCond_FirstUseEver);
+    auto ww = get_windowRef();
+    ImGui::SetNextWindowSize(ImVec2(ww->getSize().x/2,ww->getSize().y/4), ImGuiCond_FirstUseEver);
     if (ImGui::Begin(wCells, p_open, ImGuiWindowFlags_MenuBar)){
         for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++){
             const ssmt_result::ref_t& mb = m_lifProcRef->moving_bodies()[i];

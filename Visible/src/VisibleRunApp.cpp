@@ -8,7 +8,7 @@
 
 
 #include "VisibleApp.h"
-#include "visible_imgui.h"
+
 
 #define APP_WIDTH 1024
 #define APP_HEIGHT 768
@@ -50,7 +50,6 @@ void VisibleRunApp::QuitApp(){
 }
 
 void VisibleRunApp::DrawMainMenu(){
-    std::vector<std::string> names;
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File"))
@@ -62,27 +61,16 @@ void VisibleRunApp::DrawMainMenu(){
                 if (result == NFD_OKAY) {
                     bfs::path fout(outPath);
                     auto dotext = identify_file(fout, "");
-                    if(m_is_lif_file){
-                        auto num = list_lif_series(names);
-                        m_selected_lif_serie_index = -1;
-                        m_custom_type = false;
-                        
-                        if (ImGui::TreeNode("Select Serie")) {
-                            for (int i = 0; i < (int)num; i++)
-                            {
-                                if (ImGui::Selectable(names[i].c_str(), m_selected_lif_serie_index == i))
-                                {
-                                    m_selected_lif_serie_index = i;
-                                    m_selected_lif_serie_name = names[m_selected_lif_serie_index];
-                                }
-                            }
-                            ImGui::TreePop();
-                        }
-                        ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
+                    /*
+                     * Create the browser for the file type.
+                     * We do it here as it is naturally blocked operation.
+                     */
+                    if(isLifFile()){
+                        m_sections.clear();
+                        auto num = list_lif_series(m_sections);
+                        assert(num == m_sections.size());
                     }
                     free(outPath);
-                }
-                else if (result == NFD_CANCEL) {
                 }
                 else {
                 }
@@ -114,16 +102,7 @@ void VisibleRunApp::windowClose()
 
 
 
-void VisibleRunApp::DrawDocksDebug() {
-    if (ImGui::Begin("Docks", &show_docks_debug_)) {
-        ImGui::LabelText(
-                         "TODO",
-                         "Get docking information from ImGui and populate this once the ImGui "
-                         "programmatic access to docking is published as a stable API");
-        // TODO: generate docking information
-    }
-    ImGui::End();
-}
+
 
 void VisibleRunApp::DrawImGuiMetrics() { ImGui::ShowMetricsWindow(); }
 
@@ -161,6 +140,50 @@ void VisibleRunApp::DrawGUI(){
     if (show_imgui_demos_) DrawImGuiDemos();
     
     
+}
+
+void VisibleRunApp::DrawContentInfo(){
+    float width = ImGui::GetIO().DisplaySize.x / 6;
+    float height = ImGui::GetIO().DisplaySize.y / 2;
+    float pos_x =  ImGui::GetIO().DisplaySize.x - width;
+    float pos_y = 20;
+    ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Always);
+     ImGui::Begin("Info", nullptr);
+    if(isLifFile()){
+            m_selected_lif_serie_index = -1;
+            m_custom_type = false;
+            static int sSelected = -1;
+           if (ImGui::TreeNode("Select Serie")) {
+               for (auto i = 0; i < m_sections.size(); i++)
+               {
+                   if (ImGui::Selectable(m_sections[i].c_str(), sSelected == i))
+                   {
+                       sSelected = i;
+                  
+                   }
+               }
+               ImGui::TreePop();
+           }
+         
+           if (sSelected >= 0 && sSelected < m_sections.size()){
+               m_selected_lif_serie_index = sSelected;
+               m_selected_lif_serie_name = m_sections[m_selected_lif_serie_index];
+               std::cout << " Serie " << m_selected_lif_serie_name << std::endl;
+            static int clicked = 0;
+               if (ImGui::Button(m_selected_lif_serie_name.c_str()))
+                 clicked++;
+             if (clicked & 1)
+             {
+                 ImGui::SameLine();
+                 std::string msg = "Thanks for choosing " + m_selected_lif_serie_name;
+                 ImGui::Text("%s", msg.c_str());
+                 load_lif_serie(m_selected_lif_serie_name);
+             }
+           }
+          ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
+       }
+    ImGui::End();
 }
 
 bool VisibleRunApp::shouldQuit()
@@ -318,6 +341,7 @@ size_t VisibleRunApp::list_lif_series(std::vector<std::string>& names){
 }
 
 bool VisibleRunApp::load_lif_serie(const std::string& serie){
+    if( mContext && mContext->is_valid()) return true;
     
     auto bpath_path = mCurrentContent;
     VisibleAppControl::make_result_cache_directory_for_lif (bpath_path, mBrowser);
@@ -330,8 +354,8 @@ bool VisibleRunApp::load_lif_serie(const std::string& serie){
     auto indexItr = mBrowser->name_to_index_map().find(serie);
     if (indexItr != mBrowser->name_to_index_map().end()){
         auto serie = mBrowser->get_serie_by_index(indexItr->second);
-        WindowRef ww = getWindow ();
-        mContext = std::make_shared<lifContext>(ww,serie,cache_path);
+        mViewerWindow = getWindow();
+        mContext = std::make_shared<lifContext>(mViewerWindow,serie,cache_path);
         
         if (mContext->is_valid()){
             cmds += "  Ok ";
@@ -340,14 +364,15 @@ bool VisibleRunApp::load_lif_serie(const std::string& serie){
         VAPPLOG_INFO(cmds.c_str());
         update();
         
-        ww->setTitle (cmds + " Visible build: " + mBuildn);
+        mViewerWindow->setTitle (cmds + " Visible build: " + mBuildn);
         mFont = Font( "Menlo", 18 );
         mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
         // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
-        getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
-        getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
-        getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
-        getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
+        auto uniqueId = getNumWindows();
+        mViewerWindow->getSignalClose().connect(
+                [uniqueId,this] { this->console() << "You closed window #" << uniqueId << std::endl; }
+            );
+        mViewerWindow->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
         gl::enableVerticalSync();
         return true;
     }
@@ -405,20 +430,25 @@ void VisibleRunApp::update_log (const std::string& msg)
 
 void VisibleRunApp::mouseDrag( MouseEvent event )
 {
-    
-    cinder::app::App::mouseDrag(event);
+
+    if (mContext) mContext->mouseDrag(event);
+    else
+        cinder::app::App::mouseDrag(event);
 }
 
 void VisibleRunApp::mouseMove( MouseEvent event )
 {
-    
+    if (mContext) mContext->mouseMove(event);
+    else
+        cinder::app::App::mouseMove(event);
 }
 
 
 void VisibleRunApp::mouseUp( MouseEvent event )
 {
-    
-    cinder::app::App::mouseUp(event);
+    if (mContext) mContext->mouseUp(event);
+    else
+        cinder::app::App::mouseUp(event);
 }
 
 void VisibleRunApp::mouseDown( MouseEvent event )
@@ -462,8 +492,13 @@ void VisibleRunApp::keyDown( KeyEvent event )
 
 void VisibleRunApp::update()
 {
+  // ImGuiIO &io = ImGui::GetIO();
+    
     if (mContext && mContext->is_valid()) mContext->update ();
     DrawMainMenu();
+    DrawImGuiDemos();
+    
+    DrawContentInfo();
  
 }
 
@@ -474,9 +509,6 @@ void VisibleRunApp::draw ()
     if (mContext && mContext->is_valid()){
         mContext->draw ();
     }
-    
-    
-    
 }
 
 

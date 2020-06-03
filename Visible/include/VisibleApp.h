@@ -186,20 +186,25 @@ public:
     void update_log (const std::string& msg);
     
     bool shouldQuit();
+    bool isValid() const { return m_is_valid_file; }
+    bool isLifFile() const { return isValid() && m_is_lif_file; }
+    bool isMovFile() const { return isValid() && m_is_mov_file; }
+    void launchViewer ();
     
 private:
     // return null for unacceptable file or dot extension, i.e. ".lif" or ".mov" or ".mp4", etc
     std::string identify_file(const bfs::path& mfile, const std::string& content_type);
     bool load_lif_serie(const std::string& serie);
     size_t list_lif_series(std::vector<std::string>& names);
-    
+
+    void DrawContentInfo();
     void DrawMainMenu ();
     void DrawImGuiMetrics();
     void DrawImGuiDemos ();
     void DrawStatusBar(float width, float height, float pos_x, float pos_y);
     void DrawLogView();
     void DrawSettings();
-    void DrawDocksDebug();
+
     
     void setup_media_file(const bfs::path&);
     bfs::path            mRootOutputDir;
@@ -218,6 +223,7 @@ private:
     Font                mFont;
     std::string            mLog;
     
+    std::vector<std::string> m_sections;
     int m_selected_lif_serie_index;
     std::string m_selected_lif_serie_name;
     bool m_custom_type;
@@ -227,6 +233,7 @@ private:
     
     mutable std::shared_ptr<sequencedImageContext> mContext;
     mutable lif_browser::ref mBrowser;
+    app::WindowRef mViewerWindow;
     
     bool show_docks_debug_{false};
     bool show_logs_{true};
