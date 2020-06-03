@@ -352,7 +352,6 @@
 		C28596032484690300C9CCFB /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
 		C28596042484690300C9CCFB /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
 		C285963D2485DF1400C9CCFB /* VisibleRunner-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C285963C2485DF1400C9CCFB /* VisibleRunner-Info.plist */; };
-		C28596432486E28100C9CCFB /* visible_imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2859640248623A100C9CCFB /* visible_imgui.cpp */; };
 		C2859646248709EB00C9CCFB /* imgui_impl_opengl3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28596442487048700C9CCFB /* imgui_impl_opengl3.cpp */; };
 		C2859647248709EC00C9CCFB /* imgui_impl_opengl3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28596442487048700C9CCFB /* imgui_impl_opengl3.cpp */; };
 		C285964B24870EF100C9CCFB /* imgui_stdlib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C285964924870EF000C9CCFB /* imgui_stdlib.cpp */; };
@@ -976,8 +975,6 @@
 		C285963B2485DEEA00C9CCFB /* affineApp-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "affineApp-Info.plist"; sourceTree = "<group>"; };
 		C285963C2485DF1400C9CCFB /* VisibleRunner-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "VisibleRunner-Info.plist"; sourceTree = "<group>"; };
 		C285963E2485DF3200C9CCFB /* VisibleGtest-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "VisibleGtest-Info.plist"; sourceTree = "<group>"; };
-		C285963F248623A100C9CCFB /* visible_imgui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = visible_imgui.h; sourceTree = "<group>"; };
-		C2859640248623A100C9CCFB /* visible_imgui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = visible_imgui.cpp; sourceTree = "<group>"; };
 		C28596442487048700C9CCFB /* imgui_impl_opengl3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_impl_opengl3.cpp; path = ../local_cinder_imgui/lib/imgui/imgui_impl_opengl3.cpp; sourceTree = "<group>"; };
 		C285964824870C6300C9CCFB /* imgui_impl_opengl3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imgui_impl_opengl3.h; path = ../local_cinder_imgui/lib/imgui/imgui_impl_opengl3.h; sourceTree = "<group>"; };
 		C285964924870EF000C9CCFB /* imgui_stdlib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_stdlib.cpp; path = ../local_cinder_imgui/lib/imgui/imgui_stdlib.cpp; sourceTree = "<group>"; };
@@ -1264,7 +1261,6 @@
 				C21946761CE4DC7100976025 /* visible_impl.cpp */,
 				C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */,
 				C21946771CE4DC7100976025 /* VisibleRunApp.cpp */,
-				C2859640248623A100C9CCFB /* visible_imgui.cpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -1497,7 +1493,6 @@
 				C2820F3621752E5100DFA7A6 /* VisibleApp.h */,
 				C21A50E022AB4D0C00B0AC7D /* eigen_utils.hpp */,
 				C22DAD0323032F1200D171EF /* task_manager.hpp */,
-				C285963F248623A100C9CCFB /* visible_imgui.h */,
 			);
 			name = include;
 			sourceTree = "<group>";
@@ -2194,8 +2189,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8D1107260486CEB800E47090 /* Visible */,
 				C26F5F9721B0AA6D00EAE156 /* VisibleRun */,
+				8D1107260486CEB800E47090 /* Visible */,
 				C24CD87B1CEA5B1B0008C72B /* VisibleGtest */,
 				C26A05391E771CCF00BDC954 /* sscli */,
 				C28B016D229B182100B8165D /* affineApp */,
@@ -2572,7 +2567,6 @@
 				C2AC7A6F24808AB500853219 /* nfd_cocoa.m in Sources */,
 				C21E390D228A054C00778A66 /* affine_rectangle.cpp in Sources */,
 				C2AC7A7424808AC000853219 /* nfd_common.c in Sources */,
-				C28596432486E28100C9CCFB /* visible_imgui.cpp in Sources */,
 				C26F5FB921B0AA6D00EAE156 /* cinder_support.cpp in Sources */,
 				C26F5FBA21B0AA6D00EAE156 /* visible_lif_impl.cpp in Sources */,
 				C236D346230F489000ED5627 /* pf.cpp in Sources */,
