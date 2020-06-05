@@ -217,9 +217,9 @@ private:
     std::string         mCurrentContentName;
     
     bfs::path getLoggingDirectory ();
-    bool            m_is_lif_file;
-    bool            m_is_valid_file;
-    bool            m_is_mov_file;
+    bool            m_is_lif_file{false};
+    bool            m_is_valid_file{false};
+    bool            m_is_mov_file{false};
 //    vec2                mSize;
     Font                mFont;
     std::string            mLog;
@@ -254,7 +254,8 @@ private:
     imGuiLog visual_log;
     ImGui::Options m_imgui_options;
     
-    
+    // Threading Lock etc
+    std::mutex m_mutex;
     
 };
 

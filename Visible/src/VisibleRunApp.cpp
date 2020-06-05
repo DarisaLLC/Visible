@@ -45,50 +45,53 @@ void VisibleRunApp::QuitApp(){
 }
 
 void VisibleRunApp::DrawSettings() {
-  if(! isValid()) return;
+    if(! isValid()) return;
+    ImGui::SetNextWindowPos(ImVec2(0, 18), ImGuiCond_Always);
     if (ImGui::Begin(mCurrentContentName.c_str(), &show_settings_)) {
-    static bool first_time = true;
-    if (first_time) {
-      ImGui::SetNextTreeNodeOpen(true);
-      first_time = false;
-    }
-    if (ImGui::CollapsingHeader("Lif Series") && isLifFile()) {
-          m_selected_lif_serie_index = -1;
-          m_custom_type = false;
-          static int sSelected = -1;
-         if (ImGui::TreeNode("Select Serie")) {
-             for (auto i = 0; i < m_sections.size(); i++)
-             {
-                 if (ImGui::Selectable(m_sections[i].c_str(), sSelected == i))
-                     sSelected = i;
-             }
-             ImGui::TreePop();
-         }
-         if (sSelected >= 0 && sSelected < m_sections.size()){
-             m_selected_lif_serie_index = sSelected;
-             m_selected_lif_serie_name = m_sections[m_selected_lif_serie_index];
-             std::cout << " Serie " << m_selected_lif_serie_name << std::endl;
-          static int clicked = 0;
-             if (ImGui::Button(m_selected_lif_serie_name.c_str()))
-               clicked++;
-           if (clicked & 1)
-           {
-               ImGui::SameLine();
-               std::string msg = "Thanks for choosing " + m_selected_lif_serie_name;
-               ImGui::Text("%s", msg.c_str());
-               load_lif_serie(m_selected_lif_serie_name);
-           }
-         } // End Selected check & run
-     } // Collapsing Header
-    ImGui::Spacing();
-  }// Settings
+        static bool first_time = true;
+        if (first_time) {
+            ImGui::SetNextTreeNodeOpen(true);
+            first_time = false;
+        }
+        if (ImGui::CollapsingHeader("Lif Series") && isLifFile()) {
+            m_selected_lif_serie_index = -1;
+            m_custom_type = false;
+            static int sSelected = -1;
+            if (ImGui::TreeNode("Select Serie")) {
+                for (auto i = 0; i < m_sections.size(); i++)
+                {
+                    if (ImGui::Selectable(m_sections[i].c_str(), sSelected == i))
+                        sSelected = i;
+                }
+                ImGui::TreePop();
+            }
+            if (sSelected >= 0 && sSelected < m_sections.size()){
+                m_selected_lif_serie_index = sSelected;
+                m_selected_lif_serie_name = m_sections[m_selected_lif_serie_index];
+                std::cout << " Serie " << m_selected_lif_serie_name << std::endl;
+                static int clicked = 0;
+                if (ImGui::Button(m_selected_lif_serie_name.c_str()))
+                    clicked++;
+                if (clicked & 1)
+                {
+                    ImGui::SameLine();
+                    std::string msg = "Thanks for choosing " + m_selected_lif_serie_name;
+                    ImGui::Text("%s", msg.c_str());
+                    load_lif_serie(m_selected_lif_serie_name);
+                }
+            } // End Selected check & run
+        } // Collapsing Header
+        ImGui::Spacing();
+    }// Settings
     if (ImGui::CollapsingHeader("Custom Content")) {
-      ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
+        ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
     }
-  ImGui::End();
+    ImGui::End();
 }
 
 void VisibleRunApp::DrawMainMenu(){
+    
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File"))
@@ -131,6 +134,8 @@ void VisibleRunApp::DrawMainMenu(){
         }
     }
     ImGui::EndMainMenuBar();
+    DrawSettings();
+    
 }
 
 
@@ -190,40 +195,40 @@ void VisibleRunApp::DrawContentInfo(){
     float pos_y = 20;
     ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Always);
-     ImGui::Begin("Info", nullptr);
+    ImGui::Begin("Info", nullptr);
     if(isLifFile()){
-            m_selected_lif_serie_index = -1;
-            m_custom_type = false;
-            static int sSelected = -1;
-           if (ImGui::TreeNode("Select Serie")) {
-               for (auto i = 0; i < m_sections.size(); i++)
-               {
-                   if (ImGui::Selectable(m_sections[i].c_str(), sSelected == i))
-                   {
-                       sSelected = i;
-                  
-                   }
-               }
-               ImGui::TreePop();
-           }
-         
-           if (sSelected >= 0 && sSelected < m_sections.size()){
-               m_selected_lif_serie_index = sSelected;
-               m_selected_lif_serie_name = m_sections[m_selected_lif_serie_index];
-               std::cout << " Serie " << m_selected_lif_serie_name << std::endl;
+        m_selected_lif_serie_index = -1;
+        m_custom_type = false;
+        static int sSelected = -1;
+        if (ImGui::TreeNode("Select Serie")) {
+            for (auto i = 0; i < m_sections.size(); i++)
+            {
+                if (ImGui::Selectable(m_sections[i].c_str(), sSelected == i))
+                {
+                    sSelected = i;
+                    
+                }
+            }
+            ImGui::TreePop();
+        }
+        
+        if (sSelected >= 0 && sSelected < m_sections.size()){
+            m_selected_lif_serie_index = sSelected;
+            m_selected_lif_serie_name = m_sections[m_selected_lif_serie_index];
+            std::cout << " Serie " << m_selected_lif_serie_name << std::endl;
             static int clicked = 0;
-               if (ImGui::Button(m_selected_lif_serie_name.c_str()))
-                 clicked++;
-             if (clicked & 1)
-             {
-                 ImGui::SameLine();
-                 std::string msg = "Thanks for choosing " + m_selected_lif_serie_name;
-                 ImGui::Text("%s", msg.c_str());
-                 load_lif_serie(m_selected_lif_serie_name);
-             }
-           }
-          ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
-       }
+            if (ImGui::Button(m_selected_lif_serie_name.c_str()))
+                clicked++;
+            if (clicked & 1)
+            {
+                ImGui::SameLine();
+                std::string msg = "Thanks for choosing " + m_selected_lif_serie_name;
+                ImGui::Text("%s", msg.c_str());
+                load_lif_serie(m_selected_lif_serie_name);
+            }
+        }
+        ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
+    }
     ImGui::End();
 }
 
@@ -333,6 +338,11 @@ std::string identify_extension(const bfs::path& bpath){
 
 std::string VisibleRunApp::identify_file(const bfs::path& bpath, const std::string& custom_type){
     
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_is_valid_file = false;
+    m_is_lif_file = false;
+    m_is_mov_file = false;
+    
     if (bpath.empty() || exists(bpath) == false || bpath.filename_is_dot() || bpath.filename_is_dot()){
         std::string msg = bpath.string() + " is not a valid path to a file ";
         vlogger::instance().console()->info(msg);
@@ -392,7 +402,7 @@ bool VisibleRunApp::load_lif_serie(const std::string& serie){
     if (indexItr != mBrowser->name_to_index_map().end()){
         auto serie = mBrowser->get_serie_by_index(indexItr->second);
         mViewerWindow = getWindow();
-        mContext = std::make_shared<lifContext>(mViewerWindow,serie,cache_path);
+        mContext = std::make_shared<lifContext>(mViewerWindow,serie,cache_path, mCurrentContentName);
         
         if (mContext->is_valid()){
             cmds += "  Ok ";
@@ -403,12 +413,12 @@ bool VisibleRunApp::load_lif_serie(const std::string& serie){
         
         mViewerWindow->setTitle (cmds + " Visible build: " + mBuildn);
         mFont = Font( "Menlo", 18 );
-//        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+        //        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
         // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
         auto uniqueId = getNumWindows();
         mViewerWindow->getSignalClose().connect(
-                [uniqueId,this] { this->console() << "You closed window #" << uniqueId << std::endl; }
-            );
+                                                [uniqueId,this] { this->console() << "You closed window #" << uniqueId << std::endl; }
+                                                );
         mViewerWindow->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
         gl::enableVerticalSync();
         return true;
@@ -467,7 +477,7 @@ void VisibleRunApp::update_log (const std::string& msg)
 
 void VisibleRunApp::mouseDrag( MouseEvent event )
 {
-
+    
     if (mContext) mContext->mouseDrag(event);
     else
         cinder::app::App::mouseDrag(event);
@@ -529,14 +539,10 @@ void VisibleRunApp::keyDown( KeyEvent event )
 
 void VisibleRunApp::update()
 {
-  // ImGuiIO &io = ImGui::GetIO();
+    // ImGuiIO &io = ImGui::GetIO();
     
     if (mContext && mContext->is_valid()) mContext->update ();
     DrawMainMenu();
-    DrawImGuiDemos();
-    DrawSettings();
-//    DrawContentInfo();
- 
 }
 
 
@@ -552,7 +558,7 @@ void VisibleRunApp::draw ()
 
 void VisibleRunApp::resize ()
 {
-  //  mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+    //  mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     if (mContext && mContext->is_valid()) mContext->resize ();
     
 }

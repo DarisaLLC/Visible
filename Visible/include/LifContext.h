@@ -43,12 +43,7 @@ public:
   
     
     // From a lif_serie_data
-    lifContext(ci::app::WindowRef& ww, const lif_serie_data&, const bfs::path&  );
-    
-    // shared_from_this() through base class
-//    lifContext* shared_from_above () {
-//        return static_cast<lifContext*>(((guiContext*)this)->shared_from_this().get());
-//    }
+    lifContext(ci::app::WindowRef& ww, const lif_serie_data&, const bfs::path&, const std::string& lif_file_name);
     
     std::shared_ptr<lifContext> shared_from_above(){
         return std::dynamic_pointer_cast<lifContext>(shared_from_this ());
@@ -133,6 +128,7 @@ private:
     
     
     boost::filesystem::path mPath;
+    std::string mContentFileName;
     std::vector<std::string> m_plot_names;
     idlab_cardiac_defaults m_idlab_defaults;
     const Rectf& get_channel_display_rect (const int channel_number);
@@ -237,7 +233,7 @@ private:
 
     
     // Screen Info
-    vec2 mScreenSize;
+    vec2 mFrameSize;
     gl::TextureRef pixelInfoTexture ();
     std::string m_title;
     
