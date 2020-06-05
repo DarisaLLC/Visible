@@ -46,12 +46,13 @@
 #include "Resources.h"
 #include "nfd.h"
 
-#define APP_WIDTH 1024
-#define APP_HEIGHT 768
+#define APP_WIDTH 1536
+#define APP_HEIGHT 896
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
+
 
 namespace VisibleAppControl{
 /**
@@ -219,7 +220,7 @@ private:
     bool            m_is_lif_file;
     bool            m_is_valid_file;
     bool            m_is_mov_file;
-    vec2                mSize;
+//    vec2                mSize;
     Font                mFont;
     std::string            mLog;
     

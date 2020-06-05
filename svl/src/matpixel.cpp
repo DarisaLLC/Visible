@@ -584,7 +584,7 @@ roiMultiWindow<T,trait_t>::roiMultiWindow (const window_t& root, int64_t timesta
     m_size.second = root.height() / T::planes_c;
     m_spacing.first = 0;
     m_spacing.second = m_size.second;
-    
+
     init(timestamp, im);
 }
 
@@ -592,18 +592,19 @@ roiMultiWindow<T,trait_t>::roiMultiWindow (const window_t& root, int64_t timesta
 template <typename T, typename trait_t>
 void roiMultiWindow<T,trait_t>::init ( int64_t timestamp, image_memory_alignment_policy im )
 {
+    std::cout << "T::planes_c is " << T::planes_c << std::endl;
     
     this->frameBuf ()->setTimestamp (timestamp);
-
-    m_bounds[0].size (m_size);
-    m_bounds[1] = m_bounds[0];
-    m_bounds[1].translate (m_spacing);
-    m_bounds[2] = m_bounds[1];
-    m_bounds[2].translate (m_spacing);
+    m_bounds.emplace_back(m_size.first, m_size.second);
+    auto allr = m_bounds[0];
+    for (auto p = 1; p < T::planes_c; p++){
+        m_bounds.push_back(m_bounds[p-1]);
+        m_bounds.back().translate(m_spacing);
+        allr = allr | m_bounds.back();
+    }
     
-    auto allr = m_bounds[0] | m_bounds[1] | m_bounds[2];
     assert (allr == this->bound ());
-    
+    m_planes.resize(m_bounds.size());
     for (unsigned ww = 0; ww < T::planes_c; ww++)
     {
         m_planes[ww] = roiWindow<trait_t>(this->frameBuf(),m_bounds[ww]);

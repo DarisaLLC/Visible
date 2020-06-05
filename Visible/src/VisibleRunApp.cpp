@@ -10,11 +10,6 @@
 #include "VisibleApp.h"
 
 
-#define APP_WIDTH 1024
-#define APP_HEIGHT 768
-
-#pragma GCC diagnostic pop
-
 
 //
 //static void HelpMarker(const char* desc)
@@ -49,6 +44,50 @@ void VisibleRunApp::QuitApp(){
     quit();
 }
 
+void VisibleRunApp::DrawSettings() {
+  if(! isValid()) return;
+    if (ImGui::Begin(mCurrentContentName.c_str(), &show_settings_)) {
+    static bool first_time = true;
+    if (first_time) {
+      ImGui::SetNextTreeNodeOpen(true);
+      first_time = false;
+    }
+    if (ImGui::CollapsingHeader("Lif Series") && isLifFile()) {
+          m_selected_lif_serie_index = -1;
+          m_custom_type = false;
+          static int sSelected = -1;
+         if (ImGui::TreeNode("Select Serie")) {
+             for (auto i = 0; i < m_sections.size(); i++)
+             {
+                 if (ImGui::Selectable(m_sections[i].c_str(), sSelected == i))
+                     sSelected = i;
+             }
+             ImGui::TreePop();
+         }
+         if (sSelected >= 0 && sSelected < m_sections.size()){
+             m_selected_lif_serie_index = sSelected;
+             m_selected_lif_serie_name = m_sections[m_selected_lif_serie_index];
+             std::cout << " Serie " << m_selected_lif_serie_name << std::endl;
+          static int clicked = 0;
+             if (ImGui::Button(m_selected_lif_serie_name.c_str()))
+               clicked++;
+           if (clicked & 1)
+           {
+               ImGui::SameLine();
+               std::string msg = "Thanks for choosing " + m_selected_lif_serie_name;
+               ImGui::Text("%s", msg.c_str());
+               load_lif_serie(m_selected_lif_serie_name);
+           }
+         } // End Selected check & run
+     } // Collapsing Header
+    ImGui::Spacing();
+  }// Settings
+    if (ImGui::CollapsingHeader("Custom Content")) {
+      ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
+    }
+  ImGui::End();
+}
+
 void VisibleRunApp::DrawMainMenu(){
     if (ImGui::BeginMainMenuBar())
     {
@@ -78,9 +117,11 @@ void VisibleRunApp::DrawMainMenu(){
             ImGui::EndMenu();
         }
         
-        if (ImGui::BeginMenu("Edit"))
+        if (ImGui::BeginMenu("Tools"))
         {
-            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+            if (ImGui::MenuItem("ImGui Demo", "CTRL+D")){
+                DrawImGuiDemos();
+            }
             if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
             ImGui::Separator();
             if (ImGui::MenuItem("Cut", "CTRL+X")) {}
@@ -241,9 +282,9 @@ void VisibleRunApp::setup()
     mVisibleScope = gl::Texture::create( loadImage( loadResource(VISIBLE_SCOPE  )));
     
     
-    setWindowSize(APP_WIDTH/2,APP_HEIGHT/2);
+    setWindowSize(APP_WIDTH,APP_HEIGHT);
     setFrameRate( 60 );
-    setWindowPos(getWindowSize()/4);
+    setWindowPos(getWindowSize()/6);
     
     WindowRef ww = getWindow ();
     if( mVisibleScope ){
@@ -269,11 +310,7 @@ void VisibleRunApp::setup()
     
 }
 
-static std::string cok = "chapter_ok";
-static std::string ccok = "chapter_ok_custom_content_ok";
-static std::string cokcnk = "chapter_ok_custom_content_not_recognized";
-static std::string used_dialog = "selected_by_dialog_using first_chapter";
-static std::string list_chapters = "listing chapters";
+
 
 //    for( auto display : Display::getDisplays() )
 //     {
@@ -366,7 +403,7 @@ bool VisibleRunApp::load_lif_serie(const std::string& serie){
         
         mViewerWindow->setTitle (cmds + " Visible build: " + mBuildn);
         mFont = Font( "Menlo", 18 );
-        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+//        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
         // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
         auto uniqueId = getNumWindows();
         mViewerWindow->getSignalClose().connect(
@@ -497,8 +534,8 @@ void VisibleRunApp::update()
     if (mContext && mContext->is_valid()) mContext->update ();
     DrawMainMenu();
     DrawImGuiDemos();
-    
-    DrawContentInfo();
+    DrawSettings();
+//    DrawContentInfo();
  
 }
 
@@ -515,7 +552,7 @@ void VisibleRunApp::draw ()
 
 void VisibleRunApp::resize ()
 {
-    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+  //  mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     if (mContext && mContext->is_valid()) mContext->resize ();
     
 }
@@ -544,6 +581,7 @@ void prepareSettings( App::Settings *settings )
 // settings fn from top of file:
 CINDER_APP( VisibleRunApp, RendererGl, prepareSettings )
 
+#pragma GCC diagnostic pop
 
 //int main( int argc, char* argv[] )
 //{

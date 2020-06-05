@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <iostream>
+#include <algorithm>
 
 #define FULL_BG_COLOR 0xFF242424
 #define HEADER_COLOR 0xFF3D3837
@@ -139,8 +140,9 @@ namespace ImSequencer
             }
             */
             // test scroll area
-            ImVec2 headerSize(canvas_size.x, (float)ItemHeight);
-            ImVec2 scrollBarSize(canvas_size.x, scrollBarHeight);
+            // @note. ImGui no longer allowes 0 sized invisiblebuttons. 
+            ImVec2 headerSize(std::max(1.0f,canvas_size.x), (float)ItemHeight);
+            ImVec2 scrollBarSize(std::max(1.0f,canvas_size.x), scrollBarHeight);
             ImGui::InvisibleButton("topBar", headerSize);
             draw_list->AddRectFilled(canvas_pos, canvas_pos + headerSize, 0xFFFF0000, 0);
             ImVec2 childFramePos = ImGui::GetCursorScreenPos();

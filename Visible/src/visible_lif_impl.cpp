@@ -70,6 +70,22 @@ namespace {
         { "Force", 0xFFFB4551}, { "force", 0xFFFB4551}, { "Elongation", 0xFF00FF00}, { "elongation", 0xFF00FF00}
     };
     std::map<unsigned int, unsigned int> numbered_half_colors = {{0, 0x330000FF },{1, 0x3300FF00},{2, 0x33FF0000} };
+
+    struct ScopedWindowWithFlag : public ci::Noncopyable {
+        ScopedWindowWithFlag( const char* label, bool* p_open = nullptr, int windowflags = 0 );
+        ~ScopedWindowWithFlag();
+    };
+
+    ScopedWindowWithFlag::ScopedWindowWithFlag( const char* label, bool* p_open, int window_flags )
+    {
+        ImGui::Begin( label, p_open, window_flags );
+    }
+    ScopedWindowWithFlag::~ScopedWindowWithFlag()
+    {
+        ImGui::End();
+    }
+
+
 }
 
 #define wDisplay "Display"
@@ -192,7 +208,7 @@ void lifContext::setup()
     setup_signals();
     assert(is_valid());
     ww->setTitle( m_serie.name());
-//    ww->setSize(1536, 1024);
+
     mFont = Font( "Menlo", 18 );
     auto ws = ww->getSize();
     mSize = vec2( ws[0], ws[1] / 12);
@@ -895,9 +911,9 @@ void lifContext::add_canvas (){
     if(m_show_playback){
         ImVec2 pos (0,20);
         auto ww = get_windowRef();
-        ImVec2 size (ww->getSize().x/2.0, ww->getSize().y - 20.0);
-        ui::ScopedWindow utilities(wDisplay);
-        ImGui::SetNextWindowPos(pos);
+        ImVec2 size (512,256);
+        ScopedWindowWithFlag utilities(wDisplay, nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_HorizontalScrollbar );
+        ImGui::SetNextWindowPos(ImVec2(30,30));
         ImGui::SetNextWindowSize(size);
         ImGui::SameLine();
         showImage(wDisplay, &m_show_playback, mFbo->getColorTexture());
@@ -927,28 +943,16 @@ void lifContext::add_result_sequencer (){
 
     static bool results_open;
     if(ImGui::Begin(wResult, &results_open, ImGuiWindowFlags_AlwaysAutoResize)){
-//        ImGui::PushItemWidth(130);
-//        ImGui::InputInt("Frame Min", &m_main_seq.mFrameMin);
-//        ImGui::SameLine();
-//        ImGui::InputInt64("Frame ", &m_seek_position);
-//        ImGui::SameLine();
-//        ImGui::InputInt("Frame Max", &m_main_seq.mFrameMax);
-//        ImGui::PopItemWidth();
-        
-
         Sequencer(&m_main_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
-
-        
-        // add a UI to edit that particular item
-        if (selectedEntry != -1)
-        {
-            const timeLineSequence::timeline_item &item = m_main_seq.items[selectedEntry];
-            ImGui::Text("I am a %s, please edit me", m_main_seq.mSequencerItemTypeNames[item.mType].c_str());
-            // switch (type) ....
-        }
     }
     ImGui::End();
-                               
+//    // add a UI to edit that particular item
+//    if (selectedEntry != -1)
+//    {
+//        const timeLineSequence::timeline_item &item = m_main_seq.items[selectedEntry];
+//        ImGui::Text("I am a %s, please edit me", m_main_seq.mSequencerItemTypeNames[item.mType].c_str());
+//        // switch (type) ....
+//    }
 }
 
 
@@ -961,7 +965,7 @@ void lifContext::add_navigation(){
         ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y );
         ImVec2 size (window->Size.x, 100);
         
-        ui::ScopedWindow utilities(wNavigator); //, ImGuiWindowFlags_NoResize);
+        ScopedWindowWithFlag utilities(wNavigator, nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         m_navigator_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
         ImGui::SetNextWindowPos(pos);
         ImGui::SetNextWindowSize(size);
