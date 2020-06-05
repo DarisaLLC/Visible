@@ -375,10 +375,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
     }else{
         auto sp =  similarity_producer();
         sp->load_images (images);
-//        std::packaged_task<bool(int,sm_producer::progress_fn_t)> task([sp](int a, const sm_producer::progress_fn_t& reporter){ return sp->operator()(a, reporter);}); // wrap the function
-        
         std::future<bool>  future_ss = sp->launch_async(0, reporter);
-//        std::thread(std::move(task)).join(); // Finish on a thread
   
         if (future_ss.get())
         {

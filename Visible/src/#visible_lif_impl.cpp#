@@ -109,7 +109,7 @@ using contraction_t = contractionLocator::contraction_t;
 // @ todo setup default repository
 // default median cover pct is 5% (0.05)
 
-lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const bfs::path& cache_path, const std::string& fname) :sequencedImageContext(ww), m_serie(sd), m_voxel_view_available(false), mUserStorageDirPath (cache_path), mContentFileName(fname) {
+lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const bfs::path& cache_path) :sequencedImageContext(ww), m_serie(sd), m_voxel_view_available(false), mUserStorageDirPath (cache_path) {
     m_type = guiContext::Type::lif_file_viewer;
     m_show_contractions = false;
     // Create an invisible folder for storage
@@ -192,14 +192,6 @@ void lifContext::setup_params () {
 void lifContext::setup()
 {
     ci::app::WindowRef ww = get_windowRef();
-//    ui::Initialize(ui::Options()
-//                //   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
-//                //   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
-//                //   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
-//               //    .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
-//                   .window(ww)
-//                   );
-
     m_showGUI = true;
     m_showLog = true;
     m_showHelp = true;
@@ -744,9 +736,13 @@ void lifContext::loadCurrentSerie ()
         m_plot_names.clear();
         m_plot_names = m_serie.channel_names();
         m_plot_names.push_back("MisRegister");
+//        cv::Mat result;
         
         std::async(std::launch::async,&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie.channel_names(), m_plot_names);
         
+//        std::vector<std::thread> threads(1);
+//        threads[0] = std::thread(&ssmt_processor::load, m_lifProcRef.get(),
+//        std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 
         /*
          * Fetch length and channel names
@@ -762,16 +758,16 @@ void lifContext::loadCurrentSerie ()
         m_main_seq.mSequencerItemTypeNames = {"RGG"};
         m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         
-        m_title = m_serie.name() + " @ " + mContentFileName;
+        m_title = m_serie.name() + " @ " + mPath.filename().string();
         
         auto ww = get_windowRef();
         ww->setTitle(m_title );
         ww->getApp()->setFrameRate(mMediaInfo.getFramerate());
         
         
-        mFrameSize = mMediaInfo.getSize();
+        mScreenSize = mMediaInfo.getSize();
         
-        mSurface = Surface8u::create (int32_t(mFrameSize.x), int32_t(mFrameSize.y), true);
+        mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
         mFbo = gl::Fbo::create(mSurface->getWidth(), mSurface->getHeight());
         m_show_playback = true;
     }
@@ -851,7 +847,7 @@ void lifContext::add_canvas (){
         if (open && *open)
         {
           //  ImGuiIO& io = ImGui::GetIO();
-           // ImGui::SetNextWindowBgAlpha(0.4f); // Transparent background
+            ImGui::SetNextWindowBgAlpha(0.4f); // Transparent background
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
             if (ImGui::Begin(windowName, open)) //, io.ConfigResizeWindowsFromEdges))
             {
@@ -868,7 +864,6 @@ void lifContext::add_canvas (){
                 ImVec2 midv = m_layout->image2display(ivec2(0,mMediaInfo.channel_size.height));
                 ImVec2 midh = m_layout->image2display(ivec2(mMediaInfo.channel_size.width, mMediaInfo.channel_size.height));
                 draw_list->AddLine(midv, midh, IM_COL32(0,0,128,128), 3.0f);
-                
                 int index = 0;
                 auto d_channel = channel_count() - 1;
                 for (const auto& mb : m_lifProcRef->moving_bodies()){
@@ -906,18 +901,11 @@ void lifContext::add_canvas (){
     //@note: assumes, next image plus any on image graphics have already been added
     // offscreen via FBO
     if(m_show_playback){
-        ImVec2 size (mFrameSize.x+mFrameSize.y/2, mFrameSize.x+mFrameSize.y/2);
-        ImVec2 pos (300,18);
-        ImGuiWindow* window = ImGui::FindWindowByName(mContentFileName.c_str());
-        if (window){
-            pos.x = window->Pos.x;
-            pos.y = window->Pos.y + window->Size.y;
-            if(!window->Collapsed) ImGui::SetWindowCollapsed(window, true);
-        }
+        ImVec2 pos (0,20);
         auto ww = get_windowRef();
-
+        ImVec2 size (512,256);
         ScopedWindowWithFlag utilities(wDisplay, nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_HorizontalScrollbar );
-        ImGui::SetNextWindowPos(pos);
+        ImGui::SetNextWindowPos(ImVec2(30,30));
         ImGui::SetNextWindowSize(size);
         ImGui::SameLine();
         showImage(wDisplay, &m_show_playback, mFbo->getColorTexture());
