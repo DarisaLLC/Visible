@@ -259,6 +259,8 @@
 		C26A057C1E7785C300BDC954 /* cinder_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2D86DF71E5A4FA5007492D4 /* cinder_support.cpp */; };
 		C26A057D1E77A90600BDC954 /* histo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069681CED3E2C0045FF57 /* histo.cpp */; };
 		C26A057E1E77AB4700BDC954 /* libboost_date_time.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C24CD8831CEA916E0008C72B /* libboost_date_time.a */; };
+		C26C6429248C4FEC0037BB73 /* PlayLoop.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C23CFBE521E9785000C1DF16 /* PlayLoop.png */; };
+		C26C642A248C4FEC0037BB73 /* PlayNoLoop.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */; };
 		C26E558D231C883D00010169 /* imgui_visible_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26E558B231C883D00010169 /* imgui_visible_widgets.cpp */; };
 		C26E558E231C883D00010169 /* imgui_visible_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26E558B231C883D00010169 /* imgui_visible_widgets.cpp */; };
 		C26E558F231C883D00010169 /* imgui_visible_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26E558B231C883D00010169 /* imgui_visible_widgets.cpp */; };
@@ -601,6 +603,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
+				C26C6429248C4FEC0037BB73 /* PlayLoop.png in CopyFiles */,
+				C26C642A248C4FEC0037BB73 /* PlayNoLoop.png in CopyFiles */,
 				C2819ED52201287900183E44 /* visible_scope.png in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
