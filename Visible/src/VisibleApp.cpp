@@ -69,14 +69,12 @@ void VisibleApp::DrawSettings() {
                 m_selected_lif_serie_index = sSelected;
                 m_selected_lif_serie_name = m_sections[m_selected_lif_serie_index];
                 static int clicked = 0;
+                ImGui::Text("%s", " Click to Process ");
+                ImGui::SameLine();
                 if (ImGui::Button(m_selected_lif_serie_name.c_str()))
                     clicked++;
                 if (clicked & 1)
                 {
-                    ImGui::SameLine();
-                    std::string msg = " Chose " + m_selected_lif_serie_name;
-                    ImGui::Text("%s", " Click to Process ");
-                    vlogger::instance().console()->info(msg);
                     load_lif_serie(m_selected_lif_serie_name);
                 }
             } // End Selected check & run
