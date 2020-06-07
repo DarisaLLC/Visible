@@ -60,12 +60,10 @@ namespace VisibleAppControl{
  */
 extern bool ThreadsShouldStop;
 static constexpr const char c_visible_app_support[] = "Library/Application Support/net.darisallc.Visible";
-static constexpr const char c_visible_runner_app_support[] = "Library/Application Support/net.darisallc.VisibleRun";
 static constexpr const char c_visible_cache_folder_name [] = ".Visible";
 bool check_input (const string &filename);
 
 bfs::path get_visible_app_support_directory ();
-bfs::path get_runner_app_support_directory ();
 bfs::path get_visible_cache_directory ();
 
 bool setup_loggers (const bfs::path app_support_dir,  imGuiLog& visualLog, std::string id_name);
@@ -77,95 +75,13 @@ bool make_result_cache_directory_for_lif (const boost::filesystem::path& path, c
 static const std::string LIF_CUSTOM = "IDLab_0";
 }
 
-namespace vac = VisibleAppControl;
 
-class VisibleApp : public App {
-public:
-    
-    virtual void DrawGUI();
-    virtual void QuitApp();
-    //   void prepareSettings( Settings *settings );
-    void setup() override;
-    void mouseMove( MouseEvent event ) override;
-    void mouseDrag( MouseEvent event ) override;
-    void mouseDown( MouseEvent event ) override;
-    void mouseUp( MouseEvent event )override;
-    void keyDown( KeyEvent event )override;
-    void update() override;
-    void draw() override;
-    void windowClose();
-    void windowMove();
-    void windowMouseDown( MouseEvent &mouseEvt );
-    void displayChange();
-    void resize() override;
-    void fileOpen ();
-private:
-    bfs::path getLoggingDirectory ();
-    void initData( const bfs::path &path );
-    void createItem( const lif_serie_data &serie, int serieNumber );
-    
-    void fileDrop( FileDropEvent event ) override;
-    
-    bool shouldQuit();
-    void update_log (const std::string& msg);
-    WindowRef createConnectedWindow (Window::Format& format);
-    void dispatch_lif_viewer (const int serie_index);
-    
-    vector<Item>            mItems;
-    vector<Item>::iterator    mMouseOverItem;
-    vector<Item>::iterator    mNewMouseOverItem;
-    vector<Item>::iterator    mSelectedItem;
-    
-    vector<gl::Texture2dRef>    mImages;
-    
-    float mLeftBorder;
-    float mTopBorder;
-    float mItemSpacing;
-    
-    gl::Texture2dRef mVisibleScope;
-    gl::Texture2dRef mTitleTex;
-    gl::Texture2dRef mBgImage;
-    gl::Texture2dRef mFgImage;
-    gl::Texture2dRef mSwatchSmallTex, mSwatchLargeTex;
-    gl::Texture2dRef mDropFileTextTexture;
-    
-    Anim<float> mFgAlpha;
-    Anim<Color> mBgColor;
-    
-    lif_browser::ref mLifRef;
-    mutable std::list <std::unique_ptr<guiContext> > mContexts;
-    map<string, boost::any> mPlist;
-    Font                mFont;
-    std::string            mLog;
-    vec2                mSize;
-    bfs::path            mCurrentLifFilePath;
-    bfs::path            mUserStorageDirPath;
-    bfs::path            mRunAppPath;
-    
-    std::string         mFileName;
-    std::string         mFileExtension;
-    std::string         mRunAppAppString;
-    
-    int convergence = 0;
-    bool m_isIdLabLif = false;
-    bool showLog = false;
-    bool showHelp = false;
-    bool showOverlay = false;
-    bool showGUI = false;
-    
-    imGuiLog app_log;
-    
-    
-    
-};
-
-class VisibleRunApp : public App
+class VisibleApp : public App
 {
 public:
-    VisibleRunApp() { ImGui::CreateContext(); }
-    ~VisibleRunApp() { ImGui::DestroyContext (); }
+    VisibleApp() { ImGui::CreateContext(); }
+    ~VisibleApp() { ImGui::DestroyContext (); }
     
-    virtual void DrawGUI();
     virtual void QuitApp();
     
     void prepareSettings( Settings *settings );
@@ -198,7 +114,6 @@ private:
     bool load_lif_serie(const std::string& serie);
     size_t list_lif_series(std::vector<std::string>& names);
 
-    void DrawContentInfo();
     void DrawMainMenu ();
     void DrawImGuiMetrics();
     void DrawImGuiDemos ();
@@ -236,9 +151,9 @@ private:
     mutable lif_browser::ref mBrowser;
     app::WindowRef mViewerWindow;
     
-    bool show_docks_debug_{false};
     bool show_logs_{true};
     bool show_settings_{true};
+    bool show_help_{true};
     bool show_imgui_metrics_{false};
     bool show_imgui_demos_{true};
     

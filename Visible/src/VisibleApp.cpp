@@ -11,19 +11,19 @@
 
 
 
-//
-//static void HelpMarker(const char* desc)
-//{
-//    ImGui::TextDisabled("(?)");
-//    if (ImGui::IsItemHovered())
-//    {
-//        ImGui::BeginTooltip();
-//        ImGui::PushTextWrapPos(450.0f);
-//        ImGui::TextUnformatted(desc);
-//        ImGui::PopTextWrapPos();
-//        ImGui::EndTooltip();
-//    }
-//}
+
+static void ShowHelpMarker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(450.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
 
 
 
@@ -40,11 +40,11 @@ using namespace boost;
 namespace bfs=boost::filesystem;
 
 
-void VisibleRunApp::QuitApp(){
+void VisibleApp::QuitApp(){
     quit();
 }
 
-void VisibleRunApp::DrawSettings() {
+void VisibleApp::DrawSettings() {
     if(! isValid()) return;
     ImGui::SetNextWindowPos(ImVec2(0, 18), ImGuiCond_Always);
     if (ImGui::Begin(mCurrentContentName.c_str(), &show_settings_)) {
@@ -68,15 +68,15 @@ void VisibleRunApp::DrawSettings() {
             if (sSelected >= 0 && sSelected < m_sections.size()){
                 m_selected_lif_serie_index = sSelected;
                 m_selected_lif_serie_name = m_sections[m_selected_lif_serie_index];
-                std::cout << " Serie " << m_selected_lif_serie_name << std::endl;
                 static int clicked = 0;
                 if (ImGui::Button(m_selected_lif_serie_name.c_str()))
                     clicked++;
                 if (clicked & 1)
                 {
                     ImGui::SameLine();
-                    std::string msg = "Thanks for choosing " + m_selected_lif_serie_name;
-                    ImGui::Text("%s", msg.c_str());
+                    std::string msg = " Chose " + m_selected_lif_serie_name;
+                    ImGui::Text("%s", " Click to Process ");
+                    vlogger::instance().console()->info(msg);
                     load_lif_serie(m_selected_lif_serie_name);
                 }
             } // End Selected check & run
@@ -89,7 +89,7 @@ void VisibleRunApp::DrawSettings() {
     ImGui::End();
 }
 
-void VisibleRunApp::DrawMainMenu(){
+void VisibleApp::DrawMainMenu(){
     
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
     if (ImGui::BeginMainMenuBar())
@@ -102,15 +102,21 @@ void VisibleRunApp::DrawMainMenu(){
                 nfdresult_t result = NFD_OpenDialog("lif;mov,mp4", NULL, &outPath);
                 if (result == NFD_OKAY) {
                     bfs::path fout(outPath);
+                    auto msg = "Selected " + fout.string();
+                    vlogger::instance().console()->info(msg);
                     auto dotext = identify_file(fout, "");
                     /*
                      * Create the browser for the file type.
                      * We do it here as it is naturally blocked operation.
                      */
                     if(isLifFile()){
+                        vlogger::instance().console()->info(fout.string() + " Ok " );
                         m_sections.clear();
                         auto num = list_lif_series(m_sections);
                         assert(num == m_sections.size());
+                    }
+                    else{
+                        vlogger::instance().console()->error("%s not a lif file", fout.string());
                     }
                     free(outPath);
                 }
@@ -120,11 +126,10 @@ void VisibleRunApp::DrawMainMenu(){
             ImGui::EndMenu();
         }
         
-        if (ImGui::BeginMenu("Tools"))
+        if (ImGui::BeginMenu("Views"))
         {
-            if (ImGui::MenuItem("ImGui Demo", "CTRL+D")){
-                DrawImGuiDemos();
-            }
+            ImGui::MenuItem( "Log", nullptr, &show_logs_);
+            ImGui::MenuItem( "Help", nullptr, &show_help_);
             if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
             ImGui::Separator();
             if (ImGui::MenuItem("Cut", "CTRL+X")) {}
@@ -134,14 +139,36 @@ void VisibleRunApp::DrawMainMenu(){
         }
     }
     ImGui::EndMainMenuBar();
-    DrawSettings();
+    //Draw the log if desired
+    if(show_logs_){
+        visual_log.Draw("Log", &show_logs_);
+    }
     
+    if(show_help_) //ImGui::OpenPopup("Help");
+    {
+        ImGui::ScopedWindow window( "Help");
+        std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
+        buildN = "Visible ( build: " + buildN + " ) ";
+        if(ImGui::BeginPopupModal("Help", &show_help_)){
+            ImGui::TextColored(ImVec4(0.92f, 0.18f, 0.29f, 1.00f), "%s", buildN.c_str());
+            ImGui::Text("Arman Garakani, Darisa LLC");
+            if(ImGui::Button("Copy")) ImGui::LogToClipboard();
+            ImGui::SameLine();
+            //  ImGui::Text("github.com/");
+            ImGui::LogFinish();
+            ImGui::Text("");
+            ImGui::Text("Mouse over any"); ShowHelpMarker("We did it!"); ImGui::SameLine(); ImGui::Text("to show help.");
+            ImGui::Text("Ctrl+Click any slider to set its value manually.");
+            ImGui::EndPopup();
+        }
+    }
+    DrawSettings();
 }
+    
 
 
 
-
-void VisibleRunApp::windowClose()
+void VisibleApp::windowClose()
 {
     WindowRef win = getWindow();
 }
@@ -150,15 +177,15 @@ void VisibleRunApp::windowClose()
 
 
 
-void VisibleRunApp::DrawImGuiMetrics() { ImGui::ShowMetricsWindow(); }
+void VisibleApp::DrawImGuiMetrics() { ImGui::ShowMetricsWindow(); }
 
-void VisibleRunApp::DrawImGuiDemos() {
+void VisibleApp::DrawImGuiDemos() {
     ImGui::ShowDemoWindow(&show_imgui_demos_);
 }
 
 
-void VisibleRunApp::DrawStatusBar(float width, float height, float pos_x,
-                                  float pos_y) {
+void VisibleApp::DrawStatusBar(float width, float height, float pos_x,
+                               float pos_y) {
     // Draw status bar (no docking)
     ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Always);
@@ -180,64 +207,13 @@ void VisibleRunApp::DrawStatusBar(float width, float height, float pos_x,
     ImGui::End();
 }
 
-void VisibleRunApp::DrawGUI(){
-    DrawMainMenu();
-    if (show_imgui_metrics_) DrawImGuiMetrics();
-    if (show_imgui_demos_) DrawImGuiDemos();
-    
-    
-}
 
-void VisibleRunApp::DrawContentInfo(){
-    float width = ImGui::GetIO().DisplaySize.x / 6;
-    float height = ImGui::GetIO().DisplaySize.y / 2;
-    float pos_x =  ImGui::GetIO().DisplaySize.x - width;
-    float pos_y = 20;
-    ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
-    ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Always);
-    ImGui::Begin("Info", nullptr);
-    if(isLifFile()){
-        m_selected_lif_serie_index = -1;
-        m_custom_type = false;
-        static int sSelected = -1;
-        if (ImGui::TreeNode("Select Serie")) {
-            for (auto i = 0; i < m_sections.size(); i++)
-            {
-                if (ImGui::Selectable(m_sections[i].c_str(), sSelected == i))
-                {
-                    sSelected = i;
-                    
-                }
-            }
-            ImGui::TreePop();
-        }
-        
-        if (sSelected >= 0 && sSelected < m_sections.size()){
-            m_selected_lif_serie_index = sSelected;
-            m_selected_lif_serie_name = m_sections[m_selected_lif_serie_index];
-            std::cout << " Serie " << m_selected_lif_serie_name << std::endl;
-            static int clicked = 0;
-            if (ImGui::Button(m_selected_lif_serie_name.c_str()))
-                clicked++;
-            if (clicked & 1)
-            {
-                ImGui::SameLine();
-                std::string msg = "Thanks for choosing " + m_selected_lif_serie_name;
-                ImGui::Text("%s", msg.c_str());
-                load_lif_serie(m_selected_lif_serie_name);
-            }
-        }
-        ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
-    }
-    ImGui::End();
-}
-
-bool VisibleRunApp::shouldQuit()
+bool VisibleApp::shouldQuit()
 {
     return true;
 }
 
-void VisibleRunApp::setup_ui(){
+void VisibleApp::setup_ui(){
     WindowRef ww = getWindow ();
     m_imgui_options = ImGui::Options();
     ImGui::Initialize(m_imgui_options
@@ -261,27 +237,27 @@ void VisibleRunApp::setup_ui(){
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     
 }
-
+    
 #define ADD_ERR_AND_RETURN(sofar,addition)\
 sofar += addition;\
 VAPPLOG_INFO(sofar.c_str());\
 return false;
-
-void VisibleRunApp::setup()
+    
+void VisibleApp::setup()
 {
     setup_ui();
     
-    mRootOutputDir = vac::get_runner_app_support_directory();
+    mRootOutputDir = VisibleAppControl::get_visible_app_support_directory();
     mRunAppPath = ci::app::getAppPath();
-    const bfs::path plist = mRunAppPath / "VisibleRun.app/Contents/Info.plist";
+    const bfs::path plist = mRunAppPath / "Visible.app/Contents/Info.plist";
     if (exists (mRunAppPath)){
         std::ifstream stream(plist.c_str(), std::ios::binary);
         Plist::readPlist(stream, mPlist);
         mBuildn =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
     }
     
-    VisibleAppControl::setup_text_loggers(mRootOutputDir, "Visible Log " );
-    //    VisibleAppControl::setup_loggers(mRootOutputDir, visual_log, " Visible Log ");
+//        VisibleAppControl::setup_text_loggers(mRootOutputDir, "Visible Log " );
+    VisibleAppControl::setup_loggers(mRootOutputDir, visual_log, " Visible Log ");
     
     //   if(mVisibleScope== nullptr){
     mVisibleScope = gl::Texture::create( loadImage( loadResource(VISIBLE_SCOPE  )));
@@ -296,13 +272,13 @@ void VisibleRunApp::setup()
         gl::draw( mVisibleScope, getWindowBounds() );
     }
     
-    getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
+    getSignalShouldQuit().connect( std::bind( &VisibleApp::shouldQuit, this ) );
     
-    getWindow()->getSignalMove().connect( std::bind( &VisibleRunApp::windowMove, this ) );
-    getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
+    getWindow()->getSignalMove().connect( std::bind( &VisibleApp::windowMove, this ) );
+    getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
     getWindow()->getSignalDraw().connect([&]{draw();});
-    getWindow()->getSignalClose().connect(std::bind( &VisibleRunApp::windowClose, this) );
-    getWindow()->getSignalResize().connect(std::bind( &VisibleRunApp::resize, this) );
+    getWindow()->getSignalClose().connect(std::bind( &VisibleApp::windowClose, this) );
+    getWindow()->getSignalResize().connect(std::bind( &VisibleApp::resize, this) );
     
     getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
     getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
@@ -312,15 +288,15 @@ void VisibleRunApp::setup()
     mUserStorageDirPath = getHomeDirectory()/".Visible";
     if (!bfs::exists( mUserStorageDirPath)) bfs::create_directories(mUserStorageDirPath);
     
-    
+    for( auto display : Display::getDisplays() )
+     {
+         mGlobalBounds.include(display->getBounds());
+     }
 }
 
 
 
-//    for( auto display : Display::getDisplays() )
-//     {
-//         mGlobalBounds.include(display->getBounds());
-//     }
+
 
 std::string identify_extension(const bfs::path& bpath){
     
@@ -336,7 +312,7 @@ std::string identify_extension(const bfs::path& bpath){
 }
 
 
-std::string VisibleRunApp::identify_file(const bfs::path& bpath, const std::string& custom_type){
+std::string VisibleApp::identify_file(const bfs::path& bpath, const std::string& custom_type){
     
     std::lock_guard<std::mutex> lock(m_mutex);
     m_is_valid_file = false;
@@ -369,7 +345,7 @@ std::string VisibleRunApp::identify_file(const bfs::path& bpath, const std::stri
     
 }
 
-size_t VisibleRunApp::list_lif_series(std::vector<std::string>& names){
+size_t VisibleApp::list_lif_series(std::vector<std::string>& names){
     assert(m_is_lif_file);
     assert(exists(mCurrentContent));
     
@@ -377,17 +353,17 @@ size_t VisibleRunApp::list_lif_series(std::vector<std::string>& names){
     std::strstream msg;
     names = mBrowser->names ();
     
-    for (auto & se : names){
-        msg << se << std::endl;
-        std::cout << se << std::endl;
-    }
+    for (auto & se : names)
+        msg << std::endl << se;
+    msg << std::endl;
+    
     std::string tmp = msg.str();
     VAPPLOG_INFO(tmp.c_str());
     
     return names.size();
 }
 
-bool VisibleRunApp::load_lif_serie(const std::string& serie){
+bool VisibleApp::load_lif_serie(const std::string& serie){
     if( mContext && mContext->is_valid()) return true;
     
     auto bpath_path = mCurrentContent;
@@ -396,7 +372,7 @@ bool VisibleRunApp::load_lif_serie(const std::string& serie){
     auto stem = mCurrentContent.stem();
     cache_path = cache_path / stem;
     std::string cmds = " [ " + serie + " ] ";
-    std::cout << mBrowser->name_to_index_map() << std::endl;
+   // VAPPLOG_INFO(mBrowser->name_to_index_map());
     
     auto indexItr = mBrowser->name_to_index_map().find(serie);
     if (indexItr != mBrowser->name_to_index_map().end()){
@@ -415,67 +391,61 @@ bool VisibleRunApp::load_lif_serie(const std::string& serie){
         mFont = Font( "Menlo", 18 );
         //        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
         // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
-        auto uniqueId = getNumWindows();
-        mViewerWindow->getSignalClose().connect(
-                                                [uniqueId,this] { this->console() << "You closed window #" << uniqueId << std::endl; }
-                                                );
-        mViewerWindow->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
-        gl::enableVerticalSync();
         return true;
     }
     ADD_ERR_AND_RETURN(cmds, " Serie Not Found ")
 }
 
 #if 0
-else if (exists_with_extenstion && is_valid_extension && is_video_content){
-    
-    
-    VisibleAppControl::setup_loggers(root_output_dir, visual_log, bfs::path(bpath).filename().string());
-    
-    cvVideoPlayer::ref vref = cvVideoPlayer::create(bfs::path(bpath));
-    WindowRef ww = getWindow ();
-    
-    auto bpath_path = bfs::path(bpath);
-    auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
-    mContext = std::unique_ptr<sequencedImageContext>(new movContext (ww, vref, cache_path));
-    
-    if (mContext->is_valid()){ cmds += " [ " + m_args[1] + " ] ";cmds += "  Ok ";}
-    setup_ui();
-    
-    VAPPLOG_INFO(cmds.c_str());
-    update();
-    
-    ww->setTitle ( cmds + " Visible build: " + buildN);
-    mFont = Font( "Menlo", 18 );
-    mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-    // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
-    getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
-    getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
-    getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
-    getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
-    gl::enableVerticalSync();
-    
-}else{
-    ADD_ERR_AND_RETURN(cmds, " Path not valid ");
-}
+    else if (exists_with_extenstion && is_valid_extension && is_video_content){
+        
+        
+        VisibleAppControl::setup_loggers(root_output_dir, visual_log, bfs::path(bpath).filename().string());
+        
+        cvVideoPlayer::ref vref = cvVideoPlayer::create(bfs::path(bpath));
+        WindowRef ww = getWindow ();
+        
+        auto bpath_path = bfs::path(bpath);
+        auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
+        mContext = std::unique_ptr<sequencedImageContext>(new movContext (ww, vref, cache_path));
+        
+        if (mContext->is_valid()){ cmds += " [ " + m_args[1] + " ] ";cmds += "  Ok ";}
+        setup_ui();
+        
+        VAPPLOG_INFO(cmds.c_str());
+        update();
+        
+        ww->setTitle ( cmds + " Visible build: " + buildN);
+        mFont = Font( "Menlo", 18 );
+        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+        // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
+        getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
+        getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
+        getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
+        getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
+        gl::enableVerticalSync();
+        
+    }else{
+        ADD_ERR_AND_RETURN(cmds, " Path not valid ");
+    }
 #endif
+    
 
 
-
-void VisibleRunApp::windowMove()
+void VisibleApp::windowMove()
 {
     //  update_log("window pos: " + toString(getWindow()->getPos()));
 }
 
 
-void VisibleRunApp::update_log (const std::string& msg)
+void VisibleApp::update_log (const std::string& msg)
 {
     if (msg.length() > 2)
         VAPPLOG_INFO(msg.c_str());
 }
 
 
-void VisibleRunApp::mouseDrag( MouseEvent event )
+void VisibleApp::mouseDrag( MouseEvent event )
 {
     
     if (mContext) mContext->mouseDrag(event);
@@ -483,7 +453,7 @@ void VisibleRunApp::mouseDrag( MouseEvent event )
         cinder::app::App::mouseDrag(event);
 }
 
-void VisibleRunApp::mouseMove( MouseEvent event )
+void VisibleApp::mouseMove( MouseEvent event )
 {
     if (mContext) mContext->mouseMove(event);
     else
@@ -491,14 +461,14 @@ void VisibleRunApp::mouseMove( MouseEvent event )
 }
 
 
-void VisibleRunApp::mouseUp( MouseEvent event )
+void VisibleApp::mouseUp( MouseEvent event )
 {
     if (mContext) mContext->mouseUp(event);
     else
         cinder::app::App::mouseUp(event);
 }
 
-void VisibleRunApp::mouseDown( MouseEvent event )
+void VisibleApp::mouseDown( MouseEvent event )
 {
     if(mContext)
         mContext->mouseDown(event);
@@ -506,7 +476,7 @@ void VisibleRunApp::mouseDown( MouseEvent event )
         cinder::app::App::mouseDown(event);
 }
 
-void VisibleRunApp::displayChange()
+void VisibleApp::displayChange()
 {
     update_log ( "window display changed: " + to_string(getWindow()->getDisplay()->getBounds()));
     update_log ( "ContentScale = " + to_string(getWindowContentScale()));
@@ -515,7 +485,7 @@ void VisibleRunApp::displayChange()
 
 
 
-void VisibleRunApp::keyDown( KeyEvent event )
+void VisibleApp::keyDown( KeyEvent event )
 {
     if(mContext)
         mContext->keyDown(event);
@@ -537,7 +507,7 @@ void VisibleRunApp::keyDown( KeyEvent event )
 }
 
 
-void VisibleRunApp::update()
+void VisibleApp::update()
 {
     // ImGuiIO &io = ImGui::GetIO();
     
@@ -546,7 +516,7 @@ void VisibleRunApp::update()
 }
 
 
-void VisibleRunApp::draw ()
+void VisibleApp::draw ()
 {
     gl::clear( Color::gray( 0.67f ) );
     if (mContext && mContext->is_valid()){
@@ -556,7 +526,7 @@ void VisibleRunApp::draw ()
 
 
 
-void VisibleRunApp::resize ()
+void VisibleApp::resize ()
 {
     //  mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     if (mContext && mContext->is_valid()) mContext->resize ();
@@ -573,27 +543,25 @@ void prepareSettings( App::Settings *settings )
     }
     
     settings->setHighDensityDisplayEnabled();
-    settings->setWindowSize(lifContext::startup_display_size().x, lifContext::startup_display_size().y);
+//        settings->setWindowSize(lifContext::startup_display_size().x, lifContext::startup_display_size().y);
     settings->setFrameRate( 60 );
     settings->setResizable( true );
-    //    settings->setWindowSize( 640, 480 );
-    //    settings->setFullScreen( false );
-    //    settings->setResizable( true );
+    settings->setResizable( true );
 }
 
 
 
 
-// settings fn from top of file:
-CINDER_APP( VisibleRunApp, RendererGl, prepareSettings )
-
+    // settings fn from top of file:
+    CINDER_APP( VisibleApp, RendererGl, prepareSettings )
+    
 #pragma GCC diagnostic pop
-
-//int main( int argc, char* argv[] )
-//{
-//    cinder::app::RendererRef renderer( new RendererGl );
-//    cinder::app::AppMac::main<VisibleRunApp>( renderer, "VisibleRunApp", argc, argv, nullptr); // prepareSettings);
-//    return 0;
-//}
-
-
+    
+    //int main( int argc, char* argv[] )
+    //{
+    //    cinder::app::RendererRef renderer( new RendererGl );
+    //    cinder::app::AppMac::main<VisibleRunApp>( renderer, "VisibleRunApp", argc, argv, nullptr); // prepareSettings);
+    //    return 0;
+    //}
+    
+    

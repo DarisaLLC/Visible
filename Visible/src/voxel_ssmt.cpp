@@ -27,7 +27,6 @@
 #include "ssmt.hpp"
 #include "logger/logger.hpp"
 #include "result_serialization.h"
-#include "dbscan.h"
 #include "segmentation_parameters.hpp"
 
 using namespace stl_utils;
