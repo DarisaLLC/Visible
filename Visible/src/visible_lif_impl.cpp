@@ -906,7 +906,7 @@ void lifContext::add_canvas (){
     //@note: assumes, next image plus any on image graphics have already been added
     // offscreen via FBO
     if(m_show_playback){
-        ImVec2 size (mFrameSize.x+mFrameSize.y/2, mFrameSize.x+mFrameSize.y/2);
+        ImVec2 size (mFrameSize.x+mFrameSize.x/2, mFrameSize.y+mFrameSize.y/2);
         ImVec2 pos (300,18);
         ImGuiWindow* window = ImGui::FindWindowByName(mContentFileName.c_str());
         if (window){
