@@ -154,6 +154,7 @@ private:
     bool show_logs_{true};
     bool show_settings_{true};
     bool show_help_{true};
+    bool show_about_{true};
     bool show_imgui_metrics_{false};
     bool show_imgui_demos_{true};
     
