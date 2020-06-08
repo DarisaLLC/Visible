@@ -46,7 +46,7 @@ void VisibleApp::QuitApp(){
 
 void VisibleApp::DrawSettings() {
     if(! isValid()) return;
-    ImGui::SetNextWindowPos(ImVec2(0, 18), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(0, 36), ImGuiCond_Always);
     if (ImGui::Begin(mCurrentContentName.c_str(), &show_settings_)) {
         static bool first_time = true;
         if (first_time) {
@@ -87,6 +87,41 @@ void VisibleApp::DrawSettings() {
     ImGui::End();
 }
 
+
+void VisibleApp::ShowStyleEditor(ImGuiStyle* ref)
+{
+    // You can pass in a reference ImGuiStyle structure to compare to, revert to and save to (else it compares to an internally stored reference)
+    ImGuiIO &io = ImGui::GetIO();
+    ImGuiStyle& style = ImGui::GetStyle();
+    static ImGuiStyle ref_saved_style;
+
+    // Default to using internal storage as reference
+    static bool init = true;
+    if (init && ref == NULL)
+        ref_saved_style = style;
+    init = false;
+    if (ref == NULL)
+        ref = &ref_saved_style;
+
+    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
+
+    if (ImGui::ShowStyleSelector("Colors##Selector"))
+        ref_saved_style = style;
+
+    ImGui::SameLine();
+    // Save/Revert button
+    if (ImGui::Button("Save Ref"))
+        *ref = ref_saved_style = style;
+    ImGui::SameLine();
+    if (ImGui::Button("Revert Ref"))
+        style = *ref;
+    ImGui::SameLine();
+    ShowHelpMarker("Save/Revert in local non-persistent storage. Default Colors definition are not affected. Use \"Export\" below to save them somewhere.");
+    ImGui::SameLine();
+    ImGui::DragFloat("global scale", &io.FontGlobalScale, 0.005f, 0.3f, 2.0f, "%.2f");
+
+}
+
 void VisibleApp::DrawMainMenu(){
     
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
@@ -121,6 +156,11 @@ void VisibleApp::DrawMainMenu(){
                 else {
                 }
             }
+            if (ImGui::Button("Process"))
+            {
+                if (mContext) std::dynamic_pointer_cast<lifContext>(mContext)->process_async();
+            }
+            
             ImGui::EndMenu();
         }
         
@@ -128,6 +168,8 @@ void VisibleApp::DrawMainMenu(){
         {
             ImGui::MenuItem( "Log", nullptr, &show_logs_);
             ImGui::MenuItem( "Help", nullptr, &show_help_);
+            ShowStyleEditor();
+
             if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
             ImGui::Separator();
             if (ImGui::MenuItem("Cut", "CTRL+X")) {}
@@ -161,6 +203,7 @@ void VisibleApp::DrawMainMenu(){
         }
     }
     DrawSettings();
+    DrawImGuiDemos();
 }
     
 
@@ -233,6 +276,8 @@ void VisibleApp::setup_ui(){
     
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImGui::StyleColorsLight();
+    io.FontGlobalScale = 2.0;
     
 }
     
@@ -370,11 +415,14 @@ bool VisibleApp::load_lif_serie(const std::string& serie){
     auto stem = mCurrentContent.stem();
     cache_path = cache_path / stem;
     std::string cmds = " [ " + serie + " ] ";
-   // VAPPLOG_INFO(mBrowser->name_to_index_map());
     
     auto indexItr = mBrowser->name_to_index_map().find(serie);
     if (indexItr != mBrowser->name_to_index_map().end()){
         auto serie = mBrowser->get_serie_by_index(indexItr->second);
+        std::strstream msg;
+        msg << serie << std::endl;
+        VAPPLOG_INFO(msg.str());
+        
         mViewerWindow = getWindow();
         mContext = std::make_shared<lifContext>(mViewerWindow,serie,cache_path, mCurrentContentName);
         
