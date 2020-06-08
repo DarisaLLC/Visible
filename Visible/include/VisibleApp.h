@@ -120,7 +120,7 @@ private:
     void DrawStatusBar(float width, float height, float pos_x, float pos_y);
     void DrawLogView();
     void DrawSettings();
-
+    void ShowStyleEditor(ImGuiStyle* ref = NULL);   
     
     void setup_media_file(const bfs::path&);
     bfs::path            mRootOutputDir;

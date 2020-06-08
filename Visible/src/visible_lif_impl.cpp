@@ -253,7 +253,7 @@ void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
 {
     std::string msg = to_string(mMediaInfo.count) + " Samples in Media  " + to_string(loaded_frame_count) + " Loaded";
     vlogger::instance().console()->info(msg);
-    process_async();
+//    process_async();
 }
 void lifContext::signal_flu_stats_ready ()
 {
@@ -745,7 +745,7 @@ void lifContext::loadCurrentSerie ()
         m_plot_names = m_serie.channel_names();
         m_plot_names.push_back("MisRegister");
         
-        std::async(std::launch::async,&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie.channel_names(), m_plot_names);
+      //  std::async(std::launch::async,&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie.channel_names(), // m_plot_names);
         
 
         /*

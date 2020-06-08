@@ -110,6 +110,10 @@ public:
     // Supporting gui_base
     void DrawGUI();
     
+    // Async Processing
+    void process_async ();
+     
+    
 private:
     void renderToFbo (const SurfaceRef&, gl::FboRef& );
     void setup_signals ();
@@ -158,9 +162,6 @@ private:
     mutable std::vector<clip> m_clips;
     mutable std::mutex m_clip_mutex;
     mutable std::mutex m_update_mutex;
-    
-    // Async Processing
-    void process_async ();
     
     // Frame Cache and frame store
     std::shared_ptr<seqFrameContainer> mFrameSet;
