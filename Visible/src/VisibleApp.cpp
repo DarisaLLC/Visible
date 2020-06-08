@@ -53,7 +53,11 @@ void VisibleApp::DrawSettings() {
             ImGui::SetNextTreeNodeOpen(true);
             first_time = false;
         }
-        if (ImGui::CollapsingHeader("Lif Series") && isLifFile()) {
+        // @ todo: add layoput information about the LIF file
+        if (ImGui::CollapsingHeader("Custom Content")) {
+              ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
+          }
+        if (isLifFile()) {
             m_selected_lif_serie_index = -1;
             m_custom_type = false;
             static int sSelected = -1;
@@ -78,12 +82,10 @@ void VisibleApp::DrawSettings() {
                     load_lif_serie(m_selected_lif_serie_name);
                 }
             } // End Selected check & run
-        } // Collapsing Header
+        } // IsLifFile
         ImGui::Spacing();
     }// Settings
-    if (ImGui::CollapsingHeader("Custom Content")) {
-        ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
-    }
+  
     ImGui::End();
 }
 
@@ -168,13 +170,8 @@ void VisibleApp::DrawMainMenu(){
         {
             ImGui::MenuItem( "Log", nullptr, &show_logs_);
             ImGui::MenuItem( "Help", nullptr, &show_help_);
+            ImGui::MenuItem( "About", nullptr, &show_about_);
             ShowStyleEditor();
-
-            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-            ImGui::Separator();
-            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
             ImGui::EndMenu();
         }
     }
@@ -184,23 +181,14 @@ void VisibleApp::DrawMainMenu(){
         visual_log.Draw("Log", &show_logs_);
     }
     
-    if(show_help_) //ImGui::OpenPopup("Help");
+    if(show_about_) //ImGui::OpenPopup("Help");
     {
         ImGui::ScopedWindow window( "Help");
         std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
         buildN = "Visible ( build: " + buildN + " ) ";
-        if(ImGui::BeginPopupModal("Help", &show_help_)){
+//        if(ImGui::BeginPopupModal("Help", &show_help_)){
             ImGui::TextColored(ImVec4(0.92f, 0.18f, 0.29f, 1.00f), "%s", buildN.c_str());
             ImGui::Text("Arman Garakani, Darisa LLC");
-            if(ImGui::Button("Copy")) ImGui::LogToClipboard();
-            ImGui::SameLine();
-            //  ImGui::Text("github.com/");
-            ImGui::LogFinish();
-            ImGui::Text("");
-            ImGui::Text("Mouse over any"); ShowHelpMarker("We did it!"); ImGui::SameLine(); ImGui::Text("to show help.");
-            ImGui::Text("Ctrl+Click any slider to set its value manually.");
-            ImGui::EndPopup();
-        }
     }
     DrawSettings();
     DrawImGuiDemos();
@@ -305,6 +293,7 @@ void VisibleApp::setup()
     //   if(mVisibleScope== nullptr){
     mVisibleScope = gl::Texture::create( loadImage( loadResource(VISIBLE_SCOPE  )));
     
+    std::cout << getDisplay()->getWidth() << " , " << getDisplay()->getHeight() << std::endl;
     
     setWindowSize(APP_WIDTH,APP_HEIGHT);
     setFrameRate( 60 );

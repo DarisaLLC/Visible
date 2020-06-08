@@ -85,7 +85,13 @@ namespace {
         ImGui::End();
     }
 
-
+    bool getPosSizeFromWindow(const char* last_window, ImVec2& pos, ImVec2& size){
+           ImGuiWindow* window = ImGui::FindWindowByName(last_window);
+        if (window == nullptr) return false;
+        pos.x = window->Pos.x; pos.y = window->Pos.y + window->Size.y;
+        size.x = window->Size.x; size.y = window->Size.y;
+        return true;
+    }
 }
 
 #define wDisplay "Display"
@@ -745,7 +751,12 @@ void lifContext::loadCurrentSerie ()
         m_plot_names = m_serie.channel_names();
         m_plot_names.push_back("MisRegister");
         
-      //  std::async(std::launch::async,&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie.channel_names(), // m_plot_names);
+//                std::async(std::launch::async,&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie.channel_names(), m_plot_names);
+                
+        auto load_thread = std::thread(&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie.channel_names(), m_plot_names);
+        load_thread.detach();
+
+
         
 
         /*
@@ -906,14 +917,11 @@ void lifContext::add_canvas (){
     //@note: assumes, next image plus any on image graphics have already been added
     // offscreen via FBO
     if(m_show_playback){
-        ImVec2 size (mFrameSize.x+mFrameSize.x/2, mFrameSize.y+mFrameSize.y/2);
+        ImVec2 size;
         ImVec2 pos (300,18);
-        ImGuiWindow* window = ImGui::FindWindowByName(mContentFileName.c_str());
-        if (window){
-            pos.x = window->Pos.x;
-            pos.y = window->Pos.y + window->Size.y;
-            if(!window->Collapsed) ImGui::SetWindowCollapsed(window, true);
-        }
+        getPosSizeFromWindow(mContentFileName.c_str(), pos, size);
+        size.x = mFrameSize.x+mFrameSize.x/2;
+        size.y = mFrameSize.y+mFrameSize.y/2;
         auto ww = get_windowRef();
 
         ScopedWindowWithFlag utilities(wDisplay, nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_HorizontalScrollbar );
@@ -936,11 +944,8 @@ void lifContext::add_result_sequencer (){
     static int selectedEntry = -1;
     static int64 firstFrame = 0;
     static bool expanded = true;
-    
-    ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
-    assert(window != nullptr);
-    ImVec2 pos (window->Pos.x , window->Pos.y + window->Size.y);
-    ImVec2 size (window->Size.x, window->Size.y);
+    ImVec2 pos, size;
+    assert(getPosSizeFromWindow(wDisplay, pos, size));
     m_results_browser_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(size);
