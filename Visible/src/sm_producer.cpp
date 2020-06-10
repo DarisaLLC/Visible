@@ -336,6 +336,7 @@ int sm_producer::spImpl::loadMovie( const std::string& movieFile )
     }
     
     bool m_valid = m_assetReader->isValid();
+    int rtn_val = -1;
     if (m_valid)
     {
         m_assetReader->info().printout();
@@ -350,10 +351,14 @@ int sm_producer::spImpl::loadMovie( const std::string& movieFile )
         }
         m_frameCount = m_loaded_ref.size ();
         
-        return (int) m_frameCount;
-        
+        rtn_val = (int) m_frameCount;
     }
-    return -1;
+    
+    // Call the content loaded cb if any
+    if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+        signal_content_loaded->operator()();
+    
+    return rtn_val;
     
 }
 

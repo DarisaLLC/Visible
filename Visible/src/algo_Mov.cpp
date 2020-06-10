@@ -52,7 +52,7 @@ mCurrentCachePath(serie_cache_folder)
     signal_content_loaded = createSignal<sequence_processor::sig_cb_content_loaded>();
     signal_frame_loaded = createSignal<sequence_processor::sig_cb_frame_loaded>();
     signal_sm1d_available = createSignal<sequence_processor::sig_cb_sm1d_available>();
-    signal_3dstats_available = createSignal<sequence_processor::sig_cb_3dstats_available>();
+    signal_volume_available = createSignal<sequence_processor::sig_cb_volume_available>();
     signal_geometry_available = createSignal<sequence_processor::sig_cb_geometry_available>();
     _segmented_view_ready_ = createSignal<sequence_processor::sig_cb_ss_image_available>();
     
@@ -60,8 +60,8 @@ mCurrentCachePath(serie_cache_folder)
     m_sm_producer = std::shared_ptr<sm_producer> ( new sm_producer () );
     
     // Signal us when 3d stats are ready
-    std::function<void ()>_3dstats_done_cb = boost::bind (&sequence_processor::stats_3d_computed, this);
-    boost::signals2::connection _3d_stats_connection = registerCallback(_3dstats_done_cb);
+    std::function<void ()>_volume_done_cb = boost::bind (&sequence_processor::volume_stats_computed, this);
+    boost::signals2::connection _3d_stats_connection = registerCallback(_volume_done_cb);
     
     // Signal us when ss segmentation is ready
     std::function<void (cv::Mat&)>_ss_image_done_cb = boost::bind (&sequence_processor::finalize_segmentation, this, _1);
@@ -131,7 +131,7 @@ int64_t sequence_processor::load (const std::shared_ptr<seqFrameContainer>& fram
 
 void sequence_processor::run_detect_geometry (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_3d_stats_done = false;
+    m_variance_peak_detection_done  = false;
     
     std::vector<std::thread> threads(1);
     threads[0] = std::thread(&sequence_processor::generateVoxelSelfSimilarities_on_channel, this, 2,
@@ -189,9 +189,9 @@ void sequence_processor::run_detect_geometry (const int channel_index){
  * 1 monchrome channel. Compute volume stats of each on a thread
  */
 
-svl::stats<int64_t> sequence_processor::run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>& images){
+svl::stats<int64_t> sequence_processor::run_volume_stats (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_3d_stats_done = false;
+    m_variance_peak_detection_done  = false;
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
     std::vector<std::tuple<uint8_t,uint8_t>> rts;
     std::vector<std::thread> threads(1);
@@ -202,19 +202,19 @@ svl::stats<int64_t> sequence_processor::run_volume_sum_sumsq_count (std::vector<
     m_3d_stats = svl::stats<int64_t> (std::get<0>(res), std::get<1>(res), std::get<2>(res), int64_t(std::get<0>(mes)), int64_t(std::get<1>(mes)));
     
     // Signal to listeners
-    if (signal_3dstats_available && signal_3dstats_available->num_slots() > 0)
-        signal_3dstats_available->operator()();
-    return m_3d_stats;
+    if (signal_volume_available && signal_volume_available->num_slots() > 0)
+        signal_volume_available->operator()();
+    return m_variance_peak_detection_done ;
     
 }
 
 
-svl::stats<int64_t> sequence_processor::run_volume_sum_sumsq_count (const int channel_index){
-    return run_volume_sum_sumsq_count(m_all_by_channel[channel_index]);
+svl::stats<int64_t> sequence_processor::run_volume_stats (const int channel_index){
+    return run_volume_stats(m_all_by_channel[channel_index]);
 }
 
 
-void sequence_processor::stats_3d_computed(){
+void sequence_processor::volume_stats_computed(){
     
 }
 

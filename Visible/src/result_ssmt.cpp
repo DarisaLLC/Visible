@@ -76,7 +76,7 @@ const ssmt_processor::channel_vec_t& ssmt_result::content () const { return m_al
 void ssmt_result::process (){
     bool done = get_channels(m_input.channel());
     if(done){
-        auto pci_done = run_contraction_pci(m_all_by_channel[m_input.channel()]);
+        auto pci_done = run_selfsimilarity_on_region(m_all_by_channel[m_input.channel()]);
         if(pci_done) m_caRef->locate_contractions();
     }
 }
@@ -138,7 +138,7 @@ bool ssmt_result::get_channels (int channel){
 
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled
-bool ssmt_result::run_contraction_pci (const std::vector<roiWindow<P8U>>& images)
+bool ssmt_result::run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>>& images)
 {
   
     auto sp =  std::shared_ptr<sm_producer> ( new sm_producer () );

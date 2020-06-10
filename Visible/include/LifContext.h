@@ -139,9 +139,9 @@ private:
     
     // Callbacks
     void signal_content_loaded (int64_t&);
-    void signal_flu_stats_ready ();
+    void signal_intensity_over_time_ready ();
     void signal_root_pci_ready (std::vector<float> &, const input_channel_selector_t&);
-    void signal_sm1dmed_ready (const input_channel_selector_t&);
+    void signal_root_pci_med_reg_ready (const input_channel_selector_t&);
     void signal_contraction_ready (contractionLocator::contractionContainer_t&,const input_channel_selector_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
     void signal_regions_ready (int, const input_channel_selector_t&);
@@ -174,7 +174,7 @@ private:
     SurfaceRef m_segmented_surface;
     
     // Tracks of frame associated results
-    std::weak_ptr<vecOfNamedTrack_t> m_flurescence_trackWeakRef;
+    std::weak_ptr<vecOfNamedTrack_t> m_intensity_trackWeakRef;
     std::weak_ptr<vecOfNamedTrack_t> m_root_pci_trackWeakRef;
 
     // Selection -1 means none selected
