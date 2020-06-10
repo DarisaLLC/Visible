@@ -36,7 +36,7 @@ const Rectf& ssmt_processor::measuredArea () const { return m_measured_area; }
  * 1 monchrome channel. Compute 3D Standard Dev. per pixel
  */
 
-void ssmt_processor::find_moving_regions (std::vector<roiWindow<P8U>>& images){
+void ssmt_processor::internal_find_moving_regions (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
     generateVoxelsAndSelfSimilarities (images);
 
@@ -44,7 +44,11 @@ void ssmt_processor::find_moving_regions (std::vector<roiWindow<P8U>>& images){
 
 
 void ssmt_processor::find_moving_regions (const int channel_index){
-    return find_moving_regions(m_all_by_channel[channel_index]);
+    m_variance_peak_detection_done = false;
+    volume_variance_peak_promotion(m_all_by_channel[channel_index]);
+    while(!m_variance_peak_detection_done){ std::this_thread::yield();}
+    m_instant_input = input_channel_selector_t(-1, channel_index);
+    return internal_find_moving_regions(m_all_by_channel[channel_index]);
 }
 
 
@@ -63,7 +67,7 @@ void ssmt_processor::find_moving_regions (const int channel_index){
 void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
     assert(mono.cols == bi_level.cols && mono.rows == bi_level.rows);
-    assert(m_3d_stats_done);
+    assert(m_variance_peak_detection_done);
     vlogger::instance().console()->info("Locating moving regions");
     cv::Rect padded_rect, image_rect;
 

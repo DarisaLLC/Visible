@@ -846,7 +846,7 @@ void movContext::update ()
 
 //
 //    if ( is_ready (m_fluorescense_tracks_aync) )
-//        m_flurescence_trackWeakRef = m_fluorescense_tracks_aync.get();
+//        m_intensity_trackWeakRef = m_fluorescense_tracks_aync.get();
 //
 //
 //    auto flu_cnt = channel_count() - 1;

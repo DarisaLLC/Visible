@@ -40,12 +40,12 @@ mCurrentCachePath(serie_cache_folder), m_params(params)
 {
     // Signals we provide
     signal_content_loaded = createSignal<ssmt_processor::sig_cb_content_loaded>();
-    signal_flu_ready = createSignal<ssmt_processor::sig_cb_flu_stats_ready>();
+    intensity_over_time_ready = createSignal<ssmt_processor::sig_intensity_over_time_ready>();
     signal_frame_loaded = createSignal<ssmt_processor::sig_cb_frame_loaded>();
-    signal_contraction_pci_ready = createSignal<ssmt_processor::sig_cb_sm1d_ready>();
-    signal_sm1dmed_ready = createSignal<ssmt_processor::sig_cb_sm1dmed_ready>();
+    signal_root_pci_ready = createSignal<ssmt_processor::sig_cb_root_pci_ready>();
+    signal_root_pci_med_reg_ready = createSignal<ssmt_processor::sig_cb_root_pci_median_regularized_ready>();
     signal_contraction_ready = createSignal<ssmt_processor::sig_cb_contraction_ready>();
-    signal_3dstats_ready = createSignal<ssmt_processor::sig_cb_3dstats_ready>();
+    signal_volume_ready = createSignal<ssmt_processor::sig_cb_volume_ready>();
     signal_geometry_ready = createSignal<ssmt_processor::sig_cb_geometry_ready>();
     signal_segmented_view_ready = createSignal<ssmt_processor::sig_cb_segmented_view_ready>();
     signal_ss_voxel_ready = createSignal<ssmt_processor::sig_cb_ss_voxel_ready>();
@@ -59,9 +59,9 @@ mCurrentCachePath(serie_cache_folder), m_params(params)
     // boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
     
    
-    // Signal us when 3d stats are ready
-    std::function<void ()>_3dstats_done_cb = boost::bind (&ssmt_processor::stats_3d_computed, this);
-    boost::signals2::connection _3d_stats_connection = registerCallback(_3dstats_done_cb);
+    // Signal us when volume stats are ready
+    std::function<void ()>_volume_done_cb = boost::bind (&ssmt_processor::volume_stats_computed, this);
+    boost::signals2::connection _volume_stats_connection = registerCallback(_volume_done_cb);
     
     // Signal us when ss segmentation surface is ready
     std::function<sig_cb_segmented_view_ready> _ss_segmentation_done_cb = boost::bind (&ssmt_processor::finalize_segmentation,
@@ -247,15 +247,7 @@ int64_t ssmt_processor::load (const std::shared_ptr<seqFrameContainer>& frames,c
     create_named_tracks(names, plot_names);
     load_channels_from_images(frames);
     lock.unlock();
-    
-    int channel_to_use = m_channel_count - 1;
-    m_3d_stats_done = false;
-    run_volume_variances(m_all_by_channel[channel_to_use]);
-    while(!m_3d_stats_done){ std::this_thread::yield();}
-    m_instant_input = input_channel_selector_t(-1, channel_to_use);
-    find_moving_regions (channel_to_use);
-    
-    
+
     // Call the content loaded cb if any
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
         signal_content_loaded->operator()(m_frameCount);
@@ -269,7 +261,7 @@ int64_t ssmt_processor::load (const std::shared_ptr<seqFrameContainer>& frames,c
  * 1 monchrome channel. Compute volume stats of each on a thread
  */
 
-svl::stats<int64_t> ssmt_processor::run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>& images){
+svl::stats<int64_t> ssmt_processor::run_volume_stats (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
 
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
@@ -279,22 +271,22 @@ svl::stats<int64_t> ssmt_processor::run_volume_sum_sumsq_count (std::vector<roiW
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     auto res = std::accumulate(cts.begin(), cts.end(), std::make_tuple(int64_t(0),int64_t(0), uint32_t(0)), stl_utils::tuple_sum<int64_t,uint32_t>());
     auto mes = std::accumulate(rts.begin(), rts.end(), std::make_tuple(uint8_t(255),uint8_t(0)), stl_utils::tuple_minmax<uint8_t, uint8_t>());
-    m_3d_stats = svl::stats<int64_t> (std::get<0>(res), std::get<1>(res), std::get<2>(res), int64_t(std::get<0>(mes)), int64_t(std::get<1>(mes)));
+    m_volume_stats = svl::stats<int64_t> (std::get<0>(res), std::get<1>(res), std::get<2>(res), int64_t(std::get<0>(mes)), int64_t(std::get<1>(mes)));
     
     // Signal to listeners
-    if (signal_3dstats_ready && signal_3dstats_ready->num_slots() > 0)
-        signal_3dstats_ready->operator()();
-    return m_3d_stats;
+    if (signal_volume_ready && signal_volume_ready->num_slots() > 0)
+        signal_volume_ready->operator()();
+    return m_volume_stats;
     
 }
 
 
-svl::stats<int64_t> ssmt_processor::run_volume_sum_sumsq_count (const int channel_index){
-    return run_volume_sum_sumsq_count(m_all_by_channel[channel_index]);
+svl::stats<int64_t> ssmt_processor::run_volume_stats (const int channel_index){
+    return run_volume_stats(m_all_by_channel[channel_index]);
 }
 
 
-void ssmt_processor::stats_3d_computed(){
+void ssmt_processor::volume_stats_computed(){
     
 }
 /*
@@ -307,7 +299,7 @@ void ssmt_processor::stats_3d_computed(){
  @param channels vector of channels containing fluorescence images
  @return vecor of named tracks containing of output time series
  */
-std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_flu_statistics (const std::vector<int>& channels)
+std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_intensity_statistics (const std::vector<int>& channels)
 {
     std::vector<std::thread> threads(channels.size());
     for (auto tt = 0; tt < channels.size(); tt++)
@@ -319,8 +311,8 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_flu_statistics (const std
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     
     // Call the content loaded cb if any
-    if (signal_flu_ready && signal_flu_ready->num_slots() > 0)
-        signal_flu_ready->operator()();
+    if (intensity_over_time_ready && intensity_over_time_ready->num_slots() > 0)
+        intensity_over_time_ready->operator()();
     
     return m_moment_tracksRef;
 }
@@ -329,7 +321,7 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_flu_statistics (const std
 // @todo add params
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled
-std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const std::vector<roiWindow<P8U>>& images,
+std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::vector<roiWindow<P8U>>& images,
                                                                          const input_channel_selector_t& in, const progress_fn_t& reporter)
 {
     bool cache_ok = false;
@@ -412,8 +404,8 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
         }
     }
     // Signal we are done with ACI
-    if (signal_contraction_pci_ready && signal_contraction_pci_ready->num_slots() > 0){
-        signal_contraction_pci_ready->operator()(fout, in);
+    if (signal_root_pci_ready && signal_root_pci_ready->num_slots() > 0){
+        signal_root_pci_ready->operator()(fout, in);
     }
     
     return m_longterm_pci_tracksRef;
@@ -423,7 +415,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci (const s
 // channel_index which channel of multi-channel input. Usually visible channel is the last one
 // input is -1 for the entire root or index of moving object area in results container
 
-std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci_on_selected_input (const input_channel_selector_t& in, const progress_fn_t& reporter){
+std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_selfsimilarity_on_selected_input (const input_channel_selector_t& in, const progress_fn_t& reporter){
     auto cache_path = get_cache_location(in.channel(),in.region());
     if (cache_path == bfs::path()){
         return std::shared_ptr<vecOfNamedTrack_t> ();
@@ -431,7 +423,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_contraction_pci_on_selec
     // protect fetching image data 
     std::lock_guard<std::mutex> lock(m_mutex);
     const auto& _content = in.isEntire() ? content()[in.channel()] : m_results[in.region()]->content()[in.channel()];
-    return run_contraction_pci(std::move(_content), in, reporter);
+    return internal_run_selfsimilarity_on_selected_input(std::move(_content), in, reporter);
 }
 
 
@@ -445,14 +437,14 @@ void ssmt_processor::signal_geometry_done (int count, const input_channel_select
  * the atomic bool m_3d_stats_done is set to true
  */
 
-void ssmt_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
+void ssmt_processor::volume_variance_peak_promotion (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
 
     cv::Mat m_sum, m_sqsum;
     int image_count = 0;
     std::vector<std::thread> threads(1);
     threads[0] = std::thread(SequenceAccumulator(),std::ref(images),
-                             std::ref(m_sum), std::ref(m_sqsum), std::ref(image_count), std::ref(m_3d_stats_done));
+                             std::ref(m_sum), std::ref(m_sqsum), std::ref(image_count), std::ref(m_variance_peak_detection_done));
     
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     SequenceAccumulator::computeStdev(m_sum, m_sqsum, image_count, m_var_image);
@@ -467,7 +459,7 @@ void ssmt_processor::run_volume_variances (std::vector<roiWindow<P8U>>& images){
         tmp.at<float>(peak.y,peak.x) = m_var_image.at<float>(peak.y,peak.x);
     }
     cv::normalize(tmp, m_var_image, 0, 255, NORM_MINMAX, CV_8UC1);
-    m_3d_stats_done = true;
+    m_variance_peak_detection_done = true;
     
 }
 
@@ -580,8 +572,8 @@ void ssmt_processor::median_leveled_pci (namedTrack_t& track, const input_channe
         vlogger::instance().console()->info(ss.str());
     }
     // Signal we are done with median level set
-    if (signal_sm1dmed_ready && signal_sm1dmed_ready->num_slots() > 0)
-        signal_sm1dmed_ready->operator()(in);
+    if (signal_root_pci_med_reg_ready && signal_root_pci_med_reg_ready->num_slots() > 0)
+        signal_root_pci_med_reg_ready->operator()(in);
 }
 
 const int64_t& ssmt_processor::frame_count () const

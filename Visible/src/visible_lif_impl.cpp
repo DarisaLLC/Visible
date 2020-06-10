@@ -161,16 +161,16 @@ void lifContext::setup_signals(){
     boost::signals2::connection ml_connection = m_lifProcRef->registerCallback(content_loaded_cb);
     
     // Support lifProcessor::flu results available
-    std::function<void ()> flu_stats_ready_cb = boost::bind (&lifContext::signal_flu_stats_ready, shared_from_above());
-    boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(flu_stats_ready_cb);
+    std::function<void ()> intensity_over_time_ready_cb = boost::bind (&lifContext::signal_intensity_over_time_ready, shared_from_above());
+    boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(intensity_over_time_ready_cb);
     
     // Support lifProcessor::initial ss results available
     std::function<void (std::vector<float> &, const input_channel_selector_t&)> root_pci_ready_cb = boost::bind (&lifContext::signal_root_pci_ready, shared_from_above(), _1, _2);
     boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(root_pci_ready_cb);
     
     // Support lifProcessor::median level set ss results available
-    std::function<void (const input_channel_selector_t&)> sm1dmed_ready_cb = boost::bind (&lifContext::signal_sm1dmed_ready, shared_from_above(), _1);
-    boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(sm1dmed_ready_cb);
+    std::function<void (const input_channel_selector_t&)> root_pci_med_reg_ready_cb = boost::bind (&lifContext::signal_root_pci_med_reg_ready, shared_from_above(), _1);
+    boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(root_pci_med_reg_ready_cb);
     
     // Support lifProcessor::contraction results available
     std::function<void (contractionLocator::contractionContainer_t&,const input_channel_selector_t&)> contraction_ready_cb =
@@ -238,30 +238,33 @@ void lifContext::setup()
 void lifContext::signal_root_pci_ready (std::vector<float> & signal, const input_channel_selector_t& dummy)
 {
     stringstream ss;
-    ss << svl::toString(dummy.region()) << " contraction self-similarity available ";
+    ss << svl::toString(dummy.region()) << " root self-similarity available ";
     vlogger::instance().console()->info(ss.str());
 }
 
-void lifContext::signal_sm1dmed_ready (const input_channel_selector_t& dummy2)
+void lifContext::signal_root_pci_med_reg_ready (const input_channel_selector_t& dummy2)
 {
    //@note this is also checked in update. Not sure if this is necessary
-   if (haveTracks())
-    {
-        auto tracksRef = m_root_pci_trackWeakRef.lock();
-        if ( tracksRef && !tracksRef->at(0).second.empty()){
-            m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
-        }
+    auto tracksRef = m_root_pci_trackWeakRef.lock();
+    if ( tracksRef && !tracksRef->at(0).second.empty()){
+        m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
     }
-
+    stringstream ss;
+    ss << svl::toString(dummy2.region()) << " median regularized root self-similarity available ";
+     vlogger::instance().console()->info(ss.str());
 }
 
 void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
 {
     std::string msg = to_string(mMediaInfo.count) + " Samples in Media  " + to_string(loaded_frame_count) + " Loaded";
     vlogger::instance().console()->info(msg);
-//    process_async();
+    int channel_index = int(mChannelCount)-1;
+    auto load_thread = std::thread(&ssmt_processor::find_moving_regions, m_lifProcRef.get(),channel_index);
+      load_thread.detach();
+
+    
 }
-void lifContext::signal_flu_stats_ready ()
+void lifContext::signal_intensity_over_time_ready ()
 {
     vlogger::instance().console()->info(" Flu Stats Available ");
 }
@@ -750,8 +753,7 @@ void lifContext::loadCurrentSerie ()
         m_plot_names.clear();
         m_plot_names = m_serie.channel_names();
         m_plot_names.push_back("MisRegister");
-        
-//                std::async(std::launch::async,&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie.channel_names(), m_plot_names);
+
                 
         auto load_thread = std::thread(&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie.channel_names(), m_plot_names);
         load_thread.detach();
@@ -801,25 +803,25 @@ void lifContext::process_async (){
         case 3:
         {
             // note launch mode is std::launch::async
-            m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
+            m_intensity_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_intensity_statistics,
                                                   m_lifProcRef.get(), std::vector<int> ({0,1}) );
             input_channel_selector_t in (-1,2);
-            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in, pf);
+            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_selfsimilarity_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
         case 2:
         {
              //note launch mode is std::launch::async
-            m_fluorescense_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_flu_statistics,
+            m_intensity_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_intensity_statistics,
                                                     m_lifProcRef.get(), std::vector<int> ({0}) );
             input_channel_selector_t in (-1,1);
-            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in, pf);
+            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_selfsimilarity_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
         case 1:
         {
             input_channel_selector_t in (-1,0);
-            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_lifProcRef.get(), in, pf);
+            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_selfsimilarity_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
     }
@@ -1230,7 +1232,7 @@ void lifContext::resize ()
 
 bool lifContext::haveTracks()
 {
-    return ! m_flurescence_trackWeakRef.expired() && ! m_root_pci_trackWeakRef.expired();
+    return ! m_intensity_trackWeakRef.expired() && ! m_root_pci_trackWeakRef.expired();
 }
 
 
@@ -1240,16 +1242,16 @@ void lifContext::update ()
     if (! have_lif_serie() ) return;
 
 
-    if ( is_ready (m_fluorescense_tracks_aync) )
-        m_flurescence_trackWeakRef = m_fluorescense_tracks_aync.get();
+    if ( is_ready (m_intensity_tracks_aync) )
+        m_intensity_trackWeakRef = m_intensity_tracks_aync.get();
     
 
     auto flu_cnt = channel_count() - 1;
     // Update Fluorescence results if ready
-    if (flu_cnt > 0 && ! m_flurescence_trackWeakRef.expired())
+    if (flu_cnt > 0 && ! m_intensity_trackWeakRef.expired())
     {
         // Number of Flu runs is channel count - 1
-        auto tracksRef = m_flurescence_trackWeakRef.lock();
+        auto tracksRef = m_intensity_trackWeakRef.lock();
         for (auto cc = 0; cc < flu_cnt; cc++){
             m_main_seq.m_time_data.load(tracksRef->at(cc), named_colors[tracksRef->at(cc).first], cc);
         }

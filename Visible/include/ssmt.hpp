@@ -85,13 +85,13 @@ public:
     typedef void (sig_cb_content_loaded) (int64_t&); // Content is loaded and Voxel Processing is initiated
     typedef void (sig_cb_frame_loaded) (int&, double&); // a frame is loaded
     
-    typedef void (sig_cb_flu_stats_ready) (); // Fluorescense stats are done
+    typedef void (sig_intensity_over_time_ready) (); // Fluorescense stats are done
     typedef void (sig_cb_contraction_ready) (contractionLocator::contractionContainer_t&,const input_channel_selector_t& in); // Scene Contraction is ready
 
-    typedef void (sig_cb_sm1d_ready) (std::vector<float> &, const input_channel_selector_t&); // Scene self_similarity is done
-    typedef void (sig_cb_sm1dmed_ready) (const input_channel_selector_t&);// regularization via median level sets are done -1 or mobj index
+    typedef void (sig_cb_root_pci_ready) (std::vector<float> &, const input_channel_selector_t&); // Scene self_similarity is done
+    typedef void (sig_cb_root_pci_median_regularized_ready) (const input_channel_selector_t&);// regularization via median level sets are done -1 or mobj index
 
-    typedef void (sig_cb_3dstats_ready) (); // Scene Image Volume stats are done
+    typedef void (sig_cb_volume_ready) (); // Scene Image Volume stats are done
     typedef void (sig_cb_ss_voxel_ready) (std::vector<float> &); // Voxel Self-Similarity is done
     typedef void (sig_cb_geometry_ready) (int count, const input_channel_selector_t&); // Moving segments are generated
     typedef void (sig_cb_segmented_view_ready) (cv::Mat &, cv::Mat &); // Motion Entropic Space is done
@@ -105,13 +105,7 @@ public:
     */
     ssmt_processor (const bfs::path& = bfs::path(), const ssmt_processor::params& = ssmt_processor::params () );
     
-    // Assumes LIF data -- use multiple window.
-    void load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames);
-    // @note Specific to ID Lab Lif Files
-    // ADD Create Tracks for all cells
-    void create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names);
-    
-
+   
     const int64_t& frame_count () const;
     const uint32_t channel_count () const;
     const std::vector<std::shared_ptr<ssmt_result>>& moving_bodies ()const { return m_results; }
@@ -133,33 +127,31 @@ public:
     // Load frames from cache
     int64_t load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names, const std::vector<std::string>& plot_names);
     
-    // Run Luminance info on a vector of channel indices
-    std::shared_ptr<vecOfNamedTrack_t> run_flu_statistics (const std::vector<int>& channels);
+    // Run Luminance info on a vector of channel indices over time
+    // Signals completion using intensity_over_time_ready
+    // Returns results in tracks
+    std::shared_ptr<vecOfNamedTrack_t> run_intensity_statistics (const std::vector<int>& channels);
     
-    // Channel Index API for IDLab custom organization
-    // Run accumulator of 3d stats on a channel at index
-    svl::stats<int64_t> run_volume_sum_sumsq_count (const int channel_index);
-    // Run per pixel stdev accumulator a channel at index
+    // Run accumulator of Volume stats on a channel at index
+    //Signals completion using signal_volume_ready
+    svl::stats<int64_t> run_volume_stats (const int channel_index);
+    
+    // Run temporal segmentation and find moving bodies
+    // Runs Voxel based segmentation
+    //  indicates completion of voxel generation using signal_ss_voxel_ready
+    //  indicates completion of motion map using signal_segmented_view_ready
+    //     it used signal_segmented_view_ready triggers finlization and reporting.
+    // signal_geometry_ready indicates results are ready.
     void find_moving_regions (const int channel_index);
     
- 
-
-    // Vector of 8bit roiWindows API for IDLab custom organization
-    svl::stats<int64_t> run_volume_sum_sumsq_count (std::vector<roiWindow<P8U>>&);
-    void find_moving_regions (std::vector<roiWindow<P8U>>& );
-    
-  
     // Run to get Ranks and Median Level Set. Both short term and long term pic
     // Short term is specifically run on the channel contraction pci was run on
     // duplictes will be removed from indices for short term pci.
     // args:
     // channel_index which channel of multi-channel input. Usually visible channel is the last one
     // input is -1 for the entire root or index of moving object area in results container
-    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci_on_selected_input (const input_channel_selector_t&,const progress_fn_t& reporter );
-    // 2nd interface is lower level interface
-    // args:
-    // images: vector of roiWindow<P8U>s. roiWindow<P8U> is a single plane image container.
-    std::shared_ptr<vecOfNamedTrack_t> run_contraction_pci (const std::vector<roiWindow<P8U>>& images,  const input_channel_selector_t&,const progress_fn_t& reporter);
+    std::shared_ptr<vecOfNamedTrack_t> run_selfsimilarity_on_selected_input (const input_channel_selector_t&,const progress_fn_t& reporter );
+   
     
     std::vector<float> shortterm_pci (const std::vector<uint32_t>& indices);
     void shortterm_pci (const uint32_t& temporal_window);
@@ -183,23 +175,40 @@ public:
     
 protected:
     boost::signals2::signal<ssmt_processor::sig_cb_content_loaded>* signal_content_loaded;
-    boost::signals2::signal<ssmt_processor::sig_cb_flu_stats_ready>* signal_flu_ready;
+    boost::signals2::signal<ssmt_processor::sig_intensity_over_time_ready>* intensity_over_time_ready;
     boost::signals2::signal<ssmt_processor::sig_cb_frame_loaded>* signal_frame_loaded;
-    boost::signals2::signal<ssmt_processor::sig_cb_sm1d_ready>* signal_contraction_pci_ready;
-    boost::signals2::signal<ssmt_processor::sig_cb_sm1dmed_ready>* signal_sm1dmed_ready;
+    boost::signals2::signal<ssmt_processor::sig_cb_root_pci_ready>* signal_root_pci_ready;
+    boost::signals2::signal<ssmt_processor::sig_cb_root_pci_median_regularized_ready>* signal_root_pci_med_reg_ready;
     boost::signals2::signal<ssmt_processor::sig_cb_contraction_ready>* signal_contraction_ready;
-    boost::signals2::signal<ssmt_processor::sig_cb_3dstats_ready>* signal_3dstats_ready;
+    boost::signals2::signal<ssmt_processor::sig_cb_volume_ready>* signal_volume_ready;
     boost::signals2::signal<ssmt_processor::sig_cb_geometry_ready>* signal_geometry_ready;
     boost::signals2::signal<ssmt_processor::sig_cb_segmented_view_ready>* signal_segmented_view_ready;
     boost::signals2::signal<ssmt_processor::sig_cb_ss_voxel_ready>* signal_ss_voxel_ready;
     
 private:
+    // 2nd interface is lower level interface
+       // args:
+       // images: vector of roiWindow<P8U>s. roiWindow<P8U> is a single plane image container.
+   std::shared_ptr<vecOfNamedTrack_t> internal_run_selfsimilarity_on_selected_input  (const std::vector<roiWindow<P8U>>& images,  const input_channel_selector_t&,const progress_fn_t& reporter);
+// Assumes LIF data -- use multiple window.
+   void load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames);
+   // @note Specific to ID Lab Lif Files
+   // ADD Create Tracks for all cells
+   void create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names);
+       
+    
+    // Internal use
+    // Vector of 8bit roiWindows API for IDLab custom organization
+    svl::stats<int64_t> run_volume_stats (std::vector<roiWindow<P8U>>&);
+    void internal_find_moving_regions (std::vector<roiWindow<P8U>>& );
+    
+    
     // Default params. @place_holder for increasing number of params
     ssmt_processor::params m_params;
     indexToTime_t m_2TimeMap;
     timeToIndex_t m_2IndexMap;
     
-    void run_volume_variances (std::vector<roiWindow<P8U>>& images);
+    void volume_variance_peak_promotion (std::vector<roiWindow<P8U>>& images);
     
     const smProducerRef similarity_producer () const;
     void create_voxel_surface (std::vector<float>&);
@@ -215,7 +224,7 @@ private:
     void compute_shortterm (const uint32_t halfWinSz) const;
     
     void contraction_ready (contractionLocator::contractionContainer_t&);
-    void stats_3d_computed ();
+    void volume_stats_computed ();
     void pci_done ();
     void sm_content_loaded ();
     void signal_geometry_done (int, const input_channel_selector_t&);
@@ -281,8 +290,8 @@ private:
     std::shared_ptr<ioImageWriter> m_csv_writer;
     
     
-    mutable svl::stats<int64_t> m_3d_stats;
-    std::atomic<bool> m_3d_stats_done;
+    mutable svl::stats<int64_t> m_volume_stats;
+    std::atomic<bool> m_variance_peak_detection_done;
     mutable cv::Mat m_temporal_ss;
     mutable cv::Mat m_var_image;
     uiPair m_voxel_sample;
@@ -322,7 +331,7 @@ public:
     const input_channel_selector_t& input() const;
     const std::shared_ptr<contractionLocator> & locator () const;
 private:
-    bool run_contraction_pci (const std::vector<roiWindow<P8U>>& images);
+    bool run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>>& images);
     ssmt_result (const moving_region&,const input_channel_selector_t& in);
     void signal_sm1d_ready (vector<float>&, const input_channel_selector_t&);
     void contraction_ready (contractionLocator::contractionContainer_t& contractions, const input_channel_selector_t&);
