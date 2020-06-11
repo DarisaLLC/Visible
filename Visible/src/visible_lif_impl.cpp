@@ -1066,7 +1066,6 @@ void lifContext::add_motion_profile (){
  if (! m_voxel_view_available ) return;
     if (! m_segmented_texture && m_segmented_surface){
         // Create a texcture for display
-        Surface8uRef sur = Surface8u::create(cinder::fromOcv(m_segmented_image));
         auto texFormat = gl::Texture2d::Format().loadTopDown();
         m_segmented_texture = gl::Texture::create(*m_segmented_surface, texFormat);
     }
@@ -1084,8 +1083,6 @@ void lifContext::add_motion_profile (){
     if (ImGui::Begin(wShape, nullptr, ImGuiWindowFlags_NoScrollbar  ))
     {
         if(m_segmented_texture){
-            static ImVec2 zoom_center;
-            // First Child
             ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
             ImGui::Image( (void*)(intptr_t) m_segmented_texture->getId(), frame);
             ImGui::EndChild();

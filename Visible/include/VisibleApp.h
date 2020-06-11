@@ -163,7 +163,6 @@ private:
     std::string         mFileName;
     std::string         mFileExtension;
     std::string         mBuildn;
-    lifIO::ContentType_t mContentType; // "" denotes canonical LIF file
     bool m_isIdLabLif = false;
     void setup_ui ();
     

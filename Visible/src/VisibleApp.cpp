@@ -54,18 +54,38 @@ void VisibleApp::DrawSettings() {
             first_time = false;
         }
         // @ todo: add layoput information about the LIF file
-        if (ImGui::CollapsingHeader("Custom Content")) {
-              ImGui::Checkbox("Domian Lab Custome Layout", &m_custom_type);
-          }
+
         if (isLifFile()) {
             m_selected_lif_serie_index = -1;
             m_custom_type = false;
             static int sSelected = -1;
+            auto series = mBrowser->get_all_series();
+            /*
+              Format a descriptor line for selectable
+               Draw the channel configuration:
+                ---- ---- ----
+                ---- ---- ----
+                ---- ----
+                ----
+             */
             if (ImGui::TreeNode("Select Serie")) {
                 for (auto i = 0; i < m_sections.size(); i++)
                 {
                     if (ImGui::Selectable(m_sections[i].c_str(), sSelected == i))
-                        sSelected = i;
+                                        sSelected = i;
+                    
+                    lif_serie_data& serie =  series[i];
+                    auto width = serie.dimensions()[0];
+                    auto height = serie.dimensions()[1];
+                    ImGui::Text(" %s %lu x %lu (%d) (%d)", serie.name().c_str(), width, height, serie.channelCount(), serie.timesteps());
+                    ImGui::SameLine();
+                    // Create a texcture for display
+                    // Using ImageSourceCvMat directly since fromOcv api does not require const input
+                    Channel8uRef sur = Channel8u::create(ImageSourceRef(new ImageSourceCvMat( serie.poster())));
+                    auto texFormat = gl::Texture2d::Format().loadTopDown();
+                    auto postex = gl::Texture::create(*sur, texFormat);
+                    ImVec2 ps (sur->getWidth()/4, sur->getHeight()/4);
+                    ImGui::Image( (void*)(intptr_t) postex->getId(), ps);
                 }
                 ImGui::TreePop();
             }
@@ -134,7 +154,7 @@ void VisibleApp::DrawMainMenu(){
             if (ImGui::Button("Select "))
             {
                 nfdchar_t *outPath = NULL;
-                nfdresult_t result = NFD_OpenDialog("lif;mov,mp4", NULL, &outPath);
+                nfdresult_t result = NFD_OpenDialog("lif,mov,mp4", NULL, &outPath);
                 if (result == NFD_OKAY) {
                     bfs::path fout(outPath);
                     auto msg = "Selected " + fout.string();
@@ -368,9 +388,6 @@ std::string VisibleApp::identify_file(const bfs::path& bpath, const std::string&
             mCurrentContent = bpath;
             mCurrentContentName = bpath.filename().string();
         }
-        mContentType = "";
-        if(m_is_lif_file)
-            mContentType  = lifIO::isKnownCustomContent(custom_type) ? custom_type : "";
     }
     
     return mDotExtension;
