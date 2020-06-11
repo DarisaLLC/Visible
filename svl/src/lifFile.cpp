@@ -30,25 +30,18 @@ namespace  {
             }
         }
     };
-    
-
     std::shared_ptr<std::ifstream> make_shared_ifstream(std::ifstream * ifstream_ptr)
     {
         return std::shared_ptr<std::ifstream>(ifstream_ptr, ifStreamDeleter());
     }
-    
     std::shared_ptr<std::ifstream> make_shared_ifstream(std::string filename)
     {
         return make_shared_ifstream(new std::ifstream(filename, std::ifstream::in | std::ifstream::binary));
     }
-    
 }
 
 using namespace std;
 
-bool lifIO::isKnownCustomContent (const std::string& cand ){
-    return std::find(ContentTypes.begin(), ContentTypes.end(), cand) != ContentTypes.end();
-}
 
 /** @brief LifSerieHeader constructor  */
 lifIO::LifSerieHeader::LifSerieHeader(TiXmlElement *root) : name(root->Attribute("Name")), rootElement(root)
@@ -140,14 +133,10 @@ void lifIO::LifSerieHeader::parseImage(TiXmlNode *elementImage)
     TiXmlNode *elementImageDescription = elementImage->FirstChild("ImageDescription");
     if (elementImageDescription)
         parseImageDescription(elementImageDescription);
-
-
     // Parse time stamps even if there aren't any, then add empty
     // Unsigned Long Long to timestamps vector
     TiXmlNode *elementTimeStampList = elementImage->FirstChild("TimeStampList");
     parseTimeStampList(elementTimeStampList);
-
-
     // Parse Hardware Setting List even if there aren't
     TiXmlNode *elementHardwareSettingList = 0;
     TiXmlNode *child = 0;
@@ -170,11 +159,9 @@ void lifIO::LifSerieHeader::parseImageDescription(TiXmlNode *elementImageDescrip
     if (elementChannels && elementDimensions)
 	{
         TiXmlNode *child = 0;
-
         // Get info of channels
         while((child = elementChannels->IterateChildren(child)))
             this->channels.push_back(ChannelData(child->ToElement()));
-
         // Get info of dimensions
         child = 0;
         while((child = elementDimensions->IterateChildren(child)))
@@ -197,8 +184,6 @@ void lifIO::LifSerieHeader::parseTimeStampList(TiXmlNode *elementTimeStampList)
         if (elementTimeStampList->ToElement()->Attribute("NumberOfTimeStamps", &NumberOfTimeStamps) != 0 && NumberOfTimeStamps != 0)
         {
             this->timeStamps.resize(NumberOfTimeStamps);
-
-            
             //timestamps are stored in the text of the node as 16bits hexadecimal separated by spaces
             //transform this node text in a stream
             std::istringstream in(elementTimeStampList->ToElement()->GetText());
@@ -207,7 +192,6 @@ void lifIO::LifSerieHeader::parseTimeStampList(TiXmlNode *elementTimeStampList)
                 std::istream_iterator<unsigned long long>(in >> std::hex),
                 std::istream_iterator<unsigned long long>(),
                 this->timeStamps.begin());
-            
         }
         
         //old way to store time stamps
@@ -236,7 +220,6 @@ void lifIO::LifSerieHeader::parseHardwareSettingList(TiXmlNode *elementHardwareS
 {
     TiXmlNode *elementHardwareSetting = elementHardwareSettingList->FirstChild();
     TiXmlNode *elementScannerSetting = elementHardwareSetting->FirstChild("ScannerSetting");
-
     parseScannerSetting(elementScannerSetting);
     //no real need of filter settings for the moment
     //TiXmlNode *elementFilterSetting = elementHardwareSetting->FirstChild("FilterSetting");
@@ -283,8 +266,8 @@ float lifIO::LifSerieHeader::frame_duration_ms() const
 }
 
 /** @brief LifSerie constructor  */
-lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize, const std::string& ct) :
- LifSerieHeader(serie)
+lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename,
+                          unsigned long long offset, unsigned long long memorySize) : LifSerieHeader(serie)
 {
     fileRef = make_shared_ifstream(filename.c_str());
     if(! fileRef || !fileRef->is_open())
@@ -302,7 +285,6 @@ lifIO::LifSerie::LifSerie(LifSerieHeader serie, const std::string &filename, uns
 
     this->offset = offset;
     this->memorySize = memorySize;
-    this->m_content_type = ct;
 }
 
 
@@ -404,9 +386,8 @@ void lifIO::LifHeader::parseHeader()
 
 
 /** \brief Constructor from lif file name
-  * Content type specifies if it has a known none default content organization
  */
-lifIO::LifReader::LifReader(const string &filename, const std::string& ct)
+lifIO::LifReader::LifReader(const string &filename)
 {
     const int MemBlockCode = 0x70, TestCode = 0x2a;
     char lifChar;
@@ -445,26 +426,19 @@ lifIO::LifReader::LifReader(const string &filename, const std::string& ct)
     
     if (! m_Valid) return;
     
-    m_content_type = ct;
-    
     unsigned int xmlChars = readUnsignedInt();
     xmlChars*=2;
 
     // Read and parse xml header
     string xmlString;
     xmlString.reserve(xmlChars/2);
-    
     {
         std::shared_ptr<char> xmlHeader (new char[xmlChars]);
         m_fileRef->read(xmlHeader.get(),xmlChars);
         for(unsigned int p=0;p<xmlChars/2;++p)
             xmlString.push_back(xmlHeader.get()[2*p]);
     }
-
-
     m_header = std::shared_ptr<LifHeader>(new LifHeader(xmlString));
-
-
     size_t s = 0;
     while (m_fileRef->tellg() < m_lif_file_size)
     {
@@ -513,15 +487,12 @@ lifIO::LifReader::LifReader(const string &filename, const std::string& ct)
                     this->m_header->getSerieHeader(s),
                     filename,
                                           m_fileRef->tellg(),
-                    memorySize, m_content_type)
-                    );
+                    memorySize));
             s++;
             //jump to the next memory block
             m_fileRef->seekg(static_cast<streampos>(memorySize),ios::cur);
         }
     }
-
-
 }
 
 /** \brief read an int form file advancing the cursor*/
@@ -628,7 +599,6 @@ ostream &lifIO::operator<<(ostream& out, const LifSerieHeader &s)
     out<<endl;
     const vector<ChannelData> &channels = s.getChannels();
     for( const auto& cc : channels) out << cc.getName() << "\t" << std::endl;
-
     return out;
 }
 

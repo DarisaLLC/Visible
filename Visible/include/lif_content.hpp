@@ -65,8 +65,9 @@ using default_factory = synchronous_factory;
 class lif_serie_data
 {
 public:
+    
     lif_serie_data ();
-    lif_serie_data (const lifIO::LifReader::ref& m_lifRef, const unsigned index, const lifIO::ContentType_t& ct = "");
+    lif_serie_data (const lifIO::LifReader::ref& m_lifRef, const unsigned index);
     int index () const { return m_index; }
     const std::string name () const { return m_name; }
    
@@ -75,21 +76,23 @@ public:
     uint32_t pixelsInOneTimestep () const { return m_pixelsInOneTimestep; }
     uint32_t channelCount () const { return m_channelCount; }
     const std::vector<size_t>& dimensions () const { return m_dimensions; }
+    const std::vector<size_t>& buffer2d_dimensions () const { return m_buffer2d_dimensions; }
     const std::vector<lifIO::ChannelData>& channels () const { return m_channels; }
     const std::vector<std::string>& channel_names () const { return m_channel_names; }
     const std::vector<time_spec_t>& timeSpecs () const { return  m_timeSpecs; }
     const lifIO::LifReader::weak_ref& readerWeakRef () const;
     const cv::Mat& poster () const { return m_poster; }
-    const std::string& custom_identifier () const { return m_contentType; }
- 
-
+    const std::vector<cv::Rect2f>& ROIs2d () const { return m_rois_2d; }
+    
 private:
     mutable int32_t m_index;
     mutable std::string m_name;
     uint32_t    m_timesteps;
     uint32_t    m_pixelsInOneTimestep;
     uint32_t    m_channelCount;
+    std::vector<cv::Rect2f> m_rois_2d;
     std::vector<size_t> m_dimensions;
+    std::vector<size_t> m_buffer2d_dimensions;
     std::vector<lifIO::ChannelData> m_channels;
     std::vector<std::string> m_channel_names;
     std::vector<time_spec_t> m_timeSpecs;
@@ -97,7 +100,6 @@ private:
     mutable lifIO::LifReader::weak_ref m_lifWeakRef;
     
     mutable float  m_length_in_seconds;
-    mutable std::string m_contentType; // "" denostes canonical LIF
     
     
     friend std::ostream& operator<< (std::ostream& out, const lif_serie_data& se)
@@ -106,7 +108,13 @@ private:
         out << "Channels: " << se.channelCount() << std::endl;
         out << "TimeSteps  " << se.timesteps() << std::endl;
         out << "Dimensions:" << se.dimensions()[0]  << " x " << se.dimensions()[1] << std::endl;
+        out << "Buffer2D Dimensions:" << se.buffer2d_dimensions()[0]  << " x " << se.buffer2d_dimensions()[1] << std::endl;
         out << "Time Length:" << se.seconds()    << std::endl;
+        for ( auto cc = 0; cc < se.channelCount(); cc++){
+            auto tl = se.ROIs2d()[cc].tl();
+            auto sz = se.ROIs2d()[cc].size();
+            out << se.channel_names()[cc] << " :  @ (" << tl.x << "," << tl.y << ") [" << sz.width <<  "," <<  sz.height << "]" << std::endl;
+        }
         return out;
     }
     
@@ -134,15 +142,13 @@ public:
     typedef std::shared_ptr<class lif_browser> ref;
     
     // @todo move ctor to private
-    lif_browser(const std::string&  fqfn_path, const lifIO::ContentType_t& ct);
+    lif_browser(const std::string&  fqfn_path);
     
-    static lif_browser::ref create (const std::string&  fqfn_path,
-                                    const lifIO::ContentType_t& ct = ""){
-        return std::shared_ptr<lif_browser> ( new lif_browser (fqfn_path, ct));
+    static lif_browser::ref create (const std::string&  fqfn_path){
+        return std::shared_ptr<lif_browser> ( new lif_browser (fqfn_path));
     }
     
     const lifIO::LifReader::ref& reader () const { return m_lifRef; }
-    const lifIO::ContentType_t& content_type () const { return m_content_type; }
     
     const lif_serie_data get_serie_by_index (unsigned index);
     const std::vector<lif_serie_data>& get_all_series  () const;
@@ -156,15 +162,12 @@ private:
     void  internal_get_series_info () const;
     mutable lifIO::LifReader::ref m_lifRef;
     mutable std::vector<lif_serie_data> m_series_book;
-    std::vector<cv::Mat> m_series_posters;
     mutable std::vector<std::string> m_series_names;
     mutable std::map<std::string,int> m_name_to_index;
     mutable std::map<int,std::string> m_index_to_name;
     mutable std::mutex m_mutex;
     mutable std::atomic<bool> m_data_ready;
-    lifIO::ContentType_t m_content_type;
     std::string mFqfnPath;
-    void get_first_frame (lif_serie_data& si,  const int frameCount, cv::Mat& out);
 };
 
 

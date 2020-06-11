@@ -46,17 +46,6 @@ namespace lifIO
     struct ScannerSettingRecord;
     struct FilterSettingRecord;
 
-    /* Denoting Custom Types when there is no marker
-     * null string denotes the canonical LIF representation
-     */
-    
-    typedef std::string ContentType_t ;
-
-
-    static std::vector<ContentType_t> ContentTypes {"IDLab_0"};
-    
-    bool isKnownCustomContent (const std::string& cand );
-    
     class LifSerieHeader
     {
         
@@ -113,7 +102,7 @@ namespace lifIO
     {
         
     public:
-        explicit LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize, const ContentType_t& content_type = "");
+        explicit LifSerie(LifSerieHeader serie, const std::string &filename, unsigned long long offset, unsigned long long memorySize);
         
         void fill3DBuffer(void* buffer, size_t t=0) const;
         void fill2DBuffer(void* buffer, size_t t=0, size_t z=0) const;
@@ -122,16 +111,11 @@ namespace lifIO
         std::istreambuf_iterator<char> begin(size_t t=0);
         std::streampos tellg(){return fileRef->tellg();}
         unsigned long long getOffset(size_t t=0) const;
-        const ContentType_t& content_type() const { return m_content_type; }
-        void set_content_type(ContentType_t ct) const { m_content_type = ct; }
-        
     private:
         unsigned long long offset;
         unsigned long long memorySize;
         std::shared_ptr<std::ifstream> fileRef;
         std::streampos fileSize;
-        mutable ContentType_t m_content_type;
-        
     };
     
     class LifHeader : boost::noncopyable
@@ -166,18 +150,13 @@ namespace lifIO
     {
         
     public:
-   
-        
         typedef std::shared_ptr<LifReader> ref;
         typedef std::weak_ptr<LifReader> weak_ref;
         
-     
-        
-        static LifReader::ref create (const std::string&  fqfn_path, const std::string& ct = ""){
-            return LifReader::ref ( new LifReader (fqfn_path, ct));
+        static LifReader::ref create (const std::string&  fqfn_path){
+            return LifReader::ref ( new LifReader (fqfn_path));
         }
         
-        const ContentType_t& getContentType () const { return m_content_type; }
         const LifHeader& getLifHeader() const {return *this->m_header;};
         const TiXmlDocument& getXMLHeader() const{return getLifHeader().getXMLHeader();};
         std::string getName() const {return getLifHeader().getName();};
@@ -201,7 +180,7 @@ namespace lifIO
          */
   
         // @todo move ctor to private
-        LifReader(const std::string &filename, const std::string& ct = "");
+        LifReader(const std::string &filename);
         int readInt();
         unsigned int readUnsignedInt();
         unsigned long long readUnsignedLongLong();
@@ -209,15 +188,10 @@ namespace lifIO
         std::shared_ptr<std::ifstream> m_fileRef;
         std::streampos fileSize;
         std::vector<std::unique_ptr<LifSerie>> m_series;
-//        boost::ptr_vector<LifSerie> series;
         mutable bool m_Valid;
         mutable std::mutex m_mutex;
         std::string m_path;
         size_t m_lif_file_size;
-        ContentType_t m_content_type;
-       
-        
-        
     };
     
     

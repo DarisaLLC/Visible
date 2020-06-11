@@ -58,7 +58,7 @@ public:
         cv::Size ap (3, 3);
         svl::localVAR tv (ap);
         tv.process (src1,  result);
-        IplImage ires = result;
+        cv::Mat ires = result;
         EXPECT_EQ(src1.cols - ap.width + 1 , result.cols);
         EXPECT_EQ(src1.rows - ap.height + 1 , result.rows);
         

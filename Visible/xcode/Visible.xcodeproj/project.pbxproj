@@ -263,6 +263,12 @@
 		C2770658226A402B00215A55 /* cvVideoPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BE851F4FAF5C00977307 /* cvVideoPlayer.cpp */; };
 		C2770659226A402C00215A55 /* cvVideoPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C254BE851F4FAF5C00977307 /* cvVideoPlayer.cpp */; };
 		C27ED0A2220BB71D00B55D65 /* InterfaceUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C27ED0A0220BB71D00B55D65 /* InterfaceUtilities.cpp */; };
+		C280DB392492A9600027DB2D /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFC216E79580080462D /* imgui.cpp */; };
+		C280DB3A2492A9830027DB2D /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFB216E79580080462D /* imgui_draw.cpp */; };
+		C280DB3B2492A9A10027DB2D /* imgui_stdlib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C285964924870EF000C9CCFB /* imgui_stdlib.cpp */; };
+		C280DB3C2492A9A50027DB2D /* imgui_impl_opengl3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C28596442487048700C9CCFB /* imgui_impl_opengl3.cpp */; };
+		C280DB3D2492A9AC0027DB2D /* CinderImGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCF08216F0CF10080462D /* CinderImGui.cpp */; };
+		C280DB3E2492A9B20027DB2D /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AFCEFA216E79570080462D /* imgui_widgets.cpp */; };
 		C2819EC821FA94F000183E44 /* imgui.ini in Resources */ = {isa = PBXBuildFile; fileRef = C2819EC721FA94F000183E44 /* imgui.ini */; };
 		C2819ED52201287900183E44 /* visible_scope.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2819ED42201287900183E44 /* visible_scope.png */; };
 		C2820F302175298F00DFA7A6 /* Visible.cfg in Resources */ = {isa = PBXBuildFile; fileRef = C2820F2B217527DB00DFA7A6 /* Visible.cfg */; };
@@ -361,11 +367,7 @@
 		C2A5DBAD207A003F001C6608 /* Plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C252611B1F66E95B0069F665 /* Plist.cpp */; };
 		C2AC7A6C24808A2C00853219 /* nfd_common.c in Sources */ = {isa = PBXBuildFile; fileRef = C2AC7A6A24808A2C00853219 /* nfd_common.c */; };
 		C2AC7A6D24808A2C00853219 /* nfd_cocoa.m in Sources */ = {isa = PBXBuildFile; fileRef = C2AC7A6B24808A2C00853219 /* nfd_cocoa.m */; };
-		C2AC7A7024808AB800853219 /* nfd_cocoa.m in Sources */ = {isa = PBXBuildFile; fileRef = C2AC7A6B24808A2C00853219 /* nfd_cocoa.m */; };
-		C2AC7A7224808ABB00853219 /* nfd_cocoa.m in Sources */ = {isa = PBXBuildFile; fileRef = C2AC7A6B24808A2C00853219 /* nfd_cocoa.m */; };
 		C2AC7A7324808ABC00853219 /* nfd_cocoa.m in Sources */ = {isa = PBXBuildFile; fileRef = C2AC7A6B24808A2C00853219 /* nfd_cocoa.m */; };
-		C2AC7A7524808AC100853219 /* nfd_common.c in Sources */ = {isa = PBXBuildFile; fileRef = C2AC7A6A24808A2C00853219 /* nfd_common.c */; };
-		C2AC7A7624808AC100853219 /* nfd_common.c in Sources */ = {isa = PBXBuildFile; fileRef = C2AC7A6A24808A2C00853219 /* nfd_common.c */; };
 		C2AC7A7824808AC300853219 /* nfd_common.c in Sources */ = {isa = PBXBuildFile; fileRef = C2AC7A6A24808A2C00853219 /* nfd_common.c */; };
 		C2AEB73B228CD6E70078E687 /* geom_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AEB73A228CD6E60078E687 /* geom_utils.cpp */; };
 		C2AEB73D228CD6E70078E687 /* geom_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2AEB73A228CD6E60078E687 /* geom_utils.cpp */; };
@@ -405,7 +407,6 @@
 		C2ED05A622D1780600314C1B /* main_header_paths.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2ED05A522D1780600314C1B /* main_header_paths.xcconfig */; };
 		C2ED05A922D178FD00314C1B /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA576122C31F1600AAAF4F /* libswscale.a */; };
 		C2ED05AA22D178FD00314C1B /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575F22C31EB500AAAF4F /* libswresample.a */; };
-		C2ED05AB22D178FD00314C1B /* libdc1394.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575D22C31E8A00AAAF4F /* libdc1394.a */; };
 		C2ED05AC22D178FD00314C1B /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575B22C31E2400AAAF4F /* libavcodec.a */; };
 		C2ED05AD22D178FD00314C1B /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575922C31E1900AAAF4F /* libavutil.a */; };
 		C2ED05AE22D178FD00314C1B /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BA575722C31DFD00AAAF4F /* libavformat.a */; };
@@ -994,7 +995,6 @@
 			files = (
 				C2ED05A922D178FD00314C1B /* libswscale.a in Frameworks */,
 				C2ED05AA22D178FD00314C1B /* libswresample.a in Frameworks */,
-				C2ED05AB22D178FD00314C1B /* libdc1394.a in Frameworks */,
 				C2ED05AC22D178FD00314C1B /* libavcodec.a in Frameworks */,
 				C2ED05AD22D178FD00314C1B /* libavutil.a in Frameworks */,
 				C2ED05AE22D178FD00314C1B /* libavformat.a in Frameworks */,
@@ -2219,12 +2219,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				C21094692239D1C8004E88EE /* permutation_entropy.cpp in Sources */,
+				C280DB3C2492A9A50027DB2D /* imgui_impl_opengl3.cpp in Sources */,
 				C20BBC071E4E34C3002C7D68 /* lifFile.cpp in Sources */,
 				C28B01CE229B1DE500B8165D /* lif_serie.cpp in Sources */,
 				C20EDBC71CF277710074C47A /* time_spec.cpp in Sources */,
 				C2CE9C7622A48AC5003C479A /* etw_utils.cpp in Sources */,
+				C280DB392492A9600027DB2D /* imgui.cpp in Sources */,
 				C20BBC041E4E33D3002C7D68 /* tinyxml.cpp in Sources */,
 				C2869C5A2319F47E00F04C0A /* imgui_plot.cpp in Sources */,
+				C280DB3E2492A9B20027DB2D /* imgui_widgets.cpp in Sources */,
 				C24EA2D4207F081000555D16 /* sg_filter.cpp in Sources */,
 				C27221161D1C912E008EF8B2 /* histo.cpp in Sources */,
 				C2ED059C22D158ED00314C1B /* labelconnect.cpp in Sources */,
@@ -2248,12 +2251,13 @@
 				C2618F86217FDA9900FA9F43 /* window.cc in Sources */,
 				C20D4DE72208BD34004D9405 /* ellipse_fit.cpp in Sources */,
 				C28B01D3229B1E5F00B8165D /* lif_browser.cpp in Sources */,
+				C280DB3A2492A9830027DB2D /* imgui_draw.cpp in Sources */,
 				C20BBC061E4E33DA002C7D68 /* tinyxmlparser.cpp in Sources */,
+				C280DB3B2492A9A10027DB2D /* imgui_stdlib.cpp in Sources */,
 				C23CFBD921E5157F00C1DF16 /* logger.cpp in Sources */,
 				C2618F87217FDA9E00FA9F43 /* figure.cc in Sources */,
 				C2C5CF69229A0DB0004595C5 /* glmutils.cpp in Sources */,
 				C21A50E322AB4D0C00B0AC7D /* eigen_utils.cpp in Sources */,
-				C2AC7A7524808AC100853219 /* nfd_common.c in Sources */,
 				C26F49082458D4A40043952A /* main.cpp in Sources */,
 				C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */,
 				C2398A0B21DD8A0A00B180A0 /* file_system.cpp in Sources */,
@@ -2263,13 +2267,13 @@
 				C29C53C1222B58D900D17385 /* dense_motion.cpp in Sources */,
 				C21A506B22A9835A00B0AC7D /* stats.cpp in Sources */,
 				C2CE9C8922A97D2D003C479A /* math.cpp in Sources */,
-				C2AC7A7024808AB800853219 /* nfd_cocoa.m in Sources */,
 				C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */,
 				C2677586212A325F00B5E080 /* contraction_t.cpp in Sources */,
 				C2601BB81E690409004415A3 /* bitvector.cpp in Sources */,
 				C2239AB5218B6270007558AB /* boost_literals.cpp in Sources */,
 				C20EDBC81CF277740074C47A /* exception.cpp in Sources */,
 				C20BBC0C1E4E39FA002C7D68 /* rand_support.cpp in Sources */,
+				C280DB3D2492A9AC0027DB2D /* CinderImGui.cpp in Sources */,
 				C29DB077212B351200930CBD /* algo_ssmt.cpp in Sources */,
 				C2109478223F4CFE004E88EE /* opencv_draw.cpp in Sources */,
 				C28B01CA229B1D7900B8165D /* algo_shortterm.cpp in Sources */,
@@ -2311,8 +2315,6 @@
 				C26A05691E777E2100BDC954 /* tinyxmlparser.cpp in Sources */,
 				C26A05591E77744300BDC954 /* sm_producer.cpp in Sources */,
 				C26A05711E777ECC00BDC954 /* gradient.cpp in Sources */,
-				C2AC7A7624808AC100853219 /* nfd_common.c in Sources */,
-				C2AC7A7224808ABB00853219 /* nfd_cocoa.m in Sources */,
 				C21A506C22A9835A00B0AC7D /* stats.cpp in Sources */,
 				C26A055D1E77759D00BDC954 /* lifFile.cpp in Sources */,
 				C2DA195B1E80E4E200062DBC /* csv.cpp in Sources */,

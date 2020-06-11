@@ -1142,14 +1142,14 @@ TEST (ut_dm, block){
     cv::Mat fimage (fsize.second, fsize.first,  CV_8UC(1));
     fimage = 0;
     iPair fixed (11,21);
-    CvRect froi(fixed.first,fixed.second,dims.first,dims.second);
+    cv::Rect2i froi(fixed.first,fixed.second,dims.first,dims.second);
     cv::Mat fwindow = fimage(froi);
     cv::add (gm, fwindow, fwindow);
     
     cv::Mat mimage (fsize.second, fsize.first,  CV_8UC(1));
     mimage = 0;
     iPair gold (12,22);
-    CvRect mroi(gold.first,gold.second, dims.first,dims.second);
+    cv::Rect2i mroi(gold.first,gold.second, dims.first,dims.second);
     cv::Mat mwindow = mimage(mroi);
     cv::add (gm, mwindow, mwindow);
     
