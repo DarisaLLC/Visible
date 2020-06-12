@@ -24,6 +24,7 @@
 #include "iowriter.hpp"
 #include "moving_region.h"
 #include "input_selector.hpp"
+#include "lif_content.hpp"
 using namespace cv;
 using blob = svl::labelBlob::blob;
 using namespace boost;
@@ -125,7 +126,8 @@ public:
     
   
     // Load frames from cache
-    int64_t load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names, const std::vector<std::string>& plot_names);
+    int64_t load (const std::shared_ptr<seqFrameContainer>& frames,
+                  const lif_serie_data& sd = lif_serie_data () );
     
     // Run Luminance info on a vector of channel indices over time
     // Signals completion using intensity_over_time_ready
@@ -191,7 +193,7 @@ private:
        // images: vector of roiWindow<P8U>s. roiWindow<P8U> is a single plane image container.
    std::shared_ptr<vecOfNamedTrack_t> internal_run_selfsimilarity_on_selected_input  (const std::vector<roiWindow<P8U>>& images,  const input_channel_selector_t&,const progress_fn_t& reporter);
 // Assumes LIF data -- use multiple window.
-   void load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames);
+   void load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames,  const lif_serie_data& sd = lif_serie_data () );
    // @note Specific to ID Lab Lif Files
    // ADD Create Tracks for all cells
    void create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names);

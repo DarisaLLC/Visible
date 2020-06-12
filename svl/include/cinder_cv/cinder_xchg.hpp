@@ -80,12 +80,8 @@ namespace svl
     roiWindow<P8U> NewGrayFromSurface (const Surface8uRef& src);
     
     // LIF File Support 
-    // P8UP3 is 3 planes mapped as in the header file
-    std::shared_ptr<roiFixedMultiWindow<P8UP3>> NewRefMultiFromChannel ( ChannelT<uint8_t>& onec,
-        const std::vector<std::string>& names_l2r, int64_t timestamp = 0);
-   
     std::shared_ptr<roiWindow<P8U>> NewRefSingleFromSurface (const Surface8uRef& src,
-        const std::vector<std::string>& names_l2r = {" C ", " C "," C "},int64_t timestamp = 0);
+      int64_t timestamp = 0);
     
     
     //@todo move implementation to cinder_support.cpp 

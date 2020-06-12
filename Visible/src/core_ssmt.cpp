@@ -31,9 +31,9 @@
 
 /**
  ssmt_processor
-
+ 
  @param path to the Cache Folder
-
+ 
  */
 ssmt_processor::ssmt_processor (const bfs::path& serie_cache_folder, const ssmt_processor::params& params):
 mCurrentCachePath(serie_cache_folder), m_params(params)
@@ -58,14 +58,14 @@ mCurrentCachePath(serie_cache_folder), m_params(params)
     // std::function<void ()> sm_content_loaded_cb = boost::bind (&ssmt_processor::sm_content_loaded, this);
     // boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
     
-   
+    
     // Signal us when volume stats are ready
     std::function<void ()>_volume_done_cb = boost::bind (&ssmt_processor::volume_stats_computed, this);
     boost::signals2::connection _volume_stats_connection = registerCallback(_volume_done_cb);
     
     // Signal us when ss segmentation surface is ready
     std::function<sig_cb_segmented_view_ready> _ss_segmentation_done_cb = boost::bind (&ssmt_processor::finalize_segmentation,
-                                                                             this, _1, _2);
+                                                                                       this, _1, _2);
     boost::signals2::connection _ss_image_connection = registerCallback(_ss_segmentation_done_cb);
     
     // Signal us when ss segmentation is ready
@@ -83,10 +83,10 @@ mCurrentCachePath(serie_cache_folder), m_params(params)
 // 1 channel: visible
 /**
  create named_tracks
-
+ 
  @param names <#names description#>
  @param plot_names <#plot_names description#>
-  // Consider just creating a vector of tracks and leave the population and selection dynamic
+ // Consider just creating a vector of tracks and leave the population and selection dynamic
  */
 void ssmt_processor::create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
 {
@@ -100,48 +100,42 @@ void ssmt_processor::create_named_tracks (const std::vector<std::string>& names,
                 case 2:
                     m_moment_tracksRef->resize (1);
                     m_longterm_pci_tracksRef->resize (1);
-                    m_shortterm_pci_tracks.resize (1);
                     for (auto tt = 0; tt < names.size()-1; tt++)
                         m_moment_tracksRef->at(tt).first = plot_names[tt];
                     m_longterm_pci_tracksRef->at(0).first = plot_names[1];
-                    m_shortterm_pci_tracks.at(0).first = plot_names[2];
                     break;
                 case 3:
                     m_moment_tracksRef->resize (2);
                     m_longterm_pci_tracksRef->resize (1);
-                    m_shortterm_pci_tracks.resize (1);
                     for (auto tt = 0; tt < names.size()-1; tt++)
                         m_moment_tracksRef->at(tt).first = plot_names[tt];
                     m_longterm_pci_tracksRef->at(0).first = plot_names[2];
-                    m_shortterm_pci_tracks.at(0).first = plot_names[3];
                     break;
                 case 1:
                     m_longterm_pci_tracksRef->resize (1);
-                    m_shortterm_pci_tracks.resize (1);
                     m_longterm_pci_tracksRef->at(0).first = plot_names[0];
-                    m_shortterm_pci_tracks.at(0).first = plot_names[1];
                     break;
                 default:
                     assert(false);
-            
+                    
             }
             break;
         case ssmt_processor::params::ContentType::bgra:
             
-              switch(names.size()){
-                  case 3:
-                  case 4:
-                  case 1:
-                      m_longterm_pci_tracksRef->resize (1);
-                      m_shortterm_pci_tracks.resize (1);
-                      m_longterm_pci_tracksRef->at(0).first = "Long Term"; // plot_names[2];
-                      m_shortterm_pci_tracks.at(0).first = "Short Term"; // plot_names[3];
-                      break;
-                  default:
-                      assert(false);
-              }
+            switch(names.size()){
+                case 3:
+                case 4:
+                case 1:
+                    m_longterm_pci_tracksRef->resize (1);
+                    m_shortterm_pci_tracks.resize (1);
+                    m_longterm_pci_tracksRef->at(0).first = "Long Term"; // plot_names[2];
+                    m_shortterm_pci_tracks.at(0).first = "Short Term"; // plot_names[3];
+                    break;
+                default:
+                    assert(false);
+            }
     }
-            
+    
 }
 
 
@@ -181,10 +175,10 @@ bfs::path ssmt_processor::get_cache_location (const int channel_index,const int 
 }
 
 int ssmt_processor:: create_cache_paths (){
-
+    
     int count = 0;
     // Create cache directories for each cell off of the top for now (@todo create a cells subdir )
-
+    
     for(const ssmt_result::ref_t& sr : m_results){
         if(bfs::exists(mCurrentCachePath)){
             std::string subdir = to_string(sr->id());
@@ -229,7 +223,7 @@ int ssmt_processor:: create_cache_paths (){
  * that is in vCols / 2 , vRows / 2
  * And vCols / 2 , vRows / 2 border
  */
-int64_t ssmt_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
+int64_t ssmt_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const lif_serie_data& sd)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
     
@@ -241,13 +235,13 @@ int64_t ssmt_processor::load (const std::shared_ptr<seqFrameContainer>& frames,c
     /*
      Creates named tracks @todo move out of here
      Loads channels from images @note uses last channel for visible processing
-        i.e 2nd channel from 2 channel LIF file and 3rd channel from a 3 channel LIF file or media file
+     i.e 2nd channel from 2 channel LIF file and 3rd channel from a 3 channel LIF file or media file
      
      */
-    create_named_tracks(names, plot_names);
-    load_channels_from_images(frames);
+    create_named_tracks(sd.channel_names(), sd.channel_names());
+    load_channels_from_images(frames, sd);
     lock.unlock();
-
+    
     // Call the content loaded cb if any
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
         signal_content_loaded->operator()(m_frameCount);
@@ -263,7 +257,7 @@ int64_t ssmt_processor::load (const std::shared_ptr<seqFrameContainer>& frames,c
 
 svl::stats<int64_t> ssmt_processor::run_volume_stats (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
-
+    
     std::vector<std::tuple<int64_t,int64_t,uint32_t>> cts;
     std::vector<std::tuple<uint8_t,uint8_t>> rts;
     std::vector<std::thread> threads(1);
@@ -322,7 +316,7 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_intensity_statistics (con
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled
 std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::vector<roiWindow<P8U>>& images,
-                                                                         const input_channel_selector_t& in, const progress_fn_t& reporter)
+                                                                                                   const input_channel_selector_t& in, const progress_fn_t& reporter)
 {
     bool cache_ok = false;
     size_t dim = images.size();
@@ -334,7 +328,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::internal_run_selfsimilarity_
         ssref = ssResultContainer::create(cache_path);
     }
     cache_ok = ssref && ssref->size_check(dim);
-
+    
     // Create a contraction object for entire view processing.
     // @todo: add params
     m_entireCaRef = contractionLocator::create (in, -1);
@@ -356,7 +350,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::internal_run_selfsimilarity_
             smtmp.push_back(rowv);
         }
         m_smat[in.region()] = smtmp;
-
+        
         if( ! in.isEntire())
             m_results[in.region()]->locator()->load(m_entropies[in.region()], m_smat[in.region()]);
         else{
@@ -368,7 +362,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::internal_run_selfsimilarity_
         auto sp =  similarity_producer();
         sp->load_images (images);
         std::future<bool>  future_ss = sp->launch_async(0, reporter);
-  
+        
         if (future_ss.get())
         {
             const deque<double>& entropies = sp->shannonProjection ();
@@ -420,7 +414,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_selfsimilarity_on_select
     if (cache_path == bfs::path()){
         return std::shared_ptr<vecOfNamedTrack_t> ();
     }
-    // protect fetching image data 
+    // protect fetching image data
     std::lock_guard<std::mutex> lock(m_mutex);
     const auto& _content = in.isEntire() ? content()[in.channel()] : m_results[in.region()]->content()[in.channel()];
     return internal_run_selfsimilarity_on_selected_input(std::move(_content), in, reporter);
@@ -439,7 +433,7 @@ void ssmt_processor::signal_geometry_done (int count, const input_channel_select
 
 void ssmt_processor::volume_variance_peak_promotion (std::vector<roiWindow<P8U>>& images){
     std::lock_guard<std::mutex> lock(m_mutex);
-
+    
     cv::Mat m_sum, m_sqsum;
     int image_count = 0;
     std::vector<std::thread> threads(1);
@@ -467,9 +461,10 @@ void ssmt_processor::volume_variance_peak_promotion (std::vector<roiWindow<P8U>>
 // Assumes LIF data -- use multiple window.
 // @todo condider creating cv::Mats and convert to roiWindow when needed.
 
-void ssmt_processor::load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames)
+void ssmt_processor::load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames,
+                                                const lif_serie_data& sd)
 {
-    // Copy deep time / index maps from seqFrameContainer 
+    // Copy deep time / index maps from seqFrameContainer
     m_2TimeMap = indexToTime_t (frames->index2TimeMap());
     m_2IndexMap = timeToIndex_t (frames->time2IndexMap());
     
@@ -477,62 +472,44 @@ void ssmt_processor::load_channels_from_images (const std::shared_ptr<seqFrameCo
     m_all_by_channel.clear();
     m_channel_count = frames->media_info().getNumChannels();
     m_all_by_channel.resize (m_channel_count);
-    std::vector<std::string> names = {"Red", "Green","Blue"};
     
     switch(m_params.content_type()){
-              
         case ssmt_processor::params::ContentType::lif:{
-                while (frames->checkFrame(m_frameCount))
-                {
-                    auto su8 = frames->getFrame(m_frameCount);
-                    auto ts = m_frameCount;
-                    std::shared_ptr<roiWindow<P8U>> m1 = svl::NewRefSingleFromSurface (su8, names, ts);
-                    
-                    switch (m_channel_count)
-                    {
-                            // @todo support general case
-                            // ID Lab 3 vertical roi 512 x (128x3)
-                        case 3  :
-                        {
-                            auto m3 = roiFixedMultiWindow<P8UP3>(*m1, names, ts);
-                            for (auto cc = 0; cc < m3.planes(); cc++)
-                                m_all_by_channel[cc].emplace_back(m3.plane(cc));
-                            break;
-                        }
-                        case 2  :
-                        {
-                            auto m2 = roiFixedMultiWindow<P8UP2,512,128,2>(*m1, names, ts);
-                            for (auto cc = 0; cc < m2.planes(); cc++)
-                                m_all_by_channel[cc].emplace_back(m2.plane(cc));
-                            break;
-                        }
-                        case 1  :
-                        {
-                            m_all_by_channel[0].emplace_back(*m1);
-                            break;
-                        }
-                    }
-                    m_frameCount++;
+            while (frames->checkFrame(m_frameCount)){
+                auto su8 = frames->getFrame(m_frameCount);
+                auto ts = m_frameCount;
+                std::shared_ptr<roiWindow<P8U>> m1 = svl::NewRefSingleFromSurface (su8,  ts);
+                
+                for (auto cc = 0; cc < sd.channelCount(); cc++){
+                    auto tl_f = sd.ROIs2d()[cc].tl();
+                    auto sz_f = sd.ROIs2d()[cc].size();
+                    m_all_by_channel[cc].emplace_back(m1->frameBuf(),
+                                                      static_cast<int>(tl_f.x),
+                                                      static_cast<int>(tl_f.y),
+                                                      static_cast<int>(sz_f.width),
+                                                      static_cast<int>(sz_f.height));
                 }
+                m_frameCount++;
+            }
             break;
         }
         case ssmt_processor::params::ContentType::bgra:{
-              m_all_by_channel.resize(4); // surface always has 4 channels
-              while (frames->checkFrame(m_frameCount))
-              {
-                  auto su8 = frames->getFrame(m_frameCount);
-                  auto gray = svl::NewGrayFromSurface(su8);
-                  auto red = svl::NewRedFromSurface(su8);
-                  auto green = svl::NewGreenFromSurface(su8);
-                  auto blue = svl::NewBlueFromSurface(su8);
-                  m_all_by_channel[0].emplace_back(blue);
-                  m_all_by_channel[1].emplace_back(green);
-                  m_all_by_channel[2].emplace_back(red);
-                  m_all_by_channel[3].emplace_back(gray);
-                  m_frameCount++;
-              }
+            m_all_by_channel.resize(4); // surface always has 4 channels
+            while (frames->checkFrame(m_frameCount))
+            {
+                auto su8 = frames->getFrame(m_frameCount);
+                auto gray = svl::NewGrayFromSurface(su8);
+                auto red = svl::NewRedFromSurface(su8);
+                auto green = svl::NewGreenFromSurface(su8);
+                auto blue = svl::NewBlueFromSurface(su8);
+                m_all_by_channel[0].emplace_back(blue);
+                m_all_by_channel[1].emplace_back(green);
+                m_all_by_channel[2].emplace_back(red);
+                m_all_by_channel[3].emplace_back(gray);
+                m_frameCount++;
+            }
             break;
-          }
+        }
     }
 }
 
@@ -554,7 +531,7 @@ void ssmt_processor::median_leveled_pci (namedTrack_t& track, const input_channe
         auto caRef = weakCaPtr.lock();
         caRef->update ();
         leveled = caRef->leveled();
-
+        
         track.second.clear();
         auto mee = leveled.begin();
         for (auto ss = 0; mee != leveled.end() || ss < frame_count(); ss++, mee++)
@@ -578,7 +555,7 @@ void ssmt_processor::median_leveled_pci (namedTrack_t& track, const input_channe
 
 const int64_t& ssmt_processor::frame_count () const
 {
-//    std::lock_guard<std::mutex> lock(m_mutex);
+    //    std::lock_guard<std::mutex> lock(m_mutex);
     static int64_t inconsistent (0);
     
     if (m_all_by_channel.empty()) return inconsistent;
@@ -624,7 +601,7 @@ int ssmt_processor::save_channel_images (const input_channel_selector_t& in, con
     if (writer) {
         writer->operator()(dir_fqfn, c2);
     }
-
+    
     return -1;
 }
 
