@@ -78,14 +78,6 @@ void VisibleApp::DrawSettings() {
                     auto width = serie.dimensions()[0];
                     auto height = serie.dimensions()[1];
                     ImGui::Text(" %s %lu x %lu (%d) (%d)", serie.name().c_str(), width, height, serie.channelCount(), serie.timesteps());
-                    ImGui::SameLine();
-                    // Create a texcture for display
-                    // Using ImageSourceCvMat directly since fromOcv api does not require const input
-                    Channel8uRef sur = Channel8u::create(ImageSourceRef(new ImageSourceCvMat( serie.poster())));
-                    auto texFormat = gl::Texture2d::Format().loadTopDown();
-                    auto postex = gl::Texture::create(*sur, texFormat);
-                    ImVec2 ps (sur->getWidth()/4, sur->getHeight()/4);
-                    ImGui::Image( (void*)(intptr_t) postex->getId(), ps);
                 }
                 ImGui::TreePop();
             }
@@ -151,7 +143,7 @@ void VisibleApp::DrawMainMenu(){
     {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::Button("Select "))
+            if (ImGui::Button("Open "))
             {
                 nfdchar_t *outPath = NULL;
                 nfdresult_t result = NFD_OpenDialog("lif,mov,mp4", NULL, &outPath);
@@ -328,7 +320,7 @@ void VisibleApp::setup()
     
     getWindow()->getSignalMove().connect( std::bind( &VisibleApp::windowMove, this ) );
     getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleApp::displayChange, this ) );
-    getWindow()->getSignalDraw().connect([&]{draw();});
+//    getWindow()->getSignalDraw().connect([&]{draw();});
     getWindow()->getSignalClose().connect(std::bind( &VisibleApp::windowClose, this) );
     getWindow()->getSignalResize().connect(std::bind( &VisibleApp::resize, this) );
     

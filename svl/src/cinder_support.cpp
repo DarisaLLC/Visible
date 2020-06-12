@@ -71,7 +71,6 @@ namespace svl
     
     
     std::shared_ptr<roiWindow<P8U>> NewRefSingleFromSurface (const Surface8uRef& src,
-                                                                    const std::vector<std::string>& names_l2r,
                                                                     int64_t timestamp)
     {
         auto channel = src->getChannel(0);

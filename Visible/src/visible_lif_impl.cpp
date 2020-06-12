@@ -755,7 +755,7 @@ void lifContext::loadCurrentSerie ()
         m_plot_names.push_back("MisRegister");
 
                 
-        auto load_thread = std::thread(&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie.channel_names(), m_plot_names);
+        auto load_thread = std::thread(&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie);
         load_thread.detach();
 
 
