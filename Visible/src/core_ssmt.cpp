@@ -295,6 +295,7 @@ void ssmt_processor::volume_stats_computed(){
  */
 std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_intensity_statistics (const std::vector<int>& channels)
 {
+    vlogger::instance().console()->info("run_intensity_stats started ");
     std::vector<std::thread> threads(channels.size());
     for (auto tt = 0; tt < channels.size(); tt++)
     {
@@ -303,6 +304,8 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_intensity_statistics (con
                                   std::ref(m_all_by_channel[channel]), std::ref(m_moment_tracksRef->at(channel).second));
     }
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+    
+    vlogger::instance().console()->info("run_intensity_stats ended ");
     
     // Call the content loaded cb if any
     if (intensity_over_time_ready && intensity_over_time_ready->num_slots() > 0)

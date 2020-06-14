@@ -133,6 +133,8 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const b
     m_show_display_and_controls = false;
     m_show_results = false;
     m_show_playback = false;
+    m_is_loading = false;
+    m_is_loaded = false;
     
     m_valid = false;
         m_valid = sd.index() >= 0;
@@ -259,6 +261,9 @@ void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
     std::string msg = to_string(mMediaInfo.count) + " Samples in Media  " + to_string(loaded_frame_count) + " Loaded";
     vlogger::instance().console()->info(msg);
     int channel_index = int(mChannelCount)-1;
+    m_is_loading = false;
+    m_is_loaded = true;
+    
     auto load_thread = std::thread(&ssmt_processor::find_moving_regions, m_lifProcRef.get(),channel_index);
       load_thread.detach();
 
@@ -757,9 +762,7 @@ void lifContext::loadCurrentSerie ()
                 
         auto load_thread = std::thread(&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie);
         load_thread.detach();
-
-
-        
+        m_is_loading = true;
 
         /*
          * Fetch length and channel names

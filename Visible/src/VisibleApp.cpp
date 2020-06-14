@@ -11,7 +11,7 @@
 
 
 
-
+#if __used__
 static void ShowHelpMarker(const char* desc)
 {
     ImGui::TextDisabled("(?)");
@@ -24,7 +24,7 @@ static void ShowHelpMarker(const char* desc)
         ImGui::EndTooltip();
     }
 }
-
+#endif
 
 
 
@@ -85,7 +85,7 @@ void VisibleApp::DrawSettings() {
                 m_selected_lif_serie_index = sSelected;
                 m_selected_lif_serie_name = m_sections[m_selected_lif_serie_index];
                 static int clicked = 0;
-                ImGui::Text("%s", " Click to Process ");
+                ImGui::Text("%s", " Click to Load ");
                 ImGui::SameLine();
                 if (ImGui::Button(m_selected_lif_serie_name.c_str()))
                     clicked++;
@@ -117,23 +117,15 @@ void VisibleApp::ShowStyleEditor(ImGuiStyle* ref)
     if (ref == NULL)
         ref = &ref_saved_style;
 
-    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
-
-    if (ImGui::ShowStyleSelector("Colors##Selector"))
+  //  ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
+    ImGui::Text(" Choose Color Theme");
+    ImGui::SameLine();
+    if (ImGui::ShowStyleSelector("##Selector"))
         ref_saved_style = style;
-
+    ImGui::Text(" Set Global Scale ");
     ImGui::SameLine();
-    // Save/Revert button
-    if (ImGui::Button("Save Ref"))
-        *ref = ref_saved_style = style;
-    ImGui::SameLine();
-    if (ImGui::Button("Revert Ref"))
-        style = *ref;
-    ImGui::SameLine();
-    ShowHelpMarker("Save/Revert in local non-persistent storage. Default Colors definition are not affected. Use \"Export\" below to save them somewhere.");
-    ImGui::SameLine();
-    ImGui::DragFloat("global scale", &io.FontGlobalScale, 0.005f, 0.3f, 2.0f, "%.2f");
-
+    ImGui::DragFloat(" 0.0 -- 2.0 ", &io.FontGlobalScale, 0.005f, 0.3f, 2.0f, "%.2f");
+ 
 }
 
 void VisibleApp::DrawMainMenu(){
@@ -195,15 +187,16 @@ void VisibleApp::DrawMainMenu(){
     
     if(show_about_) //ImGui::OpenPopup("Help");
     {
-        ImGui::ScopedWindow window( "Help");
+        ImGui::ScopedWindow window( "About");
         std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
         buildN = "Visible ( build: " + buildN + " ) ";
 //        if(ImGui::BeginPopupModal("Help", &show_help_)){
             ImGui::TextColored(ImVec4(0.92f, 0.18f, 0.29f, 1.00f), "%s", buildN.c_str());
             ImGui::Text("Arman Garakani, Darisa LLC");
+            ImGui::Text("This App is Built With OpenCv, Boost, Cinder and ImGui Libraries ");
     }
     DrawSettings();
-    DrawImGuiDemos();
+//    DrawImGuiDemos();
 }
     
 
