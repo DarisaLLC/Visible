@@ -115,7 +115,7 @@ public:
      
     // Status
     bool isLoading() const { return m_is_loading; }
-    bool isLoaded() const { return m_is_loaded; }
+    bool isLoaded() const { return m_content_loaded; }
     
 private:
     void renderToFbo (const SurfaceRef&, gl::FboRef& );
@@ -228,7 +228,7 @@ private:
     bool mMouseInImage; // if in Image, mMouseInGraph is -1
     ivec2 mMouseInImagePosition;
     bool m_is_loading;
-    bool m_is_loaded;
+    std::atomic<bool> m_content_loaded;
     
     std::vector<sides_length_t> m_cell_ends = {sides_length_t (), sides_length_t()};
     std::vector<sides_length_t> m_normalized_cell_ends = {sides_length_t (), sides_length_t()};

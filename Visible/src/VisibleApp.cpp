@@ -272,6 +272,14 @@ void VisibleApp::setup_ui(){
     ImGui::StyleColorsLight();
     io.FontGlobalScale = 2.0;
     
+    
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiDockNodeFlags_PassthruCentralNode;
+    io.ConfigDockingWithShift = true;
+    io.ConfigDockingTransparentPayload = true;
+    io.ConfigViewportsNoAutoMerge = true;
+    
+    
 }
     
 #define ADD_ERR_AND_RETURN(sofar,addition)\
