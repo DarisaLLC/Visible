@@ -109,25 +109,24 @@ public:
    
     const int64_t& frame_count () const;
     const uint32_t channel_count () const;
-    const std::vector<std::shared_ptr<ssmt_result>>& moving_bodies ()const { return m_results; }
+  
     
     const svl::stats<int64_t> stats3D () const;
     cv::Mat & segmented () const { return m_temporal_ss;  }
     const std::vector<Rectf>& channel_rois () const;
     const  std::deque<double>& medianSet () const;
-    const std::vector<moving_region>& moving_regions ()const;
-    const Rectf& measuredArea () const;
+ 
     // Update. Called also when cutoff offset has changed
     void update (const input_channel_selector_t&);
     const vector<vector<double>>& ssMatrix () const { return m_smat[-1]; }
     const vector<double>& entropies () const { return m_entropies[-1]; }
     
-    // Add generate pci and flu for a cell.
-    
+  
   
     // Load frames from cache
-    int64_t load (const std::shared_ptr<seqFrameContainer>& frames,
+    void load_channels_from_lif (const std::shared_ptr<seqFrameContainer>& frames,
                   const lif_serie_data& sd = lif_serie_data () );
+    void load_channels_from_video (const std::shared_ptr<seqFrameContainer>& frames);
     
     // Run Luminance info on a vector of channel indices over time
     // Signals completion using intensity_over_time_ready
@@ -145,6 +144,9 @@ public:
     //     it used signal_segmented_view_ready triggers finlization and reporting.
     // signal_geometry_ready indicates results are ready.
     void find_moving_regions (const int channel_index);
+    const std::vector<std::shared_ptr<ssmt_result>>& moving_bodies ()const { return m_results; }
+    const std::vector<moving_region>& moving_regions ()const;
+    const Rectf& measuredArea () const;
     
     // Run to get Ranks and Median Level Set. Both short term and long term pic
     // Short term is specifically run on the channel contraction pci was run on
@@ -192,10 +194,10 @@ private:
        // args:
        // images: vector of roiWindow<P8U>s. roiWindow<P8U> is a single plane image container.
    std::shared_ptr<vecOfNamedTrack_t> internal_run_selfsimilarity_on_selected_input  (const std::vector<roiWindow<P8U>>& images,  const input_channel_selector_t&,const progress_fn_t& reporter);
-// Assumes LIF data -- use multiple window.
-   void load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames,  const lif_serie_data& sd = lif_serie_data () );
-   // @note Specific to ID Lab Lif Files
-   // ADD Create Tracks for all cells
+
+    // Assumes LIF data -- use multiple window.
+   void load_channels_from_lif_buffer2d (const std::shared_ptr<seqFrameContainer>& frames,  const lif_serie_data& sd = lif_serie_data () );
+
    void create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names);
        
     
@@ -298,7 +300,7 @@ private:
     mutable cv::Mat m_var_image;
     uiPair m_voxel_sample;
     iPair m_expected_segmented_size;
-    std::map<index_time_t, labelBlob::weak_ref> m_blob_cache;
+    std::map<index_time_t, labelBlob::weak_ref_t> m_blob_cache;
     labelBlob::ref m_main_blob;
     std::vector<blob> m_blobs;
     std::vector<cv::Point> m_var_peaks;

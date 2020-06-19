@@ -42,8 +42,6 @@
 #include "logger/logger.hpp"
 #include "cinder/Log.h"
 #include "CinderImGui.h"
-#include "gui_handler.hpp"
-#include "gui_base.hpp"
 #include <boost/any.hpp>
 #include "ImGuiExtensions.h"
 #include "Resources.h"
@@ -62,13 +60,64 @@ using namespace svl;
 #define ONCE(x) { static int __once = 1; if (__once) {x;} __once = 0; }
 
 namespace {
-    std::map<std::string, unsigned int> named_colors = {{"Red", 0xFF0000FF }, {"red",0xFF0000FF },{"Green", 0xFF00FF00},
-        {"green", 0xFF00FF00},{ "Long", 0xFFFF0000}, { "long", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFD66D3E}};
- 
-    
+std::map<std::string, unsigned int> named_colors = {{"Red", 0xFF0000FF }, {"red",0xFF0000FF },{"Green", 0xFF00FF00},
+    {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFFFFF3E},
+    { "Synth", 0xFFFB4551}, { "synth", 0xFFFB4551},{ "Length", 0xFFFFFF3E}, { "length", 0xFFFFFF3E},
+    { "Force", 0xFFFB4551}, { "force", 0xFFFB4551}, { "Elongation", 0xFF00FF00}, { "elongation", 0xFF00FF00}
+};
+std::map<unsigned int, unsigned int> numbered_half_colors = {{0, 0x330000FF },{1, 0x3300FF00},{2, 0x33FF0000} };
+
+struct ScopedWindowWithFlag : public ci::Noncopyable {
+    ScopedWindowWithFlag( const char* label, bool* p_open = nullptr, int windowflags = 0 );
+    ~ScopedWindowWithFlag();
+};
+
+ScopedWindowWithFlag::ScopedWindowWithFlag( const char* label, bool* p_open, int window_flags )
+{
+    ImGui::Begin( label, p_open, window_flags );
+}
+ScopedWindowWithFlag::~ScopedWindowWithFlag()
+{
+    ImGui::End();
+}
+
+bool getPosSizeFromWindow(const char* last_window, ImVec2& pos, ImVec2& size){
+    ImGuiWindow* window = ImGui::FindWindowByName(last_window);
+    if (window == nullptr) return false;
+    pos.x = window->Pos.x; pos.y = window->Pos.y + window->Size.y;
+    size.x = window->Size.x; size.y = window->Size.y;
+    return true;
+}
+
+class scopedPause : private Noncopyable {
+public:
+    scopedPause (const movContextRef& ref) :weakContext(ref) {
+        if (!weakContext){
+            if (weakContext->isPlaying())
+                weakContext->play_pause_button();
+        }
+    }
+    ~scopedPause (){
+        if (!weakContext ){
+            if (!weakContext->isPlaying()){
+                weakContext->play_pause_button();
+            }
+        }
+    }
+private:
+    std::shared_ptr<movContext>weakContext;
+};
+
+
 }
 
 
+#define wDisplay "Display"
+#define wResult "Result"
+#define wCells  "Cells"
+#define wContractions  "Contractions"
+#define wNavigator   "Navigator"
+#define wShape "Shape"
 
 /************************
  *
@@ -82,23 +131,28 @@ namespace {
 // @ todo setup default repository
 // default median cover pct is 5% (0.05)
 
-movContext::movContext(ci::app::WindowRef& ww, const cvVideoPlayer::ref& sd, const fs::path& cache_path) :sequencedImageContext(ww), m_sequence_player_ref(sd), m_geometry_available(false), mUserStorageDirPath (cache_path) {
+movContext::movContext(ci::app::WindowRef& ww, const fs::path& movie_file, const fs::path& cache_path, const std::string& fname) : mContentFileName(fname), sequencedImageContext(ww), mPath(movie_file), m_geometry_available(false), mUserStorageDirPath (cache_path) {
+    m_grabber_ref = cvVideoPlayer::create(mPath);
     m_type = guiContext::Type::cv_video_viewer;
-    m_show_contractions = false;
     // Create an invisible folder for storage
     mCurrentCachePath = mUserStorageDirPath;
     bool folder_exists = fs::exists(mCurrentCachePath);
     std::string msg = folder_exists ? " exists " : " does not exist ";
-    msg = " folder for " + m_sequence_player_ref->name() + msg;
-   // vlogger::instance().console()->info(msg);
+    msg = " folder for " + m_grabber_ref->name() + msg;
+    vlogger::instance().console()->info(msg);
+    m_playback_speed = 1;
+    m_show_display_and_controls = false;
+    m_show_results = false;
+    m_show_playback = false;
+    m_is_loading = false;
+    m_content_loaded = false;
     
-    
-    m_valid = m_sequence_player_ref->isLoaded();
+    m_valid = m_grabber_ref->isLoaded();
     if (m_valid){
-        m_layout = std::make_shared<imageDisplayMapper>  ( ivec2 (10, 30) );
-            setup();
-            ww->getRenderer()->makeCurrentContext(true);
-        }
+        m_layout = std::make_shared<imageDisplayMapper>  ();
+        setup();
+        ww->getRenderer()->makeCurrentContext(true);
+    }
 }
 
 
@@ -115,32 +169,24 @@ void movContext::setup_signals(){
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&movContext::signal_content_loaded, shared_from_above(), _1);
     boost::signals2::connection ml_connection = m_movProcRef->registerCallback(content_loaded_cb);
     
-    // Support movProcessor::initial ss results available
-  //  std::function<void (int&)> sm1d_ready_cb = boost::bind (&movContext::signal_sm1d_available, shared_from_above(), _1);
-  //  boost::signals2::connection nl_connection = m_movProcRef->registerCallback(sm1d_ready_cb);
+    // Support lifProcessor::flu results available
+    std::function<void ()> intensity_over_time_ready_cb = boost::bind (&movContext::signal_intensity_over_time_ready, shared_from_above());
+    boost::signals2::connection flu_connection = m_movProcRef->registerCallback(intensity_over_time_ready_cb);
     
- 
+    // Support lifProcessor::initial ss results available
+    std::function<void (std::vector<float> &, const input_channel_selector_t&)> root_pci_ready_cb = boost::bind (&movContext::signal_root_pci_ready, shared_from_above(), _1, _2);
+    boost::signals2::connection nl_connection = m_movProcRef->registerCallback(root_pci_ready_cb);
+    
+    // Support lifProcessor::median level set ss results available
+    std::function<void (const input_channel_selector_t&)> root_pci_med_reg_ready_cb = boost::bind (&movContext::signal_root_pci_med_reg_ready, shared_from_above(), _1);
+    boost::signals2::connection ol_connection = m_movProcRef->registerCallback(root_pci_med_reg_ready_cb);
+    
     
 }
-
-void movContext::setup_params () {
-    
-    //    gl::enableVerticalSync();
-    
-    
-}
-
 
 void movContext::setup()
 {
     ci::app::WindowRef ww = get_windowRef();
-    ui::initialize(ui::Options()
-                   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
-                   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
-                   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
-                   .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
-                   .window(ww)
-                   );
     
     m_showGUI = true;
     m_showLog = true;
@@ -149,8 +195,7 @@ void movContext::setup()
     srand( 133 );
     setup_signals();
     assert(is_valid());
-    ww->setTitle( m_sequence_player_ref->name());
-    ww->setSize(1280, 768);
+    ww->setTitle( m_grabber_ref->name());
     mFont = Font( "Menlo", 18 );
     auto ws = ww->getSize();
     mSize = vec2( ws[0], ws[1] / 12);
@@ -159,6 +204,8 @@ void movContext::setup()
     shared_from_above()->update();
     
     ww->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
+    
+    
 }
 
 
@@ -179,10 +226,37 @@ void movContext::signal_content_loaded (int64_t& loaded_frame_count )
 {
     std::string msg = to_string(mMediaInfo.count) + " Samples in Media  " + to_string(loaded_frame_count) + " Loaded";
     vlogger::instance().console()->info(msg);
-    process_async();
+    m_is_loading = false;
+    m_content_loaded.store(true, std::memory_order_release);
+    
 }
 
 
+
+void movContext::signal_root_pci_ready (std::vector<float> & signal, const input_channel_selector_t& dummy)
+{
+    stringstream ss;
+    ss << svl::toString(dummy.region()) << " root self-similarity available ";
+    vlogger::instance().console()->info(ss.str());
+}
+
+void movContext::signal_root_pci_med_reg_ready (const input_channel_selector_t& dummy2)
+{
+    //@note this is also checked in update. Not sure if this is necessary
+    auto tracksRef = m_root_pci_trackWeakRef.lock();
+    if ( tracksRef && !tracksRef->at(0).second.empty()){
+        m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
+    }
+    stringstream ss;
+    ss << svl::toString(dummy2.region()) << " median regularized root self-similarity available ";
+    vlogger::instance().console()->info(ss.str());
+}
+
+
+void movContext::signal_intensity_over_time_ready ()
+{
+    vlogger::instance().console()->info(" Flu Stats Available ");
+}
 void movContext::signal_frame_loaded (int& findex, double& timestamp)
 {
     //    frame_indices.push_back (findex);
@@ -239,8 +313,7 @@ void movContext::clear_playback_params ()
 
 bool movContext::have_sequence ()
 {
-    cvVideoPlayer::weak_ref wr(m_sequence_player_ref);
-    bool have =   wr.lock() && m_sequence_player_ref && mFrameSet;
+    bool have = m_grabber_ref && mFrameSet;
     return have;
 }
 
@@ -333,7 +406,11 @@ int movContext::getCurrentFrame ()
 
 time_spec_t movContext::getCurrentTime ()
 {
-    return time_spec_t (m_sequence_player_ref->getCurrentFrameTime());
+    return time_spec_t (m_grabber_ref->getCurrentFrameTime());
+}
+
+time_spec_t movContext::getStartTime (){
+    return time_spec_t ();
 }
 
 
@@ -406,7 +483,6 @@ void movContext::mouseMove( MouseEvent event )
 void movContext::update_with_mouse_position ( MouseEvent event )
 {
     mMouseInImage = false;
-    mMouseInGraphs  = -1;
     
     if (! have_sequence () ) return;
     
@@ -416,31 +492,20 @@ void movContext::update_with_mouse_position ( MouseEvent event )
         mMouseInImagePosition = event.getPos();
         update_instant_image_mouse ();
     }
-    
-  
-    
 }
-
 
 void movContext::mouseDrag( MouseEvent event )
 {
     
 }
-
-
 void movContext::mouseDown( MouseEvent event )
 {
     
 }
-
-
 void movContext::mouseUp( MouseEvent event )
 {
     
 }
-
-
-
 
 void movContext::keyDown( KeyEvent event )
 {
@@ -496,7 +561,7 @@ void movContext::keyDown( KeyEvent event )
 
 void movContext::load_current_sequence ()
 {
-    if ( ! is_valid() || ! m_sequence_player_ref )
+    if ( ! is_valid() || ! m_grabber_ref )
         return;
     
     try {
@@ -510,7 +575,7 @@ void movContext::load_current_sequence ()
          * Create the frameset and assign the channel names
          * Fetch the media info
          */
-        mFrameSet = seqFrameContainer::create (m_sequence_player_ref);
+        mFrameSet = seqFrameContainer::create (m_grabber_ref);
         if (! mFrameSet || ! mFrameSet->isValid())
         {
             vlogger::instance().console()->debug("Serie had 1 or no frames ");
@@ -530,48 +595,55 @@ void movContext::load_current_sequence ()
          * Loading also produces voxel images.
          */
         m_plot_names.clear();
-        m_plot_names =m_sequence_player_ref->channel_names();
+        m_plot_names =m_grabber_ref->channel_names();
         m_plot_names.push_back("MisRegister");
-        cv::Mat result;
-        std::vector<std::thread> threads(1);
-        threads[0] = std::thread(&ssmt_processor::load, m_movProcRef.get(), mFrameSet,m_sequence_player_ref->channel_names(), m_plot_names);
-        std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+        
+        // @DO ssmt_processor::load for videoPlayer
+        m_content_loaded.store(false, std::memory_order_release);
+        auto load_thread = std::thread(&ssmt_processor::load_channels_from_video,m_movProcRef.get(),mFrameSet);
+        load_thread.detach();
+        m_is_loading = true;
         
         /*
          * Fetch length and channel names
          */
-        mFrameSet->channel_names (m_sequence_player_ref->channel_names());
+      //  mFrameSet->channel_names (m_serie.channel_names());
         reset_entire_clip(mFrameSet->count());
         m_minFrame = 0;
         m_maxFrame =  mFrameSet->count() - 1;
         
-        // Initialize Sequencer
-        m_result_seq.mFrameMin = 0;
-        m_result_seq.mFrameMax = (int) mFrameSet->count() - 1;
-        m_result_seq.mSequencerItemTypeNames = {"All", "Contraction", "Force"};
-        m_result_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
+        // Initialize The Main Sequencer
+        m_main_seq.mFrameMin = 0;
+        m_main_seq.mFrameMax = (int) mFrameSet->count() - 1;
+        m_main_seq.mSequencerItemTypeNames = {"RGG"};
+        m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         
-        m_title =m_sequence_player_ref->name() + " @ " + mPath.filename().string();
+        m_title = mContentFileName;
         
         auto ww = get_windowRef();
         ww->setTitle(m_title );
         ww->getApp()->setFrameRate(mMediaInfo.getFramerate());
         
+     
         
-        mScreenSize = mMediaInfo.getSize();
+        mFrameSize = mMediaInfo.getSize();
         
-        mSurface = Surface8u::create (int32_t(mScreenSize.x), int32_t(mScreenSize.y), true);
+        mSurface = Surface8u::create (int32_t(mFrameSize.x), int32_t(mFrameSize.y), true);
+        mFbo = gl::Fbo::create(mSurface->getWidth(), mSurface->getHeight());
+        m_show_playback = true;
     }
     catch( const std::exception &ex ) {
         console() << ex.what() << endl;
+        m_show_playback = false;
         return;
     }
 }
 
-void movContext::process_window(int window_id){
-    
-}
 
+void movContext::fraction_reporter(float f){
+    m_fraction_done = f;
+    std::cout << (int)(f * 100) << std::endl;
+}
 
 void movContext::process_async (){
     
@@ -581,19 +653,19 @@ void movContext::process_async (){
         case 3:
         {
             input_channel_selector_t in (-1,2);
-            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_movProcRef.get(), in, pf);
+            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_selfsimilarity_on_selected_input, m_movProcRef.get(), in, pf);
             break;
         }
         case 2:
         {
             input_channel_selector_t in (-1,1);
-            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_movProcRef.get(), in, pf);
+            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_selfsimilarity_on_selected_input, m_movProcRef.get(), in, pf);
             break;
         }
         case 1:
         {
             input_channel_selector_t in (-1,0);
-            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_contraction_pci_on_selected_input, m_movProcRef.get(), in, pf);
+            m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_selfsimilarity_on_selected_input, m_movProcRef.get(), in, pf);
             break;
         }
     }
@@ -632,177 +704,153 @@ const Rectf& movContext::get_channel_display_rect (const int channel_number_zero
 }
 
 
+void movContext::add_canvas (){
+    
+    //@note: In ImGui, AddImage is called with uv parameters to specify a vertical flip.
+    auto showImage = [&](const char *windowName,bool *open, const gl::Texture2dRef texture){
+        if (open && *open)
+        {
+            //  ImGuiIO& io = ImGui::GetIO();
+            // ImGui::SetNextWindowBgAlpha(0.4f); // Transparent background
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            if (ImGui::Begin(windowName, open)) //, io.ConfigResizeWindowsFromEdges))
+            {
+                ImVec2 pos = ImGui::GetCursorScreenPos(); // actual position
+                draw_list->AddImage(  reinterpret_cast<ImTextureID> (texture->getId()), pos,
+                                    ImVec2(ImGui::GetContentRegionAvail().x + pos.x, ImGui::GetContentRegionAvail().y  + pos.y),
+                                    ImVec2(0,1), ImVec2(1,0));
+                ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
+                ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
+                ImRect regionRect(canvas_pos, canvas_pos + canvas_size);
+                // Update image/display coordinate transformer
+                m_layout->update_display_rect(canvas_pos, canvas_pos + canvas_size);
+            }
+            ImGui::End();
+        }
+    };
+    
+    //@note: assumes, next image plus any on image graphics have already been added
+    // offscreen via FBO
+    if(m_show_playback){
+        ImVec2 size;
+        ImVec2 pos (300,18);
+        getPosSizeFromWindow(mContentFileName.c_str(), pos, size);
+        size.x = mFrameSize.x+mFrameSize.x/2;
+        size.y = mFrameSize.y+mFrameSize.y/2;
+        auto ww = get_windowRef();
+        
+        ScopedWindowWithFlag utilities(wDisplay, nullptr, ImGuiWindowFlags_None );
+        ImGui::SetNextWindowPos(pos);
+        ImGui::SetNextWindowSize(size);
+        ImGui::SameLine();
+        showImage(wDisplay, &m_show_playback, mFbo->getColorTexture());
+    }
+}
+
 void movContext::add_result_sequencer ()
 {
+    
     // let's create the sequencer
-    static int selectedEntry = -1;
-    static int64 firstFrame = 0;
-    static bool expanded = true;
-    
-    const Rectf& dr = get_image_display_rect();
-    auto tr = dr.getUpperRight();
-    auto pos = ImVec2(tr.x+10, tr.y);
-    ImVec2 size (getWindowWidth()-30-pos.x, (3*getWindowHeight()) / 4);
-    
-    m_results_browser_display = Rectf(pos,size);
-    ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(size);
-    
-    ImGui::Begin(" Results ", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    
-    ImGui::PushItemWidth(130);
-    ImGui::InputInt("Frame Min", &m_result_seq.mFrameMin);
-    ImGui::SameLine();
-    ImGui::InputInt64("Frame ", &m_seek_position);
-    ImGui::SameLine();
-    ImGui::InputInt("Frame Max", &m_result_seq.mFrameMax);
-    ImGui::PopItemWidth();
-    
-    
-    Sequencer(&m_result_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
-    ImGui::End();
-    
-    // add a UI to edit that particular item
-    if (selectedEntry != -1)
-    {
-        const timeLineSequence::timeline_item &item = m_result_seq.items[selectedEntry];
-        ImGui::Text("I am a %s, please edit me", m_result_seq.mSequencerItemTypeNames[item.mType].c_str());
-        // switch (type) ....
-    }
-    
-    
-    
-    
+     static int selectedEntry = -1;
+     static int64 firstFrame = 0;
+     static bool expanded = true;
+     ImVec2 pos, size;
+     assert(getPosSizeFromWindow(wDisplay, pos, size));
+     m_results_browser_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
+     ImGui::SetNextWindowPos(pos);
+     ImGui::SetNextWindowSize(size);
+
+     static bool results_open;
+     if(ImGui::Begin(wResult, &results_open, ImGuiWindowFlags_None)){
+         Sequencer(&m_main_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
+     }
+     ImGui::End();
+   
 }
+
 
 void movContext::add_navigation(){
     
-    const Rectf& dr = get_image_display_rect();
-    auto pos = ImVec2(dr.getLowerLeft().x, dr.getLowerLeft().y + 30);
-    ImVec2  size (dr.getWidth(), std::min(128.0, dr.getHeight()/2.0));
-    m_navigator_display = Rectf(pos,size);
-    ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(size);
     
-    
-    if (ImGui::Begin("Navigation", &m_show_playback, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::PushItemWidth(40);
-        ImGui::PushID(200);
-        ImGui::InputInt("", &m_result_seq.mFrameMin, 0, 0);
-        ImGui::PopID();
+    if(m_show_playback){
+        
+        ImGuiWindow* window = ImGui::FindWindowByName(wResult);
+        assert(window != nullptr);
+        ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y );
+        ImVec2 size (window->Size.x, 100);
+        
+        ScopedWindowWithFlag utilities(wNavigator, nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        m_navigator_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
+        ImGui::SetNextWindowPos(pos);
+        ImGui::SetNextWindowSize(size);
         ImGui::SameLine();
-        if (ImGui::Button("|<"))
-            seekToStart();
-        ImGui::SameLine();
-        if (ImGui::Button("<"))
-            seekToFrame (getCurrentFrame() - m_playback_speed);
-        ImGui::SameLine();
-        if (ImGui::Button(">"))
-            seekToFrame (getCurrentFrame() + m_playback_speed);
-        ImGui::SameLine();
-        if (ImGui::Button(">|"))
-            seekToEnd();
-        ImGui::SameLine();
-        if (ImGui::Button(m_is_playing ? "Stop" : "Play"))
+        ImGui::BeginGroup();
         {
-            play_pause_button();
-        }
-        
-        if(mNoLoop == nullptr){
-            mNoLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PNLOOP  )));
-        }
-        if (mLoop == nullptr){
-            mLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PLOOP )));
-        }
-        
-        unsigned int playNoLoopTextureId = mNoLoop->getId();//  evaluation.GetTexture("Stock/PlayNoLoop.png");
-        unsigned int playLoopTextureId = mLoop->getId(); //evaluation.GetTexture("Stock/PlayLoop.png");
-        
-        ImGui::SameLine();
-        if (ImGui::ImageButton((ImTextureID)(uint64_t)(m_is_looping ? playLoopTextureId : playNoLoopTextureId), ImVec2(16.f, 16.f)))
-            loop_no_loop_button();
-        
-        ImGui::SameLine();
-        ImGui::PushID(202);
-        ImGui::InputInt("",  &m_result_seq.mFrameMax, 0, 0);
-        ImGui::PopID();
-        
-        
-    }
-    ImGui::End();
-    
-}
-
-
-void movContext::add_motion_profile (){
-    
-    if (! m_geometry_available ) return;
-    if (! m_segmented_texture ){
-        // Create a texcture for display
-        Surface8uRef sur = Surface8u::create(cinder::fromOcv(m_segmented_image));
-        auto texFormat = gl::Texture2d::Format().loadTopDown();
-        m_segmented_texture = gl::Texture::create(*sur, texFormat);
-    }
-    
-    ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
-    ImVec2  frame (m_segmented_texture->getWidth()*3.0f,m_segmented_texture->getHeight()*3.0f);
-    Rectf dr = m_results_browser_display;
-    auto pos = ImVec2(dr.getLowerLeft().x, dr.getLowerLeft().y + 30);
-    m_motion_profile_display = Rectf(pos,frame);
-    ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(frame);
-    
-    const RotatedRect& mt = m_movProcRef->motion_surface_bottom();
-    cv::Point2f points[4];
-    mt.points(&points[0]);
-    
-    if (ImGui::Begin("Motion Profile", nullptr,ImGuiWindowFlags_AlwaysAutoResize ))
-    {
-        if(m_segmented_texture){
-            static ImVec2 zoom_center;
-            // First Child
-            ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
-            ImVec2 pp = ImGui::GetCursorScreenPos();
-            //     ImGui::ImageZoomAndPan( (void*)(intptr_t)  m_segmented_texture->getId(),sz,
-            //                            m_segmented_texture->getAspectRatio(),NULL,&zoom,&zoom_center);
-            ImVec2 p (pp.x + mt.center.x, pp.y  + mt.center.y);
-            ImGui::Image( (void*)(intptr_t) m_segmented_texture->getId(), frame);
-            ImGui::EndChild();
-            
-            // Second Child
-            ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
-            ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x -5, p.y ), ImVec2(p.x + 5, p.y ), IM_COL32(255, 0, 0, 255), 3.0f);
-            ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x , p.y-5 ), ImVec2(p.x , p.y + 5), IM_COL32(255, 0, 0, 255), 3.0f);
-            
-            for (int ii = 0; ii < 4; ii++){
-                cv::Point2f pt = points[ii];
-                pt.x += (pp.x );
-                pt.y += (pp.y );
-                if (pt.x >=5 && pt.y >=5){
-                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x -5, pt.y ), ImVec2(pt.x + 5, pt.y ), IM_COL32(255, 128, 0, 255), 3.0f);
-                    ImGui::GetWindowDrawList()->AddLine(ImVec2(pt.x , pt.y-5 ), ImVec2(pt.x , pt.y + 5), IM_COL32(255, 128, 0, 255), 3.0f);
-                }
+            ImGui::PushItemWidth(40);
+            ImGui::PushID(200);
+            ImGui::InputInt("", &m_main_seq.mFrameMin, 0, 0);
+            ImGui::PopID();
+            ImGui::SameLine();
+            if (ImGui::Button("|<"))
+                seekToStart();
+            ImGui::SameLine();
+            if (ImGui::Button("<"))
+                seekToFrame (getCurrentFrame() - m_playback_speed);
+            ImGui::SameLine();
+            if (ImGui::Button(">"))
+                seekToFrame (getCurrentFrame() + m_playback_speed);
+            ImGui::SameLine();
+            if (ImGui::Button(">|"))
+                seekToEnd();
+            ImGui::SameLine();
+            if (ImGui::Button(m_is_playing ? "Stop" : "Play"))
+            {
+                play_pause_button();
             }
-            ImGui::EndChild();
+            
+            if(mNoLoop == nullptr){
+                mNoLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PNLOOP  )));
+            }
+            if (mLoop == nullptr){
+                mLoop = gl::Texture::create( loadImage( loadResource( IMAGE_PLOOP )));
+            }
+            
+            unsigned int playNoLoopTextureId = mNoLoop->getId();//  evaluation.GetTexture("Stock/PlayNoLoop.png");
+            unsigned int playLoopTextureId = mLoop->getId(); //evaluation.GetTexture("Stock/PlayLoop.png");
+            
+            ImGui::SameLine();
+            if (ImGui::ImageButton((ImTextureID)(uint64_t)(m_is_looping ? playLoopTextureId : playNoLoopTextureId), ImVec2(16.f, 16.f)))
+                loop_no_loop_button();
+            
+            ImGui::SameLine();
+            ImGui::PushID(202);
+            ImGui::InputInt("",  &m_main_seq.mFrameMax, 0, 0);
+            ImGui::PopID();
+            ImGui::SameLine();
+            if (ImGui::Button(m_playback_speed == 10 ? " 1 " : " 10x "))
+            {
+                auto current = m_playback_speed;
+                m_playback_speed = current == 1 ? 10 : 1;
+            }
+            ImGui::SameLine();
+            
+            auto dt = getCurrentTime().secs() - getStartTime().secs();
+            ImGui::SameLine(0,0);ImGui::Text("% 8d\t%4.4f Seconds", getCurrentFrame(), dt);
+            
         }
+        ImGui::EndGroup();
     }
-    ImGui::End();
 }
 
-void  movContext::SetupGUIVariables(){
-    
-    //      ImGuiStyle* st = &ImGui::GetStyle();
-    //      ImGui::StyleColorsLightGreen(st);
-    
-}
+
+
 
 
 void  movContext::DrawGUI(){
-    
-    add_navigation();
+    add_canvas();
     add_result_sequencer();
-    add_motion_profile ();
+    add_navigation();
+
 }
 
 const Rectf& movContext::get_image_display_rect ()
@@ -824,42 +872,41 @@ void  movContext::update_log (const std::string& msg)
 //@todo implement
 void movContext::resize ()
 {
-//    if (! have_sequence () || ! mSurface ) return;
-//    if (! m_layout->isSet()) return;
-//    auto ww = get_windowRef();
-//    auto ws = ww->getSize();
-//    m_layout->update_window_size(ws);
-//    mSize = vec2(ws[0], ws[1] / 12);
-//    //  mMainTimeLineSlider.setBounds (m_layout->display_timeline_rect());
-//
+    //    if (! have_sequence () || ! mSurface ) return;
+    //    if (! m_layout->isSet()) return;
+    //    auto ww = get_windowRef();
+    //    auto ws = ww->getSize();
+    //    m_layout->update_window_size(ws);
+    //    mSize = vec2(ws[0], ws[1] / 12);
+    //    //  mMainTimeLineSlider.setBounds (m_layout->display_timeline_rect());
+    //
     
 }
 
 bool movContext::haveTracks()
 {
-    return  ! m_longterm_pci_trackWeakRef.expired();
+    return ! m_intensity_trackWeakRef.expired() && ! m_root_pci_trackWeakRef.expired();
 }
 
 void movContext::update ()
 {
     if (! have_sequence() ) return;
-
-//
-//    if ( is_ready (m_fluorescense_tracks_aync) )
-//        m_intensity_trackWeakRef = m_fluorescense_tracks_aync.get();
-//
-//
-//    auto flu_cnt = channel_count() - 1;
-//    // Update Fluorescence results if ready
-//    if (flu_cnt > 0 && ! m_flurescence_trackWeakRef.expired())
-//    {
-//        // Number of Flu runs is channel count - 1
-//        auto tracksRef = m_flurescence_trackWeakRef.lock();
-//        for (auto cc = 0; cc < flu_cnt; cc++){
-//            m_main_seq.m_time_data.load(tracksRef->at(cc), named_colors[tracksRef->at(cc).first], cc);
-//        }
-//    }
-
+    
+    if ( is_ready (m_intensity_tracks_aync) )
+        m_intensity_trackWeakRef = m_intensity_tracks_aync.get();
+    
+    
+    auto flu_cnt = channel_count() - 1;
+    // Update Fluorescence results if ready
+    if (flu_cnt > 0 && ! m_intensity_trackWeakRef.expired())
+    {
+        // Number of Flu runs is channel count - 1
+        auto tracksRef = m_intensity_trackWeakRef.lock();
+        for (auto cc = 0; cc < flu_cnt; cc++){
+            m_main_seq.m_time_data.load(tracksRef->at(cc), named_colors[tracksRef->at(cc).first], cc);
+        }
+    }
+    
     
     // Update PCI result if ready
     if ( is_ready (m_root_pci_tracks_asyn)){
@@ -868,23 +915,9 @@ void movContext::update ()
     
     if ( ! m_root_pci_trackWeakRef.expired())
     {
-#ifdef SHORTTERM_ON
-        if (m_movProcRef->shortterm_pci().at(0).second.empty())
-                m_movProcRef->shortterm_pci(1);
-#endif
         auto tracksRef = m_root_pci_trackWeakRef.lock();
         if(tracksRef && tracksRef->size() > 0 && ! tracksRef->at(0).second.empty())
             m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], channel_count()-1);
-
-#ifdef SHORTTERM_ON
-        // Update shortterm PCI result if ready
-        if ( ! m_movProcRef->shortterm_pci().at(0).second.empty() )
-        {
-            auto tracksRef = m_movProcRef->shortterm_pci();
-            m_result_seq.m_time_data.load(tracksRef.at(0), named_colors["Short"], 3);
-        }
-#endif
-        
     }
     
     // Fetch Next Frame
@@ -909,6 +942,7 @@ void movContext::update ()
         update_instant_image_mouse ();
         seekToFrame (getCurrentFrame() + m_playback_speed);
     }
+    
     
     // Update text texture with most recent text
     auto num_str = to_string( int( getCurrentFrame ()));
@@ -938,7 +972,7 @@ gl::TextureRef movContext::pixelInfoTexture ()
 {
     if (! mMouseInImage) return gl::TextureRef ();
     TextLayout lout;
-    const auto names =m_sequence_player_ref->channel_names();
+    const auto names =m_grabber_ref->channel_names();
     auto channel_name = (m_instant_channel < names.size()) ? names[m_instant_channel] : " ";
     
     // LIF has 3 Channels.
@@ -990,82 +1024,22 @@ void movContext::draw_info ()
     
 }
 
+void  movContext::renderToFbo (const SurfaceRef&, gl::FboRef& fbo ){
+    // this will restore the old framebuffer binding when we leave this function
+    // on non-OpenGL ES platforms, you can just call mFbo->unbindFramebuffer() at the end of the function
+    // but this will restore the "screen" FBO on OpenGL ES, and does the right thing on both platforms
+    gl::ScopedFramebuffer fbScp( fbo );
+    
+}
 
 void movContext::draw ()
 {
     if( have_sequence()  && mSurface )
     {
-        auto dr = get_image_display_rect();
-        ivec2 tl = dr.getUpperLeft();
-        tl.y += (2*dr.getHeight())/3.0;
-        Rectf gdr (tl, dr.getLowerRight());
-        
-        assert(dr.getWidth() > 0 && dr.getHeight() > 0);
-        
-        gl::ScopedBlendAlpha blend_;
-        
-        switch(channel_count())
-        {
-            case 1:
-                mImage = gl::Texture::create(*mSurface);
-                mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
-                gl::draw (mImage, dr);
-                break;
-            case 3:
-            case 4:
-                mImage = gl::Texture::create(*mSurface);
-                mImage->setMagFilter(GL_NEAREST_MIPMAP_NEAREST);
-                gl::draw (mImage, dr);
-                break;
-        }
-        
-        {
-            //@todo change color to indicate presence in any display area
-            //  gl::ScopedColor (getManualEditMode() ? ColorA( 0.25f, 0.5f, 1, 1 ) : ColorA::gray(1.0));
-            gl::drawStrokedRect(get_image_display_rect(), 3.0f);
-        }
-        
-        // std::vector<float> test = {0.0,0.1,0.2,1.0,0.2,0.1,0.0};
-        // m_tsPlotter.setBounds(gdr);
-        // m_tsPlotter.draw(test);
-        
-        if (m_geometry_available)
-        {
-            const cv::RotatedRect& ellipse = m_movProcRef->motion_surface();
-            const fPair& ab = m_movProcRef->ellipse_ab();
-            vec2 a_v ((ab.first * gdr.getWidth()) / 512, 0.0f );
-            vec2 b_v (0.0f, (ab.second * gdr.getHeight()) / 128);
-            
-            cinder::gl::ScopedLineWidth( 10.0f );
-            {
-                cinder::gl::ScopedColor col (ColorA( 1.0, 0.1, 0.0, 0.8f ) );
-                {
-                    cinder::gl::ScopedModelMatrix _mdl;
-                    uDegree da(ellipse.angle);
-                    uRadian dra (da);
-                    vec2 ctr ((ellipse.center.x * gdr.getWidth()) / 512, (ellipse.center.y * gdr.getHeight()) / 128 );
-                    ctr = ctr + gdr.getUpperLeft();
-                    gl::translate(ctr);
-                    
-                    gl::rotate(dra.Double());
-                    ctr = vec2(0,0);
-                    gl::drawSolidCircle(ctr, 3.0);
-                    gl::drawLine(ctr-b_v, ctr+b_v);
-                    gl::drawLine(ctr-a_v, ctr+a_v);
-                    
-                    gl::drawStrokedEllipse(ctr, a_v.x, b_v.y);
-                }
-            }
-        }
-        
-    
-        
         if(m_showGUI)
             DrawGUI();
-        
     }
-    
-    
 }
+
 
 #pragma GCC diagnostic pop

@@ -116,8 +116,6 @@ class sequencedImageContext : public guiContext
 {
 public:
 	
-	typedef	 signals::Signal<void( marker_info_t & )>		MarkerSignalInfo_t;
-	
 	sequencedImageContext(ci::app::WindowRef& ww)
 	: guiContext (ww)
 	{}
@@ -129,6 +127,7 @@ public:
 	virtual time_spec_t getCurrentTime () = 0;
 	virtual time_spec_t getStartTime () = 0;
 	virtual int getNumFrames () = 0;
+	virtual void process_async() = 0;
 	
 	virtual void draw_info () = 0;
 	virtual void update_log (const std::string& meg = "") = 0;

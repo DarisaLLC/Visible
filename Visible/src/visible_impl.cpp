@@ -74,7 +74,7 @@ bfs::path VisibleAppControl::make_result_cache_entry_for_content_file (const boo
     try{
         auto visiblePath = get_visible_cache_directory();
         
-        // Create a directory for this lif file if it does not exist
+        // Create a directory for this content file if it does not exist
         std::string filestem = path.stem().string();
         auto cachePath = visiblePath/filestem;
         if (!bfs::exists( cachePath)) bfs::create_directories(cachePath);
@@ -191,13 +191,12 @@ bool VisibleAppControl::setup_loggers (const bfs::path app_support_dir,  imGuiLo
 guiContext::guiContext (ci::app::WindowRef& ww)
 : mWindow (ww), m_valid (false), m_type (null_viewer)
 {
-    if (ww)
-        ww->setUserData (this);
+   if (ww) ww->setUserData (this);
 }
 //
 //guiContext::~guiContext ()
 //{
-//    // std::cout << " guiContext Dtor called " << std::endl;
+//    std::cout << " guiContext Dtor called " << std::endl;
 //}
 
 // u implementation does nothing

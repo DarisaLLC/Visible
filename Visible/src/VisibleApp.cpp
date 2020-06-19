@@ -53,21 +53,11 @@ void VisibleApp::DrawSettings() {
             ImGui::SetNextTreeNodeOpen(true);
             first_time = false;
         }
-        // @ todo: add layoput information about the LIF file
-
         if (isLifFile()) {
             m_selected_lif_serie_index = -1;
             m_custom_type = false;
             static int sSelected = -1;
             auto series = mBrowser->get_all_series();
-            /*
-              Format a descriptor line for selectable
-               Draw the channel configuration:
-                ---- ---- ----
-                ---- ---- ----
-                ---- ----
-                ----
-             */
             if (ImGui::TreeNode("Select Serie")) {
                 for (auto i = 0; i < m_sections.size(); i++)
                 {
@@ -94,10 +84,21 @@ void VisibleApp::DrawSettings() {
                     load_lif_serie(m_selected_lif_serie_name);
                 }
             } // End Selected check & run
-        } // IsLifFile
+        }
+        else if (isMovFile())// IsLifFile
+        {
+          static int mov_clicked = 0;
+          ImGui::Text("%s", " Click to Load ");
+          ImGui::SameLine();
+          if (ImGui::Button(mCurrentContentName.c_str()))
+              mov_clicked++;
+          if (mov_clicked & 1)
+          {
+            load_mov_file();
+          }
+        }
         ImGui::Spacing();
-    }// Settings
-  
+    }
     ImGui::End();
 }
 
@@ -144,18 +145,20 @@ void VisibleApp::DrawMainMenu(){
                     auto msg = "Selected " + fout.string();
                     vlogger::instance().console()->info(msg);
                     auto dotext = identify_file(fout, "");
-                    /*
-                     * Create the browser for the file type.
-                     * We do it here as it is naturally blocked operation.
-                     */
                     if(isLifFile()){
                         vlogger::instance().console()->info(fout.string() + " Ok " );
                         m_sections.clear();
                         auto num = list_lif_series(m_sections);
                         assert(num == m_sections.size());
                     }
+                    else if(isMovFile()){
+                        vlogger::instance().console()->info(fout.string() + " Ok " );
+                        m_sections.clear();
+                        auto num = list_mov_channels(m_sections);
+                        assert(num == m_sections.size());
+                    }
                     else{
-                        vlogger::instance().console()->error("%s not a lif file", fout.string());
+                        vlogger::instance().console()->error("%s wrong file type", fout.string());
                     }
                     free(outPath);
                 }
@@ -164,7 +167,7 @@ void VisibleApp::DrawMainMenu(){
             }
             if (ImGui::Button("Process"))
             {
-                if (mContext) std::dynamic_pointer_cast<lifContext>(mContext)->process_async();
+                if (mContext) mContext->process_async(); //std::dynamic_pointer_cast<lifContext>(mContext)->process_async();
             }
             
             ImGui::EndMenu();
@@ -190,10 +193,9 @@ void VisibleApp::DrawMainMenu(){
         ImGui::ScopedWindow window( "About");
         std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
         buildN = "Visible ( build: " + buildN + " ) ";
-//        if(ImGui::BeginPopupModal("Help", &show_help_)){
-            ImGui::TextColored(ImVec4(0.92f, 0.18f, 0.29f, 1.00f), "%s", buildN.c_str());
-            ImGui::Text("Arman Garakani, Darisa LLC");
-            ImGui::Text("This App is Built With OpenCv, Boost, Cinder and ImGui Libraries ");
+        ImGui::TextColored(ImVec4(0.92f, 0.18f, 0.29f, 1.00f), "%s", buildN.c_str());
+        ImGui::Text("Arman Garakani, Darisa LLC");
+        ImGui::Text("This App is Built With OpenCv, Boost, Cinder and ImGui Libraries ");
     }
     DrawSettings();
 //    DrawImGuiDemos();
@@ -387,6 +389,7 @@ std::string VisibleApp::identify_file(const bfs::path& bpath, const std::string&
     
 }
 
+
 size_t VisibleApp::list_lif_series(std::vector<std::string>& names){
     assert(m_is_lif_file);
     assert(exists(mCurrentContent));
@@ -441,41 +444,56 @@ bool VisibleApp::load_lif_serie(const std::string& serie){
     ADD_ERR_AND_RETURN(cmds, " Serie Not Found ")
 }
 
-#if 0
-    else if (exists_with_extenstion && is_valid_extension && is_video_content){
-        
-        
-        VisibleAppControl::setup_loggers(root_output_dir, visual_log, bfs::path(bpath).filename().string());
-        
-        cvVideoPlayer::ref vref = cvVideoPlayer::create(bfs::path(bpath));
-        WindowRef ww = getWindow ();
-        
-        auto bpath_path = bfs::path(bpath);
-        auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
-        mContext = std::unique_ptr<sequencedImageContext>(new movContext (ww, vref, cache_path));
-        
-        if (mContext->is_valid()){ cmds += " [ " + m_args[1] + " ] ";cmds += "  Ok ";}
-        setup_ui();
-        
-        VAPPLOG_INFO(cmds.c_str());
-        update();
-        
-        ww->setTitle ( cmds + " Visible build: " + buildN);
-        mFont = Font( "Menlo", 18 );
-        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-        // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
-        getSignalShouldQuit().connect( std::bind( &VisibleRunApp::shouldQuit, this ) );
-        getSignalDidBecomeActive().connect( [this] { update_log ( "App became active." ); } );
-        getSignalWillResignActive().connect( [this] { update_log ( "App will resign active." ); } );
-        getWindow()->getSignalDisplayChange().connect( std::bind( &VisibleRunApp::displayChange, this ) );
-        gl::enableVerticalSync();
-        
-    }else{
-        ADD_ERR_AND_RETURN(cmds, " Path not valid ");
-    }
-#endif
-    
 
+
+bool VisibleApp::load_mov_file(){
+    if( mContext && mContext->is_valid()) return true;
+    auto bpath_path = mCurrentContent;
+    auto stem = mCurrentContent.stem();
+    std::string cmds = " [ " + stem.string() + " ] ";
+    if (exists(mCurrentContent)){
+            WindowRef ww = getWindow ();
+            auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
+            mContext =  std::make_shared<movContext> (ww, mCurrentContent, cache_path, stem.string());
+            update();
+            
+            ww->setTitle ( cmds + " Visible build: " + mBuildn);
+            mFont = Font( "Menlo", 18 );
+            return true;
+     }
+    ADD_ERR_AND_RETURN(cmds, " Path not valid ");
+}
+
+
+
+size_t VisibleApp::list_mov_channels(std::vector<std::string>& channel_names){
+    assert(m_is_mov_file);
+    assert(exists(mCurrentContent));
+    static std::map<int, std::string> order_map = { {ci::SurfaceChannelOrder::RGBA,"RGBA"},{ci::SurfaceChannelOrder::RGB,"RGB"},{ci::SurfaceChannelOrder::BGRA,"BGRA"},{ci::SurfaceChannelOrder::BGR,"BGR"},{ci::SurfaceChannelOrder::ARGB,"ARGB"},{ci::SurfaceChannelOrder::ABGR,"ABGR"}  };
+
+    std::strstream msg;
+    channel_names.resize(0);
+    cvVideoPlayer::ref vref = cvVideoPlayer::create(mCurrentContent.string());
+    if(vref->isLoaded()){
+        auto su8 = vref->createSurface();
+        vref->seekToFrame(0);
+        ci::SurfaceChannelOrder order = su8->getChannelOrder();
+        int channel_count = order.hasAlpha() ? 4 : 3;
+        if (order_map.find(order.getCode()) == order_map.end()){
+            for (auto cc = 0; cc < channel_count; cc++)
+                channel_names.push_back(std::to_string(cc));
+            msg << " Order: " << order.getCode() << " Not found -- numerical index used as channel names " << std::endl;
+            std::string tmp = msg.str();
+            VAPPLOG_INFO(tmp.c_str());
+        }else{
+            auto order_string = order_map[order.getCode()];
+            assert(channel_count == order_string.length());
+            for (auto cc = 0; cc < channel_count; cc++)
+                   channel_names.emplace_back(1, order_string[cc]);
+        }
+    }
+    return channel_names.size();
+}
 
 void VisibleApp::windowMove()
 {

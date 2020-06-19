@@ -223,7 +223,7 @@ int ssmt_processor:: create_cache_paths (){
  * that is in vCols / 2 , vRows / 2
  * And vCols / 2 , vRows / 2 border
  */
-int64_t ssmt_processor::load (const std::shared_ptr<seqFrameContainer>& frames,const lif_serie_data& sd)
+void ssmt_processor::load_channels_from_lif(const std::shared_ptr<seqFrameContainer>& frames,const lif_serie_data& sd)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
     
@@ -239,14 +239,12 @@ int64_t ssmt_processor::load (const std::shared_ptr<seqFrameContainer>& frames,c
      
      */
     create_named_tracks(sd.channel_names(), sd.channel_names());
-    load_channels_from_images(frames, sd);
+    load_channels_from_lif_buffer2d(frames, sd);
     lock.unlock();
     
     // Call the content loaded cb if any
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
         signal_content_loaded->operator()(m_frameCount);
-    
-    return m_frameCount;
 }
 
 
@@ -460,11 +458,36 @@ void ssmt_processor::volume_variance_peak_promotion (std::vector<roiWindow<P8U>>
     
 }
 
-
+void ssmt_processor::load_channels_from_video (const std::shared_ptr<seqFrameContainer>& frames)
+{
+    std::unique_lock<std::mutex> lock(m_mutex);
+    
+    m_frameCount = 0;
+    m_all_by_channel.clear();
+    m_channel_count = frames->media_info().getNumChannels();
+    m_all_by_channel.resize (m_channel_count);
+    std::vector<std::string> names = {"Blue", "Green","Red", "Alpha"};
+    
+    //@todo: seperate channels and add
+    while (frames->checkFrame(m_frameCount))
+    {
+        auto su8 = frames->getFrame(m_frameCount);
+        auto red = svl::NewRedFromSurface(su8);
+        for (auto cc = 0; cc < m_channel_count; cc++)
+            m_all_by_channel[cc].emplace_back(red);
+        m_frameCount++;
+    }
+    lock.unlock();
+    
+    // Call the content loaded cb if any
+      if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+          signal_content_loaded->operator()(m_frameCount);
+    
+}
 // Assumes LIF data -- use multiple window.
 // @todo condider creating cv::Mats and convert to roiWindow when needed.
 
-void ssmt_processor::load_channels_from_images (const std::shared_ptr<seqFrameContainer>& frames,
+void ssmt_processor::load_channels_from_lif_buffer2d (const std::shared_ptr<seqFrameContainer>& frames,
                                                 const lif_serie_data& sd)
 {
     // Copy deep time / index maps from seqFrameContainer

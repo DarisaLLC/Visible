@@ -101,7 +101,7 @@ m_index(-1) {
  @note Check if the returned has expired
  @return a weak_ptr to the reader data
  */
-const lifIO::LifReader::weak_ref& lif_serie_data::readerWeakRef () const{
+const lifIO::LifReader::weak_ref_t& lif_serie_data::readerWeakRef () const{
     return m_lifWeakRef;
 }
 
