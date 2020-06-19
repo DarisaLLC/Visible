@@ -151,7 +151,7 @@ namespace lifIO
         
     public:
         typedef std::shared_ptr<LifReader> ref;
-        typedef std::weak_ptr<LifReader> weak_ref;
+        typedef std::weak_ptr<LifReader> weak_ref_t;
         
         static LifReader::ref create (const std::string&  fqfn_path){
             return LifReader::ref ( new LifReader (fqfn_path));

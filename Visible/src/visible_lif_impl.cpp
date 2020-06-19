@@ -188,26 +188,9 @@ void lifContext::setup_signals(){
     boost::signals2::connection ss_image_connection = m_lifProcRef->registerCallback(ss_segmented_view_ready_cb);
     
 }
-
-void lifContext::setup_params () {
-    
-//    gl::enableVerticalSync();
- 
-    
-}
-
-
 void lifContext::setup()
 {
     ci::app::WindowRef ww = get_windowRef();
-//    ui::Initialize(ui::Options()
-//                //   .itemSpacing(vec2(6, 6)) //Spacing between widgets/lines
-//                //   .itemInnerSpacing(vec2(10, 4)) //Spacing between elements of a composed widget
-//                //   .color(ImGuiCol_Button, ImVec4(0.86f, 0.93f, 0.89f, 0.39f)) //Darken the close button
-//               //    .color(ImGuiCol_Border, ImVec4(0.86f, 0.93f, 0.89f, 0.39f))
-//                   .window(ww)
-//                   );
-
     m_showGUI = true;
     m_showLog = true;
     m_showHelp = true;
@@ -216,7 +199,6 @@ void lifContext::setup()
     setup_signals();
     assert(is_valid());
     ww->setTitle( m_serie.name());
-
     mFont = Font( "Menlo", 18 );
     auto ws = ww->getSize();
     mSize = vec2( ws[0], ws[1] / 12);
@@ -593,8 +575,7 @@ void lifContext::mouseMove( MouseEvent event )
 void lifContext::update_with_mouse_position ( MouseEvent event )
 {
     mMouseInImage = false;
-    mMouseInGraphs  = -1;
-    
+
     if (! have_lif_serie () ) return;
     
     mMouseInImage = get_image_display_rect().contains(event.getPos());
@@ -603,24 +584,16 @@ void lifContext::update_with_mouse_position ( MouseEvent event )
         mMouseInImagePosition = event.getPos();
         update_instant_image_mouse ();
     }
-    
-
-    
-  
 }
-
-
 void lifContext::mouseDrag( MouseEvent event )
 {
   
 }
 
-
 void lifContext::mouseDown( MouseEvent event )
 {
    
 }
-
 
 void lifContext::mouseUp( MouseEvent event )
 {
@@ -754,7 +727,7 @@ void lifContext::loadCurrentSerie ()
         m_plot_names.push_back("MisRegister");
 
         m_content_loaded.store(false, std::memory_order_release);
-        auto load_thread = std::thread(&ssmt_processor::load, m_lifProcRef.get(),mFrameSet, m_serie);
+        auto load_thread = std::thread(&ssmt_processor::load_channels_from_lif,m_lifProcRef.get(),mFrameSet, m_serie);
         load_thread.detach();
         m_is_loading = true;
 

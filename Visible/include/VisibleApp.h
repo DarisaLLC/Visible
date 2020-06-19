@@ -113,6 +113,8 @@ private:
     std::string identify_file(const bfs::path& mfile, const std::string& content_type);
     bool load_lif_serie(const std::string& serie);
     size_t list_lif_series(std::vector<std::string>& names);
+    bool load_mov_file();
+    size_t list_mov_channels(std::vector<std::string>& channel_names);
 
     void DrawMainMenu ();
     void DrawImGuiMetrics();

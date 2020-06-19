@@ -80,7 +80,7 @@ public:
     const std::vector<lifIO::ChannelData>& channels () const { return m_channels; }
     const std::vector<std::string>& channel_names () const { return m_channel_names; }
     const std::vector<time_spec_t>& timeSpecs () const { return  m_timeSpecs; }
-    const lifIO::LifReader::weak_ref& readerWeakRef () const;
+    const lifIO::LifReader::weak_ref_t& readerWeakRef () const;
     const cv::Mat& poster () const { return m_poster; }
     const std::vector<cv::Rect2f>& ROIs2d () const { return m_rois_2d; }
     
@@ -97,7 +97,7 @@ private:
     std::vector<std::string> m_channel_names;
     std::vector<time_spec_t> m_timeSpecs;
     cv::Mat m_poster;
-    mutable lifIO::LifReader::weak_ref m_lifWeakRef;
+    mutable lifIO::LifReader::weak_ref_t m_lifWeakRef;
     
     mutable float  m_length_in_seconds;
     

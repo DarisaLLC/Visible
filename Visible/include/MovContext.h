@@ -30,11 +30,9 @@ class movContext : public sequencedImageContext
 {
 
 public:
-    
-  
-    
+
     // From a image_sequence_data
-    movContext(ci::app::WindowRef& ww, const cvVideoPlayer::ref&, const bfs::path&  );
+    movContext(ci::app::WindowRef& ww, const bfs::path& file, const bfs::path& cache, const std::string& );
     
     // shared_from_this() through base class
     movContext* shared_from_above () {
@@ -75,11 +73,7 @@ public:
 	
 	void setZoom (vec2);
 	vec2 getZoom ();
-	void setMedianCutOff (int32_t newco);
-	int32_t getMedianCutOff () const;
-    void setCellLength (uint32_t newco);
-    uint32_t getCellLength () const;
-
+	
 
 	
 	void play_pause_button ();
@@ -97,30 +91,31 @@ public:
     // Supporting gui_base
     void DrawGUI();
     
+    virtual void process_async () override;
+    
 private:
     void renderToFbo (const SurfaceRef&, gl::FboRef& fbo );
-    void add_canvas ();
     void setup_signals ();
-    void setup_params ();
     ci::app::WindowRef& get_windowRef();
     const Rectf& get_channel_display_rect (const int channel_number);
     void glscreen_normalize (const sides_length_t& src, const Rectf& gdr, sides_length_t& dst);
     
     // mov Support
+    std::string mContentFileName;
     std::shared_ptr<ssmt_processor> m_movProcRef;
 	void load_current_sequence ();
 	bool have_sequence ();
-    cvVideoPlayer::ref m_sequence_player_ref;
+    cvVideoPlayer::ref m_grabber_ref;
     boost::filesystem::path mPath;
     std::vector<std::string> m_plot_names;
     
     
     // Callbacks
     void signal_content_loaded (int64_t&);
-    void signal_sm1d_ready (std::vector<float> &, const input_channel_selector_t&);
-    void signal_sm1dmed_ready (const input_channel_selector_t&);
+    void signal_intensity_over_time_ready ();
+    void signal_root_pci_ready (std::vector<float> &, const input_channel_selector_t&);
+    void signal_root_pci_med_reg_ready (const input_channel_selector_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
-    void signal_segmented_view_ready (cv::Mat& image, cv::Mat& label);
     void fraction_reporter(float);
     
     // Availability
@@ -141,23 +136,17 @@ private:
     mutable std::mutex m_clip_mutex;
     mutable std::mutex m_update_mutex;
     
-    // Async Processing
-    void process_async ();
-    void process_window(int);
+
     
      
     // Frame Cache and frame store
     std::shared_ptr<seqFrameContainer> mFrameSet;
     SurfaceRef  mSurface;
-  // Variance Image & Texture
-    cv::Mat m_segmented_image;
-    ci::gl::TextureRef m_segmented_texture;
-    SurfaceRef m_segmented_surface;
+      
+     // Tracks of frame associated results
+     std::weak_ptr<vecOfNamedTrack_t> m_intensity_trackWeakRef;
+     std::weak_ptr<vecOfNamedTrack_t> m_root_pci_trackWeakRef;
     
-    // Tracks of frame associated results
-    std::weak_ptr<vecOfNamedTrack_t> m_basic_trackWeakRef;
-    std::weak_ptr<vecOfNamedTrack_t> m_root_pci_trackWeakRef;
-
     // Folder for Per user result / content caching
     // @todo clarify the difference. Right now they are the same
     boost::filesystem::path mUserStorageDirPath;
@@ -170,6 +159,7 @@ private:
     int64_t m_maxFrame;
     
     // Instant information
+    float m_fraction_done;
     int64_t m_seek_position;
     bool m_is_playing, m_is_looping;
     bool m_is_editing, m_show_probe;
@@ -180,15 +170,16 @@ private:
     bool mMouseIsMoving;
     bool mMouseIsDragging;
     bool mMetaDown;
-    int mMouseInGraphs; // -1 if not, 0 1 2
+ 
     bool mMouseInImage; // if in Image, mMouseInGraph is -1
     ivec2 mMouseInImagePosition;
-    uint32_t m_cutoff_pct;	
+    bool m_is_loading;
+    std::atomic<bool> m_content_loaded;
 
     gl::TextureRef mImage;
 
     // Screen Info
-    vec2 mScreenSize;
+    vec2 mFrameSize;
     gl::TextureRef pixelInfoTexture ();
     std::string m_title;
     
@@ -200,6 +191,7 @@ private:
     void update_channel_display_rects () override;
     
     vec2 texture_to_display_zoom ();
+    void add_canvas ();
     void add_result_sequencer ();
     void add_navigation ();
     void add_motion_profile ();
@@ -216,12 +208,11 @@ private:
   
     // UI flags
     bool m_showLog, m_showGUI, m_showHelp;
-    bool m_show_contractions, m_show_playback;
+    bool m_show_playback;
     bool m_median_set_at_default;
     
-    
     // imGui
-    timeLineSequence m_result_seq;
+     timeLineSequence m_main_seq;
     
     // UI instant sub-window rects
     Rectf m_results_browser_display;
@@ -229,8 +220,6 @@ private:
       Rectf m_motion_profile_display;
     int8_t m_playback_speed;
     
-    OnImagePlot m_tsPlotter;
-
     // User Selectable ROIs
     std::map<int,Rectf> m_windows;
     
@@ -245,28 +234,8 @@ private:
 		xScaled = svl::math<size_t>::clamp( xScaled, 0, wave );
 		return xScaled;
 	}
-	
-
-    class scopedPause : private Noncopyable {
-    public:
-        scopedPause (const movContextRef& ref) :weakContext(ref) {
-            if (!weakContext){
-                if (weakContext->isPlaying())
-                    weakContext->play_pause_button();
-            }
-        }
-        ~scopedPause (){
-            if (!weakContext ){
-                if (!weakContext->isPlaying()){
-                    weakContext->play_pause_button();
-                }
-            }
-        }
-    private:
-        std::shared_ptr<movContext>weakContext;
-    };
-
-
 };
+
+
 
 #endif

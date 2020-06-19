@@ -112,7 +112,7 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const cvVideoPlaye
     minfo.mFps = mMovie->getFrameRate();
     minfo.count = mMovie->getNumFrames ();
     minfo.duration = mMovie->getDuration();
-    minfo.mChannels = 4;
+    minfo.mChannels = 3;
     minfo.channel_size = minfo.size;
     minfo.mIsMovie = true;
     

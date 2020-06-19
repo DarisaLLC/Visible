@@ -33,7 +33,7 @@ class seqFrameContainer : public tiny_media_info, public std::enable_shared_from
 {
 public:
     typedef std::shared_ptr<seqFrameContainer> ref;
-    typedef std::weak_ptr<seqFrameContainer> weak_ref;
+    typedef std::weak_ptr<seqFrameContainer> weak_ref_t;
     typedef std::vector<SurTiIndexRef_t> container_t;
     typedef typename container_t::size_type container_index_t;
     typedef std::map<int64_t, container_index_t > indexToContainer;
@@ -117,7 +117,7 @@ public:
     sequenceSample (const seqFrameContainer::ref&, int x, int y);
     
 private:
-    seqFrameContainer::weak_ref m_weak_root;
+    seqFrameContainer::weak_ref_t m_weak_root;
     
     
     

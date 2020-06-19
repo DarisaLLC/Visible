@@ -112,7 +112,7 @@ class labelBlob : public lblMgr
 {
 public:
     typedef std::shared_ptr<labelBlob> ref;
-    typedef std::weak_ptr<labelBlob> weak_ref;
+    typedef std::weak_ptr<labelBlob> weak_ref_t;
     static ref create(const cv::Mat& gray, const cv::Mat& threshold_out,  const int32_t client_id = 0, const int minAreaPixelCount = 10);
     labelBlob ();
     labelBlob (const cv::Mat& gray, const cv::Mat& threshold_out, const int64_t client_id = 0, const int minAreaPixelCount = 10);

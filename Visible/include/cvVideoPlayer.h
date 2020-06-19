@@ -11,14 +11,17 @@
 #include <exception>
 #include <chrono>
 #include <string>
+#include "cvCaptureProperties.hpp"
+#include <map>
 
+using namespace cvProperties;
 
 class cvVideoPlayer
 {
 public:
     
     typedef std::shared_ptr<cvVideoPlayer> ref;
-    typedef std::weak_ptr<cvVideoPlayer> weak_ref;
+    typedef std::weak_ptr<cvVideoPlayer> weak_ref_t;
     
     typedef std::shared_ptr<cv::VideoCapture>                VideoCaptureRef;
     static ref create(const ci::fs::path& filepath);
@@ -68,6 +71,9 @@ public:
 	void					setLoop( bool enabled );
 	void					setPause( bool resume );
 	void					setSpeed( float v );
+    
+    const std::map<int, Property>&       properties () const;
+    
 protected:
 	VideoCaptureRef			mCapture		= nullptr;
 
@@ -86,7 +92,9 @@ protected:
 	float					mSpeed			= 1.0f;
     std::string                  mName;
     std::vector<std::string>                  mChannelNames;
+    std::map<int, Property>              mProperties;
 };
+
 
 
 #endif

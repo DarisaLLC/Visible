@@ -31,17 +31,6 @@ class lifContext : public sequencedImageContext
 {
 public:
     
-  //  using contractionContainer_t = ssmt_processor::contractionContainer_t;
-    
-  
-    enum Side_t : uint32_t
-    {
-        major = 0,
-        minor = 1,
-    };
-
-  
-    
     // From a lif_serie_data
     lifContext(ci::app::WindowRef& ww, const lif_serie_data&, const bfs::path&, const std::string& lif_file_name);
     
@@ -111,7 +100,7 @@ public:
     void DrawGUI();
     
     // Async Processing
-    void process_async ();
+    virtual void process_async () override;
      
     // Status
     bool isLoading() const { return m_is_loading; }
@@ -120,7 +109,6 @@ public:
 private:
     void renderToFbo (const SurfaceRef&, gl::FboRef& );
     void setup_signals ();
-    void setup_params ();
     ci::app::WindowRef& get_windowRef();
     
     // Normalize for image rendering
@@ -224,7 +212,7 @@ private:
     bool mMouseIsMoving;
     bool mMouseIsDragging;
     bool mMetaDown;
-    int mMouseInGraphs; // -1 if not, 0 1 2
+
     bool mMouseInImage; // if in Image, mMouseInGraph is -1
     ivec2 mMouseInImagePosition;
     bool m_is_loading;
@@ -284,8 +272,6 @@ private:
     Rectf m_navigator_display;
     int8_t m_playback_speed;
 
-    OnImagePlot m_tsPlotter;
-    
     // Resource Icons
     ci::gl::TextureRef    mNoLoop, mLoop;
     
