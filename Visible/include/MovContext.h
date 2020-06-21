@@ -32,7 +32,7 @@ class movContext : public sequencedImageContext
 public:
 
     // From a image_sequence_data
-    movContext(ci::app::WindowRef& ww, const bfs::path& file, const bfs::path& cache, const std::string& );
+    movContext(ci::app::WindowRef& ww, const cvVideoPlayer::ref&, const bfs::path& cache, const fs::path& movie_file );
     
     // shared_from_this() through base class
     movContext* shared_from_above () {
@@ -49,7 +49,6 @@ public:
 	void draw_window ();
 	void draw_info () override;
 	
-	virtual void onMarked (marker_info_t&) ;
 	virtual void mouseDown( MouseEvent event ) override;
 	virtual void mouseMove( MouseEvent event ) override;
 	virtual void mouseUp( MouseEvent event ) override;
@@ -73,7 +72,8 @@ public:
 	
 	void setZoom (vec2);
 	vec2 getZoom ();
-	
+    void setMedianCutOff (int32_t newco);
+    int32_t getMedianCutOff () const;
 
 	
 	void play_pause_button ();
@@ -97,7 +97,6 @@ private:
     void renderToFbo (const SurfaceRef&, gl::FboRef& fbo );
     void setup_signals ();
     ci::app::WindowRef& get_windowRef();
-    const Rectf& get_channel_display_rect (const int channel_number);
     void glscreen_normalize (const sides_length_t& src, const Rectf& gdr, sides_length_t& dst);
     
     // mov Support
@@ -119,11 +118,8 @@ private:
     void fraction_reporter(float);
     
     // Availability
-    std::atomic<bool> m_geometry_available;
-    // Availability
-      std::atomic<bool> m_voxel_view_available;
-      input_channel_selector_t  m_input_selector;
-      mutable std::atomic<int> m_selector_last;
+    input_channel_selector_t  m_input_selector;
+    mutable std::atomic<int> m_selector_last;
 
 
     // Clip Processing

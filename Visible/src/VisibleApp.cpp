@@ -27,6 +27,7 @@ static void ShowHelpMarker(const char* desc)
 #endif
 
 
+static ImGuiDockNodeFlags opt_flags = ImGuiDockNodeFlags_None;
 
 bool VisibleAppControl::ThreadsShouldStop = false;
 
@@ -130,10 +131,12 @@ void VisibleApp::ShowStyleEditor(ImGuiStyle* ref)
 }
 
 void VisibleApp::DrawMainMenu(){
+   
     
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
     if (ImGui::BeginMainMenuBar())
     {
+       
         if (ImGui::BeginMenu("File"))
         {
             if (ImGui::Button("Open "))
@@ -198,7 +201,7 @@ void VisibleApp::DrawMainMenu(){
         ImGui::Text("This App is Built With OpenCv, Boost, Cinder and ImGui Libraries ");
     }
     DrawSettings();
-//    DrawImGuiDemos();
+    DrawImGuiDemos();
 }
     
 
@@ -277,7 +280,7 @@ void VisibleApp::setup_ui(){
     
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiDockNodeFlags_PassthruCentralNode;
-    io.ConfigDockingWithShift = true;
+//    io.ConfigDockingWithShift = true;
     io.ConfigDockingTransparentPayload = true;
     io.ConfigViewportsNoAutoMerge = true;
     
@@ -445,16 +448,26 @@ bool VisibleApp::load_lif_serie(const std::string& serie){
 }
 
 
+size_t VisibleApp::list_mov_channels(std::vector<std::string>& channel_names){
+    assert(m_is_mov_file);
+    assert(exists(mCurrentContent));
+    std::strstream msg;
+    channel_names.resize(0);
+    mGrabber = cvVideoPlayer::create(mCurrentContent.string());
+    channel_names = mGrabber->getChannelNames();
+    return channel_names.size();
+}
+
 
 bool VisibleApp::load_mov_file(){
-    if( mContext && mContext->is_valid()) return true;
+  if( mContext && mContext->is_valid()) return true;
     auto bpath_path = mCurrentContent;
     auto stem = mCurrentContent.stem();
     std::string cmds = " [ " + stem.string() + " ] ";
     if (exists(mCurrentContent)){
             WindowRef ww = getWindow ();
             auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
-            mContext =  std::make_shared<movContext> (ww, mCurrentContent, cache_path, stem.string());
+            mContext =  std::make_shared<movContext> (ww, mGrabber, cache_path, bpath_path);
             update();
             
             ww->setTitle ( cmds + " Visible build: " + mBuildn);
@@ -464,36 +477,6 @@ bool VisibleApp::load_mov_file(){
     ADD_ERR_AND_RETURN(cmds, " Path not valid ");
 }
 
-
-
-size_t VisibleApp::list_mov_channels(std::vector<std::string>& channel_names){
-    assert(m_is_mov_file);
-    assert(exists(mCurrentContent));
-    static std::map<int, std::string> order_map = { {ci::SurfaceChannelOrder::RGBA,"RGBA"},{ci::SurfaceChannelOrder::RGB,"RGB"},{ci::SurfaceChannelOrder::BGRA,"BGRA"},{ci::SurfaceChannelOrder::BGR,"BGR"},{ci::SurfaceChannelOrder::ARGB,"ARGB"},{ci::SurfaceChannelOrder::ABGR,"ABGR"}  };
-
-    std::strstream msg;
-    channel_names.resize(0);
-    cvVideoPlayer::ref vref = cvVideoPlayer::create(mCurrentContent.string());
-    if(vref->isLoaded()){
-        auto su8 = vref->createSurface();
-        vref->seekToFrame(0);
-        ci::SurfaceChannelOrder order = su8->getChannelOrder();
-        int channel_count = order.hasAlpha() ? 4 : 3;
-        if (order_map.find(order.getCode()) == order_map.end()){
-            for (auto cc = 0; cc < channel_count; cc++)
-                channel_names.push_back(std::to_string(cc));
-            msg << " Order: " << order.getCode() << " Not found -- numerical index used as channel names " << std::endl;
-            std::string tmp = msg.str();
-            VAPPLOG_INFO(tmp.c_str());
-        }else{
-            auto order_string = order_map[order.getCode()];
-            assert(channel_count == order_string.length());
-            for (auto cc = 0; cc < channel_count; cc++)
-                   channel_names.emplace_back(1, order_string[cc]);
-        }
-    }
-    return channel_names.size();
-}
 
 void VisibleApp::windowMove()
 {
@@ -575,7 +558,6 @@ void VisibleApp::update()
     // ImGuiIO &io = ImGui::GetIO();
     
     if (mContext && mContext->is_valid()) mContext->update ();
-    DrawMainMenu();
 }
 
 
@@ -585,6 +567,9 @@ void VisibleApp::draw ()
     if (mContext && mContext->is_valid()){
         mContext->draw ();
     }
+    DrawMainMenu();
+
+
 }
 
 

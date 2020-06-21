@@ -128,6 +128,7 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const cvVideoPlaye
         }
     }
     thisref->mValid = thisref->count() == minfo.count;
+    thisref->m_names = mMovie->getChannelNames();
     return thisref;
     
 }

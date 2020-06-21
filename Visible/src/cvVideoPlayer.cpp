@@ -1,6 +1,8 @@
 
 #include "cvVideoPlayer.h"
 #include "cinder_cv/cinder_opencv.h"
+#include <sstream>
+#include <iostream>
 
 using namespace ci;
 using namespace std;
@@ -78,6 +80,30 @@ Surface8uRef cvVideoPlayer::createSurface(int idx)
     return nullptr;
 }
 
+const std::vector<std::string>& cvVideoPlayer::getChannelNames()  {
+    if(! mChannelNames.empty()) return mChannelNames;
+    static std::map<int, std::string> order_map = { {ci::SurfaceChannelOrder::RGBA,"RGBA"},{ci::SurfaceChannelOrder::RGB,"RGB"},{ci::SurfaceChannelOrder::BGRA,"BGRA"},{ci::SurfaceChannelOrder::BGR,"BGR"},{ci::SurfaceChannelOrder::ARGB,"ARGB"},{ci::SurfaceChannelOrder::ABGR,"ABGR"}  };
+
+    stringstream msg;
+    if(mLoaded){
+        seekToFrame(0);
+        Surface8uRef su8 = createSurface();
+        seekToFrame(0);
+        ci::SurfaceChannelOrder order = su8->getChannelOrder();
+        int channel_count = order.hasAlpha() ? 4 : 3;
+        if (order_map.find(order.getCode()) == order_map.end()){
+            for (auto cc = 0; cc < channel_count; cc++)
+                mChannelNames.push_back(std::to_string(cc));
+        }else{
+            auto order_string = order_map[order.getCode()];
+            assert(channel_count == order_string.length());
+            for (auto cc = 0; cc < channel_count; cc++)
+                   mChannelNames.emplace_back(1, order_string[cc]);
+        }
+    }
+    return mChannelNames;
+}
+
 /**
 double dWidth = cap.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
 double dHeight = cap.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
@@ -121,9 +147,9 @@ cvVideoPlayer::ref cvVideoPlayer::create( const fs::path& filepath )
 			dref->mDuration		= (double) dref->mNumFrames / dref->mFrameRate;
 			dref->mFrameDuration	= 1.0 / dref->mFrameRate;
 		}
-        dref->mChannelNames = {"Blue", "Green", "Red", "Alpha"};
 		dref->mLoaded = true;
         dref->mProperties = cvProperties::Helper::GetAll(*dref->mCapture);
+        dref->getChannelNames();
 	}
     return dref;
 }

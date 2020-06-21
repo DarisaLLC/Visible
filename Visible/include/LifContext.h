@@ -49,7 +49,6 @@ public:
 	void draw_window ();
 	void draw_info () override;
 	
-	virtual void onMarked (marker_info_t&) ;
 	virtual void mouseDown( MouseEvent event ) override;
 	virtual void mouseMove( MouseEvent event ) override;
 	virtual void mouseUp( MouseEvent event ) override;
@@ -77,10 +76,6 @@ public:
 	vec2 getZoom ();
 	void setMedianCutOff (int32_t newco);
 	int32_t getMedianCutOff () const;
-    void setCellLength (uint32_t newco);
-    uint32_t getCellLength () const;
-
-
 	
 	void play_pause_button ();
 	void loop_no_loop_button ();
@@ -126,7 +121,6 @@ private:
     std::string mContentFileName;
     std::vector<std::string> m_plot_names;
     idlab_cardiac_defaults m_idlab_defaults;
-    const Rectf& get_channel_display_rect (const int channel_number);
     
     // Callbacks
     void signal_content_loaded (int64_t&);

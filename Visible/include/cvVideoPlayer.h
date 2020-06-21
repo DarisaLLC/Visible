@@ -31,7 +31,6 @@ public:
 	~cvVideoPlayer();
 
     const std::string& name() const { return mName; }
-    const std::vector<std::string>& channel_names() const { return mChannelNames; }
     const ci::ivec2& size () const;
     const double& format () const;
     
@@ -73,6 +72,7 @@ public:
 	void					setSpeed( float v );
     
     const std::map<int, Property>&       properties () const;
+    const std::vector<std::string>&      getChannelNames();
     
 protected:
 	VideoCaptureRef			mCapture		= nullptr;
