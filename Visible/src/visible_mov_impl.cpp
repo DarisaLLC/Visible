@@ -131,8 +131,8 @@ private:
 // @ todo setup default repository
 // default median cover pct is 5% (0.05)
 
-movContext::movContext(ci::app::WindowRef& ww, const fs::path& movie_file, const fs::path& cache_path, const std::string& fname) : mContentFileName(fname), sequencedImageContext(ww), mPath(movie_file), m_geometry_available(false), mUserStorageDirPath (cache_path) {
-    m_grabber_ref = cvVideoPlayer::create(mPath);
+movContext::movContext(ci::app::WindowRef& ww, const cvVideoPlayer::ref& grabber, const fs::path& cache_path,  const fs::path& movie_file) : sequencedImageContext(ww), m_grabber_ref(grabber), mPath(movie_file),  mUserStorageDirPath (cache_path) {
+    mContentFileName = mPath.stem().string();
     m_type = guiContext::Type::cv_video_viewer;
     // Create an invisible folder for storage
     mCurrentCachePath = mUserStorageDirPath;
@@ -163,7 +163,8 @@ ci::app::WindowRef&  movContext::get_windowRef(){
 void movContext::setup_signals(){
     
     // Create a Processing Object to attach signals to
-    m_movProcRef = std::make_shared<ssmt_processor> (mCurrentCachePath);
+    ssmt_processor::params params = ssmt_processor::params (ssmt_processor::params::ContentType::bgra);
+    m_movProcRef = std::make_shared<ssmt_processor> (mCurrentCachePath, params);
     
     // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&movContext::signal_content_loaded, shared_from_above(), _1);
@@ -217,10 +218,6 @@ void movContext::setup()
  *
  ************************/
 
-//void movContext::signal_sm1d_available (int& dummy)
-//{
-//    vlogger::instance().console()->info("self-similarity available: ");
-//}
 
 void movContext::signal_content_loaded (int64_t& loaded_frame_count )
 {
@@ -235,8 +232,17 @@ void movContext::signal_content_loaded (int64_t& loaded_frame_count )
 
 void movContext::signal_root_pci_ready (std::vector<float> & signal, const input_channel_selector_t& dummy)
 {
+    auto tracksRef = m_root_pci_trackWeakRef.lock();
+     if ( tracksRef && !tracksRef->at(0).second.empty()){
+         m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
+     }
+     
     stringstream ss;
     ss << svl::toString(dummy.region()) << " root self-similarity available ";
+    if (tracksRef){
+        ss <<  " Valid ";
+        ss << tracksRef->at(0).second.size();
+    }else ss << " Null " << std::endl;
     vlogger::instance().console()->info(ss.str());
 }
 
@@ -427,11 +433,6 @@ void movContext::seekToFrame (int mark)
 }
 
 
-void movContext::onMarked ( marker_info& t)
-{
-    seekToFrame((int) t.current_frame());
-}
-
 vec2 movContext::getZoom ()
 {
     return m_zoom;
@@ -545,6 +546,38 @@ void movContext::keyDown( KeyEvent event )
 
 
 
+/************************
+ *
+ *  MedianCutOff Set/Get
+ *
+ ************************/
+
+void movContext::setMedianCutOff (int32_t newco)
+{
+    if (! m_movProcRef) return;
+    // Get a shared_ptr from weak and check if it had not expired
+    auto spt = m_movProcRef->entireContractionWeakRef().lock();
+    if (! spt ) return;
+    uint32_t tmp = newco % 100; // pct
+    uint32_t current (spt->get_median_levelset_pct () * 100);
+    if (tmp == current) return;
+    spt->set_median_levelset_pct (tmp / 100.0f);
+    m_movProcRef->update(m_input_selector);
+
+}
+
+int32_t movContext::getMedianCutOff () const
+{
+    // Get a shared_ptr from weak and check if it had not expired
+    auto spt = m_movProcRef->entireContractionWeakRef().lock();
+    if (spt)
+    {
+        uint32_t current (spt->get_median_levelset_pct () * 100);
+        return current;
+    }
+    return 0;
+}
+
 
 
 /************************
@@ -590,15 +623,6 @@ void movContext::load_current_sequence ()
         
         m_layout->init ( mFrameSet->media_info());
         
-        /*
-         * Create the frameset and assign the channel namesStart Loading Images on async on a different thread
-         * Loading also produces voxel images.
-         */
-        m_plot_names.clear();
-        m_plot_names =m_grabber_ref->channel_names();
-        m_plot_names.push_back("MisRegister");
-        
-        // @DO ssmt_processor::load for videoPlayer
         m_content_loaded.store(false, std::memory_order_release);
         auto load_thread = std::thread(&ssmt_processor::load_channels_from_video,m_movProcRef.get(),mFrameSet);
         load_thread.detach();
@@ -615,7 +639,7 @@ void movContext::load_current_sequence ()
         // Initialize The Main Sequencer
         m_main_seq.mFrameMin = 0;
         m_main_seq.mFrameMax = (int) mFrameSet->count() - 1;
-        m_main_seq.mSequencerItemTypeNames = {"RGG"};
+        m_main_seq.mSequencerItemTypeNames = mFrameSet->channel_names();
         m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         
         m_title = mContentFileName;
@@ -652,7 +676,7 @@ void movContext::process_async (){
     switch(channel_count()){
         case 3:
         {
-            input_channel_selector_t in (-1,2);
+            input_channel_selector_t in (-1,0);
             m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_selfsimilarity_on_selected_input, m_movProcRef.get(), in, pf);
             break;
         }
@@ -697,10 +721,6 @@ void  movContext::update_channel_display_rects (){
         rect = Rectf(itl, itl+channel_size);
         itl += ivec2(0, channel_size.y);
     }
-}
-
-const Rectf& movContext::get_channel_display_rect (const int channel_number_zero_based){
-    return m_instant_channel_display_rects[channel_number_zero_based];
 }
 
 
@@ -972,7 +992,7 @@ gl::TextureRef movContext::pixelInfoTexture ()
 {
     if (! mMouseInImage) return gl::TextureRef ();
     TextLayout lout;
-    const auto names =m_grabber_ref->channel_names();
+    const auto names =m_grabber_ref->getChannelNames();
     auto channel_name = (m_instant_channel < names.size()) ? names[m_instant_channel] : " ";
     
     // LIF has 3 Channels.

@@ -146,7 +146,8 @@ void ssmt_processor::update (const input_channel_selector_t& in)
 
     auto caRef = weakCaPtr.lock();
     caRef->update ();
-    median_leveled_pci(m_longterm_pci_tracksRef->at(0), in);
+    if(m_longterm_pci_tracksRef && m_longterm_pci_tracksRef->size() > 1)
+        median_leveled_pci(m_longterm_pci_tracksRef->at(0), in);
 }
 
 

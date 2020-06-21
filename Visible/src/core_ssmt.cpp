@@ -247,7 +247,95 @@ void ssmt_processor::load_channels_from_lif(const std::shared_ptr<seqFrameContai
         signal_content_loaded->operator()(m_frameCount);
 }
 
+// @todo condider creating cv::Mats and convert to roiWindow when needed.
 
+void ssmt_processor::load_channels_from_lif_buffer2d (const std::shared_ptr<seqFrameContainer>& frames,
+                                                const lif_serie_data& sd)
+{
+    // Copy deep time / index maps from seqFrameContainer
+    m_2TimeMap = indexToTime_t (frames->index2TimeMap());
+    m_2IndexMap = timeToIndex_t (frames->time2IndexMap());
+    
+    m_frameCount = 0;
+    m_all_by_channel.clear();
+    m_channel_count = frames->media_info().getNumChannels();
+    m_all_by_channel.resize (m_channel_count);
+    
+    switch(m_params.content_type()){
+        case ssmt_processor::params::ContentType::lif:{
+            while (frames->checkFrame(m_frameCount)){
+                auto su8 = frames->getFrame(m_frameCount);
+                auto ts = m_frameCount;
+                std::shared_ptr<roiWindow<P8U>> m1 = svl::NewRefSingleFromSurface (su8,  ts);
+                
+                for (auto cc = 0; cc < sd.channelCount(); cc++){
+                    auto tl_f = sd.ROIs2d()[cc].tl();
+                    auto sz_f = sd.ROIs2d()[cc].size();
+                    m_all_by_channel[cc].emplace_back(m1->frameBuf(),
+                                                      static_cast<int>(tl_f.x),
+                                                      static_cast<int>(tl_f.y),
+                                                      static_cast<int>(sz_f.width),
+                                                      static_cast<int>(sz_f.height));
+                }
+                m_frameCount++;
+            }
+            break;
+        }
+        case ssmt_processor::params::ContentType::bgra:{
+            m_all_by_channel.resize(4); // surface always has 4 channels
+            while (frames->checkFrame(m_frameCount))
+            {
+                auto su8 = frames->getFrame(m_frameCount);
+                auto gray = svl::NewGrayFromSurface(su8);
+                auto red = svl::NewRedFromSurface(su8);
+                auto green = svl::NewGreenFromSurface(su8);
+                auto blue = svl::NewBlueFromSurface(su8);
+                m_all_by_channel[0].emplace_back(blue);
+                m_all_by_channel[1].emplace_back(green);
+                m_all_by_channel[2].emplace_back(red);
+                m_all_by_channel[3].emplace_back(gray);
+                m_frameCount++;
+            }
+            break;
+        }
+    }
+}
+
+
+void ssmt_processor::load_channels_from_video (const std::shared_ptr<seqFrameContainer>& frames)
+{
+    std::unique_lock<std::mutex> lock(m_mutex);
+    
+    m_frameCount = 0;
+    m_all_by_channel.clear();
+    m_channel_count = frames->media_info().getNumChannels();
+    m_all_by_channel.resize (m_channel_count);
+    std::vector<std::string> names;
+    for (auto cc = 0; cc < m_channel_count; cc++)
+    
+    //@todo: seperate channels and add
+    /*
+       Creates named tracks @todo move out of here
+       Loads channels from images @note uses last channel for visible processing
+       i.e 2nd channel from 2 channel LIF file and 3rd channel from a 3 channel LIF file or media file
+       
+       */
+    create_named_tracks(frames->channel_names(), frames->channel_names());
+    while (frames->checkFrame(m_frameCount))
+    {
+        auto su8 = frames->getFrame(m_frameCount);
+        auto red = svl::NewRedFromSurface(su8);
+        for (auto cc = 0; cc < m_channel_count; cc++)
+            m_all_by_channel[cc].emplace_back(red);
+        m_frameCount++;
+    }
+    lock.unlock();
+    
+    // Call the content loaded cb if any
+      if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+          signal_content_loaded->operator()(m_frameCount);
+    
+}
 
 /*
  * 1 monchrome channel. Compute volume stats of each on a thread
@@ -321,7 +409,7 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::internal_run_selfsimilarity_
 {
     bool cache_ok = false;
     size_t dim = images.size();
-    std::string ss = "Contraction PCI started on " + toString(in.region());
+    std::string ss = " internal run ss started " + toString(in.region());
     vlogger::instance().console()->info(ss);
     std::shared_ptr<ssResultContainer> ssref;
     auto cache_path = get_cache_location(in.channel(), in.region());
@@ -363,9 +451,10 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::internal_run_selfsimilarity_
         auto sp =  similarity_producer();
         sp->load_images (images);
         std::future<bool>  future_ss = sp->launch_async(0, reporter);
-        
+        vlogger::instance().console()->info(" async ss submitted ");
         if (future_ss.get())
         {
+            vlogger::instance().console()->info(" async ss finished ");
             const deque<double>& entropies = sp->shannonProjection ();
             const std::deque<deque<double>>& sm = sp->similarityMatrix();
             assert(images.size() == entropies.size() && sm.size() == images.size());
@@ -457,88 +546,6 @@ void ssmt_processor::volume_variance_peak_promotion (std::vector<roiWindow<P8U>>
     m_variance_peak_detection_done = true;
     
 }
-
-void ssmt_processor::load_channels_from_video (const std::shared_ptr<seqFrameContainer>& frames)
-{
-    std::unique_lock<std::mutex> lock(m_mutex);
-    
-    m_frameCount = 0;
-    m_all_by_channel.clear();
-    m_channel_count = frames->media_info().getNumChannels();
-    m_all_by_channel.resize (m_channel_count);
-    std::vector<std::string> names = {"Blue", "Green","Red", "Alpha"};
-    
-    //@todo: seperate channels and add
-    while (frames->checkFrame(m_frameCount))
-    {
-        auto su8 = frames->getFrame(m_frameCount);
-        auto red = svl::NewRedFromSurface(su8);
-        for (auto cc = 0; cc < m_channel_count; cc++)
-            m_all_by_channel[cc].emplace_back(red);
-        m_frameCount++;
-    }
-    lock.unlock();
-    
-    // Call the content loaded cb if any
-      if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
-          signal_content_loaded->operator()(m_frameCount);
-    
-}
-// Assumes LIF data -- use multiple window.
-// @todo condider creating cv::Mats and convert to roiWindow when needed.
-
-void ssmt_processor::load_channels_from_lif_buffer2d (const std::shared_ptr<seqFrameContainer>& frames,
-                                                const lif_serie_data& sd)
-{
-    // Copy deep time / index maps from seqFrameContainer
-    m_2TimeMap = indexToTime_t (frames->index2TimeMap());
-    m_2IndexMap = timeToIndex_t (frames->time2IndexMap());
-    
-    m_frameCount = 0;
-    m_all_by_channel.clear();
-    m_channel_count = frames->media_info().getNumChannels();
-    m_all_by_channel.resize (m_channel_count);
-    
-    switch(m_params.content_type()){
-        case ssmt_processor::params::ContentType::lif:{
-            while (frames->checkFrame(m_frameCount)){
-                auto su8 = frames->getFrame(m_frameCount);
-                auto ts = m_frameCount;
-                std::shared_ptr<roiWindow<P8U>> m1 = svl::NewRefSingleFromSurface (su8,  ts);
-                
-                for (auto cc = 0; cc < sd.channelCount(); cc++){
-                    auto tl_f = sd.ROIs2d()[cc].tl();
-                    auto sz_f = sd.ROIs2d()[cc].size();
-                    m_all_by_channel[cc].emplace_back(m1->frameBuf(),
-                                                      static_cast<int>(tl_f.x),
-                                                      static_cast<int>(tl_f.y),
-                                                      static_cast<int>(sz_f.width),
-                                                      static_cast<int>(sz_f.height));
-                }
-                m_frameCount++;
-            }
-            break;
-        }
-        case ssmt_processor::params::ContentType::bgra:{
-            m_all_by_channel.resize(4); // surface always has 4 channels
-            while (frames->checkFrame(m_frameCount))
-            {
-                auto su8 = frames->getFrame(m_frameCount);
-                auto gray = svl::NewGrayFromSurface(su8);
-                auto red = svl::NewRedFromSurface(su8);
-                auto green = svl::NewGreenFromSurface(su8);
-                auto blue = svl::NewBlueFromSurface(su8);
-                m_all_by_channel[0].emplace_back(blue);
-                m_all_by_channel[1].emplace_back(green);
-                m_all_by_channel[2].emplace_back(red);
-                m_all_by_channel[3].emplace_back(gray);
-                m_frameCount++;
-            }
-            break;
-        }
-    }
-}
-
 
 /**
  @Check if needed

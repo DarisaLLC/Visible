@@ -152,6 +152,7 @@ private:
     mutable std::shared_ptr<sequencedImageContext> mContext;
     mutable lif_browser::ref mBrowser;
     app::WindowRef mViewerWindow;
+    cvVideoPlayer::ref mGrabber;
     
     bool show_logs_{true};
     bool show_settings_{true};
