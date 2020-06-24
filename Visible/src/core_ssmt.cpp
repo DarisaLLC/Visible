@@ -250,7 +250,7 @@ void ssmt_processor::load_channels_from_lif(const std::shared_ptr<seqFrameContai
 // @todo condider creating cv::Mats and convert to roiWindow when needed.
 
 void ssmt_processor::load_channels_from_lif_buffer2d (const std::shared_ptr<seqFrameContainer>& frames,
-                                                const lif_serie_data& sd)
+                                                      const lif_serie_data& sd)
 {
     // Copy deep time / index maps from seqFrameContainer
     m_2TimeMap = indexToTime_t (frames->index2TimeMap());
@@ -312,15 +312,15 @@ void ssmt_processor::load_channels_from_video (const std::shared_ptr<seqFrameCon
     m_all_by_channel.resize (m_channel_count);
     std::vector<std::string> names;
     for (auto cc = 0; cc < m_channel_count; cc++)
-    
-    //@todo: seperate channels and add
+        
+        //@todo: seperate channels and add
     /*
-       Creates named tracks @todo move out of here
-       Loads channels from images @note uses last channel for visible processing
-       i.e 2nd channel from 2 channel LIF file and 3rd channel from a 3 channel LIF file or media file
-       
-       */
-    create_named_tracks(frames->channel_names(), frames->channel_names());
+     Creates named tracks @todo move out of here
+     Loads channels from images @note uses last channel for visible processing
+     i.e 2nd channel from 2 channel LIF file and 3rd channel from a 3 channel LIF file or media file
+     
+     */
+        create_named_tracks(frames->channel_names(), frames->channel_names());
     while (frames->checkFrame(m_frameCount))
     {
         auto su8 = frames->getFrame(m_frameCount);
@@ -332,8 +332,8 @@ void ssmt_processor::load_channels_from_video (const std::shared_ptr<seqFrameCon
     lock.unlock();
     
     // Call the content loaded cb if any
-      if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
-          signal_content_loaded->operator()(m_frameCount);
+    if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+        signal_content_loaded->operator()(m_frameCount);
     
 }
 
@@ -404,8 +404,9 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_intensity_statistics (con
 // @todo add params
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled
-std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::vector<roiWindow<P8U>>& images,
-                                                                                                   const input_channel_selector_t& in, const progress_fn_t& reporter)
+void ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::vector<roiWindow<P8U>>& images,
+                                                                    const input_channel_selector_t& in,
+                                                                    const progress_fn_t& reporter)
 {
     bool cache_ok = false;
     size_t dim = images.size();
@@ -420,94 +421,60 @@ std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::internal_run_selfsimilarity_
     
     // Create a contraction object for entire view processing.
     // @todo: add params
-    m_entireCaRef = contractionLocator::create (in, -1);
     std::vector<float> fout;
+    std::vector<double> entmp;
+    std::vector<std::vector<double>> smtmp;
     
-    if(cache_ok){
-        vlogger::instance().console()->info(" SS result container cache : Hit ");
-        std::vector<double> entmp;
-        std::vector<std::vector<double>> smtmp;
-        
-        entmp.insert(entmp.end(), ssref->entropies().begin(),
-                     ssref->entropies().end());
-        fout.insert(fout.end(), entmp.begin(), entmp.end());
-        m_entropies[in.region()] = entmp;
-        const std::deque<deque<double>>& sm = ssref->smatrix();
+    // copy the outputs
+    auto fill = [] (const std::deque<double>& en, const std::deque<deque<double>>& sm, std::vector<double> entmp, std::vector<std::vector<double>> smtmp){
+        entmp.insert(entmp.end(), en.begin(),en.end());
         for (auto row : sm){
             vector<double> rowv;
             rowv.insert(rowv.end(), row.begin(), row.end());
             smtmp.push_back(rowv);
         }
-        m_smat[in.region()] = smtmp;
-        
-        if( ! in.isEntire())
-            m_results[in.region()]->locator()->load(m_entropies[in.region()], m_smat[in.region()]);
-        else{
-            m_entireCaRef->load(m_entropies[in.region()], m_smat[in.region()]);
-        }
-        update (in);
-        
+    };
+    
+    if(cache_ok){
+        vlogger::instance().console()->info(" SS result container cache : Hit ");
+        fill(ssref->entropies(), ssref->smatrix(), entmp, smtmp);
     }else{
         auto sp =  similarity_producer();
         sp->load_images (images);
         std::future<bool>  future_ss = sp->launch_async(0, reporter);
         vlogger::instance().console()->info(" async ss submitted ");
-        if (future_ss.get())
-        {
+        if (future_ss.get()){
             vlogger::instance().console()->info(" async ss finished ");
-            const deque<double>& entropies = sp->shannonProjection ();
-            const std::deque<deque<double>>& sm = sp->similarityMatrix();
-            assert(images.size() == entropies.size() && sm.size() == images.size());
-            for (auto row : sm) assert(row.size() == images.size());
-            
-            std::vector<double> entmp;
-            std::vector<std::vector<double>> smtmp;
-            
-            entmp.insert(entmp.end(), entropies.begin(), entropies.end());
-            fout.insert(fout.end(), entmp.begin(), entmp.end());
-            m_entropies[in.region()] = entmp;
-            for (auto row : sm){
-                vector<double> rowv;
-                rowv.insert(rowv.end(), row.begin(), row.end());
-                smtmp.push_back(rowv);
-            }
-            m_smat[in.region()] = smtmp;
-            
-            if(! in.isEntire() )
-                m_results[in.region()]->locator()->load(m_entropies[in.region()] , m_smat[in.region()] );
-            else{
-                m_entireCaRef->load(m_entropies[in.region()] , m_smat[in.region()] );
-            }
-            update (in);
-            bool ok = ssResultContainer::store(cache_path,m_entropies[in.region()] , m_smat[in.region()] );
-            if(ok)
-                vlogger::instance().console()->info(" SS result container cache : filled ");
-            else
-                vlogger::instance().console()->info(" SS result container cache : failed ");
-            
+            fill(sp->shannonProjection (),  sp->similarityMatrix(), entmp, smtmp);
         }
     }
+    fout.insert(fout.end(), entmp.begin(), entmp.end());
+    m_entropies[in.region()] = entmp;
+    m_smat[in.region()] = smtmp;
+    
+    assert(images.size() == entmp.size() && smtmp.size() == images.size());
+    for (auto row : smtmp) assert(row.size() == images.size());
+    assert(images.size() == fout.size());
+    
     // Signal we are done with ACI
     if (signal_root_pci_ready && signal_root_pci_ready->num_slots() > 0){
         signal_root_pci_ready->operator()(fout, in);
     }
-    
-    return m_longterm_pci_tracksRef;
 }
 
 
 // channel_index which channel of multi-channel input. Usually visible channel is the last one
 // input is -1 for the entire root or index of moving object area in results container
 
-std::shared_ptr<vecOfNamedTrack_t>  ssmt_processor::run_selfsimilarity_on_selected_input (const input_channel_selector_t& in, const progress_fn_t& reporter){
+void ssmt_processor::run_selfsimilarity_on_selected_input (const input_channel_selector_t& in, const progress_fn_t& reporter){
     auto cache_path = get_cache_location(in.channel(),in.region());
     if (cache_path == bfs::path()){
-        return std::shared_ptr<vecOfNamedTrack_t> ();
+        return;
     }
     // protect fetching image data
     std::lock_guard<std::mutex> lock(m_mutex);
     const auto& _content = in.isEntire() ? content()[in.channel()] : m_results[in.region()]->content()[in.channel()];
-    return internal_run_selfsimilarity_on_selected_input(std::move(_content), in, reporter);
+    internal_run_selfsimilarity_on_selected_input(std::move(_content), in, reporter);
 }
 
 
