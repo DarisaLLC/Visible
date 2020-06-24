@@ -2051,39 +2051,39 @@ TEST (UT_cm_timer, run)
     
 }
 
-
-TEST (UT_QtimeCache, run)
-{
-    boost::filesystem::path test_filepath;
-    
-    // vf does not support QuickTime natively. The ut expectes and checks for failure
-    static std::string qmov_name ("box-move.m4v");
-    
-    auto res = dgenv_ptr->asset_path(qmov_name);
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    
-    if (res.second)
-        test_filepath = res.first;
-    
-    ci::qtime::MovieSurfaceRef m_movie;
-    m_movie = qtime::MovieSurface::create( test_filepath.string() );
-    EXPECT_TRUE(m_movie->isPlayable ());
-    
-    std::shared_ptr<seqFrameContainer> sm = seqFrameContainer::create(m_movie);
-    
-    Surface8uRef s8 = ci::Surface8u::create(123, 321, false);
-    time_spec_t t0 = 0.0f;
-    time_spec_t t1 = 0.1f;
-    time_spec_t t2 = 0.2f;
-    
-    EXPECT_TRUE(sm->loadFrame(s8, t0)); // loaded the first time
-    EXPECT_FALSE(sm->loadFrame(s8, t0)); // second time at same stamp, uses cache return true
-    EXPECT_TRUE(sm->loadFrame(s8, t1)); // second time at same stamp, uses cache return true
-    EXPECT_TRUE(sm->loadFrame(s8, t2)); // second time at same stamp, uses cache return true
-    EXPECT_FALSE(sm->loadFrame(s8, t0)); // second time at same stamp, uses cache return true
-    
-}
+//
+//TEST (UT_QtimeCache, run)
+//{
+//    boost::filesystem::path test_filepath;
+//
+//    // vf does not support QuickTime natively. The ut expectes and checks for failure
+//    static std::string qmov_name ("box-move.m4v");
+//
+//    auto res = dgenv_ptr->asset_path(qmov_name);
+//    EXPECT_TRUE(res.second);
+//    EXPECT_TRUE(boost::filesystem::exists(res.first));
+//
+//    if (res.second)
+//        test_filepath = res.first;
+//
+//    ci::qtime::MovieSurfaceRef m_movie;
+//    m_movie = qtime::MovieSurface::create( test_filepath.string() );
+//    EXPECT_TRUE(m_movie->isPlayable ());
+//
+//    std::shared_ptr<seqFrameContainer> sm = seqFrameContainer::create(m_movie);
+//
+//    Surface8uRef s8 = ci::Surface8u::create(123, 321, false);
+//    time_spec_t t0 = 0.0f;
+//    time_spec_t t1 = 0.1f;
+//    time_spec_t t2 = 0.2f;
+//
+//    EXPECT_TRUE(sm->loadFrame(s8, t0)); // loaded the first time
+//    EXPECT_FALSE(sm->loadFrame(s8, t0)); // second time at same stamp, uses cache return true
+//    EXPECT_TRUE(sm->loadFrame(s8, t1)); // second time at same stamp, uses cache return true
+//    EXPECT_TRUE(sm->loadFrame(s8, t2)); // second time at same stamp, uses cache return true
+//    EXPECT_FALSE(sm->loadFrame(s8, t0)); // second time at same stamp, uses cache return true
+//
+//}
 
 
 
