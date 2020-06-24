@@ -20,7 +20,7 @@
 
 #include "roiWindow.h"
 #include "seq_frame_container.hpp"
-#include "AVReader.hpp"
+#include "cvVideoPlayer.h"
 
 #include "sm_producer.h"
 
@@ -90,11 +90,8 @@ private:
     
     bool setup_image_directory_result_repo () const;
     mutable source_type m_source_type;
-    
     void get_next_frame ();
-
     typedef std::vector<bfs::path > paths_vector_t;
-  
     std::chrono::milliseconds m_frame_time;
 
     mutable mutex_t   m_mutex;
@@ -108,8 +105,8 @@ private:
     
     mutable long m_index, m_must_stop, m_frame;
     
-    std::shared_ptr<avcc::avReader>    m_assetReader;
-    std::shared_ptr<seqFrameContainer>   m_qtime_cache_ref;
+    cvVideoPlayer::ref    m_grabberRef;
+    seqFrameContainer::ref   m_frameContainer_ref;
 
     std::queue<float> m_queue;
     paths_vector_t m_framePaths;
