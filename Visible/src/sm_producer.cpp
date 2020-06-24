@@ -74,8 +74,11 @@ sm_producer::sm_producer ()
 
 bool sm_producer::load_content_file (const std::string& movie_fqfn)
 {
-    
-    if (_impl) return _impl->loadMovie(movie_fqfn);
+    if (_impl){
+        auto cnt =  _impl->loadMovie(movie_fqfn);
+        std::cout << " Frames in Movie " << cnt << std::endl;
+        return cnt == _impl->m_frameCount;
+    }
     return false;
 }
 
@@ -99,6 +102,7 @@ std::future<bool> sm_producer::launch_async (int frames, const progress_fn_t& re
 bool sm_producer::operator() (int frames,  const progress_fn_t& reporter ) const
 {
     if(has_content()){
+        std::cout << " in () " << std::endl;
         std::future<bool> bright = launch_async(frames, reporter);
         bright.wait();
         return bright.get();
@@ -330,33 +334,32 @@ int sm_producer::spImpl::loadMovie( const std::string& movieFile )
     m_source_type = movie;
     
     {
-        ScopeTimer timeit("avReader");
-        m_assetReader = std::make_shared<avcc::avReader>(movieFile, false);
-        m_assetReader->setUserDoneCallBack(std::bind(&sm_producer::spImpl::asset_reader_done_cb, this));
+        m_grabberRef = cvVideoPlayer::create(movieFile);
     }
     
-    bool m_valid = m_assetReader->isValid();
+    bool m_valid = m_grabberRef->isLoaded();
     int rtn_val = -1;
     if (m_valid)
     {
-        m_assetReader->info().printout();
-        m_assetReader->run();
-        m_qtime_cache_ref = seqFrameContainer::create (m_assetReader);
-        
-        // Now load every frame, convert and update vector
         m_loaded_ref.resize(0);
-        {
-            ScopeTimer timeit("convertTo");
-            m_qtime_cache_ref->convertTo (m_loaded_ref);
+        m_frameContainer_ref = seqFrameContainer::create (m_grabberRef);
+        if (! m_frameContainer_ref || ! m_frameContainer_ref->isValid())
+            return -1;
+        
+        for(int64_t ff = 0; ff < m_grabberRef->getNumFrames(); ff++){
+            auto mSurface = m_frameContainer_ref->getFrame(ff);
+            auto rw = NewRedFromSurface(mSurface);
+            m_loaded_ref.emplace_back(rw);
         }
+        
         m_frameCount = m_loaded_ref.size ();
         
         rtn_val = (int) m_frameCount;
+        
+        // Call the content loaded cb if any
+        if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
+            signal_content_loaded->operator()();
     }
-    
-    // Call the content loaded cb if any
-    if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
-        signal_content_loaded->operator()();
     
     return rtn_val;
     
@@ -392,7 +395,7 @@ bool sm_producer::spImpl::done_grabbing () const
     // unique lock. forces new shared locks to wait untill this lock is release
     std::unique_lock<std::mutex> lock( m_mutex, std::try_to_lock );
     
-    return m_frameCount != 0 && m_qtime_cache_ref->count() == m_frameCount;
+    return m_frameCount != 0 && m_frameContainer_ref->count() == m_frameCount;
 }
 
 bool  sm_producer::spImpl::image_file_entropy_result_ok () const
@@ -441,6 +444,8 @@ bool sm_producer::spImpl::generate_ssm ( int frames, const sm_producer::progress
     m_SMatrix.resize (0);
 
     bool ok = simi->entropies (m_entropies);
+    
+    for(auto en : m_entropies) std::cout << fixed << showpoint << std::setprecision(16) << en << std::endl;
     // Fetch the SS matrix and verify
     simi->selfSimilarityMatrix(m_SMatrix);
     ok = ok && anonymous::smatrix_ok(m_SMatrix, m_entropies.size());
