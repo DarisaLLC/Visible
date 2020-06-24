@@ -154,7 +154,7 @@ public:
     // args:
     // channel_index which channel of multi-channel input. Usually visible channel is the last one
     // input is -1 for the entire root or index of moving object area in results container
-    std::shared_ptr<vecOfNamedTrack_t> run_selfsimilarity_on_selected_input (const input_channel_selector_t&,const progress_fn_t& reporter );
+    void run_selfsimilarity_on_selected_input (const input_channel_selector_t&,const progress_fn_t& reporter );
    
     
     std::vector<float> shortterm_pci (const std::vector<uint32_t>& indices);
@@ -193,7 +193,7 @@ private:
     // 2nd interface is lower level interface
        // args:
        // images: vector of roiWindow<P8U>s. roiWindow<P8U> is a single plane image container.
-   std::shared_ptr<vecOfNamedTrack_t> internal_run_selfsimilarity_on_selected_input  (const std::vector<roiWindow<P8U>>& images,  const input_channel_selector_t&,const progress_fn_t& reporter);
+   void internal_run_selfsimilarity_on_selected_input  (const std::vector<roiWindow<P8U>>& images,  const input_channel_selector_t&,const progress_fn_t& reporter);
 
     // Assumes LIF data -- use multiple window.
    void load_channels_from_lif_buffer2d (const std::shared_ptr<seqFrameContainer>& frames,  const lif_serie_data& sd = lif_serie_data () );
