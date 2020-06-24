@@ -6,6 +6,7 @@
 //
 //
 
+
 #include "boost/program_options.hpp"
 namespace po = boost::program_options;
 
@@ -13,9 +14,11 @@ namespace po = boost::program_options;
 #include <fstream>
 #include <iterator>
 #include <strstream>
+#include <iomanip>
 #include "core/stl_utils.hpp"
-#include <iostream>
 #include <string>
+#include <boost/signals2.hpp>
+#include <boost/signals2/slot.hpp>
 #include "sm_producer.h"
 #include "core/core.hpp"
 
@@ -48,31 +51,48 @@ typedef std::deque<std::string> string_deque_t;
 typedef std::deque<string_deque_t> string_deque_array_t;
 
 size_t imageDirectoryOutput (  std::shared_ptr<sm_producer>& sp,   string_deque_array_t&  output,
-                             sm_producer::outputOrderOption ooo = sm_producer::outputOrderOption::sorted);
+                             sm_producer::outputOrderOption ooo = sm_producer::outputOrderOption::input);
+bool movieOutput (  std::shared_ptr<sm_producer>& sp,   string_deque_array_t&  output);
+
 
 struct cb_similarity_producer
 {
-    cb_similarity_producer (const std::string& imageDir, bool auto_run = false)
+    cb_similarity_producer (const std::string& content, bool auto_run = false)
     {
-        m_imagedir = imageDir;
+        m_content_path = fs::path(content);
+        assert(fs::exists(m_content_path));
+        is_movie = fs::is_regular_file(m_content_path);
+        is_dir = fs::is_directory(m_content_path);
+        assert(is_movie != is_dir);
         m_auto = auto_run;
         last_output.resize(0);
+        content_loaded = false;
     }
+    
     
     int run ()
     {
         try
         {
             sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
-            std::function<void (int&,double&)> frame_loaded_cb = boost::bind (&cb_similarity_producer::signal_frame_loaded, this, _1, _2);
+        //    std::function<void (int&,double&)> frame_loaded_cb = boost::bind (&cb_similarity_producer::signal_frame_loaded, this, _1, _2);
             std::function<void ()> content_loaded_cb = std::bind (&cb_similarity_producer::signal_content_loaded, this);
-            boost::signals2::connection fl_connection = sp->registerCallback(frame_loaded_cb);
+         //   boost::signals2::connection fl_connection = sp->registerCallback(frame_loaded_cb);
             boost::signals2::connection ml_connection = sp->registerCallback(content_loaded_cb);
-            
-            sp->load_image_directory(m_imagedir,  sm_producer::sizeMappingOption::mostCommon);
-            sp->operator()(0, sp->frames_in_content());
-            auto resc = imageDirectoryOutput ( sp,  last_output);
-        
+            if (is_dir)
+                sp->load_image_directory(m_content_path.string(),  sm_producer::sizeMappingOption::mostCommon);
+            if (is_movie)
+                sp->load_content_file(m_content_path.string());
+            auto resp = sp->operator()(0);
+            std::cout << std::boolalpha << resp << std::endl;
+            if (is_dir){
+                auto resc = imageDirectoryOutput ( sp,  last_output);
+                std::cout << " Image Directory Output " << resc << std::endl;
+            }
+            if (is_movie){
+                std::cout << " Content Movie " << std::endl;
+                movieOutput(sp, last_output);
+            }
             
         }
          catch ( const std::exception & ex )
@@ -85,7 +105,7 @@ struct cb_similarity_producer
     }
     void signal_content_loaded ()
     {
-        movie_loaded = true;
+        content_loaded = true;
         std::cout << "Content Loaded " << std::endl;
     }
     void signal_frame_loaded (int& findex, double& timestamp)
@@ -99,26 +119,16 @@ struct cb_similarity_producer
     bool m_auto;
     std::vector<int> frame_indices;
     std::vector<double> frame_times;
-    std::string m_imagedir;
+    fs::path m_content_path;
     string_deque_array_t  last_output;
-
-    bool movie_loaded;
-    void clear_movie_loaded () { movie_loaded = false; }
-    bool is_movie_loaded () { return movie_loaded; }
+    bool is_movie;
+    bool is_dir;
+    bool content_loaded;
     int frameCount () { if (sp) return sp->frames_in_content (); return -1; }
     
    };
 
 
-std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr)
-{
-    return std::shared_ptr<std::ofstream>(ifstream_ptr, ofStreamDeleter());
-}
-
-std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename)
-{
-    return make_shared_ofstream(new std::ofstream(filename, std::ofstream::out));
-}
 
 std::shared_ptr<std::ifstream> make_shared_ifstream(std::ifstream * ifstream_ptr)
 {
@@ -130,12 +140,34 @@ std::shared_ptr<std::ifstream> make_shared_ifstream(std::string filename)
     return make_shared_ifstream(new std::ifstream(filename, std::ifstream::in));
 }
 
+bool sortbysec(const std::pair<int,int>& a,
+               const std::pair<int,int>& b)
+{
+    return a.second < b.second;
+}
+  
 size_t imageDirectoryOutput (  std::shared_ptr<sm_producer>& sp,   string_deque_array_t&  output,
                              sm_producer::outputOrderOption ooo )
 {
     if (! sp || sp->paths().size() != sp->shannonProjection().size ()) return 0;
+    auto entropy = sp->shannonProjection();
+    for (auto en : entropy) std::cout << fixed << showpoint << std::setprecision(16) << en << std::endl;
+    std::cout << std::endl;
     
     const sm_producer::ordered_outuple_t& ordered_output = sp->ordered_input_output(ooo);
+    std::vector<std::pair<int,int>> order(ordered_output.size());
+    std::string::size_type sz;
+    for (auto cc = 0; cc < order.size(); cc++){
+        auto stem = get<2>(ordered_output[cc]).stem().string().substr(5,4);
+        order[cc].first = cc;
+        order[cc].second = std::stoi(stem, &sz);
+    }
+    auto seq = order;
+    sort(order.begin(), order.end(), sortbysec);
+    for (auto cc : order) std::cout << cc.first << " " << cc.second << std::endl;
+
+    
+    
     
     
     output.clear();
@@ -143,10 +175,12 @@ size_t imageDirectoryOutput (  std::shared_ptr<sm_producer>& sp,   string_deque_
     
     for (auto ff = 0; ff < cnt; ff++)
     {
-        const auto oo = ordered_output[ff];
+        strstream msg;
+        const auto oo = ordered_output[order[ff].second];
         string_deque_t row;
         row.push_back(to_string(ff));
-        row.push_back(to_string(std::get<1>(oo)));
+        msg << fixed << showpoint << std::setprecision(16) << std::get<1>(oo);
+        row.push_back(msg.str());
         row.push_back(std::get<2>(oo).string());
         output.emplace_back(row);
     }
@@ -154,20 +188,38 @@ size_t imageDirectoryOutput (  std::shared_ptr<sm_producer>& sp,   string_deque_
     return output.size();
 }
 
+bool movieOutput (  std::shared_ptr<sm_producer>& sp,   string_deque_array_t&  output)
+{
+    if (! sp || sp->paths().size() != sp->shannonProjection().size ()) return false;
+    auto entropy = sp->shannonProjection();
+    for (auto en : entropy) std::cout << fixed << showpoint << std::setprecision(16) << en << std::endl;
+    std::cout << std::endl;
+    
+    output.clear();
+    auto cnt = entropy.size();
+    
+    for (auto ff = 0; ff < cnt; ff++)
+    {
+        string_deque_t row;
+        strstream msg;
+        msg << fixed << showpoint << std::setprecision(16) << entropy[ff];
+        row.push_back(msg.str());
+        output.emplace_back(row);
+    }
+    return true;
+}
+
 int main(int ac, char* av[])
 {
-    std::string image_dir;
+    std::string input_content;
     std::string output_file;
     
     try {
-        std::string inputPth, outputPth;
         po::options_description desc("Options");
         desc.add_options()
         ("help,h", "Displays this message")
-        ("input,i", po::value<std::string>(&inputPth)->required(), "Path to image directory")
+        ("input,i", po::value<std::string>(&input_content)->required(), "Path to image directory")
         ("output,o", po::value<std::string>(&output_file)->required(), "Path to outputfile ")
-//        ("level,l", po::value<unsigned int>(&processedLevel)->default_value(0), "Set the level to be processed")
-//        ("component,c", po::value<int>(&component)->default_value(-1), "Color component to select for threshold, if none, threshold all.")
         ;
         
         po::variables_map vm;
@@ -178,7 +230,7 @@ int main(int ac, char* av[])
             }
             else
             {
-                image_dir = vm["input"].as<std::string>();
+                input_content = vm["input"].as<std::string>();
                 output_file = vm["output"].as<std::string>();
                 
                 cout << vm["input"].as<std::string>() << std::endl;
@@ -204,9 +256,9 @@ int main(int ac, char* av[])
         return 2;
     }
     
-    if(!image_dir.empty())
+    if(!input_content.empty())
     {
-        cb_similarity_producer runner (image_dir);
+        cb_similarity_producer runner (input_content);
         runner.run();
         std::string delim (",");
         fs::path opath (output_file);
@@ -220,6 +272,7 @@ int main(int ac, char* av[])
                 auto cols = row.size() - 1;
                 for (std::string& col : row)
                 {
+                    std::cout << col << std::endl;
                     *myfile << col;
                     if (cnt++ < cols)
                         *myfile << delim;
