@@ -84,6 +84,8 @@ public:
 
     const timeToIndex_t& time2IndexMap () const { return m_tti; }
     const indexToTime_t& index2TimeMap () const { return m_itt; }
+    const std::vector<float> frameTimes () const { return m_frame_times; }
+    const std::vector<float> frameIndices () const { return m_frame_indices; }
     
     
 private:
@@ -107,6 +109,8 @@ private:
     mutable progress_callback_t m_progress_cb;
     mutable std::pair<uint32_t,uint32_t> m_stats;
     mutable std::vector<std::string> m_names;
+    mutable std::vector<float> m_frame_times;
+    mutable std::vector<float> m_frame_indices;
     mutable std::mutex			mMutex;
 };
 

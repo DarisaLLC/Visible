@@ -56,7 +56,7 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const lifIO::LifSe
     seqFrameContainer::ref thisref (new seqFrameContainer(tm));
     
     thisref->channel_names (names);
-    
+    thisref->m_frame_times.resize(0);
     if (lifserie.getDurations().size ())
     {
         if (tm.count > 1)
@@ -75,7 +75,8 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const lifIO::LifSe
                     if (! check){
                         std::cout << std::endl << "-----------------" << frame_count << "--------------" << std::endl;
                     }
-                    
+                    thisref->m_frame_times.push_back((float)frame_time);
+                    thisref->m_frame_indices.push_back(frame_count);
                     // Increment durations by number of channels
                     cm_time ts((*tItr)/(10000.0));
                     frame_time = frame_time + ts;
@@ -117,12 +118,15 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const cvVideoPlaye
     minfo.mIsMovie = true;
     
     seqFrameContainer::ref thisref (new seqFrameContainer(minfo));
+    thisref->m_frame_times.resize(0);
     
     for(auto ff = 0; ff < minfo.count; ff++){
         auto sframe = mMovie->createSurface();
         auto ftime = ff / minfo.mFps;
         cm_time ft (ftime);
         bool check = thisref->loadFrame(sframe, ft);
+        thisref->m_frame_times.push_back((float)ft);
+        thisref->m_frame_indices.push_back(ff);
         if (! check){
             std::cout << std::endl << "-----------------" << ff << "--------------" << std::endl;
         }
@@ -134,6 +138,7 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const cvVideoPlaye
 }
 #endif
 
+#ifdef IMPLEMENTED
 template<>
 std::shared_ptr<seqFrameContainer> seqFrameContainer::create  (const ci::qtime::MovieSurfaceRef& mMovie)
 {
@@ -161,17 +166,21 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create  (const ci::qtime::
     return thisref;
     
 }
+#endif
 
 template<>
 std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const std::shared_ptr<avcc::avReader>& asset_reader)
 {
     seqFrameContainer::ref thisref (new seqFrameContainer(asset_reader->info()));
+    thisref->m_frame_times.resize(0);
     while (! asset_reader->isEmpty())
     {
         cm_time ts;
         Surface8uRef frame;
         asset_reader->pop(ts, frame);
         thisref->loadFrame(frame, time_spec_t(ts));
+        thisref->m_frame_times.push_back((float)ts);
+        thisref->m_frame_indices.push_back(thisref->m_frame_times.size()-1);
     }
     return thisref;
 }
@@ -186,9 +195,12 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const std::vector<
     seqFrameContainer::ref thisref (new seqFrameContainer(minfo));
     cm_time ts;
     cm_time duration (minfo.duration);
+    thisref->m_frame_times.resize(0);
     for (auto iitr = folderImages.begin(); iitr < folderImages.end(); iitr++)
     {
         thisref->loadFrame(*iitr, time_spec_t(ts));
+        thisref->m_frame_times.push_back((float)ts);
+        thisref->m_frame_indices.push_back(thisref->m_frame_times.size()-1);
         ts = ts + duration;
     }
     return thisref;
