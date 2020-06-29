@@ -39,7 +39,6 @@
 #include "cinder/ImageIo.h"
 #include "cinder_cv/cinder_xchg.hpp"
 #include "ut_sm.hpp"
-#include "AVReader.hpp"
 #include "cm_time.hpp"
 #include "core/gtest_env_utils.hpp"
 #include "vision/colorhistogram.hpp"
@@ -204,7 +203,7 @@ typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
 
 
 
-
+#if 0
 #include "ut_lif.hpp"
 
 TEST(cluster_2d, basic){
@@ -546,84 +545,7 @@ TEST(cardiac_ut, load_sm)
     
 }
 
-#if 0
-TEST(cardiac_ut, interpolated_length)
-{
-    auto res = dgenv_ptr->asset_path("avg_baseline25_28_length_length_pct_short_pct.csv");
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    
-    vector<vector<double>> array;
-    load_sm(res.first.string(), array, false);
-    EXPECT_EQ(size_t(500), array.size());
-    for (auto row = 0; row<500; row++){
-        EXPECT_EQ(size_t(5), array[row].size());
-    }
-    
-    double            MicronPerPixel = 291.19 / 512.0;
-    double            Length_max   = 118.555 * MicronPerPixel; // 67.42584072;
-    double            Lenght_min   = 106.551 * MicronPerPixel; // 60.59880018;
-                                                               // double            shortening   = Length_max - Lenght_min;
-    double            MSI_max  =  0.37240525;
-    double            MSI_min   = 0.1277325;
-    // double            shortening_um   = 6.827040547;
-    
-    data_t dst;
-    flip(array,dst);
-    auto check = std::minmax_element(dst[1].begin(), dst[1].end() );
-    EXPECT_TRUE(svl::equal(*check.first, MSI_min, 1.e-05));
-    EXPECT_TRUE(svl::equal(*check.second, MSI_max, 1.e-05));
-    
-    auto car = contraction_analyzer::create();
-    car->load(dst[1]);
-    EXPECT_TRUE(car->isPreProcessed());
-    EXPECT_TRUE(car->isValid());
-    EXPECT_TRUE(car->leveled().size() == dst[1].size());
-    car->find_best();
-    const std::pair<double,double>& minmax = car->leveled_min_max ();
-    EXPECT_TRUE(svl::equal(*check.first, minmax.first, 1.e-05));
-    EXPECT_TRUE(svl::equal(*check.second, minmax.second, 1.e-05));
-    
-    const vector<double>& signal = car->leveled();
-    auto start = std::clock();
-    car->compute_interpolated_geometries(Lenght_min, Length_max);
-    auto endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
-    std::cout << endtime << " interpolated length " << std::endl;
-    start = std::clock();
-    car->compute_force(signal.begin(),signal.end(),Lenght_min, Length_max );
-    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
-    std::cout << endtime << " FORCE " << std::endl;
-    const vector<double>& lengths = car->interpolated_length();
-    EXPECT_EQ(dst[2].size(), lengths.size());
-    std::vector<double> diffs;
-    for(auto row = 0; row < dst[2].size(); row++)
-    {
-        auto dd = dst[2][row] - lengths[row];
-        diffs.push_back(dd);
-    }
-    
-    auto dcheck = std::minmax_element(diffs.begin(), diffs.end() );
-    EXPECT_TRUE(svl::equal(*dcheck.first, 0.0, 1.e-05));
-    EXPECT_TRUE(svl::equal(*dcheck.second, 0.0, 1.e-05));
-    
-    {
-        auto name = "force";
-        cvplot::setWindowTitle(name, " Force ");
-        cvplot::moveWindow(name, 0, 256);
-        cvplot::resizeWindow(name, 512, 256);
-        cvplot::figure(name).series("Force").addValue(car->total_reactive_force()).type(cvplot::Line).color(cvplot::Red);
-        cvplot::figure(name).show();
-    }
-    {
-        auto name = "interpolated length";
-        cvplot::setWindowTitle(name, " Length ");
-        cvplot::moveWindow(name,0,0);
-        cvplot::resizeWindow(name, 512, 256);
-        cvplot::figure(name).series("Length").addValue(car->interpolated_length()).type(cvplot::Line).color(cvplot::Blue);
-        cvplot::figure(name).show();
-    }
-}
-#endif
+
 
 
 TEST(cardiac_ut, locate_contractions)
@@ -1454,56 +1376,6 @@ TEST (ut_ss_voxel, basic){
 }
 
 
-TEST (UT_AVReaderBasic, run)
-{
-    static bool check_done_val = false;
-    static int frame_count = 0;
-    const auto check_done = [] (){
-        check_done_val = true;
-    };
-    
-    // Note current implementation uses default callbacks for building timestamps
-    // and images. User supplied callbacks for replace the default ones.
-    const auto progress_report = [] (CMTime time) {
-        cm_time t(time); std::cout << frame_count << "  " << t << std::endl; frame_count++;
-    };
-    
-    boost::filesystem::path test_filepath;
-    
-    // vf does not support QuickTime natively. The ut expectes and checks for failure
-    static std::string qmov_name ("box-move.m4v");
-    
-    auto res = dgenv_ptr->asset_path(qmov_name);
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    
-    if (res.second)
-        test_filepath = res.first;
-    
-    {
-        check_done_val = false;
-        avcc::avReader rr (test_filepath.string(), false);
-        rr.setUserDoneCallBack(check_done);
-        rr.setUserProgressCallBack(progress_report);
-        rr.run ();
-        
-        EXPECT_TRUE(rr.info().count == 30);
-        EXPECT_FALSE(rr.isEmpty());
-        tiny_media_info mif (rr.info());
-        mif.printout();
-        
-        std::this_thread::sleep_for(std::chrono::duration<double, std::milli> (2000));
-        EXPECT_TRUE(check_done_val);
-        EXPECT_TRUE(rr.isValid());
-        EXPECT_TRUE(rr.size().first == 57);
-        EXPECT_TRUE(rr.size().second == 57);
-        EXPECT_FALSE(rr.isEmpty());
-        
-        
-    }
-    
-}
-
 TEST(SimpleGUITest, basic)
 {
     IMGUI_CHECKVERSION();
@@ -1822,32 +1694,7 @@ TEST (UT_make_function, make_function)
     make_function_test::run();
 }
 
-
-TEST (UT_algo, AVReader)
-{
-    boost::filesystem::path test_filepath;
-    
-    // vf does not support QuickTime natively. The ut expectes and checks for failure
-    
-    auto res = dgenv_ptr->asset_path("box-move.m4v");
-    EXPECT_TRUE(res.second);
-    EXPECT_TRUE(boost::filesystem::exists(res.first));
-    
-    if (res.second)
-        test_filepath = res.first;
-    
-    avcc::avReaderRef rref = std::make_shared< avcc::avReader> (test_filepath.string(), false);
-    rref->setUserDoneCallBack(done_callback);
-    
-    rref->run ();
-    std::shared_ptr<seqFrameContainer> sm = seqFrameContainer::create(rref);
-    
-    EXPECT_TRUE(rref->isValid());
-    EXPECT_TRUE(sm->count() == 57);
-    
-}
-
-
+#endif
 
 
 TEST(ut_similarity, short_term)

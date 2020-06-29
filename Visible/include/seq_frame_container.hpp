@@ -18,7 +18,6 @@
 #include "core/timestamp.h"
 #include "mediaInfo.h"
 #include "timed_types.h"
-#include "AVReader.hpp"
 #include "lifFile.hpp"
 
 
