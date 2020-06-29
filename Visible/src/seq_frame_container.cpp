@@ -168,22 +168,6 @@ std::shared_ptr<seqFrameContainer> seqFrameContainer::create  (const ci::qtime::
 }
 #endif
 
-template<>
-std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const std::shared_ptr<avcc::avReader>& asset_reader)
-{
-    seqFrameContainer::ref thisref (new seqFrameContainer(asset_reader->info()));
-    thisref->m_frame_times.resize(0);
-    while (! asset_reader->isEmpty())
-    {
-        cm_time ts;
-        Surface8uRef frame;
-        asset_reader->pop(ts, frame);
-        thisref->loadFrame(frame, time_spec_t(ts));
-        thisref->m_frame_times.push_back((float)ts);
-        thisref->m_frame_indices.push_back(thisref->m_frame_times.size()-1);
-    }
-    return thisref;
-}
 
 template<>
 std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const std::vector<ci::Surface8uRef>& folderImages)
