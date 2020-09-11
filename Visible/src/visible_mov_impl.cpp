@@ -167,7 +167,7 @@ void movContext::setup_signals(){
     m_movProcRef = std::make_shared<ssmt_processor> (mCurrentCachePath, params);
     
     // Support lifProcessor::content_loaded
-    std::function<void (int64_t&)> content_loaded_cb = boost::bind (&movContext::signal_content_loaded, shared_from_above(), _1);
+    std::function<void (int64_t&)> content_loaded_cb = boost::bind (&movContext::signal_content_loaded, shared_from_above(), boost::placeholders::_1);
     boost::signals2::connection ml_connection = m_movProcRef->registerCallback(content_loaded_cb);
     
     // Support lifProcessor::flu results available
@@ -175,11 +175,11 @@ void movContext::setup_signals(){
     boost::signals2::connection flu_connection = m_movProcRef->registerCallback(intensity_over_time_ready_cb);
     
     // Support lifProcessor::initial ss results available
-    std::function<void (std::vector<float> &, const input_channel_selector_t&)> root_pci_ready_cb = boost::bind (&movContext::signal_root_pci_ready, shared_from_above(), _1, _2);
+    std::function<void (std::vector<float> &, const input_channel_selector_t&)> root_pci_ready_cb = boost::bind (&movContext::signal_root_pci_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
     boost::signals2::connection nl_connection = m_movProcRef->registerCallback(root_pci_ready_cb);
     
     // Support lifProcessor::median level set ss results available
-    std::function<void (const input_channel_selector_t&)> root_pci_med_reg_ready_cb = boost::bind (&movContext::signal_root_pci_med_reg_ready, shared_from_above(), _1);
+    std::function<void (const input_channel_selector_t&)> root_pci_med_reg_ready_cb = boost::bind (&movContext::signal_root_pci_med_reg_ready, shared_from_above(), boost::placeholders::_1);
     boost::signals2::connection ol_connection = m_movProcRef->registerCallback(root_pci_med_reg_ready_cb);
     
     

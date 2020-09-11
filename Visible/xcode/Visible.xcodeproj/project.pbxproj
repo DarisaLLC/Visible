@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		C203D2FB21714D6D00B6B4A8 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995581B128DF400A5C623 /* IOKit.framework */; };
 		C206725C1D126B38009B2BDB /* ip_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C26069691CED3E2C0045FF57 /* ip_utils.cpp */; };
-		C209D47B2498418C00E2CD17 /* visible_mov_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */; };
 		C20BBC031E4E33CE002C7D68 /* tinystr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4C1E298CE50049ADDB /* tinystr.cpp */; };
 		C20BBC041E4E33D3002C7D68 /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
 		C20BBC051E4E33D6002C7D68 /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
@@ -2073,7 +2072,6 @@
 				C28B01D1229B1E5F00B8165D /* lif_browser.cpp in Sources */,
 				C2606DB01CED3E2E0045FF57 /* opencv_utils.cpp in Sources */,
 				C2770658226A402B00215A55 /* cvVideoPlayer.cpp in Sources */,
-				C209D47B2498418C00E2CD17 /* visible_mov_impl.cpp in Sources */,
 				C2AEB73B228CD6E70078E687 /* geom_utils.cpp in Sources */,
 				C20EDBC31CF277130074C47A /* time_spec.cpp in Sources */,
 				C29DB076212B351200930CBD /* algo_ssmt.cpp in Sources */,

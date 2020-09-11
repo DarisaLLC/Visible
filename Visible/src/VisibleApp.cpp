@@ -27,7 +27,7 @@ static void ShowHelpMarker(const char* desc)
 #endif
 
 
-static ImGuiDockNodeFlags opt_flags = ImGuiDockNodeFlags_None;
+//static ImGuiDockNodeFlags opt_flags = ImGuiDockNodeFlags_None;
 
 bool VisibleAppControl::ThreadsShouldStop = false;
 
@@ -95,7 +95,7 @@ void VisibleApp::DrawSettings() {
               mov_clicked++;
           if (mov_clicked & 1)
           {
-            load_mov_file();
+   //         load_mov_file();
           }
         }
         ImGui::Spacing();
@@ -458,7 +458,7 @@ size_t VisibleApp::list_mov_channels(std::vector<std::string>& channel_names){
     return channel_names.size();
 }
 
-
+#if 0
 bool VisibleApp::load_mov_file(){
   if( mContext && mContext->is_valid()) return true;
     auto bpath_path = mCurrentContent;
@@ -476,7 +476,7 @@ bool VisibleApp::load_mov_file(){
      }
     ADD_ERR_AND_RETURN(cmds, " Path not valid ");
 }
-
+#endif
 
 void VisibleApp::windowMove()
 {
