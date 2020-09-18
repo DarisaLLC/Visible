@@ -201,7 +201,7 @@ void VisibleApp::DrawMainMenu(){
         ImGui::Text("This App is Built With OpenCv, Boost, Cinder and ImGui Libraries ");
     }
     DrawSettings();
-    DrawImGuiDemos();
+ //   DrawImGuiDemos();
 }
     
 
