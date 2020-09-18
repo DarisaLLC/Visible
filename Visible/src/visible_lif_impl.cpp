@@ -48,7 +48,7 @@
 #include <boost/range/irange.hpp>
 #include "core/stl_utils.hpp"
 #include "imgui_visible_widgets.hpp"
-//#include "imguifilesystem.h"
+#include "nfd.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -1036,16 +1036,17 @@ void lifContext::add_motion_profile (){
     }
     
     ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
+    ImVec2 pos (window->Pos.x+window->Size.x, window->Pos.y + window->Size.y );
     assert(window != nullptr);
     auto ww = get_windowRef();
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
     ImVec2  frame (mMediaInfo.channel_size.width, mMediaInfo.channel_size.height);
-    ImVec2 pos (ww->getSize().x - sz.x, ww->getSize().y - sz.y);
+
     m_motion_profile_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(frame.x,frame.y));
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowContentSize(frame);
     
-    if (ImGui::Begin(wShape, nullptr, ImGuiWindowFlags_NoScrollbar  ))
+    if (ImGui::Begin(wShape, nullptr ))
     {
         if(m_segmented_texture){
             ImGui::BeginChild(" ", frame, true,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar );
@@ -1064,7 +1065,8 @@ void lifContext::add_motion_profile (){
 // Contractions
 // Shape
 
-void lifContext::draw_contraction_plots(const contractionLocator::contraction_t& ct, int id){
+void lifContext::draw_contraction_plots(const contractionLocator::contractionContainer_t& cp, int id){
+    auto ct = cp[id];
     contraction_t::sigContainer_t force = ct.force;
     auto elon = ct.elongation;
     auto elen = ct.interpolated_length;
@@ -1112,9 +1114,54 @@ void lifContext::draw_contraction_plots(const contractionLocator::contraction_t&
     
     
 }
+
+bool  lifContext::save_contraction_plots(const contractionLocator::contractionContainer_t&cp, int id){
+    
+    auto save_csv = [](const contractionMesh & cp, bfs::path& root_path){
+        auto folder = stl_utils::now_string();
+        auto folder_path = root_path / folder;
+        boost::system::error_code ec;
+        if(!bfs::exists(folder_path)){
+            bfs::create_directory(folder_path, ec);
+            if (ec != boost::system::errc::success){
+                std::string msg = "Could not create " + folder_path.string() ;
+                vlogger::instance().console()->error(msg);
+                return false;
+            }
+            std::string basefilename = folder_path.string() + boost::filesystem::path::preferred_separator;
+            auto fn = basefilename + "force.csv";
+            stl_utils::save_csv(cp.force, fn);
+            fn = basefilename + "interpolatedLength.csv";
+            stl_utils::save_csv(cp.interpolated_length, fn);
+            fn = basefilename + "elongation.csv";
+            stl_utils::save_csv(cp.elongation, fn);
+            return true;
+        }
+        return false;
+    };
+    
+    nfdchar_t* outPath = NULL;
+    nfdresult_t result = NFD_PickFolder(NULL,  &outPath);
+    bool rtn = false;
+    if(outPath == NULL) return rtn;
+    
+    bfs::path out_bpath (outPath);
+    switch(result){
+        case NFD_OKAY:
+            rtn = save_csv(cp[id], out_bpath);
+            break;
+        case NFD_CANCEL:
+        case NFD_ERROR:
+            break;
+    }
+    return rtn;
+    
+}
+
 void lifContext::add_contractions (bool* p_open)
 {
-    if (m_lifProcRef->moving_regions().empty()) return;
+//    if (m_lifProcRef->moving_regions().empty()) return;
+  
     
     ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
     assert(window != nullptr);
@@ -1123,23 +1170,20 @@ void lifContext::add_contractions (bool* p_open)
     auto ww = get_windowRef();
     ImGui::SetNextWindowSize(ImVec2(ww->getSize().x/2,ww->getSize().y/4), ImGuiCond_FirstUseEver);
     if (ImGui::Begin(wCells, p_open, ImGuiWindowFlags_MenuBar)){
+        if (m_lifProcRef->moving_regions().empty()){
+            ImGui::End();
+            return;
+        }
         for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++){
             const ssmt_result::ref_t& mb = m_lifProcRef->moving_bodies()[i];
             auto contractions = m_cell2contractions_map[mb->id()];
-#ifdef NotYet
-            static ImGuibfs::Dialog* dialog = nullptr;
+            if (contractions.empty()) continue;
             const bool browseButtonPressed = ImGui::Button(" Export CSV ");
             if (browseButtonPressed) {
-                if (dialog != nullptr)
-                    delete dialog;
-                dialog = new ImGuibfs::Dialog();
+                auto outcome = save_contraction_plots(contractions, 0);
+                vlogger::instance().console()->info(tostr(outcome));
             }
-            if (dialog) {
-                static std::string title = " Cell / Contraction Info ";
-                dialog->chooseFolderDialog(browseButtonPressed,mCurrentSerieCachePath.c_str(), title.c_str());
-                // @note Export CSV
-            }
-#endif
+
             if (ImGui::TreeNode((void*)(intptr_t)i, "Cell/Tissue %d", mb->id())){
                 
                 for (int cc = 0; cc < contractions.size(); cc++){
@@ -1151,15 +1195,14 @@ void lifContext::add_contractions (bool* p_open)
                 ImGui::TreePop();
             }
         }
-        ImGui::End();
     }
+    ImGui::End();
+
     for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++){
         const ssmt_result::ref_t& mb = m_lifProcRef->moving_bodies()[i];
         auto contractions = m_cell2contractions_map[mb->id()];
-        for (int cc = 0; cc < contractions.size(); cc++){
-            const auto ct = contractions[cc];
-            draw_contraction_plots(ct, mb->id());
-        }
+        if (contractions.empty()) continue;
+        draw_contraction_plots(contractions, mb->id());
     }
 }
 

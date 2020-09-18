@@ -445,7 +445,7 @@ bool sm_producer::spImpl::generate_ssm ( int frames, const sm_producer::progress
 
     bool ok = simi->entropies (m_entropies);
     
-    for(auto en : m_entropies) std::cout << fixed << showpoint << std::setprecision(16) << en << std::endl;
+    //for(auto en : m_entropies) std::cout << fixed << showpoint << std::setprecision(16) << en << std::endl;
     // Fetch the SS matrix and verify
     simi->selfSimilarityMatrix(m_SMatrix);
     ok = ok && anonymous::smatrix_ok(m_SMatrix, m_entropies.size());
