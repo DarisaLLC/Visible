@@ -1,3 +1,8 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+#pragma GCC diagnostic ignored "-Wint-in-bool-context"
+
+
 #include "etw_utils.hpp"
 #include <locale>
 #include <opencv2/core.hpp>
@@ -147,3 +152,6 @@ void etw_utils::progress_display::display_tic() {
         m_os << std::endl;
     }
 } // display_tic
+
+
+#pragma GCC diagnostic pop

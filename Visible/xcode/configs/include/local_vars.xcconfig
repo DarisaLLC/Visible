@@ -25,10 +25,11 @@ LOCAL_SPDLOG = $(EXTERNALS)/spdlog
 LOCAL_FMT = $(EXTERNALS)/fmt
 LOCAL_CIIMGUI = $(VISIBLE_ROOT)/local_cinder_imgui
 
+LOCAL_OIIO =  /usr/local/Cellar/openimageio/2.1.18_1
+
 LOCAL_3rdParty = $(SVL_ROOT)/local
 LOCAL_BOOST = /usr/local
 LOCAL_PNG = $(LOCAL_3rdParty)/png/
-LOCAL_gtest = $(LOCAL_3rdParty)/gtest
 LOCAL_EIGEN = $(LOCAL_3rdParty)/Eigen
 LOCAL_CEREAL = $(LOCAL_3rdParty)/cereal-1.1.1/include
 LOCAL_TINYXML = $(LOCAL_3rdParty)/tinyxml

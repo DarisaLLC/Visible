@@ -1,6 +1,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomma"
-
+#pragma GCC diagnostic ignored "-Wint-in-bool-context"
 
 
 #include "sm_producer.h"

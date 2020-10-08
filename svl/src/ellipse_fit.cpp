@@ -4,6 +4,9 @@
 //
 //  Created by Arman Garakani on 2/4/19.
 //
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+#pragma GCC diagnostic ignored "-Wint-in-bool-context"
 
 #include "vision/ellipse_fit.hpp"
 #include <math.h>
@@ -318,3 +321,6 @@ Ellipse DirectEllipseFit::calcEllipsePara(const MatrixXf &eigVV)
     
     return ellip;
 }
+
+
+#pragma GCC diagnostic pop

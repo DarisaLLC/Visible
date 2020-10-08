@@ -8,7 +8,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomma"
 #pragma GCC diagnostic ignored "-Wunused-private-field"
-
+#pragma GCC diagnostic ignored "-Wint-in-bool-context"
 
 #include <stdio.h>
 #include <iostream>
@@ -562,7 +562,7 @@ const int64_t& ssmt_processor::frame_count () const
     
     const auto cs = m_all_by_channel[0].size();
     if (cs != m_frameCount) return inconsistent;
-    for (const auto cc : m_all_by_channel){
+    for (const auto &cc : m_all_by_channel){
         if (cc.size() != cs) return inconsistent;
     }
     return m_frameCount;
