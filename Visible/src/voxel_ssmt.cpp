@@ -6,9 +6,8 @@
 //
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcomma"
 #pragma GCC diagnostic ignored "-Wunused-private-field"
-
+#pragma GCC diagnostic ignored "-Wint-in-bool-context"
 
 #include <stdio.h>
 #include <iostream>

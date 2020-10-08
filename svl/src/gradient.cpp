@@ -422,7 +422,7 @@ bool GetMotionCenter(const roiWindow<P8U> & image, fPair & center, uint8_t thres
 bool GetMotionCenter(const std::vector<svl::feature>& features, fPair & center){
     
     MotionCenter mc;
-    for (const auto feature : features){
+    for (const auto &feature : features){
         fVector_2d uv = feature.uv();
         const fVector_2d& pos = feature.position();
         mc.add(pos, uv);

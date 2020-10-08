@@ -4,6 +4,9 @@
 //
 //  Created by Arman Garakani on 6/7/19.
 //
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+#pragma GCC diagnostic ignored "-Wint-in-bool-context"
 
 #include "eigen_utils.hpp"
 #include "core/coreGLM.h"
@@ -70,3 +73,4 @@ int test_polyfit ()
 }
 
 
+#pragma GCC diagnostic pop

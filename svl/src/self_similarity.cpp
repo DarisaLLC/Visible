@@ -1,5 +1,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomma"
+#pragma GCC diagnostic ignored "-Wint-in-bool-context"
 
 /*
  * Copyright (c) 2002 Reify Corp. All rights reserved.

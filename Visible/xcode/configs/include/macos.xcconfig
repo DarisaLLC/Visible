@@ -9,7 +9,7 @@
 
 // Set default SDK.
 SDKROOT = macosx
-MACOSX_DEPLOYMENT_TARGET = 10.13
+MACOSX_DEPLOYMENT_TARGET = 10.15
 
 // Build for PPC and Intel, 32- and 64-bit
 ARCHS = x86_64

@@ -22,7 +22,7 @@ struct cb_similarity_producer
         try
         {
             sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
-            std::function<void (int&,double&)> frame_loaded_cb = boost::bind (&cb_similarity_producer::signal_frame_loaded, this, _1, _2);
+            std::function<void (int&,double&)> frame_loaded_cb = std::bind (&cb_similarity_producer::signal_frame_loaded, this, std::placeholders::_1, std::placeholders::_2);
             std::function<void ()> content_loaded_cb = std::bind (&cb_similarity_producer::signal_content_loaded, this);
             boost::signals2::connection fl_connection = sp->registerCallback(frame_loaded_cb);
             boost::signals2::connection ml_connection = sp->registerCallback(content_loaded_cb);
@@ -82,7 +82,7 @@ struct dir_producer
         try
         {
             sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
-            std::function<void (int&,double&)> frame_loaded_cb = boost::bind (&dir_producer::signal_frame_loaded, this, _1, _2);
+            std::function<void (int&,double&)> frame_loaded_cb = std::bind (&dir_producer::signal_frame_loaded, this, std::placeholders::_1, std::placeholders::_2);
             std::function<void ()> content_loaded_cb = std::bind (&dir_producer::signal_content_loaded, this);
             boost::signals2::connection fl_connection = sp->registerCallback(frame_loaded_cb);
             boost::signals2::connection ml_connection = sp->registerCallback(content_loaded_cb);

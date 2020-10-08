@@ -1,3 +1,10 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+#pragma GCC diagnostic ignored "-Wint-in-bool-context"
+
+
+
+
 #include "vision/roiWindow.h"
 #include "vision/rowfunc.h"
 #include "core/pair.hpp"
@@ -284,3 +291,4 @@ template bool Correlation::autoCorrelation(const roiWindow<P8U> & fixed, const u
 template class imageTranslation<P8U>;
 
 
+#pragma GCC diagnostic pop

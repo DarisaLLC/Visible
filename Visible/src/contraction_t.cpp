@@ -5,6 +5,11 @@
 //  Created by Arman Garakani on 8/19/18.
 //
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomma"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+#pragma GCC diagnostic ignored "-Wint-in-bool-context"
+
 #include <stdio.h>
 #include <algorithm>
 #include <cmath>
@@ -456,3 +461,4 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
     
 }
 
+#pragma GCC diagnostic pop

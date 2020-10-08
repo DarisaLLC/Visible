@@ -33,7 +33,7 @@ void svl::drawRotatedRect(cv::Mat& dst, const cv::RotatedRect& rRect,
     rRect.points(vertices.data());
     vcpy = vertices;
     std::vector<Point> points;
-    for (const auto ptf : vertices)points.emplace_back(ptf.x,ptf.y);
+    for (const auto &ptf : vertices)points.emplace_back(ptf.x,ptf.y);
     
     if(fill_only){
         fillConvexPoly(dst, points, fill_color);
@@ -67,7 +67,7 @@ void svl::drawFourCorners(cv::Mat& dst, const std::vector<Point2f>& vertices, fl
                           const cv::Scalar & ctr_color, const cv::Scalar & fill_color,
                           const cv::Scalar & vertex_color){
     std::vector<Point> points;
-    for (const auto ptf : vertices)points.emplace_back(ptf.x,ptf.y);
+    for (const auto &ptf : vertices)points.emplace_back(ptf.x,ptf.y);
     fillConvexPoly(dst, points, ctr_color);
     
     auto ctr = [] (const std::vector<Point2f>& vertices){

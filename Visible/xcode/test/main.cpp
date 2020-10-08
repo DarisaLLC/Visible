@@ -12,8 +12,10 @@
 #pragma GCC diagnostic ignored "-Wunused-private-field"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
+#pragma GCC diagnostic ignored "-Wint-in-bool-context"
 
-
+#include <OpenImageIO/imageio.h>
+#include <OpenImageIO/imagebuf.h>
 
 #include <iostream>
 #include <fstream>
@@ -44,7 +46,6 @@
 #include "vision/colorhistogram.hpp"
 #include "cinder_opencv.h"
 #include "ut_util.hpp"
-//#include "algo_cardiac.hpp"
 #include "core/csv.hpp"
 #include "core/kmeans1d.hpp"
 #include "core/stl_utils.hpp"
@@ -86,6 +87,8 @@
 #include "core/moreMath.h"
 #include "eigen_utils.hpp"
 #include "cluster_geometry.hpp"
+
+using namespace OIIO;
 
 using namespace etw_utils;
 using namespace cgeom;
@@ -201,9 +204,25 @@ typedef std::weak_ptr<Surface8u>	SurfaceWeakRef;
 typedef std::weak_ptr<Surface16u>	Surface16uWeakRef;
 typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
 
+#if 1
+
+TEST(oiio, basic){
+    auto filename = "/Volumes/medvedev/Users/arman/Downloads/nd122.tif";
+    auto in = ImageInput::open (filename);
+    if (! in)
+        return;
+    const ImageSpec &spec = in->spec();
+    int xres = spec.width;
+    int yres = spec.height;
+    int channels = spec.nchannels;
+    std::vector<unsigned char> pixels (xres*yres*channels);
+    in->read_image (OIIO::TypeDesc::UINT8, &pixels[0]);
+    in->close ();
+    
+}
 
 
-#if 0
+
 #include "ut_lif.hpp"
 
 TEST(cluster_2d, basic){
@@ -1426,27 +1445,27 @@ TEST(tracks, basic){
 }
 
 
-
-void savgol (const vector<double>& signal, vector<double>& dst)
-{
-    // for scalar data:
-    int order = 4;
-    int winlen = 17 ;
-    SGF::real sample_time = 0; // this is simply a float or double, you can change it in the header sg_filter.h if yo u want
-    SGF::ScalarSavitzkyGolayFilter filter(order, winlen, sample_time);
-    dst.resize(signal.size());
-    SGF::real output;
-    for (auto ii = 0; ii < signal.size(); ii++)
-    {
-        filter.AddData(signal[ii]);
-        if (! filter.IsInitialized()) continue;
-        dst[ii] = 0;
-        int ret_code;
-        ret_code = filter.GetOutput(0, output);
-        dst[ii] = output;
-    }
-    
-}
+//
+//void savgol (const vector<double>& signal, vector<double>& dst)
+//{
+//    // for scalar data:
+//    int order = 4;
+//    int winlen = 17 ;
+//    SGF::real sample_time = 0; // this is simply a float or double, you can change it in the header sg_filter.h if yo u want
+//    SGF::ScalarSavitzkyGolayFilter filter(order, winlen, sample_time);
+//    dst.resize(signal.size());
+//    SGF::real output;
+//    for (auto ii = 0; ii < signal.size(); ii++)
+//    {
+//        filter.AddData(signal[ii]);
+//        if (! filter.IsInitialized()) continue;
+//        dst[ii] = 0;
+//        int ret_code;
+//        ret_code = filter.GetOutput(0, output);
+//        dst[ii] = output;
+//    }
+//
+//}
 
 TEST(units,basic)
 {
