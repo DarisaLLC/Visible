@@ -36,6 +36,21 @@ using namespace std;
 
 lif_serie_data:: lif_serie_data () : m_index (-1) {}
 
+
+lif_serie_data::lif_serie_data (const std::unique_ptr<OIIO::ImageInput>& m_in): m_index(-1){
+    if (! m_in) return;
+
+    const ImageSpec spec = m_in->spec();
+    TypeDesc type = spec.format;
+    m_timesteps = spec.get_int_attribute ("oiio:subimages", 0);
+    int xres = spec.width;
+    int yres = spec.height;
+    m_channelCount = spec.nchannels;
+    m_pixelsInOneTimestep = xres * yres * m_channelCount;
+    std::string s = spec.get_string_attribute ("DateTime", "");
+    
+    
+}
 /**
  lif_serie_data : a directory of information inside a LIF Serie
 
