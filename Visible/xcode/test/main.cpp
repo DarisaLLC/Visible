@@ -267,7 +267,7 @@ TEST(oiio, basic){
             cv::Mat cvb (yres,xres, CV_16U);
             cv::Mat cvb8 (yres,xres, CV_8U);
             
-            buf.get_pixels(roi, TypeInt16, cvb.data);
+            buf.get_pixels(roi, TypeUInt16, cvb.data);
             cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
             cv::imshow("oiio", cvb8);
             cv::waitKey();
