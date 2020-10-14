@@ -11,7 +11,7 @@
 #include "cinder/ip/Fill.h"
 #include "vision/roiMultiWindow.h"
 
-
+using namespace OIIO;
 /*
  *  Concepte:
  *  Movie consisting of M frames identified by time and index in the movie context
@@ -31,6 +31,51 @@ using namespace stl_utils;
 #define OCV_PLAYER
 
 std::string seqFrameContainer::getName () const { return "seqFrameContainer"; }
+
+
+template<>
+std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const std::unique_ptr<OIIO::ImageInput>& m_in)
+{
+    const ImageSpec spec = m_in->spec();
+    TypeDesc ptype = spec.format;
+    tiny_media_info tm;
+    tm.count = spec.get_int_attribute ("oiio:subimages", 0);
+    tm.mChannels = spec.nchannels;
+    tm.channel_size.width = spec.width;
+    tm.channel_size.height = spec.height;
+    std::string s = spec.get_string_attribute ("DateTime", "");
+    tm.mBitsPerPixel  = spec.get_int_attribute("oiio:BitsPerSample");
+    tm.mBytesPerPixel = tm.mBitsPerPixel / 8;
+    
+    tm.duration = tm.count * 16.7; //@ to change with an input from the user or config
+    tm.mFps = (tm.count * 1000) / tm.duration;
+    tm.mIsLifSerie = false;
+    tm.mIsImageFolder = false;
+    tm.mIsIooI = true;
+    // @note not clear if TIF stack and movies will have the same potential channel divisions of the same width
+    tm.size = tm.channel_size;
+    cm_time frame_time;
+    
+    seqFrameContainer::ref thisref (new seqFrameContainer(tm));
+    thisref->channel_names (spec.channelnames);
+    thisref->m_frame_times.resize(0);
+    return thisref;
+    // Fettch the frames. @todo use OpenImageIO's ImageCache
+//    int ret = ErrOK;
+//    // Total Bytes in a frame
+//    int npixels = spec.width * spec.height* tm.mChannels*tm.mBytesPerPixel;
+//    std::shared_ptr<void> pels (new uint8_t[npixels]);
+//    for (int subimage = 0; subimage < tm.count; ++subimage) {
+//        if(m_in->seek_subimage (subimage, 0)) {
+//            m_in->read_image (ptype, pels);
+//
+//        }
+//
+//
+//    }
+    
+}
+
 
 template<>
 std::shared_ptr<seqFrameContainer> seqFrameContainer::create (const lifIO::LifSerie& lifserie)

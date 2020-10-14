@@ -29,8 +29,11 @@ struct tiny_media_info
     float              orientation; // 0:Right, 90: Up, 180 Left, -90 Down
     BOOL mIsImageFolder;
     BOOL mIsLifSerie;
+    BOOL mIsIooI;
     BOOL mIsMovie;
     uint32_t mChannels;
+    uint32_t mBitsPerPixel;
+    uint32_t mBytesPerPixel;
     
     
     void printout ()
@@ -52,6 +55,7 @@ struct tiny_media_info
     void clear () { std::memset(this, 0, sizeof (tiny_media_info)); }
     BOOL isImageFolder () const { return mIsImageFolder; }
     BOOL isLIFSerie () const { return mIsLifSerie; }
+    BOOL isIooI () const { return mIsIooI; }
     int32_t getWidth () const { return size.width; }
     int32_t getHeight () const { return size.height; }
     glm::vec2 getSize () const { return glm::vec2(size.width, size.height); }

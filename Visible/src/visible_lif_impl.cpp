@@ -145,6 +145,7 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const b
             m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&lifRef->getSerie(sd.index()), stl_utils::null_deleter());
             setup();
             ww->getRenderer()->makeCurrentContext(true);
+     
         }
     }
 }
@@ -695,12 +696,12 @@ void lifContext::loadCurrentSerie ()
         m_clips.clear();
         m_instant_channel_display_rects.clear();
         pause();
-        
         /*
          * Create the frameset and assign the channel names
          * Fetch the media info
          */
         mFrameSet = seqFrameContainer::create (*m_cur_lif_serie_ref);
+    
         if (! mFrameSet || ! mFrameSet->isValid())
         {
             vlogger::instance().console()->debug("Serie had 1 or no frames ");
@@ -1285,7 +1286,7 @@ void lifContext::update ()
         }
         // Update Fbo with texture.
         {
-            lock_guard<mutex> scopedLock(m_update_mutex);
+            std::lock_guard<mutex> scopedLock(m_update_mutex);
             if(mSurface){
                 mFbo->getColorTexture()->update(*mSurface);
                 renderToFbo(mSurface, mFbo);

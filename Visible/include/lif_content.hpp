@@ -24,6 +24,10 @@
 #include "segmentation_parameters.hpp"
 #include "iowriter.hpp"
 
+//#define OIIO_USE_FMT 0
+#include <OpenImageIO/imageio.h>
+#include <OpenImageIO/imagebuf.h>
+
 using namespace Eigen;
 
 using namespace boost::assign; // bring 'map_list_of()' into scope
@@ -32,7 +36,7 @@ using namespace std;
 using namespace boost;
 using namespace boost::filesystem;
 namespace fs = boost::filesystem;
-
+using namespace OIIO;
 
 
 using MappedMat = Eigen::Map<Eigen::MatrixXf, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, 1>>;
@@ -68,6 +72,8 @@ public:
     
     lif_serie_data ();
     lif_serie_data (const lifIO::LifReader::ref& m_lifRef, const unsigned index);
+    lif_serie_data (const std::unique_ptr<OIIO::ImageInput>&);
+    
     int index () const { return m_index; }
     const std::string name () const { return m_name; }
    
@@ -85,6 +91,8 @@ public:
     const std::vector<cv::Rect2f>& ROIs2d () const { return m_rois_2d; }
     
 private:
+    mutable bool m_is_lif;
+    mutable bool m_is_oiio;
     mutable int32_t m_index;
     mutable std::string m_name;
     uint32_t    m_timesteps;

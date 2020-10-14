@@ -19,6 +19,8 @@
 #include "mediaInfo.h"
 #include "timed_types.h"
 #include "lifFile.hpp"
+#include <OpenImageIO/imageio.h>
+#include <OpenImageIO/imagebuf.h>
 
 
 using namespace ci;

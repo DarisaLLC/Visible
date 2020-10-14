@@ -122,37 +122,22 @@ public:
     {
         boost::filesystem::path installpath = std::string(argv[0]);
         
-        if (argc == 3)
+        std::string current_exec_name = argv[0]; // Name of the current exec program
+        std::vector<std::string> all_args;
+        all_args.assign(argv + 1, argv + argc);
+
+        // Get all assets marker indexes in all args
+        std::vector<int> mindex;
+        for (auto argcc = 0; argcc < all_args.size(); argcc++)
         {
-            std::string current_exec_name = argv[0]; // Name of the current exec program
-            std::vector<std::string> all_args;
-            all_args.assign(argv + 1, argv + argc);
-            boost::filesystem::path input;
-            bool got_input;
-            got_input = false;
-            
-            
-            for (unsigned ac = 0; ac < all_args.size(); ac++)
-            {
-                std::cout << all_args[ac] << std::endl;
-                if (!got_input)
-                {
-                    std::size_t found = all_args.at(ac).find(input_marker);
-                    
-                    if (found != std::string::npos && ac < (all_args.size() - 1))
-                    {
-                        input = all_args[ac + 1];
-                        got_input = true;
-                    }
-                }
-            }
-            
-            if (!boost::filesystem::exists(input))
-            {
-                std::cerr << input.string() << " does not exist. Use --help\n";
-            }
-            
-            add_content_directory(input);
+            std::size_t found = all_args.at(argcc).find(input_marker);
+            if (found != std::string::npos) mindex.push_back(argcc);
+        }
+        for (auto mm : mindex){
+        
+            boost::filesystem::path input = all_args[mm+1];
+            if (boost::filesystem::exists(input))
+                add_content_directory(input);
         }
     }
     
@@ -169,18 +154,22 @@ public:
  
     std::pair<path_t, bool> asset_path(const std::string& file_name)
     {
-        if (m_content_paths.size() != 2)
-             return std::make_pair(path_t (), false);
+    //    if (m_content_paths.size() != 2)
+     //        return std::make_pair(path_t (), false);
         
-        // In the future this can be a simple cache 
-        for (auto it : recursive_directory_range(m_content_paths[1]))
-        {
-            if (it.path().filename ().compare (file_name) == 0)
+        for (auto& content : m_content_paths){
+            
+            // In the future this can be a simple cache
+            for (auto it : recursive_directory_range(content))
             {
-               return std::make_pair(it.path(), true);
+                auto diff = it.path().filename ().compare (file_name);
+                if (diff == 0)
+                {
+                   return std::make_pair(it.path(), true);
+                }
             }
         }
-
+    
         return std::make_pair(path_t (), false);
     }
 

@@ -15,7 +15,7 @@
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
 
 #include <OpenImageIO/imageio.h>
-#include <OpenImageIO/imagebuf.h>
+#include <OpenImageIO/timer.h>
 
 #include <iostream>
 #include <fstream>
@@ -206,20 +206,172 @@ typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
 
 #if 1
 
-TEST(oiio, basic){
-    auto filename = "/Volumes/medvedev/Users/arman/Downloads/nd122.tif";
-    auto in = ImageInput::open (filename);
-    if (! in)
-        return;
-    const ImageSpec &spec = in->spec();
-    int xres = spec.width;
-    int yres = spec.height;
-    int channels = spec.nchannels;
-    std::vector<unsigned char> pixels (xres*yres*channels);
-    in->read_image (OIIO::TypeDesc::UINT8, &pixels[0]);
-    in->close ();
+
+    // First check oiio:BitsPerSample int attribute.  If not set,
+    // fall back on the TypeDesc. return 0 for float types
+    // or those that exceed the int range (long long, etc)
+static unsigned long long
+get_intsample_maxval(const ImageSpec& spec)
+{
+    TypeDesc type = spec.format;
+    int bits      = spec.get_int_attribute("oiio:BitsPerSample");
+    if (bits > 0) {
+        if (type.basetype == TypeDesc::UINT8
+            || type.basetype == TypeDesc::UINT16
+            || type.basetype == TypeDesc::UINT32)
+            return ((1LL) << bits) - 1;
+        if (type.basetype == TypeDesc::INT8 || type.basetype == TypeDesc::INT16
+            || type.basetype == TypeDesc::INT32)
+            return ((1LL) << (bits - 1)) - 1;
+    }
     
+        // These correspond to all the int enums in typedesc.h <= int
+    if (type.basetype == TypeDesc::UCHAR)
+        return 0xff;
+    if (type.basetype == TypeDesc::CHAR)
+        return 0x7f;
+    if (type.basetype == TypeDesc::USHORT)
+        return 0xffff;
+    if (type.basetype == TypeDesc::SHORT)
+        return 0x7fff;
+    if (type.basetype == TypeDesc::UINT)
+        return 0xffffffff;
+    if (type.basetype == TypeDesc::INT)
+        return 0x7fffffff;
+    
+    return 0;
 }
+
+
+
+TEST(oiio, basic){
+    
+    auto test_file = [](const ustring& filename){
+        
+        ImageBuf buf(filename);
+        int nsubimages = buf.nsubimages();
+        const ImageSpec& bspec = buf.spec();
+        int xres = bspec.width;
+        int yres = bspec.height;
+        int channels = bspec.nchannels;
+        int bps = bspec.get_int_attribute("oiio:BitsPerSample", -1);
+        std::cout << xres << "," << yres << "," << channels << ":" << bps << std::endl;
+        
+            // Now read them from cache and display them
+        namedWindow("oiio", WINDOW_AUTOSIZE | WINDOW_OPENGL);
+        for (int ss = 0; ss < nsubimages; ss++){
+            buf.reset(filename, ss, 0);
+            std::string datetime = buf.spec().get_string_attribute("DateTime");
+            std::cout << buf.subimage() << " @ " << datetime << std::endl;
+            ROI roi = buf.roi();
+            cv::Mat cvb (yres,xres, CV_16U);
+            cv::Mat cvb8 (yres,xres, CV_8U);
+            
+            buf.get_pixels(roi, TypeInt16, cvb.data);
+            cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
+            cv::imshow("oiio", cvb8);
+            cv::waitKey();
+        }
+    };
+    
+    
+   auto res = dgenv_ptr->asset_path("zser16.tif");
+   EXPECT_TRUE(res.second);
+   EXPECT_TRUE(boost::filesystem::exists(res.first));
+   ustring filename (res.first.c_str());
+  //  ustring filename( "/Volumes/medvedev/Users/arman/Downloads/nd122.tif");
+    test_file(filename);
+        
+}
+
+        // Create a private ImageCache so we can customize its cache size
+        // and instruct it store everything internally as floats.
+//    ImageCache* ic = ImageCache::create(true);
+//    ic->attribute("autotile", 0);
+//    ic->attribute("max_memory_MB", 2048.0);
+//
+//
+//    ImageSpec spec;
+//    int number_of_subimages = 0;
+//    ic->get_imagespec (filename, spec, number_of_subimages);
+//
+//    ImageCache::destroy(ic);
+//    int nsubimages = 0;
+//    ic->get_image_info(filename, 0, 0, ustring("subimages"), OIIO::TypeInt, &nsubimages);
+//
+//    unsigned int maxval = (unsigned int)get_intsample_maxval(spec);
+//    int xres = spec.width;
+//    int yres = spec.height;
+//    int channels = spec.nchannels;
+//    int i = spec.get_int_attribute ("oiio:subimages", -1.0);
+//    int bp = spec.get_int_attribute ("oiio:BitsPerSample", -1);
+//    float fps = spec.get_float_attribute ("Fps", -1.0f);
+//    std::string s = spec.get_string_attribute ("DateTime", "NA");
+//    TypeDesc td = TypeDesc::UINT16;
+//        std::cout << number_of_subimages << " (" << xres << "," << yres << ") " <<
+//        maxval << "::" << i << "::" <<  fps << "::" << s << "::" << bp << "::" << channels <<
+//        "::" << nsubimages << std::endl;
+//#if 1
+//    std::vector<uint16_t> pixels (2*xres*yres*channels);
+//
+//
+//    for (int ss = 0; ss < nsubimages; ss++){
+//        if (ss & 1)
+//            ic->add_tile(filename, ss, 0, 0, 0, 0, 0, 1, td, pixels.data());
+//    }
+//
+//    {
+//        std::cout << " Half Cached " << std::endl;
+//            // average hit time and miss time
+//        float hits(0.0), miss(0.0);
+//        int hitn(0), missn(0);
+//        for (int ss = 0; ss < nsubimages; ss++){
+//            if (ss & 1){
+//                OIIO::Timer hitimer;
+//                auto tile = ic->get_tile(filename, ss, 0, 0, 0, 0, 0, 1);
+//                assert(tile != nullptr);
+//                hits += hitimer();
+//                hitn++;
+//                ic->release_tile(tile);
+//            }
+//            else{
+//                OIIO::Timer misstimer;
+//                ic->add_tile(filename, ss, 0, 0, 0, 0, 0, 1, td, pixels.data());
+//                miss += misstimer();
+//                missn++;
+//            }
+//        }
+//        hits /= hitn;
+//        miss /= missn;
+//        std::cout << hitn << "," << missn << std::endl;
+//
+//        std::cout << hits * 1000 << " , " << miss * 1000 << std::endl;
+//    }
+//
+//    std::cout << " All Cached " << std::endl;
+//
+//    float hits(0.0), miss(0.0);
+//    int hitn(0), missn(0);
+//    for (int ss = 0; ss < nsubimages; ss++){
+//        OIIO::Timer hitimer;
+//        auto tile = ic->get_tile(filename, ss, 0, 0, 0, 0, 0, 1);
+//        if (tile != nullptr){
+//            hits += hitimer();
+//            hitn++;
+//            ic->release_tile(tile);
+//        }
+//        else{
+//            miss += hitimer();
+//            missn++;
+//        }
+//    }
+//    hits /= hitn;
+//    if (missn) miss /= missn;
+//    std::cout << hitn << "," << missn << std::endl;
+//    std::cout << hits * 1000 << " , " << miss * 1000 << std::endl;
+//    std::cout << ic->getstats() << std::endl;
+//#endif
+
 
 
 
@@ -1175,7 +1327,7 @@ cv::Mat show_cv_angle (const cv::Mat& src, const std::string& name){
     svl::sobel_opencv(src, mag, ang, 7);
     
 #ifdef INTERACTIVE
-    namedWindow(name.c_str(), CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+    namedWindow(name.c_str(), WINDOW_AUTOSIZE | WINDOW_OPENGL);
     cv::imshow(name.c_str(), ang);
     cv::waitKey();
 #endif
@@ -1212,7 +1364,7 @@ void show_gradient (const cv::Mat& src, const std::string& name){
     }
     
 #ifdef INTERACTIVE
-    namedWindow(name.c_str(), CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+    namedWindow(name.c_str(), WINDOW_AUTOSIZE | WINDOW_OPENGL);
     cv::imshow(name.c_str(), disp3c);
     cv::waitKey();
 #endif
@@ -1318,18 +1470,6 @@ TEST (ut_ss_voxel, basic){
         return base;
     };
     
-    // Create random signals
-    //    auto randvec8 = []( uint32_t size){
-    //        std::vector<uint8_t> base(size);
-    //
-    //        for (auto i : irange(0u, size)) {
-    //            // base[i] = ((i % 256) / 256.0f - 0.5f) * 0.8;
-    //            base[i] = rand() % 255;
-    //        }
-    //
-    //        return base;
-    //    };
-    
     double endtime;
     std::clock_t start;
     
@@ -1338,16 +1478,6 @@ TEST (ut_ss_voxel, basic){
     int rows = 32;
     int cols = 32;
     cv::Point2f ctr (cols/2.0f, rows/2.0f);
-    
-    //    auto cvDrawPlot = [] (std::vector<float>& tmp){
-    //
-    //        std::string name = svl::toString(std::clock());
-    //        cvplot::setWindowTitle(name, svl::toString(tmp.size()));
-    //        cvplot::moveWindow(name, 0, 256);
-    //        cvplot::resizeWindow(name, 512, 256);
-    //        cvplot::figure(name).series(name).addValue(tmp).type(cvplot::Line).color(cvplot::Red);
-    //        cvplot::figure(name).show();
-    //    };
     
     start = std::clock();
     for (auto row = 0; row < rows; row++){
@@ -1387,7 +1517,7 @@ TEST (ut_ss_voxel, basic){
     
     
     /// Show in a window
-    namedWindow( " ss voxel ", CV_WINDOW_KEEPRATIO  | WINDOW_OPENGL);
+    namedWindow( " ss voxel ", WINDOW_KEEPRATIO  | WINDOW_OPENGL);
     imshow( " ss voxel ", cm);
     cv::waitKey(-1);
 #endif
@@ -1633,7 +1763,7 @@ TEST(ut_labelBlob, basic)
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     EXPECT_EQ(true, s_graphics_ready);
     /// Show in a window
-    namedWindow( "LabelBlob ", CV_WINDOW_AUTOSIZE | WINDOW_OPENGL);
+    namedWindow( "LabelBlob ", WINDOW_AUTOSIZE | WINDOW_OPENGL);
     imshow( "LabelBlob", lbr->graphicOutput());
     cv::waitKey();
 #endif
@@ -1979,7 +2109,7 @@ int main(int argc, char ** argv)
     setup_loggers(pp.parent_path().string(), id);
     testing::InitGoogleTest(&argc, argv);
   
-    bool check = argc == 3 || specifier.compare(std::string(argv[1])) == 0;
+    bool check = argc >= 3 || specifier.compare(std::string(argv[1])) == 0;
     if(!check) std::cout << " Failed to supply asset path " << std::endl;
     else{
         std::shared_ptr<test_utils::genv>  shared_env (new test_utils::genv(argv[0]));
