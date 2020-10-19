@@ -9,7 +9,7 @@
 #include <sstream>
 #include "imgui.h"
 #include "CinderImGui.h"
-
+#include "mediaInfo.h"
 using namespace std;
 using namespace ci;
 using namespace ImGui;
@@ -24,18 +24,18 @@ using namespace ImGui;
 /////////////// if three channels
 
 
-class imageDisplayMapper : tiny_media_info
+class imageDisplayMapper : mediaSpec
 {
 public:
     // Constructor
     imageDisplayMapper () {}
-    void init (const tiny_media_info& tmi){
-         *((tiny_media_info*)this) = tmi;
-        m_cc = this->getNumChannels();
+    void init (const mediaSpec& tmi){
+         *((mediaSpec*)this) = tmi;
+        m_cc = this->getSectionCount();
         m_image_rect = Rectf(0,0,this->getWidth(), this->getHeight());
         m_display_rect = m_image_rect;
-        m_channel_size.first = this->getChannelWidth();
-        m_channel_size.second = this->getChannelHeight();
+        m_channel_size.first = this->getSectionSize().first;
+        m_channel_size.second = this->getSectionSize().second;
         update_maps();
     }
     

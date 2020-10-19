@@ -1,9 +1,14 @@
 #ifndef __LIFContext___h
 #define __LIFContext___h
 
+
+#include <OpenImageIO/imagebuf.h>
+#include <OpenImageIO/imagecache.h>
+#include <OpenImageIO/imageio.h>
+
 #include "guiContext.h"
 #include "ssmt.hpp"
-#include "lif_content.hpp"
+//#include "lif_content.hpp"
 #include "clipManager.hpp"
 #include "visible_layout.hpp"
 #include <atomic>
@@ -22,6 +27,7 @@ using namespace ci::signals;
 
 using namespace std;
 namespace bfs = boost::filesystem;
+using namespace OIIO;
 
 typedef std::shared_ptr<class lifContext> lifContextRef;
 
@@ -32,7 +38,11 @@ class lifContext : public sequencedImageContext
 public:
     
     // From a lif_serie_data
-    lifContext(ci::app::WindowRef& ww, const lif_serie_data&, const bfs::path&, const std::string& lif_file_name);
+    lifContext(ci::app::WindowRef& ww,
+               const std::shared_ptr<ImageBuf>& input,
+               const mediaSpec& mspec,
+               const bfs::path&,
+               const bfs::path& );
     
     std::shared_ptr<lifContext> shared_from_above(){
         return std::dynamic_pointer_cast<lifContext>(shared_from_this ());
@@ -109,14 +119,13 @@ private:
     // Normalize for image rendering
     void glscreen_normalize (const sides_length_t& , const Rectf& display_rect,  sides_length_t&);
     
-    // LIF Support
+
     std::shared_ptr<ssmt_processor> m_lifProcRef;
-	void loadCurrentSerie ();
+	void loadCurrentMedia ();
 	bool have_lif_serie ();
-    std::shared_ptr<lifIO::LifSerie> m_cur_lif_serie_ref;
-    lif_serie_data m_serie;
+
     
-    
+    ImageSpec mSpec;
     boost::filesystem::path mPath;
     std::string mContentFileName;
     std::vector<std::string> m_plot_names;
@@ -149,6 +158,7 @@ private:
     mutable std::mutex m_update_mutex;
     
     // Frame Cache and frame store
+    std::shared_ptr<ImageBuf>  mImageCache;
     std::shared_ptr<seqFrameContainer> mFrameSet;
     SurfaceRef  mSurface;
   
@@ -183,7 +193,7 @@ private:
     // Folder for Per user result / content caching
     boost::filesystem::path mUserStorageDirPath;
     boost::filesystem::path mCurrentSerieCachePath;
-
+    ustring mContentNameU;
   
         
     // Content Info
@@ -219,9 +229,10 @@ private:
     gl::TextureRef mImage;
     uint32_t m_cutoff_pct;
 
-
+    // Time / Screen / Layout Info
+    timeIndexConverter m_tic;
+    mediaSpec m_mspec;
     
-    // Screen Info
     vec2 mFrameSize;
     gl::TextureRef pixelInfoTexture ();
     std::string m_title;
@@ -248,7 +259,7 @@ private:
 
     
     // Layout Manager
-    std::shared_ptr<imageDisplayMapper> m_layout;
+    std::shared_ptr<imageDisplayMapper> m_imageDisplayMapper;
   
     // UI flags
     bool m_showLog, m_showGUI, m_showHelp;

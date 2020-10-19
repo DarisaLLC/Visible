@@ -7,26 +7,28 @@
 #include "timed_types.h"
 
 
+// Holds the duration and frame count
+// Can be updated by either new time, new index, or normalized 
 
-
-class marker_info : index_time_t
+class timeIndexConverter : index_time_t
 {
 public:
     
-    marker_info () { first = -1; second = 0.0; }
+    timeIndexConverter () { first = -1; second = 0.0; }
     
-    marker_info (int64_t num_frames, double duration)
+    // Convertor for starting beginning at zero
+    timeIndexConverter (int64_t num_frames, double duration)
     {
-        first = 0;
-        second = time_spec_t (0.0);
+        first = mStart.first = 0;
+        second = mStart.second = time_spec_t (0.0);
         mEntire.first = num_frames;
         mEntire.second = duration;
     }
     
-    marker_info (int64_t index, float time_in_seconds, int64_t num_frames, float duration)
+    timeIndexConverter (int64_t index, float time_in_seconds, int64_t num_frames, float duration)
     {
-        first = index;
-        second = time_spec_t (time_in_seconds);
+        first = mStart.first = index;
+        second = mStart.second = time_spec_t (time_in_seconds);
         mEntire.first = num_frames;
         mEntire.second = duration;
     }
@@ -34,29 +36,13 @@ public:
     inline double duration () const { return mEntire.second.secs(); }
     inline int64_t count () const { return mEntire.first; }
     
+    inline int64_t start_frame () const { return mStart.first; }
+    inline const time_spec_t& start_time_spec () const { return mStart.second; }
+    
     inline int64_t current_frame () const { return first; }
     inline const time_spec_t& current_time_spec () const { return second; }
     
-    
-    void from_norm (double normed)
-    {
-        if (std::signbit(normed) || normed > 1.0 ) return;
-        first = count() * normed;
-        second = time_spec_t (duration() * normed);
-    }
-    
-    void from_time (double new_secs)
-    {
-        double normed = new_secs / duration ();
-        
-        if (normed > 1.0) return;
-        
-        second = time_spec_t (new_secs);
-        first = count() * normed;
-
-    }
-    
-    void from_count (int64_t _cnt)
+    void update (int64_t _cnt)
     {
         double normed = ((double)_cnt) / count();
         
@@ -67,10 +53,11 @@ public:
         
     }
     
-    double norm_time () const { return second.secs() / mEntire.second.secs(); }
-    double norm_index () const { return first / (double) mEntire.first; }
+    double norm_current_time () const { return second.secs() / mEntire.second.secs(); }
+    double norm_current_index () const { return first / (double) mEntire.first; }
     
-    friend std::ostream& operator<< (std::ostream& std_stream, marker_info& t)
+    
+    friend std::ostream& operator<< (std::ostream& std_stream, timeIndexConverter& t)
     {
         
         std_stream << t.first << "," << t.second.secs() << "[" << t.mEntire.first << "," << t.mEntire.second.secs() << "]";
@@ -79,7 +66,8 @@ public:
     
 private:
     index_time_t mEntire;
-    
+    index_time_t mStart;
+
 };
 
 

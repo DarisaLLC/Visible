@@ -17,13 +17,13 @@ typedef struct {
     intmax_t rem;
  } imaxdiv_t;
 
-static imaxdiv_t imaxdiv(intmax_t numer, intmax_t denom)
-   {
-   imaxdiv_t i;
-   i.quot = numer / denom;
-   i.rem = numer % denom;
-   return i;
-   }
+//static imaxdiv_t imaxdiv(intmax_t numer, intmax_t denom)
+//   {
+//   imaxdiv_t i;
+//   i.quot = numer / denom;
+//   i.rem = numer % denom;
+//   return i;
+//   }
 
 /*!
  * Creates a time spec from system counts:
@@ -32,10 +32,10 @@ static imaxdiv_t imaxdiv(intmax_t numer, intmax_t denom)
  * Therefore, divmod the counts into seconds + sub-second counts first.
  */
 
-static time_spec_t time_spec_t_from_counts(intmax_t counts, intmax_t freq){
-    imaxdiv_t divres = imaxdiv(counts, freq);
-    return time_spec_t(time_t(divres.quot), double(divres.rem)/freq);
-}
+//static time_spec_t time_spec_t_from_counts(intmax_t counts, intmax_t freq){
+//    imaxdiv_t divres = imaxdiv(counts, freq);
+//    return time_spec_t(time_t(divres.quot), double(divres.rem)/freq);
+//}
 
 #ifdef HAVE_CLOCK_GETTIME
 #include <time.h>
@@ -106,10 +106,10 @@ time_spec_t::time_spec_t(time_t full_secs, long tick_count, double tick_rate){
     time_spec_init(full_secs, frac_secs);
 }
 
-time_spec_t::time_spec_t(const cm_time& cmt)
-{
-    *this = time_spec_t_from_counts(cmt.getValue(),(intmax_t)cmt.getScale());
-}
+//time_spec_t::time_spec_t(const cm_time& cmt)
+//{
+//    *this = time_spec_t_from_counts(cmt.getValue(),(intmax_t)cmt.getScale());
+//}
 /***********************************************************************
  * Time spec math overloads
  **********************************************************************/

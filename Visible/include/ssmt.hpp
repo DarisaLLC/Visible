@@ -11,6 +11,11 @@
 #include <typeindex>
 #include <map>
 #include <future>
+
+#include <OpenImageIO/imagebuf.h>
+#include <OpenImageIO/imagecache.h>
+#include <OpenImageIO/imageio.h>
+
 #include "timed_types.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
@@ -24,12 +29,14 @@
 #include "iowriter.hpp"
 #include "moving_region.h"
 #include "input_selector.hpp"
-#include "lif_content.hpp"
+#include "mediaInfo.h"
+
+//#include "lif_content.hpp"
 using namespace cv;
 using blob = svl::labelBlob::blob;
 using namespace boost;
 namespace bfs=boost::filesystem;
-
+using namespace OIIO;
 
 class ssmt_result;
 
@@ -50,13 +57,10 @@ public:
     
     class params{
     public:
-        enum ContentType {
-            lif = 0,
-            bgra = lif+1,
-        };
-        params (const ContentType ct = ContentType::lif, const voxel_params_t voxel_params = voxel_params_t()): m_content(ct), m_vparams(voxel_params) {}
+
+        params (const TypeDesc ct = TypeUInt8, const voxel_params_t voxel_params = voxel_params_t()): m_type(ct), m_vparams(voxel_params) {}
         
-        const ContentType& content_type () { return m_content; }
+        const TypeDesc& content_type () { return m_type; }
         
         const std::pair<uint32_t,uint32_t>& voxel_sample () {return m_vparams.voxel_sample(); }
         const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_vparams.voxel_sample_half(); }
@@ -78,7 +82,7 @@ public:
         
     private:
         voxel_params_t m_vparams;
-        ContentType m_content;
+        TypeDesc m_type;
     };
     
   //  using contractionContainer_t = contractionLocator::contractionContainer_t;
@@ -124,9 +128,8 @@ public:
   
   
     // Load frames from cache
-    void load_channels_from_lif (const std::shared_ptr<seqFrameContainer>& frames,
-                  const lif_serie_data& sd = lif_serie_data () );
-    void load_channels_from_video (const std::shared_ptr<seqFrameContainer>& frames);
+    void load_channels_from_lif (const std::shared_ptr<ImageBuf>& frames, const ustring& contentName, const mediaSpec& );
+
     
     // Run Luminance info on a vector of channel indices over time
     // Signals completion using intensity_over_time_ready
@@ -196,7 +199,7 @@ private:
    void internal_run_selfsimilarity_on_selected_input  (const std::vector<roiWindow<P8U>>& images,  const input_channel_selector_t&,const progress_fn_t& reporter);
 
     // Assumes LIF data -- use multiple window.
-   void load_channels_from_lif_buffer2d (const std::shared_ptr<seqFrameContainer>& frames,  const lif_serie_data& sd = lif_serie_data () );
+    void load_channels_from_lif_buffer2d (const std::shared_ptr<ImageBuf>& frames,  const ustring& contentName, const mediaSpec& sd);
 
    void create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names);
        

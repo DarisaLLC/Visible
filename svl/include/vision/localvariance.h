@@ -8,7 +8,8 @@
 #ifndef irec_framework_localvariance_h
 #define irec_framework_localvariance_h
 
-#include "opencv2/core/core.hpp"
+#include "opencv2/opencv.hpp"
+
 
 
 namespace svl

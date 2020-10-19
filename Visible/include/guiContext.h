@@ -57,13 +57,6 @@ public:
 		viewer_types = lif_file_viewer+1,
 	};
 	
-	// Signal time point mark to all
-	// receive time point mark from all
-	typedef marker_info marker_info_t;
-    typedef void (sig_cb_marker) (marker_info_t&);
-	Signal <void(marker_info_t&)> signalMarker;
-	
-	
 	guiContext (ci::app::WindowRef& ww);
 	
 	virtual const std::string & getName() const ;
@@ -143,7 +136,8 @@ public:
 	static ivec2 startup_display_size () { return ivec2( 848, 564 ); }
 	
 protected:
-
+	
+	
 	std::mutex m_track_mutex;
 	
 	arrayOfNamedTracks_t m_luminance_tracks;

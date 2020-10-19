@@ -2,85 +2,84 @@
 #ifndef __GEN_MOVIE_INFO__
 #define __GEN_MOVIE_INFO__
 
-#include <CoreMedia/CMTime.h>
-#include <CoreMedia/CMTimeRange.h>
-#include <CoreGraphics/CGBitmapContext.h>
-#include "core/coreGLM.h"
-
-#ifdef __cplusplus
 #include <iostream>
+#include "core/pair.hpp"
 
 using namespace std;
-#ifndef BOOL
-#define BOOL bool
-#endif
-#endif
 
-struct tiny_media_info
+// Media spec supports ROIs that are sections of the root buffer. Sections are assumed to have same width
+// and height that is equal to height / number of sections.
+
+class mediaSpec
 {
-    uint32_t count;
-    double duration;
-    double mFps;
-    CGSize size;
-    CGSize channel_size;
-    CMTimeRange timerange;
-    CGAffineTransform  embedded;
-    CGAffineTransform  toSize;
-    float              orientation; // 0:Right, 90: Up, 180 Left, -90 Down
-    BOOL mIsImageFolder;
-    BOOL mIsLifSerie;
-    BOOL mIsIooI;
-    BOOL mIsMovie;
-    uint32_t mChannels;
-    uint32_t mBitsPerPixel;
-    uint32_t mBytesPerPixel;
-    
-    
-    void printout ()
-    {
-        if (! isImageFolder ())
-            std::cout  << " -- General Movie Info -- " << std::endl;
-        else
-            std::cout  << " -- Image Folder Info -- " << std::endl;
-        
-        std::cout  << "Dimensions:" << getWidth() << " x " << getHeight() << std::endl;
-        std::cout  << "Duration:  " << getDuration() << " seconds" << std::endl;
-        std::cout  << "Frames:    " << getNumFrames() << std::endl;
-        std::cout  << "Framerate: " << getFramerate() << std::endl;
+public:
+    mediaSpec () { mValid = false; }
+    mediaSpec (int width, int height, int sections, double duration, int64_t number_of_frames,
+               const std::vector<std::string>& names = std::vector<std::string> ()):
+    mSize(width,height), mSections(sections),
+    mDuration(duration), mFrameCount(number_of_frames){
+        mSectionSize.first = width;
+        mSectionSize.second = height / mSections;
+        for (auto ss = 0; ss < mSections; ss++){
+            mROIxRanges.emplace_back(0, width);
+            auto y_anchor = ss * mSectionSize.second;
+            mROIyRanges.emplace_back(y_anchor,y_anchor+mSectionSize.second);
+        }
+        mFps = number_of_frames / duration;
+        mSectionNames = names;
+        if (names.size() != mSections){
+            mSectionNames.resize(mSections);
+            for (auto ss = 0; ss < mSections; ss++){
+                std::string default_str = " " + svl::toString(ss) + " ";
+                mSectionNames[ss] = default_str;
+            }
+        }
+        mValid = true;
     }
     
-#ifdef __cplusplus
-    std::string mCustomLif; // if "", denotes canonical LIF file 
-    tiny_media_info () { clear (); }
-    void clear () { std::memset(this, 0, sizeof (tiny_media_info)); }
-    BOOL isImageFolder () const { return mIsImageFolder; }
-    BOOL isLIFSerie () const { return mIsLifSerie; }
-    BOOL isIooI () const { return mIsIooI; }
-    int32_t getWidth () const { return size.width; }
-    int32_t getHeight () const { return size.height; }
-    glm::vec2 getSize () const { return glm::vec2(size.width, size.height); }
-    glm::vec2 getChannelSize () const { return glm::vec2(channel_size.width, channel_size.height); }
-    int32_t getChannelWidth () const { return channel_size.width; }
-    int32_t getChannelHeight () const { return channel_size.height; }
-    
-    double getDuration () const { return duration; }
-    double getFramerate () const { return mFps; }
-    double getNumFrames () const { return count; }
-    double getFrameDuration () const { return getDuration () / getNumFrames (); }
-    uint32_t getNumChannels () const { return mChannels; }
-    
-    friend std::ostream& operator<<(std::ostream& std_stream, const tiny_media_info& t);
+    const bool& valid () { return mValid; }
+    int32_t getSectionCount () const { return mSections; }
+    const int32_t& getWidth () const { return mSize.first; }
+    const int32_t& getHeight () const { return mSize.second; }
+    const iPair& getSize () const { return mSize; }
+    const iPair& getSectionSize () const { return mSectionSize; }
+    const std::vector<iPair>& getROIxRanges () const { return mROIxRanges; }
+    const std::vector<iPair>& getROIyRanges () const { return mROIyRanges; }
+    const double duration () const { return mDuration; }
+    const int64_t frameCount () const { return mFrameCount; }
+    const float Fps () const { return mFps; }
+    const std::vector<std::string>& names () const { return mSectionNames; }
     
     
-  
-#ifdef BOOL
-#undef BOOL
-#endif
+    static bool test (int width, int height, int sections, double duration, int64_t count){
+        mediaSpec sp (width, height, sections, duration, count);
+        bool ans = sp.getSectionCount() == sections;
+        if (! ans) return false;
+        ans = sp.getWidth() == width;
+        if (! ans) return false;
+        ans = sp.getHeight() == width;
+        if (! ans) return false;
+        ans = sp.getROIxRanges().size() == sections;
+        if (! ans) return false;
+        ans = sp.getROIyRanges().size() == sections;
+        if (! ans) return false;
+        return true;
+    }
     
-#endif
-    
-    
+private:
+    bool mValid;
+    double mDuration;
+    int64_t mFrameCount;
+    iPair mSize;
+    iPair mSectionSize;
+    int mSections;
+    float mFps;
+    std::vector<iPair> mROIxRanges;
+    std::vector<iPair> mROIyRanges;
+    std::vector<std::string> mSectionNames;
 };
+
+
 
 
 #endif

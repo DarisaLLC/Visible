@@ -118,6 +118,8 @@ namespace svl
     #define cvMatRefroiP8U(a,b,cvType) cv::Mat b ((a).height(),(a).width(), cvType,(a).pelPointer(0,0), size_t((a).rowUpdate()))
 
     void cpCvMatToRoiWindow8U (const cv::Mat& m, roiWindow<P8U>& r);
+    void cpCvMatToRoiWindow16U (const cv::Mat& m, roiWindow<P16U>& r);
+    
     double correlation (cv::Mat &image_1, cv::Mat &image_2);
     double correlation_ocv(const roiWindow<P8U>& i, const roiWindow<P8U>& m);
     void cumani_opencv (const cv::Mat& input_bgr, cv::Mat& gradAbs, cv::Mat& orientation, float& maxVal);

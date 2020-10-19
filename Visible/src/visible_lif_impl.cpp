@@ -116,14 +116,26 @@ using contraction_t = contractionLocator::contraction_t;
 // @ todo setup default repository
 // default median cover pct is 5% (0.05)
 
-lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const bfs::path& cache_path, const std::string& fname) :sequencedImageContext(ww), m_serie(sd), m_voxel_view_available(false), mUserStorageDirPath (cache_path), mContentFileName(fname) {
+lifContext::lifContext(ci::app::WindowRef& ww,
+                       const std::shared_ptr<ImageBuf>& sd,
+                       const mediaSpec& mspec,
+                       const bfs::path& cache_path,
+                       const bfs::path& content_path) :
+                        sequencedImageContext(ww),
+                        mImageCache (sd),
+                        m_mspec (mspec),
+                        m_voxel_view_available(false),
+                        mUserStorageDirPath (cache_path),mPath(content_path) {
     m_type = guiContext::Type::lif_file_viewer;
     m_show_contractions = false;
     // Create an invisible folder for storage
-    mCurrentSerieCachePath = mUserStorageDirPath / m_serie.name();
+    mContentNameU = ustring(content_path.c_str());
+    mContentFileName = mPath.stem().string();
+    mCurrentSerieCachePath = mUserStorageDirPath / mContentFileName;
     bool folder_exists = bfs::exists(mCurrentSerieCachePath);
+
     std::string msg = folder_exists ? " exists " : " does not exist ";
-    msg = " folder for " + m_serie.name() + msg;
+    msg = " folder for " + mContentFileName + msg;
     vlogger::instance().console()->info(msg);
     m_idlab_defaults.median_level_set_cutoff_fraction = 15;
     m_playback_speed = 1;
@@ -136,17 +148,16 @@ lifContext::lifContext(ci::app::WindowRef& ww, const lif_serie_data& sd, const b
     m_show_playback = false;
     m_is_loading = false;
     m_content_loaded = false;
-    
+
+    mSpec = mImageCache->spec();
     m_valid = false;
-    m_valid = sd.index() >= 0;
+    m_tic = timeIndexConverter(m_mspec.frameCount(), m_mspec.duration());
+
+    m_valid = m_mspec.frameCount() > 1 & m_mspec.duration() > 0.0;
     if (m_valid){
-        m_layout = std::make_shared<imageDisplayMapper>  ();
-        if (auto lifRef = m_serie.readerWeakRef().lock()){
-            m_cur_lif_serie_ref = std::shared_ptr<lifIO::LifSerie>(&lifRef->getSerie(sd.index()), stl_utils::null_deleter());
-            setup();
-            ww->getRenderer()->makeCurrentContext(true);
-     
-        }
+        m_imageDisplayMapper = std::make_shared<imageDisplayMapper>  ();
+        setup();
+        ww->getRenderer()->makeCurrentContext(true);
     }
 }
 
@@ -158,7 +169,8 @@ ci::app::WindowRef&  lifContext::get_windowRef(){
 void lifContext::setup_signals(){
     
     // Create a Processing Object to attach signals to
-    m_lifProcRef = std::make_shared<ssmt_processor> (mCurrentSerieCachePath);
+    ssmt_processor::params params (mSpec.format);
+    m_lifProcRef = std::make_shared<ssmt_processor> ( mCurrentSerieCachePath, params);
     
     // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&lifContext::signal_content_loaded, shared_from_above(), boost::placeholders::_1);
@@ -193,6 +205,8 @@ void lifContext::setup_signals(){
 void lifContext::setup()
 {
     ci::app::WindowRef ww = get_windowRef();
+    ww->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
+    
     m_showGUI = true;
     m_showLog = true;
     m_showHelp = true;
@@ -200,16 +214,16 @@ void lifContext::setup()
     srand( 133 );
     setup_signals();
     assert(is_valid());
-    ww->setTitle( m_serie.name());
+    ww->setTitle( mContentFileName );
     mFont = Font( "Menlo", 18 );
     auto ws = ww->getSize();
     mSize = vec2( ws[0], ws[1] / 12);
     m_contraction_names = m_contraction_none;
     clear_playback_params();
-    loadCurrentSerie();
+    loadCurrentMedia();
     shared_from_above()->update();
     
-    ww->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
+
 }
 
 
@@ -248,7 +262,7 @@ void lifContext::signal_root_pci_med_reg_ready (const input_channel_selector_t& 
 
 void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
 {
-    std::string msg = to_string(mMediaInfo.count) + " Samples in Media  " + to_string(loaded_frame_count) + " Loaded";
+    std::string msg = to_string(mImageCache->nsubimages()) + " Samples in Media  " + to_string(loaded_frame_count) + " Loaded";
     vlogger::instance().console()->info(msg);
     m_is_loading = false;
     m_content_loaded.store(true, std::memory_order_release);
@@ -269,22 +283,7 @@ void lifContext::signal_contraction_ready (contractionLocator::contractionContai
     ss << " Moving Region: " << svl::toString(in.region()) << " " << svl::toString(contras.size());
     vlogger::instance().console()->info(ss.str());
     m_cell2contractions_map[contras[0].m_uid] = contras;
-    
-    // redesign of graphic output
-#if NOTYET
-    // @note: We are handling one contraction for now.
-    m_contractions = contras;
-    reset_entire_clip(mMediaInfo.count);
-    uint32_t index = 0;
-    string name = " C " + svl::toString(index) + " ";
-    m_contraction_names.push_back(name);
-    auto ctr = m_contractions[0];
-    m_clips.emplace_back(ctr.contraction_start.first,
-                         ctr.relaxation_end.first,
-                         ctr.contraction_peak.first);
-    
-    update_sequencer();
-#endif
+
     
 }
 
@@ -310,10 +309,10 @@ void lifContext::signal_regions_ready(int count, const input_channel_selector_t&
 
 void lifContext::glscreen_normalize (const sides_length_t& src, const Rectf& gdr, sides_length_t& dst){
     
-    dst.first.x = (src.first.x*gdr.getWidth()) / mMediaInfo.getWidth();
-    dst.second.x = (src.second.x*gdr.getWidth()) / mMediaInfo.getWidth();
-    dst.first.y = (src.first.y*gdr.getHeight()) / mMediaInfo.getHeight();
-    dst.second.y = (src.second.y*gdr.getHeight()) / mMediaInfo.getHeight();
+    dst.first.x = (src.first.x*gdr.getWidth()) / mSpec.width;
+    dst.second.x = (src.second.x*gdr.getWidth()) / mSpec.width;
+    dst.first.y = (src.first.y*gdr.getHeight()) / mSpec.height;
+    dst.second.y = (src.second.y*gdr.getHeight()) / mSpec.height;
 }
 
 void lifContext::signal_segmented_view_ready (cv::Mat& image, cv::Mat& label)
@@ -397,8 +396,8 @@ void lifContext::clear_playback_params ()
 
 bool lifContext::have_lif_serie ()
 {
-    bool have =   m_serie.readerWeakRef().lock() && m_cur_lif_serie_ref  && mFrameSet ;
-    return have;
+    bool not_have =  ! mImageCache ;
+    return ! not_have;
 }
 
 
@@ -492,7 +491,7 @@ void lifContext::seekToStart ()
 
 int lifContext::getNumFrames ()
 {
-    return mMediaInfo.count;
+    return mImageCache->nsubimages();
 }
 
 int lifContext::getCurrentFrame ()
@@ -502,13 +501,11 @@ int lifContext::getCurrentFrame ()
 
 time_spec_t lifContext::getCurrentTime ()
 {
-    if (m_seek_position >= 0 && m_seek_position < m_serie.timeSpecs().size())
-        return m_serie.timeSpecs()[m_seek_position];
-    else return -1.0;
+    return m_tic.current_time_spec();
 }
 
 time_spec_t lifContext::getStartTime (){
-    return m_serie.timeSpecs()[0];
+    return m_tic.start_time_spec();
 }
 
 
@@ -521,6 +518,7 @@ void lifContext::seekToFrame (int mark)
         mark = looping() ? curr.first() : curr.last();
     
     m_seek_position = mark;
+    m_tic.update(m_seek_position);
 }
 
 
@@ -684,9 +682,9 @@ int32_t lifContext::getMedianCutOff () const
 //  2
 //  3
 
-void lifContext::loadCurrentSerie ()
+void lifContext::loadCurrentMedia ()
 {
-    if ( ! is_valid() || ! m_cur_lif_serie_ref)
+    if ( ! is_valid() )
         return;
     
     try {
@@ -696,19 +694,9 @@ void lifContext::loadCurrentSerie ()
         m_clips.clear();
         m_instant_channel_display_rects.clear();
         pause();
-        /*
-         * Create the frameset and assign the channel names
-         * Fetch the media info
-         */
-        mFrameSet = seqFrameContainer::create (*m_cur_lif_serie_ref);
-    
-        if (! mFrameSet || ! mFrameSet->isValid())
-        {
-            vlogger::instance().console()->debug("Serie had 1 or no frames ");
-            return;
-        }
-        mMediaInfo = mFrameSet->media_info();
-        mChannelCount = (uint32_t) mMediaInfo.getNumChannels();
+   
+    //    mMediaInfo = mFrameSet->media_info();
+        mChannelCount = (uint32_t) mSpec.nchannels;
         m_instant_channel_display_rects.resize(mChannelCount);
         
         if (!(mChannelCount > 0 && mChannelCount < 4)){
@@ -716,15 +704,12 @@ void lifContext::loadCurrentSerie ()
             return;
         }
         
-        m_layout->init ( mFrameSet->media_info());
+        m_imageDisplayMapper->init ( m_mspec );
         
         /*
          * Create the frameset and assign the channel namesStart Loading Images on async on a different thread
          * Loading also produces voxel images.
          */
-        m_plot_names.clear();
-        m_plot_names = m_serie.channel_names();
-        m_plot_names.push_back("MisRegister");
         
         m_content_loaded.store(false, std::memory_order_release);
         auto load_thread = std::thread(&ssmt_processor::load_channels_from_lif,m_lifProcRef.get(),mFrameSet, m_serie);
@@ -734,25 +719,25 @@ void lifContext::loadCurrentSerie ()
         /*
          * Fetch length and channel names
          */
-        mFrameSet->channel_names (m_serie.channel_names());
-        reset_entire_clip(mFrameSet->count());
+        reset_entire_clip(mImageCache->nsubimages());
         m_minFrame = 0;
         m_maxFrame =  mFrameSet->count() - 1;
         
         // Initialize The Main Sequencer
         m_main_seq.mFrameMin = 0;
-        m_main_seq.mFrameMax = (int) mFrameSet->count() - 1;
+        m_main_seq.mFrameMax = (int) mImageCache->nsubimages() - 1;
         m_main_seq.mSequencerItemTypeNames = {"RGG"};
         m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
         
-        m_title = m_serie.name() + " @ " + mContentFileName;
+        m_title = mImageCache->name();
         
         auto ww = get_windowRef();
         ww->setTitle(m_title );
         ww->getApp()->setFrameRate(mMediaInfo.getFramerate());
         
         
-        mFrameSize = mMediaInfo.getSize();
+        mFrameSize.x = mSpec.width;
+        mFrameSize.y = mSpec.height;
         
         mSurface = Surface8u::create (int32_t(mFrameSize.x), int32_t(mFrameSize.y), true);
         mFbo = gl::Fbo::create(mSurface->getWidth(), mSurface->getHeight());
@@ -850,10 +835,10 @@ void lifContext::add_canvas (){
                 ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
                 ImRect regionRect(canvas_pos, canvas_pos + canvas_size);
                 // Update image/display coordinate transformer
-                m_layout->update_display_rect(canvas_pos, canvas_pos + canvas_size);
+                m_imageDisplayMapper->update_display_rect(canvas_pos, canvas_pos + canvas_size);
                 // Draw Divider between channels
-                ImVec2 midv = m_layout->image2display(ivec2(0,mMediaInfo.channel_size.height));
-                ImVec2 midh = m_layout->image2display(ivec2(mMediaInfo.channel_size.width, mMediaInfo.channel_size.height));
+                ImVec2 midv = m_imageDisplayMapper->image2display(ivec2(0,mSpec.height));
+                ImVec2 midh = m_imageDisplayMapper->image2display(ivec2(mSpec.width, mSpec.height));
                 draw_list->AddLine(midv, midh, IM_COL32(0,0,128,128), 3.0f);
                 
                 int index = 0;
@@ -862,9 +847,9 @@ void lifContext::add_canvas (){
                     const Point2f& pc = mb->motion_surface().center;
                     ivec2 iv(pc.x, pc.y);
                     
-                    ImVec2 ic = m_layout->image2display(iv, d_channel, true);
+                    ImVec2 ic = m_imageDisplayMapper->image2display(iv, d_channel, true);
                     auto roi = mb->roi();
-                    auto tl = m_layout->image2display(ivec2(roi.x, roi.y),  d_channel);
+                    auto tl = m_imageDisplayMapper->image2display(ivec2(roi.x, roi.y),  d_channel);
                     DrawCross(draw_list, ImVec4(0.0f, 1.0f, 0.0f, 0.5f), ImVec2(16,16), false, tl);
                     auto selected = DrawCross(draw_list, ImVec4(1.0f, 0.0f, 0.0f, 0.5f), ImVec2(16,16),
                                               m_selected_cell == index, ic);
@@ -879,7 +864,7 @@ void lifContext::add_canvas (){
                     if(! mb->poly().empty()){
                         std::vector<ImVec2> impts;
                         std::transform(mb->poly().begin(), mb->poly().end(), back_inserter(impts), [&](const cv::Point& f)->ImVec2
-                                       { ivec2 v(f.x,f.y); return m_layout->image2display(v, d_channel); });
+                                       { ivec2 v(f.x,f.y); return m_imageDisplayMapper->image2display(v, d_channel); });
                         auto nc = numbered_half_colors[index];
                         draw_list->AddConvexPolyFilled( impts.data(), impts.size(), nc);
                     }
@@ -1042,7 +1027,7 @@ void lifContext::add_motion_profile (){
     assert(window != nullptr);
     auto ww = get_windowRef();
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
-    ImVec2  frame (mMediaInfo.channel_size.width, mMediaInfo.channel_size.height);
+    ImVec2  frame (mSpec.width, mSpec.height);
 
     m_motion_profile_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(frame.x,frame.y));
     ImGui::SetNextWindowPos(pos);
@@ -1278,8 +1263,20 @@ void lifContext::update ()
     }
     
     // Fetch Next Frame
-    if (have_lif_serie ()){
-        mSurface = mFrameSet->getFrame(getCurrentFrame());
+    if (mImageCache){
+        mImageCache->reset(mContentNameU, getCurrentFrame(), 0);
+        mSurface = Surface::create(mSpec.width, mSpec.height, false);
+        ROI roi = mImageCache->roi();
+        cv::Mat cvb8 (mSpec.width, mSpec.height, CV_8U);
+        if(mImageCache->pixeltype() == TypeUInt16){
+                cv::Mat cvb (mSpec.width, mSpec.height, CV_16U);
+                mImageCache->get_pixels(roi, TypeUInt16, cvb.data);
+                cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
+        }
+        else
+            mImageCache->get_pixels(roi, TypeUInt8, cvb8.data);
+
+        mSurface = Surface8u::create( fromOcv( cvb8 ) );
         mCurrentIndexTime = mFrameSet->currentIndexTime();
         if (mCurrentIndexTime.first != m_seek_position){
             vlogger::instance().console()->info(tostr(mCurrentIndexTime.first - m_seek_position));
@@ -1312,8 +1309,8 @@ void lifContext::update ()
 // In channel x is pos.x, In channel y is pos.y % channel_height
 void lifContext::update_instant_image_mouse ()
 {
-    auto image_pos = m_layout->display2image(mMouseInImagePosition);
-    uint32_t channel_height = mMediaInfo.getChannelSize().y;
+    auto image_pos = m_imageDisplayMapper->display2image(mMouseInImagePosition);
+    uint32_t channel_height = mSpec.height; // mMediaInfo.getChannelSize().y;
     m_instant_channel = ((int) image_pos.y) / channel_height;
     m_instant_mouse_image_pos = image_pos;
     if (mSurface)
@@ -1323,6 +1320,9 @@ void lifContext::update_instant_image_mouse ()
     
     
 }
+
+
+#ifdef MULTI_ROI_CONTENT
 
 gl::TextureRef lifContext::pixelInfoTexture ()
 {
@@ -1377,8 +1377,10 @@ void lifContext::draw_info ()
         Rectf textrect (0.0, ws[1] - mTextTexture->getHeight(), ws[0],ws[1]);
         gl::draw(mTextTexture, textrect);
     }
-    
 }
+#endif
+
+
 void  lifContext::renderToFbo (const SurfaceRef&, gl::FboRef& fbo ){
     // this will restore the old framebuffer binding when we leave this function
     // on non-OpenGL ES platforms, you can just call mFbo->unbindFramebuffer() at the end of the function
