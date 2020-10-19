@@ -92,7 +92,7 @@ public:
     void edit_no_edit_button ();
     void update_sequencer ();
 	
-	const tiny_media_info& media () const { return mMediaInfo; }
+//	const tiny_media_info& media () const { return mMediaInfo; }
     const uint32_t& channel_count () const { return mChannelCount; }
     
     // Navigation
@@ -159,7 +159,7 @@ private:
     
     // Frame Cache and frame store
     std::shared_ptr<ImageBuf>  mImageCache;
-    std::shared_ptr<seqFrameContainer> mFrameSet;
+//    std::shared_ptr<seqFrameContainer> mFrameSet;
     SurfaceRef  mSurface;
   
     
@@ -197,7 +197,7 @@ private:
   
         
     // Content Info
-    tiny_media_info      mMediaInfo;
+//    tiny_media_info      mMediaInfo;
     mutable uint32_t  mChannelCount;
     int64_t m_minFrame;
     int64_t m_maxFrame;

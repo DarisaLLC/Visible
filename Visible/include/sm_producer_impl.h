@@ -20,6 +20,7 @@
 
 #include "roiWindow.h"
 #include "core/timestamp.h"
+#include "core/signaler.h"
 //#include "seq_frame_container.hpp"
 #include "cvVideoPlayer.h"
 
@@ -56,7 +57,7 @@ public:
         m_source_type = Unknown;
     }
     
-    bool load_content_file (const std::string& movie_fqfn);
+ //   bool load_content_file (const std::string& movie_fqfn);
     int loadImageDirectory (const std::string& image_dir, sm_producer::sizeMappingOption szmap,
                             const std::vector<std::string>& supported_extensions = { ".jpg", ".png", ".JPG", ".jpeg"});
     
@@ -107,7 +108,7 @@ private:
     mutable long m_index, m_must_stop, m_frame;
     
     cvVideoPlayer::ref    m_grabberRef;
-    seqFrameContainer::ref   m_frameContainer_ref;
+//    seqFrameContainer::ref   m_frameContainer_ref;
 
     std::queue<float> m_queue;
     paths_vector_t m_framePaths;

@@ -47,7 +47,7 @@ public:
     typedef void (sig_cb_sm2d_available) ();
     sm_producer ();
     
-    bool load_content_file (const string& fq_path);
+  //  bool load_content_file (const string& fq_path);
     bool load_image_directory (const string& fq_path, sizeMappingOption szmap = dontCare);
     void load_images (const images_vector_t&);
 

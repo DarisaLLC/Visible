@@ -13,20 +13,20 @@
 using namespace boost;
 namespace bfs=boost::filesystem;
 
-
-std::ostream& operator<<(std::ostream& std_stream, const tiny_media_info& t)
-{
-    if (! t.isImageFolder ())
-        std_stream  << " -- General Movie Info -- " << std::endl;
-    else
-        std_stream  << " -- Image Folder Info -- " << std::endl;
-    
-    std_stream << "Dimensions:" << t.getWidth() << " x " << t.getHeight() << std::endl;
-    std_stream << "Duration:  " << t.getDuration() << " seconds" << std::endl;
-    std_stream << "Frames:    " << t.getNumFrames() << std::endl;
-    std_stream << "Framerate: " << t.getFramerate() << std::endl;
-    return std_stream;
-}
+//
+//std::ostream& operator<<(std::ostream& std_stream, const tiny_media_info& t)
+//{
+//    if (! t.isImageFolder ())
+//        std_stream  << " -- General Movie Info -- " << std::endl;
+//    else
+//        std_stream  << " -- Image Folder Info -- " << std::endl;
+//    
+//    std_stream << "Dimensions:" << t.getWidth() << " x " << t.getHeight() << std::endl;
+//    std_stream << "Duration:  " << t.getDuration() << " seconds" << std::endl;
+//    std_stream << "Frames:    " << t.getNumFrames() << std::endl;
+//    std_stream << "Framerate: " << t.getFramerate() << std::endl;
+//    return std_stream;
+//}
 
 
 // Utils for both apps
