@@ -90,31 +90,7 @@ bfs::path VisibleAppControl::make_result_cache_entry_for_content_file (const boo
     return ret_path;
 }
 
-bool  VisibleAppControl::make_result_cache_directory_for_lif (const boost::filesystem::path& path, const lif_browser::ref& lif_ref){
-    
-    if(! exists(path) || ! lif_ref) return false;
-    
-    bfs::path cache_path = make_result_cache_entry_for_content_file(path);
 
-    if (cache_path.empty()) return false;
-    
-    try{
-        if(lif_ref){
-        auto series = lif_ref->get_all_series ();
-        
-            for( vector<lif_serie_data>::const_iterator serieIt = series.begin(); serieIt != series.end(); ++serieIt ){
-                auto serie_cache_path = cache_path/serieIt->name();
-                if (!bfs::exists( serie_cache_path)) bfs::create_directories(serie_cache_path);
-            }
-        }
-    }
-    catch (const std::exception & ex)
-    {
-        std::cout << "Creating cache directories failed: " << ex.what() << std::endl;
-        return false;
-    }
-    return true;
-}
 
 bool VisibleAppControl::setup_text_loggers (const bfs::path app_support_dir, std::string id_name){
     

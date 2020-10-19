@@ -19,7 +19,8 @@
 #include <condition_variable>
 
 #include "roiWindow.h"
-#include "seq_frame_container.hpp"
+#include "core/timestamp.h"
+//#include "seq_frame_container.hpp"
 #include "cvVideoPlayer.h"
 
 #include "sm_producer.h"

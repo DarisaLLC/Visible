@@ -25,7 +25,7 @@
 #include <sys/param.h>
 #include <mach-o/dyld.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include "core/cm_time.hpp"
+//#include "core/cm_time.hpp"
 
 using namespace std;
 using namespace boost;
@@ -53,7 +53,7 @@ public:
     
     time_spec_t(time_t full_secs, long tick_count, double tick_rate);
     
-    time_spec_t(const cm_time& cmt);
+//    time_spec_t(const cm_time& cmt);
     
     long get_tick_count(double tick_rate) const
     {

@@ -1,5 +1,5 @@
 //
-//  lif_core.cpp
+//  core_ssmt.cpp
 //  Visible
 //
 //  Created by Arman Garakani on 5/26/19.
@@ -10,6 +10,8 @@
 #pragma GCC diagnostic ignored "-Wunused-private-field"
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
 
+#include "opencv2/stitching.hpp"
+
 #include <stdio.h>
 #include <iostream>
 #include <string>
@@ -17,6 +19,7 @@
 #include <deque>
 #include <sstream>
 #include <map>
+#include "oiio_utils.hpp"
 #include "timed_types.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
@@ -93,49 +96,29 @@ void ssmt_processor::create_named_tracks (const std::vector<std::string>& names,
     m_moment_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
     m_longterm_pci_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
     
-    switch(m_params.content_type()){
-            
-        case ssmt_processor::params::ContentType::lif:
-            switch(names.size()){
-                case 2:
-                    m_moment_tracksRef->resize (1);
-                    m_longterm_pci_tracksRef->resize (1);
-                    for (auto tt = 0; tt < names.size()-1; tt++)
-                        m_moment_tracksRef->at(tt).first = plot_names[tt];
-                    m_longterm_pci_tracksRef->at(0).first = plot_names[1];
-                    break;
-                case 3:
-                    m_moment_tracksRef->resize (2);
-                    m_longterm_pci_tracksRef->resize (1);
-                    for (auto tt = 0; tt < names.size()-1; tt++)
-                        m_moment_tracksRef->at(tt).first = plot_names[tt];
-                    m_longterm_pci_tracksRef->at(0).first = plot_names[2];
-                    break;
-                case 1:
-                    m_longterm_pci_tracksRef->resize (1);
-                    m_longterm_pci_tracksRef->at(0).first = plot_names[0];
-                    break;
-                default:
-                    assert(false);
-                    
-            }
+    switch(names.size()){
+        case 2:
+            m_moment_tracksRef->resize (1);
+            m_longterm_pci_tracksRef->resize (1);
+            for (auto tt = 0; tt < names.size()-1; tt++)
+                m_moment_tracksRef->at(tt).first = plot_names[tt];
+            m_longterm_pci_tracksRef->at(0).first = plot_names[1];
             break;
-        case ssmt_processor::params::ContentType::bgra:
-            
-            switch(names.size()){
-                case 3:
-                case 4:
-                case 1:
-                    m_longterm_pci_tracksRef->resize (1);
-                    m_shortterm_pci_tracks.resize (1);
-                    m_longterm_pci_tracksRef->at(0).first = "Long Term"; // plot_names[2];
-                    m_shortterm_pci_tracks.at(0).first = "Short Term"; // plot_names[3];
-                    break;
-                default:
-                    assert(false);
-            }
+        case 3:
+            m_moment_tracksRef->resize (2);
+            m_longterm_pci_tracksRef->resize (1);
+            for (auto tt = 0; tt < names.size()-1; tt++)
+                m_moment_tracksRef->at(tt).first = plot_names[tt];
+            m_longterm_pci_tracksRef->at(0).first = plot_names[2];
+            break;
+        case 1:
+            m_longterm_pci_tracksRef->resize (1);
+            m_longterm_pci_tracksRef->at(0).first = plot_names[0];
+            break;
+        default:
+            assert(false);
     }
-    
+                    
 }
 
 
@@ -223,14 +206,14 @@ int ssmt_processor:: create_cache_paths (){
  * that is in vCols / 2 , vRows / 2
  * And vCols / 2 , vRows / 2 border
  */
-void ssmt_processor::load_channels_from_lif(const std::shared_ptr<seqFrameContainer>& frames,const lif_serie_data& sd)
+void ssmt_processor::load_channels_from_lif(const std::shared_ptr<ImageBuf>& frames,const ustring& contentName, const mediaSpec& mspec)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
     
     m_voxel_sample.first = m_params.voxel_sample().first;
-    m_expected_segmented_size.first = frames->getChannelWidth() / m_params.voxel_sample().first;
+    m_expected_segmented_size.first = mspec.getSectionSize().first / m_params.voxel_sample().first;
     m_voxel_sample.second = m_params.voxel_sample().second;
-    m_expected_segmented_size.second = frames->getChannelHeight() / m_params.voxel_sample().second;
+    m_expected_segmented_size.second = mspec.getSectionSize().second / m_params.voxel_sample().second;
     
     /*
      Creates named tracks @todo move out of here
@@ -238,8 +221,8 @@ void ssmt_processor::load_channels_from_lif(const std::shared_ptr<seqFrameContai
      i.e 2nd channel from 2 channel LIF file and 3rd channel from a 3 channel LIF file or media file
      
      */
-    create_named_tracks(sd.channel_names(), sd.channel_names());
-    load_channels_from_lif_buffer2d(frames, sd);
+    create_named_tracks(mspec.names(), mspec.names());
+    load_channels_from_lif_buffer2d(frames, contentName, mspec);
     lock.unlock();
     
     // Call the content loaded cb if any
@@ -248,94 +231,57 @@ void ssmt_processor::load_channels_from_lif(const std::shared_ptr<seqFrameContai
 }
 
 // @todo condider creating cv::Mats and convert to roiWindow when needed.
+// @todo consider passing ImageBuf to similarity so that it can fetch image directly and does not need all images in memory
+// 16bit is converted to 8 bit for now using normalize
 
-void ssmt_processor::load_channels_from_lif_buffer2d (const std::shared_ptr<seqFrameContainer>& frames,
-                                                      const lif_serie_data& sd)
+void ssmt_processor::load_channels_from_lif_buffer2d (const std::shared_ptr<ImageBuf>& frames, const ustring& contentName,
+                                                      const mediaSpec& mspec)
 {
-    // Copy deep time / index maps from seqFrameContainer
-    m_2TimeMap = indexToTime_t (frames->index2TimeMap());
-    m_2IndexMap = timeToIndex_t (frames->time2IndexMap());
-    
     m_frameCount = 0;
     m_all_by_channel.clear();
-    m_channel_count = frames->media_info().getNumChannels();
+    m_channel_count = mspec.getSectionCount();
     m_all_by_channel.resize (m_channel_count);
     
-    switch(m_params.content_type()){
-        case ssmt_processor::params::ContentType::lif:{
-            while (frames->checkFrame(m_frameCount)){
-                auto su8 = frames->getFrame(m_frameCount);
-                auto ts = m_frameCount;
-                std::shared_ptr<roiWindow<P8U>> m1 = svl::NewRefSingleFromSurface (su8,  ts);
+    auto nsubs = frames->nsubimages();
+    int width = mspec.getSectionSize().first;
+    int height = mspec.getSectionSize().second;
+    
+    auto format = m_params.content_type();
+    if (format == TypeUInt8){
+            for (auto ii = 0; ii < nsubs; ii++){
+                auto cvb = getRootFrame(frames, contentName, ii);
+                assert(cvb.type() == CV_8U);
+                roiWindow<P8U> r8;
+                cpCvMatToRoiWindow8U (cvb, r8);
                 
-                for (auto cc = 0; cc < sd.channelCount(); cc++){
-                    auto tl_f = sd.ROIs2d()[cc].tl();
-                    auto sz_f = sd.ROIs2d()[cc].size();
-                    m_all_by_channel[cc].emplace_back(m1->frameBuf(),
-                                                      static_cast<int>(tl_f.x),
-                                                      static_cast<int>(tl_f.y),
-                                                      static_cast<int>(sz_f.width),
-                                                      static_cast<int>(sz_f.height));
+                for (auto cc = 0; cc < mspec.getSectionCount(); cc++){
+                    auto tl_f_x = mspec.getROIxRanges()[cc][0];
+                    auto tl_f_y = mspec.getROIyRanges()[cc][0];
+                    m_all_by_channel[cc].emplace_back(r8.frameBuf(),tl_f_x,tl_f_y,width,height);
                 }
-                m_frameCount++;
             }
-            break;
-        }
-        case ssmt_processor::params::ContentType::bgra:{
-            m_all_by_channel.resize(4); // surface always has 4 channels
-            while (frames->checkFrame(m_frameCount))
-            {
-                auto su8 = frames->getFrame(m_frameCount);
-                auto gray = svl::NewGrayFromSurface(su8);
-                auto red = svl::NewRedFromSurface(su8);
-                auto green = svl::NewGreenFromSurface(su8);
-                auto blue = svl::NewBlueFromSurface(su8);
-                m_all_by_channel[0].emplace_back(blue);
-                m_all_by_channel[1].emplace_back(green);
-                m_all_by_channel[2].emplace_back(red);
-                m_all_by_channel[3].emplace_back(gray);
-                m_frameCount++;
+    }
+    else if (format == TypeUInt16){
+            for (auto ii = 0; ii < nsubs; ii++){
+                auto cvb = getRootFrame(frames, contentName, ii);
+                assert(cvb.type() == CV_16U);
+                cv::Mat cvb8 (cvb.rows, cvb.cols, CV_8U);
+                cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
+                roiWindow<P8U> r8;
+                cpCvMatToRoiWindow8U (cvb, r8);
+                
+                for (auto cc = 0; cc < mspec.getSectionCount(); cc++){
+                    auto tl_f_x = mspec.getROIxRanges()[cc][0];
+                    auto tl_f_y = mspec.getROIyRanges()[cc][0];
+                    m_all_by_channel[cc].emplace_back(r8.frameBuf(),tl_f_x,tl_f_y,width,height);
+                }
             }
-            break;
-        }
+    }
+    else{
+        assert(false);
     }
 }
 
-
-void ssmt_processor::load_channels_from_video (const std::shared_ptr<seqFrameContainer>& frames)
-{
-    std::unique_lock<std::mutex> lock(m_mutex);
-    
-    m_frameCount = 0;
-    m_all_by_channel.clear();
-    m_channel_count = frames->media_info().getNumChannels();
-    m_all_by_channel.resize (m_channel_count);
-    std::vector<std::string> names;
-    for (auto cc = 0; cc < m_channel_count; cc++)
-        
-        //@todo: seperate channels and add
-    /*
-     Creates named tracks @todo move out of here
-     Loads channels from images @note uses last channel for visible processing
-     i.e 2nd channel from 2 channel LIF file and 3rd channel from a 3 channel LIF file or media file
-     
-     */
-        create_named_tracks(frames->channel_names(), frames->channel_names());
-    while (frames->checkFrame(m_frameCount))
-    {
-        auto su8 = frames->getFrame(m_frameCount);
-        auto red = svl::NewRedFromSurface(su8);
-        for (auto cc = 0; cc < m_channel_count; cc++)
-            m_all_by_channel[cc].emplace_back(red);
-        m_frameCount++;
-    }
-    lock.unlock();
-    
-    // Call the content loaded cb if any
-    if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
-        signal_content_loaded->operator()(m_frameCount);
-    
-}
 
 /*
  * 1 monchrome channel. Compute volume stats of each on a thread

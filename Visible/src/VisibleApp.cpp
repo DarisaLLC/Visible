@@ -33,7 +33,7 @@ static void ShowHelpMarker(const char* desc)
 bool VisibleAppControl::ThreadsShouldStop = false;
 
 namespace {
-const std::vector<std::string>& supported_mov_extensions = { ".lif", ".mov", ".mp4", ".ts", ".avi"};
+const std::vector<std::string>& supported_mov_extensions = { ".lif", ".mov", ".mp4", ".ts", ".avi", ".tif"};
 }
 using namespace ci;
 using namespace ci::app;
@@ -55,39 +55,7 @@ void VisibleApp::DrawSettings() {
             ImGui::SetNextTreeNodeOpen(true);
             first_time = false;
         }
-        if (isLifFile()) {
-            m_selected_lif_serie_index = -1;
-            m_custom_type = false;
-            static int sSelected = -1;
-            auto series = mBrowser->get_all_series();
-            if (ImGui::TreeNode("Select Serie")) {
-                for (auto i = 0; i < m_sections.size(); i++)
-                {
-                    if (ImGui::Selectable(m_sections[i].c_str(), sSelected == i))
-                                        sSelected = i;
-                    
-                    lif_serie_data& serie =  series[i];
-                    auto width = serie.dimensions()[0];
-                    auto height = serie.dimensions()[1];
-                    ImGui::Text(" %s %lu x %lu (%d) (%d)", serie.name().c_str(), width, height, serie.channelCount(), serie.timesteps());
-                }
-                ImGui::TreePop();
-            }
-            if (sSelected >= 0 && sSelected < m_sections.size()){
-                m_selected_lif_serie_index = sSelected;
-                m_selected_lif_serie_name = m_sections[m_selected_lif_serie_index];
-                static int clicked = 0;
-                ImGui::Text("%s", " Click to Load ");
-                ImGui::SameLine();
-                if (ImGui::Button(m_selected_lif_serie_name.c_str()))
-                    clicked++;
-                if (clicked & 1)
-                {
-                    load_lif_serie(m_selected_lif_serie_name);
-                }
-            } // End Selected check & run
-        }
-        else if (isMovFile())// IsLifFile
+        if (isOiiOFile())
         {
           static int mov_clicked = 0;
           ImGui::Text("%s", " Click to Load ");
@@ -96,7 +64,7 @@ void VisibleApp::DrawSettings() {
               mov_clicked++;
           if (mov_clicked & 1)
           {
-   //         load_mov_file();
+            load_oiio_file();
           }
         }
         ImGui::Spacing();
@@ -149,16 +117,10 @@ void VisibleApp::DrawMainMenu(){
                     auto msg = "Selected " + fout.string();
                     vlogger::instance().console()->info(msg);
                     auto dotext = identify_file(fout, "");
-                    if(isLifFile()){
+                    if(isOiiOFile()){
                         vlogger::instance().console()->info(fout.string() + " Ok " );
                         m_sections.clear();
-                        auto num = list_lif_series(m_sections);
-                        assert(num == m_sections.size());
-                    }
-                    else if(isMovFile()){
-                        vlogger::instance().console()->info(fout.string() + " Ok " );
-                        m_sections.clear();
-                        auto num = list_mov_channels(m_sections);
+                        auto num = list_oiio_channels(m_sections);
                         assert(num == m_sections.size());
                     }
                     else{
@@ -367,8 +329,7 @@ std::string VisibleApp::identify_file(const bfs::path& bpath, const std::string&
     
     std::lock_guard<std::mutex> lock(m_mutex);
     m_is_valid_file = false;
-    m_is_lif_file = false;
-    m_is_mov_file = false;
+    m_is_oiio_file = false;
     
     if (bpath.empty() || exists(bpath) == false || bpath.filename_is_dot() || bpath.filename_is_dot()){
         std::string msg = bpath.string() + " is not a valid path to a file ";
@@ -381,8 +342,7 @@ std::string VisibleApp::identify_file(const bfs::path& bpath, const std::string&
     mDotExtension = identify_extension(bpath);
     if (mDotExtension != ""){
         m_is_valid_file = std::find( supported_mov_extensions.begin(), supported_mov_extensions.end(), mDotExtension) != supported_mov_extensions.end();
-        m_is_lif_file = m_is_valid_file && extension == ".lif";
-        m_is_mov_file = m_is_valid_file && (extension == ".mov" || extension == ".mp4");
+        m_is_oiio_file = m_is_valid_file && (extension == ".mov" || extension == ".mp4" || extension == ".tif");
         if (m_is_valid_file){
             mCurrentContent = bpath;
             mCurrentContentName = bpath.filename().string();
@@ -394,73 +354,22 @@ std::string VisibleApp::identify_file(const bfs::path& bpath, const std::string&
 }
 
 
-size_t VisibleApp::list_lif_series(std::vector<std::string>& names){
-    assert(m_is_lif_file);
-    assert(exists(mCurrentContent));
-    
-    mBrowser =  lif_browser::create(mCurrentContent.string());
-    std::strstream msg;
-    names = mBrowser->names ();
-    
-    for (auto & se : names)
-        msg << std::endl << se;
-    msg << std::endl;
-    
-    std::string tmp = msg.str();
-    VAPPLOG_INFO(tmp.c_str());
-    
-    return names.size();
-}
 
-bool VisibleApp::load_lif_serie(const std::string& serie){
-    if( mContext && mContext->is_valid()) return true;
-    
-    auto bpath_path = mCurrentContent;
-    VisibleAppControl::make_result_cache_directory_for_lif (bpath_path, mBrowser);
-    auto cache_path = VisibleAppControl::get_visible_cache_directory();
-    auto stem = mCurrentContent.stem();
-    cache_path = cache_path / stem;
-    std::string cmds = " [ " + serie + " ] ";
-    
-    auto indexItr = mBrowser->name_to_index_map().find(serie);
-    if (indexItr != mBrowser->name_to_index_map().end()){
-        auto serie = mBrowser->get_serie_by_index(indexItr->second);
-        std::strstream msg;
-        msg << serie << std::endl;
-        VAPPLOG_INFO(msg.str());
-        
-        mViewerWindow = getWindow();
-        mContext = std::make_shared<lifContext>(mViewerWindow,serie,cache_path, mCurrentContentName);
-        
-        if (mContext->is_valid()){
-            cmds += "  Ok ";
-        }
-        
-        VAPPLOG_INFO(cmds.c_str());
-        update();
-        
-        mViewerWindow->setTitle (cmds + " Visible build: " + mBuildn);
-        mFont = Font( "Menlo", 18 );
-        //        mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
-        // ci::ThreadSetup threadSetup; // instantiate this if you're talking to Cinder from a secondary thread
-        return true;
-    }
-    ADD_ERR_AND_RETURN(cmds, " Serie Not Found ")
-}
-
-
-size_t VisibleApp::list_mov_channels(std::vector<std::string>& channel_names){
-    assert(m_is_mov_file);
+size_t VisibleApp::list_oiio_channels(std::vector<std::string>& channel_names){
+    assert(m_is_oiio_file);
     assert(exists(mCurrentContent));
     std::strstream msg;
     channel_names.resize(0);
-    mGrabber = cvVideoPlayer::create(mCurrentContent.string());
-    channel_names = mGrabber->getChannelNames();
+    mCurrentContentU = ustring (mCurrentContent.string());
+    mInput.reset(new ImageBuf(mCurrentContentU));
+    mInput->init_spec(mCurrentContentU, 0, 0);  // force it to get the spec, not read
+    mInputSpec = mInput->spec();
+    channel_names = mInputSpec.channelnames;
     return channel_names.size();
 }
 
-#if 0
-bool VisibleApp::load_mov_file(){
+
+bool VisibleApp::load_oiio_file(){
   if( mContext && mContext->is_valid()) return true;
     auto bpath_path = mCurrentContent;
     auto stem = mCurrentContent.stem();
@@ -468,7 +377,7 @@ bool VisibleApp::load_mov_file(){
     if (exists(mCurrentContent)){
             WindowRef ww = getWindow ();
             auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
-            mContext =  std::make_shared<movContext> (ww, mGrabber, cache_path, bpath_path);
+            mContext =  std::make_shared<lifContext> (ww, mInput, m_mspec, cache_path, bpath_path);
             update();
             
             ww->setTitle ( cmds + " Visible build: " + mBuildn);
@@ -477,7 +386,7 @@ bool VisibleApp::load_mov_file(){
      }
     ADD_ERR_AND_RETURN(cmds, " Path not valid ");
 }
-#endif
+
 
 void VisibleApp::windowMove()
 {

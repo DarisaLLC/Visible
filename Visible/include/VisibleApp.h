@@ -11,6 +11,9 @@
  * Code Copyright 2011 Darisa LLC
  */
 
+#include <OpenImageIO/imagebuf.h>
+#include <OpenImageIO/imagecache.h>
+#include <OpenImageIO/imageio.h>
 
 #include "cinder_cv/cinder_opencv.h"
 #include "cinder/app/App.h"
@@ -34,10 +37,8 @@
 
 #include "Plist.hpp"
 
-#include "lif_content.hpp"
-#include "otherIO/lifFile.hpp"
+#include "mediaInfo.h"
 #include "LifContext.h"
-#include "MovContext.h"
 #include "imGuiLogger.hpp"
 #include "visible_logger_macro.h"
 #include "imGuiCustom/ImSequencer.h"
@@ -52,27 +53,24 @@
 using namespace ci;
 using namespace ci::app;
 using namespace std;
-
+using namespace OIIO;
 
 namespace VisibleAppControl{
-/**
- When this is set to false the threads managed by this program will stop and join the main thread.
- */
-extern bool ThreadsShouldStop;
-static constexpr const char c_visible_app_support[] = "Library/Application Support/net.darisallc.Visible";
-static constexpr const char c_visible_cache_folder_name [] = ".Visible";
-bool check_input (const string &filename);
+    /**
+     When this is set to false the threads managed by this program will stop and join the main thread.
+     */
+    extern bool ThreadsShouldStop;
+    static constexpr const char c_visible_app_support[] = "Library/Application Support/net.darisallc.Visible";
+    static constexpr const char c_visible_cache_folder_name [] = ".Visible";
+    bool check_input (const string &filename);
 
-bfs::path get_visible_app_support_directory ();
-bfs::path get_visible_cache_directory ();
+    bfs::path get_visible_app_support_directory ();
+    bfs::path get_visible_cache_directory ();
 
-bool setup_loggers (const bfs::path app_support_dir,  imGuiLog& visualLog, std::string id_name);
-bool setup_text_loggers (const bfs::path app_support_dir,  std::string id_name);
+    bool setup_loggers (const bfs::path app_support_dir,  imGuiLog& visualLog, std::string id_name);
+    bool setup_text_loggers (const bfs::path app_support_dir,  std::string id_name);
 
-bfs::path make_result_cache_entry_for_content_file (const boost::filesystem::path& path);
-bool make_result_cache_directory_for_lif (const boost::filesystem::path& path, const lif_browser::ref& lif_ref);
-
-static const std::string LIF_CUSTOM = "IDLab_0";
+    bfs::path make_result_cache_entry_for_content_file (const boost::filesystem::path& path);
 }
 
 
@@ -104,17 +102,19 @@ public:
     
     bool shouldQuit();
     bool isValid() const { return m_is_valid_file; }
-    bool isLifFile() const { return isValid() && m_is_lif_file; }
-    bool isMovFile() const { return isValid() && m_is_mov_file; }
+    bool isOiiOFile() const { return isValid() && m_is_oiio_file; }
     void launchViewer ();
     
 private:
+    
+    std::shared_ptr<ImageBuf> mInput;
+    ImageSpec mInputSpec;
+    mediaSpec m_mspec;
+    
     // return null for unacceptable file or dot extension, i.e. ".lif" or ".mov" or ".mp4", etc
     std::string identify_file(const bfs::path& mfile, const std::string& content_type);
-    bool load_lif_serie(const std::string& serie);
-    size_t list_lif_series(std::vector<std::string>& names);
-    bool load_mov_file();
-    size_t list_mov_channels(std::vector<std::string>& channel_names);
+    bool load_oiio_file();
+    size_t list_oiio_channels(std::vector<std::string>& channel_names);
 
     void DrawMainMenu ();
     void DrawImGuiMetrics();
@@ -132,12 +132,11 @@ private:
     bfs::path            mCurrentContent;
     std::string         mDotExtension;
     std::string         mCurrentContentName;
+    ustring             mCurrentContentU;
     
     bfs::path getLoggingDirectory ();
-    bool            m_is_lif_file{false};
+    bool            m_is_oiio_file{false};
     bool            m_is_valid_file{false};
-    bool            m_is_mov_file{false};
-//    vec2                mSize;
     Font                mFont;
     std::string            mLog;
     
@@ -150,9 +149,7 @@ private:
     map<string, boost::any> mPlist;
     
     mutable std::shared_ptr<sequencedImageContext> mContext;
-    mutable lif_browser::ref mBrowser;
     app::WindowRef mViewerWindow;
-    cvVideoPlayer::ref mGrabber;
     
     bool show_logs_{true};
     bool show_settings_{true};

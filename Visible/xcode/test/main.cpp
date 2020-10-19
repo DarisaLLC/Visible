@@ -14,8 +14,11 @@
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
 
+#include <OpenImageIO/imagebuf.h>
+
+#include <OpenImageIO/imagecache.h>
 #include <OpenImageIO/imageio.h>
-#include <OpenImageIO/timer.h>
+
 
 #include <iostream>
 #include <fstream>
@@ -87,6 +90,8 @@
 #include "core/moreMath.h"
 #include "eigen_utils.hpp"
 #include "cluster_geometry.hpp"
+
+#include <OpenImageIO/imagebufalgo.h>
 
 using namespace OIIO;
 
@@ -270,7 +275,7 @@ TEST(oiio, basic){
             buf.get_pixels(roi, TypeUInt16, cvb.data);
             cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
             cv::imshow("oiio", cvb8);
-            cv::waitKey();
+            cv::waitKey(100);
         }
     };
     
@@ -283,6 +288,96 @@ TEST(oiio, basic){
     test_file(filename);
         
 }
+
+
+    // Wimple wrapper to return a raw "null" ImageInput*.
+static ImageInput*
+NullInputCreator()
+{
+        // Note: we can't create it directly, but we can ask for a managed
+        // pointer and then release the raw pointer from it.
+    return ImageInput::create("0.null").release();
+}
+
+
+TEST(oiio, inmemory){
+    // Create 3 synthetic images
+    ImageCache* imagecache = ImageCache::create(false /*not shared*/);
+    
+        // Add a file entry with a "null" ImageInput proxy configured to look
+        // like a 2x2 RGB float image.
+    ustring fooname("foo");
+    const int xres = 2, yres = 2, chans = 3;
+    TypeDesc imgtype = TypeDesc::FLOAT;
+    ImageSpec config(xres, yres, chans, imgtype);
+    config.tile_width  = xres;
+    config.tile_height = yres;
+    config.attribute("null:force", 1);  // necessary because no .null extension
+    bool fadded = imagecache->add_file(fooname, NullInputCreator, &config);
+    EXPECT_TRUE(fadded);
+    
+        // Make sure it got added correctly
+    ImageSpec retrieved_spec;
+    imagecache->get_imagespec(fooname, retrieved_spec);
+    EXPECT_EQ(retrieved_spec.width, xres);
+    EXPECT_EQ(retrieved_spec.height, yres);
+    EXPECT_EQ(retrieved_spec.format, imgtype);
+    
+    float pixels[yres][xres][chans] = { { { 0, 0, 0 }, { 0, 1, 0 } },
+        { { 1, 0, 0 }, { 1, 1, 0 } } };
+        // Add a tile that copies the image.
+    bool ok = imagecache->add_tile(fooname, 0 /* subimage */, 0 /* miplevel */,
+                                   0, 0, 0,         /* origin */
+                                   0, chans,        /* channel range */
+                                   imgtype, pixels, /* the buffer */
+                                   AutoStride, AutoStride,
+                                   AutoStride, /* strides */
+                                   true /* COPY THE PIXELS! */);
+    EXPECT_TRUE(ok);
+    
+    std::shared_ptr<uint8_t> img1 = test_utils::create_trig(20,10);
+    std::shared_ptr<uint8_t> img2 = test_utils::create_trig(20,10);
+    cv::Mat mat1(10, 20, CV_8UC(1), img1.get(), 20);
+    cv::Mat mat2(10, 20, CV_8UC(1), img2.get(), 20);
+        
+    ImageBuf dst = ImageBufAlgo::from_OpenCV(mat1);
+    EXPECT_TRUE(!dst.has_error());
+    
+    
+    
+    
+    
+    
+//    for (float ii = 2; ii < 3; ii++){
+//        float pixels[yres][xres][chans] = { { { 0, 0, 0 }, { 0, ii, 0 } },
+//            { { ii, 0, 0 }, { ii, ii, 0 } } };
+//
+//        bool ok = imagecache->add_tile(fooname, int(ii) - 1/* subimage */, 0 /* miplevel */,
+//                                       0, 0, 0,         /* origin */
+//                                       0, chans,        /* channel range */
+//                                       imgtype, pixels, /* the buffer */
+//                                       AutoStride, AutoStride,
+//                                       AutoStride, /* strides */
+//                                       true /* COPY THE PIXELS! */);
+//        EXPECT_TRUE(ok);
+//    }
+//
+    
+  
+    
+    
+
+    
+    
+
+        
+    
+    
+    
+    
+}
+
+
 
         // Create a private ImageCache so we can customize its cache size
         // and instruct it store everything internally as floats.
