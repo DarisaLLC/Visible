@@ -72,6 +72,7 @@ sm_producer::sm_producer ()
     _impl = std::shared_ptr<sm_producer::spImpl> (new sm_producer::spImpl);
 }
 
+#if OIIO_INTEGRATED
 bool sm_producer::load_content_file (const std::string& movie_fqfn)
 {
     if (_impl){
@@ -81,6 +82,7 @@ bool sm_producer::load_content_file (const std::string& movie_fqfn)
     }
     return false;
 }
+#endif
 
 bool sm_producer::load_image_directory (const std::string& dir_fqfn, sm_producer::sizeMappingOption szmap)
 {
@@ -325,6 +327,7 @@ int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_pr
     return (int) m_frameCount;
 }
 
+#if OIIO_INTEGRATED
 /*
  * Load all the frames in the movie
  */
@@ -364,6 +367,7 @@ int sm_producer::spImpl::loadMovie( const std::string& movieFile )
     return rtn_val;
     
 }
+#endif
 
 void sm_producer::spImpl::loadImages (const images_vector_t& images)
 {
@@ -390,6 +394,7 @@ void sm_producer::spImpl::loadImages (const images_vector_t& images)
     
 }
 
+#if OIIO_INTEGRATED
 bool sm_producer::spImpl::done_grabbing () const
 {
     // unique lock. forces new shared locks to wait untill this lock is release
@@ -397,6 +402,7 @@ bool sm_producer::spImpl::done_grabbing () const
     
     return m_frameCount != 0 && m_frameContainer_ref->count() == m_frameCount;
 }
+#endif
 
 bool  sm_producer::spImpl::image_file_entropy_result_ok () const
 {

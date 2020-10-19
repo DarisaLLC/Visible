@@ -35,7 +35,7 @@
 #include "visible_layout.hpp"
 #include "vision/opencv_utils.hpp"
 #include "core/stl_utils.hpp"
-#include "lif_content.hpp"
+//#include "lif_content.hpp"
 #include "core/signaler.h"
 #include "core/core.hpp"
 #include "contraction.hpp"
