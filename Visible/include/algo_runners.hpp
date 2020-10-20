@@ -77,7 +77,7 @@ struct contractionTrackMaker
             return base;
         };
         
-        ilen = fill (ctr.interpolated_length);
+        ilen = fill (ctr.normalized_length);
         elo = fill (ctr.elongation);
         force = fill (ctr.force);
     }

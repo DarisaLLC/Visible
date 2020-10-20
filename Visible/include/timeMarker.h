@@ -33,14 +33,17 @@ public:
         mEntire.second = duration;
     }
 
-    inline double duration () const { return mEntire.second.secs(); }
-    inline int64_t count () const { return mEntire.first; }
+    inline const double duration () const { return mEntire.second.secs(); }
+    inline const int64_t& count () const { return mEntire.first; }
     
-    inline int64_t start_frame () const { return mStart.first; }
+    inline const int64_t& start_frame () const { return mStart.first; }
     inline const time_spec_t& start_time_spec () const { return mStart.second; }
     
-    inline int64_t current_frame () const { return first; }
+    inline const int64_t& current_frame () const { return first; }
     inline const time_spec_t& current_time_spec () const { return second; }
+    
+    inline const index_time_t& current_frame_index () const { return *this; }
+    
     
     void update (int64_t _cnt)
     {

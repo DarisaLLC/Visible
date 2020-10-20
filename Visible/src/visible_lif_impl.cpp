@@ -125,11 +125,15 @@ lifContext::lifContext(ci::app::WindowRef& ww,
                         mImageCache (sd),
                         m_mspec (mspec),
                         m_voxel_view_available(false),
-                        mUserStorageDirPath (cache_path),mPath(content_path) {
+                        mUserStorageDirPath (cache_path),mPath(content_path)
+{
     m_type = guiContext::Type::lif_file_viewer;
     m_show_contractions = false;
     // Create an invisible folder for storage
     mContentNameU = ustring(content_path.c_str());
+    assert(mContentNameU == sd->name());
+                            
+                            
     mContentFileName = mPath.stem().string();
     mCurrentSerieCachePath = mUserStorageDirPath / mContentFileName;
     bool folder_exists = bfs::exists(mCurrentSerieCachePath);
@@ -137,6 +141,7 @@ lifContext::lifContext(ci::app::WindowRef& ww,
     std::string msg = folder_exists ? " exists " : " does not exist ";
     msg = " folder for " + mContentFileName + msg;
     vlogger::instance().console()->info(msg);
+    m_title = mContentFileName;
     m_idlab_defaults.median_level_set_cutoff_fraction = 15;
     m_playback_speed = 1;
     m_input_selector = input_channel_selector_t(-1,0);
@@ -146,7 +151,6 @@ lifContext::lifContext(ci::app::WindowRef& ww,
     m_show_display_and_controls = false;
     m_show_results = false;
     m_show_playback = false;
-    m_is_loading = false;
     m_content_loaded = false;
 
     mSpec = mImageCache->spec();
@@ -264,7 +268,6 @@ void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
 {
     std::string msg = to_string(mImageCache->nsubimages()) + " Samples in Media  " + to_string(loaded_frame_count) + " Loaded";
     vlogger::instance().console()->info(msg);
-    m_is_loading = false;
     m_content_loaded.store(true, std::memory_order_release);
 }
 void lifContext::signal_intensity_over_time_ready ()
@@ -712,28 +715,25 @@ void lifContext::loadCurrentMedia ()
          */
         
         m_content_loaded.store(false, std::memory_order_release);
-        auto load_thread = std::thread(&ssmt_processor::load_channels_from_lif,m_lifProcRef.get(),mFrameSet, m_serie);
+        auto load_thread = std::thread(&ssmt_processor::load_channels_from_lif,m_lifProcRef.get(),mImageCache, mContentNameU, m_mspec);
         load_thread.detach();
-        m_is_loading = true;
+
         
         /*
          * Fetch length and channel names
          */
         reset_entire_clip(mImageCache->nsubimages());
         m_minFrame = 0;
-        m_maxFrame =  mFrameSet->count() - 1;
+        m_maxFrame =  mImageCache->nsubimages() - 1;
         
         // Initialize The Main Sequencer
         m_main_seq.mFrameMin = 0;
         m_main_seq.mFrameMax = (int) mImageCache->nsubimages() - 1;
         m_main_seq.mSequencerItemTypeNames = {"RGG"};
-        m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, (int) mFrameSet->count(), true});
-        
-        m_title = mImageCache->name();
+        m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, mImageCache->nsubimages() , true});
         
         auto ww = get_windowRef();
-        ww->setTitle(m_title );
-        ww->getApp()->setFrameRate(mMediaInfo.getFramerate());
+        ww->getApp()->setFrameRate(60); //m_mspec.Fps());
         
         
         mFrameSize.x = mSpec.width;
@@ -742,6 +742,8 @@ void lifContext::loadCurrentMedia ()
         mSurface = Surface8u::create (int32_t(mFrameSize.x), int32_t(mFrameSize.y), true);
         mFbo = gl::Fbo::create(mSurface->getWidth(), mSurface->getHeight());
         m_show_playback = true;
+        m_is_playing = true;
+        
     }
     catch( const std::exception &ex ) {
         console() << ex.what() << endl;
@@ -1056,7 +1058,7 @@ void lifContext::draw_contraction_plots(const contractionLocator::contractionCon
     auto ct = cp[id];
     contraction_t::sigContainer_t force = ct.force;
     auto elon = ct.elongation;
-    auto elen = ct.interpolated_length;
+    auto elen = ct.normalized_length;
     svl::norm_min_max (force.begin(), force.end(), true);
     svl::norm_min_max (elon.begin(), elon.end(), true);
     svl::norm_min_max (elen.begin(), elen.end(), true);
@@ -1068,7 +1070,7 @@ void lifContext::draw_contraction_plots(const contractionLocator::contractionCon
         static int i = 0;
         return i++;
     });
-    std::string names [] = { " Force ", " Elongation ", " Interpolated Length " };
+    std::string names [] = { " Force ", " Shortenning ", " Length Normalized " };
     
     auto plot = [=](const contraction_t::sigContainer_t& values, std::string& name, ImU32 color,int framewidth, int frameheight){
         static uint32_t selection_start = 0, selection_length = 0;
@@ -1119,7 +1121,7 @@ bool  lifContext::save_contraction_plots(const contractionLocator::contractionCo
             auto fn = basefilename + "force.csv";
             stl_utils::save_csv(cp.force, fn);
             fn = basefilename + "interpolatedLength.csv";
-            stl_utils::save_csv(cp.interpolated_length, fn);
+            stl_utils::save_csv(cp.normalized_length, fn);
             fn = basefilename + "elongation.csv";
             stl_utils::save_csv(cp.elongation, fn);
             return true;
@@ -1230,6 +1232,8 @@ bool lifContext::haveTracks()
 
 void lifContext::update ()
 {
+//    std::string msg = svl::toString(m_seek_position);
+//    vlogger::instance().console()->info(msg);
     
     if (! have_lif_serie() ) return;
     
@@ -1263,13 +1267,14 @@ void lifContext::update ()
     }
     
     // Fetch Next Frame
-    if (mImageCache){
+    // Make sure we have load content for processing.
+    if (mImageCache && m_content_loaded){
         mImageCache->reset(mContentNameU, getCurrentFrame(), 0);
         mSurface = Surface::create(mSpec.width, mSpec.height, false);
         ROI roi = mImageCache->roi();
-        cv::Mat cvb8 (mSpec.width, mSpec.height, CV_8U);
+        cv::Mat cvb8 (mSpec.height, mSpec.width, CV_8U);
         if(mImageCache->pixeltype() == TypeUInt16){
-                cv::Mat cvb (mSpec.width, mSpec.height, CV_16U);
+                cv::Mat cvb (mSpec.height, mSpec.width, CV_16U);
                 mImageCache->get_pixels(roi, TypeUInt16, cvb.data);
                 cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
         }
@@ -1277,7 +1282,7 @@ void lifContext::update ()
             mImageCache->get_pixels(roi, TypeUInt8, cvb8.data);
 
         mSurface = Surface8u::create( fromOcv( cvb8 ) );
-        mCurrentIndexTime = mFrameSet->currentIndexTime();
+        mCurrentIndexTime = m_tic.current_frame_index();
         if (mCurrentIndexTime.first != m_seek_position){
             vlogger::instance().console()->info(tostr(mCurrentIndexTime.first - m_seek_position));
         }

@@ -13,12 +13,12 @@ cv::Mat getRootFrame(const std::shared_ptr<ImageBuf>& ib, const ustring& content
     ROI roi = ib->roi();
     const ImageSpec& spec = ib->spec();
     if(ib->pixeltype() == TypeUInt16){
-        cv::Mat cvb (spec.width, spec.height, CV_16U);
+        cv::Mat cvb (spec.height, spec.width, CV_16U);
         ib->get_pixels(roi, TypeUInt16, cvb.data);
         return cvb;
     }
     else if (ib->pixeltype() == TypeUInt8){
-        cv::Mat cvb (spec.width, spec.height, CV_8U);
+        cv::Mat cvb (spec.height, spec.width, CV_8U);
         ib->get_pixels(roi, TypeUInt8, cvb.data);
         return cvb;
     }
