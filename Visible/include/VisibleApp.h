@@ -78,7 +78,7 @@ class VisibleApp : public App
 {
 public:
     VisibleApp() { ImGui::CreateContext(); }
-    ~VisibleApp() { ImGui::DestroyContext (); }
+    ~VisibleApp() { if(mCachePtr) mCachePtr->close_all (); ImGui::DestroyContext (); }
     
     virtual void QuitApp();
     
@@ -108,6 +108,7 @@ public:
 private:
     
     std::shared_ptr<ImageBuf> mInput;
+    ImageCache* mCachePtr = nullptr;
     ImageSpec mInputSpec;
     mediaSpec m_mspec;
     

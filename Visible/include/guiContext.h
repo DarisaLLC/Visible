@@ -122,7 +122,7 @@ public:
 	virtual int getNumFrames () = 0;
 	virtual void process_async() = 0;
 	
-	virtual void draw_info () = 0;
+//	virtual void draw_info () = 0;
 	virtual void update_log (const std::string& meg = "") = 0;
 	virtual bool looping () = 0;
 	virtual void looping (bool what) = 0;

@@ -111,7 +111,7 @@ void VisibleApp::DrawMainMenu(){
             if (ImGui::Button("Open "))
             {
                 nfdchar_t *outPath = NULL;
-                nfdresult_t result = NFD_OpenDialog("lif,mov,mp4", NULL, &outPath);
+                nfdresult_t result = NFD_OpenDialog("tif,mov,mp4", NULL, &outPath);
                 if (result == NFD_OKAY) {
                     bfs::path fout(outPath);
                     auto msg = "Selected " + fout.string();
@@ -161,7 +161,7 @@ void VisibleApp::DrawMainMenu(){
         buildN = "Visible ( build: " + buildN + " ) ";
         ImGui::TextColored(ImVec4(0.92f, 0.18f, 0.29f, 1.00f), "%s", buildN.c_str());
         ImGui::Text("Arman Garakani, Darisa LLC");
-        ImGui::Text("This App is Built With OpenCv, Boost, Cinder and ImGui Libraries ");
+        ImGui::Text("This App is Built With OpenImageIO, OpenCv, Boost, Cinder and ImGui Libraries ");
     }
     DrawSettings();
  //   DrawImGuiDemos();
@@ -361,6 +361,9 @@ size_t VisibleApp::list_oiio_channels(std::vector<std::string>& channel_names){
     std::strstream msg;
     channel_names.resize(0);
     mCurrentContentU = ustring (mCurrentContent.string());
+//    mCachePtr = ImageCache::create(true /*shared*/);
+//    assert(mCachePtr);
+//    mCachePtr->attribute("autotile", 256);   // emulate 256x256 tiles, the value is the tile size
     mInput.reset(new ImageBuf(mCurrentContentU));
     mInput->init_spec(mCurrentContentU, 0, 0);  // force it to get the spec, not read
     mInputSpec = mInput->spec();
@@ -374,6 +377,9 @@ bool VisibleApp::load_oiio_file(){
     auto bpath_path = mCurrentContent;
     auto stem = mCurrentContent.stem();
     std::string cmds = " [ " + stem.string() + " ] ";
+    
+    m_mspec = mediaSpec (mInputSpec.width, mInputSpec.height, 1, 1000.0, mInput->nsubimages());
+    
     if (exists(mCurrentContent)){
             WindowRef ww = getWindow ();
             auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);

@@ -56,12 +56,6 @@ mCurrentCachePath(serie_cache_folder), m_params(params)
     // semilarity producer
     m_sm_producer = std::shared_ptr<sm_producer> ( new sm_producer () );
     
-    // Signals we support
-    // support Similarity::Content Loaded
-    // std::function<void ()> sm_content_loaded_cb = boost::bind (&ssmt_processor::sm_content_loaded, this);
-    // boost::signals2::connection ml_connection = m_sm->registerCallback(sm_content_loaded_cb);
-    
-    
     // Signal us when volume stats are ready
     std::function<void ()>_volume_done_cb = boost::bind (&ssmt_processor::volume_stats_computed, this);
     boost::signals2::connection _volume_stats_connection = registerCallback(_volume_done_cb);
@@ -259,6 +253,7 @@ void ssmt_processor::load_channels_from_lif_buffer2d (const std::shared_ptr<Imag
                     auto tl_f_y = mspec.getROIyRanges()[cc][0];
                     m_all_by_channel[cc].emplace_back(r8.frameBuf(),tl_f_x,tl_f_y,width,height);
                 }
+                m_frameCount++;
             }
     }
     else if (format == TypeUInt16){
@@ -268,13 +263,14 @@ void ssmt_processor::load_channels_from_lif_buffer2d (const std::shared_ptr<Imag
                 cv::Mat cvb8 (cvb.rows, cvb.cols, CV_8U);
                 cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
                 roiWindow<P8U> r8;
-                cpCvMatToRoiWindow8U (cvb, r8);
+                cpCvMatToRoiWindow8U (cvb8, r8);
                 
                 for (auto cc = 0; cc < mspec.getSectionCount(); cc++){
                     auto tl_f_x = mspec.getROIxRanges()[cc][0];
                     auto tl_f_y = mspec.getROIyRanges()[cc][0];
                     m_all_by_channel[cc].emplace_back(r8.frameBuf(),tl_f_x,tl_f_y,width,height);
                 }
+                m_frameCount++;
             }
     }
     else{

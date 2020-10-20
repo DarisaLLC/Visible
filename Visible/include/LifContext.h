@@ -57,7 +57,7 @@ public:
 	virtual void update () override;
 	virtual void resize () override;
 	void draw_window ();
-	void draw_info () override;
+//	void draw_info () override;
 	
 	virtual void mouseDown( MouseEvent event ) override;
 	virtual void mouseMove( MouseEvent event ) override;
@@ -108,7 +108,6 @@ public:
     virtual void process_async () override;
      
     // Status
-    bool isLoading() const { return m_is_loading; }
     bool isLoaded() const { return m_content_loaded; }
     
 private:
@@ -220,7 +219,6 @@ private:
 
     bool mMouseInImage; // if in Image, mMouseInGraph is -1
     ivec2 mMouseInImagePosition;
-    bool m_is_loading;
     std::atomic<bool> m_content_loaded;
     
     std::vector<sides_length_t> m_cell_ends = {sides_length_t (), sides_length_t()};
@@ -234,7 +232,7 @@ private:
     mediaSpec m_mspec;
     
     vec2 mFrameSize;
-    gl::TextureRef pixelInfoTexture ();
+//    gl::TextureRef pixelInfoTexture ();
     std::string m_title;
     
     // Update GUI

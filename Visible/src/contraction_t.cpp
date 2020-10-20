@@ -448,7 +448,7 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
     // Copy Results Out.
     m_ctr.force = m_force;
     m_ctr.elongation = m_elongation;
-    m_ctr.interpolated_length = m_interpolated_length;
+    m_ctr.normalized_length = m_interpolated_length;
     
     // Add uid for this contraction
     m_ctr.m_uid = m_id;

@@ -50,7 +50,7 @@ struct contractionMesh : public std::pair<size_t,size_t>
     cell_id_t m_uid;
  
    sigContainer_t             elongation;
-   sigContainer_t             interpolated_length;
+   sigContainer_t             normalized_length;
    sigContainer_t             force;
     
     cm::cardio_model               cardioModel;
@@ -73,7 +73,7 @@ struct contractionMesh : public std::pair<size_t,size_t>
         auto fc = ok ? (a.relaxation_end.first - a.contraction_start.first) : 0;
         ok &= a.force.size() == size_t(fc);
         ok &= a.elongation.size() == size_t(fc);
-        ok &= a.interpolated_length.size() == size_t(fc);
+        ok &= a.normalized_length.size() == size_t(fc);
         return ok;
         
     }
