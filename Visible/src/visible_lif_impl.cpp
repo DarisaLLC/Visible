@@ -135,7 +135,7 @@ lifContext::lifContext(ci::app::WindowRef& ww,
                             
                             
     mContentFileName = mPath.stem().string();
-    mCurrentSerieCachePath = mUserStorageDirPath / mContentFileName;
+    mCurrentSerieCachePath = mUserStorageDirPath; // / mContentFileName;
     bool folder_exists = bfs::exists(mCurrentSerieCachePath);
 
     std::string msg = folder_exists ? " exists " : " does not exist ";
@@ -320,18 +320,12 @@ void lifContext::glscreen_normalize (const sides_length_t& src, const Rectf& gdr
 
 void lifContext::signal_segmented_view_ready (cv::Mat& image, cv::Mat& label)
 {
-    vlogger::instance().console()->info(" Voxel View Available  ");
-    if (! m_lifProcRef){
-        vlogger::instance().console()->error("Lif Processor Object does not exist ");
-        return;
-    }
     m_segmented_image = image.clone();
-    m_voxel_view_available = true;
-    
-    if (! m_segmented_texture ){
+    if (! m_segmented_image.empty()){
+        vlogger::instance().console()->info(" Voxel View Available  ");
+        m_voxel_view_available = true;
         m_segmented_surface = Surface8u::create(cinder::fromOcv(m_segmented_image));
-        //    auto cell_ends =  m_lifProcRef->cell_ends ();
-        //   m_cell_ends = cell_ends;
+        vlogger::instance().console()->info(" Voxel View Texture Available  ");
     }
 }
 
