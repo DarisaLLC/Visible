@@ -103,6 +103,7 @@ void VisibleApp::DrawMainMenu(){
    
     
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
+//    ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove
     if (ImGui::BeginMainMenuBar())
     {
        
@@ -194,7 +195,7 @@ void VisibleApp::DrawStatusBar(float width, float height, float pos_x,
     ImGui::Begin("statusbar", nullptr,
                  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings |
                  ImGuiWindowFlags_NoBringToFrontOnFocus |
-                 ImGuiWindowFlags_NoResize);
+                 ImGuiWindowFlags_AlwaysAutoResize );
     
     // Call the derived class to add stuff to the status bar
     // DrawInsideStatusBar(width - 45.0f, height);
@@ -481,9 +482,11 @@ void VisibleApp::draw ()
 {
     gl::clear( Color::gray( 0.67f ) );
     if (mContext && mContext->is_valid()){
-        mContext->draw ();
+        if (GImGui != nullptr && GImGui->CurrentWindow != nullptr)
+            mContext->draw ();
     }
-    DrawMainMenu();
+    if (GImGui != nullptr && GImGui->CurrentWindow != nullptr)
+        DrawMainMenu();
 
 
 }
@@ -492,6 +495,13 @@ void VisibleApp::draw ()
 
 void VisibleApp::resize ()
 {
+    assert(GImGui != nullptr && GImGui->CurrentWindow != nullptr);
+    ImGui::SetCurrentContext(GImGui);
+    
+    ImGuiIO& io    = ImGui::GetIO();
+    auto ws = getWindowSize();
+    io.DisplaySize    = ImVec2(ws.x, ws.y);
+    
     //  mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
     if (mContext && mContext->is_valid()) mContext->resize ();
     

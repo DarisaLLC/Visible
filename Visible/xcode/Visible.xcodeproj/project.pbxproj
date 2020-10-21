@@ -565,7 +565,6 @@
 		C236D344230F488300ED5627 /* pf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pf.cpp; sourceTree = "<group>"; };
 		C237500224A1B57600E13081 /* libboost_program_options-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_program_options-mt.a"; path = "../../../../../../usr/local/Cellar/boost/1.71.0/lib/libboost_program_options-mt.a"; sourceTree = "<group>"; };
 		C237500424A1B5BF00E13081 /* libboost_program_options.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_program_options.a; path = ../../../../../../usr/local/Cellar/boost/1.71.0/lib/libboost_program_options.a; sourceTree = "<group>"; };
-		C237500724A1B71600E13081 /* sscli.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sscli.pch; sourceTree = "<group>"; };
 		C237500E24A1BAB700E13081 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		C237501024A1BB6E00E13081 /* libboost_system-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_system-mt.a"; path = "../../../../../../usr/local/Cellar/boost/1.71.0/lib/libboost_system-mt.a"; sourceTree = "<group>"; };
 		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
@@ -1817,7 +1816,6 @@
 		C29C726F216FC7340028AED1 /* imgui */ = {
 			isa = PBXGroup;
 			children = (
-				C237500724A1B71600E13081 /* sscli.pch */,
 				C285964924870EF000C9CCFB /* imgui_stdlib.cpp */,
 				C285964824870C6300C9CCFB /* imgui_impl_opengl3.h */,
 				C28596442487048700C9CCFB /* imgui_impl_opengl3.cpp */,
