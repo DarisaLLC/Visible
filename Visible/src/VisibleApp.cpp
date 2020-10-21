@@ -136,6 +136,10 @@ void VisibleApp::DrawMainMenu(){
             {
                 if (mContext) mContext->process_async(); //std::dynamic_pointer_cast<lifContext>(mContext)->process_async();
             }
+            if (ImGui::Button("Quit"))
+            {
+                quit();
+            }
             
             ImGui::EndMenu();
         }
