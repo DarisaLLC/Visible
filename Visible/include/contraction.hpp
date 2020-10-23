@@ -162,12 +162,12 @@ public:
     // signal_contraction_available
     // signal pci is median level processed
     typedef void (sig_cb_pci_available) (std::vector<double>&);
-    typedef void (sig_cb_contraction_ready) (contractionContainer_t&, const input_channel_selector_t& );
+    typedef void (sig_cb_contraction_ready) (contractionContainer_t&, const input_section_selector_t& );
     typedef void (sig_cb_cell_length_ready) (sigContainer_t&);
     typedef void (sig_cb_force_ready) (sigContainer_t&);
     
     // Factory create method
-    static Ref create(const input_channel_selector_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params());
+    static Ref create(const input_section_selector_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params());
     Ref getShared();
     // Load raw entropies and the self-similarity matrix
     // If no self-similarity matrix is given, entropies are assumed to be filtered and used directly
@@ -185,7 +185,7 @@ public:
     bool isPreProcessed () const { return mNoSMatrix; }
     size_t size () const { return m_entsize; }
     const uint32_t id () const { return m_id; }
-    const input_channel_selector_t& input () const { return m_in; }
+    const input_section_selector_t& input () const { return m_in; }
     
     // Original
     const vector<double>& entropies () { return m_entropies; }
@@ -214,7 +214,7 @@ public:
     // Static public functions. Enabling testing @todo move out of here
     static double Median_levelsets (const vector<double>& entropies,  std::vector<int>& ranks );
 private:
-    contractionLocator(const input_channel_selector_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params ());
+    contractionLocator(const input_section_selector_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params ());
     contractionLocator::params m_params;
     
 
@@ -245,7 +245,7 @@ private:
     mutable int m_id;
     mutable std::vector<double> m_ac;
     mutable std::vector<double> m_bac;
-    input_channel_selector_t m_in;
+    input_section_selector_t m_in;
     
 protected:
     boost::signals2::signal<contractionLocator::sig_cb_cell_length_ready>* cell_length_ready;

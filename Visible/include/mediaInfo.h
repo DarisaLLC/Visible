@@ -15,9 +15,11 @@ class mediaSpec
 public:
     mediaSpec () { mValid = false; }
     mediaSpec (int width, int height, int sections, double duration, int64_t number_of_frames,
+               const std::vector<std::string>& channel_names,
                const std::vector<std::string>& names = std::vector<std::string> ()):
     mSize(width,height), mSections(sections),
-    mDuration(duration), mFrameCount(number_of_frames){
+    mDuration(duration), mFrameCount(number_of_frames),
+    mChannelNames (channel_names), mSectionNames(names){
         mSectionSize.first = width;
         mSectionSize.second = height / mSections;
         for (auto ss = 0; ss < mSections; ss++){
@@ -26,7 +28,6 @@ public:
             mROIyRanges.emplace_back(y_anchor,y_anchor+mSectionSize.second);
         }
         mFps = number_of_frames / duration;
-        mSectionNames = names;
         if (names.size() != mSections){
             mSectionNames.resize(mSections);
             for (auto ss = 0; ss < mSections; ss++){
@@ -34,6 +35,7 @@ public:
                 mSectionNames[ss] = default_str;
             }
         }
+        mChannelCount = int(channel_names.size());
         mValid = true;
     }
     
@@ -52,7 +54,8 @@ public:
     
     
     static bool test (int width, int height, int sections, double duration, int64_t count){
-        mediaSpec sp (width, height, sections, duration, count);
+        std::vector<std::string> channel_names ({"Y"});
+        mediaSpec sp (width, height, sections, duration, count, channel_names);
         bool ans = sp.getSectionCount() == sections;
         if (! ans) return false;
         ans = sp.getWidth() == width;
@@ -70,6 +73,7 @@ private:
     bool mValid;
     double mDuration;
     int64_t mFrameCount;
+    int mChannelCount;
     iPair mSize;
     iPair mSectionSize;
     int mSections;
@@ -77,6 +81,7 @@ private:
     std::vector<iPair> mROIxRanges;
     std::vector<iPair> mROIyRanges;
     std::vector<std::string> mSectionNames;
+    std::vector<std::string> mChannelNames;
 };
 
 

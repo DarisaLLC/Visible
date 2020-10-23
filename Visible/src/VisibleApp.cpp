@@ -9,11 +9,11 @@
 
 
 #include "VisibleApp.h"
+#include "oiio_utils.hpp"
+#define __used__
 
-
-
-#if __used__
-static void ShowHelpMarker(const char* desc)
+#ifdef __used__
+static void HelpMarker(const char* desc)
 {
     ImGui::TextDisabled("(?)");
     if (ImGui::IsItemHovered())
@@ -40,6 +40,7 @@ using namespace ci::app;
 using namespace std;
 using namespace boost;
 namespace bfs=boost::filesystem;
+using pipeline = visibleContext::pipeline;
 
 
 void VisibleApp::QuitApp(){
@@ -66,6 +67,21 @@ void VisibleApp::DrawSettings() {
           {
             load_oiio_file();
           }
+
+      //  dump_all_extra_attributes(mInputSpec);
+        ImGui::BulletText("Image Size (width: %d, height: %d)", mInputSpec.width, mInputSpec.height);
+        ImGui::BulletText("TimeSteps %d", mInput->nsubimages());
+        ImGui::BulletText("Data Format: %s", mInputSpec.format.c_str());
+        ImGui::BulletText("Number of Channels: %d", mInputSpec.nchannels);
+        for (auto nn = 0; nn < mInputSpec.nchannels; nn++)
+            ImGui::BulletText("Channel(%d) %s", nn, mInputSpec.channelnames[nn].c_str());
+        
+        static int cpipe = pipeline::temporalEntropy;
+        const char* pipeline_names[pipeline::count] = { "Cardiac", "TemporalEntropy", "SpatioTemporalSegmentation", "TemporalIntensity" };
+        const char* pipeline_name = (cpipe >= 0 && cpipe < pipeline::count) ? pipeline_names[cpipe] : "Unknown";
+        ImGui::SliderInt("slider enum", &cpipe, 0, pipeline::count - 1, pipeline_name);
+        ImGui::SameLine(); HelpMarker("Using the format string parameter to display a name instead of the underlying integer.");
+        
         }
         ImGui::Spacing();
     }
@@ -366,9 +382,6 @@ size_t VisibleApp::list_oiio_channels(std::vector<std::string>& channel_names){
     std::strstream msg;
     channel_names.resize(0);
     mCurrentContentU = ustring (mCurrentContent.string());
-//    mCachePtr = ImageCache::create(true /*shared*/);
-//    assert(mCachePtr);
-//    mCachePtr->attribute("autotile", 256);   // emulate 256x256 tiles, the value is the tile size
     mInput.reset(new ImageBuf(mCurrentContentU));
     mInput->init_spec(mCurrentContentU, 0, 0);  // force it to get the spec, not read
     mInputSpec = mInput->spec();
@@ -383,12 +396,14 @@ bool VisibleApp::load_oiio_file(){
     auto stem = mCurrentContent.stem();
     std::string cmds = " [ " + stem.string() + " ] ";
     
-    m_mspec = mediaSpec (mInputSpec.width, mInputSpec.height, 1, 1000.0, mInput->nsubimages());
+    m_mspec = mediaSpec (mInputSpec.width, mInputSpec.height,
+                         1, 1000.0, mInput->nsubimages(),
+                         mInputSpec.channelnames);
     
     if (exists(mCurrentContent)){
             WindowRef ww = getWindow ();
             auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
-            mContext =  std::make_shared<lifContext> (ww, mInput, m_mspec, cache_path, bpath_path);
+            mContext =  std::make_shared<visibleContext> (ww, mInput, m_mspec, cache_path, bpath_path);
             update();
             
             ww->setTitle ( cmds + " Visible build: " + mBuildn);
@@ -499,6 +514,10 @@ void VisibleApp::draw ()
 
 void VisibleApp::resize ()
 {
+    ImGuiViewport*  imvp = GetMainViewport();
+    std::cout << imvp->Pos.x << "," << imvp->Pos.y << imvp->Size.x  << "," << imvp->Size.y << std::endl;
+    std::cout << getWindowSize().x << "," << getWindowSize().y << std::endl;
+    
     assert(GImGui != nullptr && GImGui->CurrentWindow != nullptr);
     ImGui::SetCurrentContext(GImGui);
     
