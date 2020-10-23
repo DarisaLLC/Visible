@@ -112,13 +112,13 @@ private:
     // Callbacks
     void signal_content_loaded (int64_t&);
     void signal_intensity_over_time_ready ();
-    void signal_root_pci_ready (std::vector<float> &, const input_channel_selector_t&);
-    void signal_root_pci_med_reg_ready (const input_channel_selector_t&);
+    void signal_root_pci_ready (std::vector<float> &, const input_section_selector_t&);
+    void signal_root_pci_med_reg_ready (const input_section_selector_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
     void fraction_reporter(float);
     
     // Availability
-    input_channel_selector_t  m_input_selector;
+    input_section_selector_t  m_input_selector;
     mutable std::atomic<int> m_selector_last;
 
 

@@ -93,6 +93,7 @@ bool getPosSizeFromWindow(const char* last_window, ImVec2& pos, ImVec2& size){
     size.x = window->Size.x; size.y = window->Size.y;
     return true;
 }
+    
 }
 
 #define wDisplay "Display"
@@ -103,6 +104,7 @@ bool getPosSizeFromWindow(const char* last_window, ImVec2& pos, ImVec2& size){
 #define wShape "Shape"
 
 using contraction_t = contractionLocator::contraction_t;
+using pipeline = visibleContext::pipeline;
 
 /************************
  *
@@ -116,11 +118,12 @@ using contraction_t = contractionLocator::contraction_t;
 // @ todo setup default repository
 // default median cover pct is 5% (0.05)
 
-lifContext::lifContext(ci::app::WindowRef& ww,
+visibleContext::visibleContext(ci::app::WindowRef& ww,
                        const std::shared_ptr<ImageBuf>& sd,
                        const mediaSpec& mspec,
                        const bfs::path& cache_path,
-                       const bfs::path& content_path) :
+                       const bfs::path& content_path,
+                               const pipeline pl) :
                         sequencedImageContext(ww),
                         mImageCache (sd),
                         m_mspec (mspec),
@@ -144,7 +147,7 @@ lifContext::lifContext(ci::app::WindowRef& ww,
     m_title = mContentFileName;
     m_idlab_defaults.median_level_set_cutoff_fraction = 15;
     m_playback_speed = 1;
-    m_input_selector = input_channel_selector_t(-1,0);
+    m_input_selector = input_section_selector_t(-1,0);
     m_selector_last = -1;
     m_selected_cell = -1;
     m_selected_contraction = -1;
@@ -166,47 +169,47 @@ lifContext::lifContext(ci::app::WindowRef& ww,
 }
 
 
-ci::app::WindowRef&  lifContext::get_windowRef(){
+ci::app::WindowRef&  visibleContext::get_windowRef(){
     return shared_from_above()->mWindow;
 }
 
-void lifContext::setup_signals(){
+void visibleContext::setup_signals(){
     
     // Create a Processing Object to attach signals to
     ssmt_processor::params params (mSpec.format);
     m_lifProcRef = std::make_shared<ssmt_processor> ( mCurrentSerieCachePath, params);
     
     // Support lifProcessor::content_loaded
-    std::function<void (int64_t&)> content_loaded_cb = boost::bind (&lifContext::signal_content_loaded, shared_from_above(), boost::placeholders::_1);
+    std::function<void (int64_t&)> content_loaded_cb = boost::bind (&visibleContext::signal_content_loaded, shared_from_above(), boost::placeholders::_1);
     boost::signals2::connection ml_connection = m_lifProcRef->registerCallback(content_loaded_cb);
     
     // Support lifProcessor::flu results available
-    std::function<void ()> intensity_over_time_ready_cb = boost::bind (&lifContext::signal_intensity_over_time_ready, shared_from_above());
+    std::function<void ()> intensity_over_time_ready_cb = boost::bind (&visibleContext::signal_intensity_over_time_ready, shared_from_above());
     boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(intensity_over_time_ready_cb);
     
     // Support lifProcessor::initial ss results available
-    std::function<void (std::vector<float> &, const input_channel_selector_t&)> root_pci_ready_cb = boost::bind (&lifContext::signal_root_pci_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
+    std::function<void (std::vector<float> &, const input_section_selector_t&)> root_pci_ready_cb = boost::bind (&visibleContext::signal_root_pci_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
     boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(root_pci_ready_cb);
     
     // Support lifProcessor::median level set ss results available
-    std::function<void (const input_channel_selector_t&)> root_pci_med_reg_ready_cb = boost::bind (&lifContext::signal_root_pci_med_reg_ready, shared_from_above(), boost::placeholders::_1);
+    std::function<void (const input_section_selector_t&)> root_pci_med_reg_ready_cb = boost::bind (&visibleContext::signal_root_pci_med_reg_ready, shared_from_above(), boost::placeholders::_1);
     boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(root_pci_med_reg_ready_cb);
     
     // Support lifProcessor::contraction results available
-    std::function<void (contractionLocator::contractionContainer_t&,const input_channel_selector_t&)> contraction_ready_cb =
-    boost::bind (&lifContext::signal_contraction_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
+    std::function<void (contractionLocator::contractionContainer_t&,const input_section_selector_t&)> contraction_ready_cb =
+    boost::bind (&visibleContext::signal_contraction_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
     boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_ready_cb);
     
     // Support lifProcessor::geometry_ready
-    std::function<void (int,const input_channel_selector_t&)> geometry_ready_cb = boost::bind (&lifContext::signal_regions_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
+    std::function<void (int,const input_section_selector_t&)> geometry_ready_cb = boost::bind (&visibleContext::signal_regions_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
     boost::signals2::connection geometry_connection = m_lifProcRef->registerCallback(geometry_ready_cb);
     
     // Support lifProcessor::temporal_image_ready
-    std::function<void (cv::Mat&,cv::Mat&)> ss_segmented_view_ready_cb = boost::bind (&lifContext::signal_segmented_view_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
+    std::function<void (cv::Mat&,cv::Mat&)> ss_segmented_view_ready_cb = boost::bind (&visibleContext::signal_segmented_view_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
     boost::signals2::connection ss_image_connection = m_lifProcRef->registerCallback(ss_segmented_view_ready_cb);
     
 }
-void lifContext::setup()
+void visibleContext::setup()
 {
     ci::app::WindowRef ww = get_windowRef();
     ww->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
@@ -224,12 +227,37 @@ void lifContext::setup()
     mSize = vec2( ws[0], ws[1] / 12);
     m_contraction_names = m_contraction_none;
     clear_playback_params();
+ 
+        
     loadCurrentMedia();
     shared_from_above()->update();
     
 
 }
 
+// Called at startup and resize
+bool visibleContext::setup_panels (int image_width, int image_height, int vp_width, int vp_height){
+    int left_width = vp_width / 4;
+    int right_width = vp_width / 4;
+    int center_width = vp_width - left_width - right_width;
+    int left_top_x = 0;
+    int left_top_y = 0;
+    int left_height = vp_height;
+    int center_top_x = left_width;
+    int center_top_y = 0;
+    int center_height = vp_height;
+    int right_top_x = center_top_x + center_width;
+    int right_top_y = 0;
+    int right_height = vp_height;
+    ImVec4 left (left_top_x, left_top_y, left_top_x + left_width, left_top_y + left_height);
+    ImVec4 center (center_top_x, center_top_y, center_top_x + center_width, center_top_y + center_height);
+    ImVec4 right (right_top_x, right_top_y, right_top_x + right_width, right_top_y + right_height);
+    m_panels_map["left"].rectangle = left;
+    m_panels_map["right"].rectangle = right;
+    m_panels_map["center"].rectangle = center;
+    return true;
+    
+}
 
 
 /************************
@@ -239,7 +267,7 @@ void lifContext::setup()
  *
  ************************/
 
-void lifContext::signal_root_pci_ready (std::vector<float> & signal, const input_channel_selector_t& dummy)
+void visibleContext::signal_root_pci_ready (std::vector<float> & signal, const input_section_selector_t& dummy)
 {
     //@note this is also checked in update. Not sure if this is necessary
     auto tracksRef = m_root_pci_trackWeakRef.lock();
@@ -252,7 +280,7 @@ void lifContext::signal_root_pci_ready (std::vector<float> & signal, const input
     vlogger::instance().console()->info(ss.str());
 }
 
-void lifContext::signal_root_pci_med_reg_ready (const input_channel_selector_t& dummy2)
+void visibleContext::signal_root_pci_med_reg_ready (const input_section_selector_t& dummy2)
 {
     //@note this is also checked in update. Not sure if this is necessary
     auto tracksRef = m_root_pci_trackWeakRef.lock();
@@ -264,21 +292,23 @@ void lifContext::signal_root_pci_med_reg_ready (const input_channel_selector_t& 
     vlogger::instance().console()->info(ss.str());
 }
 
-void lifContext::signal_content_loaded (int64_t& loaded_frame_count )
+void visibleContext::signal_content_loaded (int64_t& loaded_frame_count )
 {
     std::string msg = to_string(mImageCache->nsubimages()) + " Samples in Media  " + to_string(loaded_frame_count) + " Loaded";
     vlogger::instance().console()->info(msg);
     m_content_loaded.store(true, std::memory_order_release);
 }
-void lifContext::signal_intensity_over_time_ready ()
+void visibleContext::signal_intensity_over_time_ready ()
 {
     vlogger::instance().console()->info(" Flu Stats Available ");
 }
 
-void lifContext::signal_contraction_ready (contractionLocator::contractionContainer_t& contras, const input_channel_selector_t& in)
+void visibleContext::signal_contraction_ready (contractionLocator::contractionContainer_t& contras, const input_section_selector_t& in)
 {
+    assert(isCardiacPipeline());
+    
     // Pauses playback if playing and restore it at scope's end
-    scopedPause sp(std::shared_ptr<lifContext>(shared_from_above().get(), stl_utils::null_deleter () ));
+    scopedPause sp(std::shared_ptr<visibleContext>(shared_from_above().get(), stl_utils::null_deleter () ));
     
     if (contras.empty()) return;
     
@@ -294,9 +324,10 @@ void lifContext::signal_contraction_ready (contractionLocator::contractionContai
  * Is called when segmentation is done. The input_selector should have full view (-1) and channel #
  * count is numner
  */
-void lifContext::signal_regions_ready(int count, const input_channel_selector_t& in)
+void visibleContext::signal_regions_ready(int count, const input_section_selector_t& in)
 {
     assert(m_lifProcRef);
+    assert(isCardiacPipeline() || isSpatioTemporalPipeline());
     std::string mr = " Regions Ready: Moving Region";
     mr += (count > 1) ? "s" : " ";
     std::string msg = " Found " + stl_utils::tostr(count) + mr;
@@ -310,7 +341,7 @@ void lifContext::signal_regions_ready(int count, const input_channel_selector_t&
     }
 }
 
-void lifContext::glscreen_normalize (const sides_length_t& src, const Rectf& gdr, sides_length_t& dst){
+void visibleContext::glscreen_normalize (const sides_length_t& src, const Rectf& gdr, sides_length_t& dst){
     
     dst.first.x = (src.first.x*gdr.getWidth()) / mSpec.width;
     dst.second.x = (src.second.x*gdr.getWidth()) / mSpec.width;
@@ -318,8 +349,9 @@ void lifContext::glscreen_normalize (const sides_length_t& src, const Rectf& gdr
     dst.second.y = (src.second.y*gdr.getHeight()) / mSpec.height;
 }
 
-void lifContext::signal_segmented_view_ready (cv::Mat& image, cv::Mat& label)
+void visibleContext::signal_segmented_view_ready (cv::Mat& image, cv::Mat& label)
 {
+    assert(isCardiacPipeline() || isSpatioTemporalPipeline());
     m_segmented_image = image.clone();
     if (! m_segmented_image.empty()){
         vlogger::instance().console()->info(" Voxel View Available  ");
@@ -331,14 +363,14 @@ void lifContext::signal_segmented_view_ready (cv::Mat& image, cv::Mat& label)
 
 
 
-void lifContext::signal_frame_loaded (int& findex, double& timestamp)
+void visibleContext::signal_frame_loaded (int& findex, double& timestamp)
 {
     //    frame_indices.push_back (findex);
     //    frame_times.push_back (timestamp);
     //     std::cout << frame_indices.size() << std::endl;
 }
 
-void lifContext::fraction_reporter(float f){
+void visibleContext::fraction_reporter(float f){
     m_fraction_done = f;
     std::cout << (int)(f * 100) << std::endl;
 }
@@ -348,23 +380,23 @@ void lifContext::fraction_reporter(float f){
  *
  ************************/
 
-int lifContext::get_current_clip_index () const
+int visibleContext::get_current_clip_index () const
 {
     std::lock_guard<std::mutex> guard(m_clip_mutex);
     return m_current_clip_index;
 }
 
-void lifContext::set_current_clip_index (int cindex) const
+void visibleContext::set_current_clip_index (int cindex) const
 {
     std::lock_guard<std::mutex> guard(m_clip_mutex);
     m_current_clip_index = cindex;
 }
 
-const clip& lifContext::get_current_clip () const {
+const clip& visibleContext::get_current_clip () const {
     return m_clips.at(m_current_clip_index);
 }
 
-void lifContext::reset_entire_clip (const size_t& frame_count) const
+void visibleContext::reset_entire_clip (const size_t& frame_count) const
 {
     // Stop Playback ?
     m_clips.clear();
@@ -381,7 +413,7 @@ void lifContext::reset_entire_clip (const size_t& frame_count) const
  *
  ************************/
 
-void lifContext::clear_playback_params ()
+void visibleContext::clear_playback_params ()
 {
     m_seek_position = 0;
     m_is_playing = false;
@@ -391,14 +423,14 @@ void lifContext::clear_playback_params ()
     m_zoom.x = m_zoom.y = 1.0f;
 }
 
-bool lifContext::have_lif_serie ()
+bool visibleContext::have_lif_serie ()
 {
     bool not_have =  ! mImageCache ;
     return ! not_have;
 }
 
 
-bool lifContext::is_valid () const { return m_valid && is_context_type(guiContext::lif_file_viewer); }
+bool visibleContext::is_valid () const { return m_valid && is_context_type(guiContext::lif_file_viewer); }
 
 
 
@@ -409,7 +441,7 @@ bool lifContext::is_valid () const { return m_valid && is_context_type(guiContex
  *
  ************************/
 
-void lifContext::loop_no_loop_button ()
+void visibleContext::loop_no_loop_button ()
 {
     if (! have_lif_serie()) return;
     if (looping())
@@ -418,31 +450,31 @@ void lifContext::loop_no_loop_button ()
         looping(true);
 }
 
-void lifContext::looping (bool what)
+void visibleContext::looping (bool what)
 {
     m_is_looping = what;
 }
 
 
-bool lifContext::looping ()
+bool visibleContext::looping ()
 {
     return m_is_looping;
 }
 
-void lifContext::play ()
+void visibleContext::play ()
 {
     if (! have_lif_serie() || m_is_playing ) return;
     m_is_playing = true;
 }
 
-void lifContext::pause ()
+void visibleContext::pause ()
 {
     if (! have_lif_serie() || ! m_is_playing ) return;
     m_is_playing = false;
 }
 
 // For use with RAII scoped pause pattern
-void lifContext::play_pause_button ()
+void visibleContext::play_pause_button ()
 {
     if (! have_lif_serie () ) return;
     if (m_is_playing)
@@ -453,7 +485,7 @@ void lifContext::play_pause_button ()
 
 
 
-void lifContext::update_sequencer()
+void visibleContext::update_sequencer()
 {
     m_show_contractions = true;
     m_main_seq.items.resize(1);
@@ -473,40 +505,40 @@ void lifContext::update_sequencer()
  ************************/
 
 // @ todo: indicate mode differently
-void lifContext::seekToEnd ()
+void visibleContext::seekToEnd ()
 {
     seekToFrame (get_current_clip().last());
     assert(! m_clips.empty());
 }
 
-void lifContext::seekToStart ()
+void visibleContext::seekToStart ()
 {
     
     seekToFrame(get_current_clip().first());
     assert(! m_clips.empty());
 }
 
-int lifContext::getNumFrames ()
+int visibleContext::getNumFrames ()
 {
     return mImageCache->nsubimages();
 }
 
-int lifContext::getCurrentFrame ()
+int visibleContext::getCurrentFrame ()
 {
     return int(m_seek_position);
 }
 
-time_spec_t lifContext::getCurrentTime ()
+time_spec_t visibleContext::getCurrentTime ()
 {
     return m_tic.current_time_spec();
 }
 
-time_spec_t lifContext::getStartTime (){
+time_spec_t visibleContext::getStartTime (){
     return m_tic.start_time_spec();
 }
 
 
-void lifContext::seekToFrame (int mark)
+void visibleContext::seekToFrame (int mark)
 {
     const clip& curr = get_current_clip();
     
@@ -519,12 +551,12 @@ void lifContext::seekToFrame (int mark)
 }
 
 
-vec2 lifContext::getZoom ()
+vec2 visibleContext::getZoom ()
 {
     return m_zoom;
 }
 
-void lifContext::setZoom (vec2 zoom)
+void visibleContext::setZoom (vec2 zoom)
 {
     m_zoom = zoom;
     update ();
@@ -537,7 +569,7 @@ void lifContext::setZoom (vec2 zoom)
  *
  ************************/
 
-void lifContext::processDrag( ivec2 pos )
+void visibleContext::processDrag( ivec2 pos )
 {
     //    for (Widget* wPtr : mWidgets)
     //    {
@@ -548,7 +580,7 @@ void lifContext::processDrag( ivec2 pos )
     //    }
 }
 
-void  lifContext::mouseWheel( MouseEvent event )
+void  visibleContext::mouseWheel( MouseEvent event )
 {
 #if 0
     if( mMouseInTimeLine )
@@ -562,12 +594,12 @@ mPov.adjustDist( event.getWheelIncrement() * -5.0f );
 }
 
 
-void lifContext::mouseMove( MouseEvent event )
+void visibleContext::mouseMove( MouseEvent event )
 {
     update_with_mouse_position (event);
 }
 
-void lifContext::update_with_mouse_position ( MouseEvent event )
+void visibleContext::update_with_mouse_position ( MouseEvent event )
 {
     mMouseInImage = false;
     
@@ -580,17 +612,17 @@ void lifContext::update_with_mouse_position ( MouseEvent event )
         update_instant_image_mouse ();
     }
 }
-void lifContext::mouseDrag( MouseEvent event )
+void visibleContext::mouseDrag( MouseEvent event )
 {
     
 }
 
-void lifContext::mouseDown( MouseEvent event )
+void visibleContext::mouseDown( MouseEvent event )
 {
     
 }
 
-void lifContext::mouseUp( MouseEvent event )
+void visibleContext::mouseUp( MouseEvent event )
 {
     
 }
@@ -598,7 +630,7 @@ void lifContext::mouseUp( MouseEvent event )
 
 
 
-void lifContext::keyDown( KeyEvent event )
+void visibleContext::keyDown( KeyEvent event )
 {
     ci::app::WindowRef ww = get_windowRef();
     
@@ -640,7 +672,7 @@ void lifContext::keyDown( KeyEvent event )
  *
  ************************/
 
-void lifContext::setMedianCutOff (int32_t newco)
+void visibleContext::setMedianCutOff (int32_t newco)
 {
     if (! m_lifProcRef) return;
     // Get a shared_ptr from weak and check if it had not expired
@@ -654,7 +686,7 @@ void lifContext::setMedianCutOff (int32_t newco)
     
 }
 
-int32_t lifContext::getMedianCutOff () const
+int32_t visibleContext::getMedianCutOff () const
 {
     // Get a shared_ptr from weak and check if it had not expired
     auto spt = m_lifProcRef->entireContractionWeakRef().lock();
@@ -679,7 +711,7 @@ int32_t lifContext::getMedianCutOff () const
 //  2
 //  3
 
-void lifContext::loadCurrentMedia ()
+void visibleContext::loadCurrentMedia ()
 {
     if ( ! is_valid() )
         return;
@@ -705,7 +737,6 @@ void lifContext::loadCurrentMedia ()
         
         /*
          * Create the frameset and assign the channel namesStart Loading Images on async on a different thread
-         * Loading also produces voxel images.
          */
         
         m_content_loaded.store(false, std::memory_order_release);
@@ -746,24 +777,25 @@ void lifContext::loadCurrentMedia ()
     }
 }
 
-void lifContext::process_async (){
+void visibleContext::process_async (){
     
     while(!m_content_loaded.load(std::memory_order_acquire)){
         std::this_thread::yield();
     }
     
-    auto load_thread = std::thread(&ssmt_processor::find_moving_regions, m_lifProcRef.get(),channel_count()-1);
-    load_thread.detach();
+    if (isCardiacPipeline() || isSpatioTemporalPipeline()){
+        auto load_thread = std::thread(&ssmt_processor::find_moving_regions, m_lifProcRef.get(),channel_count()-1);
+        load_thread.detach();
+    }
     
-    
-    progress_fn_t pf = std::bind(&lifContext::fraction_reporter, this, std::placeholders::_1);
+    progress_fn_t pf = std::bind(&visibleContext::fraction_reporter, this, std::placeholders::_1);
     switch(channel_count()){
         case 3:
         {
             // note launch mode is std::launch::async
             m_intensity_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_intensity_statistics,
                                                  m_lifProcRef.get(), std::vector<int> ({0,1}) );
-            input_channel_selector_t in (-1,2);
+            input_section_selector_t in (-1,2);
         //    m_root_pci_tracks_asyn = std::async(std::launch::async, //&ssmt_processor::run_selfsimilarity_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
@@ -772,13 +804,13 @@ void lifContext::process_async (){
             //note launch mode is std::launch::async
             m_intensity_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_intensity_statistics,
                                                  m_lifProcRef.get(), std::vector<int> ({0}) );
-            input_channel_selector_t in (-1,1);
+            input_section_selector_t in (-1,1);
          //   m_root_pci_tracks_asyn = std::async(std::launch::async, //&ssmt_processor::run_selfsimilarity_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
         case 1:
         {
-            input_channel_selector_t in (-1,0);
+            input_section_selector_t in (-1,0);
           //  m_root_pci_tracks_asyn = std::async(std::launch::async, //&ssmt_processor::run_selfsimilarity_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
@@ -793,12 +825,12 @@ void lifContext::process_async (){
  ************************/
 
 
-const Rectf& lifContext::get_image_display_rect ()
+const Rectf& visibleContext::get_image_display_rect ()
 {
     return m_display_rect;
 }
 
-void  lifContext::update_channel_display_rects (){
+void  visibleContext::update_channel_display_rects (){
     int cn = channel_count();
     assert(m_instant_channel_display_rects.size() == channel_count());
     vec2 channel_size (get_image_display_rect().getWidth(), get_image_display_rect().getHeight()/cn);
@@ -812,7 +844,7 @@ void  lifContext::update_channel_display_rects (){
 
 
 
-void lifContext::add_canvas (){
+void visibleContext::add_canvas (){
     
     //@note: In ImGui, AddImage is called with uv parameters to specify a vertical flip.
     auto showImage = [&](const char *windowName,bool *open, const gl::Texture2dRef texture){
@@ -895,7 +927,7 @@ void lifContext::add_canvas (){
  * Size height: app window height / 2
  */
 
-void lifContext::add_result_sequencer (){
+void visibleContext::add_result_sequencer (){
     
     // let's create the sequencer
     static int selectedEntry = -1;
@@ -915,7 +947,7 @@ void lifContext::add_result_sequencer (){
 }
 
 
-void lifContext::add_navigation(){
+void visibleContext::add_navigation(){
     
     if(m_show_playback){
         
@@ -1009,7 +1041,7 @@ void lifContext::add_navigation(){
 /*
  * Segmentation image is reduced from full resolution. It is exanpanded by displaying it in full res here
  */
-void lifContext::add_motion_profile (){
+void visibleContext::add_motion_profile (){
     
     if (! m_voxel_view_available ) return;
     if (! m_segmented_texture && m_segmented_surface){
@@ -1048,7 +1080,7 @@ void lifContext::add_motion_profile (){
 // Contractions
 // Shape
 
-void lifContext::draw_contraction_plots(const contractionLocator::contractionContainer_t& cp, int id){
+void visibleContext::draw_contraction_plots(const contractionLocator::contractionContainer_t& cp, int id){
     auto ct = cp[id];
     contraction_t::sigContainer_t force = ct.force;
     auto elon = ct.elongation;
@@ -1098,7 +1130,7 @@ void lifContext::draw_contraction_plots(const contractionLocator::contractionCon
     
 }
 
-bool  lifContext::save_contraction_plots(const contractionLocator::contractionContainer_t&cp, int id){
+bool  visibleContext::save_contraction_plots(const contractionLocator::contractionContainer_t&cp, int id){
     
     auto save_csv = [](const contractionMesh & cp, bfs::path& root_path){
         auto folder = stl_utils::now_string();
@@ -1141,7 +1173,7 @@ bool  lifContext::save_contraction_plots(const contractionLocator::contractionCo
     
 }
 
-void lifContext::add_contractions (bool* p_open)
+void visibleContext::add_contractions (bool* p_open)
 {
 //    if (m_lifProcRef->moving_regions().empty()) return;
   
@@ -1191,7 +1223,7 @@ void lifContext::add_contractions (bool* p_open)
 
 
 
-void  lifContext::DrawGUI(){
+void  visibleContext::DrawGUI(){
     
     add_canvas();
     add_result_sequencer();
@@ -1201,7 +1233,7 @@ void  lifContext::DrawGUI(){
     add_motion_profile ();
 }
 
-void  lifContext::update_log (const std::string& msg)
+void  visibleContext::update_log (const std::string& msg)
 {
     if (msg.length() > 2)
         mLog = msg;
@@ -1213,18 +1245,18 @@ void  lifContext::update_log (const std::string& msg)
 }
 
 //@todo implement
-void lifContext::resize ()
+void visibleContext::resize ()
 {
     if (! have_lif_serie () || ! mSurface ) return;
 }
 
-bool lifContext::haveTracks()
+bool visibleContext::haveTracks()
 {
     return ! m_intensity_trackWeakRef.expired() && ! m_root_pci_trackWeakRef.expired();
 }
 
 
-void lifContext::update ()
+void visibleContext::update ()
 {
 //    std::string msg = svl::toString(m_seek_position);
 //    vlogger::instance().console()->info(msg);
@@ -1306,7 +1338,7 @@ void lifContext::update ()
 // LIF 3 channel organization. Channel height is 1/3 of image height
 // Channel Index is pos.y / channel_height,
 // In channel x is pos.x, In channel y is pos.y % channel_height
-void lifContext::update_instant_image_mouse ()
+void visibleContext::update_instant_image_mouse ()
 {
     auto image_pos = m_imageDisplayMapper->display2image(mMouseInImagePosition);
     uint32_t channel_height = mSpec.height; // mMediaInfo.getChannelSize().y;
@@ -1380,7 +1412,7 @@ void lifContext::draw_info ()
 #endif
 
 
-void  lifContext::renderToFbo (const SurfaceRef&, gl::FboRef& fbo ){
+void  visibleContext::renderToFbo (const SurfaceRef&, gl::FboRef& fbo ){
     // this will restore the old framebuffer binding when we leave this function
     // on non-OpenGL ES platforms, you can just call mFbo->unbindFramebuffer() at the end of the function
     // but this will restore the "screen" FBO on OpenGL ES, and does the right thing on both platforms
@@ -1388,7 +1420,7 @@ void  lifContext::renderToFbo (const SurfaceRef&, gl::FboRef& fbo ){
     
 }
 
-void lifContext::draw (){
+void visibleContext::draw (){
     if( have_lif_serie()  && mSurface ){
         
         if(m_showGUI)

@@ -16,8 +16,7 @@
 #include "imGuiCustom/ImSequencer.h"
 #include "imGuiCustom/visibleSequencer.h"
 #include "imGuiCustom/imgui_plot.h"
-
-
+#include <map>
 
 using namespace boost;
 using namespace boost::filesystem;
@@ -29,23 +28,44 @@ using namespace std;
 namespace bfs = boost::filesystem;
 using namespace OIIO;
 
-typedef std::shared_ptr<class lifContext> lifContextRef;
+typedef std::shared_ptr<class visibleContext> visibleContextRef;
 
 
 
-class lifContext : public sequencedImageContext
+class visibleContext : public sequencedImageContext
 {
 public:
     
+    enum pipeline {
+        cardiac = 0,
+        temporalEntropy = 1,
+        spatioTemporalSegmentation = 2,
+        temporalIntensity = 3,
+        count = temporalIntensity + 1
+    };
+    
+    using pipeline = visibleContext::pipeline;
+
+    typedef std::map<std::string, ImGuiWindow*> imgui_window_map_t;
+    struct imgui_panel{
+        // IMVec4 represents a rectangle (x1, y1, x2, y2)
+        ImVec4 rectangle;
+        imgui_window_map_t window_map;
+    };
+    
+    
+    
+    
     // From a lif_serie_data
-    lifContext(ci::app::WindowRef& ww,
+    visibleContext(ci::app::WindowRef& ww,
                const std::shared_ptr<ImageBuf>& input,
                const mediaSpec& mspec,
                const bfs::path&,
-               const bfs::path& );
+               const bfs::path&,
+                   const pipeline which_pipeline = pipeline::cardiac);
     
-    std::shared_ptr<lifContext> shared_from_above(){
-        return std::dynamic_pointer_cast<lifContext>(shared_from_this ());
+    std::shared_ptr<visibleContext> shared_from_above(){
+        return std::dynamic_pointer_cast<visibleContext>(shared_from_this ());
     }
 
 
@@ -92,7 +112,6 @@ public:
     void edit_no_edit_button ();
     void update_sequencer ();
 	
-//	const tiny_media_info& media () const { return mMediaInfo; }
     const uint32_t& channel_count () const { return mChannelCount; }
     
     // Navigation
@@ -103,6 +122,7 @@ public:
     
     // Supporting gui_base
     void DrawGUI();
+    bool setup_panels (int image_width, int image_height, int vp_width, int vp_height);
     
     // Async Processing
     virtual void process_async () override;
@@ -110,7 +130,18 @@ public:
     // Status
     bool isLoaded() const { return m_content_loaded; }
     
+    // Processing Choices @todo add an actual design !!
+    const pipeline& operation () const { return m_operation; }
+    void operation (pipeline p) const { m_operation = p; }
+    bool isCardiacPipeline () const { return m_operation == pipeline::cardiac; }
+    bool isVisualEntropyPipeline () const { return m_operation == pipeline::temporalEntropy; }
+    bool isSpatioTemporalPipeline () const { return m_operation == pipeline::spatioTemporalSegmentation; }
+    bool isTemporalIntensityPipeline () const { return m_operation == pipeline::temporalIntensity; }
+    
+    
 private:
+    mutable pipeline m_operation;
+    
     void renderToFbo (const SurfaceRef&, gl::FboRef& );
     void setup_signals ();
     ci::app::WindowRef& get_windowRef();
@@ -133,17 +164,17 @@ private:
     // Callbacks
     void signal_content_loaded (int64_t&);
     void signal_intensity_over_time_ready ();
-    void signal_root_pci_ready (std::vector<float> &, const input_channel_selector_t&);
-    void signal_root_pci_med_reg_ready (const input_channel_selector_t&);
-    void signal_contraction_ready (contractionLocator::contractionContainer_t&,const input_channel_selector_t&);
+    void signal_root_pci_ready (std::vector<float> &, const input_section_selector_t&);
+    void signal_root_pci_med_reg_ready (const input_section_selector_t&);
+    void signal_contraction_ready (contractionLocator::contractionContainer_t&,const input_section_selector_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
-    void signal_regions_ready (int, const input_channel_selector_t&);
+    void signal_regions_ready (int, const input_section_selector_t&);
     void signal_segmented_view_ready (cv::Mat&, cv::Mat&);
     void fraction_reporter(float);
     
     // Availability
     std::atomic<bool> m_voxel_view_available;
-    input_channel_selector_t  m_input_selector;
+    input_section_selector_t  m_input_selector;
     mutable std::atomic<int> m_selector_last;
 
     // Clip Processing
@@ -268,7 +299,8 @@ private:
     // imGui
     timeLineSequence m_main_seq;
     std::unordered_map<uint32_t, timeLineSequence> cell2Sequence;
- 
+    std::map<std::string, imgui_panel> m_panels_map;
+     
     
     // UI instant sub-window rects
     Rectf m_results_browser_display;
@@ -291,7 +323,7 @@ private:
 
 class scopedPause : private Noncopyable {
 public:
-    scopedPause (const lifContextRef& ref) : weakLif(ref) {
+    scopedPause (const visibleContextRef& ref) : weakLif(ref) {
         if (! weakLif){
             if (weakLif->isPlaying())
                 weakLif->play_pause_button();
@@ -305,7 +337,7 @@ public:
         }
     }
 private:
-    std::shared_ptr<lifContext> weakLif;
+    std::shared_ptr<visibleContext> weakLif;
 };
 
 #endif

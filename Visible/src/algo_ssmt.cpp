@@ -47,7 +47,7 @@ void ssmt_processor::find_moving_regions (const int channel_index){
     m_variance_peak_detection_done = false;
     volume_variance_peak_promotion(m_all_by_channel[channel_index]);
     while(!m_variance_peak_detection_done){ std::this_thread::yield();}
-    m_instant_input = input_channel_selector_t(-1, channel_index);
+    m_instant_input = input_section_selector_t(-1, channel_index);
     return internal_find_moving_regions(m_all_by_channel[channel_index]);
 }
 
@@ -96,7 +96,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
         int idx = 0;
         for (const moving_region& mr : m_regions){
             auto dis = shared_from_this();
-            input_channel_selector_t inn (idx++,m_instant_input.channel());
+            input_section_selector_t inn (idx++,m_instant_input.section());
             auto ref = ssmt_result::create (dis, mr,  inn);
             m_results.push_back(ref);
         }
@@ -138,7 +138,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
 
 
 // Update. Called when cutoff offset has changed
-void ssmt_processor::update (const input_channel_selector_t& in)
+void ssmt_processor::update (const input_section_selector_t& in)
 {
     std::weak_ptr<contractionLocator> weakCaPtr (in.isEntire() ? m_entireCaRef : m_results[in.region()]->locator());
     if (weakCaPtr.expired())

@@ -18,6 +18,8 @@
 using namespace OIIO;
 using namespace cv;
 
+void dump_all_extra_attributes (const ImageSpec& spec);
+std::string describe_image_spec (const ImageSpec& spec);
 cv::Mat getRootFrame(const std::shared_ptr<ImageBuf>& ib, const ustring& contentName, int frame_index);
 cv::Mat getRoiFrame(const std::shared_ptr<ImageBuf>& ib, const ustring& contentName, int frame_index, const ROI& roi);
 cv::Mat getRoiFrame(const std::shared_ptr<ImageBuf>& ib, const ustring& contentName, int frame_index,

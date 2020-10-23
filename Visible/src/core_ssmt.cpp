@@ -70,7 +70,7 @@ mCurrentCachePath(serie_cache_folder), m_params(params)
     boost::signals2::connection _ss_voxel_connection = registerCallback(_ss_voxel_done_cb);
     
     // Support lifProcessor::geometry_ready
-    std::function<void (int, const input_channel_selector_t&)> geometry_ready_cb = boost::bind (&ssmt_processor::signal_geometry_done, this, boost::placeholders::_1, boost::placeholders::_2);
+    std::function<void (int, const input_section_selector_t&)> geometry_ready_cb = boost::bind (&ssmt_processor::signal_geometry_done, this, boost::placeholders::_1, boost::placeholders::_2);
     boost::signals2::connection geometry_connection = registerCallback(geometry_ready_cb);
 }
 
@@ -347,7 +347,7 @@ std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_intensity_statistics (con
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled
 void ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::vector<roiWindow<P8U>>& images,
-                                                                    const input_channel_selector_t& in,
+                                                                    const input_section_selector_t& in,
                                                                     const progress_fn_t& reporter)
 {
     bool cache_ok = false;
@@ -355,7 +355,7 @@ void ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::v
     std::string ss = " internal run ss started " + toString(in.region());
     vlogger::instance().console()->info(ss);
     std::shared_ptr<ssResultContainer> ssref;
-    auto cache_path = get_cache_location(in.channel(), in.region());
+    auto cache_path = get_cache_location(in.section(), in.region());
     if(bfs::exists(cache_path)){
         ssref = ssResultContainer::create(cache_path);
     }
@@ -408,19 +408,19 @@ void ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::v
 // channel_index which channel of multi-channel input. Usually visible channel is the last one
 // input is -1 for the entire root or index of moving object area in results container
 
-void ssmt_processor::run_selfsimilarity_on_selected_input (const input_channel_selector_t& in, const progress_fn_t& reporter){
-    auto cache_path = get_cache_location(in.channel(),in.region());
+void ssmt_processor::run_selfsimilarity_on_selected_input (const input_section_selector_t& in, const progress_fn_t& reporter){
+    auto cache_path = get_cache_location(in.section(),in.region());
     if (cache_path == bfs::path()){
         return;
     }
     // protect fetching image data
     std::lock_guard<std::mutex> lock(m_mutex);
-    const auto& _content = in.isEntire() ? content()[in.channel()] : m_results[in.region()]->content()[in.channel()];
+    const auto& _content = in.isEntire() ? content()[in.section()] : m_results[in.region()]->content()[in.section()];
     internal_run_selfsimilarity_on_selected_input(std::move(_content), in, reporter);
 }
 
 
-void ssmt_processor::signal_geometry_done (int count, const input_channel_selector_t& in){
+void ssmt_processor::signal_geometry_done (int count, const input_section_selector_t& in){
     auto msg = "ssmt_processor called geom cb " + toString(count);
     vlogger::instance().console()->info(msg);
 }
@@ -463,7 +463,7 @@ void ssmt_processor::volume_variance_peak_promotion (std::vector<roiWindow<P8U>>
  Each call to find_best can be with different median cut-off
  @param track track to be filled
  */
-void ssmt_processor::median_leveled_pci (namedTrack_t& track, const input_channel_selector_t& in)
+void ssmt_processor::median_leveled_pci (namedTrack_t& track, const input_section_selector_t& in)
 {
     try{
         vector<double>& leveled = m_entropies[in.region()];
@@ -530,14 +530,14 @@ std::shared_ptr<ioImageWriter>& ssmt_processor::get_csv_writer (){
     return m_csv_writer;
 }
 
-int ssmt_processor::save_channel_images (const input_channel_selector_t& in, const std::string& dir_fqfn){
+int ssmt_processor::save_channel_images (const input_section_selector_t& in, const std::string& dir_fqfn){
     std::lock_guard<std::mutex> lock(m_mutex);
     bfs::path _path (dir_fqfn);
     if (! bfs::exists(_path)){
         return -1;
     }
     const auto& _content = in.isEntire() ? content() : m_results[in.region()]->content();
-    int channel_to_use = in.channel() % m_channel_count;
+    int channel_to_use = in.section() % m_channel_count;
     channel_images_t c2 = _content[channel_to_use];
     auto writer = get_image_writer();
     if (writer) {

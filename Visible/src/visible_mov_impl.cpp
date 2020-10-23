@@ -175,11 +175,11 @@ void movContext::setup_signals(){
     boost::signals2::connection flu_connection = m_movProcRef->registerCallback(intensity_over_time_ready_cb);
     
     // Support lifProcessor::initial ss results available
-    std::function<void (std::vector<float> &, const input_channel_selector_t&)> root_pci_ready_cb = boost::bind (&movContext::signal_root_pci_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
+    std::function<void (std::vector<float> &, const input_section_selector_t&)> root_pci_ready_cb = boost::bind (&movContext::signal_root_pci_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
     boost::signals2::connection nl_connection = m_movProcRef->registerCallback(root_pci_ready_cb);
     
     // Support lifProcessor::median level set ss results available
-    std::function<void (const input_channel_selector_t&)> root_pci_med_reg_ready_cb = boost::bind (&movContext::signal_root_pci_med_reg_ready, shared_from_above(), boost::placeholders::_1);
+    std::function<void (const input_section_selector_t&)> root_pci_med_reg_ready_cb = boost::bind (&movContext::signal_root_pci_med_reg_ready, shared_from_above(), boost::placeholders::_1);
     boost::signals2::connection ol_connection = m_movProcRef->registerCallback(root_pci_med_reg_ready_cb);
     
     
@@ -230,7 +230,7 @@ void movContext::signal_content_loaded (int64_t& loaded_frame_count )
 
 
 
-void movContext::signal_root_pci_ready (std::vector<float> & signal, const input_channel_selector_t& dummy)
+void movContext::signal_root_pci_ready (std::vector<float> & signal, const input_section_selector_t& dummy)
 {
     auto tracksRef = m_root_pci_trackWeakRef.lock();
      if ( tracksRef && !tracksRef->at(0).second.empty()){
@@ -246,7 +246,7 @@ void movContext::signal_root_pci_ready (std::vector<float> & signal, const input
     vlogger::instance().console()->info(ss.str());
 }
 
-void movContext::signal_root_pci_med_reg_ready (const input_channel_selector_t& dummy2)
+void movContext::signal_root_pci_med_reg_ready (const input_section_selector_t& dummy2)
 {
     //@note this is also checked in update. Not sure if this is necessary
     auto tracksRef = m_root_pci_trackWeakRef.lock();
@@ -676,19 +676,19 @@ void movContext::process_async (){
     switch(channel_count()){
         case 3:
         {
-            input_channel_selector_t in (-1,0);
+            input_section_selector_t in (-1,0);
             m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_selfsimilarity_on_selected_input, m_movProcRef.get(), in, pf);
             break;
         }
         case 2:
         {
-            input_channel_selector_t in (-1,1);
+            input_section_selector_t in (-1,1);
             m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_selfsimilarity_on_selected_input, m_movProcRef.get(), in, pf);
             break;
         }
         case 1:
         {
-            input_channel_selector_t in (-1,0);
+            input_section_selector_t in (-1,0);
             m_root_pci_tracks_asyn = std::async(std::launch::async, &ssmt_processor::run_selfsimilarity_on_selected_input, m_movProcRef.get(), in, pf);
             break;
         }

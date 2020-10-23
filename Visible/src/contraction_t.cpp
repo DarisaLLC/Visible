@@ -83,7 +83,7 @@ namespace anonymous
 
 
 
-std::shared_ptr<contractionLocator> contractionLocator::create(const input_channel_selector_t& in, const uint32_t& body_id, const contractionLocator::params& params){
+std::shared_ptr<contractionLocator> contractionLocator::create(const input_section_selector_t& in, const uint32_t& body_id, const contractionLocator::params& params){
     return std::shared_ptr<contractionLocator>(new contractionLocator(in, body_id, params));
 }
 
@@ -91,7 +91,7 @@ std::shared_ptr<contractionLocator> contractionLocator::getShared () {
     return shared_from_this();
 }
 
-contractionLocator::contractionLocator(const input_channel_selector_t& in,  const uint32_t& body_id, const contractionLocator::params& params) :
+contractionLocator::contractionLocator(const input_section_selector_t& in,  const uint32_t& body_id, const contractionLocator::params& params) :
 m_cached(false),  m_in(in), mValidInput (false), m_params(params)
 {
     m_median_levelset_frac = m_params.median_levelset_fraction();
