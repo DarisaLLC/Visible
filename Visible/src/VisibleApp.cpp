@@ -10,7 +10,7 @@
 
 #include "VisibleApp.h"
 #include "oiio_utils.hpp"
-#define __used__
+//#define __used__
 
 #ifdef __used__
 static void HelpMarker(const char* desc)
@@ -76,11 +76,13 @@ void VisibleApp::DrawSettings() {
         for (auto nn = 0; nn < mInputSpec.nchannels; nn++)
             ImGui::BulletText("Channel(%d) %s", nn, mInputSpec.channelnames[nn].c_str());
         
+#if 0
         static int cpipe = pipeline::temporalEntropy;
         const char* pipeline_names[pipeline::count] = { "Cardiac", "TemporalEntropy", "SpatioTemporalSegmentation", "TemporalIntensity" };
         const char* pipeline_name = (cpipe >= 0 && cpipe < pipeline::count) ? pipeline_names[cpipe] : "Unknown";
         ImGui::SliderInt("slider enum", &cpipe, 0, pipeline::count - 1, pipeline_name);
         ImGui::SameLine(); HelpMarker("Using the format string parameter to display a name instead of the underlying integer.");
+#endif
         
         }
         ImGui::Spacing();
