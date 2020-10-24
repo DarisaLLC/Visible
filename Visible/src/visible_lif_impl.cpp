@@ -1230,7 +1230,7 @@ void  visibleContext::DrawGUI(){
     add_navigation();
     m_show_cells = true;
     add_contractions(&m_show_cells);
-    add_motion_profile ();
+//    add_motion_profile ();
 }
 
 void  visibleContext::update_log (const std::string& msg)
