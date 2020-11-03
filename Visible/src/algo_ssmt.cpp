@@ -121,11 +121,25 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     if(bfs::exists(mCurrentCachePath)){
         std::string imagename = "voxel_binary_.png";
         auto image_path = cache_path / imagename;
-        cv::imwrite(image_path.string(), bi_level);
+        std::unique_ptr<ImageOutput> out = ImageOutput::create (image_path.c_str());
+        if (out){
+            ImageSpec spec (bi_level.rows, bi_level.cols, bi_level.channels(), TypeDesc::UINT8);
+            out->open (image_path.c_str(), spec);
+            out->write_image (TypeDesc::UINT8, bi_level.data);
+            out->close ();
+        }
+//        cv::imwrite(image_path.string(), bi_level);
         {
             std::string imagename = "peaks_.png";
             auto image_path = cache_path / imagename;
-            cv::imwrite(image_path.string(), m_var_image);
+            std::unique_ptr<ImageOutput> out = ImageOutput::create (image_path.c_str());
+            if (out){
+                ImageSpec spec (m_var_image.rows, m_var_image.cols, m_var_image.channels(), TypeDesc::UINT8);
+                out->open (image_path.c_str(), spec);
+                out->write_image (TypeDesc::UINT8, m_var_image.data);
+                out->close ();
+            }
+//        cv::imwrite(image_path.string(), m_var_image);
         }
     }
     

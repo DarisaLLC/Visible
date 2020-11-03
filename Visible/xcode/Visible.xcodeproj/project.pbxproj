@@ -354,8 +354,6 @@
 		C2AFAD892252E2AE0038AF5B /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AFAD872252E2950038AF5B /* CoreImage.framework */; };
 		C2B2F208234D1C2D0026ADDB /* imgui_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C210946C223AEC19004E88EE /* imgui_wrapper.cpp */; };
 		C2B2F209234D1E6B0026ADDB /* moviong_region.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACF922FF793C00D171EF /* moviong_region.cpp */; };
-		C2B75A0E2550B59700B7A4D2 /* libOpenImageIO.2.1.18.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2171339252E89E100851EBA /* libOpenImageIO.2.1.18.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		C2B75A142550B59C00B7A4D2 /* libOpenImageIO_Util.2.1.18.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = C217133A252E89E100851EBA /* libOpenImageIO_Util.2.1.18.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2B87C9921D012D700C91E35 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
 		C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
 		C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
@@ -385,6 +383,8 @@
 		C2ED05A622D1780600314C1B /* main_header_paths.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2ED05A522D1780600314C1B /* main_header_paths.xcconfig */; };
 		C2ED5BB62209F67600EE52B3 /* imguivariouscontrols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */; };
 		C2EF8D1E2148768800A5D3D6 /* Item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0D2148709300A5D3D6 /* Item.cpp */; };
+		C2F07CCF2551CBA7000ABF0E /* libOpenImageIO.2.2.7.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2F07CCD2551CBA7000ABF0E /* libOpenImageIO.2.2.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		C2F07CD02551CBA7000ABF0E /* libOpenImageIO_Util.2.2.7.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2F07CCE2551CBA7000ABF0E /* libOpenImageIO_Util.2.2.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2F09C4A253CE61000563B9B /* oiio_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2F09C48253CE61000563B9B /* oiio_utils.cpp */; };
 		C2F09C4B253CE61000563B9B /* oiio_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2F09C48253CE61000563B9B /* oiio_utils.cpp */; };
 		C2F09C4C253CE61000563B9B /* oiio_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2F09C48253CE61000563B9B /* oiio_utils.cpp */; };
@@ -461,8 +461,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 11;
 			files = (
-				C2B75A0E2550B59700B7A4D2 /* libOpenImageIO.2.1.18.dylib in CopyFiles */,
-				C2B75A142550B59C00B7A4D2 /* libOpenImageIO_Util.2.1.18.dylib in CopyFiles */,
+				C2F07CCF2551CBA7000ABF0E /* libOpenImageIO.2.2.7.dylib in CopyFiles */,
+				C2F07CD02551CBA7000ABF0E /* libOpenImageIO_Util.2.2.7.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -867,8 +867,6 @@
 		C2AFCEFD216E79590080462D /* imgui_demo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_demo.cpp; path = ../local_cinder_imgui/lib/imgui/imgui_demo.cpp; sourceTree = "<group>"; };
 		C2AFCF08216F0CF10080462D /* CinderImGui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CinderImGui.cpp; path = ../local_cinder_imgui/src/CinderImGui.cpp; sourceTree = "<group>"; };
 		C2B1EB8F247876C8007F8445 /* VisibleRunRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VisibleRunRelease.entitlements; sourceTree = "<group>"; };
-		C2B759FE2550B08000B7A4D2 /* libOpenImageIO_Util.2.1.18.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libOpenImageIO_Util.2.1.18.dylib; path = ../../../../../../../../usr/local/Cellar/openimageio/2.1.18_4/lib/libOpenImageIO_Util.2.1.18.dylib; sourceTree = "<group>"; };
-		C2B759FF2550B08000B7A4D2 /* libOpenImageIO.2.1.18.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libOpenImageIO.2.1.18.dylib; path = ../../../../../../../../usr/local/Cellar/openimageio/2.1.18_4/lib/libOpenImageIO.2.1.18.dylib; sourceTree = "<group>"; };
 		C2B87C9721CEE27500C91E35 /* visible_cli.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = visible_cli.hpp; path = ../include/visible_cli.hpp; sourceTree = "<group>"; };
 		C2B87C9821D008AC00C91E35 /* visible_logger_macro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = visible_logger_macro.h; path = ../include/visible_logger_macro.h; sourceTree = "<group>"; };
 		C2BA575522C31DE900AAAF4F /* libavresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavresample.a; path = ../../../../../../../usr/local/lib/libavresample.a; sourceTree = "<group>"; };
@@ -918,6 +916,8 @@
 		C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VisibleApp.cpp; path = ../src/VisibleApp.cpp; sourceTree = "<group>"; };
 		C2EF8D1B214873E700A5D3D6 /* Item.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Item.h; path = ../include/Item.h; sourceTree = "<group>"; };
 		C2EF8D2021498C8D00A5D3D6 /* ut_lif.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ut_lif.hpp; sourceTree = "<group>"; };
+		C2F07CCD2551CBA7000ABF0E /* libOpenImageIO.2.2.7.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libOpenImageIO.2.2.7.dylib; path = ../../../../../../../../usr/local/Cellar/openimageio/2.2.7/lib/libOpenImageIO.2.2.7.dylib; sourceTree = "<group>"; };
+		C2F07CCE2551CBA7000ABF0E /* libOpenImageIO_Util.2.2.7.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libOpenImageIO_Util.2.2.7.dylib; path = ../../../../../../../../usr/local/Cellar/openimageio/2.2.7/lib/libOpenImageIO_Util.2.2.7.dylib; sourceTree = "<group>"; };
 		C2F09C48253CE61000563B9B /* oiio_utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = oiio_utils.cpp; path = ../include/oiio_utils.cpp; sourceTree = "<group>"; };
 		C2F09C49253CE61000563B9B /* oiio_utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = oiio_utils.hpp; path = ../include/oiio_utils.hpp; sourceTree = "<group>"; };
 		C2F1B6211FB13FE600DDD7DB /* LifContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LifContext.h; path = ../include/LifContext.h; sourceTree = "<group>"; };
@@ -1112,8 +1112,8 @@
 		29B97314FDCFA39411CA2CEA /* QuickTimeIteration */ = {
 			isa = PBXGroup;
 			children = (
-				C2B759FE2550B08000B7A4D2 /* libOpenImageIO_Util.2.1.18.dylib */,
-				C2B759FF2550B08000B7A4D2 /* libOpenImageIO.2.1.18.dylib */,
+				C2F07CCE2551CBA7000ABF0E /* libOpenImageIO_Util.2.2.7.dylib */,
+				C2F07CCD2551CBA7000ABF0E /* libOpenImageIO.2.2.7.dylib */,
 				C2B1EB8F247876C8007F8445 /* VisibleRunRelease.entitlements */,
 				C2409B2F2475CCBE003CF7BC /* VisibleRelease.entitlements */,
 				C2175DD22150B779004315C0 /* Visible.entitlements */,
@@ -2062,7 +2062,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export DYLIB=\"libOpenImageIO.2.1.dylib\"\nexport DYLIB_UTIL=\"libOpenImageIO_Util.2.1.dylib\"\nexport CUR_LOC=\"/usr/local/opt/openimageio/lib\"\necho \"$CUR_LOC/$DYLIB\"\necho \"$CUR_LOC/$DYLIB_UTIL\"\n\ninstall_name_tool -change \"$CUR_LOC/$DYLIB\"   \"@executable_path/../SharedFrameworks/$DYLIB\"  \"$TARGET_BUILD_DIR/$TARGET_NAME.app/Contents/MacOS/$PRODUCT_NAME\"\ninstall_name_tool -change \"$CUR_LOCAL/$DYLIB_UTIL\" \"@loader_path/../SharedFrameworks/$DYLIB_UTIL\" \"$TARGET_BUILD_DIR/$TARGET_NAME.app/Contents/MacOS/$PRODUCT_NAME\"\n";
+			shellScript = "export DYLIB=\"libOpenImageIO.2.2.dylib\"\nexport DYLIB_UTIL=\"libOpenImageIO_Util.2.2.dylib\"\nexport CUR_LOC=\"/usr/local/opt/openimageio/lib\"\necho \"$CUR_LOC/$DYLIB\"\necho \"$CUR_LOC/$DYLIB_UTIL\"\n\ninstall_name_tool -change \"/usr/local/opt/openimageio/lib/$DYLIB\"   \"@executable_path/../SharedFrameworks/$DYLIB\"  \"$TARGET_BUILD_DIR/$TARGET_NAME.app/Contents/MacOS/$PRODUCT_NAME\"\n\ninstall_name_tool -change \"/usr/local/opt/openimageio/lib/$DYLIB_UTIL\"  \"@executable_path/../SharedFrameworks/$DYLIB_UTIL\" \"$TARGET_BUILD_DIR/$TARGET_NAME.app/Contents/MacOS/$PRODUCT_NAME\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
