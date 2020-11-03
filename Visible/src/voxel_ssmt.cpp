@@ -27,10 +27,12 @@
 #include "logger/logger.hpp"
 #include "result_serialization.h"
 #include "segmentation_parameters.hpp"
+#include <OpenImageIO/imageio.h>
 
 using namespace stl_utils;
 using namespace boost;
 namespace bfs=boost::filesystem;
+using namespace OIIO;
 
 
 // Return 2D latice of pixels over time
@@ -166,7 +168,14 @@ void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
     if(bfs::exists(mCurrentCachePath)){
         std::string imagename = "voxel_ss_.png";
         auto image_path = mCurrentCachePath / imagename;
-        cv::imwrite(image_path.string(), m_temporal_ss);
+        std::unique_ptr<ImageOutput> out = ImageOutput::create (image_path.c_str());
+        if (out){
+            ImageSpec spec (m_temporal_ss.rows, m_temporal_ss.cols, m_temporal_ss.channels(), TypeDesc::UINT8);
+            out->open (image_path.c_str(), spec);
+            out->write_image (TypeDesc::UINT8, m_temporal_ss.data);
+            out->close ();
+        }
+//        cv::imwrite(image_path.string(), m_temporal_ss);
     }
     
     // Call the voxel ready cb if any
