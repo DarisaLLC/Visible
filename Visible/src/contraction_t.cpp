@@ -331,10 +331,10 @@ bool contractionLocator::locate_contractions (){
             m_contractions.emplace_back(profile->contraction());
             
             //@todo use cache_root for this
-            bfs::path sp ("/Volumes/medvedev/Users/arman/tmp/");
-            save_csv(profile, sp);
-            auto msg = "Stored " + stl_utils::tostr(pp);
-            vlogger::instance().console()->info(msg);
+//            bfs::path sp ("/Volumes/medvedev/Users/arman/tmp/");
+//            save_csv(profile, sp);
+//            auto msg = "Stored " + stl_utils::tostr(pp);
+//            vlogger::instance().console()->info(msg);
             break;
         }
     }
