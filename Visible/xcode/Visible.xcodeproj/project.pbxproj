@@ -383,8 +383,6 @@
 		C2ED05A622D1780600314C1B /* main_header_paths.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C2ED05A522D1780600314C1B /* main_header_paths.xcconfig */; };
 		C2ED5BB62209F67600EE52B3 /* imguivariouscontrols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */; };
 		C2EF8D1E2148768800A5D3D6 /* Item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D0D2148709300A5D3D6 /* Item.cpp */; };
-		C2F07CCF2551CBA7000ABF0E /* libOpenImageIO.2.2.7.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2F07CCD2551CBA7000ABF0E /* libOpenImageIO.2.2.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		C2F07CD02551CBA7000ABF0E /* libOpenImageIO_Util.2.2.7.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = C2F07CCE2551CBA7000ABF0E /* libOpenImageIO_Util.2.2.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2F09C4A253CE61000563B9B /* oiio_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2F09C48253CE61000563B9B /* oiio_utils.cpp */; };
 		C2F09C4B253CE61000563B9B /* oiio_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2F09C48253CE61000563B9B /* oiio_utils.cpp */; };
 		C2F09C4C253CE61000563B9B /* oiio_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2F09C48253CE61000563B9B /* oiio_utils.cpp */; };
@@ -455,17 +453,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C2B759FD2550AF1400B7A4D2 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 11;
-			files = (
-				C2F07CCF2551CBA7000ABF0E /* libOpenImageIO.2.2.7.dylib in CopyFiles */,
-				C2F07CD02551CBA7000ABF0E /* libOpenImageIO_Util.2.2.7.dylib in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -531,8 +518,6 @@
 		C210F11C2159A832002A82A3 /* liblibtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibtiff.a; path = "../../../../../../../../../usr/local/opencv-3.4.3/build/3rdparty/lib/Release/liblibtiff.a"; sourceTree = "<group>"; };
 		C210F148215AA720002A82A3 /* macos.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = macos.xcconfig; path = configs/include/macos.xcconfig; sourceTree = "<group>"; };
 		C213607821647E4A00F794AB /* cached_results.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cached_results.hpp; path = ../include/cached_results.hpp; sourceTree = "<group>"; };
-		C2171339252E89E100851EBA /* libOpenImageIO.2.1.18.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libOpenImageIO.2.1.18.dylib; path = /usr/local/Cellar/openimageio/2.1.18_4/lib/libOpenImageIO.2.1.18.dylib; sourceTree = "<absolute>"; };
-		C217133A252E89E100851EBA /* libOpenImageIO_Util.2.1.18.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libOpenImageIO_Util.2.1.18.dylib; path = /usr/local/Cellar/openimageio/2.1.18_4/lib/libOpenImageIO_Util.2.1.18.dylib; sourceTree = "<absolute>"; };
 		C2175DD22150B779004315C0 /* Visible.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Visible.entitlements; path = Visible/Visible.entitlements; sourceTree = "<group>"; };
 		C2175DD8215154A9004315C0 /* swatchLarge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = swatchLarge.png; path = ../assets/swatchLarge.png; sourceTree = "<group>"; };
 		C2175DD9215154A9004315C0 /* swatchSmall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = swatchSmall.png; path = ../assets/swatchSmall.png; sourceTree = "<group>"; };
@@ -916,11 +901,27 @@
 		C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VisibleApp.cpp; path = ../src/VisibleApp.cpp; sourceTree = "<group>"; };
 		C2EF8D1B214873E700A5D3D6 /* Item.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Item.h; path = ../include/Item.h; sourceTree = "<group>"; };
 		C2EF8D2021498C8D00A5D3D6 /* ut_lif.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ut_lif.hpp; sourceTree = "<group>"; };
-		C2F07CCD2551CBA7000ABF0E /* libOpenImageIO.2.2.7.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libOpenImageIO.2.2.7.dylib; path = ../../../../../../../../usr/local/Cellar/openimageio/2.2.7/lib/libOpenImageIO.2.2.7.dylib; sourceTree = "<group>"; };
-		C2F07CCE2551CBA7000ABF0E /* libOpenImageIO_Util.2.2.7.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libOpenImageIO_Util.2.2.7.dylib; path = ../../../../../../../../usr/local/Cellar/openimageio/2.2.7/lib/libOpenImageIO_Util.2.2.7.dylib; sourceTree = "<group>"; };
 		C2F09C48253CE61000563B9B /* oiio_utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = oiio_utils.cpp; path = ../include/oiio_utils.cpp; sourceTree = "<group>"; };
 		C2F09C49253CE61000563B9B /* oiio_utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = oiio_utils.hpp; path = ../include/oiio_utils.hpp; sourceTree = "<group>"; };
 		C2F1B6211FB13FE600DDD7DB /* LifContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LifContext.h; path = ../include/LifContext.h; sourceTree = "<group>"; };
+		C2F4300325536B120033FEBE /* libIlmImfUtil-2_5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libIlmImfUtil-2_5.a"; path = "../../../../../../../../usr/local/lib/libIlmImfUtil-2_5.a"; sourceTree = "<group>"; };
+		C2F4300425536B120033FEBE /* libImath-2_5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libImath-2_5.a"; path = "../../../../../../../../usr/local/lib/libImath-2_5.a"; sourceTree = "<group>"; };
+		C2F4300525536B120033FEBE /* libIlmImf-2_5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libIlmImf-2_5.a"; path = "../../../../../../../../usr/local/lib/libIlmImf-2_5.a"; sourceTree = "<group>"; };
+		C2F4300625536B120033FEBE /* libIexMath-2_5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libIexMath-2_5.a"; path = "../../../../../../../../usr/local/lib/libIexMath-2_5.a"; sourceTree = "<group>"; };
+		C2F4300725536B120033FEBE /* libIlmThread-2_5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libIlmThread-2_5.a"; path = "../../../../../../../../usr/local/lib/libIlmThread-2_5.a"; sourceTree = "<group>"; };
+		C2F4300825536B130033FEBE /* libIex-2_5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libIex-2_5.a"; path = "../../../../../../../../usr/local/lib/libIex-2_5.a"; sourceTree = "<group>"; };
+		C2F4300925536B130033FEBE /* libHalf-2_5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libHalf-2_5.a"; path = "../../../../../../../../usr/local/lib/libHalf-2_5.a"; sourceTree = "<group>"; };
+		C2F4301625536BEF0033FEBE /* libheif.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libheif.a; path = ../../../../../../../../usr/local/Cellar/libheif/1.9.1/lib/libheif.a; sourceTree = "<group>"; };
+		C2F4301D25536C620033FEBE /* libgif.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgif.a; path = ../../../../../../../../usr/local/Cellar/giflib/5.2.1/lib/libgif.a; sourceTree = "<group>"; };
+		C2F4302425536CD30033FEBE /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = ../../../../../../../../usr/local/Cellar/ffmpeg/4.3.1_2/lib/libavutil.a; sourceTree = "<group>"; };
+		C2F4302525536CD30033FEBE /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswresample.a; path = ../../../../../../../../usr/local/Cellar/ffmpeg/4.3.1_2/lib/libswresample.a; sourceTree = "<group>"; };
+		C2F4302625536CD30033FEBE /* libavresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavresample.a; path = ../../../../../../../../usr/local/Cellar/ffmpeg/4.3.1_2/lib/libavresample.a; sourceTree = "<group>"; };
+		C2F4302725536CD30033FEBE /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = ../../../../../../../../usr/local/Cellar/ffmpeg/4.3.1_2/lib/libavcodec.a; sourceTree = "<group>"; };
+		C2F4302825536CD30033FEBE /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswscale.a; path = ../../../../../../../../usr/local/Cellar/ffmpeg/4.3.1_2/lib/libswscale.a; sourceTree = "<group>"; };
+		C2F4302925536CD30033FEBE /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = ../../../../../../../../usr/local/Cellar/ffmpeg/4.3.1_2/lib/libavformat.a; sourceTree = "<group>"; };
+		C2F4302A25536CD30033FEBE /* libavdevice.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavdevice.a; path = ../../../../../../../../usr/local/Cellar/ffmpeg/4.3.1_2/lib/libavdevice.a; sourceTree = "<group>"; };
+		C2F4302B25536CD30033FEBE /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpostproc.a; path = ../../../../../../../../usr/local/Cellar/ffmpeg/4.3.1_2/lib/libpostproc.a; sourceTree = "<group>"; };
+		C2F4302C25536CD30033FEBE /* libavfilter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavfilter.a; path = ../../../../../../../../usr/local/Cellar/ffmpeg/4.3.1_2/lib/libavfilter.a; sourceTree = "<group>"; };
 		C2F7C47B22DFD21B00E28521 /* convex_hull.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = convex_hull.hpp; sourceTree = "<group>"; };
 		C2F7C47C22E65A2900E28521 /* cluster_geometry.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = cluster_geometry.hpp; path = ../include/cluster_geometry.hpp; sourceTree = "<group>"; };
 		C2FC528A246F2E1F00B1030D /* CinderImGuiConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CinderImGuiConfig.h; path = ../local_cinder_imgui/include/CinderImGuiConfig.h; sourceTree = "<group>"; };
@@ -1112,8 +1113,6 @@
 		29B97314FDCFA39411CA2CEA /* QuickTimeIteration */ = {
 			isa = PBXGroup;
 			children = (
-				C2F07CCE2551CBA7000ABF0E /* libOpenImageIO_Util.2.2.7.dylib */,
-				C2F07CCD2551CBA7000ABF0E /* libOpenImageIO.2.2.7.dylib */,
 				C2B1EB8F247876C8007F8445 /* VisibleRunRelease.entitlements */,
 				C2409B2F2475CCBE003CF7BC /* VisibleRelease.entitlements */,
 				C2175DD22150B779004315C0 /* Visible.entitlements */,
@@ -1171,8 +1170,24 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				C2171339252E89E100851EBA /* libOpenImageIO.2.1.18.dylib */,
-				C217133A252E89E100851EBA /* libOpenImageIO_Util.2.1.18.dylib */,
+				C2F4302725536CD30033FEBE /* libavcodec.a */,
+				C2F4302A25536CD30033FEBE /* libavdevice.a */,
+				C2F4302C25536CD30033FEBE /* libavfilter.a */,
+				C2F4302925536CD30033FEBE /* libavformat.a */,
+				C2F4302625536CD30033FEBE /* libavresample.a */,
+				C2F4302425536CD30033FEBE /* libavutil.a */,
+				C2F4302B25536CD30033FEBE /* libpostproc.a */,
+				C2F4302525536CD30033FEBE /* libswresample.a */,
+				C2F4302825536CD30033FEBE /* libswscale.a */,
+				C2F4301D25536C620033FEBE /* libgif.a */,
+				C2F4301625536BEF0033FEBE /* libheif.a */,
+				C2F4300925536B130033FEBE /* libHalf-2_5.a */,
+				C2F4300825536B130033FEBE /* libIex-2_5.a */,
+				C2F4300625536B120033FEBE /* libIexMath-2_5.a */,
+				C2F4300525536B120033FEBE /* libIlmImf-2_5.a */,
+				C2F4300325536B120033FEBE /* libIlmImfUtil-2_5.a */,
+				C2F4300725536B120033FEBE /* libIlmThread-2_5.a */,
+				C2F4300425536B120033FEBE /* libImath-2_5.a */,
 				C237501024A1BB6E00E13081 /* libboost_system-mt.a */,
 				C237500E24A1BAB700E13081 /* OpenGL.framework */,
 				C237500424A1B5BF00E13081 /* libboost_program_options.a */,
@@ -1862,8 +1877,6 @@
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
 				C2819ED12201271A00183E44 /* CopyFiles */,
-				C2B759FD2550AF1400B7A4D2 /* CopyFiles */,
-				C2B759FC2550AECD00B7A4D2 /* ShellScript */,
 				C25261131F66D7BF0069F665 /* Build Number */,
 			);
 			buildRules = (
@@ -2046,23 +2059,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "#Update build number with number of git commits if in release mode\nbuildNumber=$(git rev-list HEAD | wc -l | tr -d ' ')\necho $buildNumber\n#if [ ${CONFIGURATION} == \"Release\" ]; then\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n#fi;\n";
-		};
-		C2B759FC2550AECD00B7A4D2 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "export DYLIB=\"libOpenImageIO.2.2.dylib\"\nexport DYLIB_UTIL=\"libOpenImageIO_Util.2.2.dylib\"\nexport CUR_LOC=\"/usr/local/opt/openimageio/lib\"\necho \"$CUR_LOC/$DYLIB\"\necho \"$CUR_LOC/$DYLIB_UTIL\"\n\ninstall_name_tool -change \"/usr/local/opt/openimageio/lib/$DYLIB\"   \"@executable_path/../SharedFrameworks/$DYLIB\"  \"$TARGET_BUILD_DIR/$TARGET_NAME.app/Contents/MacOS/$PRODUCT_NAME\"\n\ninstall_name_tool -change \"/usr/local/opt/openimageio/lib/$DYLIB_UTIL\"  \"@executable_path/../SharedFrameworks/$DYLIB_UTIL\" \"$TARGET_BUILD_DIR/$TARGET_NAME.app/Contents/MacOS/$PRODUCT_NAME\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2423,11 +2419,16 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/libheif/1.9.1/lib,
+					/usr/local/Cellar/giflib/5.2.1/lib,
+					/usr/local/Cellar/ffmpeg/4.3.1_2/lib,
+				);
 				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.01;
+				MARKETING_VERSION = 1.013;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -2479,11 +2480,16 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/libheif/1.9.1/lib,
+					/usr/local/Cellar/giflib/5.2.1/lib,
+					/usr/local/Cellar/ffmpeg/4.3.1_2/lib,
+				);
 				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.01;
+				MARKETING_VERSION = 1.013;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
