@@ -293,28 +293,28 @@ bool contractionLocator::locate_contractions (){
     for (auto idx : peaks_idx) ss << idx << ",";
     vlogger::instance().console()->info(ss.str());
     
-    auto save_csv = [](const std::shared_ptr<contractionProfile>& cp, bfs::path& root_path){
-        auto folder = stl_utils::now_string();
-        auto folder_path = root_path / folder;
-        boost::system::error_code ec;
-        if(!bfs::exists(folder_path)){
-            bfs::create_directory(folder_path, ec);
-            if (ec != boost::system::errc::success){
-                std::string msg = "Could not create " + folder_path.string() ;
-                vlogger::instance().console()->error(msg);
-                return false;
-            }
-            std::string basefilename = folder_path.string() + boost::filesystem::path::preferred_separator;
-            auto fn = basefilename + "force.csv";
-            stl_utils::save_csv(cp->force(), fn);
-            fn = basefilename + "interpolatedLength.csv";
-            stl_utils::save_csv(cp->interpolatedLength(), fn);
-            fn = basefilename + "elongation.csv";
-            stl_utils::save_csv(cp->elongation(), fn);
-              return true;
-        }
-        return false;
-    };
+//    auto save_csv = [](const std::shared_ptr<contractionProfile>& cp, bfs::path& root_path){
+//        auto folder = stl_utils::now_string();
+//        auto folder_path = root_path / folder;
+//        boost::system::error_code ec;
+//        if(!bfs::exists(folder_path)){
+//            bfs::create_directory(folder_path, ec);
+//            if (ec != boost::system::errc::success){
+//                std::string msg = "Could not create " + folder_path.string() ;
+//                vlogger::instance().console()->error(msg);
+//                return false;
+//            }
+//            std::string basefilename = folder_path.string() + boost::filesystem::path::preferred_separator;
+//            auto fn = basefilename + "force.csv";
+//            stl_utils::save_csv(cp->force(), fn);
+//            fn = basefilename + "interpolatedLength.csv";
+//            stl_utils::save_csv(cp->interpolatedLength(), fn);
+//            fn = basefilename + "elongation.csv";
+//            stl_utils::save_csv(cp->elongation(), fn);
+//              return true;
+//        }
+//        return false;
+//    };
     
     for (auto pp = 0; pp < peaks_idx.size(); pp++){
         m_peaks.emplace_back(peaks_idx[pp], m_signal[peaks_idx[pp]]);

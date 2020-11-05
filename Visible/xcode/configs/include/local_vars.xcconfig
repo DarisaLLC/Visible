@@ -27,7 +27,7 @@ LOCAL_SPDLOG = $(EXTERNALS)/spdlog
 LOCAL_FMT = $(EXTERNALS)/fmt
 LOCAL_CIIMGUI = $(VISIBLE_ROOT)/local_cinder_imgui
 
-LOCAL_OIIO =  /usr/local/Cellar/openimageio/2.2.7
+LOCAL_OIIO =  $(EXTERNALS)/oiio-dist
 
 LOCAL_3rdParty = $(SVL_ROOT)/local
 LOCAL_BOOST = /usr/local
