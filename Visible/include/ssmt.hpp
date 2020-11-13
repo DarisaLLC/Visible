@@ -236,9 +236,9 @@ private:
     void sm_content_loaded ();
     void signal_geometry_done (int, const input_section_selector_t&);
     
-    std::shared_ptr<ioImageWriter>& get_image_writer ();
-    std::shared_ptr<ioImageWriter>& get_csv_writer ();
-    int save_channel_images (const input_section_selector_t& in,  const std::string& dir_fqfn);
+//    std::shared_ptr<ioImageWriter>& get_image_writer ();
+//    std::shared_ptr<ioImageWriter>& get_csv_writer ();
+//    int save_channel_images (const input_section_selector_t& in,  const std::string& dir_fqfn);
 
     // Generate profiles and images for moving regions & save them
     void generate_affine_windows ();
