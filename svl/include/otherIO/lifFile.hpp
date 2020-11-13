@@ -34,7 +34,6 @@
 #include <memory>
 #include <boost/utility.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 
 
 
@@ -136,7 +135,6 @@ namespace lifIO
         
     protected:
         TiXmlDocument m_xmldoc;
-//        boost::ptr_vector<LifSerieHeader> m_series;
         std::vector<std::unique_ptr<LifSerieHeader>> m_series;
         
     private:

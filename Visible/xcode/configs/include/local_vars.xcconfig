@@ -20,7 +20,7 @@ TEST_DATA = $(SVL_ROOT)/Assets
 TEST_VISIBLE_DATA = $(VISIBLE_ROOT)/test/assets
 
 LOCAL_CINDER = $(EXTERNALS)/cinder
-LOCAL_OCV = /usr/local/Cellar/opencv/4.5.0_2
+LOCAL_OCV = /usr/local/Cellar/opencv/4.5.0_3
 LOCAL_GSL = /usr/local/
 LOCAL_CIMG = $(EXTERNALS)/CImg
 LOCAL_SPDLOG = $(EXTERNALS)/spdlog

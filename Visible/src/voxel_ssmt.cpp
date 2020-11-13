@@ -175,7 +175,7 @@ void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
             out->write_image (TypeDesc::UINT8, m_temporal_ss.data);
             out->close ();
         }
-//        cv::imwrite(image_path.string(), m_temporal_ss);
+
     }
     
     // Call the voxel ready cb if any

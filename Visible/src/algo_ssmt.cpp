@@ -128,7 +128,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
             out->write_image (TypeDesc::UINT8, bi_level.data);
             out->close ();
         }
-//        cv::imwrite(image_path.string(), bi_level);
+
         {
             std::string imagename = "peaks_.png";
             auto image_path = cache_path / imagename;
@@ -139,7 +139,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
                 out->write_image (TypeDesc::UINT8, m_var_image.data);
                 out->close ();
             }
-//        cv::imwrite(image_path.string(), m_var_image);
+
         }
     }
     

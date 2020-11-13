@@ -515,6 +515,18 @@ const uint32_t ssmt_processor::channel_count () const
     return m_channel_count;
 }
 
+
+const std::vector<moving_region>& ssmt_processor::moving_regions ()const {
+    return m_regions;
+}
+
+const ssmt_processor::channel_vec_t& ssmt_processor::content () const{
+    return m_all_by_channel;
+}
+
+
+#ifdef notYet
+
 std::shared_ptr<ioImageWriter>& ssmt_processor::get_image_writer (){
     if (! m_image_writer){
         m_image_writer = std::make_shared<ioImageWriter>();
@@ -547,10 +559,5 @@ int ssmt_processor::save_channel_images (const input_section_selector_t& in, con
     return -1;
 }
 
-const std::vector<moving_region>& ssmt_processor::moving_regions ()const {
-    return m_regions;
-}
+#endif
 
-const ssmt_processor::channel_vec_t& ssmt_processor::content () const{
-    return m_all_by_channel;
-}
