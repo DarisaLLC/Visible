@@ -20,7 +20,7 @@
 #include "eigen_utils.hpp"
 #include "input_selector.hpp"
 #include "timed_types.h"
-#include "visible_types.h"
+
 
 
 using namespace std;
@@ -195,7 +195,9 @@ public:
     const std::pair<double,double>& leveled_min_max () { return m_leveled_min_max; };
   
     
-    const std::vector<index_val_t>& low_peaks () const { return m_peaks; }
+    const std::vector<index_val_t>& contraction_peaks () const { return m_peaks; }
+    const std::vector<int>& contraction_peak_frame_indicies () const { return m_peaks_idx; }
+    
     const contractionContainer_t & contractions () const { return m_contractions; }
     
     // Adjusting Median Level
@@ -232,6 +234,7 @@ private:
     vector<double>               m_accum;
     mutable vector<double>              m_signal;
     mutable vector<double>              m_interpolation;
+    std::vector<int> m_peaks_idx;
 
     mutable std::vector<int>            m_ranks;
     size_t m_entsize;
