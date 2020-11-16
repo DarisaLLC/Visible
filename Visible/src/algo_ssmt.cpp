@@ -123,7 +123,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
         auto image_path = cache_path / imagename;
         std::unique_ptr<ImageOutput> out = ImageOutput::create (image_path.c_str());
         if (out){
-            ImageSpec spec (bi_level.rows, bi_level.cols, bi_level.channels(), TypeDesc::UINT8);
+            ImageSpec spec (bi_level.cols, bi_level.rows, bi_level.channels(), TypeDesc::UINT8);
             out->open (image_path.c_str(), spec);
             out->write_image (TypeDesc::UINT8, bi_level.data);
             out->close ();
@@ -134,7 +134,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
             auto image_path = cache_path / imagename;
             std::unique_ptr<ImageOutput> out = ImageOutput::create (image_path.c_str());
             if (out){
-                ImageSpec spec (m_var_image.rows, m_var_image.cols, m_var_image.channels(), TypeDesc::UINT8);
+                ImageSpec spec (m_var_image.cols, m_var_image.rows, m_var_image.channels(), TypeDesc::UINT8);
                 out->open (image_path.c_str(), spec);
                 out->write_image (TypeDesc::UINT8, m_var_image.data);
                 out->close ();
@@ -204,32 +204,16 @@ void ssmt_processor::internal_generate_affine_windows (const std::vector<roiWind
     };
 
 
-    auto horizontal_vertical_projections = [](const cv::Mat& mm){
-        cv::Mat hz (1, mm.cols, CV_32F);
-        cv::Mat vt (mm.rows, 1, CV_32F);
-        reduce(mm,vt,1,CV_REDUCE_SUM,CV_32F);
-        reduce(mm,hz,0,CV_REDUCE_SUM,CV_32F);
-        std::vector<float> hz_vec(mm.cols);
-        for (auto ii = 0; ii < mm.cols; ii++) hz_vec[ii] = hz.at<float>(0,ii);
-        std::vector<float> vt_vec(mm.rows);
-        for (auto ii = 0; ii < mm.rows; ii++) vt_vec[ii] = vt.at<float>(ii,0);
-        return std::make_pair(hz_vec, vt_vec);
-    };
 
     uint32_t count = 0;
     uint32_t total = static_cast<uint32_t>(rws.size());
     m_affine_windows.clear();
-    m_hz_profiles.clear();
-    m_vt_profiles.clear();
     vector<roiWindow<P8U> >::const_iterator vitr = rws.begin();
     do
     {
         cv::Mat affine = affineCrop(vitr, m_motion_mass);
         auto clone = affine.clone();
-        auto hvpair = horizontal_vertical_projections(clone);
         m_affine_windows.push_back(clone);
-        m_hz_profiles.push_back(hvpair.first);
-        m_vt_profiles.push_back(hvpair.second);
         count++;
     }
     while (++vitr != rws.end());
@@ -238,7 +222,6 @@ void ssmt_processor::internal_generate_affine_windows (const std::vector<roiWind
     internal_generate_affine_translations();
     internal_generate_affine_profiles();
     save_affine_windows ();
-    save_affine_profiles();
     
 }
 
@@ -270,34 +253,6 @@ void ssmt_processor::save_affine_windows (){
 }
 
 
-void ssmt_processor::save_affine_profiles (){
-    
-    if(bfs::exists(mCurrentSerieCachePath)){
-        std::string subdir ("affine_cell_profiles");
-        auto save_path = mCurrentSerieCachePath / subdir;
-        boost::system::error_code ec;
-        if(!bfs::exists(save_path)){
-            bfs::create_directory(save_path, ec);
-            switch( ec.value() ) {
-                case boost::system::errc::success: {
-                    std::string msg = "Created " + save_path.string() ;
-                    vlogger::instance().console()->info(msg);
-                }
-                    break;
-                default:
-                    std::string msg = "Failed to create " + save_path.string() + ec.message();
-                    vlogger::instance().console()->info(msg);
-            }
-        } // tried creatring it if was not already
-        if(bfs::exists(save_path)){
-            std::lock_guard<std::mutex> process_lock(m_io_mutex);
-            auto this_csv_writer = std::make_shared<ioImageWriter>("hp");
-            this_csv_writer->operator()(save_path.string(), m_hz_profiles);
-            auto other_csv_writer = std::make_shared<ioImageWriter>("vp");
-            other_csv_writer->operator()(save_path.string(), m_vt_profiles);
-        }
-    }
-}
 
 void ssmt_processor::internal_generate_affine_translations (){
     if(m_affine_windows.empty()) return;

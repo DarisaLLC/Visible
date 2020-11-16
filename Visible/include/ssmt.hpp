@@ -30,6 +30,7 @@
 #include "moving_region.h"
 #include "input_selector.hpp"
 #include "mediaInfo.h"
+#include "thread.h"
 
 //#include "lif_content.hpp"
 using namespace cv;
@@ -262,8 +263,8 @@ private:
     mutable std::mutex m_mutex;
     mutable std::mutex m_shortterms_mutex;
     mutable std::mutex m_segmentation_mutex;
-    mutable std::mutex m_processing_mutex;
     mutable std::mutex m_io_mutex;
+    mutable recursive_mutex m_input_mutex;  ///< Mutex protecting ssmt
     
     uint32_t m_channel_count;
     mutable std::condition_variable m_shortterm_cv;
@@ -337,6 +338,8 @@ public:
     size_t Id() const;
     const input_section_selector_t& input() const;
     const std::shared_ptr<contractionLocator> & locator () const;
+    const vector<double>& entropies () const;
+    
 private:
     bool run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>>& images);
     ssmt_result (const moving_region&,const input_section_selector_t& in);
@@ -344,10 +347,6 @@ private:
     void contraction_ready (contractionLocator::contractionContainer_t& contractions, const input_section_selector_t&);
     bool get_channels (int channel);
     input_section_selector_t m_input;
-    
-    mutable trackRef_t m_flurescence_tracksRef;
-    mutable trackRef_t m_contraction_pci_tracksRef;
-    async_vecOfNamedTrack_t m_contraction_pci_tracks_asyn;
     
     vector<double> m_entropies;
     std::vector<std::vector<double>> m_smat;

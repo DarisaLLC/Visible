@@ -27,7 +27,7 @@
 #include "core/stl_utils.hpp"
 #include "timed_types.h"
 #include "timeMarker.h"
-#include "visible_types.h"
+
 #include "DisplayObjectContainer.h"
 
 

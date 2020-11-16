@@ -27,7 +27,9 @@
 #include "ssmt.hpp"
 #include "logger/logger.hpp"
 #include "result_serialization.h"
+#include "core/boost_stats.hpp"
 
+using namespace svl;
 
 using cc_t = contractionLocator::contractionContainer_t;
 
@@ -66,6 +68,9 @@ void ssmt_result::contraction_ready (contractionLocator::contractionContainer_t&
 }
 
 const input_section_selector_t& ssmt_result::input() const { return m_input; }
+
+const vector<double>& ssmt_result::entropies () const { return m_entropies; }
+
 
 size_t ssmt_result::Id() const { return id(); }
 const std::shared_ptr<contractionLocator> & ssmt_result::locator () const { return m_caRef; }
@@ -164,6 +169,7 @@ bool ssmt_result::run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>
         }
         
         m_caRef->load(m_entropies, m_smat);
+    
         return true;
     }
     return false;

@@ -31,6 +31,7 @@
 #include "logger/logger.hpp"
 #include "cpp-perf.hpp"
 #include "boost/filesystem.hpp"
+#include "thread.h"
 
 using namespace perf;
 using namespace boost;
@@ -78,12 +79,15 @@ namespace anonymous
         for (int ii = 0; ii < src.size (); ii++)
             dst[ii] = (src[ii] - *bot) / scaleBy;
     }
+    
+    recursive_mutex contraction_mutex;
 }
 
 
 
 
 std::shared_ptr<contractionLocator> contractionLocator::create(const input_section_selector_t& in, const uint32_t& body_id, const contractionLocator::params& params){
+    recursive_lock_guard lock(anonymous::contraction_mutex);
     return std::shared_ptr<contractionLocator>(new contractionLocator(in, body_id, params));
 }
 
@@ -260,81 +264,84 @@ bool contractionLocator::locate_contractions (){
     if(! isPreProcessed())
         update ();
     
-    //
+    auto save_csv = [](const std::vector<double>& data, bfs::path& root_path){
+        auto folder = stl_utils::now_string();
+        auto folder_path = root_path / folder;
+        boost::system::error_code ec;
+        if(!bfs::exists(folder_path)){
+            bfs::create_directory(folder_path, ec);
+            if (ec != boost::system::errc::success){
+                std::string msg = "Could not create " + folder_path.string() ;
+                vlogger::instance().console()->error(msg);
+                return false;
+            }
+            
+            std::string basefilename = folder_path.string() + boost::filesystem::path::preferred_separator;
+            auto fn = basefilename + "entropy.csv";
+            stl_utils::save_csv(data, fn);
+            return true;
+        }
+        return false;
+    };
+    
+    bfs::path dst_path = "/Users/arman/tmp";
+    save_csv(m_signal, dst_path);
+    
+    
     m_ac.resize(0);
     f1dAutoCorr(m_signal.begin(), m_signal.end(), m_ac);
     
     m_bac.resize(m_ac.size());
     cv::GaussianBlur(m_ac,m_bac,cv::Size(0,0), 4.0);
-    svl::boostStatistics bstats;
-    for (const auto& val : m_bac) bstats.update(val);
-    std::cout << std::endl
-    << "(time in ms)" << std::endl
-    << "Count:  " << bstats.get_n() << std::endl
-    << "Min:    " << bstats.get_min() << std::endl
-    << "Max:    " << bstats.get_max() << std::endl
-    << "Med:    " << bstats.get_median() << std::endl
-    << "x75:    " << bstats.get_quantile(0.75) << std::endl
-    << "x85:    " << bstats.get_quantile(0.85) << std::endl
-    << "x95:    " << bstats.get_quantile(0.95) << std::endl
-    << "x99:    " << bstats.get_quantile(0.99) << std::endl
-    << "x99.9:  " << bstats.get_quantile(0.999) << std::endl
-    << "x99.99: " << bstats.get_quantile(0.9999) << std::endl
+    {
+        stringstream ss;
+
+        svl::boostStatistics bstats;
+        for (const auto& val : m_bac) bstats.update(val);
+        ss << std::endl;
+        ss << "(time in ms)" << std::endl
+        << "Count:  " << bstats.get_n() << std::endl
+        << "Min:    " << bstats.get_min() << std::endl
+        << "Max:    " << bstats.get_max() << std::endl
+        << "Med:    " << bstats.get_median() << std::endl
+        << "x75:    " << bstats.get_quantile(0.75) << std::endl
+        << "x85:    " << bstats.get_quantile(0.85) << std::endl
+        << "x95:    " << bstats.get_quantile(0.95) << std::endl
+        << "x99:    " << bstats.get_quantile(0.99) << std::endl
+        << "x99.9:  " << bstats.get_quantile(0.999) << std::endl
+        << "x99.99: " << bstats.get_quantile(0.9999) << std::endl;
+        vlogger::instance().console()->info(ss.str());
+    }
     
-    
-    << std::endl;
     clear_outputs ();
-    std::vector<int> peaks_idx;
+    m_peaks_idx.resize(0);
+    
+    // @to_remove Flip for peak finding
     std::vector<double> valleys(m_signal.size());
     std::transform(m_signal.begin(), m_signal.end(), valleys.begin(), [](double f)->double { return 1.0 - f; });
     
-    svl::findPeaks(valleys, peaks_idx);
-    stringstream ss;
-    for (auto idx : peaks_idx) ss << idx << ",";
-    vlogger::instance().console()->info(ss.str());
-    
-//    auto save_csv = [](const std::shared_ptr<contractionProfile>& cp, bfs::path& root_path){
-//        auto folder = stl_utils::now_string();
-//        auto folder_path = root_path / folder;
-//        boost::system::error_code ec;
-//        if(!bfs::exists(folder_path)){
-//            bfs::create_directory(folder_path, ec);
-//            if (ec != boost::system::errc::success){
-//                std::string msg = "Could not create " + folder_path.string() ;
-//                vlogger::instance().console()->error(msg);
-//                return false;
-//            }
-//            std::string basefilename = folder_path.string() + boost::filesystem::path::preferred_separator;
-//            auto fn = basefilename + "force.csv";
-//            stl_utils::save_csv(cp->force(), fn);
-//            fn = basefilename + "interpolatedLength.csv";
-//            stl_utils::save_csv(cp->interpolatedLength(), fn);
-//            fn = basefilename + "elongation.csv";
-//            stl_utils::save_csv(cp->elongation(), fn);
-//              return true;
-//        }
-//        return false;
-//    };
-    
-    for (auto pp = 0; pp < peaks_idx.size(); pp++){
-        m_peaks.emplace_back(peaks_idx[pp], m_signal[peaks_idx[pp]]);
+    svl::findPeaks(valleys, m_peaks_idx);
+    {
+        stringstream ss;
+        for (auto idx : m_peaks_idx) ss << idx << ",";
+        vlogger::instance().console()->info(ss.str());
     }
     
-    for (auto pp = 0; pp < peaks_idx.size(); pp++){
+    // @todo check if this and peak indexes are redundant in use
+    for (auto pp = 0; pp < m_peaks_idx.size(); pp++){
+        m_peaks.emplace_back(m_peaks_idx[pp], m_signal[m_peaks_idx[pp]]);
+    }
+    
+    for (auto pp = 0; pp < m_peaks_idx.size(); pp++){
         
         contraction_t ct;
         
         // Contraction gets a unique id by contraction profiler
-        if(get_contraction_at_point(pp, peaks_idx, ct)){
+        if(get_contraction_at_point(pp, m_peaks_idx, ct)){
             auto profile = std::make_shared<contractionProfile>(ct, m_id);
             profile->compute_interpolated_geometries_and_force(m_signal);
             m_contractions.emplace_back(profile->contraction());
-            
             //@todo use cache_root for this
-//            bfs::path sp ("/Volumes/medvedev/Users/arman/tmp/");
-//            save_csv(profile, sp);
-//            auto msg = "Stored " + stl_utils::tostr(pp);
-//            vlogger::instance().console()->info(msg);
             break;
         }
     }
@@ -344,8 +351,8 @@ bool contractionLocator::locate_contractions (){
 
     timeit.stop();
     auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
-    vlogger::instance().console()->info("Update (ms): " + timestr);
-    vlogger::instance().console()->info(" Number of Peaks: " + toString(peaks_idx.size()));
+    vlogger::instance().console()->info(" Update (ms): " + timestr);
+    vlogger::instance().console()->info(" Number of Peaks: " + toString(m_peaks_idx.size()));
     
     return true;
 }

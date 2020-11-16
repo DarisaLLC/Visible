@@ -64,37 +64,41 @@ namespace ui=ImGui;
 
 #define ONCE(x) { static int __once = 1; if (__once) {x;} __once = 0; }
 
-namespace {
-std::map<std::string, unsigned int> named_colors = {{"Red", 0xFF0000FF }, {"red",0xFF0000FF },{"Green", 0xFF00FF00},
-    {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFFFFF3E},
-    { "Synth", 0xFFFB4551}, { "synth", 0xFFFB4551},{ "Length", 0xFFFFFF3E}, { "length", 0xFFFFFF3E},
-    { "Force", 0xFFFB4551}, { "force", 0xFFFB4551}, { "Elongation", 0xFF00FF00}, { "elongation", 0xFF00FF00}
-};
-std::map<unsigned int, unsigned int> numbered_half_colors = {{0, 0x330000FF },{1, 0x3300FF00},{2, 0x33FF0000} };
+namespace prt {
+    std::map<std::string, unsigned int> named_colors = {{"Red", 0xFF0000FF }, {"red",0xFF0000FF },{"Green", 0xFF00FF00},
+        {"green", 0xFF00FF00},{ "PCI", 0xFFFF0000}, { "pci", 0xFFFF0000}, { "Short", 0xFFD66D3E}, { "short", 0xFFFFFF3E},
+        { "Synth", 0xFFFB4551}, { "synth", 0xFFFB4551},{ "Length", 0xFFFFFF3E}, { "length", 0xFFFFFF3E},
+        { "Force", 0xFFFB4551}, { "force", 0xFFFB4551}, { "Elongation", 0xFF00FF00}, { "elongation", 0xFF00FF00}
+    };
+    std::map<unsigned int, unsigned int> numbered_half_colors = {{0, 0x330000FF },{1, 0x3300FF00},{2, 0x33FF0000} };
 
-struct ScopedWindowWithFlag : public ci::Noncopyable {
-    ScopedWindowWithFlag( const char* label, bool* p_open = nullptr, int windowflags = 0 );
-    ~ScopedWindowWithFlag();
-};
+    struct ScopedWindowWithFlag : public ci::Noncopyable {
+        ScopedWindowWithFlag( const char* label, bool* p_open = nullptr, int windowflags = 0 );
+        ~ScopedWindowWithFlag();
+    };
 
-ScopedWindowWithFlag::ScopedWindowWithFlag( const char* label, bool* p_open, int window_flags )
-{
-    ImGui::Begin( label, p_open, window_flags );
-}
-ScopedWindowWithFlag::~ScopedWindowWithFlag()
-{
-    ImGui::End();
-}
+    ScopedWindowWithFlag::ScopedWindowWithFlag( const char* label, bool* p_open, int window_flags )
+    {
+        ImGui::Begin( label, p_open, window_flags );
+    }
+    ScopedWindowWithFlag::~ScopedWindowWithFlag()
+    {
+        ImGui::End();
+    }
 
-bool getPosSizeFromWindow(const char* last_window, ImVec2& pos, ImVec2& size){
-    ImGuiWindow* window = ImGui::FindWindowByName(last_window);
-    if (window == nullptr) return false;
-    pos.x = window->Pos.x; pos.y = window->Pos.y + window->Size.y;
-    size.x = window->Size.x; size.y = window->Size.y;
-    return true;
-}
+    bool getPosSizeFromWindow(const char* last_window, ImVec2& pos, ImVec2& size){
+        ImGuiWindow* window = ImGui::FindWindowByName(last_window);
+        if (window == nullptr) return false;
+        pos.x = window->Pos.x; pos.y = window->Pos.y + window->Size.y;
+        size.x = window->Size.x; size.y = window->Size.y;
+        return true;
+    }
+    
+    recursive_mutex visible_mutex;
     
 }
+
+using namespace prt;
 
 #define wDisplay "Display"
 #define wResult "Result"

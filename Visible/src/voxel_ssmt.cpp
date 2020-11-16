@@ -170,7 +170,7 @@ void ssmt_processor::create_voxel_surface(std::vector<float>& ven){
         auto image_path = mCurrentCachePath / imagename;
         std::unique_ptr<ImageOutput> out = ImageOutput::create (image_path.c_str());
         if (out){
-            ImageSpec spec (m_temporal_ss.rows, m_temporal_ss.cols, m_temporal_ss.channels(), TypeDesc::UINT8);
+            ImageSpec spec (m_temporal_ss.cols, m_temporal_ss.rows, m_temporal_ss.channels(), TypeDesc::UINT8);
             out->open (image_path.c_str(), spec);
             out->write_image (TypeDesc::UINT8, m_temporal_ss.data);
             out->close ();
