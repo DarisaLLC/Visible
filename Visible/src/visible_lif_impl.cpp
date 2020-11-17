@@ -142,10 +142,11 @@ visibleContext::visibleContext(ci::app::WindowRef& ww,
                             
                             
     mContentFileName = mPath.stem().string();
-    mCurrentSerieCachePath = mUserStorageDirPath; // / mContentFileName;
-    bool folder_exists = bfs::exists(mCurrentSerieCachePath);
+    mCurrentCachePath = mUserStorageDirPath; // / mContentFileName;
+    bool folder_exists = bfs::exists(mCurrentCachePath);
 
     std::string msg = folder_exists ? " exists " : " does not exist ";
+    if (folder_exists) msg = msg + mCurrentCachePath.string();
     msg = " folder for " + mContentFileName + msg;
     vlogger::instance().console()->info(msg);
     m_title = mContentFileName;
@@ -181,7 +182,7 @@ void visibleContext::setup_signals(){
     
     // Create a Processing Object to attach signals to
     ssmt_processor::params params (mSpec.format);
-    m_lifProcRef = std::make_shared<ssmt_processor> ( mCurrentSerieCachePath, params);
+    m_lifProcRef = std::make_shared<ssmt_processor> ( mCurrentCachePath, params);
     
     // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&visibleContext::signal_content_loaded, shared_from_above(), boost::placeholders::_1);
@@ -814,7 +815,7 @@ void visibleContext::process_async (){
         }
         case 1:
         {
-            input_section_selector_t in (-1,0);
+                input_section_selector_t in (-1,0);
           //  m_root_pci_tracks_asyn = std::async(std::launch::async, //&ssmt_processor::run_selfsimilarity_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }

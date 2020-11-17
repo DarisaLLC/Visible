@@ -2,6 +2,7 @@
 #define __TPAIR_H
 
 #include <assert.h>
+#include <ostream>
 
 using namespace std;
 

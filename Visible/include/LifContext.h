@@ -222,7 +222,7 @@ private:
     
     // Folder for Per user result / content caching
     boost::filesystem::path mUserStorageDirPath;
-    boost::filesystem::path mCurrentSerieCachePath;
+    boost::filesystem::path mCurrentCachePath;
     ustring mContentNameU;
   
         
