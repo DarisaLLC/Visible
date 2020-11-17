@@ -23,8 +23,6 @@
 #include "timed_types.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
-#include "cinder_cv/cinder_xchg.hpp"
-#include "cinder_cv/cinder_opencv.h"
 #include "vision/histo.h"
 #include "vision/opencv_utils.hpp"
 #include "ssmt.hpp"
@@ -61,13 +59,13 @@ mCurrentCachePath(serie_cache_folder), m_params(params)
     boost::signals2::connection _volume_stats_connection = registerCallback(_volume_done_cb);
     
     // Signal us when ss segmentation surface is ready
+    std::function<sig_cb_ss_voxel_ready> _ss_voxel_done_cb = boost::bind (&ssmt_processor::create_voxel_surface,this, boost::placeholders::_1);
+    boost::signals2::connection _ss_voxel_connection = registerCallback(_ss_voxel_done_cb);
+
+    // Signal us when ss segmentation is ready
     std::function<sig_cb_segmented_view_ready> _ss_segmentation_done_cb = boost::bind (&ssmt_processor::finalize_segmentation,
                                                                                        this, boost::placeholders::_1, boost::placeholders::_2);
     boost::signals2::connection _ss_image_connection = registerCallback(_ss_segmentation_done_cb);
-    
-    // Signal us when ss segmentation is ready
-    std::function<sig_cb_ss_voxel_ready> _ss_voxel_done_cb = boost::bind (&ssmt_processor::create_voxel_surface,this, boost::placeholders::_1);
-    boost::signals2::connection _ss_voxel_connection = registerCallback(_ss_voxel_done_cb);
     
     // Support lifProcessor::geometry_ready
     std::function<void (int, const input_section_selector_t&)> geometry_ready_cb = boost::bind (&ssmt_processor::signal_geometry_done, this, boost::placeholders::_1, boost::placeholders::_2);
@@ -203,7 +201,7 @@ int ssmt_processor:: create_cache_paths (){
 void ssmt_processor::load_channels_from_lif(const std::shared_ptr<ImageBuf>& frames,const ustring& contentName, const mediaSpec& mspec)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
-    
+    m_loaded_spec = mspec;
     m_voxel_sample.first = m_params.voxel_sample().first;
     m_expected_segmented_size.first = mspec.getSectionSize().first / m_params.voxel_sample().first;
     m_voxel_sample.second = m_params.voxel_sample().second;

@@ -31,7 +31,7 @@
 #include "input_selector.hpp"
 #include "mediaInfo.h"
 #include "thread.h"
-
+#include "contraction.hpp"
 //#include "lif_content.hpp"
 using namespace cv;
 using blob = svl::labelBlob::blob;
@@ -166,10 +166,10 @@ public:
     
     // Return 2D latice of pixels over time
     void generateVoxels_on_channel (const int channel_index);
-    void generateVoxelsOfSampled (const std::vector<roiWindow<P8U>>&);
-    
-    // Return 2D latice of voxel self-similarity
-    void generateVoxelSelfSimilarities ();
+//    void generateVoxelsOfSampled (const std::vector<roiWindow<P8U>>&);
+//
+//    // Return 2D latice of voxel self-similarity
+//    void generateVoxelSelfSimilarities ();
     void generateVoxelsAndSelfSimilarities (const std::vector<roiWindow<P8U>>& images);
     
     void finalize_segmentation (cv::Mat& mono, cv::Mat& label);
@@ -213,6 +213,8 @@ private:
     
     // Default params. @place_holder for increasing number of params
     ssmt_processor::params m_params;
+    mediaSpec m_loaded_spec;
+    
     indexToTime_t m_2TimeMap;
     timeToIndex_t m_2IndexMap;
     

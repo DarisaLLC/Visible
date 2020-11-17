@@ -349,6 +349,7 @@
 		C2B2F209234D1E6B0026ADDB /* moviong_region.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C22DACF922FF793C00D171EF /* moviong_region.cpp */; };
 		C2B87C9921D012D700C91E35 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2203D6421CAFFD9003F2F33 /* logger.cpp */; };
 		C2BB4DEE21384FB30002AECE /* localvariance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696C1CED3E2C0045FF57 /* localvariance.cpp */; };
+		C2BDCC042563C5DF0061B68E /* voxel_processor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDCC032563C5DF0061B68E /* voxel_processor.cpp */; };
 		C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
 		C2BDEFF021C8237B00A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
 		C2C5CF67229A0DB0004595C5 /* glmutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C5CF66229A0DB0004595C5 /* glmutils.cpp */; };
@@ -843,6 +844,7 @@
 		C2B87C9721CEE27500C91E35 /* visible_cli.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = visible_cli.hpp; path = ../include/visible_cli.hpp; sourceTree = "<group>"; };
 		C2B87C9821D008AC00C91E35 /* visible_logger_macro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = visible_logger_macro.h; path = ../include/visible_logger_macro.h; sourceTree = "<group>"; };
 		C2BB4DED21384F970002AECE /* ut_localvar.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_localvar.hpp; sourceTree = "<group>"; };
+		C2BDCC032563C5DF0061B68E /* voxel_processor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = voxel_processor.cpp; path = ../src/voxel_processor.cpp; sourceTree = "<group>"; };
 		C2BDEFED21C8232300A8CB94 /* core_support.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = core_support.cpp; sourceTree = "<group>"; };
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
 		C2C2E3552496CAA900E26B3E /* imgui_experiment.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = imgui_experiment.hpp; path = ../include/imgui_experiment.hpp; sourceTree = "<group>"; };
@@ -1037,6 +1039,7 @@
 		080E96DDFE201D6D7F000001 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C2BDCC032563C5DF0061B68E /* voxel_processor.cpp */,
 				C2F09C48253CE61000563B9B /* oiio_utils.cpp */,
 				C2C2E3562496CB2E00E26B3E /* imgui_experiment.cpp */,
 				C2AC7A6B24808A2C00853219 /* nfd_cocoa.m */,
@@ -2092,6 +2095,7 @@
 				C253337E233149ED003B3212 /* ImGuiExtensions.cpp in Sources */,
 				C248D6D8224939AC00C2C02F /* VisibleApp.cpp in Sources */,
 				C285964B24870EF100C9CCFB /* imgui_stdlib.cpp in Sources */,
+				C2BDCC042563C5DF0061B68E /* voxel_processor.cpp in Sources */,
 				C236D345230F488300ED5627 /* pf.cpp in Sources */,
 				C2618F80217FDA6600FA9F43 /* color.cc in Sources */,
 				C20EDBC21CF277130074C47A /* self_similarity.cpp in Sources */,

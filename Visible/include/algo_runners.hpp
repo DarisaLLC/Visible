@@ -11,10 +11,9 @@
 #include "core/stl_utils.hpp"
 #include "core/stats.hpp"
 #include "vision/localvariance.h"
-#include "core/lineseg.hpp"
 #include <boost/range/irange.hpp>
 #include "core/moreMath.h"
-#include "contraction.hpp"
+
 
 using namespace std;
 using namespace stl_utils;
@@ -54,34 +53,6 @@ struct IntensityStatisticsRunner
     }
 };
 
-
-/*
-struct contractionTrackMaker
- Create named tracks for contraction
-*/
-struct contractionTrackMaker
-{
-    contractionTrackMaker (contractionLocator::contraction_t& ctr, timedVecOfVals_t& ilen, timedVecOfVals_t& elo, timedVecOfVals_t& force)
-    {
-        
-        auto fill = [ctr=ctr](const contractionLocator::contraction_t::sigContainer_t& lens){
-            timedVecOfVals_t base(lens.size());
-            
-            for (auto i=0; i < lens.size(); i++) {
-                timedVal_t res;
-                index_time_t ti;
-                ti.first = i + ctr.contraction_start.first;
-                base[i].first = ti;
-                base[i].second =  lens[i];
-            }
-            return base;
-        };
-        
-        ilen = fill (ctr.normalized_length);
-        elo = fill (ctr.elongation);
-        force = fill (ctr.force);
-    }
-};
 
 /*
 struct trackMaker
@@ -219,58 +190,54 @@ struct IntensityStatisticsPartialRunner
 };
 
 
-#ifdef NOT_YET
-struct fbFlowRunner
-{
-    typedef std::vector<roiWindow<P8U>> channel_images_t;
-    void operator()(channel_images_t& channel, svl::stats<int64_t>& volstats, timed_mat_vec_t& results)
-    {
-        if (channel.size () < 2) return;
-        std::mutex m_mutex;
-        std::lock_guard<std::mutex> guard (m_mutex);
-        
-        results.clear();
-        std::vector<cv::Mat> frames;
-        svl::localVAR tv (cv::Size(7,7));
-        
-        for (int ii = 0; ii < channel.size(); ii++)
-        {
-            const roiWindow<P8U>& image = channel[ii];
-            std::string imgpath = "/Users/arman/oflow/out" + svl::toString(ii) + ".png";
-            cv::Mat mat (image.height(), image.width(), CV_8UC(1), image.pelPointer(0,0), size_t(image.rowUpdate()));
-            cv::Mat lv;
-            tv.process (mat,lv);
-//            cv::Mat diff (image.height(), image.width(), CV_32F);
-//            diff = mat - volstats.mean();
-//            cv::Mat slices[3];
-//            cv::Mat mzp;
-        //   cv::multiply(diff,diff,diff);
-        //   diff /= std::sqrt(volstats.variance());
-            cv::normalize(lv,mat,0,UCHAR_MAX,cv::NORM_MINMAX);
-            cv::imwrite(imgpath, lv);
-            std::cout << "wrote Out " << imgpath << std::endl;
-        }
-    }
+class voxel_processor {
+public:
+    voxel_processor();
 
+    bool generate_voxel_space (const std::vector<roiWindow<P8U>>& images);
+    bool generate_voxel_surface (const std::vector<float>&);
     
-    static void drawOptFlowMap(const cv::Mat& flow, cv::Mat& cflowmap, int step,
-                               double, const Scalar& color)
-    {
-        for(int y = 0; y < cflowmap.rows; y += step)
-            for(int x = 0; x < cflowmap.cols; x += step)
-            {
-                const Point2f& fxy = flow.at<Point2f>(y, x);
-                line(cflowmap, cv::Point(x,y), cv::Point(cvRound(x+fxy.x), cvRound(y+fxy.y)),
-                     color);
-                circle(cflowmap, cv::Point(x,y), 2, color, -1);
-            }
+    const uiPair &sample() { return m_voxel_sample; }
+    const uiPair &half_offet() { return m_half_offset; }
+    void sample(uint32_t x, uint32_t y = 0) {
+        m_voxel_sample.first = x;
+        m_voxel_sample.second = y == 0 ? x : y;
+        m_half_offset = m_voxel_sample / 2;
+    }
+    void image_size(int width, int height){
+        m_image_size.first = width - m_half_offset.first;
+        m_image_size.second = height - m_half_offset.second;
+        m_expected_segmented_size.first = m_image_size.first / m_voxel_sample.first;
+        m_expected_segmented_size.second = m_image_size.second / m_voxel_sample.second;
     }
     
+    const Rectf& measured_area () { return m_measured_area; }
+    const cv::Mat& temporal_ss () { return m_temporal_ss; }
+    const std::vector<uint32_t>& surface_hist () { return m_hist; }
+    const std::vector<float>& entropies () { return m_voxel_entropies; }
     
-
+    
+private:
+    const smProducerRef similarity_producer () const;
+    
+    bool m_internal_generate();
+    
+  
+    bool m_load(const std::vector<roiWindow<P8U>> &images, uint32_t sample_x,
+                uint32_t sample_y = 0); 
+    
+    uiPair m_voxel_sample;
+    uiPair m_half_offset;
+    iPair m_expected_segmented_size;
+    mutable std::vector<roiWindow<P8U>> m_voxels;
+    size_t m_voxel_length;
+    uiPair m_image_size;
+    vector<float> m_voxel_entropies;
+    mutable smProducerRef m_sm_producer;
+    Rectf m_measured_area;
+    cv::Mat m_temporal_ss;
+    std::vector<uint32_t> m_hist;
 };
-#endif
-
 
 
 #endif

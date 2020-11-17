@@ -78,7 +78,10 @@ bfs::path VisibleAppControl::make_result_cache_entry_for_content_file (const boo
         // Create a directory for this content file if it does not exist
         std::string filestem = path.stem().string();
         auto cachePath = visiblePath/filestem;
-        if (!bfs::exists( cachePath)) bfs::create_directories(cachePath);
+        if (!bfs::exists( cachePath)){
+            vlogger::instance().console()->info(cachePath.string() + " Created Cache Entry " );
+            bfs::create_directories(cachePath);
+        }
         ret_path = cachePath;
     }
     catch (const std::exception & ex)

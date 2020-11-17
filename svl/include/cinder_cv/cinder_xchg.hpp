@@ -4,10 +4,10 @@
 #include <boost/filesystem.hpp>
 #include <cinder/Channel.h>
 #include <cinder/Area.h>
+#include <cinder/Rect.h>
 #include <limits>
 #include "vision/roiWindow.h"
 #include "vision/roiVariant.hpp"
-#include "vision/roiMultiWindow.h"
 #include "core/vector2d.hpp"
 #include <fstream>
 #include "cinder/ImageSourcePng.h"
@@ -106,70 +106,6 @@ namespace svl
         
         return chP;
     }
-    
-    
-    
-#if defined (USED)
-    
-
-    
-    ci::Surface8uRef load_from_path (const fs::path& path, bool assume_jpg_if_no_extension = true);
-    //    cv::Mat load_from_path_ocv (const fs::path& path,  bool assume_jpg_if_no_extension = true);
-    
-    static std::shared_ptr<roiWindow<P8U>> NewRefFromChannel ( ChannelT<uint8_t>& onec)
-    {
-        uint8_t* pixels = onec.getData();
-        std::shared_ptr<root<P8U>> rootref (new root<P8U> (pixels, (int32_t) onec.getRowBytes (),
-                                                           onec.getWidth(), onec.getHeight()));
-        return std::shared_ptr<roiWindow<P8U>> (new roiWindow<P8U>(rootref, 0, 0, onec.getWidth(), onec.getHeight()));
-    }
-    
-    
-    static roiWindow<P8U> NewChannelFromSurfaceAtIndex (const Surface8uRef& src, uint8_t ci)
-    {
-        return NewFromChannel (src->getChannel(ci), ci);
-    }
-    
-    
-    static roiVP8UC  NewFromSurface (const Surface8u *ones)
-    {
-        roiVP8UC unknown;
-        uint8_t* pixels = (uint8_t*) ones->getData();
-        switch(ones->getPixelInc())
-        {
-            case 3:
-            {
-                roiWindow<P8UC3> window3 (ones->getWidth (),ones->getHeight ());
-                window3.copy_pixels_from(pixels, ones->getWidth (),ones->getHeight (), (int32_t) ones->getRowBytes ());
-                unknown = window3;
-            }
-            break;
-            case 4:
-            {
-                roiWindow<P8UC4> window4 (ones->getWidth (),ones->getHeight ());
-                window4.copy_pixels_from(pixels, ones->getWidth (),ones->getHeight (), (int32_t) ones->getRowBytes ());
-                unknown = window4;
-            }
-            break;
-            default:
-            assert(false);
-            break;
-        }
-        return unknown;
-    }
-    
-  
-    
-    static std::shared_ptr<roiMultiWindow<P8UP3>> NewRefMultiFromSurface (const Surface8uRef& src,
-                                                                          const std::vector<std::string>& names_l2r = {"Red", "Green","Blue"},
-                                                                          int64_t timestamp = 0)
-    {
-        return NewRefMultiFromChannel (src->getChannel(0), names_l2r, timestamp);
-    }
- 
-#endif
-    
-    
 }
 
 

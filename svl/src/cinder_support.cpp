@@ -82,16 +82,7 @@ namespace svl
     }
     
     
-    std::shared_ptr<roiFixedMultiWindow<P8UP3>> NewRefMultiFromChannel ( ChannelT<uint8_t>& onec,
-                                                                   const std::vector<std::string>& names_l2r, int64_t timestamp)
-    {
-        uint8_t* pixels = onec.getData();
-        std::shared_ptr<roiFixedMultiWindow<P8UP3>> mwRef (new roiFixedMultiWindow<P8UP3>(names_l2r, timestamp));
-        assert (onec.getWidth() == mwRef->width() && onec.getHeight() == mwRef->height());
-        mwRef->copy_pixels_from(pixels, onec.getWidth (),onec.getHeight (), (int32_t) onec.getRowBytes ());
-        return mwRef;
-    }
-    
+
     
     std::pair<Surface8uRef, Channel8uRef> image_io_read_surface (const boost::filesystem::path & pp)
     {
