@@ -194,7 +194,7 @@ class voxel_processor {
 public:
     voxel_processor();
 
-    bool generate_voxel_space (const std::vector<roiWindow<P8U>>& images);
+    bool generate_voxel_space (const std::vector<roiWindow<P8U>>& images, const std::vector<int>& indicies = std::vector<int> ());
     bool generate_voxel_surface (const std::vector<float>&);
     
     const uiPair &sample() { return m_voxel_sample; }
@@ -224,7 +224,7 @@ private:
     
   
     bool m_load(const std::vector<roiWindow<P8U>> &images, uint32_t sample_x,
-                uint32_t sample_y = 0); 
+                uint32_t sample_y = 0, const std::vector<int>& indicies = std::vector<int> ()); 
     
     uiPair m_voxel_sample;
     uiPair m_half_offset;

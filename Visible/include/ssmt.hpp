@@ -372,38 +372,5 @@ private:
 };
 
 
-/*
- 
- Example of how to write out channel images
- 
- TEST (ut_lifFile, save_channel_image)
- {
- std::string filename ("3channels.lif");
- std::pair<test_utils::genv::path_t, bool> res = dgenv_ptr->asset_path(filename);
- EXPECT_TRUE(res.second);
- lifIO::LifReader lif(res.first.string(), "");
- cout << "LIF version "<<lif.getVersion() << endl;
- EXPECT_EQ(13, lif.getNbSeries() );
- size_t serie = 4;
- lifIO::LifSerie& se4 = lif.getSerie(serie);
- se4.set_content_type("IDLab_0");
- 
- std::vector<std::string> names { "green", "red", "gray" };
- 
- // Create the frameset and assign the channel names
- // Fetch the media info
- auto mFrameSet = seqFrameContainer::create (se4);
- ssmt_processor lp;
- lp.load(mFrameSet, names);
- std::string dir = "/Users/arman/tmp/c2";
- lp.save_channel_images(2,dir);
- 
- }
- 
- 
- */
-
-
-
 
 #endif

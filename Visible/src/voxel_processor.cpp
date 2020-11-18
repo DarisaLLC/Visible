@@ -12,7 +12,8 @@
 
 
 
-bool voxel_processor::generate_voxel_space (const std::vector<roiWindow<P8U>>& images){
+bool voxel_processor::generate_voxel_space (const std::vector<roiWindow<P8U>>& images,
+                                            const std::vector<int>& indicies){
     if (m_load(images, m_voxel_sample.first, m_voxel_sample.second))
         return m_internal_generate();
     return false;
@@ -48,12 +49,12 @@ bool  voxel_processor::m_internal_generate() {
 }
 
 bool  voxel_processor::generate_voxel_surface (const std::vector<float>& ven){
-
+    
     uiPair size_diff = m_half_offset + m_half_offset;
     uint32_t width = m_expected_segmented_size.first;
     uint32_t height = m_expected_segmented_size.second;
     assert(width*height == ven.size());
-
+    
     
     cv::Mat ftmp = cv::Mat(height, width, CV_32F);
     std::vector<float>::const_iterator start = ven.begin();
@@ -93,10 +94,13 @@ bool  voxel_processor::generate_voxel_surface (const std::vector<float>& ven){
 }
 
 
-bool  voxel_processor::m_load(const std::vector<roiWindow<P8U>> &images, uint32_t sample_x,uint32_t sample_y) {
+bool  voxel_processor::m_load(const std::vector<roiWindow<P8U>> &images,
+                              uint32_t sample_x,uint32_t sample_y,
+                              const std::vector<int>& indicies) {
     sample(sample_x, sample_y);
-    m_voxel_length = images.size();
-    image_size(images[0].width(), images[0].height());
+    m_voxel_length = indicies.empty() ? images.size() : indicies.size();
+    int first_index = indicies.empty() ? 0 : indicies[0];
+    image_size(images[first_index].width(), images[first_index].height());
     uint32_t expected_width = m_expected_segmented_size.first;
     uint32_t expected_height = m_expected_segmented_size.second;
     
@@ -116,7 +120,8 @@ bool  voxel_processor::m_load(const std::vector<roiWindow<P8U>> &images, uint32_
              col += m_voxel_sample.first) {
             std::vector<uint8_t> voxel(m_voxel_length);
             for (auto tt = 0; tt < m_voxel_length; tt++) {
-                voxel[tt] = images[tt].getPixel(col, row);
+                int idx = indicies.empty() ? tt : indicies[tt];
+                voxel[tt] = images[idx].getPixel(col, row);
             }
             count++;
             m_voxels.emplace_back(voxel);
