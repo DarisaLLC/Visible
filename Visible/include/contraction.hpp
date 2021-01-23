@@ -44,6 +44,8 @@ struct contractionMesh : public std::pair<size_t,size_t>
     index_val_t contraction_peak;
     index_val_t relaxation_max_acceleration;
     index_val_t relaxation_end;
+
+    float contraction_peak_interpolated;
     
     double relaxation_visual_rank;
     double max_length;
@@ -196,6 +198,9 @@ public:
   
     
     const std::vector<index_val_t>& contraction_peaks () const { return m_peaks; }
+
+    const std::vector<float>& contraction_interpolated_peaks () const { return m_peaks_interpolated; }
+    
     const std::vector<int>& contraction_peak_frame_indicies () const { return m_peaks_idx; }
     
     const contractionContainer_t & contractions () const { return m_contractions; }
@@ -242,6 +247,7 @@ private:
     mutable bool mValidOutput;
     mutable bool mNoSMatrix;
     mutable std::vector<index_val_t> m_peaks;
+    mutable std::vector<float> m_peaks_interpolated;
     mutable contractionContainer_t m_contractions;
     mutable int m_input; // input source
     mutable std::atomic<bool> m_cached;

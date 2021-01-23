@@ -20,6 +20,7 @@
 #include "sg_filter.h"
 #include "core/core.hpp"
 #include "core/stl_utils.hpp"
+#include "core/fit.hpp"
 #include "logger/logger.hpp"
 #include "cardiomyocyte_model_detail.hpp"
 #include "core/boost_units.hpp"
@@ -242,14 +243,22 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
     auto loc_relaxation_quadratic = maxima(cpt, m_fder.begin()+right_boundary);
     m_contraction.relaxation_end.first =  m_contraction.contraction_peak.first + loc_relaxation_quadratic;
     
+    m_contraction.contraction_peak_interpolated = m_contraction.contraction_peak.first;
+    m_contraction.contraction_peak_interpolated += parabolicFit(1.0 - m_fder[m_contraction.contraction_peak.first-1],
+                                                               1.0 - m_fder[m_contraction.contraction_peak.first],
+                                                               1.0 - m_fder[m_contraction.contraction_peak.first+1]);
+
+    m_peaks_interpolated.push_back(m_contraction.contraction_peak_interpolated);
+
     /*
      * Use Median visual rank value for relaxation visual rank
      */
     m_contraction.relaxation_visual_rank = svl::Median(m_fder);
     timeit.stop();
     auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
-    vlogger::instance().console()->info("get_contraction_at_point (ms): " + timestr);
-    vlogger::instance().console()->info(" Peak Index: " + toString(src_peak_index));
+    vlogger::instance().console()->info(" get_contraction took (ms): " + timestr);
+    vlogger::instance().console()->info(" Peak Index: " + toString(m_contraction.contraction_peak.first));
+    vlogger::instance().console()->info(" Peak Interpolated: " + toString(m_contraction.contraction_peak_interpolated));
     
     return true;
 }
@@ -338,12 +347,17 @@ bool contractionLocator::locate_contractions (){
         
         // Contraction gets a unique id by contraction profiler
         if(get_contraction_at_point(pp, m_peaks_idx, ct)){
-            auto profile = std::make_shared<contractionProfile>(ct, m_id);
+            auto profile = std::make_shared<contractionProfile>(ct, pp);
             profile->compute_interpolated_geometries_and_force(m_signal);
             m_contractions.emplace_back(profile->contraction());
-            //@todo use cache_root for this
-            break;
+//            break;
         }
+    }
+    
+    {
+        stringstream ss;
+        for (auto pinterp : m_peaks_interpolated) ss << pinterp << ",";
+        vlogger::instance().console()->info(ss.str());
     }
     
     if (signal_contraction_ready && signal_contraction_ready->num_slots() > 0)
@@ -423,7 +437,7 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
      * Compute everything within contraction interval
      */
     auto c_start = m_ctr.contraction_start.first;
-    auto c_end = m_ctr.relaxation_end.first;
+    auto c_end = std::min(m_ctr.relaxation_end.first, m_fder.size()-1);
     assert(!m_fder.empty());
     assert(c_start >= 0 && c_start < c_end && c_end < m_fder.size());
     
@@ -462,7 +476,7 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
     
     timeit.stop();
     auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
-    vlogger::instance().console()->info("Force (ms): " + timestr);
+    vlogger::instance().console()->info("Force took (ms): " + timestr);
     vlogger::instance().console()->info("Id " + toString(m_ctr.m_uid));
     
     

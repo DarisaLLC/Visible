@@ -96,55 +96,59 @@ void ssmt_processor::generateVoxelsAndSelfSimilarities (const std::vector<roiWin
     assert(m_voxel_entropies.empty() == false);
 }
     
-    void ssmt_processor::create_voxel_surface (std::vector<float>& env){
-        voxel_processor vp;
-        vp.sample(m_voxel_sample.first, m_voxel_sample.second);
-        vp.image_size(m_loaded_spec.getSectionSize().first, m_loaded_spec.getSectionSize().second);
+void ssmt_processor::create_voxel_surface (std::vector<float>& env){
+    voxel_processor vp;
+    vp.sample(m_voxel_sample.first, m_voxel_sample.second);
+    vp.image_size(m_loaded_spec.getSectionSize().first, m_loaded_spec.getSectionSize().second);
+    
+    if (vp.generate_voxel_surface(env)){
         
-        if (vp.generate_voxel_surface(env)){
-            
-            m_temporal_ss = vp.temporal_ss();
-            auto const hist = vp.surface_hist();
-            auto hm = std::max_element(hist.begin(), hist.end());                // Find the mode of the histogram
-            if(hm == hist.end()){vlogger::instance().console()->error("motion signal error");return;}
-            double motion_peak(std::distance(hist.begin(), hm));
-            if(m_var_peaks.size() == 0){vlogger::instance().console()->error("motion space flat" );return;}
-                // Sum sim under the var peaks
-                // @note: Temporal Info is collected at full res. Voxel segmentation is done at reduce res
-            float peaks_sums = 0.0f;
-            for (cv::Point& pt : m_var_peaks)peaks_sums += m_temporal_ss.at<uint8_t>(pt.y,pt.x);
-            auto peaks_average = peaks_sums / int(m_var_peaks.size());
-            
-            std::string msg = " Temporal Peak Average  @ (" + to_string(peaks_average) + ", Motion Peak " + to_string(motion_peak) + ")";
-            vlogger::instance().console()->info("starting " + msg);
-            
-            cv::Mat bi_level;
-            int erosion_size = 3;
-            cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE,
-                                                Size( 2*erosion_size + 1, 2*erosion_size+1 ),
-                                                Point( erosion_size, erosion_size ) );
-            
-            threshold(m_temporal_ss, bi_level, peaks_average, 255, THRESH_BINARY);
-            cv::erode(bi_level, bi_level, element);
-            
-            vlogger::instance().console()->info("finished voxel surface");
-            if(bfs::exists(mCurrentCachePath)){
-                std::string imagename = "voxel_ss_.png";
-                auto image_path = mCurrentCachePath / imagename;
-                std::unique_ptr<ImageOutput> out = ImageOutput::create (image_path.c_str());
-                if (out){
-                    ImageSpec spec (m_temporal_ss.cols, m_temporal_ss.rows, m_temporal_ss.channels(), TypeDesc::UINT8);
-                    out->open (image_path.c_str(), spec);
-                    out->write_image (TypeDesc::UINT8, m_temporal_ss.data);
-                    out->close ();
-                }
-                
+        m_temporal_ss = vp.temporal_ss();
+//        auto const hist = vp.surface_hist();
+//        auto hm = std::max_element(hist.begin(), hist.end());                // Find the mode of the histogram
+//        if(hm == hist.end()){vlogger::instance().console()->error("motion signal error");return;}
+//        double motion_peak(std::distance(hist.begin(), hm));
+//        if(m_var_peaks.size() == 0){vlogger::instance().console()->error("motion space flat" );return;}
+//            // Sum sim under the var peaks
+//            // @note: Temporal Info is collected at full res. Voxel segmentation is done at reduce res
+//        float peaks_sums = 0.0f;
+//        for (cv::Point& pt : m_var_peaks)peaks_sums += m_temporal_ss.at<uint8_t>(pt.y,pt.x);
+//        auto peaks_average = peaks_sums / int(m_var_peaks.size());
+        
+  
+        
+        cv::Mat bi_level;
+        int erosion_size = 3;
+        cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE,
+                                            Size( 2*erosion_size + 1, 2*erosion_size+1 ),
+                                            Point( erosion_size, erosion_size ) );
+        
+        auto othreshold = threshold(m_temporal_ss, bi_level, 0, 255, THRESH_OTSU | THRESH_BINARY);
+        
+        std::string msg = " Temporal Peak Average  @ (" + to_string(othreshold) +  ")";
+        vlogger::instance().console()->info("starting " + msg);
+        
+        
+        cv::erode(bi_level, bi_level, element);
+        
+        vlogger::instance().console()->info("finished voxel surface");
+        if(bfs::exists(mCurrentCachePath)){
+            std::string imagename = "voxel_ss_.png";
+            auto image_path = mCurrentCachePath / imagename;
+            std::unique_ptr<ImageOutput> out = ImageOutput::create (image_path.c_str());
+            if (out){
+                ImageSpec spec (m_temporal_ss.cols, m_temporal_ss.rows, m_temporal_ss.channels(), TypeDesc::UINT8);
+                out->open (image_path.c_str(), spec);
+                out->write_image (TypeDesc::UINT8, m_temporal_ss.data);
+                out->close ();
             }
             
-                // Call the voxel ready cb if any
-            if (signal_segmented_view_ready && signal_segmented_view_ready->num_slots() > 0){
-                signal_segmented_view_ready->operator()(m_temporal_ss, bi_level);
-            }
+        }
+        
+            // Call the voxel ready cb if any
+        if (signal_segmented_view_ready && signal_segmented_view_ready->num_slots() > 0){
+            signal_segmented_view_ready->operator()(m_temporal_ss, bi_level);
+        }
     }
 }
 

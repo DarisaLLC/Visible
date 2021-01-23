@@ -44,9 +44,9 @@ void ssmt_processor::internal_find_moving_regions (std::vector<roiWindow<P8U>>& 
 
 
 void ssmt_processor::find_moving_regions (const int channel_index){
-    m_variance_peak_detection_done = false;
-    volume_variance_peak_promotion(m_all_by_channel[channel_index]);
-    while(!m_variance_peak_detection_done){ std::this_thread::yield();}
+//    m_variance_peak_detection_done = true;
+//    volume_variance_peak_promotion(m_all_by_channel[channel_index]);
+//    while(!m_variance_peak_detection_done){ std::this_thread::yield();}
     m_instant_input = input_section_selector_t(-1, channel_index);
     return internal_find_moving_regions(m_all_by_channel[channel_index]);
 }
@@ -67,7 +67,6 @@ void ssmt_processor::find_moving_regions (const int channel_index){
 void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
     std::lock_guard<std::mutex> lock(m_segmentation_mutex);
     assert(mono.cols == bi_level.cols && mono.rows == bi_level.rows);
-    assert(m_variance_peak_detection_done);
     vlogger::instance().console()->info("Locating moving regions");
     cv::Rect padded_rect, image_rect;
 
@@ -127,19 +126,6 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
             out->open (image_path.c_str(), spec);
             out->write_image (TypeDesc::UINT8, bi_level.data);
             out->close ();
-        }
-
-        {
-            std::string imagename = "peaks_.png";
-            auto image_path = cache_path / imagename;
-            std::unique_ptr<ImageOutput> out = ImageOutput::create (image_path.c_str());
-            if (out){
-                ImageSpec spec (m_var_image.cols, m_var_image.rows, m_var_image.channels(), TypeDesc::UINT8);
-                out->open (image_path.c_str(), spec);
-                out->write_image (TypeDesc::UINT8, m_var_image.data);
-                out->close ();
-            }
-
         }
     }
     
