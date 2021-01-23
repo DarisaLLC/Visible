@@ -2387,7 +2387,7 @@
 					"$(inherited)",
 					/usr/local/Cellar/libheif/1.9.1/lib,
 					/usr/local/Cellar/giflib/5.2.1/lib,
-					/usr/local/Cellar/ffmpeg/4.3.1_2/lib,
+					/usr/local/Cellar/ffmpeg/4.3.1_4/lib,
 				);
 				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
