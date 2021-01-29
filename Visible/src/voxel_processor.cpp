@@ -15,6 +15,15 @@
 
 using namespace svl;
 
+bool scaleSpace::generate(const std::vector<roiWindow<P8U>> &images, int start_sigma, int end_sigma, int step){
+    std::vector<cv::Mat> mats;
+    for (auto& rw : images){
+        cvMatRefroiP8U(rw,cvmat,CV_8U);
+        mats.push_back(cvmat.clone());
+    }
+    return generate(mats, start_sigma, end_sigma, step);
+}
+
 bool scaleSpace::generate(const std::vector<cv::Mat>& images,
                                                   int start_sigma, int end_sigma, int step){
     
@@ -38,26 +47,31 @@ bool scaleSpace::generate(const std::vector<cv::Mat>& images,
     m_loaded = m_filtered.size() == images.size();
     int n = static_cast<int>(images.size());
     int n2 = n * (n - 1);
-    for (auto scale = start_sigma; scale <= end_sigma; scale+=step){
+    for (auto scale = start_sigma; scale < end_sigma; scale+=step){
         cv::Mat sum = cv::Mat(isize.height, isize.width, CV_64F);
         cv::Mat sumsq = cv::Mat(isize.height, isize.width, CV_64F);
         sum = 0;
         sumsq = 0;
-        for (auto& img : m_filtered){
-            auto mm = img.clone();
-            cv::GaussianBlur(mm, mm, cv::Size(0,0), scale);
+        for (auto ii = 0; ii < m_filtered.size(); ii++){
+            auto mm = m_filtered[ii].clone();
+            cv::GaussianBlur(mm, mm, cv::Size(0,0), scale );
+            // Sum
             sum += mm;
-            cv::multiply(mm, mm, mm);
+            // square at Sum Squared
+            mm = mm.mul(mm);
             sumsq += mm;
         }
+        // n SS - S * S
         cv::multiply(sum, sum, sum);
         sumsq *= n;
         cv::subtract(sumsq, sum, sumsq);
+        // n * ( n - 1 )
         sumsq /= n2;
+        // Produce variance. Since we will be summing the square at the next step
         m_scale_space.push_back(sumsq);
     }
-
-
+    auto scale_steps = (end_sigma - start_sigma) / step;
+    assert(m_scale_space.size() == scale_steps);
     return true;
     
 }

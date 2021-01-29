@@ -7,6 +7,8 @@
 #include "core/timestamp.h"
 
 typedef int cell_id_t;
+typedef int contraction_id_t;
+
 
 using namespace std;
 

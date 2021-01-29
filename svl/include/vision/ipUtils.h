@@ -42,7 +42,7 @@ namespace sliceSimilarity{
     typedef struct  { pixel_t::value_type val; float corr; float weight;} slice_result_t;
     typedef std::vector<slice_result_t> results_t;
     
-    slice_result_t threshold (roiWindow<pixel_t>& src,results_t &);
+    slice_result_t threshold (roiWindow<pixel_t>& src,results_t &, bool output = false);
 }
 
 

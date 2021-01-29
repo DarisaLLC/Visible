@@ -27,6 +27,12 @@ using namespace std;
 using namespace boost;
 using namespace svl;
 
+class contractionProfile;
+typedef std::shared_ptr<contractionProfile> profileRef;
+class contractionLocator;
+typedef std::weak_ptr<contractionLocator> locatorWeakRef_t;
+
+
 /* contractionMesh contains all measured data for a contraction
  * duration of a contraction is relaxaton_end - contraction_start
  * peak contraction is at contraction peak
@@ -34,6 +40,7 @@ using namespace svl;
 
 struct contractionMesh : public std::pair<size_t,size_t>
 {
+
     //@note: pair representing frame number and frame time
     typedef std::pair<size_t,double> index_val_t;
     // container
@@ -49,6 +56,7 @@ struct contractionMesh : public std::pair<size_t,size_t>
     
     double relaxation_visual_rank;
     double max_length;
+    contraction_id_t m_bid;
     cell_id_t m_uid;
  
    sigContainer_t             elongation;
@@ -114,9 +122,6 @@ class ca_signaler : public base_signaler
     getName () const { return "caSignaler"; }
 };
 
-class contractionProfile;
-typedef std::shared_ptr<contractionProfile> profileRef;
-
 
 
 class contractionLocator : public ca_signaler, std::enable_shared_from_this<contractionLocator>
@@ -171,6 +176,8 @@ public:
     // Factory create method
     static Ref create(const input_section_selector_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params());
     Ref getShared();
+    locatorWeakRef_t getWeakRef();
+    
     // Load raw entropies and the self-similarity matrix
     // If no self-similarity matrix is given, entropies are assumed to be filtered and used directly
     // // input selector -1 entire index mobj index
@@ -179,8 +186,9 @@ public:
     // Update with most recent median level set
     void update () const;
     
-    // @todo: add multi-contraction
     bool locate_contractions () ;
+    bool profile_contractions ();
+
     
     bool isValid () const { return mValidInput; }
     bool isOutputValid () const { return mValidOutput; }
@@ -273,10 +281,10 @@ public:
     using index_val_t = contractionMesh::index_val_t;
     using sigContainer_t = contractionMesh::sigContainer_t;
     
-    contractionProfile (contraction_t&, cell_id_t cid);
+    contractionProfile (contraction_t&);
 
-    static profileRef create(contraction_t& ct, cell_id_t cid){
-        return profileRef(new contractionProfile(ct, cid));
+    static profileRef create(contraction_t& ct){
+        return profileRef(new contractionProfile(ct));
     }
     // Compute Length Interpolation for measured contraction
     void compute_interpolated_geometries_and_force(const std::vector<double>& );

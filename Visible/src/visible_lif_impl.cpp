@@ -50,6 +50,7 @@
 #include "core/stl_utils.hpp"
 #include "imgui_visible_widgets.hpp"
 #include "nfd.h"
+#include "imGui_utils.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -883,6 +884,7 @@ void visibleContext::add_canvas (){
                     ImVec2 ic = m_imageDisplayMapper->image2display(iv, d_channel, true);
                     auto roi = mb->roi();
                     auto tl = m_imageDisplayMapper->image2display(ivec2(roi.x, roi.y),  d_channel);
+                    auto br = m_imageDisplayMapper->image2display(ivec2(roi.x+roi.width, roi.y+roi.height),  d_channel);
                     DrawCross(draw_list, ImVec4(0.0f, 1.0f, 0.0f, 0.5f), ImVec2(16,16), false, tl);
                     auto selected = DrawCross(draw_list, ImVec4(1.0f, 0.0f, 0.0f, 0.5f), ImVec2(16,16),
                                               m_selected_cell == index, ic);
@@ -899,8 +901,18 @@ void visibleContext::add_canvas (){
                         std::transform(mb->poly().begin(), mb->poly().end(), back_inserter(impts), [&](const cv::Point& f)->ImVec2
                                        { ivec2 v(f.x,f.y); return m_imageDisplayMapper->image2display(v, d_channel); });
                         auto nc = numbered_half_colors[index];
-                        draw_list->AddConvexPolyFilled( impts.data(), impts.size(), nc);
+                    //    draw_list->AddConvexPolyFilled( impts.data(), impts.size(), nc);
+
+                        rotatedRect2ImGui(mb->rotated_roi(),impts);
+                        for (auto ii = 0; ii < impts.size(); ii++){
+                            ivec2 v(impts[ii].x, impts[ii].y);
+                            impts[ii] = m_imageDisplayMapper->image2display(v);
+                        }
+                        draw_list->AddConvexPolyFilled(impts.data(), 4, nc);;
                     }
+                    
+                    draw_list->AddRect(tl, br, numbered_half_colors[index], 0.0f, 15, 2.0);
+                    
                     index++;
                 }
             }
@@ -1085,8 +1097,7 @@ void visibleContext::add_motion_profile (){
 // Contractions
 // Shape
 
-void visibleContext::draw_contraction_plots(const contractionLocator::contractionContainer_t& cp, int id){
-    auto ct = cp[id];
+void visibleContext::draw_contraction_plots(const contractionLocator::contraction_t& ct){
     contraction_t::sigContainer_t force = ct.force;
     auto elon = ct.elongation;
     auto elen = ct.normalized_length;
@@ -1123,7 +1134,7 @@ void visibleContext::draw_contraction_plots(const contractionLocator::contractio
         ImGui::Plot(name.c_str(), conf);
         
     };
-    std::string title = " Cell/Tissue " + stl_utils::tostr(id) + " ";
+    std::string title = " Cell/Tissue " + stl_utils::tostr(ct.m_uid) + " / " + stl_utils::tostr(ct.m_bid);
     ImGui::Begin(title.c_str(), nullptr, 0); //ImGuiWindowFlags_AlwaysAutoResize);
     plot(force, names[0], colors[0], 128, 200);
     ImGui::SameLine();
@@ -1135,7 +1146,7 @@ void visibleContext::draw_contraction_plots(const contractionLocator::contractio
     
 }
 
-bool  visibleContext::save_contraction_plots(const contractionLocator::contractionContainer_t&cp, int id){
+bool  visibleContext::save_contraction_plots(const contractionLocator::contraction_t&cp){
     
     auto save_csv = [](const contractionMesh & cp, bfs::path& root_path){
         auto folder = stl_utils::now_string();
@@ -1168,7 +1179,7 @@ bool  visibleContext::save_contraction_plots(const contractionLocator::contracti
     bfs::path out_bpath (outPath);
     switch(result){
         case NFD_OKAY:
-            rtn = save_csv(cp[id], out_bpath);
+            rtn = save_csv(cp, out_bpath);
             break;
         case NFD_CANCEL:
         case NFD_ERROR:
@@ -1200,8 +1211,10 @@ void visibleContext::add_contractions (bool* p_open)
             if (contractions.empty()) continue;
             const bool browseButtonPressed = ImGui::Button(" Export CSV ");
             if (browseButtonPressed) {
-                auto outcome = save_contraction_plots(contractions, 0);
-                vlogger::instance().console()->info(tostr(outcome));
+                for (int cc = 0; cc < contractions.size(); cc++){
+                    auto outcome = save_contraction_plots(contractions[cc]);
+                    vlogger::instance().console()->info(tostr(outcome));
+                }
             }
 
             if (ImGui::TreeNode((void*)(intptr_t)i, "Cell/Tissue %d", mb->id())){
@@ -1222,7 +1235,8 @@ void visibleContext::add_contractions (bool* p_open)
         const ssmt_result::ref_t& mb = m_lifProcRef->moving_bodies()[i];
         auto contractions = m_cell2contractions_map[mb->id()];
         if (contractions.empty()) continue;
-        draw_contraction_plots(contractions, mb->id());
+        for (int cc = 0; cc < contractions.size(); cc++)
+            draw_contraction_plots(contractions[cc]);
     }
 }
 

@@ -32,7 +32,7 @@
 #include "mediaInfo.h"
 #include "thread.h"
 #include "contraction.hpp"
-//#include "lif_content.hpp"
+
 using namespace cv;
 using blob = svl::labelBlob::blob;
 using namespace boost;
@@ -63,8 +63,8 @@ public:
         
         const TypeDesc& content_type () { return m_type; }
         
-        const std::pair<uint32_t,uint32_t>& voxel_sample () {return m_vparams.voxel_sample(); }
-        const std::pair<uint32_t,uint32_t>& voxel_pad () {return m_vparams.voxel_sample_half(); }
+        const std::pair<uint32_t,uint32_t>& voxel_sample () const {return m_vparams.voxel_sample(); }
+        const std::pair<uint32_t,uint32_t>& voxel_pad () const {return m_vparams.voxel_sample_half(); }
         const iPair& expected_segmented_size () {return m_vparams.expected_segmented_size(); }
         const uint32_t& min_seqmentation_area () {return m_vparams.min_segmentation_area(); }
         
@@ -82,8 +82,8 @@ public:
         }
         
     private:
-        voxel_params_t m_vparams;
-        TypeDesc m_type;
+        mutable voxel_params_t m_vparams;
+        mutable TypeDesc m_type;
     };
     
   //  using contractionContainer_t = contractionLocator::contractionContainer_t;
@@ -114,7 +114,8 @@ public:
    
     const int64_t& frame_count () const;
     const uint32_t channel_count () const;
-  
+    const ssmt_processor::params& parameters () const { return m_params; }
+    const mediaSpec& media_spec () const { return m_loaded_spec;}
     
     const svl::stats<int64_t> stats3D () const;
     cv::Mat & segmented () const { return m_temporal_ss;  }
@@ -212,8 +213,8 @@ private:
     
     
     // Default params. @place_holder for increasing number of params
-    ssmt_processor::params m_params;
-    mediaSpec m_loaded_spec;
+    mutable ssmt_processor::params m_params;
+    mutable mediaSpec m_loaded_spec;
     
     indexToTime_t m_2TimeMap;
     timeToIndex_t m_2IndexMap;
@@ -323,16 +324,28 @@ private:
 // 3 channels: 2 flu one visible
 // 1 channel: visible
 // Note create_named_tracks
-class ssmt_result : public moving_region {
+class ssmt_result : public moving_region,std::enable_shared_from_this<ssmt_result> {
 public:
     typedef std::shared_ptr<ssmt_result> ref_t;
+    typedef std::weak_ptr<ssmt_result> weak_ref_t;
     typedef std::shared_ptr<vecOfNamedTrack_t> trackRef_t;
     typedef std::unordered_map<std::string, trackRef_t> trackMap_t;
     
     static const ref_t create (std::shared_ptr<ssmt_processor>&, const moving_region&,
                                const input_section_selector_t& in);
+
+    ssmt_result::ref_t getShared () {
+        return shared_from_this();
+    }
+    
+    ssmt_result::weak_ref_t getWeakRef(){
+        weak_ref_t weak = getShared();
+        return weak;
+    }
     
     void process ();
+    bool segment_at_contraction (const std::vector<roiWindow<P8U>>& images, const std::vector<int> &peak_indices);
+    
     const trackMap_t& trackBook () const;
     const uint64_t frameCount () const;
     const uint32_t channelCount () const;
