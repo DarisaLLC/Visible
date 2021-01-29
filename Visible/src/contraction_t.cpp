@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
+
 #include "cinder_cv/cinder_opencv.h"
 
 #include "contraction.hpp"
@@ -26,6 +27,7 @@
 #include "core/boost_units.hpp"
 #include "core/simple_timing.hpp"
 #include "core/moreMath.h"
+#include "core/stats.hpp"
 #include "core/pf.h"
 #include "vision/correlation1d.hpp"
 #include "core/boost_stats.hpp"
@@ -94,6 +96,11 @@ std::shared_ptr<contractionLocator> contractionLocator::create(const input_secti
 
 std::shared_ptr<contractionLocator> contractionLocator::getShared () {
     return shared_from_this();
+}
+
+locatorWeakRef_t contractionLocator::getWeakRef(){
+    locatorWeakRef_t weak = getShared();
+    return weak;
 }
 
 contractionLocator::contractionLocator(const input_section_selector_t& in,  const uint32_t& body_id, const contractionLocator::params& params) :
@@ -266,13 +273,12 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
 
 
 bool contractionLocator::locate_contractions (){
-    perf::timer timeit;
-    timeit.start();
-     
+
     assert(verify_input());
     if(! isPreProcessed())
         update ();
-    
+ 
+#if 0
     auto save_csv = [](const std::vector<double>& data, bfs::path& root_path){
         auto folder = stl_utils::now_string();
         auto folder_path = root_path / folder;
@@ -292,9 +298,13 @@ bool contractionLocator::locate_contractions (){
         }
         return false;
     };
+
     
-    bfs::path dst_path = "/Users/arman/tmp";
-    save_csv(m_signal, dst_path);
+    auto tempFilePath = bfs::temp_directory_path()/ boost::filesystem::unique_path();
+    save_csv(m_signal, tempFilePath);
+    vlogger::instance().console()->info(tempFilePath);
+
+#endif
     
     
     m_ac.resize(0);
@@ -330,27 +340,48 @@ bool contractionLocator::locate_contractions (){
     std::transform(m_signal.begin(), m_signal.end(), valleys.begin(), [](double f)->double { return 1.0 - f; });
     
     svl::findPeaks(valleys, m_peaks_idx);
+    // Find periods
+    std::vector<int> periods;
+    std::adjacent_difference (m_peaks_idx.begin(), m_peaks_idx.end(), std::back_inserter(periods));
+    auto median_period = svl::Median(periods);
+    auto half_period = median_period / 2;
+    std::vector<int> selected;
+    for (int ii = 0; ii < m_peaks_idx.size(); ii++){
+        if (periods[ii] > half_period)
+            selected.push_back(m_peaks_idx[ii]);
+    }
     {
         stringstream ss;
-        for (auto idx : m_peaks_idx) ss << idx << ",";
+        for (auto idx : m_peaks_idx) ss << idx << "," << std::endl;
+        for (auto idx : periods) ss << idx << "," << std::endl;
+        for (auto idx : selected) ss << idx << "," << std::endl;
         vlogger::instance().console()->info(ss.str());
     }
+    m_peaks_idx = selected;
     
     // @todo check if this and peak indexes are redundant in use
     for (auto pp = 0; pp < m_peaks_idx.size(); pp++){
         m_peaks.emplace_back(m_peaks_idx[pp], m_signal[m_peaks_idx[pp]]);
     }
+    return true;
+}
+        // @todo: add multi-contraction
+bool contractionLocator::profile_contractions (){
+    perf::timer timeit;
+    timeit.start();
     
     for (auto pp = 0; pp < m_peaks_idx.size(); pp++){
         
         contraction_t ct;
+        ct.m_uid = id();
+        ct.m_bid = pp;
         
         // Contraction gets a unique id by contraction profiler
         if(get_contraction_at_point(pp, m_peaks_idx, ct)){
-            auto profile = std::make_shared<contractionProfile>(ct, pp);
+            auto profile = contractionProfile::create(ct);
             profile->compute_interpolated_geometries_and_force(m_signal);
             m_contractions.emplace_back(profile->contraction());
-//            break;
+//          @todo progress & report 
         }
     }
     
@@ -412,8 +443,7 @@ bool contractionLocator::verify_input () const
 
 template boost::signals2::connection contractionLocator::registerCallback(const std::function<contractionLocator::sig_cb_contraction_ready>&);
 
-contractionProfile::contractionProfile (contraction_t& ct, cell_id_t cid ):
-m_ctr(ct), m_id(cid)
+contractionProfile::contractionProfile (contraction_t& ct): m_ctr(ct)
 {
     
 }
@@ -430,7 +460,7 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
     perf::timer timeit;
     timeit.start();
      
-    const double relaxed_length = contraction().relaxation_visual_rank;
+    const double relaxed_length = m_ctr.relaxation_visual_rank;
     for (auto dd : signal) m_fder.push_back((float)dd);
 
     /*
@@ -471,13 +501,11 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
     m_ctr.elongation = m_elongation;
     m_ctr.normalized_length = m_interpolated_length;
     
-    // Add uid for this contraction
-    m_ctr.m_uid = m_id;
     
     timeit.stop();
     auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
     vlogger::instance().console()->info("Force took (ms): " + timestr);
-    vlogger::instance().console()->info("Id " + toString(m_ctr.m_uid));
+    vlogger::instance().console()->info("Cell Id " + toString(m_ctr.m_uid) + " Contraction Id " + toString(m_ctr.m_bid));
     
     
 }

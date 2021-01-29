@@ -247,13 +247,20 @@ public:
     bool generate(const std::vector<roiWindow<P8U>> &images, int start_sigma, int end_sigma, int step);
     bool generate(const std::vector<cv::Mat> &images, int start_sigma, int end_sigma, int step);
     const std::vector<cv::Mat>& space() const { return m_scale_space; }
+    const cv::Mat& motion_field() const { return m_motion_field; }
+    
+    int start_sigma() const { return m_start_sigma; }
+    int end_sigma() const { return m_end_sigma; }
+    int steps() const { return m_step; }
+    bool isLoaded () const { return m_loaded; }
     
 private:
     bool m_loaded;
-    std::vector<roiWindow<P8U>> m_images;
     std::vector<float> m_sigmas;
+    cv::Mat m_motion_field;
     std::vector<cv::Mat> m_filtered;
     std::vector<cv::Mat> m_scale_space;
+    int m_start_sigma, m_end_sigma, m_step;
     
 };
 

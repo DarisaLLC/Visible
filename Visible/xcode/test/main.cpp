@@ -40,10 +40,8 @@
 #include "opencv2/highgui.hpp"
 #include "vision/roiWindow.h"
 #include "vision/self_similarity.h"
-#include "seq_frame_container.hpp"
 #include "cinder/ImageIo.h"
 #include "cinder_cv/cinder_xchg.hpp"
-#include "ut_sm.hpp"
 #include "cm_time.hpp"
 #include "core/gtest_env_utils.hpp"
 #include "vision/colorhistogram.hpp"
@@ -101,7 +99,7 @@ using namespace cgeom;
 // @FIXME Logger has to come before these
 #include "ut_units.hpp"
 #include "ut_cardio.hpp"
-
+//#include "ut_sm.hpp" @todo refactor
 #define cimg_plugin1 "plugins/cvMat.h"
 #define cimg_display 0
 #include "CImg.h"
@@ -248,6 +246,79 @@ get_intsample_maxval(const ImageSpec& spec)
 }
 
 
+TEST(mat_ops, basic){
+    
+    Mat img = (Mat_<float>(3,4) << 0, -1, 0, -1, 5, -1, 0, -1, 0, 1, 2, 3);
+    cv::Mat smin(3,4,CV_32F);
+    cv::Mat qmin(3,4,CV_32F);
+    smin = 255;
+    qmin = 0;
+    auto min_a = min(img,smin);
+    output(smin, 1);
+    output(img, 1);
+    output(min_a, 1);
+    
+    
+}
+
+
+TEST(scale_space, basic){
+    
+    auto res = dgenv_ptr->asset_path("zser16.tif");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    std::vector<cv::Mat> src_images;
+    
+    auto build_vector = [&](const ustring& filename, std::vector<cv::Mat>& images){
+        images.resize(0);
+        ImageBuf buf(filename);
+        int nsubimages = buf.nsubimages();
+        const ImageSpec& bspec = buf.spec();
+        int xres = bspec.width;
+        int yres = bspec.height;
+        buf.threads(1);
+        
+            // Now read them from cache and display them
+        namedWindow("oiio", WINDOW_AUTOSIZE | WINDOW_OPENGL);
+        for (int ss = 0; ss < nsubimages; ss++){
+            buf.reset(filename, ss, 0);
+            std::string datetime = buf.spec().get_string_attribute("DateTime");
+            ROI roi = buf.roi();
+            cv::Mat cvb (yres,xres, CV_16U);
+            cv::Mat cvb8 (yres,xres, CV_8U);
+            
+            buf.get_pixels(roi, TypeUInt16, cvb.data);
+            cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
+            images.push_back(cvb8);
+        }
+    };
+
+    //ustring filename(res.first.c_str());
+    ustring filename ("/Volumes/medvedev/Users/arman/Pictures/nd122.tif");
+    build_vector(filename, src_images);
+
+
+  
+//    scaleSpace ss;
+//    ss.generate(src_images, 1, 15, 2);
+//    auto grw = cv::Mat(ss.motion_field().rows,ss.motion_field().cols,CV_8U);
+//    cv::normalize(ss.motion_field(),grw,0,255, CV_MINMAX, CV_8U);
+//    cv::imshow(" Motion Field ", grw);
+//    cv::waitKey();
+    
+    std::string msg = " ScaleSpace " ;
+    int index = 0;
+    for(const auto& rw : ss.space()){
+        auto grw = cv::Mat(rw.rows,rw.cols,CV_8U);
+        cv::normalize(rw,grw,0,255, CV_MINMAX, CV_8U);
+        auto filepath = "/Volumes/medvedev/Users/arman/tmp/scales/scale_var_" + to_string(index) + ".png";
+        cv::imwrite(filepath, grw);
+        index++;
+        imshow( msg, grw);
+        cv::waitKey();
+    }
+    
+}
 
 TEST(oiio, basic){
     
@@ -343,134 +414,11 @@ TEST(oiio, inmemory){
     ImageBuf dst = ImageBufAlgo::from_OpenCV(mat1);
     EXPECT_TRUE(!dst.has_error());
     
-    
-    
-    
-    
-    
-//    for (float ii = 2; ii < 3; ii++){
-//        float pixels[yres][xres][chans] = { { { 0, 0, 0 }, { 0, ii, 0 } },
-//            { { ii, 0, 0 }, { ii, ii, 0 } } };
-//
-//        bool ok = imagecache->add_tile(fooname, int(ii) - 1/* subimage */, 0 /* miplevel */,
-//                                       0, 0, 0,         /* origin */
-//                                       0, chans,        /* channel range */
-//                                       imgtype, pixels, /* the buffer */
-//                                       AutoStride, AutoStride,
-//                                       AutoStride, /* strides */
-//                                       true /* COPY THE PIXELS! */);
-//        EXPECT_TRUE(ok);
-//    }
-//
-    
-  
-    
-    
-
-    
-    
-
-        
-    
-    
-    
-    
 }
 
 
 
-        // Create a private ImageCache so we can customize its cache size
-        // and instruct it store everything internally as floats.
-//    ImageCache* ic = ImageCache::create(true);
-//    ic->attribute("autotile", 0);
-//    ic->attribute("max_memory_MB", 2048.0);
-//
-//
-//    ImageSpec spec;
-//    int number_of_subimages = 0;
-//    ic->get_imagespec (filename, spec, number_of_subimages);
-//
-//    ImageCache::destroy(ic);
-//    int nsubimages = 0;
-//    ic->get_image_info(filename, 0, 0, ustring("subimages"), OIIO::TypeInt, &nsubimages);
-//
-//    unsigned int maxval = (unsigned int)get_intsample_maxval(spec);
-//    int xres = spec.width;
-//    int yres = spec.height;
-//    int channels = spec.nchannels;
-//    int i = spec.get_int_attribute ("oiio:subimages", -1.0);
-//    int bp = spec.get_int_attribute ("oiio:BitsPerSample", -1);
-//    float fps = spec.get_float_attribute ("Fps", -1.0f);
-//    std::string s = spec.get_string_attribute ("DateTime", "NA");
-//    TypeDesc td = TypeDesc::UINT16;
-//        std::cout << number_of_subimages << " (" << xres << "," << yres << ") " <<
-//        maxval << "::" << i << "::" <<  fps << "::" << s << "::" << bp << "::" << channels <<
-//        "::" << nsubimages << std::endl;
-//#if 1
-//    std::vector<uint16_t> pixels (2*xres*yres*channels);
-//
-//
-//    for (int ss = 0; ss < nsubimages; ss++){
-//        if (ss & 1)
-//            ic->add_tile(filename, ss, 0, 0, 0, 0, 0, 1, td, pixels.data());
-//    }
-//
-//    {
-//        std::cout << " Half Cached " << std::endl;
-//            // average hit time and miss time
-//        float hits(0.0), miss(0.0);
-//        int hitn(0), missn(0);
-//        for (int ss = 0; ss < nsubimages; ss++){
-//            if (ss & 1){
-//                OIIO::Timer hitimer;
-//                auto tile = ic->get_tile(filename, ss, 0, 0, 0, 0, 0, 1);
-//                assert(tile != nullptr);
-//                hits += hitimer();
-//                hitn++;
-//                ic->release_tile(tile);
-//            }
-//            else{
-//                OIIO::Timer misstimer;
-//                ic->add_tile(filename, ss, 0, 0, 0, 0, 0, 1, td, pixels.data());
-//                miss += misstimer();
-//                missn++;
-//            }
-//        }
-//        hits /= hitn;
-//        miss /= missn;
-//        std::cout << hitn << "," << missn << std::endl;
-//
-//        std::cout << hits * 1000 << " , " << miss * 1000 << std::endl;
-//    }
-//
-//    std::cout << " All Cached " << std::endl;
-//
-//    float hits(0.0), miss(0.0);
-//    int hitn(0), missn(0);
-//    for (int ss = 0; ss < nsubimages; ss++){
-//        OIIO::Timer hitimer;
-//        auto tile = ic->get_tile(filename, ss, 0, 0, 0, 0, 0, 1);
-//        if (tile != nullptr){
-//            hits += hitimer();
-//            hitn++;
-//            ic->release_tile(tile);
-//        }
-//        else{
-//            miss += hitimer();
-//            missn++;
-//        }
-//    }
-//    hits /= hitn;
-//    if (missn) miss /= missn;
-//    std::cout << hitn << "," << missn << std::endl;
-//    std::cout << hits * 1000 << " , " << miss * 1000 << std::endl;
-//    std::cout << ic->getstats() << std::endl;
-//#endif
-
-
-
-
-#include "ut_lif.hpp"
+//#include "ut_lif.hpp"
 
 TEST(cluster_2d, basic){
     
@@ -483,14 +431,18 @@ TEST(cluster_2d, basic){
     std::vector<cluster2f_t> clusters;
     
     find_2dclusters(points, 3.0, clusters);
-    
+  
+#if PRINT_OUT
     for(size_t i = 0 ; i < clusters.size() ; ++i) {
         std::cout << "Cluster " << i << std::endl;
         for (auto const& p : clusters[i]) {
-            std::cout << bg::wkt(p) << std::endl;
+            std::cout << bg::wkt(p) << "==";
         }
+        std::cout << std::endl;
     }
+#endif
 }
+
 
 
 TEST(cluster, basic){
@@ -519,6 +471,7 @@ TEST(cluster, basic){
     
     find_3dclusters(points, 3.0f, 0.3f, clusters);
     
+#if PRINT_OUT
     for(size_t i = 0 ; i < clusters.size() ; ++i) {
         if (clusters[i].empty()) continue;
         std::cout << "Cluster " << i << std::endl;
@@ -526,6 +479,8 @@ TEST(cluster, basic){
             std::cout << bg::wkt(p) << std::endl;
         }
     }
+#endif
+    
 }
 
 TEST(chull, basic){
@@ -551,8 +506,9 @@ TEST(chull, basic){
         }
 
         // display new polygon
+#if PRINT_OUT
         std::cout << bg::wkt<polygon_2d>(*p_ref) << std::endl;
-        
+#endif
         // calculate polygon bounding box
         box_2d b = bg::return_envelope<box_2d>(*p_ref);
         // insert new value
@@ -562,10 +518,12 @@ TEST(chull, basic){
         boost::geometry::convex_hull(*p_ref, hull);
     
         using boost::geometry::dsv;
+#if PRINT_OUT
         std::cout
         << "polygon: " << dsv(*p_ref) << std::endl
         << "hull: " << dsv(hull) << std::endl
         ;
+#endif
     }
     // find values intersecting some area defined by a box
     box_2d query_box(point_2d(0, 0), point_2d(5, 5));
@@ -607,9 +565,11 @@ TEST(zscore, basic){
     roiWindow<P8U> r8(src.cols, src.rows);
     cpCvMatToRoiWindow8U (src, r8);
     auto tres = zscore (r8);
+#if PRINT_OUT
     for (const auto& kv : tres) {
         std::cout << unsigned(kv.first) << " has value " << kv.second << std::endl;
     }
+#endif
     std::vector<sliceSimilarity::slice_result_t> ires;
     auto sres = sliceSimilarity::threshold(r8, ires);
     std::cout << unsigned(sres.val) << " @ " <<  sres.corr << " w  " << sres.weight << std::endl;
@@ -639,7 +599,9 @@ TEST(ut_labelBlob, mult_level)
     
     histoStats hh;
     hh.from_image<P8U>(r8);
+#if PRINT_OUT
     std::cout << hh;
+#endif
     std::vector<uint8_t> valid_bins;
     valid_bins.resize(0);
     for (unsigned binh = 0; binh < hh.histogram().size(); binh++)
@@ -685,18 +647,19 @@ TEST(ut_labelBlob, mult_level)
         EXPECT_EQ(true, cid == 666);
         EXPECT_EQ(true, lbr->hasResults());
         const std::vector<blob> blobs = lbr->results();
+#if PRINT_OUT
         std::cout << "["<< tt << "]: " << blobs.size() << std::endl;
-        
+#endif
         
 #ifdef INTERACTIVE
         try{
-        lbr->drawOutput();
-        while(! s_graphics_ready){ std::this_thread::yield(); }
-        EXPECT_EQ(true, s_graphics_ready);
-        /// Show in a window
-        std::string msg = " LabelBlob " + toString(tt) + " ";
-        imshow( msg, lbr->graphicOutput());
-        cv::waitKey();
+            lbr->drawOutput();
+            while(! s_graphics_ready){ std::this_thread::yield(); }
+            EXPECT_EQ(true, s_graphics_ready);
+            /// Show in a window
+            std::string msg = " LabelBlob " + toString(tt) + " ";
+            imshow( msg, lbr->graphicOutput());
+            cv::waitKey();
         }
         catch(const std::exception & ex)
         {
@@ -906,7 +869,10 @@ static Eigen::VectorXd getZPlanes(const std::vector<double> &z) {
                       zCoords.end());
         
         domZs[count++] = z0;
-        std::cout << domZs.minCoeff() << std::endl;domZs.minCoeff();
+#if PRINT_OUT
+        std::cout << domZs.minCoeff() << std::endl;
+#endif
+        
     } while (domZs.minCoeff() <= 0 || count < 2);
     
     std::vector<float> fcp;
@@ -931,7 +897,9 @@ static Eigen::VectorXd getZPlanes(const std::vector<double> &z) {
 
 TEST(ut_ransac, basic){
     auto domz = getZPlanes(oneD_example);
+#if PRINT_OUT
     std::cout << domz << std::endl;
+#endif
     
 }
 
@@ -948,7 +916,7 @@ void ransacManhattan1(const std::vector<Eigen::Vector3d> &N,
                           return std::fabs(nest.z() - n.z()) > 1;
                       },
                       [](const auto &ave, const auto &n, const auto &est) -> Eigen::Vector3d {
-                          if (std::fabs(est.z() - n.z()) < 2)
+                          if (std::fabs(est.z() - n.z()) < 1)
                               return ave - n;
                           else
                               return ave + n;
@@ -956,7 +924,7 @@ void ransacManhattan1(const std::vector<Eigen::Vector3d> &N,
 }
 
 TEST(ut_ransac, plane){
-    auto res = dgenv_ptr->asset_path("checkerboard_u8.png");
+    auto res = dgenv_ptr->asset_path("voxel_ss_.png");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
     cv::Mat image = cv::imread(res.first.c_str(), cv::ImreadModes::IMREAD_GRAYSCALE);
@@ -973,7 +941,7 @@ TEST(ut_ransac, plane){
     std::vector<Eigen::Vector3d> M(3);
     ransacManhattan1(normals, M[0]);
     
-    std::cout << "D1: " << M[0] << std::endl << std::endl;
+    std::cout << "D1: " << M[0][2] << std::endl << std::endl;
 }
 
 TEST (ut_affine_translation, basic){
@@ -1074,13 +1042,13 @@ TEST (ut_algo_lif, segment){
     test.convertTo(ut8, CV_8U);
     
     imshow( "divide", ut8);
-    cv::waitKey(0);
+    cv::waitKey(30);
 
     imshow( "log", dlog);
-    cv::waitKey(0);
+    cv::waitKey(30);
     
     imshow( "image", image);
-    cv::waitKey(0);
+    cv::waitKey(30);
 
     std::string file_path = "/Volumes/medvedev/Users/arman/tmp/iratio.png";
     cv::imwrite(file_path, ut8);
@@ -1090,6 +1058,7 @@ TEST (ut_algo_lif, segment){
     cv::imwrite(file_path, dlog);
     
     
+#if PRINT_OUT
     auto printMat = [](const cv::Mat& m){
         for (auto row = 0; row < m.rows; row++){
             for_each(m.ptr<float>(row), m.ptr<float>(row)+m.cols, [](float elem) { std::cout << " | " << elem; });
@@ -1097,7 +1066,7 @@ TEST (ut_algo_lif, segment){
         }
     };
     printMat(test);
-    
+#endif
 
 }
 
@@ -1122,6 +1091,7 @@ TEST (ut_rotated_rect, basic){
     std::vector<Point2f> Points3 = {{5.5f,6.5f},{7.5f,6.5f},{7.5f,8.5f},{7.5f,12.5f}};
     Point2f cvcenter_gold (11.5,2.5);
     
+#if cinder_poly_line_not_solved
     ci::PolyLine2 pl(points);
     bool is_colinear = true;
     bool isCCW = pl.isCounterclockwise(&is_colinear);
@@ -1130,6 +1100,7 @@ TEST (ut_rotated_rect, basic){
     auto com = pl.calcCentroid();
     auto area = pl.calcArea();
     std::cout << com << "  ,   " << area << std::endl;
+#endif
     
     {
         cv::RotatedRect rr;
@@ -1291,7 +1262,8 @@ TEST (ut_dm, basic){
     auto x = ((space[2][3]-space[2][1])/2.0) / (space[2][3]+space[2][1]-space[2][2]);
     auto y = ((space[1][2]-space[3][2])/2.0) / (space[1][2]+space[3][2]-space[2][2]);
     cv::Point loc(x,y);
-    
+
+#if PRINT_OUT
     std::cout << std::endl;
     for(std::vector<int>& row : space){
         for (const int& score : row){
@@ -1299,6 +1271,7 @@ TEST (ut_dm, basic){
         }
         std::cout << std::endl;
     }
+#endif
     
     //    {
     //        auto name = "Motion";
@@ -1669,28 +1642,6 @@ TEST(tracks, basic){
     }
 }
 
-
-//
-//void savgol (const vector<double>& signal, vector<double>& dst)
-//{
-//    // for scalar data:
-//    int order = 4;
-//    int winlen = 17 ;
-//    SGF::real sample_time = 0; // this is simply a float or double, you can change it in the header sg_filter.h if yo u want
-//    SGF::ScalarSavitzkyGolayFilter filter(order, winlen, sample_time);
-//    dst.resize(signal.size());
-//    SGF::real output;
-//    for (auto ii = 0; ii < signal.size(); ii++)
-//    {
-//        filter.AddData(signal[ii]);
-//        if (! filter.IsInitialized()) continue;
-//        dst[ii] = 0;
-//        int ret_code;
-//        ret_code = filter.GetOutput(0, output);
-//        dst[ii] = output;
-//    }
-//
-//}
 
 TEST(units,basic)
 {
@@ -2141,41 +2092,6 @@ TEST (UT_cm_timer, run)
     EXPECT_TRUE(c1.isNumeric());
     
 }
-
-//
-//TEST (UT_QtimeCache, run)
-//{
-//    boost::filesystem::path test_filepath;
-//
-//    // vf does not support QuickTime natively. The ut expectes and checks for failure
-//    static std::string qmov_name ("box-move.m4v");
-//
-//    auto res = dgenv_ptr->asset_path(qmov_name);
-//    EXPECT_TRUE(res.second);
-//    EXPECT_TRUE(boost::filesystem::exists(res.first));
-//
-//    if (res.second)
-//        test_filepath = res.first;
-//
-//    ci::qtime::MovieSurfaceRef m_movie;
-//    m_movie = qtime::MovieSurface::create( test_filepath.string() );
-//    EXPECT_TRUE(m_movie->isPlayable ());
-//
-//    std::shared_ptr<seqFrameContainer> sm = seqFrameContainer::create(m_movie);
-//
-//    Surface8uRef s8 = ci::Surface8u::create(123, 321, false);
-//    time_spec_t t0 = 0.0f;
-//    time_spec_t t1 = 0.1f;
-//    time_spec_t t2 = 0.2f;
-//
-//    EXPECT_TRUE(sm->loadFrame(s8, t0)); // loaded the first time
-//    EXPECT_FALSE(sm->loadFrame(s8, t0)); // second time at same stamp, uses cache return true
-//    EXPECT_TRUE(sm->loadFrame(s8, t1)); // second time at same stamp, uses cache return true
-//    EXPECT_TRUE(sm->loadFrame(s8, t2)); // second time at same stamp, uses cache return true
-//    EXPECT_FALSE(sm->loadFrame(s8, t0)); // second time at same stamp, uses cache return true
-//
-//}
-
 
 
 

@@ -15,7 +15,6 @@
 #include "vision/opencv_utils.hpp"
 #include "sm_producer.h"
 #include <boost/foreach.hpp>
-#include "seq_frame_container.hpp"
 #include <boost/filesystem.hpp>
 #include <boost/assign/list_of.hpp> // for 'map_list_of()'
 #include <boost/assert.hpp>
@@ -71,7 +70,7 @@ class lif_serie_data
 public:
     
     lif_serie_data ();
-    lif_serie_data (const lifIO::LifReader::ref& m_lifRef, const unsigned index);
+//    lif_serie_data (const lifIO::LifReader::ref& m_lifRef, const unsigned index);
     lif_serie_data (const std::unique_ptr<OIIO::ImageInput>&);
     
     int index () const { return m_index; }
@@ -83,10 +82,10 @@ public:
     uint32_t channelCount () const { return m_channelCount; }
     const std::vector<size_t>& dimensions () const { return m_dimensions; }
     const std::vector<size_t>& buffer2d_dimensions () const { return m_buffer2d_dimensions; }
-    const std::vector<lifIO::ChannelData>& channels () const { return m_channels; }
+//    const std::vector<lifIO::ChannelData>& channels () const { return m_channels; }
     const std::vector<std::string>& channel_names () const { return m_channel_names; }
     const std::vector<time_spec_t>& timeSpecs () const { return  m_timeSpecs; }
-    const lifIO::LifReader::weak_ref_t& readerWeakRef () const;
+//    const lifIO::LifReader::weak_ref_t& readerWeakRef () const;
     const cv::Mat& poster () const { return m_poster; }
     const std::vector<cv::Rect2f>& ROIs2d () const { return m_rois_2d; }
     
@@ -101,11 +100,11 @@ private:
     std::vector<cv::Rect2f> m_rois_2d;
     std::vector<size_t> m_dimensions;
     std::vector<size_t> m_buffer2d_dimensions;
-    std::vector<lifIO::ChannelData> m_channels;
+//    std::vector<lifIO::ChannelData> m_channels;
     std::vector<std::string> m_channel_names;
     std::vector<time_spec_t> m_timeSpecs;
     cv::Mat m_poster;
-    mutable lifIO::LifReader::weak_ref_t m_lifWeakRef;
+//    mutable lifIO::LifReader::weak_ref_t m_lifWeakRef;
     
     mutable float  m_length_in_seconds;
     
@@ -156,7 +155,7 @@ public:
         return std::shared_ptr<lif_browser> ( new lif_browser (fqfn_path));
     }
     
-    const lifIO::LifReader::ref& reader () const { return m_lifRef; }
+//    const lifIO::LifReader::ref& reader () const { return m_lifRef; }
     
     const lif_serie_data get_serie_by_index (unsigned index);
     const std::vector<lif_serie_data>& get_all_series  () const;
@@ -168,7 +167,7 @@ public:
 private:
     void  get_series_info () const;
     void  internal_get_series_info () const;
-    mutable lifIO::LifReader::ref m_lifRef;
+//    mutable lifIO::LifReader::ref m_lifRef;
     mutable std::vector<lif_serie_data> m_series_book;
     mutable std::vector<std::string> m_series_names;
     mutable std::map<std::string,int> m_name_to_index;

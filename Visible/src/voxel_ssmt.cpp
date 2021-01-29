@@ -27,12 +27,30 @@
 #include "segmentation_parameters.hpp"
 #include <OpenImageIO/imageio.h>
 #include "algo_runners.hpp"
+#include "etw_utils.hpp"
 
 using namespace stl_utils;
 using namespace boost;
 namespace bfs=boost::filesystem;
 using namespace OIIO;
 
+namespace anonymous{
+
+    void ransac_non_maximal_suppression(const std::vector<Eigen::Vector3d> &N,
+                          Eigen::Vector3d &M) {
+        M = etw_utils::ransac(
+                              N, []() -> Eigen::Vector3d { return Eigen::Vector3d::Zero(); },
+                              [](auto &n, auto &nest) {
+            return std::fabs(nest.z() - n.z()) > 3;
+        },
+                              [](const auto &ave, const auto &n, const auto &est) -> Eigen::Vector3d {
+            if (std::fabs(est.z() - n.z()) < 2)
+                return ave - n;
+            else
+                return ave + n;
+        });
+    }
+}
 
 // Return 2D latice of pixels over time
 void ssmt_processor::generateVoxels_on_channel (const int channel_index){
@@ -104,18 +122,6 @@ void ssmt_processor::create_voxel_surface (std::vector<float>& env){
     if (vp.generate_voxel_surface(env)){
         
         m_temporal_ss = vp.temporal_ss();
-//        auto const hist = vp.surface_hist();
-//        auto hm = std::max_element(hist.begin(), hist.end());                // Find the mode of the histogram
-//        if(hm == hist.end()){vlogger::instance().console()->error("motion signal error");return;}
-//        double motion_peak(std::distance(hist.begin(), hm));
-//        if(m_var_peaks.size() == 0){vlogger::instance().console()->error("motion space flat" );return;}
-//            // Sum sim under the var peaks
-//            // @note: Temporal Info is collected at full res. Voxel segmentation is done at reduce res
-//        float peaks_sums = 0.0f;
-//        for (cv::Point& pt : m_var_peaks)peaks_sums += m_temporal_ss.at<uint8_t>(pt.y,pt.x);
-//        auto peaks_average = peaks_sums / int(m_var_peaks.size());
-        
-  
         
         cv::Mat bi_level;
         int erosion_size = 3;
@@ -123,9 +129,15 @@ void ssmt_processor::create_voxel_surface (std::vector<float>& env){
                                             Size( 2*erosion_size + 1, 2*erosion_size+1 ),
                                             Point( erosion_size, erosion_size ) );
         
-        auto othreshold = threshold(m_temporal_ss, bi_level, 0, 255, THRESH_OTSU | THRESH_BINARY);
+        // Get threshold using ransac for doing non_maximal_suppression
+        std::vector<Eigen::Vector3d> M(3);
+        anonymous::ransac_non_maximal_suppression(vp.cloud(), M[0]);
+        auto rthreshold = (int) M[0][2];
         
-        std::string msg = " Temporal Peak Average  @ (" + to_string(othreshold) +  ")";
+        auto othreshold = threshold(m_temporal_ss, bi_level, 0, 255, THRESH_OTSU | THRESH_BINARY);
+        threshold(m_temporal_ss, bi_level, (rthreshold+othreshold)/2, 255, THRESH_BINARY);
+        
+        std::string msg = " Otsu Threshold  @ (" + to_string(othreshold) +  " RANSAC Threshold    " + to_string(rthreshold) + ")";
         vlogger::instance().console()->info("starting " + msg);
         
         

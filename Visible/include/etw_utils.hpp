@@ -316,7 +316,7 @@ namespace etw_utils {
     auto ransac(const RandAccIterator &data, E init, PurePairwiseFunc is_inlier,
                 Reducer reducer) {
         
-        const int m = data.size();
+        const int m = static_cast<int>(data.size());
         
         double maxInliers = 0, K = 1e5;
         int k = 0;
@@ -410,7 +410,7 @@ namespace etw_utils {
         assert(fs::exists(n));// << "Could not open: " << n;
         return std::ifstream(n.string(), mode);
     }
-} // utils
+} // etw_utils
 
 template <unsigned N, unsigned L, typename... Targs> struct tuple_printer {
     static void print(std::ostream &os, std::tuple<Targs...> &print) {

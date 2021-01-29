@@ -150,12 +150,14 @@ void upBiValueMap(roiWindow<P8U> & src, tpair<uint16_t> & range, std::shared_ptr
 
 namespace sliceSimilarity{
     
-    slice_result_t threshold(roiWindow<pixel_t>& src, std::vector<slice_result_t>& i3results)
+    slice_result_t threshold(roiWindow<pixel_t>& src, std::vector<slice_result_t>& i3results, bool output)
 {
 
     histoStats hh;
     hh.from_image<P8U>(src);
-     std::cout << hh;
+    if (output)
+        std::cout << hh;
+    
     std::vector<uint8_t> valid_bins;
     valid_bins.resize(0);
     for (unsigned binh = 0; binh < hh.histogram().size(); binh++)
@@ -198,7 +200,8 @@ namespace sliceSimilarity{
         slice_result_t tmp;
         tmp.val = valid_bins[tt]; tmp.corr = cp.r(); tmp.weight = weight;
         i3results.push_back(tmp);
-        std::cout << "[" << (int) valid_bins[tt] << "]: " << cp.milR() << "   " << weight << std::endl;
+        if (output)
+            std::cout << "[" << (int) valid_bins[tt] << "]: " << cp.milR() << "   " << weight << std::endl;
         if (cp.milR() >= max_corr_val)
         {
             max_weight = weight;
