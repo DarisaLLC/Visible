@@ -1,4 +1,7 @@
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+#pragma GCC diagnostic ignored "-Wint-in-bool-context"
 
 #include "core/pair.hpp"
 #include "logger/logger.hpp"
@@ -10,11 +13,58 @@
 #include <memory>
 #include "algo_runners.hpp"
 
+using namespace svl;
 
+bool scaleSpace::generate(const std::vector<cv::Mat>& images,
+                                                  int start_sigma, int end_sigma, int step){
+    
+    // check start, end and step are positive and end-start is multiple of step
+    m_filtered.resize(0);
+    m_scale_space.resize(0);
+    
+    int step_range = end_sigma - start_sigma;
+    if (step == 0 || step_range == 0 || (step_range%step) != 0) return false;
+    int steps = (end_sigma - start_sigma)/step;
+    if (steps < 4) return false;
+
+    // make a cv::mat clone of input images
+    cv::Size isize(images[0].cols, images[0].rows);
+    for (const auto& rw : images){
+        if(rw.cols != isize.width || rw.rows != isize.height) return false;
+        auto clone = rw.clone();
+        clone.convertTo(clone, CV_64F);
+        m_filtered.push_back(clone);
+    }
+    m_loaded = m_filtered.size() == images.size();
+    int n = static_cast<int>(images.size());
+    int n2 = n * (n - 1);
+    for (auto scale = start_sigma; scale <= end_sigma; scale+=step){
+        cv::Mat sum = cv::Mat(isize.height, isize.width, CV_64F);
+        cv::Mat sumsq = cv::Mat(isize.height, isize.width, CV_64F);
+        sum = 0;
+        sumsq = 0;
+        for (auto& img : m_filtered){
+            auto mm = img.clone();
+            cv::GaussianBlur(mm, mm, cv::Size(0,0), scale);
+            sum += mm;
+            cv::multiply(mm, mm, mm);
+            sumsq += mm;
+        }
+        cv::multiply(sum, sum, sum);
+        sumsq *= n;
+        cv::subtract(sumsq, sum, sumsq);
+        sumsq /= n2;
+        m_scale_space.push_back(sumsq);
+    }
+
+
+    return true;
+    
+}
 
 bool voxel_processor::generate_voxel_space (const std::vector<roiWindow<P8U>>& images,
                                             const std::vector<int>& indicies){
-    if (m_load(images, m_voxel_sample.first, m_voxel_sample.second))
+    if (m_load(images, m_voxel_sample.first, m_voxel_sample.second, indicies))
         return m_internal_generate();
     return false;
 }
@@ -58,8 +108,7 @@ bool  voxel_processor::generate_voxel_surface (const std::vector<float>& ven){
     
     cv::Mat ftmp = cv::Mat(height, width, CV_32F);
     std::vector<float>::const_iterator start = ven.begin();
-    m_hist.resize(256,0);
-    
+//    std::memcpy(ftmp.data, ven.data(),ven.size()*sizeof(float));
     
         // Fillup floating image and hist of 8bit values
     for (auto row =0; row < height; row++){
@@ -67,16 +116,15 @@ bool  voxel_processor::generate_voxel_surface (const std::vector<float>& ven){
         auto end = start + width; // point to one after
         for (; start < end; start++, f_row_ptr++){
             if(std::isnan(*start)) continue; // nan is set to 1, the pre-set value
-            float valf(*start);
-            uint8_t val8 (valf*255);
-            m_hist[val8]++;
-            *f_row_ptr = valf;
+            *f_row_ptr = *start;
         }
         start = end;
     }
+
     
         // Median Smooth, Expand, CheckSize
-    cv::medianBlur(ftmp, ftmp, 5);
+    cv::GaussianBlur(ftmp, ftmp, cv::Size(0,0), 2.0);
+    cv::normalize(ftmp, ftmp,  1.0, 0.0, NORM_INF);
     
         // Straight resize. Add pads afterwards
     cv::Size bot(ftmp.cols * m_voxel_sample.first,ftmp.rows * m_voxel_sample.second);
@@ -85,6 +133,13 @@ bool  voxel_processor::generate_voxel_surface (const std::vector<float>& ven){
     ftmp = getPadded(f_temporal, m_half_offset, 0.0);
     ftmp = ftmp * 255.0f;
     ftmp.convertTo(m_temporal_ss, CV_8U);
+    
+    m_cloud.reserve(width*height);
+    for(auto row = 0; row < height; row++){
+        for (auto col = 0; col < width; col++){
+            m_cloud.emplace_back(col, row, (double) m_temporal_ss.at<uint8_t>(row,col));
+        }
+    }
     
     m_measured_area = Rectf(0,0,bot.width, bot.height);
     bool ok = m_temporal_ss.cols == m_measured_area.getWidth() + size_diff.first;
@@ -111,30 +166,32 @@ bool  voxel_processor::m_load(const std::vector<roiWindow<P8U>> &images,
     msg += "Expected Size: " + to_string(expected_width) + " x " +
     to_string(expected_height);
     vlogger::instance().console()->info("starting " + msg);
-    
+
+    // Walk through the sampled space and fetch the voxels
     int count = 0;
-    int row, col;
-    for (row = m_half_offset.second; row < m_image_size.second;
-         row += m_voxel_sample.second) {
-        for (col = m_half_offset.first; col < m_image_size.first;
-             col += m_voxel_sample.first) {
+    for (int row = 0; row < expected_height; row++){
+        for (int col = 0; col < expected_width; col++){
+            int org_col = m_half_offset.first + col * m_voxel_sample.first;
+            int org_row = m_half_offset.second + row * m_voxel_sample.second;
             std::vector<uint8_t> voxel(m_voxel_length);
             for (auto tt = 0; tt < m_voxel_length; tt++) {
                 int idx = indicies.empty() ? tt : indicies[tt];
-                voxel[tt] = images[idx].getPixel(col, row);
+                if (! images[idx].contains(org_col, org_row)){
+                    std::cout << org_col << "," << org_row << std::endl;
+                }
+                voxel[tt] = images[idx].getPixel(org_col, org_row);
             }
             count++;
             m_voxels.emplace_back(voxel);
         }
-        expected_height -= 1;
     }
-    expected_width -= (count / m_expected_segmented_size.second);
     
-    bool ok = expected_width == expected_height && expected_width == 0;
-    msg = " remainders: " + to_string(expected_width) + " x " +
-    to_string(expected_height);
+    bool ok = count == (expected_width * expected_height);
+
     vlogger::instance().console()->info(ok ? "finished ok "
-                                        : "finished with error " + msg);
+                                        : "finished with error ");
     return ok;
 }
+
+#pragma GCC diagnostic pop
 
