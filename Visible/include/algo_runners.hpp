@@ -13,7 +13,7 @@
 #include "vision/localvariance.h"
 #include <boost/range/irange.hpp>
 #include "core/moreMath.h"
-
+#include "etw_utils.hpp"
 
 using namespace std;
 using namespace stl_utils;
@@ -202,7 +202,7 @@ public:
     void sample(uint32_t x, uint32_t y = 0) {
         m_voxel_sample.first = x;
         m_voxel_sample.second = y == 0 ? x : y;
-        m_half_offset = m_voxel_sample / 2;
+        m_half_offset = (m_voxel_sample - 1) / 2;
     }
     void image_size(int width, int height){
         m_image_size.first = width - m_half_offset.first;
@@ -213,9 +213,8 @@ public:
     
     const Rectf& measured_area () { return m_measured_area; }
     const cv::Mat& temporal_ss () { return m_temporal_ss; }
-    const std::vector<uint32_t>& surface_hist () { return m_hist; }
     const std::vector<float>& entropies () { return m_voxel_entropies; }
-    
+    const std::vector<Eigen::Vector3d>& cloud () { return m_cloud; }
     
 private:
     const smProducerRef similarity_producer () const;
@@ -226,6 +225,7 @@ private:
     bool m_load(const std::vector<roiWindow<P8U>> &images, uint32_t sample_x,
                 uint32_t sample_y = 0, const std::vector<int>& indicies = std::vector<int> ()); 
     
+    std::vector<Eigen::Vector3d> m_cloud;
     uiPair m_voxel_sample;
     uiPair m_half_offset;
     iPair m_expected_segmented_size;
@@ -239,6 +239,23 @@ private:
     std::vector<uint32_t> m_hist;
 };
 
+
+class scaleSpace{
+public:
+    scaleSpace(): m_loaded(false) {}
+    
+    bool generate(const std::vector<roiWindow<P8U>> &images, int start_sigma, int end_sigma, int step);
+    bool generate(const std::vector<cv::Mat> &images, int start_sigma, int end_sigma, int step);
+    const std::vector<cv::Mat>& space() const { return m_scale_space; }
+    
+private:
+    bool m_loaded;
+    std::vector<roiWindow<P8U>> m_images;
+    std::vector<float> m_sigmas;
+    std::vector<cv::Mat> m_filtered;
+    std::vector<cv::Mat> m_scale_space;
+    
+};
 
 #endif
 
