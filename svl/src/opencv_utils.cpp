@@ -110,22 +110,7 @@ namespace svl
         result = resultLocal;
     }
     
-    void findPeaks(const Mat& src, std::vector<cv::Point>& peaks) {
-        peaks.resize(0);
-        //finds local maximas
-        for (int i = 1; i < src.rows-1; i++)
-        {
-            for (int j = 1; j < src.cols - 1; j++)
-            {
-                if (src.at<float>(i, j) > src.at<float>(i, j - 1) && src.at<float>(i, j) > src.at<float>(i, j + 1)){
-                    peaks.emplace_back(i, j);
-                }
-            }
-        }
-   
-    }
-    
-    
+
     
     cv::Mat gaborKernel(int ks, double sig, double th, double lm, double ps)
     {
