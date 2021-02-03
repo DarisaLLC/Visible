@@ -113,6 +113,13 @@ public:
     {
         m_exec_dir = executable_path().parent_path();
         add_content_directory(m_exec_dir);
+        // Create a directory for output if it does not exists
+        m_output_path = m_exec_dir / "output";
+        boost::system::error_code ec;
+        if(!bfs::exists(m_output_path)){
+            bfs::create_directory(m_output_path, ec);
+        }
+    
     }
     
     bool executable_path_exists () const{
@@ -175,6 +182,8 @@ public:
 
     const path_t & executable_path() { return m_exec_path; }
     const path_t & executable_folder() { return m_exec_dir; }
+    const path_t & output_path() { return m_output_path; }
+    
 
 
  //   void TearDown() {}
@@ -208,6 +217,7 @@ private:
     mutable std::vector<path_t> m_content_paths;
     mutable path_t m_exec_path;
     mutable path_t m_exec_dir;
+    mutable path_t m_output_path;
 };
 }
 

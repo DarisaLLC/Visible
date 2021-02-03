@@ -193,7 +193,7 @@ bool setup_loggers (const std::string& log_path,  std::string id_name);
 std::shared_ptr<std::ofstream> make_shared_ofstream(std::ofstream * ifstream_ptr);
 std::shared_ptr<std::ofstream> make_shared_ofstream(std::string filename);
 void output_array (const std::vector<std::vector<float>>& data, const std::string& output_file);
-void finalize_segmentation (cv::Mat& space);
+
 cv::Mat generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels,
                                        std::vector<std::vector<float>>& ss);
 bool setup_text_loggers (const fs::path app_support_dir, std::string id_name);
@@ -206,6 +206,16 @@ typedef std::weak_ptr<Surface8u>	Surface8uWeakRef;
 typedef std::weak_ptr<Surface8u>	SurfaceWeakRef;
 typedef std::weak_ptr<Surface16u>	Surface16uWeakRef;
 typedef std::weak_ptr<Surface32f>	Surface32fWeakRef;
+typedef boost::filesystem::path path_t;
+
+path_t create_if (const path_t path){
+    boost::system::error_code ec;
+    if(bfs::exists(path))
+        bfs::remove_all(path);
+    bfs::create_directory(path, ec);
+    return path;
+}
+
 
 #if 1
 
@@ -257,11 +267,34 @@ TEST(mat_ops, basic){
     output(smin, 1);
     output(img, 1);
     output(min_a, 1);
-    
-    
+
 }
 
+TEST(nms, basic){
+    auto res = dgenv_ptr->asset_path("motion_field.png");
+    EXPECT_TRUE(res.second);
+    EXPECT_TRUE(boost::filesystem::exists(res.first));
+    
+    cv::Mat src = cv::imread(res.first.c_str(), cv::ImreadModes::IMREAD_GRAYSCALE);
+    EXPECT_EQ(src.channels() , 1);
+    EXPECT_EQ(src.cols , 512);
+    EXPECT_EQ(src.rows , 128);
 
+    std::vector<cv::Rect> output;
+    iPair trim (24,24);
+    scaleSpace::detect_peaks(src, output, trim);
+    for (auto rr : output){
+        cv::Point ctr ((rr.tl().x + rr.br().x)/2, (rr.tl().y + rr.br().y)/2);
+        cv::drawMarker(src, ctr, Scalar(0, 255, 0), MARKER_SQUARE, 49, 2);
+    }
+
+    
+#ifndef INTERACTIVE
+    imshow( "nms", src);
+    cv::waitKey();
+#endif
+    
+}
 TEST(scale_space, basic){
     
     auto res = dgenv_ptr->asset_path("zser16.tif");
@@ -293,31 +326,64 @@ TEST(scale_space, basic){
         }
     };
 
-    //ustring filename(res.first.c_str());
-    ustring filename ("/Volumes/medvedev/Users/arman/Pictures/nd122.tif");
-    build_vector(filename, src_images);
+    {
+        auto res = dgenv_ptr->asset_path("nd122.tif");
+        EXPECT_TRUE(res.second);
+        EXPECT_TRUE(boost::filesystem::exists(res.first));
+        ustring filename (res.first.c_str());
+        build_vector(filename, src_images);
+    }
 
 
-  
-//    scaleSpace ss;
-//    ss.generate(src_images, 1, 15, 2);
-//    auto grw = cv::Mat(ss.motion_field().rows,ss.motion_field().cols,CV_8U);
-//    cv::normalize(ss.motion_field(),grw,0,255, CV_MINMAX, CV_8U);
-//    cv::imshow(" Motion Field ", grw);
-//    cv::waitKey();
+    auto output_path = dgenv_ptr->output_path();
+    auto scales_dir = output_path / "scales";
+    scales_dir = create_if(scales_dir);
+    auto dogs_dir = output_path / "dogs";
+    dogs_dir = create_if(dogs_dir);
+    
+    
+    scaleSpace ss;
+    ss.generate(src_images, 2, 15, 2);
     
     std::string msg = " ScaleSpace " ;
     int index = 0;
+    auto sum = cv::Mat(src_images[0].rows, src_images[0].cols, CV_64F);
+    sum = 0;
     for(const auto& rw : ss.space()){
+        sum += rw;
         auto grw = cv::Mat(rw.rows,rw.cols,CV_8U);
         cv::normalize(rw,grw,0,255, CV_MINMAX, CV_8U);
-        auto filepath = "/Volumes/medvedev/Users/arman/tmp/scales/scale_var_" + to_string(index) + ".png";
-        cv::imwrite(filepath, grw);
+        std::string filename = "scale_var_"+ to_string(index) + ".png";
+        auto filepath = scales_dir / filename;
+        cv::imwrite(filepath.c_str(), grw);
         index++;
+#ifdef INTERACTIVE
         imshow( msg, grw);
         cv::waitKey();
+#endif
     }
+
+
+    std::string filename = "motion_field.png";
+    auto filepath = output_path / filename;
+    cv::imwrite(filepath.c_str(), ss.motion_field());
+    imshow( " Motion Field ", ss.motion_field());
+    cv::waitKey();
+
     
+    index = 0;
+    for(const auto& rw : ss.dog()){
+        auto filename = "dog_var_" + to_string(index) + ".png";
+        auto filpath = dogs_dir / filename;
+        cv::imwrite(filepath.c_str(), rw);
+        index++;
+#ifdef INTERACTIVE
+        imshow( "DOG", rw);
+        cv::waitKey();
+#endif
+        
+    }
+
 }
 
 TEST(oiio, basic){
@@ -1041,6 +1107,7 @@ TEST (ut_algo_lif, segment){
     cv::Mat ut8;
     test.convertTo(ut8, CV_8U);
     
+#ifdef INTERACTIVE
     imshow( "divide", ut8);
     cv::waitKey(30);
 
@@ -1049,14 +1116,17 @@ TEST (ut_algo_lif, segment){
     
     imshow( "image", image);
     cv::waitKey(30);
+#endif
+    auto filename = "iratio.png";
+    auto file_path = dgenv_ptr->output_path() / filename;
+    cv::imwrite(file_path.c_str(), ut8);
+    filename = "firatio.png";
+    file_path = dgenv_ptr->output_path() / filename;
+    cv::imwrite(file_path.c_str(), test);
+    filename = "dlog.png";
+    file_path = dgenv_ptr->output_path() / filename;
+    cv::imwrite(file_path.c_str(), dlog);
 
-    std::string file_path = "/Volumes/medvedev/Users/arman/tmp/iratio.png";
-    cv::imwrite(file_path, ut8);
-    file_path = "/Volumes/medvedev/Users/arman/tmp/firatio.png";
-    cv::imwrite(file_path, test);
-    file_path = "/Volumes/medvedev/Users/arman/tmp/dlog.png";
-    cv::imwrite(file_path, dlog);
-    
     
 #if PRINT_OUT
     auto printMat = [](const cv::Mat& m){
@@ -1553,26 +1623,21 @@ TEST (ut_ss_voxel, basic){
         for (auto col = 0; col < cols; col++){
             float r = (row+col)/2.0;
             r = std::max(1.0f,r);
-            
             std::vector<uint8_t> tmp = sinvec8(1.0/r, 64);
-            
             rrs.emplace_back(tmp);
-            //            cvDrawPlot(signal);
         }
         voxels.push_back(rrs);
     }
     
     endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
     std::cout << " Generating Synthetic Data " << endtime  << " Seconds " << std::endl;
-    
-    
     std::vector<std::vector<float>> results;
     
 #ifdef INTERACTIVE
     std::string filename = svl::toString(std::clock()) + ".csv";
     std::string imagename = svl::toString(std::clock()) + ".png";
-    std::string file_path = "/Users/arman/tmp/" + filename;
-    std::string image_path = "/Users/arman/tmp/" + imagename;
+    auto file_path = dgenv_ptr->output_path() / filename;
+    auto image_path = dgenv_ptr->output_path() /  imagename;
 #endif
     
     start = std::clock();
@@ -2120,11 +2185,14 @@ int main(int argc, char ** argv)
     setup_loggers(pp.parent_path().string(), id);
     testing::InitGoogleTest(&argc, argv);
   
+ 
+    
     bool check = argc >= 3 || specifier.compare(std::string(argv[1])) == 0;
     if(!check) std::cout << " Failed to supply asset path " << std::endl;
     else{
         std::shared_ptr<test_utils::genv>  shared_env (new test_utils::genv(argv[0]));
         shared_env->setUpFromArgs(argc, argv);
+        
         dgenv_ptr = shared_env;
         auto ret = RUN_ALL_TESTS();
         return ret;
@@ -2228,63 +2296,6 @@ void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
         dst[ii] = (src[ii] - *bot) / scaleBy;
 }
 
-
-void finalize_segmentation (cv::Mat& space){
-    
-    using blob=svl::labelBlob::blob;
-    static bool s_results_ready = false;
-    static bool s_graphics_ready = false;
-    static int64_t cid = 0;
-    
-    
-    cv::Point replicated_pad (5,5);
-    cv::Mat mono, bi_level;
-    copyMakeBorder(space,mono, replicated_pad.x,replicated_pad.y,
-                   replicated_pad.x,replicated_pad.y, BORDER_REPLICATE, 0);
-    
-    threshold(mono, bi_level, 126, 255, THRESH_BINARY | THRESH_OTSU);
-    //Show source image
-//#ifdef INTERACTIVE
-    imshow("Monochrome Image",mono);
-    imshow("Binary Image", bi_level);
-//#endif
-    
-    labelBlob::ref lbr = labelBlob::create(mono, bi_level, 10, 666);
-    EXPECT_EQ(lbr == nullptr , false);
-    std::function<labelBlob::results_ready_cb> res_ready_lambda = [](int64_t& cbi){ s_results_ready = ! s_results_ready; cid = cbi;};
-    std::function<labelBlob::graphics_ready_cb> graphics_ready_lambda = [](){ s_graphics_ready = ! s_graphics_ready;};
-    boost::signals2::connection results_ready_ = lbr->registerCallback(res_ready_lambda);
-    boost::signals2::connection graphics_ready_ = lbr->registerCallback(graphics_ready_lambda);
-    EXPECT_EQ(false, s_results_ready);
-    EXPECT_EQ(true, cid == 0);
-    EXPECT_EQ(true, lbr->client_id() == 666);
-    lbr->run_async();
-    while (! s_results_ready) std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    
-    EXPECT_EQ(true, s_results_ready);
-    EXPECT_EQ(true, lbr->client_id() == 666);
-    EXPECT_EQ(true, cid == 666);
-    EXPECT_EQ(true, lbr->hasResults());
-    const std::vector<blob> blobs = lbr->results();
-    
-    
-    lbr->drawOutput();
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    EXPECT_EQ(true, s_graphics_ready);
-//#ifdef INTERACTIVE
-    /// Show in a window
-    namedWindow( "LabelBlob ", WINDOW_AUTOSIZE | WINDOW_OPENGL);
-    //    std::vector<cv::KeyPoint> one;
-    //    one.push_back(lbr->keyPoints()[1]);
-    cv::drawKeypoints(mono, lbr->keyPoints(),bi_level, cv::Scalar(0,255,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-    imshow( "LabelBlob", bi_level);
-    cv::waitKey();
-//#endif
-    
-    
-    
-    
-}
 
 
 cv::Mat generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels,

@@ -3,6 +3,7 @@
 #pragma GCC diagnostic ignored "-Wunused-private-field"
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
 
+#include <mutex>
 #include "core/pair.hpp"
 #include "logger/logger.hpp"
 #include "sm_producer.h"
@@ -12,10 +13,32 @@
 #include <future>
 #include <memory>
 #include "algo_runners.hpp"
+#include "nms.hpp"
+#include "core/stl_utils.hpp"
 
 using namespace svl;
+using namespace stl_utils;
 
-bool scaleSpace::generate(const std::vector<roiWindow<P8U>> &images, int start_sigma, int end_sigma, int step){
+namespace anonymous{
+    class inverse_lut : public std::vector<uint8_t>{
+    public:
+        inverse_lut (){
+            resize(256);
+            for (auto ii = 255; ii >= 0; ii--)
+            at(ii) = 255 - ii;
+        }
+        
+        void apply(cv::Mat& image8){
+            std::lock_guard<std::mutex> lock(m_mutex);
+            cv::LUT(image8, *this, image8);
+        }
+    private:
+        mutable std::mutex m_mutex;
+    };
+}
+
+
+bool scaleSpace::generate(const std::vector<roiWindow<P8U>> &images, float start_sigma, float end_sigma, float step){
     std::vector<cv::Mat> mats;
     for (auto& rw : images){
         cvMatRefroiP8U(rw,cvmat,CV_8U);
@@ -24,15 +47,76 @@ bool scaleSpace::generate(const std::vector<roiWindow<P8U>> &images, int start_s
     return generate(mats, start_sigma, end_sigma, step);
 }
 
+const cv::Mat& scaleSpace::motion_field() const {
+    if (fieldDone()) return m_motion_field;
+    
+    m_motion_field = cv::Mat(space()[0].rows, space()[0].cols, CV_8U);
+    m_motion_field = 255;
+    // Calculate Difference of Gaussians
+    m_dogs.resize(0);
+    for (auto ss = 1; ss < m_scale_space.size() - 1; ss++){
+        const cv::Mat& current = m_scale_space[ss];
+        const cv::Mat& prev = m_scale_space[ss-1];
+        cv::Mat dog = cv::Mat(space()[0].rows, space()[0].cols, CV_64F);
+        cv::Mat dog_8 = cv::Mat(space()[0].rows, space()[0].cols, CV_8U);
+        dog = current - prev;
+        cv::normalize(dog,dog_8,0,255, NORM_MINMAX, CV_8U);
+        cv::min(dog_8, m_motion_field, m_motion_field);
+        m_dogs.push_back(dog_8);
+    }
+    
+    // Invert since we are looking for valleys with peak detector
+    static anonymous::inverse_lut ilut;
+    ilut.apply(m_motion_field);
+
+    
+    m_field_done = true;
+    return m_motion_field;
+}
+    
+    
+
+
+void scaleSpace::detect_peaks(const cv::Mat& space, std::vector<cv::Rect>& output, const iPair& trim){
+        // Make sure it is empty
+    std::vector<cv::Rect> peaks;
+    std::vector<float> scores;
+    peaks.resize(0);
+    iPair rsize = trim * 2 + 1;
+    int height = space.rows - 3 - trim.second;
+    int width = space.cols - 3 - trim.first;
+    for (int row = 3 + trim.second; row < height; row++){
+        for (int col = 3 + trim.first; col < width; col++){
+            uint8_t pel = space.at<uint8_t>(row,col);
+            if (pel >= space.at<uint8_t>(row, col-1) &&
+                pel >= space.at<uint8_t>(row, col+1) &&
+                pel >= space.at<uint8_t>(row-1,col-1) &&
+                pel >= space.at<uint8_t>(row-1, col+1) &&
+                pel >= space.at<uint8_t>(row+1,col-1) &&
+                pel >= space.at<uint8_t>(row+1, col+1) &&
+                pel >= space.at<uint8_t>(row-1, col) &&
+                pel >= space.at<uint8_t>(row+1, col)){
+                    peaks.emplace_back(col-trim.first,row-trim.second,rsize.first,rsize.second );
+                    scores.emplace_back(pel);
+                }
+            }
+        }
+    auto sorted_indicies = stl_utils::sort_indexes(scores);
+    for (auto ii = 0; ii < 8; ii++)
+        output.push_back(peaks[sorted_indicies[ii]]);
+    
+    }
+
+
 bool scaleSpace::generate(const std::vector<cv::Mat>& images,
-                                                  int start_sigma, int end_sigma, int step){
+                          float start_sigma, float end_sigma, float step){
     
     // check start, end and step are positive and end-start is multiple of step
     m_filtered.resize(0);
     m_scale_space.resize(0);
     
-    int step_range = end_sigma - start_sigma;
-    if (step == 0 || step_range == 0 || (step_range%step) != 0) return false;
+    auto step_range = end_sigma - start_sigma;
+    if (step <= 0 || step_range <= 0) return false;
     int steps = (end_sigma - start_sigma)/step;
     if (steps < 4) return false;
 
@@ -70,9 +154,10 @@ bool scaleSpace::generate(const std::vector<cv::Mat>& images,
         // Produce variance. Since we will be summing the square at the next step
         m_scale_space.push_back(sumsq);
     }
-    auto scale_steps = (end_sigma - start_sigma) / step;
+    auto scale_steps = (end_sigma - start_sigma + 1.0 ) / step;
     assert(m_scale_space.size() == scale_steps);
-    return true;
+    m_space_done = true;
+    return m_space_done;
     
 }
 

@@ -242,25 +242,35 @@ private:
 
 class scaleSpace{
 public:
-    scaleSpace(): m_loaded(false) {}
+    scaleSpace(): m_loaded(false), m_space_done(false), m_field_done(false) {}
     
-    bool generate(const std::vector<roiWindow<P8U>> &images, int start_sigma, int end_sigma, int step);
-    bool generate(const std::vector<cv::Mat> &images, int start_sigma, int end_sigma, int step);
+    bool generate(const std::vector<roiWindow<P8U>> &images, float start_sigma, float end_sigma, float step);
+    bool generate(const std::vector<cv::Mat> &images,float start_sigma, float end_sigma, float step);
     const std::vector<cv::Mat>& space() const { return m_scale_space; }
-    const cv::Mat& motion_field() const { return m_motion_field; }
+    const std::vector<cv::Mat>& dog() const { return m_dogs; }
+    const cv::Mat& motion_field() const;
+    const cv::Rect& motion_peaks() const;
     
     int start_sigma() const { return m_start_sigma; }
     int end_sigma() const { return m_end_sigma; }
     int steps() const { return m_step; }
     bool isLoaded () const { return m_loaded; }
+    bool spaceDone () const { return m_space_done; }
+    bool fieldDone () const { return m_field_done; }
+    static void detect_peaks(const cv::Mat&, std::vector<cv::Rect>& peaks, const iPair& = iPair(7,7));
     
 private:
+    
     bool m_loaded;
+    bool m_space_done;
+    mutable bool m_field_done;
     std::vector<float> m_sigmas;
-    cv::Mat m_motion_field;
+    mutable cv::Mat m_motion_field;
     std::vector<cv::Mat> m_filtered;
-    std::vector<cv::Mat> m_scale_space;
-    int m_start_sigma, m_end_sigma, m_step;
+    mutable std::vector<cv::Mat> m_dogs;
+    mutable std::vector<cv::Mat> m_scale_space;
+    mutable std::vector<cv::Rect> m_motion_peaks;
+    float m_start_sigma, m_end_sigma, m_step;
     
 };
 

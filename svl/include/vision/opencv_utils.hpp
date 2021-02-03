@@ -21,8 +21,6 @@ namespace svl
     
     cv::Mat getPadded (const cv::Mat& src, uiPair pad, double pad_value);
     
-    void findPeaks(const cv::Mat& input, std::vector<cv::Point>& output);
-    
     std::string matInfo(const cv::Mat &m);
     
     cv::Mat matRotateSize(cv::Size sizeIn, cv::Point2f center, float angle, float &minx, float &maxx, float &miny, float &maxy, float scale);
