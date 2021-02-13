@@ -49,7 +49,7 @@ namespace stl_utils
 {
     
     template <typename T>
-    vector<size_t> sort_indexes(const vector<T> &v) {
+    vector<size_t> sort_indexes(const vector<T> &v, bool descending) {
         
             // initialize original index locations
         vector<size_t> idx(v.size());
@@ -59,8 +59,12 @@ namespace stl_utils
             // using std::stable_sort instead of std::sort
             // to avoid unnecessary index re-orderings
             // when v contains elements of equal values
-        stable_sort(idx.begin(), idx.end(),
-                    [&v](size_t i1, size_t i2) {return v[i1] > v[i2];});
+        if (! descending)
+            stable_sort(idx.begin(), idx.end(),
+                        [&v](size_t i1, size_t i2) {return v[i1] > v[i2];});
+        else
+            stable_sort(idx.begin(), idx.end(),
+                        [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
         
         return idx;
     }

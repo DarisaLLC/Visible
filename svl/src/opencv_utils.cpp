@@ -809,46 +809,13 @@ namespace svl
     ////////// Gaussian Template  /////////////////
     /////////////////////////////////////////////////////////
     
+    // https://codereview.stackexchange.com/a/169675
     
-    
-    cv::Mat gaussianTemplate(const std::pair<uint32_t,uint32_t>& dims, const vec2& sigma, const vec2& ctr)
+    cv::Mat getGaussianKernel(int rows, int cols, double sigmax, double sigmay)
     {
-        int w = dims.first, h = dims.second;
-        cv::Mat ret ( h, w, CV_32F);
-        cv::Mat ret8 (h, w, CV_8U);
-        std::pair<float,float> maxVar (std::numeric_limits<float>::max (), std::numeric_limits<float>::min ());
-        vec2 center (ctr.x * w, ctr.y * h);
-        
-        float fac = 0.5f / (M_1_PI * sigma.x * sigma.y);
-        float vx = -0.5f / (sigma.x * sigma.x);
-        float vy = -0.5f / (sigma.y * sigma.y);
-        for (int jj = 0; jj < h; jj ++)
-        {
-            float vydy2 = float(jj - center.y)/h; vydy2 *= vydy2 * vy;
-            float* pelPtr = (float*) ret.ptr(jj);
-            for (int ii = 0; ii < w; ii ++, pelPtr++)
-            {
-                float dx2 = float(ii - center.x)/w; dx2 *= dx2;
-                dx2 = (fac * expf(vx * dx2 + vydy2));
-                *pelPtr = dx2;
-                maxVar.first = (dx2 < maxVar.first) ? dx2 : maxVar.first;
-                maxVar.second = (dx2 > maxVar.second) ? dx2 : maxVar.second;
-            }
-        }
-        
-        float range = maxVar.second - maxVar.first;
-        for (int jj = 0; jj < h; jj ++)
-        {
-            uint8_t* pel8Ptr = ret8.ptr(jj);
-            float* pelPtr = (float*) ret.ptr(jj);
-            for (int ii = 0; ii < w; ii ++, pelPtr++, pel8Ptr++)
-            {
-                float dx2 = *pelPtr;
-                dx2 = (dx2 - maxVar.first) / range;
-                *pel8Ptr = (uchar) (dx2*255);
-            }
-        }
-        return ret8;
+        auto gauss_x = cv::getGaussianKernel(cols, sigmax, CV_32F);
+        auto gauss_y = cv::getGaussianKernel(rows, sigmay, CV_32F);
+        return gauss_x * gauss_y.t();
     }
     
     

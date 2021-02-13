@@ -88,7 +88,7 @@
 #include "core/moreMath.h"
 #include "eigen_utils.hpp"
 #include "cluster_geometry.hpp"
-
+#include "core/fit.hpp"
 #include <OpenImageIO/imagebufalgo.h>
 
 using namespace OIIO;
@@ -217,6 +217,18 @@ path_t create_if (const path_t path){
 }
 
 
+#define SHOW(a,b,c) \
+{\
+std::string _msg (a);\
+if (c == 0){_msg += " Space to Cont ";std::cout << _msg << std::endl;}\
+cv::namedWindow(_msg.c_str(), cv::WINDOW_NORMAL);\
+cv::imshow(_msg.c_str(),(b));\
+cv::waitKey((c));\
+}
+
+
+
+
 #if 1
 
 
@@ -256,19 +268,128 @@ get_intsample_maxval(const ImageSpec& spec)
 }
 
 
+
+TEST (ut_dm, block){
+    
+    iPair dims (9,9);
+    float sigma = 4.5f;
+    cv::Mat fgm = getGaussianKernel(dims.first, dims.second, sigma, sigma);
+    cv::normalize(fgm, fgm, 0, 1, cv::NORM_MINMAX);
+    fgm *= 255;
+    cv::Mat gm(fgm.rows, fgm.cols, CV_8U);
+    fgm.convertTo(gm, CV_8U);
+    
+    iPair fsize(32,64);
+    
+    cv::Mat fimage (fsize.second, fsize.first,  CV_8UC(1));
+    fimage = 0;
+    iPair fixed (11,21);
+    cv::Rect2i froi(fixed.first,fixed.second,dims.first,dims.second);
+    cv::Mat fwindow = fimage(froi);
+    cv::add (gm, fwindow, fwindow);
+    
+    cv::Mat mimage (fsize.second, fsize.first,  CV_8UC(1));
+    mimage = 0;
+    iPair gold (12,22);
+    cv::Rect2i mroi(gold.first,gold.second, dims.first,dims.second);
+    cv::Mat mwindow = mimage(mroi);
+    cv::add (gm, mwindow, mwindow);
+    
+    iPair scan (6,6);
+    denseMotion ff(fsize, dims / 2, (dims + scan) / 2);
+    auto moving = fixed - scan / 2;
+    denseMotion::match res;
+    ff.update(fimage);
+    ff.update(mimage);
+    auto check = ff.block_match(fixed, moving, res);
+    EXPECT_TRUE(check);
+    std::cout << std::boolalpha << check << std::endl;
+    
+    
+//    SHOW("gtmpl", gm, 0);
+//    SHOW("fixed", fimage, 0);
+//    SHOW("moving", mimage, 0);
+    
+    
+}
+
+
 TEST(mat_ops, basic){
     
-    Mat img = (Mat_<float>(3,4) << 0, -1, 0, -1, 5, -1, 0, -1, 0, 1, 2, 3);
-    cv::Mat smin(3,4,CV_32F);
-    cv::Mat qmin(3,4,CV_32F);
-    smin = 255;
-    qmin = 0;
-    auto min_a = min(img,smin);
-    output(smin, 1);
-    output(img, 1);
-    output(min_a, 1);
+    Mat a(128,512, CV_8U);
+    randu(a, Scalar(0), Scalar(255));
+    Mat b(128,512, CV_8U);
+    randu(b, Scalar(0), Scalar(255));
+    Mat c(128,512, CV_8U);
+    randu(c, Scalar(0), Scalar(255));
+    
+    cv::Mat gold = Mat::zeros(128,512, CV_8U);
+    for (auto row = 0; row < gold.rows; row++){
+        for (auto col = 0; col < gold.cols; col++)
+            {
+                gold.at<uint8_t>(row,col) = median_of_3(a.at<uint8_t>(row,col), b.at<uint8_t>(row,col), c.at<uint8_t>(row,col));
+            }
+    }
+    
+    
+    auto m3 = [](const cv::Mat& _a, const cv::Mat& _b, const cv::Mat& _c){
+    auto A = _a > _b;
+    auto B = _a < _c;
+    auto C = _b < _c;
+    auto D = ~B; //a > c;
+    
 
+    cv::Mat ac = Mat::zeros(_a.rows,_a.cols, CV_8U);
+    _a.copyTo(ac, A&B);
+    _c.copyTo(ac, A & ~B & C);
+    _b.copyTo(ac,  A & ~B & ~C);
+    _a.copyTo(ac, ~A&D);
+    _b.copyTo(ac, ~A & ~D & C);
+    _c.copyTo(ac,  ~A & ~D & ~C);
+    
+        return ac;
+    };
+    
+    auto ac = m3(a, b, c);
+    
+    {
+        double endtime;
+        std::clock_t start;
+        
+        start = std::clock();
+        for (auto i = 0; i < 100000; i++)
+            auto ac = m3(a, b, c);
+
+        endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+        std::cout << " Array Logic Implementation " << endtime  << " Seconds " << std::endl;
+    }
+    
+    {
+    double endtime;
+    std::clock_t start;
+    
+    start = std::clock();
+    for (auto i = 0; i < 100000; i++)
+        {
+            cv::Mat gold = Mat::zeros(a.rows, a.cols, CV_8U);
+            for (auto row = 0; row < gold.rows; row++){
+                for (auto col = 0; col < gold.cols; col++)
+                {
+                gold.at<uint8_t>(row,col) = median_of_3(a.at<uint8_t>(row,col), b.at<uint8_t>(row,col), c.at<uint8_t>(row,col));
+                }
+            }
+        }
+    
+    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+    std::cout << " Per Pixel at<> Implementation " << endtime  << " Seconds " << std::endl;
+    }
+    
+    
+    
 }
+
+
+
 
 TEST(nms, basic){
     auto res = dgenv_ptr->asset_path("motion_field.png");
@@ -277,29 +398,31 @@ TEST(nms, basic){
     
     cv::Mat src = cv::imread(res.first.c_str(), cv::ImreadModes::IMREAD_GRAYSCALE);
     EXPECT_EQ(src.channels() , 1);
-    EXPECT_EQ(src.cols , 512);
-    EXPECT_EQ(src.rows , 128);
-
+    int lt = leftTailPost (src, 0.05);
+    std::cout << " Left Tail at " << lt << std::endl;
     std::vector<cv::Rect> output;
-    iPair trim (24,24);
-    scaleSpace::detect_peaks(src, output, trim);
+    iPair trim (6,6);
+    scaleSpace::detect_extremas(src, output, lt, trim);
+ //   ASSERT_EQ(output.size(), size_t(8));
+    
+    cv::Mat roi(src, output[0]);
+    SHOW(" roi ", roi, 10);
+    
     for (auto rr : output){
         cv::Point ctr ((rr.tl().x + rr.br().x)/2, (rr.tl().y + rr.br().y)/2);
-        cv::drawMarker(src, ctr, Scalar(0, 255, 0), MARKER_SQUARE, 49, 2);
+        cv::drawMarker(src, ctr, Scalar(0, 255, 0), MARKER_CROSS, 8, 2);
     }
-
-    
-#ifndef INTERACTIVE
-    imshow( "nms", src);
-    cv::waitKey();
-#endif
-    
+    SHOW(" Peaks ", src, 0);
 }
+
+
+
 TEST(scale_space, basic){
     
-    auto res = dgenv_ptr->asset_path("zser16.tif");
+    auto res = dgenv_ptr->asset_path("C2-nd004_all.tif");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
+    ustring filename (res.first.c_str());
     std::vector<cv::Mat> src_images;
     
     auto build_vector = [&](const ustring& filename, std::vector<cv::Mat>& images){
@@ -326,14 +449,7 @@ TEST(scale_space, basic){
         }
     };
 
-    {
-        auto res = dgenv_ptr->asset_path("nd122.tif");
-        EXPECT_TRUE(res.second);
-        EXPECT_TRUE(boost::filesystem::exists(res.first));
-        ustring filename (res.first.c_str());
-        build_vector(filename, src_images);
-    }
-
+    build_vector(filename, src_images);
 
     auto output_path = dgenv_ptr->output_path();
     auto scales_dir = output_path / "scales";
@@ -357,33 +473,108 @@ TEST(scale_space, basic){
         auto filepath = scales_dir / filename;
         cv::imwrite(filepath.c_str(), grw);
         index++;
-#ifdef INTERACTIVE
-        imshow( msg, grw);
-        cv::waitKey();
-#endif
+        SHOW(filename.c_str(),grw, 100);
     }
 
-
-    std::string filename = "motion_field.png";
-    auto filepath = output_path / filename;
-    cv::imwrite(filepath.c_str(), ss.motion_field());
-    imshow( " Motion Field ", ss.motion_field());
-    cv::waitKey();
-
-    
     index = 0;
     for(const auto& rw : ss.dog()){
         auto filename = "dog_var_" + to_string(index) + ".png";
-        auto filpath = dogs_dir / filename;
+        auto filepath = dogs_dir / filename;
         cv::imwrite(filepath.c_str(), rw);
         index++;
-#ifdef INTERACTIVE
-        imshow( "DOG", rw);
-        cv::waitKey();
-#endif
+        SHOW(filename.c_str(), rw, 100);
         
     }
+ //   bool ok = ss.process_motion_peaks();
+ //   ASSERT_TRUE(ok);
+    
+    auto mm = ss.motion_field();
+    
+    std::string file_name = "motion_field.png";
+    auto filepath = output_path / file_name;
+    cv::imwrite(filepath.c_str(), mm);
+    
+    std::vector<cv::Rect> rects;
+    iPair trim (36,36/2);
+    scaleSpace::detect_extremas(mm, rects, 10, trim);
 
+    std::sort(rects.begin(), rects.end(), [](cv::Rect& a, cv::Rect&b){ return a.tl().x > b.tl().x; });
+    std::vector<cv::Rect> rects2;
+    rects2.push_back(rects[0]);
+    rects2.push_back(rects[rects.size()-1]);
+    
+    auto model_frame = src_images[47];
+    std::vector<cv::Mat> models;
+    Point2i ctr (rects2[0].tl().x+rects2[1].tl().x+rects2[0].width, rects2[0].tl().y+rects2[1].tl().y+rects2[0].height);
+    ctr.x /= 2;
+    ctr.y /= 2;
+    rects2[0].width = rects2[0].br().x - ctr.x;
+    rects2[0].x = ctr.x;
+    rects2[1].width = ctr.x - rects2[1].x;
+    
+    for (auto rr : rects2){
+        models.emplace_back(model_frame, rr);
+    }
+
+    std::vector<float> lengths;
+    Mat img_display;
+    
+    for (const cv::Mat& img : src_images){
+        
+        std::vector<cv::Point2f> points;
+        std::vector<cv::Rect2i> l_rects;
+        std::vector<cv::Point2f> coms;
+        
+        
+        for (const cv::Mat& templ : models){
+            img.copyTo( img_display );
+            Mat result;
+            int result_cols =  img.cols - templ.cols + 1;
+            int result_rows = img.rows - templ.rows + 1;
+            result.create( result_rows, result_cols, CV_32FC1 );
+            matchTemplate( img, templ, result, TM_CCORR_NORMED);
+            result = result.mul(result);
+//            normalize( result, result, 0, 1, NORM_MINMAX, -1, Mat() );
+            double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
+            minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
+            cv::Point matchLoc = maxLoc;
+            float par_x, par_y;
+            par_x = par_y = 0;
+            parabolicFit<float,float>(result.at<float>(matchLoc.y,matchLoc.x-1), result.at<float>(matchLoc.y,matchLoc.x),result.at<float>(matchLoc.y,matchLoc.x+1),&par_x);
+            parabolicFit<float,float>(result.at<float>(matchLoc.y-1,matchLoc.x), result.at<float>(matchLoc.y,matchLoc.x),result.at<float>(matchLoc.y+1,matchLoc.x),&par_y);
+            points.emplace_back(matchLoc.x+par_x,matchLoc.y+par_y);
+            cv::Rect rr(maxLoc, cv::Size(templ.cols, templ.rows));
+            l_rects.push_back(rr);
+        }
+        std::sort(points.begin(), points.end(), [](Point2f& a, Point2f&b){ return a.x > b.x; });
+        auto length = std::sqrt(squareOf(points[points.size()-1].x - points[0].x) + squareOf(points[points.size()-1].y - points[0].y));
+        lengths.push_back(length);
+        Point2i istart((int)points[0].x, (int) points[0].y);
+        Point2i iend((int)points[points.size()-1].x, (int) points[points.size()-1].y);
+        cv::line(img_display, istart, iend, Scalar::all(156), 2);
+        for (auto rr : l_rects)
+            cv::rectangle(img_display, rr, Scalar::all(224), 2);
+        cv::circle(img_display, ctr, 10, Scalar::all(224), 2);
+        SHOW(" Line Connecting the Ends", img_display, 100);
+    }
+    
+    vector<float>::iterator min_length_iter = std::min_element(lengths.begin(), lengths.end());
+    vector<float>::iterator max_length_iter = std::max_element(lengths.begin(), lengths.end());
+    float clength = *min_length_iter;
+    float rlength = *max_length_iter;
+    
+    std::cout << int(clength*100) << "," << (int)(rlength*100)   << std::endl;
+    
+    {
+    auto name = " Length ";
+    cvplot::setWindowTitle(name, " Over Time");
+    cvplot::moveWindow(name, 300, 100);
+    cvplot::resizeWindow(name, 1024, 512);
+    
+    cvplot::figure(name).series(" L(t) ").addValue(lengths);
+    cvplot::figure(name).show();
+    cv::waitKey();
+    }
 }
 
 TEST(oiio, basic){
@@ -411,8 +602,7 @@ TEST(oiio, basic){
             
             buf.get_pixels(roi, TypeUInt16, cvb.data);
             cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
-            cv::imshow("oiio", cvb8);
-            cv::waitKey(100);
+            SHOW("oiio", cvb8, 100);
         }
     };
     
@@ -717,22 +907,18 @@ TEST(ut_labelBlob, mult_level)
         std::cout << "["<< tt << "]: " << blobs.size() << std::endl;
 #endif
         
-#ifdef INTERACTIVE
         try{
             lbr->drawOutput();
             while(! s_graphics_ready){ std::this_thread::yield(); }
             EXPECT_EQ(true, s_graphics_ready);
             /// Show in a window
             std::string msg = " LabelBlob " + toString(tt) + " ";
-            imshow( msg, lbr->graphicOutput());
-            cv::waitKey();
+            SHOW(msg, lbr->graphicOutput(), 100);
         }
         catch(const std::exception & ex)
         {
             std::cout <<  ex.what() << std::endl;
         }
-
-#endif
     }
 }
 
@@ -1107,16 +1293,10 @@ TEST (ut_algo_lif, segment){
     cv::Mat ut8;
     test.convertTo(ut8, CV_8U);
     
-#ifdef INTERACTIVE
-    imshow( "divide", ut8);
-    cv::waitKey(30);
+    SHOW("divide", ut8, 30);
+    SHOW( "log", dlog, 30);
+    SHOW( "image", image, 30);
 
-    imshow( "log", dlog);
-    cv::waitKey(30);
-    
-    imshow( "image", image);
-    cv::waitKey(30);
-#endif
     auto filename = "iratio.png";
     auto file_path = dgenv_ptr->output_path() / filename;
     cv::imwrite(file_path.c_str(), ut8);
@@ -1360,45 +1540,6 @@ TEST (ut_dm, basic){
     
 }
 
-TEST (ut_dm, block){
-    using vec2=glm::vec2;
-    
-    iPair dims (9,9);
-    iPair fsize(32,64);
-    
-    float sigma = 1.5f;
-    cv::Mat gm = gaussianTemplate(dims,vec2(sigma,sigma));
-    
-    
-    cv::Mat fimage (fsize.second, fsize.first,  CV_8UC(1));
-    fimage = 0;
-    iPair fixed (11,21);
-    cv::Rect2i froi(fixed.first,fixed.second,dims.first,dims.second);
-    cv::Mat fwindow = fimage(froi);
-    cv::add (gm, fwindow, fwindow);
-    
-    cv::Mat mimage (fsize.second, fsize.first,  CV_8UC(1));
-    mimage = 0;
-    iPair gold (12,22);
-    cv::Rect2i mroi(gold.first,gold.second, dims.first,dims.second);
-    cv::Mat mwindow = mimage(mroi);
-    cv::add (gm, mwindow, mwindow);
-    
-    iPair scan (6,6);
-    denseMotion ff(fsize, dims / 2, (dims + scan) / 2);
-    auto moving = fixed - scan / 2;
-    denseMotion::match res;
-    ff.update(fimage);
-    ff.update(mimage);
-    auto check = ff.block_match(fixed, moving, res);
-    std::cout << std::boolalpha << check << std::endl;
-    
-    
-#ifdef INTERACTIVE
-    cv::imshow("block", mimage);
-    cv::waitKey();
-#endif
-}
 
 TEST (ut_fit_ellipse, local_maxima){
     
@@ -1464,11 +1605,9 @@ cv::Mat show_cv_angle (const cv::Mat& src, const std::string& name){
     cv::Mat mag, ang;
     svl::sobel_opencv(src, mag, ang, 7);
     
-#ifdef INTERACTIVE
-    namedWindow(name.c_str(), WINDOW_AUTOSIZE | WINDOW_OPENGL);
-    cv::imshow(name.c_str(), ang);
+    SHOW(name.c_str(), ang, 0);
     cv::waitKey();
-#endif
+
     return ang;
     
 }
@@ -1501,11 +1640,8 @@ void show_gradient (const cv::Mat& src, const std::string& name){
         svl::drawCross(disp3c, pt,cv::Scalar(CVCOLOR_RED), 3, 1);
     }
     
-#ifdef INTERACTIVE
-    namedWindow(name.c_str(), WINDOW_AUTOSIZE | WINDOW_OPENGL);
-    cv::imshow(name.c_str(), disp3c);
+    SHOW(name.c_str(), disp3c, 0);
     cv::waitKey();
-#endif
     
 }
 
@@ -1959,7 +2095,7 @@ TEST (UT_make_function, make_function)
 
 TEST(ut_similarity, short_term)
 {
-    using vec2=glm::vec2;
+
     
     self_similarity_producer<P8U> sm(3,0);
     
@@ -1977,7 +2113,9 @@ TEST(ut_similarity, short_term)
     
     for (uint32_t i = 0; i < fill_images.size(); i++) {
         float sigma = 0.5 + i * 0.5;
-        cv::Mat gm = gaussianTemplate(dims,vec2(sigma,sigma));
+        cv::Mat fgm = getGaussianKernel(dims.first, dims.second, sigma, sigma);
+        cv::Mat gm(fgm.rows, fgm.cols, CV_8U);
+        fgm.convertTo(gm, CV_8U);
         cpCvMatToRoiWindow8U(gm,fill_images[i]);
     }
     roiWindow<P8U> tmp (dims.first, dims.second);
@@ -2184,8 +2322,7 @@ int main(int argc, char ** argv)
     fs::path pp(argv[0]);
     setup_loggers(pp.parent_path().string(), id);
     testing::InitGoogleTest(&argc, argv);
-  
- 
+
     
     bool check = argc >= 3 || specifier.compare(std::string(argv[1])) == 0;
     if(!check) std::cout << " Failed to supply asset path " << std::endl;
