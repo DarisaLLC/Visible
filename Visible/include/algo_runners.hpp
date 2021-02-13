@@ -239,28 +239,45 @@ private:
     std::vector<uint32_t> m_hist;
 };
 
+ 
+ /*   Scale Space Processing  for cardiomyocyte detection and processing
+      
+ 
+ */
+
 
 class scaleSpace{
 public:
-    scaleSpace(): m_loaded(false), m_space_done(false), m_field_done(false) {}
+    scaleSpace(): m_loaded(false), m_space_done(false), m_field_done(false), m_trim(iPair(24,24)) {}
     
     bool generate(const std::vector<roiWindow<P8U>> &images, float start_sigma, float end_sigma, float step);
     bool generate(const std::vector<cv::Mat> &images,float start_sigma, float end_sigma, float step);
+    bool process_motion_peaks (int model_frame_index = 0);
+    
+    const std::vector<float> estimated_lengths (int model_frame_index = 0, const iPair& trim = iPair(24,24)) const;
+    
+    const std::pair<std::vector<fVector_2d>,std::vector<fVector_2d>> estimated_positions () const;
     const std::vector<cv::Mat>& space() const { return m_scale_space; }
-    const std::vector<cv::Mat>& dog() const { return m_dogs; }
+    const std::vector<cv::Mat>& dog() const;
+    const std::vector<cv::Mat>& models() const;
     const cv::Mat& motion_field() const;
     const cv::Rect& motion_peaks() const;
+    bool length_extremes (fPair& ) const;
+    
     
     int start_sigma() const { return m_start_sigma; }
     int end_sigma() const { return m_end_sigma; }
     int steps() const { return m_step; }
+    iPair& trim () const { return m_trim; }
+    void trim(const iPair& tr) const { m_trim = tr; }
+    
     bool isLoaded () const { return m_loaded; }
     bool spaceDone () const { return m_space_done; }
     bool fieldDone () const { return m_field_done; }
-    static void detect_peaks(const cv::Mat&, std::vector<cv::Rect>& peaks, const iPair& = iPair(7,7));
+    static void detect_extremas(const cv::Mat&, std::vector<cv::Rect>& peaks, const int threshold,
+                                const iPair& = iPair(7,7), bool detect_valleys = true);
     
 private:
-    
     bool m_loaded;
     bool m_space_done;
     mutable bool m_field_done;
@@ -268,8 +285,15 @@ private:
     mutable cv::Mat m_motion_field;
     std::vector<cv::Mat> m_filtered;
     mutable std::vector<cv::Mat> m_dogs;
+    mutable std::vector<cv::Mat> m_models;
     mutable std::vector<cv::Mat> m_scale_space;
     mutable std::vector<cv::Rect> m_motion_peaks;
+    mutable std::pair<std::vector<fVector_2d>,std::vector<fVector_2d>> m_ends;
+    mutable std::vector<float> m_lengths;
+    mutable std::vector<cv::Rect> m_all_rects;
+    mutable std::vector<cv::Rect> m_rects;
+    mutable iPair m_trim;
+    mutable fPair m_length_extremes;
     float m_start_sigma, m_end_sigma, m_step;
     
 };

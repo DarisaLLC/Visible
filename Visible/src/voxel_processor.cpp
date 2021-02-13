@@ -15,27 +15,11 @@
 #include "algo_runners.hpp"
 #include "nms.hpp"
 #include "core/stl_utils.hpp"
+#include "core/fit.hpp"
 
 using namespace svl;
 using namespace stl_utils;
 
-namespace anonymous{
-    class inverse_lut : public std::vector<uint8_t>{
-    public:
-        inverse_lut (){
-            resize(256);
-            for (auto ii = 255; ii >= 0; ii--)
-            at(ii) = 255 - ii;
-        }
-        
-        void apply(cv::Mat& image8){
-            std::lock_guard<std::mutex> lock(m_mutex);
-            cv::LUT(image8, *this, image8);
-        }
-    private:
-        mutable std::mutex m_mutex;
-    };
-}
 
 
 bool scaleSpace::generate(const std::vector<roiWindow<P8U>> &images, float start_sigma, float end_sigma, float step){
@@ -65,30 +49,34 @@ const cv::Mat& scaleSpace::motion_field() const {
         m_dogs.push_back(dog_8);
     }
     
-    // Invert since we are looking for valleys with peak detector
-    static anonymous::inverse_lut ilut;
-    ilut.apply(m_motion_field);
-
-    
     m_field_done = true;
     return m_motion_field;
 }
     
-    
+const std::vector<cv::Mat>& scaleSpace::dog() const {
+    motion_field();
+    return m_dogs;
+}
 
 
-void scaleSpace::detect_peaks(const cv::Mat& space, std::vector<cv::Rect>& output, const iPair& trim){
+void scaleSpace::detect_extremas(const cv::Mat& space, std::vector<cv::Rect>& output, const int threshold, const iPair& trim, bool detect_valleys){
         // Make sure it is empty
     std::vector<cv::Rect> peaks;
+    
     std::vector<float> scores;
     peaks.resize(0);
-    iPair rsize = trim * 2 + 1;
+    iPair rsize(5);
     int height = space.rows - 3 - trim.second;
     int width = space.cols - 3 - trim.first;
+    int peak_threshold = 255 - threshold;
+    int valley_threshold = threshold;
+    
+    if (! detect_valleys){
     for (int row = 3 + trim.second; row < height; row++){
         for (int col = 3 + trim.first; col < width; col++){
             uint8_t pel = space.at<uint8_t>(row,col);
-            if (pel >= space.at<uint8_t>(row, col-1) &&
+            if (pel >= peak_threshold &&
+                pel >= space.at<uint8_t>(row, col-1) &&
                 pel >= space.at<uint8_t>(row, col+1) &&
                 pel >= space.at<uint8_t>(row-1,col-1) &&
                 pel >= space.at<uint8_t>(row-1, col+1) &&
@@ -97,17 +85,109 @@ void scaleSpace::detect_peaks(const cv::Mat& space, std::vector<cv::Rect>& outpu
                 pel >= space.at<uint8_t>(row-1, col) &&
                 pel >= space.at<uint8_t>(row+1, col)){
                     peaks.emplace_back(col-trim.first,row-trim.second,rsize.first,rsize.second );
-                    scores.emplace_back(pel);
+                    scores.emplace_back(pel/255.);
                 }
             }
         }
-    auto sorted_indicies = stl_utils::sort_indexes(scores);
-    for (auto ii = 0; ii < 8; ii++)
-        output.push_back(peaks[sorted_indicies[ii]]);
+    }else{
+        for (int row = 3 + trim.second; row < height; row++){
+            for (int col = 3 + trim.first; col < width; col++){
+                uint8_t pel = space.at<uint8_t>(row,col);
+                if (pel < valley_threshold &&
+                    pel <= space.at<uint8_t>(row, col-1) &&
+                    pel <= space.at<uint8_t>(row, col+1) &&
+                    pel <= space.at<uint8_t>(row-1,col-1) &&
+                    pel <= space.at<uint8_t>(row-1, col+1) &&
+                    pel <= space.at<uint8_t>(row+1,col-1) &&
+                    pel <= space.at<uint8_t>(row+1, col+1) &&
+                    pel <= space.at<uint8_t>(row-1, col) &&
+                    pel <= space.at<uint8_t>(row+1, col)){
+                    peaks.emplace_back(col-trim.first,row-trim.second,rsize.first,rsize.second );
+                    scores.emplace_back(1.0 - pel/255.);
+                }
+            }
+        }
+    }
+    
+    /*
+     void nms2(const std::vector<cv::Rect>& srcRects,
+     const std::vector<float>& scores,
+     std::vector<cv::Rect>& resRects,
+     float thresh,
+     int neighbors,
+     float minScoresSum)
+    */
+    nms2(peaks, scores, output, 0.5, 2, 0.5);
+    output = peaks;
+//    auto sorted_indicies = stl_utils::sort_indexes(scores, detect_valleys);
+//    auto take = std::min(size_t(8), sorted_indicies.size());
+//    for (auto ii = 0; ii < take; ii++)
+//        output.push_back(peaks[sorted_indicies[ii]]);
     
     }
 
+bool scaleSpace::process_motion_peaks(int model_frame_index){
+    if (! isLoaded() || ! spaceDone() || ! fieldDone() ) return false;
+    
+    m_all_rects.resize(0);
+    scaleSpace::detect_extremas(m_motion_field, m_all_rects, 10, m_trim);
+    std::sort(m_all_rects.begin(), m_all_rects.end(), [](cv::Rect& a, cv::Rect&b){ return a.tl().x > b.tl().x; });
+    m_rects.resize(0);
+    m_rects.push_back(m_all_rects[0]);
+    m_rects.push_back(m_all_rects[m_all_rects.size()-1]);
+    
+    auto model_frame = m_scale_space[model_frame_index];
+    for (auto rr : m_rects){
+        m_models.emplace_back(model_frame, rr);
+    }
+    
+    m_lengths.resize(0);
+    m_ends.first.resize(0);
+    m_ends.second.resize(0);
+    
 
+    for (const cv::Mat& img : m_scale_space){
+        
+        std::vector<cv::Point2f> points;
+        std::vector<float> scores;
+
+        // Run over Two Models, record template matches
+        for (const cv::Mat& templ : m_models){
+            Mat result;
+            int result_cols =  img.cols - templ.cols + 1;
+            int result_rows = img.rows - templ.rows + 1;
+            result.create( result_rows, result_cols, CV_32FC1 );
+            matchTemplate( img, templ, result, TM_CCORR_NORMED);
+            normalize( result, result, 0, 1, NORM_MINMAX, -1, Mat() );
+            double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
+            minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
+            cv::Point matchLoc = maxLoc;
+            float par_x, par_y;
+            par_x = par_y = 0;
+            parabolicFit<float,float>(result.at<float>(matchLoc.y,matchLoc.x-1), result.at<float>(matchLoc.y,matchLoc.x),result.at<float>(matchLoc.y,matchLoc.x+1),&par_x);
+            parabolicFit<float,float>(result.at<float>(matchLoc.y-1,matchLoc.x), result.at<float>(matchLoc.y,matchLoc.x),result.at<float>(matchLoc.y+1,matchLoc.x),&par_y);
+            points.emplace_back(matchLoc.x+par_x,matchLoc.y+par_y);
+            scores.push_back(maxVal);
+        }
+        std::sort(points.begin(), points.end(), [](Point2f& a, Point2f&b){ return a.x > b.x; });
+        auto length = std::sqrt(squareOf(points[points.size()-1].x - points[0].x) + squareOf(points[points.size()-1].y - points[0].y));
+        m_lengths.push_back(length);
+    }
+    return true;
+}
+
+bool scaleSpace::length_extremes(fPair& extremes) const {
+    if (m_scale_space.empty() || m_lengths.empty() || m_scale_space.size() != m_lengths.size())
+        return false;
+    
+    vector<float>::iterator min_length_iter = std::min_element(m_lengths.begin(), m_lengths.end());
+    vector<float>::iterator max_length_iter = std::max_element(m_lengths.begin(), m_lengths.end());
+    extremes.first = *min_length_iter;
+    extremes.second = *max_length_iter;
+    m_length_extremes = extremes;
+    return (extremes.second - extremes.first) > 1.0f;
+    
+}
 bool scaleSpace::generate(const std::vector<cv::Mat>& images,
                           float start_sigma, float end_sigma, float step){
     

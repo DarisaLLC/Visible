@@ -195,8 +195,8 @@ cv::line( img, cv::Point( center.x, center.y - d ), cv::Point( center.x , center
     }
  
  
-    
-    cv::Mat gaussianTemplate(const std::pair<uint32_t,uint32_t>& dims, const vec2& sigma = vec2(1.0, 1.0), const vec2& center = vec2(0.5,0.5));
+    cv::Mat getGaussianKernel(int rows, int cols, double sigmax, double sigmay);
+ 
     
     
     float crossMatch (const cv::Mat& img, const cv::Mat& model, cv::Mat& space, bool squareit = true);
