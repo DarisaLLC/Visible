@@ -844,6 +844,8 @@
 		C2AFCEFC216E79580080462D /* imgui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui.cpp; path = ../local_cinder_imgui/lib/imgui/imgui.cpp; sourceTree = "<group>"; };
 		C2AFCEFD216E79590080462D /* imgui_demo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_demo.cpp; path = ../local_cinder_imgui/lib/imgui/imgui_demo.cpp; sourceTree = "<group>"; };
 		C2AFCF08216F0CF10080462D /* CinderImGui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CinderImGui.cpp; path = ../local_cinder_imgui/src/CinderImGui.cpp; sourceTree = "<group>"; };
+		C2B0A13325D8461400E3A83D /* temporal_medianOf3.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = temporal_medianOf3.hpp; path = ../include/temporal_medianOf3.hpp; sourceTree = "<group>"; };
+		C2B0A13925D8471E00E3A83D /* temporal_medianOf3.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = temporal_medianOf3.hpp; sourceTree = SOURCE_ROOT; };
 		C2B1EB8F247876C8007F8445 /* VisibleRunRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VisibleRunRelease.entitlements; sourceTree = "<group>"; };
 		C2B87C9721CEE27500C91E35 /* visible_cli.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = visible_cli.hpp; path = ../include/visible_cli.hpp; sourceTree = "<group>"; };
 		C2B87C9821D008AC00C91E35 /* visible_logger_macro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = visible_logger_macro.h; path = ../include/visible_logger_macro.h; sourceTree = "<group>"; };
@@ -1045,6 +1047,7 @@
 			children = (
 				C209012325C9CDAE00F6F2C4 /* nms.cpp */,
 				C2BDCC032563C5DF0061B68E /* voxel_processor.cpp */,
+				C2B0A13325D8461400E3A83D /* temporal_medianOf3.hpp */,
 				C2F09C48253CE61000563B9B /* oiio_utils.cpp */,
 				C2C2E3562496CB2E00E26B3E /* imgui_experiment.cpp */,
 				C2AC7A6B24808A2C00853219 /* nfd_cocoa.m */,
@@ -1269,6 +1272,7 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C2B0A13925D8471E00E3A83D /* temporal_medianOf3.hpp */,
 				C2F09C49253CE61000563B9B /* oiio_utils.hpp */,
 				C2C2E3552496CAA900E26B3E /* imgui_experiment.hpp */,
 				C2AC7A6E24808A8E00853219 /* nfd.h */,
