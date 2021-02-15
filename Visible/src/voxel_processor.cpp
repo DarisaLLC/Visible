@@ -58,7 +58,16 @@ const std::vector<cv::Mat>& scaleSpace::dog() const {
     return m_dogs;
 }
 
-
+void scaleSpace::detect_profile_extremas(const cv::Mat&, fPair& horizontal_ends){
+	
+	
+	
+	
+	
+	
+	
+	
+}
 void scaleSpace::detect_extremas(const cv::Mat& space, std::vector<cv::Rect>& output, const int threshold, const iPair& trim, bool detect_valleys){
         // Make sure it is empty
     std::vector<cv::Rect> peaks;
