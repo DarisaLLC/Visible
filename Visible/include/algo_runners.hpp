@@ -276,6 +276,7 @@ public:
     bool fieldDone () const { return m_field_done; }
     static void detect_extremas(const cv::Mat&, std::vector<cv::Rect>& peaks, const int threshold,
                                 const iPair& = iPair(7,7), bool detect_valleys = true);
+	static void detect_profile_extremas(const cv::Mat&, fPair& horizontal_ends);
     
 private:
     bool m_loaded;

@@ -264,36 +264,7 @@ TEST (ut_lifFile, triple_channel)
     EXPECT_NEAR(h.min(), 0.0, 0.001);
     EXPECT_NEAR(h.max(), 205.0, 0.001);
     
-    std::vector<std::string> names { "green", "red", "gray" };
-    
-    {
-        lifIO::LifSerie& lls = lif.getSerie(0);
-        roiFixedMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[0]);
-        lls.fill2DBuffer(oneBy3.rowPointer(0), 0);
-        
-        EXPECT_EQ(oneBy3.timestamp(),lls.getTimestamps()[0] );
-        histoStats h;
-        h.from_image(oneBy3.plane(0));
-        EXPECT_NEAR(h.mean(), 5.82, 0.001);
-        EXPECT_NEAR(h.median(), 0.0, 0.001);
-        EXPECT_NEAR(h.min(), 0.0, 0.001);
-        EXPECT_NEAR(h.max(), 205.0, 0.001);
-    }
-    
-    {
-        lifIO::LifSerie& lls = lif.getSerie(0);
-        roiFixedMultiWindow<P8UP3> oneBy3 (names, lls.getTimestamps()[30]);
-        lif.getSerie(0).fill2DBuffer(oneBy3.rowPointer(0), 30);
-        EXPECT_EQ(oneBy3.timestamp(),lls.getTimestamps()[30] );
-        
-        histoStats h;
-        h.from_image(oneBy3.plane(2));
-        EXPECT_NEAR(h.mean(), 125.4625, 0.001);
-        EXPECT_NEAR(h.median(), 126.0, 0.001);
-        EXPECT_NEAR(h.min(), 88.0, 0.001);
-        EXPECT_NEAR(h.max(), 165.0, 0.001);
-        EXPECT_NEAR(h.mode(), 125.0, 0.001);
-    }
+
 }
 
 TEST(basicU8, gradient)
@@ -482,12 +453,6 @@ TEST (ut_mi, basic)
     
 }
 
-TEST (ut_roiMultiWindow, basic)
-{
-    std::vector<std::string> names { "green", "red", "gray" };
-    roiFixedMultiWindow<P8UP3> wide3 (names);
-    EXPECT_EQ(3*128, wide3.height());
-}
 
 
 TEST (ut_similarity, run)
