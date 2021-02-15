@@ -105,14 +105,14 @@ struct paired_extremas_t
 	Think of "data on a line", or a function f(x) over some domain xmin <= x <= xmax.
 */
 template<typename T = float>
-class persistenace1d
+class persistence1d
 {
 public:
-	persistenace1d()
+	persistence1d()
 	{
 	}
 
-	~persistenace1d()
+	~persistence1d()
 	{
 	}
 		
