@@ -7,6 +7,31 @@
 
 #include "nms.hpp"
 
+/*
+ From OpenCv
+ 
+ In addition to the class members, the following operations on rectangles are implemented:
+ -   \f$\texttt{rect} = \texttt{rect} \pm \texttt{point}\f$ (shifting a rectangle by a certain offset)
+ -   \f$\texttt{rect} = \texttt{rect} \pm \texttt{size}\f$ (expanding or shrinking a rectangle by a
+ certain amount)
+ -   rect += point, rect -= point, rect += size, rect -= size (augmenting operations)
+ -   rect = rect1 & rect2 (rectangle intersection)
+ -   rect = rect1 | rect2 (minimum area rectangle containing rect1 and rect2 )
+ -   rect &= rect1, rect |= rect1 (and the corresponding augmenting operations)
+ -   rect == rect1, rect != rect1 (rectangle comparison)
+ 
+ This is an example how the partial ordering on rectangles can be established (rect1 \f$\subseteq\f$
+ rect2):
+ @code
+ template<typename _Tp> inline bool
+ operator <= (const Rect_<_Tp>& r1, const Rect_<_Tp>& r2)
+ {
+ return (r1 & r2) == r1;
+ }
+ @endcode
+ For your convenience, the Rect_\<\> alias is available: cv::Rect
+ 
+*/
 /**
  * @brief nms
  * Non maximum suppression

@@ -63,7 +63,6 @@
 #include <cereal/types/utility.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/archives/binary.hpp>
-#include "vision/opencv_utils.hpp"
 #include "permutation_entropy.h"
 #include "result_serialization.h"
 #include "cvplot/cvplot.h"
@@ -90,6 +89,8 @@
 #include "cluster_geometry.hpp"
 #include "core/fit.hpp"
 #include <OpenImageIO/imagebufalgo.h>
+#include "temporal_medianOf3.hpp"
+#include "core/concurrent_containers.hpp"
 
 using namespace OIIO;
 
@@ -314,7 +315,7 @@ TEST (ut_dm, block){
 }
 
 
-TEST(mat_ops, basic){
+TEST(temporal_median, basic){
     
     Mat a(128,512, CV_8U);
     randu(a, Scalar(0), Scalar(255));
@@ -332,56 +333,48 @@ TEST(mat_ops, basic){
     }
     
     
-    auto m3 = [](const cv::Mat& _a, const cv::Mat& _b, const cv::Mat& _c){
-    auto A = _a > _b;
-    auto B = _a < _c;
-    auto C = _b < _c;
-    auto D = ~B; //a > c;
+    auto ac = a.clone();
     
+    EXPECT_TRUE(temporal_medianOf3(a, b, c, ac));
+    
+    bool check = matIsEqual(gold, ac);
+    EXPECT_TRUE(check);
+    
+    int count = 100;
+    auto npixels = count * a.rows * a.cols;
+    
+    {
+        double endtime;
+        std::clock_t start;
+        start = std::clock();
 
-    cv::Mat ac = Mat::zeros(_a.rows,_a.cols, CV_8U);
-    _a.copyTo(ac, A&B);
-    _c.copyTo(ac, A & ~B & C);
-    _b.copyTo(ac,  A & ~B & ~C);
-    _a.copyTo(ac, ~A&D);
-    _b.copyTo(ac, ~A & ~D & C);
-    _c.copyTo(ac,  ~A & ~D & ~C);
-    
-        return ac;
-    };
-    
-    auto ac = m3(a, b, c);
+        for (auto i = 0; i < count; i++)
+            EXPECT_TRUE(temporal_medianOf3(a, b, c, ac));
+
+        endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+        auto million_rate = npixels / endtime / 1000000;
+        std::cout << " Array Logic Implementation " << endtime  << " Seconds " << million_rate << " Million Pixels Per second " << std::endl;
+    }
     
     {
         double endtime;
         std::clock_t start;
         
         start = std::clock();
-        for (auto i = 0; i < 100000; i++)
-            auto ac = m3(a, b, c);
-
-        endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
-        std::cout << " Array Logic Implementation " << endtime  << " Seconds " << std::endl;
-    }
-    
-    {
-    double endtime;
-    std::clock_t start;
-    
-    start = std::clock();
-    for (auto i = 0; i < 100000; i++)
-        {
-            cv::Mat gold = Mat::zeros(a.rows, a.cols, CV_8U);
-            for (auto row = 0; row < gold.rows; row++){
-                for (auto col = 0; col < gold.cols; col++)
-                {
-                gold.at<uint8_t>(row,col) = median_of_3(a.at<uint8_t>(row,col), b.at<uint8_t>(row,col), c.at<uint8_t>(row,col));
+        for (auto i = 0; i < count; i++)
+            {
+                cv::Mat gold = Mat::zeros(a.rows, a.cols, CV_8U);
+                for (auto row = 0; row < gold.rows; row++){
+                    for (auto col = 0; col < gold.cols; col++)
+                    {
+                    gold.at<uint8_t>(row,col) = median_of_3(a.at<uint8_t>(row,col), b.at<uint8_t>(row,col), c.at<uint8_t>(row,col));
+                    }
                 }
             }
-        }
-    
-    endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
-    std::cout << " Per Pixel at<> Implementation " << endtime  << " Seconds " << std::endl;
+        
+        endtime = (std::clock() - start) / ((double)CLOCKS_PER_SEC);
+        auto million_rate = npixels / endtime / 1000000;
+        std::cout << " Per Pixel at<> Implementation " << endtime  << " Seconds " << million_rate << " Million Pixels Per second " << std::endl;
     }
     
     
@@ -416,10 +409,102 @@ TEST(nms, basic){
 }
 
 
+bool
+image_progress_callback(void* opaque, float done)
+{
+    std::cout << " Progress " << (int)(done * 100) << std::endl;
+    return false;
+}
+
+//TEST(temporal_median, tiffstack){
+//    auto res = dgenv_ptr->asset_path("C2-nd004_all.tif");
+//    EXPECT_TRUE(res.second);
+//    EXPECT_TRUE(boost::filesystem::exists(res.first));
+//    ustring filename (res.first.c_str());
+//    std::vector<cv::Mat> src_images;
+//
+//
+//
+//    auto build_vector = [&](const ustring& filename, std::vector<cv::Mat>& images){
+//        images.resize(0);
+//        ImageBuf buf(filename);
+//        int nsubimages = buf.nsubimages();
+//        const ImageSpec& bspec = buf.spec();
+//        int xres = bspec.width;
+//        int yres = bspec.height;
+//        buf.threads(1);
+//
+//            // Now read them from cache and display them
+//        for (int ss = 0; ss < nsubimages; ss++){
+//            buf.reset(filename, ss, 0);
+//            std::string datetime = buf.spec().get_string_attribute("DateTime");
+//            ROI roi = buf.roi();
+//            cv::Mat cvb (yres,xres, CV_16U);
+//            cv::Mat cvb8 (yres,xres, CV_8U);
+//
+//            buf.get_pixels(roi, TypeUInt16, cvb.data);
+//            cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
+//            images.push_back(cvb8);
+//        }
+//    };
+//
+//    build_vector(filename, src_images);
+//
+//    auto output_path = dgenv_ptr->output_path();
+//	auto frames_dir = output_path / "frames";
+//    ImageBuf buf(filename);
+//    int nsubimages = buf.nsubimages();
+//
+//#if 0
+//        // Create the ImageOutput
+//    std::unique_ptr<ImageOutput> out = ImageOutput::create (output_path.string());
+//
+//        // Be sure we can support subimages
+//    if (nsubimages > 1 && ! out->supports ("multiimage")) {
+//        std::cerr << "Cannot write multiple subimages\n";
+//        return;
+//    }
+//
+//    ImageSpec U8spec(src_images[0].cols, src_images[0].rows, 1, TypeUInt8);
+//
+//        // Open and declare all subimages
+//    out->open(output_path.string(), U8spec, ImageOutput::OpenMode::Create);
+//
+//        // Be sure we can support subimages
+//    if (nsubimages > 1 &&  (! out->supports("multiimage") ||
+//                           ! out->supports("appendsubimage"))) {
+//        std::cerr << "Does not support appending of subimages\n";
+//        return;
+//    }
+//
+//    EXPECT_TRUE(out->supports ("multiimage"));
+//    EXPECT_TRUE(out->supports ("appendsubimage"));
+//
+//
+//        // Use Create mode for the first level.
+//    ImageOutput::OpenMode appendmode = ImageOutput::Create;
+//#endif
+//
+//    static std::mutex _mu;
+//        // Write the individual subimages
+//    for (int s = 0;  s < nsubimages-2;  ++s) {
+//        std::lock_guard<std::mutex> lock(_mu);
+//
+//        // Produce temporal median of 3 frames
+//        cv::Mat dst;
+//        if (temporal_medianOf3(src_images[s],src_images[s+1], src_images[s+2], dst)){
+//            SHOW(" Median ", dst, 10);
+//			std::string fname = "C2_median"+ to_string(s) + ".tif";
+//			output_path = frames_dir / fname;
+//			cv::imwrite(output_path.c_str(), dst);
+//        }
+//    }
+//
+//}
 
 TEST(scale_space, basic){
     
-    auto res = dgenv_ptr->asset_path("C2-nd004_all.tif");
+    auto res = dgenv_ptr->asset_path("frames.tif");
     EXPECT_TRUE(res.second);
     EXPECT_TRUE(boost::filesystem::exists(res.first));
     ustring filename (res.first.c_str());
@@ -435,17 +520,25 @@ TEST(scale_space, basic){
         buf.threads(1);
         
             // Now read them from cache and display them
-        namedWindow("oiio", WINDOW_AUTOSIZE | WINDOW_OPENGL);
         for (int ss = 0; ss < nsubimages; ss++){
             buf.reset(filename, ss, 0);
             std::string datetime = buf.spec().get_string_attribute("DateTime");
             ROI roi = buf.roi();
-            cv::Mat cvb (yres,xres, CV_16U);
-            cv::Mat cvb8 (yres,xres, CV_8U);
-            
-            buf.get_pixels(roi, TypeUInt16, cvb.data);
-            cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
-            images.push_back(cvb8);
+			if (bspec.format ==  TypeUInt16){
+				cv::Mat cvb (yres,xres, CV_16U);
+				cv::Mat cvb8 (yres,xres, CV_8U);
+				
+				buf.get_pixels(roi, TypeUInt16, cvb.data);
+				cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
+				images.push_back(cvb8);
+			}else if (bspec.format ==  TypeUInt8){
+				cv::Mat cvb8 (yres,xres, CV_8U);
+				buf.get_pixels(roi, TypeUInt8, cvb8.data);
+				images.push_back(cvb8);
+			}
+			else{
+				assert(false);
+			}
         }
     };
 
@@ -503,7 +596,7 @@ TEST(scale_space, basic){
     rects2.push_back(rects[0]);
     rects2.push_back(rects[rects.size()-1]);
     
-    auto model_frame = src_images[47];
+    auto model_frame = src_images[16];
     std::vector<cv::Mat> models;
     Point2i ctr (rects2[0].tl().x+rects2[1].tl().x+rects2[0].width, rects2[0].tl().y+rects2[1].tl().y+rects2[0].height);
     ctr.x /= 2;
