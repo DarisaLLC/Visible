@@ -391,21 +391,88 @@ TEST(nms, basic){
     
     cv::Mat src = cv::imread(res.first.c_str(), cv::ImreadModes::IMREAD_GRAYSCALE);
     EXPECT_EQ(src.channels() , 1);
-    int lt = leftTailPost (src, 0.05);
-    std::cout << " Left Tail at " << lt << std::endl;
-    std::vector<cv::Rect> output;
-    iPair trim (6,6);
-    scaleSpace::detect_extremas(src, output, lt, trim);
- //   ASSERT_EQ(output.size(), size_t(8));
-    
-    cv::Mat roi(src, output[0]);
-    SHOW(" roi ", roi, 10);
-    
-    for (auto rr : output){
-        cv::Point ctr ((rr.tl().x + rr.br().x)/2, (rr.tl().y + rr.br().y)/2);
-        cv::drawMarker(src, ctr, Scalar(0, 255, 0), MARKER_CROSS, 8, 2);
-    }
-    SHOW(" Peaks ", src, 0);
+  
+
+	cv::Mat hz (1, src.cols, CV_32F);
+	cv::Mat vt (src.rows, 1, CV_32F);
+	horizontal_vertical_projections (src, hz, vt);
+	std::vector<float> hz_vec(src.cols);
+	for (auto ii = 0; ii < src.cols; ii++) hz_vec[ii] = hz.at<float>(0,ii);
+	std::vector<float> vt_vec(src.rows);
+	for (auto ii = 0; ii < src.rows; ii++) vt_vec[ii] = vt.at<float>(ii,0);
+
+	
+//	svl::norm_min_max(hz_vec.begin(),hz_vec.end());
+//	svl::norm_min_max(vt_vec.begin(),vt_vec.end());
+
+	auto measure_profile = [&](const std::vector<float>& profile, const std::string& name,
+							  std::vector<std::pair<float, float>>& peaks,
+							  std::vector<std::pair<float, float>>& valleys,
+							  std::vector<std::pair<float, float>>& global_mins){
+		persistence1d<float> p;
+		p.RunPersistence(profile);
+		std::vector<int> tmins, lmins, tmaxs, lmaxs;
+		p.GetExtremaIndices(tmins,tmaxs);
+		peaks.resize(0);
+		valleys.resize(0);
+		global_mins.resize(0);
+
+
+		for (auto lmx : tmaxs){
+			peaks.emplace_back(lmx,profile[lmx]);
+		}
+		for (auto lmi : tmins){
+			valleys.emplace_back(lmi,profile[lmi]);
+		}
+
+
+		std::pair<float, float> global_min (p.GetGlobalMinimumIndex(), p.GetGlobalMinimumValue());
+		global_mins.push_back(global_min);
+		
+		std::sort(peaks.begin(), peaks.end(), [] (std::pair<float,float>& a,std::pair<float,float>& b)
+				  { return a.first < b.first; });
+		std::sort(valleys.begin(), valleys.end(), [] (std::pair<float,float>& a,std::pair<float,float>& b)
+				  { return a.first < b.first; });
+		
+	
+//		{
+//			cvplot::setWindowTitle(name, " Over Time");
+//			cvplot::moveWindow(name, 300, 100);
+//			cvplot::resizeWindow(name, 1024, 512);
+//
+//			cvplot::figure(name).series(" L(t) ").addValue(profile);
+//			cvplot::figure(name).series(" Peaks ").set(peaks).type(cvplot::Dots).color(cvplot::Red);
+//			cvplot::figure(name).series(" Valleys ").set(valleys).type(cvplot::Dots).color(cvplot::Orange);
+//			cvplot::figure(name).series(" Global Mins ").set(global_mins).type(cvplot::Dots).color(cvplot::Gray);
+//			cvplot::figure(name).show();
+//			cv::waitKey();
+//		}
+	};
+	
+	std::vector<std::pair<float, float>> hz_peaks, hz_valleys,hz_global_mins;
+	std::vector<std::pair<float, float>> vt_peaks, vt_valleys,vt_global_mins;
+	
+	measure_profile(hz_vec, " Horizontal ", hz_peaks, hz_valleys, hz_global_mins);
+	measure_profile(vt_vec, " Vertical " ,vt_peaks, vt_valleys, vt_global_mins);
+	
+	
+	// Get first and last peaks in hz at global minimum of vt
+	std::vector<std::pair<float,float>>::const_iterator be = hz_peaks.begin();
+	std::vector<std::pair<float,float>>::const_iterator en = hz_peaks.end();
+	en--;
+	
+	// Get first and last peaks in hz at global minimum of vt
+	cv::Point left_end (be->first, vt_global_mins[0].first);
+	cv::Point right_end (en->first, vt_global_mins[0].first);
+	
+	cv::Mat planes[] = {src,src,src};
+	cv::Mat display;
+	cv::merge(planes, 3, display);
+	
+	cv::drawMarker(display, left_end, Scalar(0, 255, 0), MARKER_CROSS, 20, 2);
+	cv::drawMarker(display, right_end, Scalar(255, 0, 0), MARKER_CROSS, 20, 2);
+
+    SHOW(" Peaks ", display, 0);
 }
 
 
@@ -588,22 +655,25 @@ TEST(scale_space, basic){
     cv::imwrite(filepath.c_str(), mm);
     
     std::vector<cv::Rect> rects;
-    iPair trim (36,36/2);
-    scaleSpace::detect_extremas(mm, rects, 10, trim);
+	std::vector<cv::Point2f> ends;
+	scaleSpace::detect_profile_extremas(mm, ends);
+	cv::Rect left (ends[0].x, 8, 16, 40);
+	cv::Rect right (ends[1].x, 8, 16, 40);
 
-    std::sort(rects.begin(), rects.end(), [](cv::Rect& a, cv::Rect&b){ return a.tl().x > b.tl().x; });
     std::vector<cv::Rect> rects2;
-    rects2.push_back(rects[0]);
-    rects2.push_back(rects[rects.size()-1]);
+    rects2.push_back(left);
+    rects2.push_back(right);
     
+	std::sort(rects2.begin(), rects2.end(), [](cv::Rect& a, cv::Rect&b){ return a.tl().x > b.tl().x; });
+	
     auto model_frame = src_images[16];
     std::vector<cv::Mat> models;
     Point2i ctr (rects2[0].tl().x+rects2[1].tl().x+rects2[0].width, rects2[0].tl().y+rects2[1].tl().y+rects2[0].height);
     ctr.x /= 2;
     ctr.y /= 2;
-    rects2[0].width = rects2[0].br().x - ctr.x;
-    rects2[0].x = ctr.x;
-    rects2[1].width = ctr.x - rects2[1].x;
+//    rects2[0].width = rects2[0].br().x - ctr.x;
+//    rects2[0].x = ctr.x;
+//    rects2[1].width = ctr.x - rects2[1].x;
     
     for (auto rr : rects2){
         models.emplace_back(model_frame, rr);
@@ -1139,7 +1209,7 @@ TEST(cardiac_ut, locate_contractions)
     flip(array,dst);
     
     // Persistence of Extremas
-    persistenace1d<double> p;
+    persistence1d<double> p;
     vector<double> dst_1;
     dst_1.insert(dst_1.end(),dst[1].begin(), dst[1].end());
     

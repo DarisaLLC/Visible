@@ -16,7 +16,7 @@
 #include "nms.hpp"
 #include "core/stl_utils.hpp"
 #include "core/fit.hpp"
-
+#include "time_series/persistence1d.hpp"
 using namespace svl;
 using namespace stl_utils;
 
@@ -58,16 +58,69 @@ const std::vector<cv::Mat>& scaleSpace::dog() const {
     return m_dogs;
 }
 
-void scaleSpace::detect_profile_extremas(const cv::Mat&, fPair& horizontal_ends){
+void scaleSpace::detect_profile_extremas(const cv::Mat& src, std::vector<cv::Point2f>& horizontal_ends, const iPair& limits){
 	
+	cv::Mat hz (1, src.cols, CV_32F);
+	cv::Mat vt (src.rows, 1, CV_32F);
+	horizontal_vertical_projections (src, hz, vt);
+	std::vector<float> hz_vec(src.cols);
+	for (auto ii = 0; ii < src.cols; ii++) hz_vec[ii] = hz.at<float>(0,ii);
+	std::vector<float> vt_vec(src.rows);
+	for (auto ii = 0; ii < src.rows; ii++) vt_vec[ii] = vt.at<float>(ii,0);
+	auto dmz = limits;
+	dmz.second = src.cols - dmz.second;
 	
+//	svl::norm_min_max(hz_vec.begin(),hz_vec.end());
+//	svl::norm_min_max(vt_vec.begin(),vt_vec.end());
+
+	auto measure_profile = [&](const std::vector<float>& profile,
+							  std::vector<std::pair<float, float>>& peaks,
+							  std::vector<std::pair<float, float>>& valleys,
+							  std::vector<std::pair<float, float>>& global_mins){
+		persistence1d<float> p;
+		p.RunPersistence(profile);
+		std::vector<int> tmins, lmins, tmaxs, lmaxs;
+		p.GetExtremaIndices(tmins,tmaxs);
+		peaks.resize(0);
+		valleys.resize(0);
+		global_mins.resize(0);
+
+
+		for (auto lmx : tmaxs){
+			peaks.emplace_back(lmx,profile[lmx]);
+		}
+		for (auto lmi : tmins){
+			valleys.emplace_back(lmi,profile[lmi]);
+		}
+
+
+		std::pair<float, float> global_min (p.GetGlobalMinimumIndex(), p.GetGlobalMinimumValue());
+		global_mins.push_back(global_min);
+		
+		std::sort(peaks.begin(), peaks.end(), [] (std::pair<float,float>& a,std::pair<float,float>& b)
+				  { return a.first > b.first; });
+		std::sort(valleys.begin(), valleys.end(), [] (std::pair<float,float>& a,std::pair<float,float>& b)
+				  { return a.first > b.first; });
+	};
 	
+	std::vector<std::pair<float, float>> hz_peaks, hz_valleys,hz_global_mins;
+	std::vector<std::pair<float, float>> vt_peaks, vt_valleys,vt_global_mins;
 	
+	measure_profile(hz_vec, hz_peaks, hz_valleys, hz_global_mins);
+	measure_profile(vt_vec, vt_peaks, vt_valleys, vt_global_mins);
 	
+	// Get first and last peaks in hz at global minimum of vt
+	std::vector<std::pair<float,float>>::iterator be = hz_peaks.begin();
+	std::vector<std::pair<float,float>>::iterator en = hz_peaks.end();
+	en--;
 	
-	
-	
+	cv::Point2f left_end (be->first, vt_global_mins[0].first);
+	cv::Point2f right_end (en->first, vt_global_mins[0].first);
+	horizontal_ends.resize(0);
+	horizontal_ends.push_back(left_end);
+	horizontal_ends.push_back(right_end);
 }
+
 void scaleSpace::detect_extremas(const cv::Mat& space, std::vector<cv::Rect>& output, const int threshold, const iPair& trim, bool detect_valleys){
         // Make sure it is empty
     std::vector<cv::Rect> peaks;
@@ -139,11 +192,9 @@ bool scaleSpace::process_motion_peaks(int model_frame_index){
     if (! isLoaded() || ! spaceDone() || ! fieldDone() ) return false;
     
     m_all_rects.resize(0);
-    scaleSpace::detect_extremas(m_motion_field, m_all_rects, 10, m_trim);
-    std::sort(m_all_rects.begin(), m_all_rects.end(), [](cv::Rect& a, cv::Rect&b){ return a.tl().x > b.tl().x; });
-    m_rects.resize(0);
-    m_rects.push_back(m_all_rects[0]);
-    m_rects.push_back(m_all_rects[m_all_rects.size()-1]);
+	std::vector<cv::Point2f> ends;
+	scaleSpace::detect_profile_extremas(m_motion_field, ends);
+	
     
     auto model_frame = m_scale_space[model_frame_index];
     for (auto rr : m_rects){
