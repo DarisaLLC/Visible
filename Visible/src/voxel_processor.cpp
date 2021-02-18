@@ -17,6 +17,8 @@
 #include "core/stl_utils.hpp"
 #include "core/fit.hpp"
 #include "time_series/persistence1d.hpp"
+#include "cvplot/cvplot.h"
+
 using namespace svl;
 using namespace stl_utils;
 
@@ -58,145 +60,76 @@ const std::vector<cv::Mat>& scaleSpace::dog() const {
     return m_dogs;
 }
 
-void scaleSpace::detect_profile_extremas(const cv::Mat& src, std::vector<cv::Point2f>& horizontal_ends, const iPair& limits){
+
+bool scaleSpace::detect_moving_profile(const cv::Mat& mof, const iPair& e_size, const iPair& margin){
+	static iPair zerop (0,0);
+
+	// Sanity check: margin and structuring element required to be less than quarter of the input image size
+	iPair isize(mof.cols/4, mof.rows/4);
+	assert(margin > zerop && e_size > zerop);
+	assert(isize > margin && isize > e_size);
 	
-	cv::Mat hz (1, src.cols, CV_32F);
-	cv::Mat vt (src.rows, 1, CV_32F);
-	horizontal_vertical_projections (src, hz, vt);
-	std::vector<float> hz_vec(src.cols);
-	for (auto ii = 0; ii < src.cols; ii++) hz_vec[ii] = hz.at<float>(0,ii);
-	std::vector<float> vt_vec(src.rows);
-	for (auto ii = 0; ii < src.rows; ii++) vt_vec[ii] = vt.at<float>(ii,0);
-	auto dmz = limits;
-	dmz.second = src.cols - dmz.second;
 	
-//	svl::norm_min_max(hz_vec.begin(),hz_vec.end());
-//	svl::norm_min_max(vt_vec.begin(),vt_vec.end());
+	cv::Mat eroded_input_image, thresholded_input_image, thresholded_input_8bit;
+	
+	cv::Mat element = cv::getStructuringElement(
+		cv::MORPH_ELLIPSE, cv::Size(2 * e_size.first + 1, e_size.second * 3 + 1),
+		cv::Point(e_size.first, e_size.second));
+	
+	cv::erode(mof, eroded_input_image, element);
+	m_motion_field_minimas = mof.clone();
+	cv::compare(mof, eroded_input_image, m_motion_field_minimas, cv::CMP_EQ);
 
-	auto measure_profile = [&](const std::vector<float>& profile,
-							  std::vector<std::pair<float, float>>& peaks,
-							  std::vector<std::pair<float, float>>& valleys,
-							  std::vector<std::pair<float, float>>& global_mins){
-		persistence1d<float> p;
-		p.RunPersistence(profile);
-		std::vector<int> tmins, lmins, tmaxs, lmaxs;
-		p.GetExtremaIndices(tmins,tmaxs);
-		peaks.resize(0);
-		valleys.resize(0);
-		global_mins.resize(0);
+	m_profile_threshold = cv::threshold(mof, thresholded_input_image, 0, 255,
+							 cv::THRESH_BINARY_INV | cv::THRESH_OTSU );
 
-
-		for (auto lmx : tmaxs){
-			peaks.emplace_back(lmx,profile[lmx]);
+	thresholded_input_image.convertTo(thresholded_input_8bit, CV_8U);
+	cv::bitwise_and(m_motion_field_minimas, thresholded_input_8bit, m_motion_field_minimas);
+	
+	std::vector<Point2f> minimas;
+	for (int j = margin.second; j < (m_motion_field_minimas.rows - margin.second); j++)
+		for (int i = margin.first; i < (m_motion_field_minimas.cols - margin.first); i++){
+		if (m_motion_field_minimas.at<uint8_t>(j,i) > 0)
+			minimas.emplace_back(i,j);
 		}
-		for (auto lmi : tmins){
-			valleys.emplace_back(lmi,profile[lmi]);
-		}
+	if (minimas.size() < 5){
+		std::cout << " Too Few Points for Profile Detection " << std::endl;
+		return false;
+	}
+	
+	m_body = fitEllipseDirect(minimas);
+	m_ellipse = ellipseShape(m_body);
 
-
-		std::pair<float, float> global_min (p.GetGlobalMinimumIndex(), p.GetGlobalMinimumValue());
-		global_mins.push_back(global_min);
-		
-		std::sort(peaks.begin(), peaks.end(), [] (std::pair<float,float>& a,std::pair<float,float>& b)
-				  { return a.first > b.first; });
-		std::sort(valleys.begin(), valleys.end(), [] (std::pair<float,float>& a,std::pair<float,float>& b)
-				  { return a.first > b.first; });
-	};
 	
-	std::vector<std::pair<float, float>> hz_peaks, hz_valleys,hz_global_mins;
-	std::vector<std::pair<float, float>> vt_peaks, vt_valleys,vt_global_mins;
-	
-	measure_profile(hz_vec, hz_peaks, hz_valleys, hz_global_mins);
-	measure_profile(vt_vec, vt_peaks, vt_valleys, vt_global_mins);
-	
-	// Get first and last peaks in hz at global minimum of vt
-	std::vector<std::pair<float,float>>::iterator be = hz_peaks.begin();
-	std::vector<std::pair<float,float>>::iterator en = hz_peaks.end();
-	en--;
-	
-	cv::Point2f left_end (be->first, vt_global_mins[0].first);
-	cv::Point2f right_end (en->first, vt_global_mins[0].first);
-	horizontal_ends.resize(0);
-	horizontal_ends.push_back(left_end);
-	horizontal_ends.push_back(right_end);
+	return true;
 }
 
-void scaleSpace::detect_extremas(const cv::Mat& space, std::vector<cv::Rect>& output, const int threshold, const iPair& trim, bool detect_valleys){
-        // Make sure it is empty
-    std::vector<cv::Rect> peaks;
-    
-    std::vector<float> scores;
-    peaks.resize(0);
-    iPair rsize(5);
-    int height = space.rows - 3 - trim.second;
-    int width = space.cols - 3 - trim.first;
-    int peak_threshold = 255 - threshold;
-    int valley_threshold = threshold;
-    
-    if (! detect_valleys){
-    for (int row = 3 + trim.second; row < height; row++){
-        for (int col = 3 + trim.first; col < width; col++){
-            uint8_t pel = space.at<uint8_t>(row,col);
-            if (pel >= peak_threshold &&
-                pel >= space.at<uint8_t>(row, col-1) &&
-                pel >= space.at<uint8_t>(row, col+1) &&
-                pel >= space.at<uint8_t>(row-1,col-1) &&
-                pel >= space.at<uint8_t>(row-1, col+1) &&
-                pel >= space.at<uint8_t>(row+1,col-1) &&
-                pel >= space.at<uint8_t>(row+1, col+1) &&
-                pel >= space.at<uint8_t>(row-1, col) &&
-                pel >= space.at<uint8_t>(row+1, col)){
-                    peaks.emplace_back(col-trim.first,row-trim.second,rsize.first,rsize.second );
-                    scores.emplace_back(pel/255.);
-                }
-            }
-        }
-    }else{
-        for (int row = 3 + trim.second; row < height; row++){
-            for (int col = 3 + trim.first; col < width; col++){
-                uint8_t pel = space.at<uint8_t>(row,col);
-                if (pel < valley_threshold &&
-                    pel <= space.at<uint8_t>(row, col-1) &&
-                    pel <= space.at<uint8_t>(row, col+1) &&
-                    pel <= space.at<uint8_t>(row-1,col-1) &&
-                    pel <= space.at<uint8_t>(row-1, col+1) &&
-                    pel <= space.at<uint8_t>(row+1,col-1) &&
-                    pel <= space.at<uint8_t>(row+1, col+1) &&
-                    pel <= space.at<uint8_t>(row-1, col) &&
-                    pel <= space.at<uint8_t>(row+1, col)){
-                    peaks.emplace_back(col-trim.first,row-trim.second,rsize.first,rsize.second );
-                    scores.emplace_back(1.0 - pel/255.);
-                }
-            }
-        }
-    }
-    
-    /*
-     void nms2(const std::vector<cv::Rect>& srcRects,
-     const std::vector<float>& scores,
-     std::vector<cv::Rect>& resRects,
-     float thresh,
-     int neighbors,
-     float minScoresSum)
-    */
-    nms2(peaks, scores, output, 0.5, 2, 0.5);
-    output = peaks;
-//    auto sorted_indicies = stl_utils::sort_indexes(scores, detect_valleys);
-//    auto take = std::min(size_t(8), sorted_indicies.size());
-//    for (auto ii = 0; ii < take; ii++)
-//        output.push_back(peaks[sorted_indicies[ii]]);
-    
-    }
 
-bool scaleSpace::process_motion_peaks(int model_frame_index){
+
+bool scaleSpace::process_motion_peaks(int model_frame_index, const iPair& e_size, const iPair& margin){
     if (! isLoaded() || ! spaceDone() || ! fieldDone() ) return false;
     
     m_all_rects.resize(0);
-	std::vector<cv::Point2f> ends;
-	scaleSpace::detect_profile_extremas(m_motion_field, ends);
+	m_segmented_ends.resize(2);
+	auto ok = scaleSpace::detect_moving_profile(m_motion_field, e_size, margin);
 	
+	if (! ok) return ok;
+	
+	m_segmented_ends[0].x = m_ellipse.x - m_ellipse.a * std::cos(m_ellipse.phi);
+	m_segmented_ends[0].y = m_ellipse.y + m_ellipse.a * std::sin(m_ellipse.phi);
+	m_segmented_ends[1].x = m_ellipse.x + m_ellipse.a * std::cos(m_ellipse.phi);
+	m_segmented_ends[1].y = m_ellipse.y - m_ellipse.a * std::sin(m_ellipse.phi);
+	
+	std::sort(m_segmented_ends.begin(), m_segmented_ends.end(), [](Point2f& a, Point2f&b){ return a.x < b.x; });
+	
+	m_rects.resize(2);
+	iPair halfwidths;
+	halfwidths.first = m_segmented_ends[0].x;
+	halfwidths.second = m_motion_field.cols - m_segmented_ends[1].x;
+	m_rects[0] = cv::Rect(cv::Point2i(m_segmented_ends[0].x,10), cv::Point2i(m_ellipse.x, m_motion_field.rows-10));
+	m_rects[1] = cv::Rect(cv::Point2i(m_ellipse.x,10), cv::Point2i(m_segmented_ends[1].x, m_motion_field.rows-10));
     
-    auto model_frame = m_scale_space[model_frame_index];
+    auto model_frame = m_inputs[model_frame_index];
     for (auto rr : m_rects){
         m_models.emplace_back(model_frame, rr);
     }
@@ -206,7 +139,7 @@ bool scaleSpace::process_motion_peaks(int model_frame_index){
     m_ends.second.resize(0);
     
 
-    for (const cv::Mat& img : m_scale_space){
+    for (const cv::Mat& img : m_inputs){
         
         std::vector<cv::Point2f> points;
         std::vector<float> scores;
@@ -254,7 +187,8 @@ bool scaleSpace::generate(const std::vector<cv::Mat>& images,
     // check start, end and step are positive and end-start is multiple of step
     m_filtered.resize(0);
     m_scale_space.resize(0);
-    
+	m_inputs.resize(0);
+	
     auto step_range = end_sigma - start_sigma;
     if (step <= 0 || step_range <= 0) return false;
     int steps = (end_sigma - start_sigma)/step;
@@ -267,6 +201,8 @@ bool scaleSpace::generate(const std::vector<cv::Mat>& images,
         auto clone = rw.clone();
         clone.convertTo(clone, CV_64F);
         m_filtered.push_back(clone);
+		clone = rw.clone();
+		m_inputs.push_back(clone);
     }
     m_loaded = m_filtered.size() == images.size();
     int n = static_cast<int>(images.size());
