@@ -14,6 +14,7 @@
 #include <boost/range/irange.hpp>
 #include "core/moreMath.h"
 #include "etw_utils.hpp"
+#include "vision/ellipse.hpp"
 
 using namespace std;
 using namespace stl_utils;
@@ -252,10 +253,12 @@ public:
     
     bool generate(const std::vector<roiWindow<P8U>> &images, float start_sigma, float end_sigma, float step);
     bool generate(const std::vector<cv::Mat> &images,float start_sigma, float end_sigma, float step);
-    bool process_motion_peaks (int model_frame_index = 0);
+	bool process_motion_peaks (int model_frame_index = 0, const iPair& = iPair(3,3), const iPair& = iPair(10,10));
     
     const std::vector<float> estimated_lengths (int model_frame_index = 0, const iPair& trim = iPair(24,24)) const;
     
+	const std::vector<float>& lengths () const { return m_lengths; }
+	
     const std::pair<std::vector<fVector_2d>,std::vector<fVector_2d>> estimated_positions () const;
     const std::vector<cv::Mat>& space() const { return m_scale_space; }
     const std::vector<cv::Mat>& dog() const;
@@ -263,6 +266,8 @@ public:
     const cv::Mat& motion_field() const;
     const cv::Rect& motion_peaks() const;
     bool length_extremes (fPair& ) const;
+	const std::vector<cv::Point2f>& segmented_ends() const;
+	
     
     
     int start_sigma() const { return m_start_sigma; }
@@ -274,18 +279,20 @@ public:
     bool isLoaded () const { return m_loaded; }
     bool spaceDone () const { return m_space_done; }
     bool fieldDone () const { return m_field_done; }
-    static void detect_extremas(const cv::Mat&, std::vector<cv::Rect>& peaks, const int threshold,
-                                const iPair& = iPair(7,7), bool detect_valleys = true);
-	static void detect_profile_extremas(const cv::Mat&, std::vector<cv::Point2f>& horizontal_ends, const iPair& = iPair(8,8));
-	
+
     
 private:
+	bool detect_moving_profile(const cv::Mat&, const iPair& = iPair(3,3), const iPair& = iPair(10,10));
+	
     bool m_loaded;
     bool m_space_done;
     mutable bool m_field_done;
     std::vector<float> m_sigmas;
-    mutable cv::Mat m_motion_field;
-    std::vector<cv::Mat> m_filtered;
+	mutable cv::Mat m_motion_field;
+	mutable cv::Mat m_motion_field_minimas;
+	mutable std::vector<cv::Point2f> m_segmented_ends;
+	std::vector<cv::Mat> m_filtered;
+	std::vector<cv::Mat> m_inputs;
     mutable std::vector<cv::Mat> m_dogs;
     mutable std::vector<cv::Mat> m_models;
     mutable std::vector<cv::Mat> m_scale_space;
@@ -297,6 +304,9 @@ private:
     mutable iPair m_trim;
     mutable fPair m_length_extremes;
     float m_start_sigma, m_end_sigma, m_step;
+	double m_profile_threshold;
+	mutable cv::RotatedRect m_body;
+	mutable ellipseShape m_ellipse;
     
 };
 
