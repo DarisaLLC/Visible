@@ -318,11 +318,7 @@ iPair get_size_from_file (const std::string& fqfn)
         line_count++;
     }
     
-  //  std::cout << line_count << std::endl;
-  //  std::cout << col_count << std::endl;
-  //  std::cout << diff_count << std::endl;
-    
-    // = first < second
+
     if (diff_count) return iPair(-1,-1);
     iPair range (col_count, line_count);
     return range;

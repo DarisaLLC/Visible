@@ -16,6 +16,7 @@ using namespace std;
 using namespace cv;
 
 void rotatedRect2ImGui(const cv::RotatedRect& rr, std::vector<ImVec2> impts);
+ImVec2 ImGui_Image_Constrain(const ImVec2&, const ImVec2& available);
 
 
 #endif /* imGui_utils_h */

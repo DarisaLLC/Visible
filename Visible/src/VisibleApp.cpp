@@ -516,9 +516,9 @@ void VisibleApp::draw ()
 
 void VisibleApp::resize ()
 {
-    ImGuiViewport*  imvp = GetMainViewport();
-    std::cout << imvp->Pos.x << "," << imvp->Pos.y << imvp->Size.x  << "," << imvp->Size.y << std::endl;
-    std::cout << getWindowSize().x << "," << getWindowSize().y << std::endl;
+//    ImGuiViewport*  imvp = GetMainViewport();
+//    std::cout << imvp->Pos.x << "," << imvp->Pos.y << imvp->Size.x  << "," << imvp->Size.y << std::endl;
+//    std::cout << getWindowSize().x << "," << getWindowSize().y << std::endl;
     
     assert(GImGui != nullptr && GImGui->CurrentWindow != nullptr);
     ImGui::SetCurrentContext(GImGui);

@@ -18,3 +18,18 @@ void rotatedRect2ImGui(const cv::RotatedRect& rr, std::vector<ImVec2> impts){
     for (int i = 0; i < 4; i++)
         impts.emplace_back(ImVec2(corners[i].x, corners[i].y));
 }
+
+ImVec2 ImGui_Image_Constrain(const ImVec2& content, const ImVec2& available)
+{
+	float availableRatio = available.x / available.y;
+	float imageRatio = (float)content.x / (float)content.y;
+	if(availableRatio > imageRatio) {
+		// available space is wider, so we have extra space on the sides
+		return ImVec2(imageRatio * available.y, available.y);
+	} else if(availableRatio < imageRatio) {
+		// available space is taller, so we have extra space on the top
+		return ImVec2(available.x, available.x / imageRatio);
+	} else {
+		return available;
+	}
+}

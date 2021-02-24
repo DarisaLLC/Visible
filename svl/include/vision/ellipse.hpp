@@ -21,7 +21,7 @@ public:
     // ellipse position      [px]
     double x, y;
     // ellipse long/short axis length [px]
-    double a, b;
+    double a, b, c;
     // ellipse rotation in radiants [rad]
     double phi;
     // mean fit error
@@ -36,6 +36,7 @@ public:
         a = e.a;
         b = e.b;
         phi = e.phi;
+		c = std::sqrt(a*a-b*b);
     }
 
     ellipseShape(const cv::RotatedRect& rect){
@@ -65,6 +66,7 @@ public:
         y2 = 0;
         m_e = std::sqrt(1.0 - (b2/a2));
         m_c = a * m_e;
+		c = std::sqrt(a2-b2);
         bool bz = isZero(b);
         
         auto acot = [](double cc){
@@ -137,6 +139,26 @@ public:
         return imagePoints;
     }
     
+	void wide_points(std::vector<cv::Point2f>& points, float wide_distance){
+		points.resize(2);
+		points[0].x = x - wide_distance * std::cos(phi);
+		points[0].y = y + wide_distance * std::sin(phi);
+		points[1].x = x + wide_distance * std::cos(phi);
+		points[1].y = y - wide_distance * std::sin(phi);
+	}
+	
+	void wide_ends (std::vector<cv::Point2f>& ends){
+		wide_points(ends, a);
+	}
+	
+	void focal_points (std::vector<cv::Point2f>& focals){
+		wide_points(focals, c);
+	}
+	
+	void directrix_points (std::vector<cv::Point2f>& directrix){
+		wide_points(directrix, a2/c);
+	}
+	
     unsigned ellipseSupport(const std::vector<cv::Point2f> &points, double inl_dist, std::vector<bool> &inl_idx){
         {
             double co = cos(-phi), si = sin(-phi), n, d, dist;

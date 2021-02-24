@@ -262,11 +262,15 @@ public:
     const std::pair<std::vector<fVector_2d>,std::vector<fVector_2d>> estimated_positions () const;
     const std::vector<cv::Mat>& space() const { return m_scale_space; }
     const std::vector<cv::Mat>& dog() const;
-    const std::vector<cv::Mat>& models() const;
-    const cv::Mat& motion_field() const;
+	const std::vector<cv::Mat>& models() const;
+	const cv::Mat& motion_field() const;
     const cv::Rect& motion_peaks() const;
     bool length_extremes (fPair& ) const;
 	const std::vector<cv::Point2f>& segmented_ends() const;
+	const std::vector<cv::Rect>& modeled_ends() const;
+	const cv::RotatedRect& body() const { return m_body; }
+	const ellipseShape& ellipse_shape() const { return m_ellipse; }
+	const cv::Mat& voxel_range () const;
 	
     
     
@@ -288,9 +292,12 @@ private:
     bool m_space_done;
     mutable bool m_field_done;
     std::vector<float> m_sigmas;
+	mutable cv::Mat m_voxel_range;
 	mutable cv::Mat m_motion_field;
 	mutable cv::Mat m_motion_field_minimas;
 	mutable std::vector<cv::Point2f> m_segmented_ends;
+	mutable std::vector<cv::Point2f> m_focals;
+	mutable std::vector<cv::Point2f> m_directrix;
 	std::vector<cv::Mat> m_filtered;
 	std::vector<cv::Mat> m_inputs;
     mutable std::vector<cv::Mat> m_dogs;
