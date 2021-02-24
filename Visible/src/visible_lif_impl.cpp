@@ -90,7 +90,7 @@ namespace prt {
     bool getPosSizeFromWindow(const char* last_window, ImVec2& pos, ImVec2& size){
         ImGuiWindow* window = ImGui::FindWindowByName(last_window);
         if (window == nullptr) return false;
-        pos.x = window->Pos.x; pos.y = window->Pos.y + window->Size.y;
+        pos.x = window->Pos.x + window->Size.x; pos.y = window->Pos.y + window->Size.y;
         size.x = window->Size.x; size.y = window->Size.y;
         return true;
     }
@@ -851,91 +851,71 @@ void  visibleContext::update_channel_display_rects (){
 
 
 void visibleContext::add_canvas (){
-    
-    //@note: In ImGui, AddImage is called with uv parameters to specify a vertical flip.
-    auto showImage = [&](const char *windowName,bool *open, const gl::Texture2dRef texture){
-        if (open && *open)
-        {
-            //  ImGuiIO& io = ImGui::GetIO();
-            // ImGui::SetNextWindowBgAlpha(0.4f); // Transparent background
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
-            if (ImGui::Begin(windowName, open)) //, io.ConfigResizeWindowsFromEdges))
-            {
-                ImVec2 pos = ImGui::GetCursorScreenPos(); // actual position
-                draw_list->AddImage(  reinterpret_cast<ImTextureID> (texture->getId()), pos,
-                                    ImVec2(ImGui::GetContentRegionAvail().x + pos.x, ImGui::GetContentRegionAvail().y  + pos.y),
-                                    ImVec2(0,1), ImVec2(1,0));
-                ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
-                ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
-                ImRect regionRect(canvas_pos, canvas_pos + canvas_size);
-                // Update image/display coordinate transformer
-                m_imageDisplayMapper->update_display_rect(canvas_pos, canvas_pos + canvas_size);
-                // Draw Divider between channels
-                ImVec2 midv = m_imageDisplayMapper->image2display(ivec2(0,mSpec.height));
-                ImVec2 midh = m_imageDisplayMapper->image2display(ivec2(mSpec.width, mSpec.height));
-                draw_list->AddLine(midv, midh, IM_COL32(0,0,128,128), 3.0f);
-                
-                int index = 0;
-                auto d_channel = channel_count() - 1;
-                for (const auto& mb : m_lifProcRef->moving_bodies()){
-                    const Point2f& pc = mb->motion_surface().center;
-                    ivec2 iv(pc.x, pc.y);
-                    
-                    ImVec2 ic = m_imageDisplayMapper->image2display(iv, d_channel, true);
-                    auto roi = mb->roi();
-                    auto tl = m_imageDisplayMapper->image2display(ivec2(roi.x, roi.y),  d_channel);
-                    auto br = m_imageDisplayMapper->image2display(ivec2(roi.x+roi.width, roi.y+roi.height),  d_channel);
-                    DrawCross(draw_list, ImVec4(0.0f, 1.0f, 0.0f, 0.5f), ImVec2(16,16), false, tl);
-                    auto selected = DrawCross(draw_list, ImVec4(1.0f, 0.0f, 0.0f, 0.5f), ImVec2(16,16),
-                                              m_selected_cell == index, ic);
-                    if(selected == 2){
-                        if (m_selected_cell < 0)m_selected_cell = index;
-                        else m_selected_cell = -1;
-                        auto sel_string = m_selected_cell < 0 ? " is deselected " : " is selected";
-                        auto msg = " Cell " + tostr(index) + sel_string;
-                        vlogger::instance().console()->info(msg);
-                    }
-                    
-                    if(! mb->poly().empty()){
-                        std::vector<ImVec2> impts;
-                        std::transform(mb->poly().begin(), mb->poly().end(), back_inserter(impts), [&](const cv::Point& f)->ImVec2
-                                       { ivec2 v(f.x,f.y); return m_imageDisplayMapper->image2display(v, d_channel); });
-                        auto nc = numbered_half_colors[index];
-                    //    draw_list->AddConvexPolyFilled( impts.data(), impts.size(), nc);
+	
+		//@note: assumes, next image plus any on image graphics have already been added
+		// offscreen via FBO
+	if(! m_show_playback)
+		return;
 
-                        rotatedRect2ImGui(mb->rotated_roi(),impts);
-                        for (auto ii = 0; ii < impts.size(); ii++){
-                            ivec2 v(impts[ii].x, impts[ii].y);
-                            impts[ii] = m_imageDisplayMapper->image2display(v);
-                        }
-                        draw_list->AddConvexPolyFilled(impts.data(), 4, nc);;
-                    }
-                    
-                    draw_list->AddRect(tl, br, numbered_half_colors[index], 0.0f, 15, 2.0);
-                    
-                    index++;
-                }
-            }
-            ImGui::End();
-        }
-    };
-    
-    //@note: assumes, next image plus any on image graphics have already been added
-    // offscreen via FBO
-    if(m_show_playback){
-        ImVec2 size;
-        ImVec2 pos (300,18);
-        getPosSizeFromWindow(mContentFileName.c_str(), pos, size);
-        size.x = mFrameSize.x+mFrameSize.x/2;
-        size.y = mFrameSize.y+mFrameSize.y/2;
-        auto ww = get_windowRef();
-        
-        ScopedWindowWithFlag utilities(wDisplay, nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_HorizontalScrollbar );
-        ImGui::SetNextWindowPos(pos);
-        ImGui::SetNextWindowSize(size);
-        ImGui::SameLine();
-        showImage(wDisplay, &m_show_playback, mFbo->getColorTexture());
-    }
+	ImGuiIO& io = ImGui::GetIO();
+	auto texture = mFbo->getColorTexture();
+	ScopedWindowWithFlag utilities(wDisplay, &m_show_playback, io.ConfigWindowsResizeFromEdges );
+
+	ImVec2 windowSize = ImGui::GetContentRegionAvail();
+	ImVec2 contentSize (texture->getWidth(), texture->getHeight());
+	ImVec2 constrainedSize = ImGui_Image_Constrain(contentSize, windowSize);
+	ImVec2 start = ImGui::GetWindowPos();
+	start.x += 20.0f;
+	start.y += 20.0f;
+	ImVec2 end(start.x + constrainedSize.x, start.y + constrainedSize.y);
+
+	ImDrawList *draw_list = ImGui::GetWindowDrawList();
+	draw_list->AddImage( reinterpret_cast<ImTextureID> (texture->getId()), start, end, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+	
+	ImRect regionRect(start, end);
+		// Update image/display coordinate transformer
+	m_imageDisplayMapper->update_display_rect(start, end);
+	
+	int index = 0;
+	auto d_channel = channel_count() - 1;
+	for (const auto& mb : m_lifProcRef->moving_bodies()){
+		const Point2f& pc = mb->motion_surface().center;
+		ivec2 iv(pc.x, pc.y);
+		
+		ImVec2 ic = m_imageDisplayMapper->image2display(iv, d_channel, true);
+		auto roi = mb->roi();
+		auto tl = m_imageDisplayMapper->image2display(ivec2(roi.x, roi.y),  d_channel);
+		auto br = m_imageDisplayMapper->image2display(ivec2(roi.x+roi.width, roi.y+roi.height),  d_channel);
+		DrawCross(draw_list, ImVec4(0.0f, 1.0f, 0.0f, 0.5f), ImVec2(16,16), false, tl);
+		auto selected = DrawCross(draw_list, ImVec4(1.0f, 0.0f, 0.0f, 0.5f), ImVec2(16,16),
+								  m_selected_cell == index, ic);
+		if(selected == 2){
+			if (m_selected_cell < 0)m_selected_cell = index;
+			else m_selected_cell = -1;
+			auto sel_string = m_selected_cell < 0 ? " is deselected " : " is selected";
+			auto msg = " Cell " + tostr(index) + sel_string;
+			vlogger::instance().console()->info(msg);
+		}
+		
+		if(! mb->poly().empty()){
+			std::vector<ImVec2> impts;
+			std::transform(mb->poly().begin(), mb->poly().end(), back_inserter(impts), [&](const cv::Point& f)->ImVec2
+						   { ivec2 v(f.x,f.y); return m_imageDisplayMapper->image2display(v, d_channel); });
+			auto nc = numbered_half_colors[index];
+				//    draw_list->AddConvexPolyFilled( impts.data(), impts.size(), nc);
+			
+			rotatedRect2ImGui(mb->rotated_roi(),impts);
+			for (auto ii = 0; ii < impts.size(); ii++){
+				ivec2 v(impts[ii].x, impts[ii].y);
+				impts[ii] = m_imageDisplayMapper->image2display(v);
+			}
+			draw_list->AddConvexPolyFilled(impts.data(), 4, nc);;
+		}
+		
+		draw_list->AddRect(tl, br, numbered_half_colors[index], 0.0f, 15, 2.0);
+		
+		index++;
+	}
 }
 
 /*

@@ -456,7 +456,7 @@ TEST(syn, basic){
 	EXPECT_EQ(img1.channels() , 1);
 	
 
-	auto fit_ellipse = [](const cv::Mat& img){
+	auto fit_ellipse = [](const cv::Mat& img, const std::string& name){
 		cv::Mat lm = img.clone();
 		find_local_minima(img, lm);
 
@@ -482,11 +482,13 @@ TEST(syn, basic){
 		std::cout << " a " << es.a << " b " << es.b << " Angle " << es.phi << std::endl;
 		
 		std::vector<cv::Point2f> ends(2);
+		std::vector<cv::Point2f> focals;
+		std::vector<cv::Point2f> directrix;
 		
-		ends[0].x = es.x - es.a * std::cos(es.phi);
-		ends[0].y = es.y + es.a * std::sin(es.phi);
-		ends[1].x = es.x + es.a * std::cos(es.phi);
-		ends[1].y = es.y - es.a * std::sin(es.phi);
+		es.wide_ends(ends);
+		es.focal_points(focals);
+		es.directrix_points(directrix);
+		
 
 		std::sort(ends.begin(), ends.end(), [](Point2f& a, Point2f&b){ return a.x < b.x; });
 		
@@ -504,6 +506,18 @@ TEST(syn, basic){
 			cv::drawMarker(display, cv::Point(pt.x,pt.y), color);
 		}
 		
+		
+		for (auto pt : focals){
+			auto color = pt.x < boxDirect.center.x ? Scalar(0,255,0) : Scalar(255,0,0);
+			cv::drawMarker(display, cv::Point(pt.x,pt.y), color);
+		}
+
+		for (auto pt : directrix){
+			auto color = pt.x < boxDirect.center.x ? Scalar(0,255,0) : Scalar(255,0,0);
+			cv::drawMarker(display, cv::Point(pt.x,pt.y), color);
+		}
+		
+		
 		for (auto rr : m_rects){
 			auto color = rr.x < boxDirect.center.x ? Scalar(0,255,0) : Scalar(255,0,0);
 			cv::rectangle(display, rr, color);
@@ -511,13 +525,14 @@ TEST(syn, basic){
 		
 		
 		
-		
-		SHOW("Peaks", lm, 0);
-		SHOW("Ellipse", display, 0);
+		std::string title = name + " Peaks ";
+		SHOW(title, lm, 100);
+		title = name + " Ellipse Fit  ";
+		SHOW(title, display, 0);
 	};
 	
-	fit_ellipse(img2);
-	fit_ellipse(img1);
+	fit_ellipse(img2, " motion field 2" );
+	fit_ellipse(img1, " motion field 1" );
 	
 	
 }
@@ -531,91 +546,7 @@ image_progress_callback(void* opaque, float done)
     return false;
 }
 
-//TEST(temporal_median, tiffstack){
-//    auto res = dgenv_ptr->asset_path("C2-nd004_all.tif");
-//    EXPECT_TRUE(res.second);
-//    EXPECT_TRUE(boost::filesystem::exists(res.first));
-//    ustring filename (res.first.c_str());
-//    std::vector<cv::Mat> src_images;
-//
-//
-//
-//    auto build_vector = [&](const ustring& filename, std::vector<cv::Mat>& images){
-//        images.resize(0);
-//        ImageBuf buf(filename);
-//        int nsubimages = buf.nsubimages();
-//        const ImageSpec& bspec = buf.spec();
-//        int xres = bspec.width;
-//        int yres = bspec.height;
-//        buf.threads(1);
-//
-//            // Now read them from cache and display them
-//        for (int ss = 0; ss < nsubimages; ss++){
-//            buf.reset(filename, ss, 0);
-//            std::string datetime = buf.spec().get_string_attribute("DateTime");
-//            ROI roi = buf.roi();
-//            cv::Mat cvb (yres,xres, CV_16U);
-//            cv::Mat cvb8 (yres,xres, CV_8U);
-//
-//            buf.get_pixels(roi, TypeUInt16, cvb.data);
-//            cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
-//            images.push_back(cvb8);
-//        }
-//    };
-//
-//    build_vector(filename, src_images);
-//
-//    auto output_path = dgenv_ptr->output_path();
-//	auto frames_dir = output_path / "frames";
-//    ImageBuf buf(filename);
-//    int nsubimages = buf.nsubimages();
-//
-//#if 0
-//        // Create the ImageOutput
-//    std::unique_ptr<ImageOutput> out = ImageOutput::create (output_path.string());
-//
-//        // Be sure we can support subimages
-//    if (nsubimages > 1 && ! out->supports ("multiimage")) {
-//        std::cerr << "Cannot write multiple subimages\n";
-//        return;
-//    }
-//
-//    ImageSpec U8spec(src_images[0].cols, src_images[0].rows, 1, TypeUInt8);
-//
-//        // Open and declare all subimages
-//    out->open(output_path.string(), U8spec, ImageOutput::OpenMode::Create);
-//
-//        // Be sure we can support subimages
-//    if (nsubimages > 1 &&  (! out->supports("multiimage") ||
-//                           ! out->supports("appendsubimage"))) {
-//        std::cerr << "Does not support appending of subimages\n";
-//        return;
-//    }
-//
-//    EXPECT_TRUE(out->supports ("multiimage"));
-//    EXPECT_TRUE(out->supports ("appendsubimage"));
-//
-//
-//        // Use Create mode for the first level.
-//    ImageOutput::OpenMode appendmode = ImageOutput::Create;
-//#endif
-//
-//    static std::mutex _mu;
-//        // Write the individual subimages
-//    for (int s = 0;  s < nsubimages-2;  ++s) {
-//        std::lock_guard<std::mutex> lock(_mu);
-//
-//        // Produce temporal median of 3 frames
-//        cv::Mat dst;
-//        if (temporal_medianOf3(src_images[s],src_images[s+1], src_images[s+2], dst)){
-//            SHOW(" Median ", dst, 10);
-//			std::string fname = "C2_median"+ to_string(s) + ".tif";
-//			output_path = frames_dir / fname;
-//			cv::imwrite(output_path.c_str(), dst);
-//        }
-//    }
-//
-//}
+
 
 
 TEST(scale_space, basic){
@@ -635,6 +566,11 @@ TEST(scale_space, basic){
         int yres = bspec.height;
         buf.threads(1);
         
+		cv::Mat min_i (yres,xres, CV_8U);
+		min_i = 255;
+		cv::Mat max_i (yres,xres, CV_8U);
+		max_i = 0;
+		
             // Now read them from cache and display them
         for (int ss = 0; ss < nsubimages; ss++){
             buf.reset(filename, ss, 0);
@@ -647,6 +583,7 @@ TEST(scale_space, basic){
 				buf.get_pixels(roi, TypeUInt16, cvb.data);
 				cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
 				images.push_back(cvb8);
+				
 			}else if (bspec.format ==  TypeUInt8){
 				cv::Mat cvb8 (yres,xres, CV_8U);
 				buf.get_pixels(roi, TypeUInt8, cvb8.data);
@@ -655,10 +592,13 @@ TEST(scale_space, basic){
 			else{
 				assert(false);
 			}
+			cv::min(images.back(), min_i, min_i);
+			cv::max(images.back(), max_i, max_i);
+
         }
+		return std::make_pair(min_i,max_i);
     };
 
-    build_vector(filename, src_images);
 
     auto output_path = dgenv_ptr->output_path();
     auto scales_dir = output_path / "scales";
@@ -666,9 +606,13 @@ TEST(scale_space, basic){
     auto dogs_dir = output_path / "dogs";
     dogs_dir = create_if(dogs_dir);
     
-    
+	auto min_max = build_vector(filename, src_images);
+	
     scaleSpace ss;
     ss.generate(src_images, 2, 15, 2);
+	
+	const cv::Mat& mask = ss.voxel_range() / 255;
+	const cv::Mat& output = src_images[0];
     
     std::string msg = " ScaleSpace " ;
     int index = 0;
@@ -694,8 +638,6 @@ TEST(scale_space, basic){
         SHOW(filename.c_str(), rw, 100);
         
     }
- //   bool ok = ss.process_motion_peaks();
- //   ASSERT_TRUE(ok);
     
     auto mm = ss.motion_field();
     
@@ -705,9 +647,33 @@ TEST(scale_space, basic){
     
     std::vector<cv::Rect> rects;
 	std::vector<cv::Point2f> ends;
-	bool ok = ss.process_motion_peaks(16);
+	bool ok = ss.process_motion_peaks(1);
+
+	{
+		cv::Mat planes[] = {src_images[0],src_images[0], src_images[0]};
+		cv::Mat display;
+		cv::merge(planes, 3, display);
+
+		for (auto rr : ss.modeled_ends()){
+			auto color = rr.x < display.cols/2 ? Scalar(0,255,0) : Scalar(255,0,0);
+			cv::rectangle(display, rr, color);
+		}
 	
-  
+		
+		drawEllipseWithBox(display, ss.body(), Scalar(0,0,255), 2);
+	
+		
+		// Create a mask
+		auto image = output.mul(mask);
+		svl::momento mom(image, true);
+		Point2i cm (mom.com().x, mom.com().y);
+		SHOW(" Mask ", image, 0);
+
+	
+	}
+	std::vector<float> dst;
+	rolling_median_3(ss.lengths().begin(), ss.lengths().end(), dst);
+
 	if (ok)
     {
     auto name = " Length ";
@@ -715,7 +681,7 @@ TEST(scale_space, basic){
     cvplot::moveWindow(name, 300, 100);
     cvplot::resizeWindow(name, 1024, 512);
     
-    cvplot::figure(name).series(" L(t) ").addValue(ss.lengths());
+    cvplot::figure(name).series(" L(t) ").addValue(dst);
     cvplot::figure(name).show();
     cv::waitKey();
     }

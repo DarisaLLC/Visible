@@ -18,7 +18,16 @@ using namespace svl;
 /*! Functions related to affine transformations. */
 namespace svl
 {
-    
+
+		// Some utility functions
+  cv::Point2f     toImgCoord(const cv::Point2f& point, const cv::Mat& m, double scale = 1, int shift = 0);
+  cv::Point       toImgCoord(const cv::Point&   point, const cv::Mat& m, double scale = 1, int shift = 0);
+  cv::RotatedRect toImgCoord(const cv::RotatedRect& rect, const cv::Mat& m, float scale = 1);
+  cv::Point2f     toImgCoordInv(const cv::Point2f& point, const cv::Mat& m, double scale = 1, int shift = 0);
+  cv::Point       toImgCoordInv(const cv::Point&   point, const cv::Mat& m, double scale = 1, int shift = 0);
+  cv::RotatedRect toImgCoordInv(const cv::RotatedRect& rect, const cv::Mat& m, float scale = 1);
+
+	
     cv::Mat getPadded (const cv::Mat& src, uiPair pad, double pad_value);
     
     std::string matInfo(const cv::Mat &m);

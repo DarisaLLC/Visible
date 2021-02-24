@@ -33,6 +33,8 @@ bool scaleSpace::generate(const std::vector<roiWindow<P8U>> &images, float start
     return generate(mats, start_sigma, end_sigma, step);
 }
 
+const cv::Mat& scaleSpace::voxel_range() const { return m_voxel_range; }
+
 const cv::Mat& scaleSpace::motion_field() const {
     if (fieldDone()) return m_motion_field;
     
@@ -60,6 +62,9 @@ const std::vector<cv::Mat>& scaleSpace::dog() const {
     return m_dogs;
 }
 
+const std::vector<cv::Rect>& scaleSpace::modeled_ends() const {
+	return m_rects;
+}
 
 bool scaleSpace::detect_moving_profile(const cv::Mat& mof, const iPair& e_size, const iPair& margin){
 	static iPair zerop (0,0);
@@ -104,7 +109,9 @@ bool scaleSpace::detect_moving_profile(const cv::Mat& mof, const iPair& e_size, 
 	return true;
 }
 
-
+/*
+  This code needs to  be refactored to support cells at any angle.
+*/
 
 bool scaleSpace::process_motion_peaks(int model_frame_index, const iPair& e_size, const iPair& margin){
     if (! isLoaded() || ! spaceDone() || ! fieldDone() ) return false;
@@ -114,11 +121,9 @@ bool scaleSpace::process_motion_peaks(int model_frame_index, const iPair& e_size
 	auto ok = scaleSpace::detect_moving_profile(m_motion_field, e_size, margin);
 	
 	if (! ok) return ok;
-	
-	m_segmented_ends[0].x = m_ellipse.x - m_ellipse.a * std::cos(m_ellipse.phi);
-	m_segmented_ends[0].y = m_ellipse.y + m_ellipse.a * std::sin(m_ellipse.phi);
-	m_segmented_ends[1].x = m_ellipse.x + m_ellipse.a * std::cos(m_ellipse.phi);
-	m_segmented_ends[1].y = m_ellipse.y - m_ellipse.a * std::sin(m_ellipse.phi);
+	m_ellipse.wide_ends(m_segmented_ends);
+	m_ellipse.focal_points(m_focals);
+	m_ellipse.directrix_points(m_directrix);
 	
 	std::sort(m_segmented_ends.begin(), m_segmented_ends.end(), [](Point2f& a, Point2f&b){ return a.x < b.x; });
 	
@@ -126,8 +131,9 @@ bool scaleSpace::process_motion_peaks(int model_frame_index, const iPair& e_size
 	iPair halfwidths;
 	halfwidths.first = m_segmented_ends[0].x;
 	halfwidths.second = m_motion_field.cols - m_segmented_ends[1].x;
-	m_rects[0] = cv::Rect(cv::Point2i(m_segmented_ends[0].x,10), cv::Point2i(m_ellipse.x, m_motion_field.rows-10));
-	m_rects[1] = cv::Rect(cv::Point2i(m_ellipse.x,10), cv::Point2i(m_segmented_ends[1].x, m_motion_field.rows-10));
+	m_rects[0] = cv::Rect(cv::Point2i(m_segmented_ends[0].x,10), cv::Point2i(m_ellipse.x-30, m_motion_field.rows-10));
+	m_rects[1] = cv::Rect(cv::Point2i(m_ellipse.x+30,10), cv::Point2i(m_segmented_ends[1].x+20, m_motion_field.rows-10));
+	iPair origins (0, m_rects[1].size().width);
     
     auto model_frame = m_inputs[model_frame_index];
     for (auto rr : m_rects){
@@ -162,6 +168,9 @@ bool scaleSpace::process_motion_peaks(int model_frame_index, const iPair& e_size
             points.emplace_back(matchLoc.x+par_x,matchLoc.y+par_y);
             scores.push_back(maxVal);
         }
+		
+		points[0].x += origins.first;
+		points[1].x += origins.second;
         std::sort(points.begin(), points.end(), [](Point2f& a, Point2f&b){ return a.x > b.x; });
         auto length = std::sqrt(squareOf(points[points.size()-1].x - points[0].x) + squareOf(points[points.size()-1].y - points[0].y));
         m_lengths.push_back(length);
@@ -188,7 +197,7 @@ bool scaleSpace::generate(const std::vector<cv::Mat>& images,
     m_filtered.resize(0);
     m_scale_space.resize(0);
 	m_inputs.resize(0);
-	
+
     auto step_range = end_sigma - start_sigma;
     if (step <= 0 || step_range <= 0) return false;
     int steps = (end_sigma - start_sigma)/step;
@@ -196,6 +205,12 @@ bool scaleSpace::generate(const std::vector<cv::Mat>& images,
 
     // make a cv::mat clone of input images
     cv::Size isize(images[0].cols, images[0].rows);
+	m_voxel_range = cv::Mat(isize.height, isize.width, CV_8U);
+	cv::Mat imin = cv::Mat(isize.height, isize.width, CV_8U);
+	cv::Mat imax = cv::Mat(isize.height, isize.width, CV_8U);
+	imin = 255;
+	imax = 0;
+	
     for (const auto& rw : images){
         if(rw.cols != isize.width || rw.rows != isize.height) return false;
         auto clone = rw.clone();
@@ -203,12 +218,18 @@ bool scaleSpace::generate(const std::vector<cv::Mat>& images,
         m_filtered.push_back(clone);
 		clone = rw.clone();
 		m_inputs.push_back(clone);
+		cv::min(m_inputs.back(), imin, imin);
+		cv::max(m_inputs.back(), imax, imax);
     }
+	auto min_max_d = imax - imin;
+	cv::GaussianBlur(min_max_d, m_voxel_range, cv::Size(0,0), 4.0);
+	cv::threshold(m_voxel_range, m_voxel_range, 0, 255, THRESH_BINARY | THRESH_OTSU);
+	
     m_loaded = m_filtered.size() == images.size();
     int n = static_cast<int>(images.size());
     int n2 = n * (n - 1);
     for (auto scale = start_sigma; scale < end_sigma; scale+=step){
-        cv::Mat sum = cv::Mat(isize.height, isize.width, CV_64F);
+		cv::Mat sum = cv::Mat(isize.height, isize.width, CV_64F);
         cv::Mat sumsq = cv::Mat(isize.height, isize.width, CV_64F);
         sum = 0;
         sumsq = 0;
@@ -352,7 +373,7 @@ bool  voxel_processor::m_load(const std::vector<roiWindow<P8U>> &images,
             for (auto tt = 0; tt < m_voxel_length; tt++) {
                 int idx = indicies.empty() ? tt : indicies[tt];
                 if (! images[idx].contains(org_col, org_row)){
-                    std::cout << org_col << "," << org_row << std::endl;
+                    std::cout << " Voxel " << org_col << "," << org_row << std::endl;
                 }
                 voxel[tt] = images[idx].getPixel(org_col, org_row);
             }
