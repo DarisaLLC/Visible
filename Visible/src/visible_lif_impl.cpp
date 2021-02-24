@@ -51,6 +51,7 @@
 #include "imgui_visible_widgets.hpp"
 #include "nfd.h"
 #include "imGui_utils.h"
+#include "imgui_panel.hpp"
 
 using namespace ci;
 using namespace ci::app;
@@ -935,12 +936,15 @@ void visibleContext::add_result_sequencer (){
     m_results_browser_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowSize(size);
-    
+
     static bool results_open;
     if(ImGui::Begin(wResult, &results_open, ImGuiWindowFlags_AlwaysAutoResize)){
         Sequencer(&m_main_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
     }
     ImGui::End();
+	
+
+	
 }
 
 
@@ -948,7 +952,7 @@ void visibleContext::add_navigation(){
     
     if(m_show_playback){
         
-        ImGuiWindow* window = ImGui::FindWindowByName(wResult);
+        ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
         assert(window != nullptr);
         ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y );
         ImVec2 size (window->Size.x, 100);

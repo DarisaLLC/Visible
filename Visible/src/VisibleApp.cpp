@@ -10,6 +10,7 @@
 
 #include "VisibleApp.h"
 #include "oiio_utils.hpp"
+#include "imgui_panel.hpp"
 //#define __used__
 
 #ifdef __used__
@@ -48,46 +49,40 @@ void VisibleApp::QuitApp(){
 }
 
 void VisibleApp::DrawSettings() {
+	
+	ImGui::ScopedWindow window( " Input ");
     if(! isValid()) return;
-    ImGui::SetNextWindowPos(ImVec2(0, 36), ImGuiCond_Always);
-    if (ImGui::Begin(mCurrentContentName.c_str(), &show_settings_)) {
-        static bool first_time = true;
-        if (first_time) {
-            ImGui::SetNextTreeNodeOpen(true);
-            first_time = false;
-        }
-        if (isOiiOFile())
-        {
-          static int mov_clicked = 0;
-          ImGui::Text("%s", " Click to Load ");
-          ImGui::SameLine();
-          if (ImGui::Button(mCurrentContentName.c_str()))
-              mov_clicked++;
-          if (mov_clicked & 1)
-          {
-            load_oiio_file();
-          }
+	
+	ImGui::BeginGroupPanel(mCurrentContentName.c_str(), {0, 0});
 
-      //  dump_all_extra_attributes(mInputSpec);
-        ImGui::BulletText("Image Size (width: %d, height: %d)", mInputSpec.width, mInputSpec.height);
-        ImGui::BulletText("TimeSteps %d", mInput->nsubimages());
-        ImGui::BulletText("Data Format: %s", mInputSpec.format.c_str());
-        ImGui::BulletText("Number of Channels: %d", mInputSpec.nchannels);
-        for (auto nn = 0; nn < mInputSpec.nchannels; nn++)
-            ImGui::BulletText("Channel(%d) %s", nn, mInputSpec.channelnames[nn].c_str());
-        
-#if 0
-        static int cpipe = pipeline::temporalEntropy;
-        const char* pipeline_names[pipeline::count] = { "Cardiac", "TemporalEntropy", "SpatioTemporalSegmentation", "TemporalIntensity" };
-        const char* pipeline_name = (cpipe >= 0 && cpipe < pipeline::count) ? pipeline_names[cpipe] : "Unknown";
-        ImGui::SliderInt("slider enum", &cpipe, 0, pipeline::count - 1, pipeline_name);
-        ImGui::SameLine(); HelpMarker("Using the format string parameter to display a name instead of the underlying integer.");
-#endif
-        
-        }
-        ImGui::Spacing();
-    }
-    ImGui::End();
+	static bool first_time = true;
+	if (first_time) {
+		ImGui::SetNextTreeNodeOpen(true);
+		first_time = false;
+	}
+	if (isOiiOFile())
+	{
+	  static int mov_clicked = 0;
+	  ImGui::Text("%s", " Click to Load ");
+	  ImGui::SameLine();
+	  if (ImGui::Button(mCurrentContentName.c_str()))
+		  mov_clicked++;
+	  if (mov_clicked & 1)
+	  {
+		load_oiio_file();
+	  }
+
+  //  dump_all_extra_attributes(mInputSpec);
+	ImGui::BulletText("Image Size (width: %d, height: %d)", mInputSpec.width, mInputSpec.height);
+	ImGui::BulletText("TimeSteps %d", mInput->nsubimages());
+	ImGui::BulletText("Data Format: %s", mInputSpec.format.c_str());
+	ImGui::BulletText("Number of Channels: %d", mInputSpec.nchannels);
+	for (auto nn = 0; nn < mInputSpec.nchannels; nn++)
+		ImGui::BulletText("Channel(%d) %s", nn, mInputSpec.channelnames[nn].c_str());
+	}
+	
+	ImGui::EndGroupPanel();
+
 }
 
 
@@ -179,7 +174,7 @@ void VisibleApp::DrawMainMenu(){
     
     if(show_about_) //ImGui::OpenPopup("Help");
     {
-        ImGui::ScopedWindow window( "About");
+		ImGui::ScopedWindow window( "About");
         std::string buildN =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
         buildN = "Visible ( build: " + buildN + " ) ";
         ImGui::TextColored(ImVec4(0.92f, 0.18f, 0.29f, 1.00f), "%s", buildN.c_str());
