@@ -369,6 +369,7 @@
 		C2DA195B1E80E4E200062DBC /* csv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2DA19561E7F30D800062DBC /* csv.cpp */; };
 		C2E0EE621F7B079300D32697 /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693D1CED3E2B0045FF57 /* libgtest.a */; };
 		C2E0EE631F7B079600D32697 /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693E1CED3E2B0045FF57 /* libgtest_main.a */; };
+		C2E1F73025E6C43C009B28E5 /* imgui_panel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E1F72E25E6C43C009B28E5 /* imgui_panel.cpp */; };
 		C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
 		C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
 		C2ED059C22D158ED00314C1B /* labelconnect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696A1CED3E2C0045FF57 /* labelconnect.cpp */; };
@@ -873,6 +874,8 @@
 		C2DB59B221557CF800750C2E /* result_serialization.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = result_serialization.h; path = ../include/result_serialization.h; sourceTree = "<group>"; };
 		C2E02ED1225AB45E00AC175D /* MovContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MovContext.h; path = ../include/MovContext.h; sourceTree = "<group>"; };
 		C2E02ED2225AB49900AC175D /* ssmt.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ssmt.hpp; path = ../include/ssmt.hpp; sourceTree = "<group>"; };
+		C2E1F72E25E6C43C009B28E5 /* imgui_panel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_panel.cpp; path = ../include/imGuiCustom/imgui_panel.cpp; sourceTree = "<group>"; };
+		C2E1F72F25E6C43C009B28E5 /* imgui_panel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = imgui_panel.hpp; path = ../include/imGuiCustom/imgui_panel.hpp; sourceTree = "<group>"; };
 		C2E321FF1D0480E4006DFE5E /* mediaInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mediaInfo.h; path = ../include/mediaInfo.h; sourceTree = "<group>"; };
 		C2E3F55C213D9408007B1088 /* labelBlob.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = labelBlob.cpp; sourceTree = "<group>"; };
 		C2E3F560213D9483007B1088 /* labelBlob.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = labelBlob.hpp; sourceTree = "<group>"; };
@@ -1333,6 +1336,8 @@
 		C23E346521F254F200221E68 /* imGuiCustom */ = {
 			isa = PBXGroup;
 			children = (
+				C2E1F72F25E6C43C009B28E5 /* imgui_panel.hpp */,
+				C2E1F72E25E6C43C009B28E5 /* imgui_panel.cpp */,
 				C2872DBD25BFCC5A0051DF1E /* imGui_utils.h */,
 				C2872DBE25C087220051DF1E /* imgui_utils.cpp */,
 				C25BCA502464BB9C003386B6 /* dirent_portable.h */,
@@ -2096,6 +2101,7 @@
 				C28595FB248468F700C9CCFB /* CinderImGui.cpp in Sources */,
 				C2A5DBAC207A003C001C6608 /* PlistDate.cpp in Sources */,
 				C2AC7A6C24808A2C00853219 /* nfd_common.c in Sources */,
+				C2E1F73025E6C43C009B28E5 /* imgui_panel.cpp in Sources */,
 				C28595FE2484690200C9CCFB /* imgui_draw.cpp in Sources */,
 				C21A506922A9835A00B0AC7D /* stats.cpp in Sources */,
 				C23E346021F2511D00221E68 /* ImSequencer.cpp in Sources */,
