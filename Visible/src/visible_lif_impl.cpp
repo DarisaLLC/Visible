@@ -917,6 +917,14 @@ void visibleContext::add_canvas (){
 		
 		index++;
 	}
+	
+	add_navigation();
+	// Put result player after image rect.
+	end.x = 0;
+	ImGui::SetCursorPos(end);
+	add_result_sequencer();
+
+	
 }
 
 /*
@@ -932,16 +940,18 @@ void visibleContext::add_result_sequencer (){
     static int64 firstFrame = 0;
     static bool expanded = true;
     ImVec2 pos, size;
-    assert(getPosSizeFromWindow(wDisplay, pos, size));
-    m_results_browser_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
-    ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(size);
+//    assert(getPosSizeFromWindow(wDisplay, pos, size));
+//    m_results_browser_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
+//    ImGui::SetNextWindowPos(pos);
+//    ImGui::SetNextWindowSize(size);
 
-    static bool results_open;
-    if(ImGui::Begin(wResult, &results_open, ImGuiWindowFlags_AlwaysAutoResize)){
-        Sequencer(&m_main_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
-    }
-    ImGui::End();
+//    static bool results_open;
+//    if(ImGui::Begin(wResult, &results_open, ImGuiWindowFlags_AlwaysAutoResize)){
+	  ImGui::BeginGroup();
+		Sequencer(&m_main_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
+	ImGui::EndGroup();
+ //   }
+ //   ImGui::End();
 	
 
 	
@@ -952,22 +962,22 @@ void visibleContext::add_navigation(){
     
     if(m_show_playback){
         
-        ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
-        assert(window != nullptr);
-        ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y );
-        ImVec2 size (window->Size.x, 100);
-        
-        ScopedWindowWithFlag utilities(wNavigator, nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-        m_navigator_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
-        ImGui::SetNextWindowPos(pos);
-        ImGui::SetNextWindowSize(size);
+//        ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
+//        assert(window != nullptr);
+//        ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y );
+//        ImVec2 size (window->Size.x, 100);
+//
+//        ScopedWindowWithFlag utilities(wNavigator, nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+//        m_navigator_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
+//        ImGui::SetNextWindowPos(pos);
+//        ImGui::SetNextWindowSize(size);
         ImGui::SameLine();
         ImGui::BeginGroup();
         {
             ImGui::PushItemWidth(40);
-            ImGui::PushID(200);
-            ImGui::InputInt("", &m_main_seq.mFrameMin, 0, 0);
-            ImGui::PopID();
+//            ImGui::PushID(200);
+//            ImGui::InputInt("", &m_main_seq.mFrameMin, 0, 0);
+//            ImGui::PopID();
             ImGui::SameLine();
             if (ImGui::Button("|<"))
                 seekToStart();
@@ -1000,10 +1010,10 @@ void visibleContext::add_navigation(){
             if (ImGui::ImageButton((ImTextureID)(uint64_t)(m_is_looping ? playLoopTextureId : playNoLoopTextureId), ImVec2(16.f, 16.f)))
                 loop_no_loop_button();
             
-            ImGui::SameLine();
-            ImGui::PushID(202);
-            ImGui::InputInt("",  &m_main_seq.mFrameMax, 0, 0);
-            ImGui::PopID();
+//            ImGui::SameLine();
+//            ImGui::PushID(202);
+//            ImGui::InputInt("",  &m_main_seq.mFrameMax, 0, 0);
+//            ImGui::PopID();
             ImGui::SameLine();
             if (ImGui::Button(m_playback_speed == 10 ? " 1 " : " 10x "))
             {
@@ -1229,8 +1239,8 @@ void visibleContext::add_contractions (bool* p_open)
 void  visibleContext::DrawGUI(){
     
     add_canvas();
-    add_result_sequencer();
-    add_navigation();
+//    add_result_sequencer();
+//    add_navigation();
     m_show_cells = true;
     add_contractions(&m_show_cells);
 //    add_motion_profile ();
