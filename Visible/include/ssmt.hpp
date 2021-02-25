@@ -357,6 +357,8 @@ public:
     
 private:
     bool run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>>& images);
+	bool run_scale_space (const std::vector<roiWindow<P8U>>& images);
+	
     ssmt_result (const moving_region&,const input_section_selector_t& in);
     void signal_sm1d_ready (vector<float>&, const input_section_selector_t&);
     void contraction_ready (contractionLocator::contractionContainer_t& contractions, const input_section_selector_t&);
@@ -376,6 +378,8 @@ private:
     
     ssmt_processor::channel_images_t m_images;
     ssmt_processor::channel_vec_t m_all_by_channel;
+	
+	mutable scaleSpace m_scale_space;
     
     uint64_t m_frameCount;
     uint32_t m_channel_count;

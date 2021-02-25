@@ -148,9 +148,14 @@ bool ssmt_result::get_channels (int channel){
     }
     while (++vitr != rws.end());
     bool check = m_all_by_channel[channel].size() == total;
+	
     return check && count == total;
 }
 
+bool ssmt_result::run_scale_space (const std::vector<roiWindow<P8U>>& images){
+	
+	return m_scale_space.generate(images,  2, 15, 2);
+}
 
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled
