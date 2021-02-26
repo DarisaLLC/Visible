@@ -81,6 +81,13 @@ void VisibleApp::DrawSettings() {
 		ImGui::BulletText("Channel(%d) %s", nn, mInputSpec.channelnames[nn].c_str());
 	}
 	
+	ImGui::BeginGroup();
+	bool changed = false;
+	changed |= ImGui::InputFloat(" Magnification X ", &m_magnification, 0.5, 2.0);
+	m_magnification = svl::math<float>::clamp(m_magnification, 0.01f, 100.0f);
+	ImGui::EndGroup();
+	
+	
 	ImGui::EndGroupPanel();
 
 }
@@ -400,7 +407,7 @@ bool VisibleApp::load_oiio_file(){
     if (exists(mCurrentContent)){
             WindowRef ww = getWindow ();
             auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
-            mContext =  std::make_shared<visibleContext> (ww, mInput, m_mspec, cache_path, bpath_path);
+            mContext =  std::make_shared<visibleContext> (ww, mInput, m_mspec, cache_path, bpath_path), magnification();
             update();
             
             ww->setTitle ( cmds + " Visible build: " + mBuildn);

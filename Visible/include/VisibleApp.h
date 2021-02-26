@@ -103,6 +103,10 @@ public:
     bool shouldQuit();
     bool isValid() const { return m_is_valid_file; }
     bool isOiiOFile() const { return isValid() && m_is_oiio_file; }
+	void magnification (const float& mmag) const { m_magnification = mmag; }
+	float magnification () const { return m_magnification; }
+	
+	
     void launchViewer ();
     
 private:
@@ -111,6 +115,8 @@ private:
     ImageCache* mCachePtr = nullptr;
     ImageSpec mInputSpec;
     mediaSpec m_mspec;
+	mutable float m_magnification;
+	
     
     // return null for unacceptable file or dot extension, i.e. ".lif" or ".mov" or ".mp4", etc
     std::string identify_file(const bfs::path& mfile, const std::string& content_type);

@@ -270,7 +270,18 @@ get_intsample_maxval(const ImageSpec& spec)
     return 0;
 }
 
-
+TEST (ut_integral, basic){
+	Mat M = (Mat_<uint8_t>(3,3) << 1, 0, 0, 0, 1, 0, 0, 0, 1);
+	Mat sum = M.clone();
+		// create local variance filter size runner
+	svl::localVAR tv (cv::Size(3,2));
+	cv::Mat var0;
+	cv::Mat std0U8;
+	tv.process(out0, var0);
+	EXPECT_EQ(tv.min_variance() , 0);
+	EXPECT_EQ(tv.max_variance() , 11712);
+	
+}
 
 TEST (ut_dm, block){
     
@@ -308,11 +319,7 @@ TEST (ut_dm, block){
     EXPECT_TRUE(check);
     std::cout << std::boolalpha << check << std::endl;
     
-    
-//    SHOW("gtmpl", gm, 0);
-//    SHOW("fixed", fimage, 0);
-//    SHOW("moving", mimage, 0);
-    
+
     
 }
 
@@ -608,7 +615,7 @@ TEST(scale_space, basic){
     
 	auto min_max = build_vector(filename, src_images);
 	
-    scaleSpace ss;
+    lengthFromMotion ss;
     ss.generate(src_images, 2, 15, 2);
 	
 	const cv::Mat& mask = ss.voxel_range() / 255;

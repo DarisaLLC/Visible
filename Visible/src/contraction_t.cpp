@@ -365,8 +365,10 @@ bool contractionLocator::locate_contractions (){
     }
     return true;
 }
-        // @todo: add multi-contraction
-bool contractionLocator::profile_contractions (){
+        // Note: Lengths are in units of microns.
+		// lengthFromMotion is created with Magnification X
+		// And converts accordingly
+bool contractionLocator::profile_contractions (const std::vector<float>& lengths){
     perf::timer timeit;
     timeit.start();
     
@@ -378,8 +380,8 @@ bool contractionLocator::profile_contractions (){
         
         // Contraction gets a unique id by contraction profiler
         if(get_contraction_at_point(pp, m_peaks_idx, ct)){
-            auto profile = contractionProfile::create(ct);
-            profile->compute_interpolated_geometries_and_force(m_signal);
+            auto profile = contractionProfile::create(ct, m_signal, lengths);
+            profile->compute_interpolated_geometries_and_force();
             m_contractions.emplace_back(profile->contraction());
 //          @todo progress & report 
         }
@@ -443,9 +445,10 @@ bool contractionLocator::verify_input () const
 
 template boost::signals2::connection contractionLocator::registerCallback(const std::function<contractionLocator::sig_cb_contraction_ready>&);
 
-contractionProfile::contractionProfile (contraction_t& ct): m_ctr(ct)
+contractionProfile::contractionProfile (contraction_t& ct, const std::vector<double>& signal,const std::vector<float>& lengths ):
+m_ctr(ct), m_lengths(lengths)
 {
-    
+	for (const auto dd : signal) m_fder.push_back((float)dd);
 }
 
 
@@ -456,12 +459,16 @@ contractionProfile::contractionProfile (contraction_t& ct): m_ctr(ct)
  *
  */
 
-void contractionProfile::compute_interpolated_geometries_and_force(const std::vector<double>& signal){
+void contractionProfile::compute_interpolated_geometries_and_force(){
     perf::timer timeit;
     timeit.start();
-     
-    const double relaxed_length = m_ctr.relaxation_visual_rank;
-    for (auto dd : signal) m_fder.push_back((float)dd);
+	
+	
+    double relaxed_length = m_ctr.relaxation_visual_rank;
+	if (!m_lengths.empty()){
+		relaxed_length = Median(m_lengths);
+	}
+ 
 
     /*
      * Compute everything within contraction interval
@@ -479,13 +486,21 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
     cmm.shear_control(1.0f);
     cmm.shear_velocity(200.0_cm_s);
     m_ctr.cardioModel = cmm;
-    
+	if (!m_lengths.empty()){
+		auto minIter = std::min_element(m_lengths.begin(), m_lengths.end());
+		if (minIter != m_lengths.end())
+			m_ctr.contraction_length = *minIter;
+	}
+	
     for (auto ii = c_start; ii < c_end; ii++)
     {
-        const auto & reading = m_fder[ii];
-        auto linMul = clampValue(reading/relaxed_length, 0.0, 1.0);
+        auto linMul = clampValue(m_fder[ii]/relaxed_length, 0.0, 1.0);
         auto elon = relaxed_length - linMul;
-        
+		if (! m_lengths.empty()){
+			linMul = m_lengths[ii];
+			elon = relaxed_length - linMul;
+		}
+	
         cmm.length(linMul * boost::units::cgs::micron);
         cmm.elongation(elon * boost::units::cgs::micron);
         cmm.width((linMul/3.0) * boost::units::cgs::micron);
@@ -500,7 +515,9 @@ void contractionProfile::compute_interpolated_geometries_and_force(const std::ve
     m_ctr.force = m_force;
     m_ctr.elongation = m_elongation;
     m_ctr.normalized_length = m_interpolated_length;
-    
+	m_ctr.length = m_lengths;
+	m_ctr.relaxed_length = relaxed_length;
+
     
     timeit.stop();
     auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
