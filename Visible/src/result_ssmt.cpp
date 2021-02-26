@@ -48,7 +48,12 @@ const ssmt_result::ref_t ssmt_result::create (std::shared_ptr<ssmt_processor>& p
 
 ssmt_result::ssmt_result(const moving_region& mr,const input_section_selector_t& in):moving_region(mr),  m_input(in) {
     // Create a contraction object
-    m_caRef = contractionLocator::create (in, mr.id());
+	contractionLocator::params default_params;
+	auto shared_parent = m_weak_parent.lock();
+	if(shared_parent){
+		default_params.magnification(shared_parent->parameters().magnification());
+	}
+    m_caRef = contractionLocator::create (in, mr.id(), default_params);
     
     // Suport lif_processor::Contraction Analyzed
     std::function<void (contractionLocator::contractionContainer_t&,const input_section_selector_t& in)>ca_analyzed_cb =
@@ -88,10 +93,15 @@ void ssmt_result::process (){
     if(done){
         auto pci_done = run_selfsimilarity_on_region(m_all_by_channel[m_input.section()]);
         if(pci_done){
-
             m_caRef->locate_contractions();
-            m_caRef->profile_contractions();
         }
+		auto ss_done = run_scale_space(m_all_by_channel[m_input.section()]);
+		if(ss_done){
+			m_scale_space.process_motion_peaks();
+		}
+		if(pci_done && ss_done){
+			m_caRef->profile_contractions(m_scale_space.lengths());
+		}
     }
 }
 
@@ -154,7 +164,7 @@ bool ssmt_result::get_channels (int channel){
 
 bool ssmt_result::run_scale_space (const std::vector<roiWindow<P8U>>& images){
 	
-	return m_scale_space.generate(images,  2, 15, 2);
+	return m_scale_space.generate(images,  2, 15, 2, m_caRef->parameters().magnification());
 }
 
 // Run to get Entropies and Median Level Set

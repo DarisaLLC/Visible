@@ -24,18 +24,18 @@ using namespace stl_utils;
 
 
 
-bool scaleSpace::generate(const std::vector<roiWindow<P8U>> &images, float start_sigma, float end_sigma, float step){
+bool lengthFromMotion::generate(const std::vector<roiWindow<P8U>> &images, float start_sigma, float end_sigma, float step, float magX){
     std::vector<cv::Mat> mats;
     for (auto& rw : images){
         cvMatRefroiP8U(rw,cvmat,CV_8U);
         mats.push_back(cvmat.clone());
     }
-    return generate(mats, start_sigma, end_sigma, step);
+    return generate(mats, start_sigma, end_sigma, step, magX);
 }
 
-const cv::Mat& scaleSpace::voxel_range() const { return m_voxel_range; }
+const cv::Mat& lengthFromMotion::voxel_range() const { return m_voxel_range; }
 
-const cv::Mat& scaleSpace::motion_field() const {
+const cv::Mat& lengthFromMotion::motion_field() const {
     if (fieldDone()) return m_motion_field;
     
     m_motion_field = cv::Mat(space()[0].rows, space()[0].cols, CV_8U);
@@ -57,16 +57,16 @@ const cv::Mat& scaleSpace::motion_field() const {
     return m_motion_field;
 }
     
-const std::vector<cv::Mat>& scaleSpace::dog() const {
+const std::vector<cv::Mat>& lengthFromMotion::dog() const {
     motion_field();
     return m_dogs;
 }
 
-const std::vector<cv::Rect>& scaleSpace::modeled_ends() const {
+const std::vector<cv::Rect>& lengthFromMotion::modeled_ends() const {
 	return m_rects;
 }
 
-bool scaleSpace::detect_moving_profile(const cv::Mat& mof, const iPair& e_size, const iPair& margin){
+bool lengthFromMotion::detect_moving_profile(const cv::Mat& mof, const iPair& e_size, const iPair& margin){
 	static iPair zerop (0,0);
 
 	// Sanity check: margin and structuring element required to be less than quarter of the input image size
@@ -113,12 +113,12 @@ bool scaleSpace::detect_moving_profile(const cv::Mat& mof, const iPair& e_size, 
   This code needs to  be refactored to support cells at any angle.
 */
 
-bool scaleSpace::process_motion_peaks(int model_frame_index, const iPair& e_size, const iPair& margin){
-    if (! isLoaded() || ! spaceDone() || ! fieldDone() ) return false;
+bool lengthFromMotion::process_motion_peaks(int model_frame_index, const iPair& e_size, const iPair& margin){
+    if (! isLoaded() || ! spaceDone()  ) return false;
     
     m_all_rects.resize(0);
 	m_segmented_ends.resize(2);
-	auto ok = scaleSpace::detect_moving_profile(m_motion_field, e_size, margin);
+	auto ok = lengthFromMotion::detect_moving_profile(motion_field(), e_size, margin);
 	
 	if (! ok) return ok;
 	m_ellipse.wide_ends(m_segmented_ends);
@@ -173,12 +173,12 @@ bool scaleSpace::process_motion_peaks(int model_frame_index, const iPair& e_size
 		points[1].x += origins.second;
         std::sort(points.begin(), points.end(), [](Point2f& a, Point2f&b){ return a.x > b.x; });
         auto length = std::sqrt(squareOf(points[points.size()-1].x - points[0].x) + squareOf(points[points.size()-1].y - points[0].y));
-        m_lengths.push_back(length);
+        m_lengths.push_back(length * m_microns_per_pixel);
     }
     return true;
 }
 
-bool scaleSpace::length_extremes(fPair& extremes) const {
+bool lengthFromMotion::length_extremes(fPair& extremes) const {
     if (m_scale_space.empty() || m_lengths.empty() || m_scale_space.size() != m_lengths.size())
         return false;
     
@@ -190,13 +190,14 @@ bool scaleSpace::length_extremes(fPair& extremes) const {
     return (extremes.second - extremes.first) > 1.0f;
     
 }
-bool scaleSpace::generate(const std::vector<cv::Mat>& images,
-                          float start_sigma, float end_sigma, float step){
+bool lengthFromMotion::generate(const std::vector<cv::Mat>& images,
+                          float start_sigma, float end_sigma, float step, float magX){
     
     // check start, end and step are positive and end-start is multiple of step
     m_filtered.resize(0);
     m_scale_space.resize(0);
 	m_inputs.resize(0);
+	m_microns_per_pixel = 10.0f / magX ; // 10x is 1 micron.
 
     auto step_range = end_sigma - start_sigma;
     if (step <= 0 || step_range <= 0) return false;

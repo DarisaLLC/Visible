@@ -55,13 +55,17 @@ struct contractionMesh : public std::pair<size_t,size_t>
     float contraction_peak_interpolated;
     
     double relaxation_visual_rank;
-    double max_length;
+	
+    double contraction_length;
+	double relaxed_length;
+	
     contraction_id_t m_bid;
     cell_id_t m_uid;
  
-   sigContainer_t             elongation;
-   sigContainer_t             normalized_length;
-   sigContainer_t             force;
+    sigContainer_t             elongation;
+    sigContainer_t             normalized_length;
+	sigContainer_t             force;
+	sigContainer_t             length;
     
     cm::cardio_model               cardioModel;
 
@@ -130,7 +134,8 @@ public:
     
     class params{
     public:
-        params ():m_median_levelset_fraction(0.07), m_minimum_contraction_time (0.32), m_frame_duration(0.020){
+        params ():m_median_levelset_fraction(0.07), m_minimum_contraction_time (0.32), m_frame_duration(0.020),
+		m_magnification_x(10.0f) {
             update ();
         }
         float median_levelset_fraction()const {return m_median_levelset_fraction; }
@@ -147,11 +152,16 @@ public:
         }
         
         uint32_t minimum_contraction_frames () const { return m_pad_frames; }
+		
+		void magnification (const float& mmag) const { m_magnification_x = mmag; }
+		float magnification () const { return m_magnification_x; }
+		
         
     private:
         void update () const {
             m_pad_frames = m_minimum_contraction_time / m_frame_duration;
         }
+		mutable float m_magnification_x;
         mutable float m_median_levelset_fraction;
         mutable float m_minimum_contraction_time;
         mutable float m_frame_duration;
@@ -182,12 +192,14 @@ public:
     // If no self-similarity matrix is given, entropies are assumed to be filtered and used directly
     // // input selector -1 entire index mobj index
     void load (const vector<double>& entropies, const vector<vector<double>>& mmatrix = vector<vector<double>>());
+	
+	const contractionLocator::params& parameters () const { return m_params; }
 
     // Update with most recent median level set
     void update () const;
     
     bool locate_contractions () ;
-    bool profile_contractions ();
+    bool profile_contractions (const std::vector<float>& lengths = std::vector<float>());
 
     
     bool isValid () const { return mValidInput; }
@@ -281,20 +293,21 @@ public:
     using index_val_t = contractionMesh::index_val_t;
     using sigContainer_t = contractionMesh::sigContainer_t;
     
-    contractionProfile (contraction_t&);
+    contractionProfile (contraction_t&, const std::vector<double>& signal, const std::vector<float>& lengths = std::vector<float>());
 
-    static profileRef create(contraction_t& ct){
-        return profileRef(new contractionProfile(ct));
+    static profileRef create(contraction_t& ct, const std::vector<double>& signal, const std::vector<float>& lengths = std::vector<float>()){
+        return profileRef(new contractionProfile(ct, signal, lengths));
     }
     // Compute Length Interpolation for measured contraction
-    void compute_interpolated_geometries_and_force(const std::vector<double>& );
+    void compute_interpolated_geometries_and_force();
     
     const contraction_t& contraction () const { return m_ctr; }
     const double& relaxed_length () const { return m_relaxed_length; }
     const sigContainer_t& profiled () const { return m_fder; }
     const sigContainer_t& force () const { return m_force; }
     const sigContainer_t& interpolatedLength () const { return m_interpolated_length; }
-    const sigContainer_t& elongation () const { return m_elongation; }
+	const sigContainer_t& elongation () const { return m_elongation; }
+	const sigContainer_t& lengths () const { return m_lengths; }
     
     
 private:
@@ -303,7 +316,8 @@ private:
     std::pair<uRadian,double> m_ls_result;
     mutable contraction_t m_ctr;
     double m_relaxed_length;
-    mutable std::vector<float> m_fder;
+	mutable std::vector<float> m_fder;
+	mutable std::vector<float> m_lengths;
     cell_id_t m_id;
     mutable sigContainer_t m_interpolated_length;
     mutable sigContainer_t m_elongation;

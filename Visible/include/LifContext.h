@@ -62,7 +62,8 @@ public:
                const mediaSpec& mspec,
                const bfs::path&,
                const bfs::path&,
-                   const pipeline which_pipeline = pipeline::cardiac);
+                   const pipeline which_pipeline = pipeline::cardiac,
+				   const float magnification = 10.0f);
     
     std::shared_ptr<visibleContext> shared_from_above(){
         return std::dynamic_pointer_cast<visibleContext>(shared_from_this ());
@@ -137,9 +138,13 @@ public:
     bool isVisualEntropyPipeline () const { return m_operation == pipeline::temporalEntropy; }
     bool isSpatioTemporalPipeline () const { return m_operation == pipeline::spatioTemporalSegmentation; }
     bool isTemporalIntensityPipeline () const { return m_operation == pipeline::temporalIntensity; }
-    
+	void magnification (const float& mmag) const { m_magnification = mmag; }
+	float magnification () const { return m_magnification; }
     
 private:
+
+	mutable float m_magnification;
+	
     mutable pipeline m_operation;
     
     void renderToFbo (const SurfaceRef&, gl::FboRef& );

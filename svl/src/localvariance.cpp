@@ -89,7 +89,7 @@ namespace svl
     
     bool localVAR::process(const cv::Mat& _image, cv::Mat& result) const
     {
-        if (m_fsize.width < 2 || m_fsize.height < 2) return false;
+        if (m_fsize.width < 1 || m_fsize.height < 1) return false;
         
         // Allocate intergral image: 1 bigger in each dimension
         allocate_images (_image);

@@ -174,6 +174,7 @@ protected:
 	
 	gl::FboRef mFbo, mFbo2;
 	gl::GlslProgRef mShader;
+
 	
 };
 

@@ -80,8 +80,11 @@ public:
             static std::string s_internal_container_cache_name = "internal_ss_";
             return s_internal_container_cache_name;
         }
+		void magnification (const float& mmag) const { m_magnification_x = mmag; }
+		float magnification () const { return m_magnification_x; }
         
     private:
+		mutable float m_magnification_x;
         mutable voxel_params_t m_vparams;
         mutable TypeDesc m_type;
     };
@@ -379,7 +382,7 @@ private:
     ssmt_processor::channel_images_t m_images;
     ssmt_processor::channel_vec_t m_all_by_channel;
 	
-	mutable scaleSpace m_scale_space;
+	mutable lengthFromMotion m_scale_space;
     
     uint64_t m_frameCount;
     uint32_t m_channel_count;

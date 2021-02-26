@@ -129,12 +129,13 @@ visibleContext::visibleContext(ci::app::WindowRef& ww,
                        const mediaSpec& mspec,
                        const bfs::path& cache_path,
                        const bfs::path& content_path,
-                               const pipeline pl) :
+                               const pipeline pl, const float magnification) :
                         sequencedImageContext(ww),
                         mImageCache (sd),
                         m_mspec (mspec),
                         m_voxel_view_available(false),
-                        mUserStorageDirPath (cache_path),mPath(content_path)
+                        mUserStorageDirPath (cache_path),mPath(content_path),
+						m_magnification (magnification)
 {
     m_type = guiContext::Type::lif_file_viewer;
     m_show_contractions = false;
@@ -184,6 +185,8 @@ void visibleContext::setup_signals(){
     
     // Create a Processing Object to attach signals to
     ssmt_processor::params params (mSpec.format);
+	params.magnification(magnification());
+	
     m_lifProcRef = std::make_shared<ssmt_processor> ( mCurrentCachePath, params);
     
     // Support lifProcessor::content_loaded
@@ -1095,18 +1098,21 @@ void visibleContext::draw_contraction_plots(const contractionLocator::contractio
     contraction_t::sigContainer_t force = ct.force;
     auto elon = ct.elongation;
     auto elen = ct.normalized_length;
+	auto length = ct.length;
+	
     svl::norm_min_max (force.begin(), force.end(), true);
     svl::norm_min_max (elon.begin(), elon.end(), true);
-    svl::norm_min_max (elen.begin(), elen.end(), true);
+	svl::norm_min_max (elen.begin(), elen.end(), true);
+	svl::norm_min_max (length.begin(), length.end(), true);
     
     //    static const float* y_data[] = force.data();
-    static ImU32 colors[3] = { ImColor(0, 255, 0), ImColor(255, 0, 0), ImColor(0, 0, 255) };
+    static ImU32 colors[4] = { ImColor(0, 255, 0), ImColor(255, 0, 0), ImColor(0, 0, 255), ImColor(128, 0, 128) };
     std::vector<float> x_data;
     std::generate(x_data.begin(), x_data.end(), [] {
         static int i = 0;
         return i++;
     });
-    std::string names [] = { " Force ", " Shortenning ", " Length Normalized " };
+    std::string names [] = { " Force ", " Shortenning ", " Length Normalized ", "length"};
     
     auto plot = [=](const contraction_t::sigContainer_t& values, std::string& name, ImU32 color,int framewidth, int frameheight){
         static uint32_t selection_start = 0, selection_length = 0;
@@ -1133,9 +1139,11 @@ void visibleContext::draw_contraction_plots(const contractionLocator::contractio
     plot(force, names[0], colors[0], 128, 200);
     ImGui::SameLine();
     plot(elon, names[1], colors[1], 128,200);
-    ImGui::SameLine();
+	ImGui::SameLine();
     plot(elen, names[2], colors[2], 128, 200);
-    ImGui::End();
+	ImGui::SameLine();
+	plot(length, names[3], colors[3], 128, 200);
+	ImGui::End();
     
     
 }
@@ -1160,6 +1168,8 @@ bool  visibleContext::save_contraction_plots(const contractionLocator::contracti
             stl_utils::save_csv(cp.normalized_length, fn);
             fn = basefilename + "elongation.csv";
             stl_utils::save_csv(cp.elongation, fn);
+			fn = basefilename + "length.csv";
+			stl_utils::save_csv(cp.length, fn);
             return true;
         }
         return false;
@@ -1218,6 +1228,8 @@ void visibleContext::add_contractions (bool* p_open)
                     ImGui::Text(" Contraction Start : %d", int(ct.contraction_start.first));
                     ImGui::Text(" Contraction Peak : %d", int(ct.contraction_peak.first));
                     ImGui::Text(" Relaxation End : %d", int(ct.relaxation_end.first));
+					ImGui::Text(" Relaxed Length: %d", int(ct.relaxed_length));
+					ImGui::Text(" Contracted Length: %d", int(ct.contraction_length));
                 }
                 ImGui::TreePop();
             }

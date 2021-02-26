@@ -247,12 +247,12 @@ private:
  */
 
 
-class scaleSpace{
+class lengthFromMotion{
 public:
-    scaleSpace(): m_loaded(false), m_space_done(false), m_field_done(false), m_trim(iPair(24,24)) {}
+    lengthFromMotion(): m_loaded(false), m_space_done(false), m_field_done(false), m_trim(iPair(24,24)) {}
     
-    bool generate(const std::vector<roiWindow<P8U>> &images, float start_sigma, float end_sigma, float step);
-    bool generate(const std::vector<cv::Mat> &images,float start_sigma, float end_sigma, float step);
+    bool generate(const std::vector<roiWindow<P8U>> &images, float start_sigma, float end_sigma, float step, float magX = 10.0f);
+    bool generate(const std::vector<cv::Mat> &images,float start_sigma, float end_sigma, float step, float magX = 10.0f);
 	bool process_motion_peaks (int model_frame_index = 0, const iPair& = iPair(3,3), const iPair& = iPair(10,10));
     
     const std::vector<float> estimated_lengths (int model_frame_index = 0, const iPair& trim = iPair(24,24)) const;
@@ -271,6 +271,7 @@ public:
 	const cv::RotatedRect& body() const { return m_body; }
 	const ellipseShape& ellipse_shape() const { return m_ellipse; }
 	const cv::Mat& voxel_range () const;
+	float microns_per_pixel () const { return m_microns_per_pixel; }
 	
     
     
@@ -314,6 +315,7 @@ private:
 	double m_profile_threshold;
 	mutable cv::RotatedRect m_body;
 	mutable ellipseShape m_ellipse;
+	mutable float m_microns_per_pixel;
     
 };
 
