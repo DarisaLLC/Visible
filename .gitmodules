@@ -17,3 +17,6 @@
 [submodule "externals/albatross"]
 	path = externals/albatross
 	url = https://github.com/swift-nav/albatross.git
+[submodule "externals/implot"]
+	path = externals/implot
+	url = git@github.com:epezent/implot.git
