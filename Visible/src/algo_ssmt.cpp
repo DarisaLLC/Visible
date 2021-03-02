@@ -138,16 +138,11 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
 
 
 // Update. Called when cutoff offset has changed
-void ssmt_processor::update (const input_section_selector_t& in)
+void ssmt_processor::update ()
 {
-    std::weak_ptr<contractionLocator> weakCaPtr (in.isEntire() ? m_entireCaRef : m_results[in.region()]->locator());
-    if (weakCaPtr.expired())
-        return;
-
-    auto caRef = weakCaPtr.lock();
-    caRef->update ();
-    if(m_longterm_pci_tracksRef && m_longterm_pci_tracksRef->size() > 1)
-        median_leveled_pci(m_longterm_pci_tracksRef->at(0), in);
+	for (auto & mb : moving_bodies()){
+		mb->locator()->update();
+	}
 }
 
 

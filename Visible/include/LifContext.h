@@ -13,8 +13,6 @@
 #include "visible_layout.hpp"
 #include <atomic>
 #include "OnImagePlotUtils.h"
-#include "imGuiCustom/ImSequencer.h"
-#include "imGuiCustom/visibleSequencer.h"
 #include "imGuiCustom/imgui_plot.h"
 #include <map>
 
@@ -46,17 +44,11 @@ public:
     
     using pipeline = visibleContext::pipeline;
 
-    typedef std::map<std::string, ImGuiWindow*> imgui_window_map_t;
-    struct imgui_panel{
-        // IMVec4 represents a rectangle (x1, y1, x2, y2)
-        ImVec4 rectangle;
-        imgui_window_map_t window_map;
-    };
+  
     
     
     
-    
-    // From a lif_serie_data
+    // From a oiio ImageBuf
     visibleContext(ci::app::WindowRef& ww,
                const std::shared_ptr<ImageBuf>& input,
                const mediaSpec& mspec,
@@ -69,7 +61,10 @@ public:
         return std::dynamic_pointer_cast<visibleContext>(shared_from_this ());
     }
 
-
+	// namedTimeSeries_t<float> is std::map<std::string, std::vector<float>> namedTimeSeries_t;
+	template<class T>
+	using timeDataDict_t = std::map<std::string, std::vector<T>>;
+	
 	
 	static const std::string& caption () { static std::string cp ("Lif Viewer # "); return cp; }
 	virtual void draw () override;
@@ -78,7 +73,7 @@ public:
 	virtual void update () override;
 	virtual void resize () override;
 	void draw_window ();
-//	void draw_info () override;
+
 	
 	virtual void mouseDown( MouseEvent event ) override;
 	virtual void mouseMove( MouseEvent event ) override;
@@ -127,22 +122,42 @@ public:
     
     // Async Processing
     virtual void process_async () override;
+	
+	// Access to data asynchronically updated
+	const timeDataDict_t<float>& timedDataDict_F () const;
      
     // Status
     bool isLoaded() const { return m_content_loaded; }
     
     // Processing Choices @todo add an actual design !!
-    const pipeline& operation () const { return m_operation; }
-    void operation (pipeline p) const { m_operation = p; }
-    bool isCardiacPipeline () const { return m_operation == pipeline::cardiac; }
-    bool isVisualEntropyPipeline () const { return m_operation == pipeline::temporalEntropy; }
-    bool isSpatioTemporalPipeline () const { return m_operation == pipeline::spatioTemporalSegmentation; }
-    bool isTemporalIntensityPipeline () const { return m_operation == pipeline::temporalIntensity; }
+	const pipeline& operation () const {  std::lock_guard<std::mutex> guard(m_clip_mutex); return m_operation; }
+	void operation (pipeline p) const {  std::lock_guard<std::mutex> guard(m_clip_mutex); m_operation = p; }
+	bool isCardiacPipeline () const {   return operation() == pipeline::cardiac; }
+	bool isVisualEntropyPipeline () const {  return operation() == pipeline::temporalEntropy; }
+	bool isSpatioTemporalPipeline () const {  return operation() == pipeline::spatioTemporalSegmentation; }
+	bool isTemporalIntensityPipeline () const {  return operation() == pipeline::temporalIntensity; }
 	void magnification (const float& mmag) const { m_magnification = mmag; }
 	float magnification () const { return m_magnification; }
     
 private:
-
+	timeDataDict_t<float> m_timeFloatDict;
+	
+		// utility structure for realtime plot
+	struct RollingBuffer {
+		float Span;
+		ImVector<ImVec2> Data;
+		RollingBuffer() {
+			Span = 10.0f;
+			Data.reserve(2000);
+		}
+		void AddPoint(float x, float y) {
+			float xmod = fmodf(x, Span);
+			if (!Data.empty() && xmod < Data.back().x)
+				Data.shrink(0);
+			Data.push_back(ImVec2(xmod, y));
+		}
+	};
+	
 	mutable float m_magnification;
 	
     mutable pipeline m_operation;
@@ -155,9 +170,9 @@ private:
     void glscreen_normalize (const sides_length_t& , const Rectf& display_rect,  sides_length_t&);
     
 
-    std::shared_ptr<ssmt_processor> m_lifProcRef;
+    std::shared_ptr<ssmt_processor> m_ssmtRef;
 	void loadCurrentMedia ();
-	bool have_lif_serie ();
+	bool have_content ();
 
     
     ImageSpec mSpec;
@@ -194,7 +209,6 @@ private:
     
     // Frame Cache and frame store
     std::shared_ptr<ImageBuf>  mImageCache;
-//    std::shared_ptr<seqFrameContainer> mFrameSet;
     SurfaceRef  mSurface;
   
     
@@ -203,9 +217,7 @@ private:
     ci::gl::TextureRef m_segmented_texture;
     SurfaceRef m_segmented_surface;
     
-    // Tracks of frame associated results
-    std::weak_ptr<vecOfNamedTrack_t> m_intensity_trackWeakRef;
-    std::weak_ptr<vecOfNamedTrack_t> m_root_pci_trackWeakRef;
+
 
     // Selection -1 means none selected
     bool change_current_cell ();
@@ -301,11 +313,7 @@ private:
     bool m_median_set_at_default;
     
     
-    // imGui
-    timeLineSequence m_main_seq;
-    std::unordered_map<uint32_t, timeLineSequence> cell2Sequence;
-    std::map<std::string, imgui_panel> m_panels_map;
-     
+
     
     // UI instant sub-window rects
     Rectf m_results_browser_display;

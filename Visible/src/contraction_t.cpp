@@ -111,8 +111,8 @@ m_cached(false),  m_in(in), mValidInput (false), m_params(params)
     m_id = body_id;
     m_in = in;
     // Signals we provide
-    signal_contraction_ready = createSignal<contractionLocator::sig_cb_contraction_ready> ();
-    signal_pci_available = createSignal<contractionLocator::sig_cb_pci_available> ();
+    contraction_ready = createSignal<contractionLocator::sig_cb_contraction_ready> ();
+    med_pci_ready = createSignal<contractionLocator::sig_cb_med_pci_ready> ();
     total_reactive_force_ready = createSignal<contractionLocator::sig_cb_force_ready>();
     cell_length_ready = createSignal<contractionLocator::sig_cb_cell_length_ready>();
 }
@@ -135,6 +135,13 @@ void contractionLocator::load(const vector<double>& entropies, const vector<vect
     vlogger::instance().console()->info(msg);
 }
 
+void contractionLocator::compute_median_levelsets () const
+{
+	if (m_cached) return;
+	m_median_value = contractionLocator::Median_levelsets (m_entropies, m_ranks);
+	m_cached = true;
+}
+
 /* Compute rank for all entropies
  * Steps:
  * 1. Copy and Calculate Median Entropy
@@ -144,7 +151,9 @@ void contractionLocator::load(const vector<double>& entropies, const vector<vect
  */
 double contractionLocator::Median_levelsets (const vector<double>& entropies,  std::vector<int>& ranks )
 {
- 
+	perf::timer timeit;
+	timeit.start();
+	
     vector<double> entcpy;
     
     for (const auto val : entropies)
@@ -160,6 +169,9 @@ double contractionLocator::Median_levelsets (const vector<double>& entropies,  s
     auto comparator = [&entcpy](double a, double b){ return entcpy[a] < entcpy[b]; };
     std::sort(ranks.begin(), ranks.end(), comparator);
     return median_value;
+	timeit.stop();
+	auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
+	vlogger::instance().console()->info(" Median Level Set (ms): " + timestr);
 }
 
 size_t contractionLocator::recompute_signal () const
@@ -183,16 +195,17 @@ size_t contractionLocator::recompute_signal () const
     return count;
 }
 void contractionLocator::update() const{
-    perf::timer timeit;
-    timeit.start();
-     
+	if (m_entropies.empty()) return;
+	
     // Cache Rank Calculations
     compute_median_levelsets ();
     // If the fraction of entropies values expected is zero, then just find the minimum and call it contraction
     size_t count = recompute_signal();
     if (count == 0) m_signal = m_entropies;
-    timeit.stop();
-    auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
+	
+	if (med_pci_ready && med_pci_ready->num_slots() > 0)
+		med_pci_ready->operator()(m_signal);
+ 
 }
 
 bool contractionLocator::get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& m_contraction) const{
@@ -277,35 +290,6 @@ bool contractionLocator::locate_contractions (){
     assert(verify_input());
     if(! isPreProcessed())
         update ();
- 
-#if 0
-    auto save_csv = [](const std::vector<double>& data, bfs::path& root_path){
-        auto folder = stl_utils::now_string();
-        auto folder_path = root_path / folder;
-        boost::system::error_code ec;
-        if(!bfs::exists(folder_path)){
-            bfs::create_directory(folder_path, ec);
-            if (ec != boost::system::errc::success){
-                std::string msg = "Could not create " + folder_path.string() ;
-                vlogger::instance().console()->error(msg);
-                return false;
-            }
-            
-            std::string basefilename = folder_path.string() + boost::filesystem::path::preferred_separator;
-            auto fn = basefilename + "entropy.csv";
-            stl_utils::save_csv(data, fn);
-            return true;
-        }
-        return false;
-    };
-
-    
-    auto tempFilePath = bfs::temp_directory_path()/ boost::filesystem::unique_path();
-    save_csv(m_signal, tempFilePath);
-    vlogger::instance().console()->info(tempFilePath);
-
-#endif
-    
     
     m_ac.resize(0);
     f1dAutoCorr(m_signal.begin(), m_signal.end(), m_ac);
@@ -393,8 +377,8 @@ bool contractionLocator::profile_contractions (const std::vector<float>& lengths
         vlogger::instance().console()->info(ss.str());
     }
     
-    if (signal_contraction_ready && signal_contraction_ready->num_slots() > 0)
-        signal_contraction_ready->operator()(m_contractions, m_in);
+    if (contraction_ready && contraction_ready->num_slots() > 0)
+        contraction_ready->operator()(m_contractions, m_in);
 
     timeit.stop();
     auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
@@ -404,13 +388,6 @@ bool contractionLocator::profile_contractions (const std::vector<float>& lengths
     return true;
 }
 
-
-void contractionLocator::compute_median_levelsets () const
-{
-    if (m_cached) return;
-    m_median_value = contractionLocator::Median_levelsets (m_entropies, m_ranks);
-    m_cached = true;
-}
 
 
 void contractionLocator::clear_outputs () const
@@ -442,7 +419,7 @@ bool contractionLocator::verify_input () const
 
 
 
-
+template boost::signals2::connection contractionLocator::registerCallback(const std::function<contractionLocator::sig_cb_med_pci_ready>&);
 template boost::signals2::connection contractionLocator::registerCallback(const std::function<contractionLocator::sig_cb_contraction_ready>&);
 
 contractionProfile::contractionProfile (contraction_t& ct, const std::vector<double>& signal,const std::vector<float>& lengths ):

@@ -29,7 +29,18 @@
 
 namespace svl // protection from unintended ADL
 {
-    
+	// From StackOverflow
+	template <typename T>
+	std::vector<T> linspace(T a, T b, size_t N) {
+		T h = (b - a) / static_cast<T>(N-1);
+		std::vector<T> xs(N);
+		typename std::vector<T>::iterator x;
+		T val;
+		for (x = xs.begin(), val = a; x != xs.end(); ++x, val += h)
+		*x = val;
+		return xs;
+	}
+	
 //    The following code example is taken from the book
 //    C++ Templates - The Complete Guide
 //    by David Vandevoorde and Nicolai M. Josuttis, Addison-Wesley, 2002

@@ -29,23 +29,23 @@
 #include <map>
 
 
-#include "Item.h"
 #include "logger/logger.hpp"
 #include "core/core.hpp"
 #include "core/singleton.hpp"
 #include "core/file_system.hpp"
 
 #include "Plist.hpp"
+#include "imgui.h"
+#include "imgui_internal.h"
 
 #include "mediaInfo.h"
 #include "LifContext.h"
 #include "imGuiLogger.hpp"
 #include "visible_logger_macro.h"
-#include "imGuiCustom/ImSequencer.h"
-#include "imGuiCustom/visibleSequencer.h"
 #include "imGuiCustom/imgui_wrapper.h"
 #include "Resources.h"
 #include "nfd.h"
+#include "implot.h"
 
 #define APP_WIDTH 1536
 #define APP_HEIGHT 896
@@ -77,8 +77,8 @@ namespace VisibleAppControl{
 class VisibleApp : public App
 {
 public:
-    VisibleApp() { ImGui::CreateContext(); }
-    ~VisibleApp() { if(mCachePtr) mCachePtr->close_all (); ImGui::DestroyContext (); }
+	VisibleApp() { ImGui::CreateContext(); ImPlot::CreateContext();}
+	~VisibleApp() { if(mCachePtr) mCachePtr->close_all (); ImPlot::DestroyContext(); ImGui::DestroyContext (); }
     
     virtual void QuitApp();
     
@@ -128,7 +128,7 @@ private:
     void DrawImGuiDemos ();
     void DrawStatusBar(float width, float height, float pos_x, float pos_y);
     void DrawLogView();
-    void DrawSettings();
+    void DrawInputPanel();
     void ShowStyleEditor(ImGuiStyle* ref = NULL);   
     
     void setup_media_file(const bfs::path&);
