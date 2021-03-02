@@ -126,20 +126,21 @@ public:
     const  std::deque<double>& medianSet () const;
  
     // Update. Called also when cutoff offset has changed
-    void update (const input_section_selector_t&);
+    //void update (const input_section_selector_t&);
+	void update();
     const vector<vector<double>>& ssMatrix () const { return m_smat[-1]; }
     const vector<double>& entropies () const { return m_entropies[-1]; }
     
   
   
     // Load frames from cache
-    void load_channels_from_lif (const std::shared_ptr<ImageBuf>& frames, const ustring& contentName, const mediaSpec& );
+    void load_channels_from_ImageBuf (const std::shared_ptr<ImageBuf>& frames, const ustring& contentName, const mediaSpec& );
 
     
     // Run Luminance info on a vector of channel indices over time
     // Signals completion using intensity_over_time_ready
     // Returns results in tracks
-    std::shared_ptr<vecOfNamedTrack_t> run_intensity_statistics (const std::vector<int>& channels);
+ //   std::shared_ptr<vecOfNamedTrack_t> run_intensity_statistics (const std::vector<int>& channels);
     
     // Run accumulator of Volume stats on a channel at index
     //Signals completion using signal_volume_ready
@@ -179,9 +180,6 @@ public:
     void finalize_segmentation (cv::Mat& mono, cv::Mat& label);
     const channel_vec_t& content () const;
   
-    const timeToIndex_t& time2IndexMap () const { return m_2IndexMap; }
-    const indexToTime_t& index2TimeMap () const { return m_2TimeMap; }
-    
     std::weak_ptr<contractionLocator> entireContractionWeakRef ();
     
     
@@ -204,7 +202,7 @@ private:
    void internal_run_selfsimilarity_on_selected_input  (const std::vector<roiWindow<P8U>>& images,  const input_section_selector_t&,const progress_fn_t& reporter);
 
     // Assumes LIF data -- use multiple window.
-    void load_channels_from_lif_buffer2d (const std::shared_ptr<ImageBuf>& frames,  const ustring& contentName, const mediaSpec& sd);
+    void internal_load_channels_from_lif_buffer2d (const std::shared_ptr<ImageBuf>& frames,  const ustring& contentName, const mediaSpec& sd);
 
    void create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names);
        
@@ -218,9 +216,6 @@ private:
     // Default params. @place_holder for increasing number of params
     mutable ssmt_processor::params m_params;
     mutable mediaSpec m_loaded_spec;
-    
-    indexToTime_t m_2TimeMap;
-    timeToIndex_t m_2IndexMap;
     
     void volume_variance_peak_promotion (std::vector<roiWindow<P8U>>& images);
     
@@ -261,7 +256,7 @@ private:
     std::shared_ptr<contractionLocator> m_entireCaRef;
   
     // Note tracks contained timed data.
-    void median_leveled_pci (namedTrack_t& track, const input_section_selector_t& in);
+ //   void median_leveled_pci (namedTrack_t& track, const input_section_selector_t& in);
     
     std::vector<std::shared_ptr<ssmt_result>> m_results;
     std::vector<moving_region> m_regions;
@@ -293,11 +288,11 @@ private:
     Rectf m_measured_area;
     Rectf m_all;
     
-    mutable std::shared_ptr<vecOfNamedTrack_t> m_moment_tracksRef;
-    mutable std::shared_ptr<vecOfNamedTrack_t> m_longterm_pci_tracksRef;
+  //  mutable std::shared_ptr<vecOfNamedTrack_t> m_moment_tracksRef;
+ //   mutable std::shared_ptr<vecOfNamedTrack_t> m_longterm_pci_tracksRef;
 
-    mutable  vecOfNamedTrack_t m_shortterm_pci_tracks;
-    mutable std::queue<float> m_shortterms;
+//    mutable  vecOfNamedTrack_t m_shortterm_pci_tracks;
+//    mutable std::queue<float> m_shortterms;
     
     
     std::shared_ptr<ioImageWriter> m_image_writer;
@@ -331,8 +326,8 @@ class ssmt_result : public moving_region,std::enable_shared_from_this<ssmt_resul
 public:
     typedef std::shared_ptr<ssmt_result> ref_t;
     typedef std::weak_ptr<ssmt_result> weak_ref_t;
-    typedef std::shared_ptr<vecOfNamedTrack_t> trackRef_t;
-    typedef std::unordered_map<std::string, trackRef_t> trackMap_t;
+ //   typedef std::shared_ptr<vecOfNamedTrack_t> trackRef_t;
+   // typedef std::unordered_map<std::string, trackRef_t> trackMap_t;
     
     static const ref_t create (std::shared_ptr<ssmt_processor>&, const moving_region&,
                                const input_section_selector_t& in);
@@ -349,7 +344,7 @@ public:
     void process ();
     bool segment_at_contraction (const std::vector<roiWindow<P8U>>& images, const std::vector<int> &peak_indices);
     
-    const trackMap_t& trackBook () const;
+//    const trackMap_t& trackBook () const;
     const uint64_t frameCount () const;
     const uint32_t channelCount () const;
     const ssmt_processor::channel_vec_t& content () const;

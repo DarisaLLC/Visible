@@ -35,7 +35,6 @@
 #include "visible_layout.hpp"
 #include "vision/opencv_utils.hpp"
 #include "core/stl_utils.hpp"
-//#include "lif_content.hpp"
 #include "core/signaler.h"
 #include "core/core.hpp"
 #include "contraction.hpp"
@@ -52,7 +51,7 @@
 #include "nfd.h"
 #include "imGui_utils.h"
 #include "imgui_panel.hpp"
-
+#include "implot.h"
 using namespace ci;
 using namespace ci::app;
 using namespace std;
@@ -187,36 +186,42 @@ void visibleContext::setup_signals(){
     ssmt_processor::params params (mSpec.format);
 	params.magnification(magnification());
 	
-    m_lifProcRef = std::make_shared<ssmt_processor> ( mCurrentCachePath, params);
+    m_ssmtRef = std::make_shared<ssmt_processor> ( mCurrentCachePath, params);
     
     // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&visibleContext::signal_content_loaded, shared_from_above(), boost::placeholders::_1);
-    boost::signals2::connection ml_connection = m_lifProcRef->registerCallback(content_loaded_cb);
+    boost::signals2::connection ml_connection = m_ssmtRef->registerCallback(content_loaded_cb);
     
     // Support lifProcessor::flu results available
     std::function<void ()> intensity_over_time_ready_cb = boost::bind (&visibleContext::signal_intensity_over_time_ready, shared_from_above());
-    boost::signals2::connection flu_connection = m_lifProcRef->registerCallback(intensity_over_time_ready_cb);
+    boost::signals2::connection flu_connection = m_ssmtRef->registerCallback(intensity_over_time_ready_cb);
     
     // Support lifProcessor::initial ss results available
     std::function<void (std::vector<float> &, const input_section_selector_t&)> root_pci_ready_cb = boost::bind (&visibleContext::signal_root_pci_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
-    boost::signals2::connection nl_connection = m_lifProcRef->registerCallback(root_pci_ready_cb);
+    boost::signals2::connection nl_connection = m_ssmtRef->registerCallback(root_pci_ready_cb);
     
     // Support lifProcessor::median level set ss results available
     std::function<void (const input_section_selector_t&)> root_pci_med_reg_ready_cb = boost::bind (&visibleContext::signal_root_pci_med_reg_ready, shared_from_above(), boost::placeholders::_1);
-    boost::signals2::connection ol_connection = m_lifProcRef->registerCallback(root_pci_med_reg_ready_cb);
+    boost::signals2::connection ol_connection = m_ssmtRef->registerCallback(root_pci_med_reg_ready_cb);
     
-    // Support lifProcessor::contraction results available
+    // Support contraction results available
     std::function<void (contractionLocator::contractionContainer_t&,const input_section_selector_t&)> contraction_ready_cb =
     boost::bind (&visibleContext::signal_contraction_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
-    boost::signals2::connection contraction_connection = m_lifProcRef->registerCallback(contraction_ready_cb);
-    
+	boost::signals2::connection contraction_connection = m_ssmtRef->registerCallback(contraction_ready_cb);
+
+	// Note signal should be defined in ssmt. contractionLocator can fetch it via parent **************************************
+																						
+	
+	
     // Support lifProcessor::geometry_ready
     std::function<void (int,const input_section_selector_t&)> geometry_ready_cb = boost::bind (&visibleContext::signal_regions_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
-    boost::signals2::connection geometry_connection = m_lifProcRef->registerCallback(geometry_ready_cb);
+    boost::signals2::connection geometry_connection = m_ssmtRef->registerCallback(geometry_ready_cb);
     
     // Support lifProcessor::temporal_image_ready
     std::function<void (cv::Mat&,cv::Mat&)> ss_segmented_view_ready_cb = boost::bind (&visibleContext::signal_segmented_view_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
-    boost::signals2::connection ss_image_connection = m_lifProcRef->registerCallback(ss_segmented_view_ready_cb);
+    boost::signals2::connection ss_image_connection = m_ssmtRef->registerCallback(ss_segmented_view_ready_cb);
+	
+
     
 }
 void visibleContext::setup()
@@ -245,29 +250,29 @@ void visibleContext::setup()
 
 }
 
-// Called at startup and resize
-bool visibleContext::setup_panels (int image_width, int image_height, int vp_width, int vp_height){
-    int left_width = vp_width / 4;
-    int right_width = vp_width / 4;
-    int center_width = vp_width - left_width - right_width;
-    int left_top_x = 0;
-    int left_top_y = 0;
-    int left_height = vp_height;
-    int center_top_x = left_width;
-    int center_top_y = 0;
-    int center_height = vp_height;
-    int right_top_x = center_top_x + center_width;
-    int right_top_y = 0;
-    int right_height = vp_height;
-    ImVec4 left (left_top_x, left_top_y, left_top_x + left_width, left_top_y + left_height);
-    ImVec4 center (center_top_x, center_top_y, center_top_x + center_width, center_top_y + center_height);
-    ImVec4 right (right_top_x, right_top_y, right_top_x + right_width, right_top_y + right_height);
-    m_panels_map["left"].rectangle = left;
-    m_panels_map["right"].rectangle = right;
-    m_panels_map["center"].rectangle = center;
-    return true;
-    
-}
+//// Called at startup and resize
+//bool visibleContext::setup_panels (int image_width, int image_height, int vp_width, int vp_height){
+//    int left_width = vp_width / 4;
+//    int right_width = vp_width / 4;
+//    int center_width = vp_width - left_width - right_width;
+//    int left_top_x = 0;
+//    int left_top_y = 0;
+//    int left_height = vp_height;
+//    int center_top_x = left_width;
+//    int center_top_y = 0;
+//    int center_height = vp_height;
+//    int right_top_x = center_top_x + center_width;
+//    int right_top_y = 0;
+//    int right_height = vp_height;
+//    ImVec4 left (left_top_x, left_top_y, left_top_x + left_width, left_top_y + left_height);
+//    ImVec4 center (center_top_x, center_top_y, center_top_x + center_width, center_top_y + center_height);
+//    ImVec4 right (right_top_x, right_top_y, right_top_x + right_width, right_top_y + right_height);
+//    m_panels_map["left"].rectangle = left;
+//    m_panels_map["right"].rectangle = right;
+//    m_panels_map["center"].rectangle = center;
+//    return true;
+//    
+//}
 
 
 /************************
@@ -279,12 +284,22 @@ bool visibleContext::setup_panels (int image_width, int image_height, int vp_wid
 
 void visibleContext::signal_root_pci_ready (std::vector<float> & signal, const input_section_selector_t& dummy)
 {
-    //@note this is also checked in update. Not sure if this is necessary
-    auto tracksRef = m_root_pci_trackWeakRef.lock();
-    if ( tracksRef && !tracksRef->at(0).second.empty()){
-        m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
-    }
-    
+	// Always the last one
+	m_timeFloatDict["root"] = signal;
+//	namedTrack_t track;
+//	track.second.clear();
+//	auto mee = signal.begin();
+//	for (auto ss = 0; mee != signal.end() || ss < getNumFrames(); ss++, mee++)
+//	{
+//		index_time_t ti;
+//		ti.first = ss;
+//		timedVal_t res;
+//		track.second.emplace_back(ti,*mee);
+//	}
+//
+//    m_main_seq.m_time_data.load(track, named_colors["PCI"], 0);
+//
+//
     stringstream ss;
     ss << svl::toString(dummy.region()) << " root self-similarity available ";
     vlogger::instance().console()->info(ss.str());
@@ -293,10 +308,10 @@ void visibleContext::signal_root_pci_ready (std::vector<float> & signal, const i
 void visibleContext::signal_root_pci_med_reg_ready (const input_section_selector_t& dummy2)
 {
     //@note this is also checked in update. Not sure if this is necessary
-    auto tracksRef = m_root_pci_trackWeakRef.lock();
-    if ( tracksRef && !tracksRef->at(0).second.empty()){
-        m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
-    }
+//    auto tracksRef = m_root_pci_trackWeakRef.lock();
+//    if ( tracksRef && !tracksRef->at(0).second.empty()){
+//        m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
+//    }
     stringstream ss;
     ss << svl::toString(dummy2.region()) << " median regularized root self-similarity available ";
     vlogger::instance().console()->info(ss.str());
@@ -304,6 +319,8 @@ void visibleContext::signal_root_pci_med_reg_ready (const input_section_selector
 
 void visibleContext::signal_content_loaded (int64_t& loaded_frame_count )
 {
+	std::lock_guard<std::mutex> guard(m_clip_mutex);
+	
     std::string msg = to_string(mImageCache->nsubimages()) + " Samples in Media  " + to_string(loaded_frame_count) + " Loaded";
     vlogger::instance().console()->info(msg);
     m_content_loaded.store(true, std::memory_order_release);
@@ -336,7 +353,7 @@ void visibleContext::signal_contraction_ready (contractionLocator::contractionCo
  */
 void visibleContext::signal_regions_ready(int count, const input_section_selector_t& in)
 {
-    assert(m_lifProcRef);
+    assert(m_ssmtRef);
     assert(isCardiacPipeline() || isSpatioTemporalPipeline());
     std::string mr = " Regions Ready: Moving Region";
     mr += (count > 1) ? "s" : " ";
@@ -344,7 +361,7 @@ void visibleContext::signal_regions_ready(int count, const input_section_selecto
     vlogger::instance().console()->info(msg);
     
     m_input_selector = in;
-    for (auto mb : m_lifProcRef->moving_bodies()){
+    for (auto mb : m_ssmtRef->moving_bodies()){
         auto roi = mb->roi();
         vlogger::instance().console()->info(" @ " + svl::toString(roi.tl())+"::"+ svl::toString(roi.size()));
         mb->process();
@@ -416,7 +433,6 @@ void visibleContext::reset_entire_clip (const size_t& frame_count) const
     set_current_clip_index(0);
 }
 
-
 /************************
  *
  *  Validation, Clear & Log
@@ -433,7 +449,7 @@ void visibleContext::clear_playback_params ()
     m_zoom.x = m_zoom.y = 1.0f;
 }
 
-bool visibleContext::have_lif_serie ()
+bool visibleContext::have_content ()
 {
     bool not_have =  ! mImageCache ;
     return ! not_have;
@@ -453,7 +469,7 @@ bool visibleContext::is_valid () const { return m_valid && is_context_type(guiCo
 
 void visibleContext::loop_no_loop_button ()
 {
-    if (! have_lif_serie()) return;
+    if (! have_content()) return;
     if (looping())
         looping(false);
     else
@@ -473,20 +489,20 @@ bool visibleContext::looping ()
 
 void visibleContext::play ()
 {
-    if (! have_lif_serie() || m_is_playing ) return;
+    if (! have_content() || m_is_playing ) return;
     m_is_playing = true;
 }
 
 void visibleContext::pause ()
 {
-    if (! have_lif_serie() || ! m_is_playing ) return;
+    if (! have_content() || ! m_is_playing ) return;
     m_is_playing = false;
 }
 
 // For use with RAII scoped pause pattern
 void visibleContext::play_pause_button ()
 {
-    if (! have_lif_serie () ) return;
+    if (! have_content () ) return;
     if (m_is_playing)
         pause ();
     else
@@ -497,14 +513,14 @@ void visibleContext::play_pause_button ()
 
 void visibleContext::update_sequencer()
 {
-    m_show_contractions = true;
-    m_main_seq.items.resize(1);
-    auto ctr = m_contractions[0];
-    
-    m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0,
-        (int) ctr.contraction_start.first,
-        (int) ctr.relaxation_end.first , true});
-    
+//    m_show_contractions = true;
+//    m_main_seq.items.resize(1);
+//    auto ctr = m_contractions[0];
+//    
+//    m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0,
+//        (int) ctr.contraction_start.first,
+//        (int) ctr.relaxation_end.first , true});
+//    
     
 }
 
@@ -613,7 +629,7 @@ void visibleContext::update_with_mouse_position ( MouseEvent event )
 {
     mMouseInImage = false;
     
-    if (! have_lif_serie () ) return;
+    if (! have_content () ) return;
     
     mMouseInImage = get_image_display_rect().contains(event.getPos());
     if (mMouseInImage)
@@ -656,7 +672,7 @@ void visibleContext::keyDown( KeyEvent event )
     
     
     // these keys only make sense if there is an active movie
-    if( have_lif_serie () ) {
+    if( have_content () ) {
         if( event.getCode() == KeyEvent::KEY_LEFT ) {
             pause();
             seekToFrame (getCurrentFrame() - m_playback_speed);
@@ -684,22 +700,22 @@ void visibleContext::keyDown( KeyEvent event )
 
 void visibleContext::setMedianCutOff (int32_t newco)
 {
-    if (! m_lifProcRef) return;
+    if (! m_ssmtRef) return;
     // Get a shared_ptr from weak and check if it had not expired
-    auto spt = m_lifProcRef->entireContractionWeakRef().lock();
+    auto spt = m_ssmtRef->entireContractionWeakRef().lock();
     if (! spt ) return;
     uint32_t tmp = newco % 100; // pct
     uint32_t current (spt->get_median_levelset_pct () * 100);
     if (tmp == current) return;
     spt->set_median_levelset_pct (tmp / 100.0f);
-    m_lifProcRef->update(m_input_selector);
+//    m_ssmtRef->update(m_input_selector);
     
 }
 
 int32_t visibleContext::getMedianCutOff () const
 {
     // Get a shared_ptr from weak and check if it had not expired
-    auto spt = m_lifProcRef->entireContractionWeakRef().lock();
+    auto spt = m_ssmtRef->entireContractionWeakRef().lock();
     if (spt)
     {
         uint32_t current (spt->get_median_levelset_pct () * 100);
@@ -750,7 +766,7 @@ void visibleContext::loadCurrentMedia ()
          */
         
         m_content_loaded.store(false, std::memory_order_release);
-        auto load_thread = std::thread(&ssmt_processor::load_channels_from_lif,m_lifProcRef.get(),mImageCache, mContentNameU, m_mspec);
+        auto load_thread = std::thread(&ssmt_processor::load_channels_from_ImageBuf,m_ssmtRef.get(),mImageCache, mContentNameU, m_mspec);
         load_thread.detach();
 
         
@@ -762,10 +778,10 @@ void visibleContext::loadCurrentMedia ()
         m_maxFrame =  mImageCache->nsubimages() - 1;
         
         // Initialize The Main Sequencer
-        m_main_seq.mFrameMin = 0;
-        m_main_seq.mFrameMax = (int) mImageCache->nsubimages() - 1;
-        m_main_seq.mSequencerItemTypeNames = {"RGG"};
-        m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, mImageCache->nsubimages() , true});
+//        m_main_seq.mFrameMin = 0;
+//        m_main_seq.mFrameMax = (int) mImageCache->nsubimages() - 1;
+//        m_main_seq.mSequencerItemTypeNames = {"RGG"};
+//        m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, mImageCache->nsubimages() , true});
         
         auto ww = get_windowRef();
         ww->getApp()->setFrameRate(60); //m_mspec.Fps());
@@ -789,13 +805,17 @@ void visibleContext::loadCurrentMedia ()
 
 void visibleContext::process_async (){
     
+
+	
     while(!m_content_loaded.load(std::memory_order_acquire)){
         std::this_thread::yield();
     }
     
     if (isCardiacPipeline() || isSpatioTemporalPipeline()){
-        auto load_thread = std::thread(&ssmt_processor::find_moving_regions, m_lifProcRef.get(),channel_count()-1);
+        auto load_thread = std::thread(&ssmt_processor::find_moving_regions, m_ssmtRef.get(),channel_count()-1);
         load_thread.detach();
+		std::string msg = " Processing " + mContentFileName + " Started ";
+		vlogger::instance().console()->info(msg);
     }
     
     progress_fn_t pf = std::bind(&visibleContext::fraction_reporter, this, std::placeholders::_1);
@@ -803,25 +823,22 @@ void visibleContext::process_async (){
         case 3:
         {
             // note launch mode is std::launch::async
-            m_intensity_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_intensity_statistics,
-                                                 m_lifProcRef.get(), std::vector<int> ({0,1}) );
+     //       m_intensity_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_intensity_statistics,
+       //                                          m_ssmtRef.get(), std::vector<int> ({0,1}) );
             input_section_selector_t in (-1,2);
-        //    m_root_pci_tracks_asyn = std::async(std::launch::async, //&ssmt_processor::run_selfsimilarity_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
         case 2:
         {
             //note launch mode is std::launch::async
-            m_intensity_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_intensity_statistics,
-                                                 m_lifProcRef.get(), std::vector<int> ({0}) );
+     //       m_intensity_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_intensity_statistics,
+        //                                         m_ssmtRef.get(), std::vector<int> ({0}) );
             input_section_selector_t in (-1,1);
-         //   m_root_pci_tracks_asyn = std::async(std::launch::async, //&ssmt_processor::run_selfsimilarity_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
         case 1:
         {
                 input_section_selector_t in (-1,0);
-          //  m_root_pci_tracks_asyn = std::async(std::launch::async, //&ssmt_processor::run_selfsimilarity_on_selected_input, m_lifProcRef.get(), in, pf);
             break;
         }
     }
@@ -882,7 +899,7 @@ void visibleContext::add_canvas (){
 	
 	int index = 0;
 	auto d_channel = channel_count() - 1;
-	for (const auto& mb : m_lifProcRef->moving_bodies()){
+	for (const auto& mb : m_ssmtRef->moving_bodies()){
 		const Point2f& pc = mb->motion_surface().center;
 		ivec2 iv(pc.x, pc.y);
 		
@@ -937,26 +954,27 @@ void visibleContext::add_canvas (){
  */
 
 void visibleContext::add_result_sequencer (){
-    
-    // let's create the sequencer
-    static int selectedEntry = -1;
-    static int64 firstFrame = 0;
-    static bool expanded = true;
-    ImVec2 pos, size;
-//    assert(getPosSizeFromWindow(wDisplay, pos, size));
-//    m_results_browser_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
-//    ImGui::SetNextWindowPos(pos);
-//    ImGui::SetNextWindowSize(size);
-
-//    static bool results_open;
-//    if(ImGui::Begin(wResult, &results_open, ImGuiWindowFlags_AlwaysAutoResize)){
-	  ImGui::BeginGroup();
-		Sequencer(&m_main_seq, &m_seek_position, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_NONE );
-	ImGui::EndGroup();
- //   }
- //   ImGui::End();
+	if (m_timeFloatDict.find("root") == m_timeFloatDict.end()) return;
+	const std::vector<float>& root = m_timeFloatDict["root"];
 	
+	static RollingBuffer   rdata1;
+	ImVec2 mouse = ImGui::GetMousePos();
+	static auto t = getCurrentFrame();
+	t += 1;
+	rdata1.AddPoint(root[t], mouse.x * 0.0005f);
 
+	
+	static float history = 10.0f;
+	ImGui::SliderFloat("History",&history,1,30,"%.1f s");
+	rdata1.Span = history;
+	
+	static ImPlotAxisFlags rt_axis = ImPlotAxisFlags_NoTickLabels;
+
+	ImPlot::SetNextPlotLimitsX(0, history, ImGuiCond_Always);
+	if (ImPlot::BeginPlot("##Rolling", NULL, NULL, ImVec2(-1,150), 0, rt_axis, rt_axis)) {
+		ImPlot::PlotLine("Data 1", &rdata1.Data[0].x, &rdata1.Data[0].y, rdata1.Data.size(), 0, 2 * sizeof(float));
+		ImPlot::EndPlot();
+	}
 	
 }
 
@@ -965,22 +983,10 @@ void visibleContext::add_navigation(){
     
     if(m_show_playback){
         
-//        ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
-//        assert(window != nullptr);
-//        ImVec2 pos (window->Pos.x, window->Pos.y + window->Size.y );
-//        ImVec2 size (window->Size.x, 100);
-//
-//        ScopedWindowWithFlag utilities(wNavigator, nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-//        m_navigator_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(size.x,size.y));
-//        ImGui::SetNextWindowPos(pos);
-//        ImGui::SetNextWindowSize(size);
         ImGui::SameLine();
         ImGui::BeginGroup();
         {
             ImGui::PushItemWidth(40);
-//            ImGui::PushID(200);
-//            ImGui::InputInt("", &m_main_seq.mFrameMin, 0, 0);
-//            ImGui::PopID();
             ImGui::SameLine();
             if (ImGui::Button("|<"))
                 seekToStart();
@@ -1013,10 +1019,6 @@ void visibleContext::add_navigation(){
             if (ImGui::ImageButton((ImTextureID)(uint64_t)(m_is_looping ? playLoopTextureId : playNoLoopTextureId), ImVec2(16.f, 16.f)))
                 loop_no_loop_button();
             
-//            ImGui::SameLine();
-//            ImGui::PushID(202);
-//            ImGui::InputInt("",  &m_main_seq.mFrameMax, 0, 0);
-//            ImGui::PopID();
             ImGui::SameLine();
             if (ImGui::Button(m_playback_speed == 10 ? " 1 " : " 10x "))
             {
@@ -1028,18 +1030,18 @@ void visibleContext::add_navigation(){
             auto dt = getCurrentTime().secs() - getStartTime().secs();
             ui::SameLine(0,0); ui::Text("% 8d\t%4.4f Seconds", getCurrentFrame(), dt);
             
-            if(!m_root_pci_trackWeakRef.expired()){
-                if(m_median_set_at_default){
-                    int default_median_cover_pct = m_idlab_defaults.median_level_set_cutoff_fraction;
-                    setMedianCutOff(default_median_cover_pct);
-                    ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, default_median_cover_pct, default_median_cover_pct);
-                }
-                else{
-                    int default_median_cover_pct = getMedianCutOff();
-                    ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, 0, 20);
-                    setMedianCutOff(default_median_cover_pct);
-                }
-            }
+//            if(!m_root_pci_trackWeakRef.expired()){
+//                if(m_median_set_at_default){
+//                    int default_median_cover_pct = m_idlab_defaults.median_level_set_cutoff_fraction;
+//                    setMedianCutOff(default_median_cover_pct);
+//                    ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, default_median_cover_pct, default_median_cover_pct);
+//                }
+//                else{
+//                    int default_median_cover_pct = getMedianCutOff();
+//                    ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, 0, 20);
+//                    setMedianCutOff(default_median_cover_pct);
+//                }
+//            }
             ImGui::SameLine();
             if (ImGui::Button(m_median_set_at_default ? "Default" : "Not Set"))
             {
@@ -1205,12 +1207,12 @@ void visibleContext::add_contractions (bool* p_open)
     auto ww = get_windowRef();
     ImGui::SetNextWindowSize(ImVec2(ww->getSize().x/2,ww->getSize().y/4), ImGuiCond_FirstUseEver);
     if (ImGui::Begin(wCells, p_open, ImGuiWindowFlags_MenuBar)){
-        if (m_lifProcRef->moving_regions().empty()){
+        if (m_ssmtRef->moving_regions().empty()){
             ImGui::End();
             return;
         }
-        for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++){
-            const ssmt_result::ref_t& mb = m_lifProcRef->moving_bodies()[i];
+        for (int i = 0; i < m_ssmtRef->moving_bodies().size(); i++){
+            const ssmt_result::ref_t& mb = m_ssmtRef->moving_bodies()[i];
             auto contractions = m_cell2contractions_map[mb->id()];
             if (contractions.empty()) continue;
             const bool browseButtonPressed = ImGui::Button(" Export CSV ");
@@ -1237,8 +1239,8 @@ void visibleContext::add_contractions (bool* p_open)
     }
     ImGui::End();
 
-    for (int i = 0; i < m_lifProcRef->moving_bodies().size(); i++){
-        const ssmt_result::ref_t& mb = m_lifProcRef->moving_bodies()[i];
+    for (int i = 0; i < m_ssmtRef->moving_bodies().size(); i++){
+        const ssmt_result::ref_t& mb = m_ssmtRef->moving_bodies()[i];
         auto contractions = m_cell2contractions_map[mb->id()];
         if (contractions.empty()) continue;
         for (int cc = 0; cc < contractions.size(); cc++)
@@ -1272,12 +1274,12 @@ void  visibleContext::update_log (const std::string& msg)
 //@todo implement
 void visibleContext::resize ()
 {
-    if (! have_lif_serie () || ! mSurface ) return;
+    if (! have_content () || ! mSurface ) return;
 }
 
 bool visibleContext::haveTracks()
 {
-    return ! m_intensity_trackWeakRef.expired() && ! m_root_pci_trackWeakRef.expired();
+	return have_content();
 }
 
 
@@ -1286,37 +1288,38 @@ void visibleContext::update ()
 //    std::string msg = svl::toString(m_seek_position);
 //    vlogger::instance().console()->info(msg);
     
-    if (! have_lif_serie() ) return;
+    if (! have_content() ) return;
     
+	if (m_ssmtRef) m_ssmtRef->update();
     
-    if ( is_ready (m_intensity_tracks_aync) )
-        m_intensity_trackWeakRef = m_intensity_tracks_aync.get();
-    
-    
-    auto flu_cnt = channel_count() - 1;
-    // Update Fluorescence results if ready
-    if (flu_cnt > 0 && ! m_intensity_trackWeakRef.expired())
-    {
-        // Number of Flu runs is channel count - 1
-        auto tracksRef = m_intensity_trackWeakRef.lock();
-        for (auto cc = 0; cc < flu_cnt; cc++){
-            m_main_seq.m_time_data.load(tracksRef->at(cc), named_colors[tracksRef->at(cc).first], cc);
-        }
-    }
-    
-    
-    // Update PCI result if ready
-    if ( is_ready (m_root_pci_tracks_asyn)){
-        m_root_pci_trackWeakRef = m_root_pci_tracks_asyn.get();
-    }
-    
-    if ( ! m_root_pci_trackWeakRef.expired())
-    {
-        auto tracksRef = m_root_pci_trackWeakRef.lock();
-        if(tracksRef && tracksRef->size() > 0 && ! tracksRef->at(0).second.empty())
-            m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], channel_count()-1);
-    }
-    
+//    if ( is_ready (m_intensity_tracks_aync) )
+//        m_intensity_trackWeakRef = m_intensity_tracks_aync.get();
+//    
+//    
+//    auto flu_cnt = channel_count() - 1;
+//    // Update Fluorescence results if ready
+//    if (flu_cnt > 0 && ! m_intensity_trackWeakRef.expired())
+//    {
+//        // Number of Flu runs is channel count - 1
+//        auto tracksRef = m_intensity_trackWeakRef.lock();
+//        for (auto cc = 0; cc < flu_cnt; cc++){
+//            m_main_seq.m_time_data.load(tracksRef->at(cc), named_colors[tracksRef->at(cc).first], cc);
+//        }
+//    }
+//    
+//    
+//    // Update PCI result if ready
+//    if ( is_ready (m_root_pci_tracks_asyn)){
+//        m_root_pci_trackWeakRef = m_root_pci_tracks_asyn.get();
+//    }
+//    
+//    if ( ! m_root_pci_trackWeakRef.expired())
+//    {
+//        auto tracksRef = m_root_pci_trackWeakRef.lock();
+//        if(tracksRef && tracksRef->size() > 0 && ! tracksRef->at(0).second.empty())
+//            m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], channel_count()-1);
+//    }
+//    
     // Fetch Next Frame
     // Make sure we have load content for processing.
     if (mImageCache && m_content_loaded){
@@ -1446,7 +1449,7 @@ void  visibleContext::renderToFbo (const SurfaceRef&, gl::FboRef& fbo ){
 }
 
 void visibleContext::draw (){
-    if( have_lif_serie()  && mSurface ){
+    if( have_content()  && mSurface ){
         
         if(m_showGUI)
             DrawGUI();

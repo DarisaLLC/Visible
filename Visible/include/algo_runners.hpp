@@ -26,7 +26,7 @@ struct idlab_cardiac_defaults{
 };
 
 
-
+#if 0
 struct IntensityStatisticsRunner
 {
     typedef std::vector<roiWindow<P8U>> channel_images_t;
@@ -107,6 +107,7 @@ struct UnitSyntheticProducer
     }
 };
 
+#endif
 
 
 /*

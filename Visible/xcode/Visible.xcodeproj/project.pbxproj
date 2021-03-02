@@ -150,8 +150,6 @@
 		C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */; };
 		C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */; };
 		C23D0F531E298CE50049ADDB /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */; };
-		C23E346021F2511D00221E68 /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E345F21F2511D00221E68 /* ImSequencer.cpp */; };
-		C23E346321F254DE00221E68 /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E346221F254DE00221E68 /* ImCurveEdit.cpp */; };
 		C242CCC5217E76D8004F7867 /* contraction_t.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2677584212A325F00B5E080 /* contraction_t.cpp */; };
 		C248D6D8224939AC00C2C02F /* VisibleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EF8D102148709300A5D3D6 /* VisibleApp.cpp */; };
 		C248DD2C1F64601A00FF72B1 /* onImagePlotUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21946651CE4DC7100976025 /* onImagePlotUtils.cpp */; };
@@ -370,6 +368,9 @@
 		C2E0EE621F7B079300D32697 /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693D1CED3E2B0045FF57 /* libgtest.a */; };
 		C2E0EE631F7B079600D32697 /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C260693E1CED3E2B0045FF57 /* libgtest_main.a */; };
 		C2E1F73025E6C43C009B28E5 /* imgui_panel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E1F72E25E6C43C009B28E5 /* imgui_panel.cpp */; };
+		C2E1F74025EC703A009B28E5 /* implot_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E1F73C25EC703A009B28E5 /* implot_demo.cpp */; };
+		C2E1F74125EC703A009B28E5 /* implot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E1F73D25EC703A009B28E5 /* implot.cpp */; };
+		C2E1F74225EC703A009B28E5 /* implot_items.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E1F73F25EC703A009B28E5 /* implot_items.cpp */; };
 		C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
 		C2E3F55F213D9408007B1088 /* labelBlob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2E3F55C213D9408007B1088 /* labelBlob.cpp */; };
 		C2ED059C22D158ED00314C1B /* labelconnect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C260696A1CED3E2C0045FF57 /* labelconnect.cpp */; };
@@ -521,12 +522,10 @@
 		C2177BDD215E04FB003E6C3E /* appstore.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = appstore.xcconfig; path = configs/include/appstore.xcconfig; sourceTree = "<group>"; };
 		C21946611CE4D95E00976025 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		C21946651CE4DC7100976025 /* onImagePlotUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = onImagePlotUtils.cpp; path = ../src/onImagePlotUtils.cpp; sourceTree = "<group>"; };
-		C21946741CE4DC7100976025 /* seq_frame_container.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = seq_frame_container.cpp; path = ../src/seq_frame_container.cpp; sourceTree = "<group>"; };
 		C21946761CE4DC7100976025 /* visible_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = visible_impl.cpp; path = ../src/visible_impl.cpp; sourceTree = "<group>"; };
 		C219468A1CE4EA4900976025 /* OnImagePlotUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OnImagePlotUtils.h; path = ../include/OnImagePlotUtils.h; sourceTree = "<group>"; };
 		C219469F1CE4EA4900976025 /* sshist.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sshist.hpp; path = ../include/sshist.hpp; sourceTree = "<group>"; };
 		C21946A31CE4EA4900976025 /* guiContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = guiContext.h; path = ../include/guiContext.h; sourceTree = "<group>"; usesTabs = 1; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
-		C21946AC1CE4EA4900976025 /* seq_frame_container.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = seq_frame_container.hpp; path = ../include/seq_frame_container.hpp; sourceTree = "<group>"; };
 		C21A506822A9835A00B0AC7D /* stats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stats.cpp; sourceTree = "<group>"; };
 		C21A506F22A9895C00B0AC7D /* moreMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = moreMath.h; sourceTree = "<group>"; };
 		C21A507022A98AE800B0AC7D /* mathBSpline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mathBSpline.h; sourceTree = "<group>"; };
@@ -571,8 +570,6 @@
 		C23D0F4D1E298CE50049ADDB /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../local/tinyxml/tinyxml.cpp; sourceTree = "<group>"; };
 		C23D0F4E1E298CE50049ADDB /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../local/tinyxml/tinyxmlerror.cpp; sourceTree = "<group>"; };
 		C23D0F4F1E298CE50049ADDB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../local/tinyxml/tinyxmlparser.cpp; sourceTree = "<group>"; };
-		C23E345F21F2511D00221E68 /* ImSequencer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImSequencer.cpp; path = ../include/imGuiCustom/ImSequencer.cpp; sourceTree = "<group>"; };
-		C23E346221F254DE00221E68 /* ImCurveEdit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImCurveEdit.cpp; path = ../include/imGuiCustom/ImCurveEdit.cpp; sourceTree = "<group>"; };
 		C2409B2F2475CCBE003CF7BC /* VisibleRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = VisibleRelease.entitlements; path = Visible/VisibleRelease.entitlements; sourceTree = "<group>"; };
 		C240F9FA21E14C8900FBA228 /* sscli-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "sscli-Info.plist"; sourceTree = "<group>"; };
 		C240F9FE21E15ADE00FBA228 /* imguivariouscontrols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imguivariouscontrols.h; path = ../include/imguivariouscontrols.h; sourceTree = "<group>"; };
@@ -601,12 +598,10 @@
 		C252611B1F66E95B0069F665 /* Plist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Plist.cpp; path = ../src/Plist.cpp; sourceTree = "<group>"; };
 		C252611E1F66EA910069F665 /* PlistDate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlistDate.cpp; path = ../src/PlistDate.cpp; sourceTree = "<group>"; };
 		C252611F1F66EA910069F665 /* pugixml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pugixml.cpp; path = ../src/pugixml.cpp; sourceTree = "<group>"; };
-		C253337C233053B6003B3212 /* imgui_common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = imgui_common.h; path = ../include/imGuiCustom/imgui_common.h; sourceTree = "<group>"; };
 		C253337D233149ED003B3212 /* ImGuiExtensions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ImGuiExtensions.cpp; path = ../include/imGuiCustom/ImGuiExtensions.cpp; sourceTree = "<group>"; };
 		C254BE851F4FAF5C00977307 /* cvVideoPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cvVideoPlayer.cpp; path = ../src/cvVideoPlayer.cpp; sourceTree = "<group>"; };
 		C254BE871F4FAF7100977307 /* cvVideoPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cvVideoPlayer.h; path = ../include/cvVideoPlayer.h; sourceTree = "<group>"; };
 		C254BEE01F4FB3D300977307 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
-		C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_mov_impl.cpp; path = ../src/visible_mov_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		C259145F2145BA7500F80D5F /* clipManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = clipManager.hpp; path = ../include/clipManager.hpp; sourceTree = "<group>"; };
 		C259982B1ECF668F0015EE7B /* cardiomyocyte_model.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cardiomyocyte_model.hpp; sourceTree = "<group>"; };
 		C259982C1ECF668F0015EE7B /* cerruti_rectangle_integral.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cerruti_rectangle_integral.hpp; sourceTree = "<group>"; };
@@ -791,9 +786,6 @@
 		C2792DA4246D0276004FD947 /* signaler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = signaler.h; sourceTree = "<group>"; };
 		C27ED0A0220BB71D00B55D65 /* InterfaceUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InterfaceUtilities.cpp; path = ../include/imGuiCustom/InterfaceUtilities.cpp; sourceTree = "<group>"; };
 		C27ED0A1220BB71D00B55D65 /* InterfaceUtilities.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = InterfaceUtilities.hpp; path = ../include/imGuiCustom/InterfaceUtilities.hpp; sourceTree = "<group>"; };
-		C2819EAC21F4457800183E44 /* ImSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImSequencer.h; path = ../include/imGuiCustom/ImSequencer.h; sourceTree = "<group>"; };
-		C2819EAD21F4457800183E44 /* ImCurveEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImCurveEdit.h; path = ../include/imGuiCustom/ImCurveEdit.h; sourceTree = "<group>"; };
-		C2819EAE21F4457800183E44 /* visibleSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = visibleSequencer.h; path = ../include/imGuiCustom/visibleSequencer.h; sourceTree = "<group>"; };
 		C2819EC721FA94F000183E44 /* imgui.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = imgui.ini; path = ../assets/imgui.ini; sourceTree = "<group>"; };
 		C2819ECB2200D3F300183E44 /* ImGuiExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImGuiExtensions.h; path = ../include/imGuiCustom/ImGuiExtensions.h; sourceTree = "<group>"; };
 		C2819ED42201287900183E44 /* visible_scope.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = visible_scope.png; path = data/visible_scope.png; sourceTree = "<group>"; };
@@ -872,10 +864,14 @@
 		C2DA19591E8091FA00062DBC /* kmeans1d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kmeans1d.hpp; sourceTree = "<group>"; };
 		C2DB59B121557C0C00750C2E /* app_core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = app_core.h; path = ../include/app_core.h; sourceTree = "<group>"; };
 		C2DB59B221557CF800750C2E /* result_serialization.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = result_serialization.h; path = ../include/result_serialization.h; sourceTree = "<group>"; };
-		C2E02ED1225AB45E00AC175D /* MovContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MovContext.h; path = ../include/MovContext.h; sourceTree = "<group>"; };
 		C2E02ED2225AB49900AC175D /* ssmt.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ssmt.hpp; path = ../include/ssmt.hpp; sourceTree = "<group>"; };
 		C2E1F72E25E6C43C009B28E5 /* imgui_panel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_panel.cpp; path = ../include/imGuiCustom/imgui_panel.cpp; sourceTree = "<group>"; };
 		C2E1F72F25E6C43C009B28E5 /* imgui_panel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = imgui_panel.hpp; path = ../include/imGuiCustom/imgui_panel.hpp; sourceTree = "<group>"; };
+		C2E1F73B25EC703A009B28E5 /* implot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = implot.h; path = ../../externals/implot/implot.h; sourceTree = "<group>"; };
+		C2E1F73C25EC703A009B28E5 /* implot_demo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = implot_demo.cpp; path = ../../externals/implot/implot_demo.cpp; sourceTree = "<group>"; };
+		C2E1F73D25EC703A009B28E5 /* implot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = implot.cpp; path = ../../externals/implot/implot.cpp; sourceTree = "<group>"; };
+		C2E1F73E25EC703A009B28E5 /* implot_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = implot_internal.h; path = ../../externals/implot/implot_internal.h; sourceTree = "<group>"; };
+		C2E1F73F25EC703A009B28E5 /* implot_items.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = implot_items.cpp; path = ../../externals/implot/implot_items.cpp; sourceTree = "<group>"; };
 		C2E321FF1D0480E4006DFE5E /* mediaInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mediaInfo.h; path = ../include/mediaInfo.h; sourceTree = "<group>"; };
 		C2E3F55C213D9408007B1088 /* labelBlob.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = labelBlob.cpp; sourceTree = "<group>"; };
 		C2E3F560213D9483007B1088 /* labelBlob.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = labelBlob.hpp; sourceTree = "<group>"; };
@@ -1075,8 +1071,6 @@
 				C21A50DF22AB4D0C00B0AC7D /* eigen_utils.cpp */,
 				C21FFE6F1CFD20A400C97013 /* sm_producer.cpp */,
 				C21946651CE4DC7100976025 /* onImagePlotUtils.cpp */,
-				C21946741CE4DC7100976025 /* seq_frame_container.cpp */,
-				C25822451CE6478400D83AB0 /* visible_mov_impl.cpp */,
 				C21946761CE4DC7100976025 /* visible_impl.cpp */,
 				C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */,
 			);
@@ -1309,13 +1303,11 @@
 				C219469F1CE4EA4900976025 /* sshist.hpp */,
 				C21946A31CE4EA4900976025 /* guiContext.h */,
 				C2F1B6211FB13FE600DDD7DB /* LifContext.h */,
-				C2E02ED1225AB45E00AC175D /* MovContext.h */,
 				C2E321FF1D0480E4006DFE5E /* mediaInfo.h */,
 				C2BF1A671E71D12200A30407 /* timeMarker.h */,
 				C2C68C3B1ED9F9440095FFC4 /* tracker.h */,
 				C296BFD622A0A55E0072BF80 /* iowriter.hpp */,
 				C2601BB41E674F88004415A3 /* visible_layout.hpp */,
-				C21946AC1CE4EA4900976025 /* seq_frame_container.hpp */,
 				C2601BBE1E6B5C78004415A3 /* algo_runners.hpp */,
 				C2820F3621752E5100DFA7A6 /* VisibleApp.h */,
 				C21A50E022AB4D0C00B0AC7D /* eigen_utils.hpp */,
@@ -1336,6 +1328,11 @@
 		C23E346521F254F200221E68 /* imGuiCustom */ = {
 			isa = PBXGroup;
 			children = (
+				C2E1F73C25EC703A009B28E5 /* implot_demo.cpp */,
+				C2E1F73E25EC703A009B28E5 /* implot_internal.h */,
+				C2E1F73F25EC703A009B28E5 /* implot_items.cpp */,
+				C2E1F73D25EC703A009B28E5 /* implot.cpp */,
+				C2E1F73B25EC703A009B28E5 /* implot.h */,
 				C2E1F72F25E6C43C009B28E5 /* imgui_panel.hpp */,
 				C2E1F72E25E6C43C009B28E5 /* imgui_panel.cpp */,
 				C2872DBD25BFCC5A0051DF1E /* imGui_utils.h */,
@@ -1352,14 +1349,8 @@
 				C210946D223AEC19004E88EE /* imgui_wrapper.h */,
 				C2820F3721754C3100DFA7A6 /* imGuiLogger.hpp */,
 				C2ED5BB52209F67600EE52B3 /* imguivariouscontrols.cpp */,
-				C2819EAD21F4457800183E44 /* ImCurveEdit.h */,
 				C2819ECB2200D3F300183E44 /* ImGuiExtensions.h */,
 				C253337D233149ED003B3212 /* ImGuiExtensions.cpp */,
-				C2819EAC21F4457800183E44 /* ImSequencer.h */,
-				C2819EAE21F4457800183E44 /* visibleSequencer.h */,
-				C253337C233053B6003B3212 /* imgui_common.h */,
-				C23E346221F254DE00221E68 /* ImCurveEdit.cpp */,
-				C23E345F21F2511D00221E68 /* ImSequencer.cpp */,
 			);
 			name = imGuiCustom;
 			sourceTree = "<group>";
@@ -2064,6 +2055,7 @@
 				C25261211F66EA910069F665 /* pugixml.cpp in Sources */,
 				C2606DAD1CED3E2E0045FF57 /* lineseg.cpp in Sources */,
 				C2D86DF81E5A4FA5007492D4 /* cinder_support.cpp in Sources */,
+				C2E1F74125EC703A009B28E5 /* implot.cpp in Sources */,
 				C2ED5BB62209F67600EE52B3 /* imguivariouscontrols.cpp in Sources */,
 				C23D0F471E297B3B0049ADDB /* visible_lif_impl.cpp in Sources */,
 				C209012525C9CDAE00F6F2C4 /* nms.cpp in Sources */,
@@ -2078,6 +2070,7 @@
 				C28B01D6229B1F8000B8165D /* core_ssmt.cpp in Sources */,
 				C2E3F55E213D9408007B1088 /* labelBlob.cpp in Sources */,
 				C2606DAB1CED3E2E0045FF57 /* ip_utils.cpp in Sources */,
+				C2E1F74225EC703A009B28E5 /* implot_items.cpp in Sources */,
 				C2618F82217FDA6600FA9F43 /* window.cc in Sources */,
 				C2C5CF67229A0DB0004595C5 /* glmutils.cpp in Sources */,
 				C2606DB21CED3E2E0045FF57 /* rowfunc.cpp in Sources */,
@@ -2089,7 +2082,6 @@
 				C23D0F511E298CE50049ADDB /* tinyxml.cpp in Sources */,
 				C2618F81217FDA6600FA9F43 /* figure.cc in Sources */,
 				C2606DAC1CED3E2E0045FF57 /* labelconnect.cpp in Sources */,
-				C23E346321F254DE00221E68 /* ImCurveEdit.cpp in Sources */,
 				C2606DB11CED3E2E0045FF57 /* registration.cpp in Sources */,
 				C2A24FDB2304C7330064DE58 /* result_ssmt.cpp in Sources */,
 				C21FFE701CFD20A400C97013 /* sm_producer.cpp in Sources */,
@@ -2103,8 +2095,8 @@
 				C2AC7A6C24808A2C00853219 /* nfd_common.c in Sources */,
 				C2E1F73025E6C43C009B28E5 /* imgui_panel.cpp in Sources */,
 				C28595FE2484690200C9CCFB /* imgui_draw.cpp in Sources */,
+				C2E1F74025EC703A009B28E5 /* implot_demo.cpp in Sources */,
 				C21A506922A9835A00B0AC7D /* stats.cpp in Sources */,
-				C23E346021F2511D00221E68 /* ImSequencer.cpp in Sources */,
 				C22DACFF23032E8F00D171EF /* task_manager.cpp in Sources */,
 				C2B87C9921D012D700C91E35 /* logger.cpp in Sources */,
 				C253337E233149ED003B3212 /* ImGuiExtensions.cpp in Sources */,

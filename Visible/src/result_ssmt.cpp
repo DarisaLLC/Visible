@@ -195,6 +195,13 @@ bool ssmt_result::run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>
         }
         
         m_caRef->load(m_entropies, m_smat);
+	
+	    auto parent = m_weak_parent.lock();
+		if (parent.get() != 0 && parent->signal_root_pci_ready){
+			std::vector<float> fent(m_entropies.size());
+			std::transform(m_entropies.begin(), m_entropies.end(), fent.begin(), [] (const double d){ return float(d); });
+			parent->signal_root_pci_ready->operator()(fent, m_input);
+		}
     
         return true;
     }

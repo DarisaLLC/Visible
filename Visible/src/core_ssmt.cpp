@@ -76,42 +76,6 @@ mCurrentCachePath(serie_cache_folder), m_params(params)
 // @note Specific to ID Lab Lif Files
 // 3 channels: 2 flu one visible
 // 1 channel: visible
-/**
- create named_tracks
- 
- @param names <#names description#>
- @param plot_names <#plot_names description#>
- // Consider just creating a vector of tracks and leave the population and selection dynamic
- */
-void ssmt_processor::create_named_tracks (const std::vector<std::string>& names, const std::vector<std::string>& plot_names)
-{
-    m_moment_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
-    m_longterm_pci_tracksRef = std::make_shared<vecOfNamedTrack_t> ();
-    
-    switch(names.size()){
-        case 2:
-            m_moment_tracksRef->resize (1);
-            m_longterm_pci_tracksRef->resize (1);
-            for (auto tt = 0; tt < names.size()-1; tt++)
-                m_moment_tracksRef->at(tt).first = plot_names[tt];
-            m_longterm_pci_tracksRef->at(0).first = plot_names[1];
-            break;
-        case 3:
-            m_moment_tracksRef->resize (2);
-            m_longterm_pci_tracksRef->resize (1);
-            for (auto tt = 0; tt < names.size()-1; tt++)
-                m_moment_tracksRef->at(tt).first = plot_names[tt];
-            m_longterm_pci_tracksRef->at(0).first = plot_names[2];
-            break;
-        case 1:
-            m_longterm_pci_tracksRef->resize (1);
-            m_longterm_pci_tracksRef->at(0).first = plot_names[0];
-            break;
-        default:
-            assert(false);
-    }
-                    
-}
 
 
 const smProducerRef ssmt_processor::similarity_producer () const {
@@ -198,7 +162,7 @@ int ssmt_processor:: create_cache_paths (){
  * that is in vCols / 2 , vRows / 2
  * And vCols / 2 , vRows / 2 border
  */
-void ssmt_processor::load_channels_from_lif(const std::shared_ptr<ImageBuf>& frames,const ustring& contentName, const mediaSpec& mspec)
+void ssmt_processor::load_channels_from_ImageBuf(const std::shared_ptr<ImageBuf>& frames,const ustring& contentName, const mediaSpec& mspec)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
     m_loaded_spec = mspec;
@@ -213,20 +177,26 @@ void ssmt_processor::load_channels_from_lif(const std::shared_ptr<ImageBuf>& fra
      i.e 2nd channel from 2 channel LIF file and 3rd channel from a 3 channel LIF file or media file
      
      */
-    create_named_tracks(mspec.names(), mspec.names());
-    load_channels_from_lif_buffer2d(frames, contentName, mspec);
+    internal_load_channels_from_lif_buffer2d(frames, contentName, mspec);
     lock.unlock();
     
     // Call the content loaded cb if any
     if (signal_content_loaded && signal_content_loaded->num_slots() > 0)
         signal_content_loaded->operator()(m_frameCount);
+	
+	// Dispatch a thread to perform ss on entire -- root -- image
+	input_section_selector_t dummy(-1,0);
+	assert(dummy.isEntire());
+	auto ss_thread = std::thread(&ssmt_processor::run_selfsimilarity_on_selected_input,this, dummy,nullptr);
+	ss_thread.detach();
+	
 }
 
 // @todo condider creating cv::Mats and convert to roiWindow when needed.
 // @todo consider passing ImageBuf to similarity so that it can fetch image directly and does not need all images in memory
 // 16bit is converted to 8 bit for now using normalize
 
-void ssmt_processor::load_channels_from_lif_buffer2d (const std::shared_ptr<ImageBuf>& frames, const ustring& contentName,
+void ssmt_processor::internal_load_channels_from_lif_buffer2d (const std::shared_ptr<ImageBuf>& frames, const ustring& contentName,
                                                       const mediaSpec& mspec)
 {
     m_frameCount = 0;
@@ -319,26 +289,26 @@ void ssmt_processor::volume_stats_computed(){
  @param channels vector of channels containing fluorescence images
  @return vecor of named tracks containing of output time series
  */
-std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_intensity_statistics (const std::vector<int>& channels)
-{
-    vlogger::instance().console()->info("run_intensity_stats started ");
-    std::vector<std::thread> threads(channels.size());
-    for (auto tt = 0; tt < channels.size(); tt++)
-    {
-        auto channel = channels[tt];
-        threads[tt] = std::thread(IntensityStatisticsRunner(),
-                                  std::ref(m_all_by_channel[channel]), std::ref(m_moment_tracksRef->at(channel).second));
-    }
-    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
-    
-    vlogger::instance().console()->info("run_intensity_stats ended ");
-    
-    // Call the content loaded cb if any
-    if (intensity_over_time_ready && intensity_over_time_ready->num_slots() > 0)
-        intensity_over_time_ready->operator()();
-    
-    return m_moment_tracksRef;
-}
+//std::shared_ptr<vecOfNamedTrack_t> ssmt_processor::run_intensity_statistics (const std::vector<int>& channels)
+//{
+//    vlogger::instance().console()->info("run_intensity_stats started ");
+//    std::vector<std::thread> threads(channels.size());
+//    for (auto tt = 0; tt < channels.size(); tt++)
+//    {
+//        auto channel = channels[tt];
+//        threads[tt] = std::thread(IntensityStatisticsRunner(),
+//                                  std::ref(m_all_by_channel[channel]), std::ref(m_moment_tracksRef->at(channel).second));
+//    }
+//    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+//
+//    vlogger::instance().console()->info("run_intensity_stats ended ");
+//
+//    // Call the content loaded cb if any
+//    if (intensity_over_time_ready && intensity_over_time_ready->num_slots() > 0)
+//        intensity_over_time_ready->operator()();
+//
+//    return m_moment_tracksRef;
+//}
 
 // This is called from GUI side.
 // @todo add params
@@ -365,19 +335,14 @@ void ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::v
     std::vector<double> entmp;
     std::vector<std::vector<double>> smtmp;
     
-    // copy the outputs
-    auto fill = [] (const std::deque<double>& en, const std::deque<deque<double>>& sm, std::vector<double> entmp, std::vector<std::vector<double>> smtmp){
-        entmp.insert(entmp.end(), en.begin(),en.end());
-        for (auto row : sm){
-            vector<double> rowv;
-            rowv.insert(rowv.end(), row.begin(), row.end());
-            smtmp.push_back(rowv);
-        }
-    };
-    
     if(cache_ok){
         vlogger::instance().console()->info(" SS result container cache : Hit ");
-        fill(ssref->entropies(), ssref->smatrix(), entmp, smtmp);
+		entmp.insert(entmp.end(), ssref->entropies().begin(), ssref->entropies().end());
+		for (auto row : ssref->smatrix()){
+			vector<double> rowv;
+			rowv.insert(rowv.end(), row.begin(), row.end());
+			smtmp.push_back(rowv);
+		}
     }else{
         auto sp =  similarity_producer();
         sp->load_images (images);
@@ -385,13 +350,24 @@ void ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::v
         vlogger::instance().console()->info(" async ss submitted ");
         if (future_ss.get()){
             vlogger::instance().console()->info(" async ss finished ");
-            fill(sp->shannonProjection (),  sp->similarityMatrix(), entmp, smtmp);
+			entmp.insert(entmp.end(), sp->shannonProjection ().begin(),sp->shannonProjection ().end());
+			for (auto row : sp->similarityMatrix()){
+				vector<double> rowv;
+				rowv.insert(rowv.end(), row.begin(), row.end());
+				smtmp.push_back(rowv);
+			}
         }
     }
     fout.insert(fout.end(), entmp.begin(), entmp.end());
     m_entropies[in.region()] = entmp;
     m_smat[in.region()] = smtmp;
     
+	bool ok = ssResultContainer::store(cache_path,m_entropies[in.region()] , m_smat[in.region()] );
+	if(ok)
+		vlogger::instance().console()->info(" SS result container cache : filled ");
+	else
+		vlogger::instance().console()->info(" SS result container cache : failed ");
+	
     assert(images.size() == entmp.size() && smtmp.size() == images.size());
     for (auto row : smtmp) assert(row.size() == images.size());
     assert(images.size() == fout.size());
@@ -407,10 +383,6 @@ void ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::v
 // input is -1 for the entire root or index of moving object area in results container
 
 void ssmt_processor::run_selfsimilarity_on_selected_input (const input_section_selector_t& in, const progress_fn_t& reporter){
-    auto cache_path = get_cache_location(in.section(),in.region());
-    if (cache_path == bfs::path()){
-        return;
-    }
     // protect fetching image data
     std::lock_guard<std::mutex> lock(m_mutex);
     const auto& _content = in.isEntire() ? content()[in.section()] : m_results[in.region()]->content()[in.section()];
@@ -423,7 +395,7 @@ void ssmt_processor::signal_geometry_done (int count, const input_section_select
     vlogger::instance().console()->info(msg);
 }
 
-/*
+/* UnUsed
  * 1 monchrome channel. Compute 3D Standard Dev. per pixel
  * the atomic bool m_3d_stats_done is set to true
  */
@@ -461,37 +433,37 @@ void ssmt_processor::volume_variance_peak_promotion (std::vector<roiWindow<P8U>>
  Each call to find_best can be with different median cut-off
  @param track track to be filled
  */
-void ssmt_processor::median_leveled_pci (namedTrack_t& track, const input_section_selector_t& in)
-{
-    try{
-        vector<double>& leveled = m_entropies[in.region()];
-        std::weak_ptr<contractionLocator> weakCaPtr (in.isEntire() ? m_entireCaRef : m_results[in.region()]->locator());
-        if (weakCaPtr.expired())
-            return;
-        auto caRef = weakCaPtr.lock();
-        caRef->update ();
-        leveled = caRef->leveled();
-        
-        track.second.clear();
-        auto mee = leveled.begin();
-        for (auto ss = 0; mee != leveled.end() || ss < frame_count(); ss++, mee++)
-        {
-            index_time_t ti;
-            ti.first = ss;
-            timedVal_t res;
-            track.second.emplace_back(ti,*mee);
-        }
-    }
-    catch(const std::exception & ex)
-    {
-        stringstream ss;
-        ss << __FILE__  << ":::" << __LINE__ << ex.what();
-        vlogger::instance().console()->info(ss.str());
-    }
-    // Signal we are done with median level set
-    if (signal_root_pci_med_reg_ready && signal_root_pci_med_reg_ready->num_slots() > 0)
-        signal_root_pci_med_reg_ready->operator()(in);
-}
+//void ssmt_processor::median_leveled_pci (namedTrack_t& track, const input_section_selector_t& in)
+//{
+//    try{
+//        vector<double>& leveled = m_entropies[in.region()];
+//        std::weak_ptr<contractionLocator> weakCaPtr (in.isEntire() ? m_entireCaRef : m_results[in.region()]->locator());
+//        if (weakCaPtr.expired())
+//            return;
+//        auto caRef = weakCaPtr.lock();
+//        caRef->update ();
+//        leveled = caRef->leveled();
+//        
+//        track.second.clear();
+//        auto mee = leveled.begin();
+//        for (auto ss = 0; mee != leveled.end() || ss < frame_count(); ss++, mee++)
+//        {
+//            index_time_t ti;
+//            ti.first = ss;
+//            timedVal_t res;
+//            track.second.emplace_back(ti,*mee);
+//        }
+//    }
+//    catch(const std::exception & ex)
+//    {
+//        stringstream ss;
+//        ss << __FILE__  << ":::" << __LINE__ << ex.what();
+//        vlogger::instance().console()->info(ss.str());
+//    }
+//    // Signal we are done with median level set
+//    if (signal_root_pci_med_reg_ready && signal_root_pci_med_reg_ready->num_slots() > 0)
+//        signal_root_pci_med_reg_ready->operator()(in);
+//}
 
 const int64_t& ssmt_processor::frame_count () const
 {

@@ -140,14 +140,6 @@ protected:
 	
 	std::mutex m_track_mutex;
 	
-	arrayOfNamedTracks_t m_luminance_tracks;
-	vecOfNamedTrack_t m_shortterm_tracks;
-	
-	async_vecOfNamedTrack_t m_intensity_tracks_aync;
-	async_vecOfNamedTrack_t m_root_pci_tracks_asyn;
-	async_vecOfNamedTrack_t m_longterm_pci_tracks_async;
-	async_vecOfNamedTrack_t m_roi_longterm_pci_tracks_async;
-	
 	bool m_have_tracks;
 	bool m_show_display_and_controls, m_show_results;
 	
