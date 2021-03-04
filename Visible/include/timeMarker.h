@@ -5,6 +5,7 @@
 
 #include "cinder/Cinder.h"
 #include "timed_types.h"
+#include "core/core.hpp"
 
 
 // Holds the duration and frame count
@@ -23,6 +24,7 @@ public:
         second = mStart.second = time_spec_t (0.0);
         mEntire.first = num_frames;
         mEntire.second = duration;
+		for (auto ii = 0; ii < num_frames; ii++) m_frame_sequence.push_back(ii);
     }
     
     timeIndexConverter (int64_t index, float time_in_seconds, int64_t num_frames, float duration)
@@ -31,6 +33,7 @@ public:
         second = mStart.second = time_spec_t (time_in_seconds);
         mEntire.first = num_frames;
         mEntire.second = duration;
+		for (auto ii = 0; ii < num_frames; ii++) m_frame_sequence.push_back(ii);
     }
 
     inline const double duration () const { return mEntire.second.secs(); }
@@ -47,18 +50,20 @@ public:
     
     void update (int64_t _cnt)
     {
-        double normed = ((double)_cnt) / count();
-        
-        if (normed > 1.0) return;
+		int64_t mCnt = _cnt % count();
+        double normed = ((double)mCnt) / count();
+		svl::clampValue(normed, 0.0, 1.0);
+
         
         second = time_spec_t (normed * duration());
-        first = _cnt;
+        first = mCnt;
         
     }
     
     double norm_current_time () const { return second.secs() / mEntire.second.secs(); }
     double norm_current_index () const { return first / (double) mEntire.first; }
     
+	const std::vector<float>& frame_sequence () const { return m_frame_sequence; }
     
     friend std::ostream& operator<< (std::ostream& std_stream, timeIndexConverter& t)
     {
@@ -70,6 +75,8 @@ public:
 private:
     index_time_t mEntire;
     index_time_t mStart;
+	std::vector<float> m_frame_sequence;
+	
 
 };
 

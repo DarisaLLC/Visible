@@ -32,6 +32,8 @@
 #include "mediaInfo.h"
 #include "thread.h"
 #include "contraction.hpp"
+#include "median_levelset.hpp"
+#include "mediaInfo.h"
 
 using namespace cv;
 using blob = svl::labelBlob::blob;
@@ -59,7 +61,8 @@ public:
     class params{
     public:
 
-        params (const TypeDesc ct = TypeUInt8, const voxel_params_t voxel_params = voxel_params_t()): m_type(ct), m_vparams(voxel_params) {}
+        params (const TypeDesc ct = TypeUInt8, const voxel_params_t voxel_params = voxel_params_t()):
+		m_type(ct), m_vparams(voxel_params), m_channel_to_use(0), m_channel_root(-1,m_channel_to_use){}
         
         const TypeDesc& content_type () { return m_type; }
         
@@ -82,11 +85,22 @@ public:
         }
 		void magnification (const float& mmag) const { m_magnification_x = mmag; }
 		float magnification () const { return m_magnification_x; }
-        
+
+		void channel_to_use(int c){ m_channel_to_use = c; m_channel_root = input_section_selector_t(-1,c); }
+		int channel_to_use() const { return m_channel_to_use; }
+		const input_section_selector_t& channel_to_use_root () const {
+			return m_channel_root;
+		}
+		
+		
+		
     private:
 		mutable float m_magnification_x;
         mutable voxel_params_t m_vparams;
         mutable TypeDesc m_type;
+		mutable int m_channel_to_use;
+		mutable input_section_selector_t m_channel_root;
+		
     };
     
   //  using contractionContainer_t = contractionLocator::contractionContainer_t;
@@ -112,7 +126,7 @@ public:
     /*
        ssmt_processor constructor (takes an optional path to cache to be used or constructed )
     */
-    ssmt_processor (const bfs::path& = bfs::path(), const ssmt_processor::params& = ssmt_processor::params () );
+    ssmt_processor ( const mediaSpec&, const bfs::path& = bfs::path(), const ssmt_processor::params& = ssmt_processor::params () );
     
    
     const int64_t& frame_count () const;
@@ -173,14 +187,16 @@ public:
     void generateVoxels_on_channel (const int channel_index);
 //    void generateVoxelsOfSampled (const std::vector<roiWindow<P8U>>&);
 //
-//    // Return 2D latice of voxel self-similarity
-//    void generateVoxelSelfSimilarities ();
     void generateVoxelsAndSelfSimilarities (const std::vector<roiWindow<P8U>>& images);
     
     void finalize_segmentation (cv::Mat& mono, cv::Mat& label);
     const channel_vec_t& content () const;
   
-    std::weak_ptr<contractionLocator> entireContractionWeakRef ();
+	medianLevelSet& medianLeveler () { return m_leveler; }
+	
+	
+	const mediaSpec& media() const { return m_media_spec; }
+	
     
     
 protected:
@@ -253,7 +269,7 @@ private:
     // path to cache folder for this serie
     bfs::path mCurrentCachePath;
     
-    std::shared_ptr<contractionLocator> m_entireCaRef;
+	medianLevelSet m_leveler;
   
     // Note tracks contained timed data.
  //   void median_leveled_pci (namedTrack_t& track, const input_section_selector_t& in);
@@ -313,6 +329,7 @@ private:
     mutable std::vector<roiWindow<P8U>> m_voxels;
     input_section_selector_t m_instant_input;
     std::map<uint32_t, bfs::path> m_result_index_to_cache_path;
+	mediaSpec m_media_spec;
     
   
     

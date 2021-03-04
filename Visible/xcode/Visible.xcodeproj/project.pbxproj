@@ -350,6 +350,8 @@
 		C2BDCC042563C5DF0061B68E /* voxel_processor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDCC032563C5DF0061B68E /* voxel_processor.cpp */; };
 		C2BDEFEE21C8232300A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
 		C2BDEFF021C8237B00A8CB94 /* core_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BDEFED21C8232300A8CB94 /* core_support.cpp */; };
+		C2BF54F025EF92C1009B9E39 /* median_levelset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BF54EE25EF92C1009B9E39 /* median_levelset.cpp */; };
+		C2BF54F125EF92C1009B9E39 /* median_levelset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2BF54EE25EF92C1009B9E39 /* median_levelset.cpp */; };
 		C2C5CF67229A0DB0004595C5 /* glmutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C5CF66229A0DB0004595C5 /* glmutils.cpp */; };
 		C2C5CF69229A0DB0004595C5 /* glmutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C5CF66229A0DB0004595C5 /* glmutils.cpp */; };
 		C2CE9C7422A48AC5003C479A /* etw_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2CE9C7322A48AC5003C479A /* etw_utils.cpp */; };
@@ -471,7 +473,6 @@
 		53E3CDFB0E86099300238D2B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Visible.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Visible.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C202D9721D18427800AA8951 /* bit_chrome.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = bit_chrome.hpp; sourceTree = "<group>"; };
 		C203D2E02171300B00B6B4A8 /* libtbb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtbb.a; path = ../../../../../../../../usr/local/Cellar/tbb/2018_U5/lib/libtbb.a; sourceTree = "<group>"; };
 		C203D2E221713E0B00B6B4A8 /* CoreMediaIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMediaIO.framework; path = System/Library/Frameworks/CoreMediaIO.framework; sourceTree = SDKROOT; };
 		C203D2E421714A4600B6B4A8 /* libdc1394.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdc1394.a; path = ../../../../../../../../usr/local/Cellar/libdc1394/2.2.2_1/lib/libdc1394.a; sourceTree = "<group>"; };
@@ -555,7 +556,6 @@
 		C232F00A229377770075B2EE /* ellipse.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ellipse.hpp; sourceTree = "<group>"; };
 		C2342E5D227CC27300D74D80 /* ps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ps.cpp; sourceTree = "<group>"; };
 		C2342E5F227CC45F00D74D80 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
-		C234C57E229EFAF4001EF98B /* rc_filter1d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rc_filter1d.h; sourceTree = "<group>"; };
 		C236D344230F488300ED5627 /* pf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pf.cpp; sourceTree = "<group>"; };
 		C237500E24A1BAB700E13081 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
@@ -691,7 +691,6 @@
 		C26009FC1CED3E010045FF57 /* stl_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = stl_utils.hpp; sourceTree = "<group>"; };
 		C26009FE1CED3E010045FF57 /* vector2d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vector2d.hpp; sourceTree = "<group>"; };
 		C2600A001CED3E010045FF57 /* colorhistogram.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = colorhistogram.hpp; sourceTree = "<group>"; };
-		C2600A011CED3E010045FF57 /* corners.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = corners.hpp; sourceTree = "<group>"; };
 		C2600A021CED3E010045FF57 /* disjoint-set.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "disjoint-set.h"; sourceTree = "<group>"; };
 		C2600A031CED3E010045FF57 /* drawUtils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = drawUtils.hpp; sourceTree = "<group>"; };
 		C2600A041CED3E010045FF57 /* edgel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = edgel.h; sourceTree = "<group>"; };
@@ -844,6 +843,8 @@
 		C2BDCC032563C5DF0061B68E /* voxel_processor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = voxel_processor.cpp; path = ../src/voxel_processor.cpp; sourceTree = "<group>"; };
 		C2BDEFED21C8232300A8CB94 /* core_support.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = core_support.cpp; sourceTree = "<group>"; };
 		C2BF1A671E71D12200A30407 /* timeMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeMarker.h; path = ../include/timeMarker.h; sourceTree = "<group>"; };
+		C2BF54EE25EF92C1009B9E39 /* median_levelset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = median_levelset.cpp; path = ../src/median_levelset.cpp; sourceTree = "<group>"; };
+		C2BF54EF25EF92C1009B9E39 /* median_levelset.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = median_levelset.hpp; path = ../src/median_levelset.hpp; sourceTree = "<group>"; };
 		C2C2E3552496CAA900E26B3E /* imgui_experiment.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = imgui_experiment.hpp; path = ../include/imgui_experiment.hpp; sourceTree = "<group>"; };
 		C2C2E3562496CB2E00E26B3E /* imgui_experiment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_experiment.cpp; path = ../src/imgui_experiment.cpp; sourceTree = "<group>"; };
 		C2C5CF612299E4C7004595C5 /* ut_rotated_rect.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ut_rotated_rect.hpp; sourceTree = "<group>"; };
@@ -1042,6 +1043,7 @@
 		080E96DDFE201D6D7F000001 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C2BF54EE25EF92C1009B9E39 /* median_levelset.cpp */,
 				C209012325C9CDAE00F6F2C4 /* nms.cpp */,
 				C2BDCC032563C5DF0061B68E /* voxel_processor.cpp */,
 				C2F09C48253CE61000563B9B /* oiio_utils.cpp */,
@@ -1266,6 +1268,7 @@
 		C21946B11CE4EA6100976025 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C2BF54EF25EF92C1009B9E39 /* median_levelset.hpp */,
 				C2B0A13925D8471E00E3A83D /* temporal_medianOf3.hpp */,
 				C2F09C49253CE61000563B9B /* oiio_utils.hpp */,
 				C2C2E3552496CAA900E26B3E /* imgui_experiment.hpp */,
@@ -1600,7 +1603,6 @@
 		C26009FF1CED3E010045FF57 /* vision */ = {
 			isa = PBXGroup;
 			children = (
-				C234C57E229EFAF4001EF98B /* rc_filter1d.h */,
 				C232F00A229377770075B2EE /* ellipse.hpp */,
 				C210947F2243039A004E88EE /* voxel_frequency.h */,
 				C20D4DE42208BD34004D9405 /* ellipse_fit.hpp */,
@@ -1608,7 +1610,6 @@
 				C20BBC181E5271C5002C7D68 /* opencv_utils.hpp */,
 				C21FFE711CFDF82600C97013 /* self_similarity.h */,
 				C2600A001CED3E010045FF57 /* colorhistogram.hpp */,
-				C2600A011CED3E010045FF57 /* corners.hpp */,
 				C2600A021CED3E010045FF57 /* disjoint-set.h */,
 				C2600A031CED3E010045FF57 /* drawUtils.hpp */,
 				C2600A041CED3E010045FF57 /* edgel.h */,
@@ -1629,7 +1630,6 @@
 				C2600A151CED3E010045FF57 /* sample.hpp */,
 				C2600A161CED3E010045FF57 /* sparsehist.h */,
 				C2600A171CED3E010045FF57 /* ss_segmenter.hpp */,
-				C202D9721D18427800AA8951 /* bit_chrome.hpp */,
 				C24C6E2F23329D4800A118AC /* correlation1d.hpp */,
 			);
 			path = vision;
@@ -2065,6 +2065,7 @@
 				C2EF8D1E2148768800A5D3D6 /* Item.cpp in Sources */,
 				C20BBC0B1E4E39E6002C7D68 /* rand_support.cpp in Sources */,
 				C2AC7A6D24808A2C00853219 /* nfd_cocoa.m in Sources */,
+				C2BF54F025EF92C1009B9E39 /* median_levelset.cpp in Sources */,
 				C23D0F4B1E298C9D0049ADDB /* lifFile.cpp in Sources */,
 				C23D0F521E298CE50049ADDB /* tinyxmlerror.cpp in Sources */,
 				C28B01D6229B1F8000B8165D /* core_ssmt.cpp in Sources */,
@@ -2243,6 +2244,7 @@
 				C20BBC031E4E33CE002C7D68 /* tinystr.cpp in Sources */,
 				C2F09C4B253CE61000563B9B /* oiio_utils.cpp in Sources */,
 				C232F00B2296FDCB0075B2EE /* lineseg.cpp in Sources */,
+				C2BF54F125EF92C1009B9E39 /* median_levelset.cpp in Sources */,
 				C2BDEFF021C8237B00A8CB94 /* core_support.cpp in Sources */,
 				C2533380233149ED003B3212 /* ImGuiExtensions.cpp in Sources */,
 			);
@@ -2364,6 +2366,7 @@
 			baseConfigurationReference = C2AF87F51CFBCA4C00CFC191 /* cp-visible-debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ADDRESS_SANITIZER_CONTAINER_OVERFLOW = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_ENTITLEMENTS = Visible/Visible.entitlements;
@@ -2423,6 +2426,7 @@
 			baseConfigurationReference = C276EC841C72988200242CDB /* cp-visible_release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ADDRESS_SANITIZER_CONTAINER_OVERFLOW = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_ENTITLEMENTS = Visible/VisibleRelease.entitlements;

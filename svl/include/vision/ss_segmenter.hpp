@@ -18,7 +18,7 @@
 
 
 template<typename T, typename ...Args>
-std::unique_ptr<T> my_make_unique( Args&& ...args )
+std::unique_ptr<T> make_unique( Args&& ...args )
 {
     return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
 }
@@ -197,7 +197,7 @@ private:
     {
         
         // make a disjoint-set forest
-        mUniverse = my_make_unique<universe> (num_vertices);
+        mUniverse = make_unique<universe> (num_vertices);
         
         // init thresholds
         std::vector<float> threshold (num_vertices, THRESHOLD(1,c));

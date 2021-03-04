@@ -20,7 +20,7 @@ class region_and_source{
 public:
     
     region_and_source ():m_region(ni()),m_section(ni()) {}
-    region_and_source (int r, int section):m_region(r), m_section(section) {}
+    region_and_source (int r, int section=0):m_region(r), m_section(section) {}
     inline int entire () { return -1; }
     inline int ni () { return -2; }
     bool isSection() const {return m_section >= 0;}
@@ -28,6 +28,7 @@ public:
     int region () const { return m_region;}
     int section () const { return m_section; }
     
+	
     friend ostream& operator<<(ostream& out,region_and_source& rs){
          out << (rs.isEntire() ? " Entire " : " ROI ") << std::endl;
         out << " Region Index: " << rs.region () << std::endl;

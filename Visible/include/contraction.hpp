@@ -179,7 +179,7 @@ public:
     // signal_contraction_available
     // signal pci is median level processed
     typedef void (sig_cb_med_pci_ready) (std::vector<double>&);
-    typedef void (sig_cb_contraction_ready) (contractionContainer_t&, const input_section_selector_t& );
+    typedef void (sig_cb_contraction_ready) (contractionContainer_t&, input_section_selector_t& );
     typedef void (sig_cb_cell_length_ready) (sigContainer_t&);
     typedef void (sig_cb_force_ready) (sigContainer_t&);
     
@@ -243,14 +243,14 @@ public:
 private:
     contractionLocator(const input_section_selector_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params ());
     contractionLocator::params m_params;
-    
+	bool get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& ) const;
 
     void compute_median_levelsets () const;
     size_t recompute_signal () const;
     void clear_outputs () const;
     bool verify_input () const;
     bool savgol_filter () const;
-    bool get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& ) const;
+
     mutable double m_median_value;
     mutable std::pair<double,double> m_leveled_min_max;
     mutable float m_median_levelset_frac;

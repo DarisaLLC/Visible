@@ -11,6 +11,19 @@
 using namespace cv;
 using namespace std;
 
+void HelpMarker(const char* desc)
+{
+	ImGui::TextDisabled("(?)");
+	if (ImGui::IsItemHovered())
+		{
+		ImGui::BeginTooltip();
+		ImGui::PushTextWrapPos(450.0f);
+		ImGui::TextUnformatted(desc);
+		ImGui::PopTextWrapPos();
+		ImGui::EndTooltip();
+		}
+}
+
 
 void rotatedRect2ImGui(const cv::RotatedRect& rr, std::vector<ImVec2> impts){
     std::vector<cv::Point2f> corners;

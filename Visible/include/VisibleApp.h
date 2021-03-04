@@ -77,7 +77,7 @@ namespace VisibleAppControl{
 class VisibleApp : public App
 {
 public:
-	VisibleApp() { ImGui::CreateContext(); ImPlot::CreateContext();}
+	VisibleApp() { ImGui::CreateContext(); ImPlot::CreateContext(); m_displayFPS = 1.0f;}
 	~VisibleApp() { if(mCachePtr) mCachePtr->close_all (); ImPlot::DestroyContext(); ImGui::DestroyContext (); }
     
     virtual void QuitApp();
@@ -105,6 +105,8 @@ public:
     bool isOiiOFile() const { return isValid() && m_is_oiio_file; }
 	void magnification (const float& mmag) const { m_magnification = mmag; }
 	float magnification () const { return m_magnification; }
+	void displayFPS (const float& fps) const { m_displayFPS = fps; }
+	float displayFPS () const { return m_displayFPS; }
 	
 	
     void launchViewer ();
@@ -116,6 +118,7 @@ private:
     ImageSpec mInputSpec;
     mediaSpec m_mspec;
 	mutable float m_magnification;
+	mutable float m_displayFPS;
 	
     
     // return null for unacceptable file or dot extension, i.e. ".lif" or ".mov" or ".mp4", etc

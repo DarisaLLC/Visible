@@ -128,13 +128,14 @@ visibleContext::visibleContext(ci::app::WindowRef& ww,
                        const mediaSpec& mspec,
                        const bfs::path& cache_path,
                        const bfs::path& content_path,
-                               const pipeline pl, const float magnification) :
+                                const float magnification, const float displayFPS, const pipeline pl) :
                         sequencedImageContext(ww),
                         mImageCache (sd),
                         m_mspec (mspec),
                         m_voxel_view_available(false),
                         mUserStorageDirPath (cache_path),mPath(content_path),
-						m_magnification (magnification)
+						m_magnification (magnification),
+						m_displayFPS(displayFPS)
 {
     m_type = guiContext::Type::lif_file_viewer;
     m_show_contractions = false;
@@ -162,10 +163,13 @@ visibleContext::visibleContext(ci::app::WindowRef& ww,
     m_show_results = false;
     m_show_playback = false;
     m_content_loaded = false;
-
-    mSpec = mImageCache->spec();
+	ImGuiIO& io = ImGui::GetIO();
+	io.DeltaTime = 1.0 / m_displayFPS;
+	
+    m_oiio_spec = mImageCache->spec();
     m_valid = false;
-    m_tic = timeIndexConverter(m_mspec.frameCount(), m_mspec.duration());
+	// @todo get actual captured FPS
+    m_tic = timeIndexConverter(m_mspec.frameCount(), m_displayFPS * m_mspec.frameCount());
 
     m_valid = m_mspec.frameCount() > 1 & m_mspec.duration() > 0.0;
     if (m_valid){
@@ -183,10 +187,11 @@ ci::app::WindowRef&  visibleContext::get_windowRef(){
 void visibleContext::setup_signals(){
     
     // Create a Processing Object to attach signals to
-    ssmt_processor::params params (mSpec.format);
+    ssmt_processor::params params (m_oiio_spec.format);
 	params.magnification(magnification());
 	
-    m_ssmtRef = std::make_shared<ssmt_processor> ( mCurrentCachePath, params);
+    m_ssmtRef = std::make_shared<ssmt_processor> ( m_mspec, mCurrentCachePath, params);
+
     
     // Support lifProcessor::content_loaded
     std::function<void (int64_t&)> content_loaded_cb = boost::bind (&visibleContext::signal_content_loaded, shared_from_above(), boost::placeholders::_1);
@@ -201,17 +206,16 @@ void visibleContext::setup_signals(){
     boost::signals2::connection nl_connection = m_ssmtRef->registerCallback(root_pci_ready_cb);
     
     // Support lifProcessor::median level set ss results available
-    std::function<void (const input_section_selector_t&)> root_pci_med_reg_ready_cb = boost::bind (&visibleContext::signal_root_pci_med_reg_ready, shared_from_above(), boost::placeholders::_1);
-    boost::signals2::connection ol_connection = m_ssmtRef->registerCallback(root_pci_med_reg_ready_cb);
+
+    std::function<void (std::vector<float>&, const input_section_selector_t&,  uint32_t& body_id )> root_mls_ready_cb =
+		boost::bind (&visibleContext::signal_root_mls_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3);
+	boost::signals2::connection ol_connection = m_ssmtRef->medianLeveler().registerCallback(root_mls_ready_cb);
     
     // Support contraction results available
     std::function<void (contractionLocator::contractionContainer_t&,const input_section_selector_t&)> contraction_ready_cb =
     boost::bind (&visibleContext::signal_contraction_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
 	boost::signals2::connection contraction_connection = m_ssmtRef->registerCallback(contraction_ready_cb);
 
-	// Note signal should be defined in ssmt. contractionLocator can fetch it via parent **************************************
-																						
-	
 	
     // Support lifProcessor::geometry_ready
     std::function<void (int,const input_section_selector_t&)> geometry_ready_cb = boost::bind (&visibleContext::signal_regions_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
@@ -228,7 +232,8 @@ void visibleContext::setup()
 {
     ci::app::WindowRef ww = get_windowRef();
     ww->getSignalMouseDrag().connect( [this] ( MouseEvent &event ) { processDrag( event.getPos() ); } );
-    
+	ww->getApp()->setFrameRate(m_displayFPS);
+	
     m_showGUI = true;
     m_showLog = true;
     m_showHelp = true;
@@ -282,10 +287,38 @@ void visibleContext::setup()
  *
  ************************/
 
+
+
+void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
+{
+	vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
+	vector<double>::const_iterator top = std::max_element (src.begin (), src.end() );
+	
+	if (svl::equal(*top, *bot)) return;
+	double scaleBy = *top - *bot;
+	dst.resize (src.size ());
+	for (int ii = 0; ii < src.size (); ii++)
+	dst[ii] = (src[ii] - *bot) / scaleBy;
+}
+
+void exponential_smoother (const std::vector<double>& src, std::vector<double>& dst)
+{
+	vector<double>::const_iterator bot = std::min_element (src.begin (), src.end() );
+	vector<double>::const_iterator top = std::max_element (src.begin (), src.end() );
+	
+	if (svl::equal(*top, *bot)) return;
+	double scaleBy = *top - *bot;
+	dst.resize (src.size ());
+	for (int ii = 0; ii < src.size (); ii++)
+	dst[ii] = (src[ii] - *bot) / scaleBy;
+}
+
 void visibleContext::signal_root_pci_ready (std::vector<float> & signal, const input_section_selector_t& dummy)
 {
 	// Always the last one
-	m_timeFloatDict["root"] = signal;
+	auto copyy = signal;
+	svl::norm_min_max (copyy.begin(), copyy.end(), true);
+	m_timeFloatDict["root"] = copyy;
 //	namedTrack_t track;
 //	track.second.clear();
 //	auto mee = signal.begin();
@@ -305,8 +338,7 @@ void visibleContext::signal_root_pci_ready (std::vector<float> & signal, const i
     vlogger::instance().console()->info(ss.str());
 }
 
-void visibleContext::signal_root_pci_med_reg_ready (const input_section_selector_t& dummy2)
-{
+void visibleContext::signal_root_mls_ready (std::vector<float> &signal, const input_section_selector_t& dummy2, uint32_t& body_id){
     //@note this is also checked in update. Not sure if this is necessary
 //    auto tracksRef = m_root_pci_trackWeakRef.lock();
 //    if ( tracksRef && !tracksRef->at(0).second.empty()){
@@ -370,10 +402,10 @@ void visibleContext::signal_regions_ready(int count, const input_section_selecto
 
 void visibleContext::glscreen_normalize (const sides_length_t& src, const Rectf& gdr, sides_length_t& dst){
     
-    dst.first.x = (src.first.x*gdr.getWidth()) / mSpec.width;
-    dst.second.x = (src.second.x*gdr.getWidth()) / mSpec.width;
-    dst.first.y = (src.first.y*gdr.getHeight()) / mSpec.height;
-    dst.second.y = (src.second.y*gdr.getHeight()) / mSpec.height;
+    dst.first.x = (src.first.x*gdr.getWidth()) / m_oiio_spec.width;
+    dst.second.x = (src.second.x*gdr.getWidth()) / m_oiio_spec.width;
+    dst.first.y = (src.first.y*gdr.getHeight()) / m_oiio_spec.height;
+    dst.second.y = (src.second.y*gdr.getHeight()) / m_oiio_spec.height;
 }
 
 void visibleContext::signal_segmented_view_ready (cv::Mat& image, cv::Mat& label)
@@ -698,30 +730,19 @@ void visibleContext::keyDown( KeyEvent event )
  *
  ************************/
 
-void visibleContext::setMedianCutOff (int32_t newco)
+bool visibleContext::setMedianCutOff (float newco) const
 {
-    if (! m_ssmtRef) return;
-    // Get a shared_ptr from weak and check if it had not expired
-    auto spt = m_ssmtRef->entireContractionWeakRef().lock();
-    if (! spt ) return;
-    uint32_t tmp = newco % 100; // pct
-    uint32_t current (spt->get_median_levelset_pct () * 100);
-    if (tmp == current) return;
-    spt->set_median_levelset_pct (tmp / 100.0f);
-//    m_ssmtRef->update(m_input_selector);
-    
+    if (! m_ssmtRef) return false;
+	if (svl::RealEq(newco, getMedianCutOff(), 0.01f))
+		return false;
+	m_ssmtRef->medianLeveler().set_median_levelset_pct (newco);
+	return true;
 }
 
-int32_t visibleContext::getMedianCutOff () const
+float visibleContext::getMedianCutOff () const
 {
-    // Get a shared_ptr from weak and check if it had not expired
-    auto spt = m_ssmtRef->entireContractionWeakRef().lock();
-    if (spt)
-    {
-        uint32_t current (spt->get_median_levelset_pct () * 100);
-        return current;
-    }
-    return 0;
+	if (! m_ssmtRef) return - 1.0;
+	return m_ssmtRef->medianLeveler().get_median_levelset_pct ();
 }
 
 
@@ -751,7 +772,7 @@ void visibleContext::loadCurrentMedia ()
         pause();
    
     //    mMediaInfo = mFrameSet->media_info();
-        mChannelCount = (uint32_t) mSpec.nchannels;
+        mChannelCount = (uint32_t) m_oiio_spec.nchannels;
         m_instant_channel_display_rects.resize(mChannelCount);
         
         if (!(mChannelCount > 0 && mChannelCount < 4)){
@@ -777,18 +798,12 @@ void visibleContext::loadCurrentMedia ()
         m_minFrame = 0;
         m_maxFrame =  mImageCache->nsubimages() - 1;
         
-        // Initialize The Main Sequencer
-//        m_main_seq.mFrameMin = 0;
-//        m_main_seq.mFrameMax = (int) mImageCache->nsubimages() - 1;
-//        m_main_seq.mSequencerItemTypeNames = {"RGG"};
-//        m_main_seq.items.push_back(timeLineSequence::timeline_item{ 0, 0, mImageCache->nsubimages() , true});
-        
         auto ww = get_windowRef();
         ww->getApp()->setFrameRate(60); //m_mspec.Fps());
         
         
-        mFrameSize.x = mSpec.width;
-        mFrameSize.y = mSpec.height;
+        mFrameSize.x = m_oiio_spec.width;
+        mFrameSize.y = m_oiio_spec.height;
         
         mSurface = Surface8u::create (int32_t(mFrameSize.x), int32_t(mFrameSize.y), true);
         mFbo = gl::Fbo::create(mSurface->getWidth(), mSurface->getHeight());
@@ -954,28 +969,40 @@ void visibleContext::add_canvas (){
  */
 
 void visibleContext::add_result_sequencer (){
-	if (m_timeFloatDict.find("root") == m_timeFloatDict.end()) return;
-	const std::vector<float>& root = m_timeFloatDict["root"];
-	
-	static RollingBuffer   rdata1;
-	ImVec2 mouse = ImGui::GetMousePos();
-	static auto t = getCurrentFrame();
-	t += 1;
-	rdata1.AddPoint(root[t], mouse.x * 0.0005f);
+	if (ImGui::CollapsingHeader(" Entire View ")) {
+		int count = getNumFrames();
+		float xs1[count], ys1[count];
+		for (int i = 0; i < count; ++i) {
+			xs1[i] = i / float(count);
+			auto idx = i % getNumFrames();
+			ys1[i] = 1.0 - m_timeFloatDict["root"][idx];
+		}
 
-	
-	static float history = 10.0f;
-	ImGui::SliderFloat("History",&history,1,30,"%.1f s");
-	rdata1.Span = history;
-	
-	static ImPlotAxisFlags rt_axis = ImPlotAxisFlags_NoTickLabels;
-
-	ImPlot::SetNextPlotLimitsX(0, history, ImGuiCond_Always);
-	if (ImPlot::BeginPlot("##Rolling", NULL, NULL, ImVec2(-1,150), 0, rt_axis, rt_axis)) {
-		ImPlot::PlotLine("Data 1", &rdata1.Data[0].x, &rdata1.Data[0].y, rdata1.Data.size(), 0, 2 * sizeof(float));
-		ImPlot::EndPlot();
+		static double xs2[11], ys2[11];
+		for (int i = 0; i < 11; ++i) {
+			xs2[i] = m_tic.current_frame() / float(count);
+			ys2[i] = i * 0.1;
+		}
+		
+		static float mf = 0;
+		float f32_low = 0.f, f32_high = 0.2f;
+		ImGui::Text(" Median LevelSet Adjustment ");
+		ImGui::SameLine(); HelpMarker(" Adjust Influence of Outlier Time Points ");
+		ImGui::SetNextItemWidth(100);
+		ImGui::SliderScalar("slider float low",   ImGuiDataType_Float,  &mf, &f32_low, &f32_high);
+		if (setMedianCutOff(mf)){
+			std::cout << " Median Cutoff Called " << std::endl;
+		}
+		
+		
+		ImGui::BulletText(" Temporal Self-Similarity ");
+		if (ImPlot::BeginPlot(" PCI ", "time/frame", " pci (t) ")) {
+			ImPlot::PlotLine(" Entire ", xs1, ys1, count);
+			ImPlot::SetNextMarkerStyle(ImPlotMarker_Plus);
+			ImPlot::PlotLine(" Instant ", xs2, ys2, 11);
+			ImPlot::EndPlot();
+		}
 	}
-	
 }
 
 
@@ -1071,7 +1098,7 @@ void visibleContext::add_motion_profile (){
     assert(window != nullptr);
     auto ww = get_windowRef();
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
-    ImVec2  frame (mSpec.width, mSpec.height);
+    ImVec2  frame (m_oiio_spec.width, m_oiio_spec.height);
 
     m_motion_profile_display = Rectf(glm::vec2(pos.x,pos.y),glm::vec2(frame.x,frame.y));
     ImGui::SetNextWindowPos(pos);
@@ -1288,7 +1315,7 @@ void visibleContext::update ()
 //    std::string msg = svl::toString(m_seek_position);
 //    vlogger::instance().console()->info(msg);
     
-    if (! have_content() ) return;
+    if (! have_content() || ! m_ssmtRef ) return;
     
 	if (m_ssmtRef) m_ssmtRef->update();
     
@@ -1324,11 +1351,11 @@ void visibleContext::update ()
     // Make sure we have load content for processing.
     if (mImageCache && m_content_loaded){
         mImageCache->reset(mContentNameU, getCurrentFrame(), 0);
-        mSurface = Surface::create(mSpec.width, mSpec.height, false);
+        mSurface = Surface::create(m_oiio_spec.width, m_oiio_spec.height, false);
         ROI roi = mImageCache->roi();
-        cv::Mat cvb8 (mSpec.height, mSpec.width, CV_8U);
+        cv::Mat cvb8 (m_oiio_spec.height, m_oiio_spec.width, CV_8U);
         if(mImageCache->pixeltype() == TypeUInt16){
-                cv::Mat cvb (mSpec.height, mSpec.width, CV_16U);
+                cv::Mat cvb (m_oiio_spec.height, m_oiio_spec.width, CV_16U);
                 mImageCache->get_pixels(roi, TypeUInt16, cvb.data);
                 cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
         }
@@ -1369,7 +1396,7 @@ void visibleContext::update ()
 void visibleContext::update_instant_image_mouse ()
 {
     auto image_pos = m_imageDisplayMapper->display2image(mMouseInImagePosition);
-    uint32_t channel_height = mSpec.height; // mMediaInfo.getChannelSize().y;
+    uint32_t channel_height = m_oiio_spec.height; // mMediaInfo.getChannelSize().y;
     m_instant_channel = ((int) image_pos.y) / channel_height;
     m_instant_mouse_image_pos = image_pos;
     if (mSurface)
