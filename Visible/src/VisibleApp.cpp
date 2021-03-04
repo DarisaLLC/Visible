@@ -13,22 +13,6 @@
 #include "imgui_panel.hpp"
 #include "imgui.h"
 
-	//#define __used__
-
-#ifdef __used__
-static void HelpMarker(const char* desc)
-{
-	ImGui::TextDisabled("(?)");
-	if (ImGui::IsItemHovered())
-		{
-		ImGui::BeginTooltip();
-		ImGui::PushTextWrapPos(450.0f);
-		ImGui::TextUnformatted(desc);
-		ImGui::PopTextWrapPos();
-		ImGui::EndTooltip();
-		}
-}
-#endif
 
 
 	//static ImGuiDockNodeFlags opt_flags = ImGuiDockNodeFlags_None;
@@ -87,8 +71,10 @@ void VisibleApp::DrawInputPanel() {
 	
 	ImGui::BeginGroup();
 	bool changed = false;
-	changed |= ImGui::InputFloat(" Magnification X ", &m_magnification, 0.5, 2.0, "%.3f" );
-	m_magnification = svl::math<float>::clamp(m_magnification, 0.01f, 100.0f);
+	changed |= ImGui::InputFloat(" Magnification X ", &m_magnification, 0.1, 2.0, "%.3f" );
+	m_magnification = svl::math<float>::clamp(m_magnification, 0.1f, 100.0f);
+	changed |= ImGui::InputFloat(" Display FPS ", &m_displayFPS, 0.1, 2.0, "%.3f" );
+	m_displayFPS = svl::math<float>::clamp(m_displayFPS, 0.1f, 100.0f);
 	ImGui::EndGroup();
 	
 	
@@ -184,7 +170,7 @@ void VisibleApp::DrawMainMenu(){
 		ImGui::Text("This App is Built With OpenImageIO, OpenCv, Boost, Cinder and ImGui Libraries ");
 	}
 	DrawInputPanel();
-	DrawImGuiDemos();
+//	DrawImGuiDemos();
 }
 
 
@@ -297,7 +283,6 @@ void VisibleApp::setup()
 	std::cout << getDisplay()->getWidth() << " , " << getDisplay()->getHeight() << std::endl;
 	
 	setWindowSize(APP_WIDTH,APP_HEIGHT);
-	setFrameRate( 60 );
 	setWindowPos(getWindowSize()/6);
 	
 	WindowRef ww = getWindow ();
@@ -401,8 +386,9 @@ bool VisibleApp::load_oiio_file(){
 	
 	if (exists(mCurrentContent)){
 		WindowRef ww = getWindow ();
+		ww->getApp()->setFrameRate(m_displayFPS);
 		auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
-		mContext =  std::make_shared<visibleContext> (ww, mInput, m_mspec, cache_path, bpath_path), magnification();
+		mContext =  std::make_shared<visibleContext> (ww, mInput, m_mspec, cache_path, bpath_path, magnification(), displayFPS());
 		update();
 		
 		ww->setTitle ( cmds + " Visible build: " + mBuildn);
@@ -530,7 +516,7 @@ void VisibleApp::resize ()
 }
 
 
-void prepareSettings( App::Settings *settings )
+void VisibleApp::prepareSettings( App::Settings *settings )
 {
 	const auto &args = settings->getCommandLineArgs();
 	if(args.size() > 1){
@@ -540,8 +526,6 @@ void prepareSettings( App::Settings *settings )
 	
 	settings->setHighDensityDisplayEnabled();
 		//        settings->setWindowSize(lifContext::startup_display_size().x, lifContext::startup_display_size().y);
-	settings->setFrameRate( 60 );
-	settings->setResizable( true );
 	settings->setResizable( true );
 }
 
@@ -549,7 +533,7 @@ void prepareSettings( App::Settings *settings )
 
 
 	// settings fn from top of file:
-CINDER_APP( VisibleApp, RendererGl, prepareSettings )
+CINDER_APP( VisibleApp, RendererGl )
 
 #pragma GCC diagnostic pop
 

@@ -36,8 +36,8 @@
  @param path to the Cache Folder
  
  */
-ssmt_processor::ssmt_processor (const bfs::path& serie_cache_folder, const ssmt_processor::params& params):
-mCurrentCachePath(serie_cache_folder), m_params(params)
+ssmt_processor::ssmt_processor (const mediaSpec& ms, const bfs::path& serie_cache_folder,  const ssmt_processor::params& params):
+mCurrentCachePath(serie_cache_folder), m_params(params), m_media_spec(ms)
 {
     // Signals we provide
     signal_content_loaded = createSignal<ssmt_processor::sig_cb_content_loaded>();
@@ -53,7 +53,9 @@ mCurrentCachePath(serie_cache_folder), m_params(params)
     
     // semilarity producer
     m_sm_producer = std::shared_ptr<sm_producer> ( new sm_producer () );
-    
+	m_leveler.initialize(params.channel_to_use_root());
+
+	
     // Signal us when volume stats are ready
     std::function<void ()>_volume_done_cb = boost::bind (&ssmt_processor::volume_stats_computed, this);
     boost::signals2::connection _volume_stats_connection = registerCallback(_volume_done_cb);
@@ -83,12 +85,6 @@ const smProducerRef ssmt_processor::similarity_producer () const {
     
 }
 
-// Check if the returned has expired
-std::weak_ptr<contractionLocator> ssmt_processor::entireContractionWeakRef ()
-{
-    std::weak_ptr<contractionLocator> wp (m_entireCaRef);
-    return wp;
-}
 
 bfs::path ssmt_processor::get_cache_location (const int channel_index,const int input){
     // Check input

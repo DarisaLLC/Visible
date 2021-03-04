@@ -40,6 +40,7 @@ static ImVec2 operator*(const ImVec2 &a, const float b) {
 }
 #endif
 
+void HelpMarker(const char* desc);
 
 void rotatedRect2ImGui(const cv::RotatedRect& rr, std::vector<ImVec2> impts);
 ImVec2 ImGui_Image_Constrain(const ImVec2&, const ImVec2& available);

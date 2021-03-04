@@ -54,8 +54,9 @@ public:
                const mediaSpec& mspec,
                const bfs::path&,
                const bfs::path&,
-                   const pipeline which_pipeline = pipeline::cardiac,
-				   const float magnification = 10.0f);
+				   const float magnification = 10.0f,
+				   const float displayFPS = 1.0f,
+                   const pipeline which_pipeline = pipeline::cardiac);
     
     std::shared_ptr<visibleContext> shared_from_above(){
         return std::dynamic_pointer_cast<visibleContext>(shared_from_this ());
@@ -100,8 +101,8 @@ public:
 	
 	void setZoom (vec2);
 	vec2 getZoom ();
-	void setMedianCutOff (int32_t newco);
-	int32_t getMedianCutOff () const;
+	bool setMedianCutOff (float newco) const;
+	float getMedianCutOff () const;
 	
 	void play_pause_button ();
 	void loop_no_loop_button ();
@@ -159,6 +160,7 @@ private:
 	};
 	
 	mutable float m_magnification;
+	mutable float m_displayFPS;
 	
     mutable pipeline m_operation;
     
@@ -175,7 +177,7 @@ private:
 	bool have_content ();
 
     
-    ImageSpec mSpec;
+    ImageSpec m_oiio_spec;
     boost::filesystem::path mPath;
     std::string mContentFileName;
     std::vector<std::string> m_plot_names;
@@ -185,7 +187,7 @@ private:
     void signal_content_loaded (int64_t&);
     void signal_intensity_over_time_ready ();
     void signal_root_pci_ready (std::vector<float> &, const input_section_selector_t&);
-    void signal_root_pci_med_reg_ready (const input_section_selector_t&);
+    void signal_root_mls_ready (std::vector<float> &, const input_section_selector_t&, uint32_t& body_id);
     void signal_contraction_ready (contractionLocator::contractionContainer_t&,const input_section_selector_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
     void signal_regions_ready (int, const input_section_selector_t&);
