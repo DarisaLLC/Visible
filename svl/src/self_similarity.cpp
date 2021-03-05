@@ -221,11 +221,6 @@ bool self_similarity_producer<P>::entropies(deque<double>& signal) const
     if (_finished && !m_entropies.empty())
     {
         signal = m_entropies;
-        for (unsigned int i = 0; i < signal.size(); i++)
-        {
-            signal[i] = 1 - signal[i];
-        }
-        
         return true;
     }
     
