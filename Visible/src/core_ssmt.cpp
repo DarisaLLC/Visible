@@ -357,7 +357,8 @@ void ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::v
     fout.insert(fout.end(), entmp.begin(), entmp.end());
     m_entropies[in.region()] = entmp;
     m_smat[in.region()] = smtmp;
-    
+	m_leveler.load(entmp, smtmp);
+	
 	bool ok = ssResultContainer::store(cache_path,m_entropies[in.region()] , m_smat[in.region()] );
 	if(ok)
 		vlogger::instance().console()->info(" SS result container cache : filled ");

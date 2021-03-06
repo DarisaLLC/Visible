@@ -48,7 +48,7 @@ public:
 	
 	class params{
 	public:
-		params (float low=0.01, float high=0.07):m_median_levelset_fraction_range(low, high) {
+		params (float low=0.01, float high=0.20):m_median_levelset_fraction_range(low, high) {
 		}
 		const fPair& range ()const {return m_median_levelset_fraction_range; }
 
