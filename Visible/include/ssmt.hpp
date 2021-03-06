@@ -248,7 +248,7 @@ private:
     
     void compute_shortterm (const uint32_t halfWinSz) const;
     
-    void contraction_ready (contractionLocator::contractionContainer_t&);
+	void contraction_ready (contractionLocator::contractionContainer_t&, const input_section_selector_t&);
     void volume_stats_computed ();
     void pci_done ();
     void sm_content_loaded ();

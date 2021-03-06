@@ -56,9 +56,16 @@ ssmt_result::ssmt_result(const moving_region& mr,const input_section_selector_t&
     m_caRef = contractionLocator::create (in, mr.id(), default_params);
     
     // Suport lif_processor::Contraction Analyzed
-    std::function<void (contractionLocator::contractionContainer_t&,const input_section_selector_t& in)>ca_analyzed_cb =
-        boost::bind (&ssmt_result::contraction_ready, this, boost::placeholders::_1, boost::placeholders::_2);
-    boost::signals2::connection ca_connection = m_caRef->registerCallback(ca_analyzed_cb);
+	try{
+		std::function<void (contractionLocator::contractionContainer_t&,const input_section_selector_t& in)>ca_analyzed_cb =
+			boost::bind (&ssmt_result::contraction_ready, this, boost::placeholders::_1, boost::placeholders::_2);
+		boost::signals2::connection ca_connection = m_caRef->registerCallback(ca_analyzed_cb);
+	}
+	catch (const std::exception & ex)
+	{
+		std::cout << " Throw in Binding Signals " << ex.what() << std::endl;
+	}
+
 }
 
 // When contraction is ready, signal a copy

@@ -388,7 +388,8 @@ bool VisibleApp::load_oiio_file(){
 		WindowRef ww = getWindow ();
 		ww->getApp()->setFrameRate(m_displayFPS);
 		auto cache_path = VisibleAppControl::make_result_cache_entry_for_content_file(bpath_path);
-		mContext =  std::make_shared<visibleContext> (ww, mInput, m_mspec, cache_path, bpath_path, magnification(), displayFPS());
+		mContext =  std::make_shared<visibleContext> (ww, mInput, m_mspec, cache_path, bpath_path, magnification(), displayFPS(),
+													  visibleContext::pipeline::cardiac);
 		update();
 		
 		ww->setTitle ( cmds + " Visible build: " + mBuildn);

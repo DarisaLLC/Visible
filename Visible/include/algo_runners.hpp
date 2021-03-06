@@ -20,10 +20,6 @@ using namespace std;
 using namespace stl_utils;
 using namespace svl;
 
-struct idlab_cardiac_defaults{
-    float median_level_set_cutoff_fraction;
-    
-};
 
 
 #if 0

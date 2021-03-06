@@ -153,7 +153,6 @@ visibleContext::visibleContext(ci::app::WindowRef& ww,
     msg = " folder for " + mContentFileName + msg;
     vlogger::instance().console()->info(msg);
     m_title = mContentFileName;
-    m_idlab_defaults.median_level_set_cutoff_fraction = 15;
     m_playback_speed = 1;
     m_input_selector = input_section_selector_t(-1,0);
     m_selector_last = -1;
