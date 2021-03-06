@@ -162,8 +162,7 @@ private:
 	mutable float m_magnification;
 	mutable float m_displayFPS;
 	
-    mutable pipeline m_operation;
-    
+
     void renderToFbo (const SurfaceRef&, gl::FboRef& );
     void setup_signals ();
     ci::app::WindowRef& get_windowRef();
@@ -251,6 +250,8 @@ private:
     int64_t m_minFrame;
     int64_t m_maxFrame;
     
+	// Operation
+	mutable pipeline m_operation;
     // Normalized to screen
     
     
