@@ -135,7 +135,8 @@ visibleContext::visibleContext(ci::app::WindowRef& ww,
                         m_voxel_view_available(false),
                         mUserStorageDirPath (cache_path),mPath(content_path),
 						m_magnification (magnification),
-						m_displayFPS(displayFPS)
+						m_displayFPS(displayFPS),
+									 m_operation(pl)
 {
     m_type = guiContext::Type::lif_file_viewer;
     m_show_contractions = false;
@@ -343,6 +344,11 @@ void visibleContext::signal_root_mls_ready (std::vector<float> &signal, const in
 //    if ( tracksRef && !tracksRef->at(0).second.empty()){
 //        m_main_seq.m_time_data.load(tracksRef->at(0), named_colors["PCI"], 2);
 //    }
+	
+	auto copyy = signal;
+	svl::norm_min_max (copyy.begin(), copyy.end(), true);
+	m_timeFloatDict["root"] = copyy;
+	
     stringstream ss;
     ss << svl::toString(dummy2.region()) << " median regularized root self-similarity available ";
     vlogger::instance().console()->info(ss.str());
@@ -974,7 +980,7 @@ void visibleContext::add_result_sequencer (){
 		for (int i = 0; i < count; ++i) {
 			xs1[i] = i / float(count);
 			auto idx = i % getNumFrames();
-			ys1[i] = 1.0 - m_timeFloatDict["root"][idx];
+			ys1[i] = m_timeFloatDict["root"][idx];
 		}
 
 		static double xs2[11], ys2[11];
@@ -984,11 +990,14 @@ void visibleContext::add_result_sequencer (){
 		}
 		
 		static float mf = 0;
-		float f32_low = 0.f, f32_high = 0.2f;
+		auto params = m_ssmtRef->medianLeveler().parameters();
+		float f32_low = params.range().first;
+		float f32_high = params.range().second;
+		
 		ImGui::Text(" Median LevelSet Adjustment ");
 		ImGui::SameLine(); HelpMarker(" Adjust Influence of Outlier Time Points ");
 		ImGui::SetNextItemWidth(100);
-		ImGui::SliderScalar("slider float low",   ImGuiDataType_Float,  &mf, &f32_low, &f32_high);
+		ImGui::SliderScalar(" Percent of Frames ",   ImGuiDataType_Float,  &mf, &f32_low, &f32_high);
 		if (setMedianCutOff(mf)){
 			std::cout << " Median Cutoff Called " << std::endl;
 		}
