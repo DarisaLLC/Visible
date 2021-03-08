@@ -963,7 +963,7 @@ void visibleContext::add_canvas (){
  */
 
 void visibleContext::add_result_sequencer (){
-	if (ImGui::CollapsingHeader(" Entire View ")) {
+	if (ImGui::CollapsingHeader(" Adaptive PCI ")) {
 		int count = getNumFrames();
 		float xs1[count], ys1[count];
 		for (int i = 0; i < count; ++i) {
@@ -1221,9 +1221,6 @@ bool  visibleContext::save_contraction_plots(const contractionLocator::contracti
 
 void visibleContext::add_contractions (bool* p_open)
 {
-//    if (m_lifProcRef->moving_regions().empty()) return;
-  
-    
     ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
     assert(window != nullptr);
     ImVec2 pos (window->Pos.x + window->Size.x, window->Pos.y );

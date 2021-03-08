@@ -64,15 +64,13 @@ locatorWeakRef_t contractionLocator::getWeakRef(){
 }
 
 contractionLocator::contractionLocator(const input_section_selector_t& in,  const uint32_t& body_id, const contractionLocator::params& params) :
-m_cached(false),  m_in(in), mValidInput (false), m_params(params)
+m_cached(false),  m_in(in), m_params(params)
 {
-    m_median_levelset_frac = m_params.median_levelset_fraction();
     m_peaks.resize(0);
     m_id = body_id;
     m_in = in;
     // Signals we provide
     contraction_ready = createSignal<contractionLocator::sig_cb_contraction_ready> ();
-    med_pci_ready = createSignal<contractionLocator::sig_cb_med_pci_ready> ();
     total_reactive_force_ready = createSignal<contractionLocator::sig_cb_force_ready>();
     cell_length_ready = createSignal<contractionLocator::sig_cb_cell_length_ready>();
 }
@@ -82,97 +80,21 @@ void contractionLocator::load(const vector<float>& entropies, const vector<vecto
     m_entropies = entropies;
     m_SMatrix = mmatrix;
     mNoSMatrix = m_SMatrix.empty();
-    
+	m_signal = m_entropies;
     m_entsize = m_entropies.size();
-    if (isPreProcessed()) m_signal = m_entropies;
-    else{
-        m_ranks.resize (m_entsize);
-        m_signal.resize (m_entsize);
-    }
+ 
     m_peaks.resize(0);
-    mValidInput = verify_input ();
     auto msg = "Contraction Locator Initialized For " + to_string(m_id);
     vlogger::instance().console()->info(msg);
 }
 
-void contractionLocator::compute_median_levelsets () const
-{
-	if (m_cached) return;
-	m_median_value = contractionLocator::Median_levelsets (m_entropies, m_ranks);
-	m_cached = true;
-}
 
-/* Compute rank for all entropies
- * Steps:
- * 1. Copy and Calculate Median Entropy
- * 2. Subtract Median from the Copy
- * 3. Sort according to distance to Median
- * 4. Fill up rank vector
- */
-double contractionLocator::Median_levelsets (const vector<float>& entropies,  std::vector<int>& ranks )
-{
-	perf::timer timeit;
-	timeit.start();
-	
-    vector<float> entcpy;
-    
-    for (const auto val : entropies)
-        entcpy.push_back(val);
-    auto median_value = svl::Median(entcpy);
-    // Subtract median from all
-    for (float& val : entcpy)
-        val = std::abs (val - median_value );
-    
-    // Sort according to distance to the median. small to high
-    ranks.resize(entropies.size());
-    std::iota(ranks.begin(), ranks.end(), 0);
-    auto comparator = [&entcpy](float a, float b){ return entcpy[a] < entcpy[b]; };
-    std::sort(ranks.begin(), ranks.end(), comparator);
-    return median_value;
-	timeit.stop();
-	auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
-	vlogger::instance().console()->info(" Median Level Set (ms): " + timestr);
-}
 
-size_t contractionLocator::recompute_signal () const
-{
-
-    size_t count = std::floor (m_entropies.size () * m_median_levelset_frac);
-    assert(count < m_ranks.size());
-    m_signal.resize(m_entropies.size (), 0.0);
-    for (auto ii = 0; ii < m_signal.size(); ii++)
-    {
-        double val = 0;
-        for (int index = 0; index < count; index++)
-        {
-            auto jj = m_ranks[index]; // get the actual index from rank
-            val += m_SMatrix[jj][ii]; // fetch the cross match value for
-        }
-        val = val / count;
-        m_signal[ii] = val;
-    }
-    
-    return count;
-}
-void contractionLocator::update() const{
-	if (m_entropies.empty()) return;
-	
-    // Cache Rank Calculations
-    compute_median_levelsets ();
-    // If the fraction of entropies values expected is zero, then just find the minimum and call it contraction
-    size_t count = recompute_signal();
-    if (count == 0) m_signal = m_entropies;
-	
-	if (med_pci_ready && med_pci_ready->num_slots() > 0)
-		med_pci_ready->operator()(m_signal);
- 
-}
 
 bool contractionLocator::get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& m_contraction) const{
     perf::timer timeit;
     timeit.start();
       
-    if (! mValidInput) return false;
     contraction_t::clear(m_contraction);
     
     auto maxima = [](std::vector<float>::const_iterator a,
@@ -251,10 +173,6 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
 
 bool contractionLocator::locate_contractions (){
 
-    assert(verify_input());
-    if(! isPreProcessed())
-        update ();
-    
     m_ac.resize(0);
     f1dAutoCorr(m_signal.begin(), m_signal.end(), m_ac);
     
@@ -280,7 +198,6 @@ bool contractionLocator::locate_contractions (){
         vlogger::instance().console()->info(ss.str());
     }
     
-    clear_outputs ();
     m_peaks_idx.resize(0);
     
     // @to_remove Flip for peak finding
@@ -355,36 +272,9 @@ bool contractionLocator::profile_contractions (const std::vector<float>& lengths
 
 
 
-void contractionLocator::clear_outputs () const
-{
-    m_peaks.resize(0);
-    m_contractions.resize(0);
-}
-bool contractionLocator::verify_input () const
-{
-    bool ok = ! m_entropies.empty();
-    if (!ok)return false;
-    
-    if ( ! m_SMatrix.empty () ){
-        ok = m_entropies.size() == m_entsize;
-        if (!ok) return ok;
-        ok &= m_SMatrix.size() == m_entsize;
-        if (!ok) return ok;
-        for (int row = 0; row < m_entsize; row++)
-        {
-            //      std::cout << "[" << row << "]" << m_SMatrix[row].size () << std::endl;
-            ok &= m_SMatrix[row].size () == m_entsize;
-            if (!ok) return ok;
-        }
-    }
-    return ok;
-}
 
 
 
-
-
-template boost::signals2::connection contractionLocator::registerCallback(const std::function<contractionLocator::sig_cb_med_pci_ready>&);
 template boost::signals2::connection contractionLocator::registerCallback(const std::function<contractionLocator::sig_cb_contraction_ready>&);
 
 contractionProfile::contractionProfile (contraction_t& ct, const std::vector<float>& signal,const std::vector<float>& lengths ):

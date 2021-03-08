@@ -20,7 +20,7 @@
 #include "eigen_utils.hpp"
 #include "input_selector.hpp"
 #include "timed_types.h"
-
+#include "median_levelset.hpp"
 
 
 using namespace std;
@@ -134,12 +134,10 @@ public:
     
     class params{
     public:
-        params ():m_median_levelset_fraction(0.07), m_minimum_contraction_time (0.32), m_frame_duration(0.020),
+        params ():m_minimum_contraction_time (0.32), m_frame_duration(0.020),
 		m_magnification_x(10.0f), m_min_peak_to_relaxation_end(5.0) {
             update ();
         }
-        float median_levelset_fraction()const {return m_median_levelset_fraction; }
-        void median_levelset_fraction(const float newval)const {m_median_levelset_fraction = newval; }
         float minimum_contraction_time () const { return m_minimum_contraction_time; }
         void minimum_contraction_time (const float newval) const {
             m_minimum_contraction_time = newval;
@@ -165,7 +163,6 @@ public:
             m_pad_frames = m_minimum_contraction_time / m_frame_duration;
         }
 		mutable float m_magnification_x;
-        mutable float m_median_levelset_fraction;
         mutable float m_minimum_contraction_time;
         mutable float m_frame_duration;
         mutable uint32_t m_pad_frames;
@@ -181,8 +178,7 @@ public:
 
     // Signals we provide
     // signal_contraction_available
-    // signal pci is median level processed
-    typedef void (sig_cb_med_pci_ready) (std::vector<float>&);
+
     typedef void (sig_cb_contraction_ready) (contractionContainer_t&, const input_section_selector_t& );
     typedef void (sig_cb_cell_length_ready) (sigContainer_t&);
     typedef void (sig_cb_force_ready) (sigContainer_t&);
@@ -199,27 +195,18 @@ public:
 	
 	const contractionLocator::params& parameters () const { return m_params; }
 
-    // Update with most recent median level set
-    void update () const;
+ 
     
     bool locate_contractions () ;
     bool profile_contractions (const std::vector<float>& lengths = std::vector<float>());
 
     
-    bool isValid () const { return mValidInput; }
-    bool isOutputValid () const { return mValidOutput; }
-    bool isPreProcessed () const { return mNoSMatrix; }
     size_t size () const { return m_entsize; }
     const uint32_t id () const { return m_id; }
     const input_section_selector_t& input () const { return m_in; }
     
     // Original
     const vector<float>& entropies () { return m_entropies; }
-    
-    // LevelSet corresponding to last coverage pct setting
-    const vector<float>& leveled () { return m_signal; }
-    const std::pair<double,double>& leveled_min_max () { return m_leveled_min_max; };
-  
     
     const std::vector<index_val_t>& contraction_peaks () const { return m_peaks; }
 
@@ -229,31 +216,14 @@ public:
     
     const contractionContainer_t & contractions () const { return m_contractions; }
     
-    // Adjusting Median Level
-    /* @note: left in public interface as the UT assumes that.
-     * @todo: refactor
-     * Compute rank for all entropies
-     * Steps:
-     * 1. Copy and Calculate Median Entropy
-     * 2. Subtract Median from the Copy
-     * 3. Sort according to distance to Median
-     * 4. Fill up rank vector
-     */
-    void set_median_levelset_pct (float frac) const { m_median_levelset_frac = frac;  }
-    float get_median_levelset_pct () const { return m_median_levelset_frac; }
-    
-    // Static public functions. Enabling testing @todo move out of here
-    static double Median_levelsets (const vector<float>& entropies,  std::vector<int>& ranks );
+  
 private:
     contractionLocator(const input_section_selector_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params ());
     contractionLocator::params m_params;
+	medianLevelSet m_leveler;
+	
 	bool get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& ) const;
 
-    void compute_median_levelsets () const;
-    size_t recompute_signal () const;
-    void clear_outputs () const;
-    bool verify_input () const;
-    bool savgol_filter () const;
 
     mutable double m_median_value;
     mutable std::pair<double,double> m_leveled_min_max;
@@ -266,8 +236,6 @@ private:
 
     mutable std::vector<int>            m_ranks;
     size_t m_entsize;
-    mutable bool mValidInput;
-    mutable bool mValidOutput;
     mutable bool mNoSMatrix;
     mutable std::vector<index_val_t> m_peaks;
     mutable std::vector<float> m_peaks_interpolated;
@@ -283,7 +251,7 @@ protected:
     boost::signals2::signal<contractionLocator::sig_cb_cell_length_ready>* cell_length_ready;
     boost::signals2::signal<contractionLocator::sig_cb_force_ready>* total_reactive_force_ready;
     boost::signals2::signal<contractionLocator::sig_cb_contraction_ready>* contraction_ready;
-    boost::signals2::signal<contractionLocator::sig_cb_med_pci_ready>* med_pci_ready;
+
     
 };
 
