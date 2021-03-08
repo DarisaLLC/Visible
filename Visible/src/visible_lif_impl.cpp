@@ -319,20 +319,7 @@ void visibleContext::signal_root_pci_ready (std::vector<float> & signal, const i
 	auto copyy = signal;
 	svl::norm_min_max (copyy.begin(), copyy.end(), true);
 	m_timeFloatDict["root"] = copyy;
-//	namedTrack_t track;
-//	track.second.clear();
-//	auto mee = signal.begin();
-//	for (auto ss = 0; mee != signal.end() || ss < getNumFrames(); ss++, mee++)
-//	{
-//		index_time_t ti;
-//		ti.first = ss;
-//		timedVal_t res;
-//		track.second.emplace_back(ti,*mee);
-//	}
-//
-//    m_main_seq.m_time_data.load(track, named_colors["PCI"], 0);
-//
-//
+
     stringstream ss;
     ss << svl::toString(dummy.region()) << " root self-similarity available ";
     vlogger::instance().console()->info(ss.str());
@@ -401,6 +388,8 @@ void visibleContext::signal_regions_ready(int count, const input_section_selecto
     for (auto mb : m_ssmtRef->moving_bodies()){
         auto roi = mb->roi();
         vlogger::instance().console()->info(" @ " + svl::toString(roi.tl())+"::"+ svl::toString(roi.size()));
+		mb->generateRegionImages();
+		mb->run_selfsimilarity();
         mb->process();
     }
 }

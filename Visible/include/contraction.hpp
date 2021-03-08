@@ -135,7 +135,7 @@ public:
     class params{
     public:
         params ():m_median_levelset_fraction(0.07), m_minimum_contraction_time (0.32), m_frame_duration(0.020),
-		m_magnification_x(10.0f) {
+		m_magnification_x(10.0f), m_min_peak_to_relaxation_end(5.0) {
             update ();
         }
         float median_levelset_fraction()const {return m_median_levelset_fraction; }
@@ -151,6 +151,9 @@ public:
             update ();
         }
         
+		float minimum_peak_relaxation_end() const { return m_min_peak_to_relaxation_end; }
+		void  minimum_peak_relaxation_end(float newval) const { m_min_peak_to_relaxation_end = newval; }
+		
         uint32_t minimum_contraction_frames () const { return m_pad_frames; }
 		
 		void magnification (const float& mmag) const { m_magnification_x = mmag; }
@@ -166,6 +169,7 @@ public:
         mutable float m_minimum_contraction_time;
         mutable float m_frame_duration;
         mutable uint32_t m_pad_frames;
+		mutable float m_min_peak_to_relaxation_end;
     };
     
     using contraction_t = contractionMesh;
@@ -178,8 +182,8 @@ public:
     // Signals we provide
     // signal_contraction_available
     // signal pci is median level processed
-    typedef void (sig_cb_med_pci_ready) (std::vector<double>&);
-    typedef void (sig_cb_contraction_ready) (contractionContainer_t&, input_section_selector_t& );
+    typedef void (sig_cb_med_pci_ready) (std::vector<float>&);
+    typedef void (sig_cb_contraction_ready) (contractionContainer_t&, const input_section_selector_t& );
     typedef void (sig_cb_cell_length_ready) (sigContainer_t&);
     typedef void (sig_cb_force_ready) (sigContainer_t&);
     
@@ -191,7 +195,7 @@ public:
     // Load raw entropies and the self-similarity matrix
     // If no self-similarity matrix is given, entropies are assumed to be filtered and used directly
     // // input selector -1 entire index mobj index
-    void load (const vector<double>& entropies, const vector<vector<double>>& mmatrix = vector<vector<double>>());
+    void load (const vector<float>& entropies, const vector<vector<double>>& mmatrix = vector<vector<double>>());
 	
 	const contractionLocator::params& parameters () const { return m_params; }
 
@@ -210,10 +214,10 @@ public:
     const input_section_selector_t& input () const { return m_in; }
     
     // Original
-    const vector<double>& entropies () { return m_entropies; }
+    const vector<float>& entropies () { return m_entropies; }
     
     // LevelSet corresponding to last coverage pct setting
-    const vector<double>& leveled () { return m_signal; }
+    const vector<float>& leveled () { return m_signal; }
     const std::pair<double,double>& leveled_min_max () { return m_leveled_min_max; };
   
     
@@ -239,7 +243,7 @@ public:
     float get_median_levelset_pct () const { return m_median_levelset_frac; }
     
     // Static public functions. Enabling testing @todo move out of here
-    static double Median_levelsets (const vector<double>& entropies,  std::vector<int>& ranks );
+    static double Median_levelsets (const vector<float>& entropies,  std::vector<int>& ranks );
 private:
     contractionLocator(const input_section_selector_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params ());
     contractionLocator::params m_params;
@@ -255,10 +259,9 @@ private:
     mutable std::pair<double,double> m_leveled_min_max;
     mutable float m_median_levelset_frac;
     mutable vector<vector<double>>        m_SMatrix;   // Used in eExhaustive and
-    vector<double>               m_entropies;
-    vector<double>               m_accum;
-    mutable vector<double>              m_signal;
-    mutable vector<double>              m_interpolation;
+    vector<float>               m_entropies;
+
+    mutable vector<float>              m_signal;
     std::vector<int> m_peaks_idx;
 
     mutable std::vector<int>            m_ranks;
@@ -293,13 +296,13 @@ public:
     using index_val_t = contractionMesh::index_val_t;
     using sigContainer_t = contractionMesh::sigContainer_t;
     
-    contractionProfile (contraction_t&, const std::vector<double>& signal, const std::vector<float>& lengths = std::vector<float>());
+    contractionProfile (contraction_t&, const std::vector<float>& signal, const std::vector<float>& lengths = std::vector<float>());
 
-    static profileRef create(contraction_t& ct, const std::vector<double>& signal, const std::vector<float>& lengths = std::vector<float>()){
+    static profileRef create(contraction_t& ct, const std::vector<float>& signal, const std::vector<float>& lengths = std::vector<float>()){
         return profileRef(new contractionProfile(ct, signal, lengths));
     }
     // Compute Length Interpolation for measured contraction
-    void compute_interpolated_geometries_and_force();
+    bool compute_interpolated_geometries_and_force();
     
     const contraction_t& contraction () const { return m_ctr; }
     const double& relaxed_length () const { return m_relaxed_length; }

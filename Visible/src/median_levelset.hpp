@@ -123,7 +123,7 @@ private:
 	mutable vector<vector<double>>        m_SMatrix;   // Used in eExhaustive and
 	vector<double>               m_entropies;
 	mutable vector<double>               m_signal;
-	vector<double>               m_accum;
+
 	mutable std::atomic<bool> m_cached;
 	mutable input_section_selector_t m_in;
 	mutable std::vector<int>            m_ranks;
