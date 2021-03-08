@@ -77,7 +77,7 @@ m_cached(false),  m_in(in), mValidInput (false), m_params(params)
     cell_length_ready = createSignal<contractionLocator::sig_cb_cell_length_ready>();
 }
 
-void contractionLocator::load(const vector<double>& entropies, const vector<vector<double>>& mmatrix)
+void contractionLocator::load(const vector<float>& entropies, const vector<vector<double>>& mmatrix)
 {
     m_entropies = entropies;
     m_SMatrix = mmatrix;
@@ -109,24 +109,24 @@ void contractionLocator::compute_median_levelsets () const
  * 3. Sort according to distance to Median
  * 4. Fill up rank vector
  */
-double contractionLocator::Median_levelsets (const vector<double>& entropies,  std::vector<int>& ranks )
+double contractionLocator::Median_levelsets (const vector<float>& entropies,  std::vector<int>& ranks )
 {
 	perf::timer timeit;
 	timeit.start();
 	
-    vector<double> entcpy;
+    vector<float> entcpy;
     
     for (const auto val : entropies)
         entcpy.push_back(val);
     auto median_value = svl::Median(entcpy);
     // Subtract median from all
-    for (double& val : entcpy)
+    for (float& val : entcpy)
         val = std::abs (val - median_value );
     
     // Sort according to distance to the median. small to high
     ranks.resize(entropies.size());
     std::iota(ranks.begin(), ranks.end(), 0);
-    auto comparator = [&entcpy](double a, double b){ return entcpy[a] < entcpy[b]; };
+    auto comparator = [&entcpy](float a, float b){ return entcpy[a] < entcpy[b]; };
     std::sort(ranks.begin(), ranks.end(), comparator);
     return median_value;
 	timeit.stop();
@@ -175,14 +175,14 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
     if (! mValidInput) return false;
     contraction_t::clear(m_contraction);
     
-    auto maxima = [](std::vector<double>::const_iterator a,
-                     std::vector<double>::const_iterator b){
+    auto maxima = [](std::vector<float>::const_iterator a,
+                     std::vector<float>::const_iterator b){
         std::vector<double> coeffs;
         polyfit(a, b, 1.0, coeffs, 2);
         assert(coeffs.size() == 3);
         return (-coeffs[1] / (2 * coeffs[2]));
     };
-    const std::vector<double>& m_fder = m_signal;
+    const std::vector<float>& m_fder = m_signal;
     
     // Find distance between this peak and its previous and next peak or the begining or the end of the signal
     
@@ -198,8 +198,8 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
     if (edge_case) return false;
     
     m_contraction.contraction_peak.first = peak_indices[src_peak_index];
-    std::vector<double>::const_iterator cpt = m_fder.begin() + peak_indices[src_peak_index];
-    std::vector<double> results;
+    std::vector<float>::const_iterator cpt = m_fder.begin() + peak_indices[src_peak_index];
+    std::vector<float> results;
     // Left Boundary: If there is a peak behind us, use that other wise signal start
     auto left_boundary = src_peak_index > 0 ? peak_indices[src_peak_index - 1] : 0;
     results.reserve(m_contraction.contraction_peak.first - left_boundary);
@@ -222,7 +222,11 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
      */
     auto loc_relaxation_quadratic = maxima(cpt, m_fder.begin()+right_boundary);
     m_contraction.relaxation_end.first =  m_contraction.contraction_peak.first + loc_relaxation_quadratic;
-    
+	
+	// Make sure that relaxation end is beyond conraction peak 
+    if (m_contraction.relaxation_end.first < (m_contraction.contraction_peak.first + m_params.minimum_peak_relaxation_end()))
+		return false;
+	
     m_contraction.contraction_peak_interpolated = m_contraction.contraction_peak.first;
     m_contraction.contraction_peak_interpolated += parabolicFit(1.0 - m_fder[m_contraction.contraction_peak.first-1],
                                                                1.0 - m_fder[m_contraction.contraction_peak.first],
@@ -325,7 +329,8 @@ bool contractionLocator::profile_contractions (const std::vector<float>& lengths
         // Contraction gets a unique id by contraction profiler
         if(get_contraction_at_point(pp, m_peaks_idx, ct)){
             auto profile = contractionProfile::create(ct, m_signal, lengths);
-            profile->compute_interpolated_geometries_and_force();
+			if ( ! profile->compute_interpolated_geometries_and_force()) continue;
+			
             m_contractions.emplace_back(profile->contraction());
 //          @todo progress & report 
         }
@@ -382,7 +387,7 @@ bool contractionLocator::verify_input () const
 template boost::signals2::connection contractionLocator::registerCallback(const std::function<contractionLocator::sig_cb_med_pci_ready>&);
 template boost::signals2::connection contractionLocator::registerCallback(const std::function<contractionLocator::sig_cb_contraction_ready>&);
 
-contractionProfile::contractionProfile (contraction_t& ct, const std::vector<double>& signal,const std::vector<float>& lengths ):
+contractionProfile::contractionProfile (contraction_t& ct, const std::vector<float>& signal,const std::vector<float>& lengths ):
 m_ctr(ct), m_lengths(lengths)
 {
 	for (const auto dd : signal) m_fder.push_back((float)dd);
@@ -396,7 +401,7 @@ m_ctr(ct), m_lengths(lengths)
  *
  */
 
-void contractionProfile::compute_interpolated_geometries_and_force(){
+bool contractionProfile::compute_interpolated_geometries_and_force(){
     perf::timer timeit;
     timeit.start();
 	
@@ -405,15 +410,16 @@ void contractionProfile::compute_interpolated_geometries_and_force(){
 	if (!m_lengths.empty()){
 		relaxed_length = Median(m_lengths);
 	}
- 
+	if(m_fder.empty()) return false;
 
     /*
      * Compute everything within contraction interval
      */
     auto c_start = m_ctr.contraction_start.first;
     auto c_end = std::min(m_ctr.relaxation_end.first, m_fder.size()-1);
-    assert(!m_fder.empty());
-    assert(c_start >= 0 && c_start < c_end && c_end < m_fder.size());
+
+	bool check = c_start >= 0 && c_start < c_end && c_end < m_fder.size();
+	if (! check) return check;
     
     // Compute force using cardio model
     m_elongation.clear();
@@ -460,7 +466,7 @@ void contractionProfile::compute_interpolated_geometries_and_force(){
     auto timestr = toString(std::chrono::duration_cast<milliseconds>(timeit.duration()).count());
     vlogger::instance().console()->info("Force took (ms): " + timestr);
     vlogger::instance().console()->info("Cell Id " + toString(m_ctr.m_uid) + " Contraction Id " + toString(m_ctr.m_bid));
-    
+	return true;
     
 }
 

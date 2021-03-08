@@ -293,23 +293,12 @@ private:
     mutable std::unordered_map<int,vector<double>> m_entropies;
     mutable std::unordered_map<int,vector<vector<double>>> m_smat;
     
-    
-    // Median Levels
-    std::vector<double> m_medianLevel;
-    
     channel_images_t m_images;
     channel_vec_t m_all_by_channel;
     
     int64_t m_frameCount;
     Rectf m_measured_area;
     Rectf m_all;
-    
-  //  mutable std::shared_ptr<vecOfNamedTrack_t> m_moment_tracksRef;
- //   mutable std::shared_ptr<vecOfNamedTrack_t> m_longterm_pci_tracksRef;
-
-//    mutable  vecOfNamedTrack_t m_shortterm_pci_tracks;
-//    mutable std::queue<float> m_shortterms;
-    
     
     std::shared_ptr<ioImageWriter> m_image_writer;
     std::shared_ptr<ioImageWriter> m_csv_writer;
@@ -357,8 +346,13 @@ public:
         weak_ref_t weak = getShared();
         return weak;
     }
-    
-    void process ();
+	
+	bool generateRegionImages () const;
+	
+	bool run_selfsimilarity ();
+
+	// entropies is empty, it runs self
+	bool process (const std::vector<float>& entropies = std::vector<float>());
     bool segment_at_contraction (const std::vector<roiWindow<P8U>>& images, const std::vector<int> &peak_indices);
     
 //    const trackMap_t& trackBook () const;
@@ -368,8 +362,10 @@ public:
     size_t Id() const;
     const input_section_selector_t& input() const;
     const std::shared_ptr<contractionLocator> & locator () const;
-    const vector<double>& entropies () const;
-    
+	const vector<float>& entropies () const;
+	const vector<double>& leveled () const;
+	const std::vector<std::vector<double>> ssMatrix () const;
+	
 private:
     bool run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>>& images);
 	bool run_scale_space (const std::vector<roiWindow<P8U>>& images);
@@ -377,10 +373,10 @@ private:
     ssmt_result (const moving_region&,const input_section_selector_t& in);
     void signal_sm1d_ready (vector<float>&, const input_section_selector_t&);
     void contraction_ready (contractionLocator::contractionContainer_t& contractions, const input_section_selector_t&);
-    bool get_channels (int channel);
+    bool get_channels (int channel) const ;
     input_section_selector_t m_input;
     
-    vector<double> m_entropies;
+	vector<float> m_entropies, m_leveled;
     std::vector<std::vector<double>> m_smat;
     
     std::shared_ptr<contractionLocator> m_caRef;
@@ -391,15 +387,18 @@ private:
     std::vector<std::vector<float>> m_hz_profiles;
     std::vector<std::vector<float>> m_vt_profiles;
     
-    ssmt_processor::channel_images_t m_images;
-    ssmt_processor::channel_vec_t m_all_by_channel;
+//    ssmt_processor::channel_images_t m_images;
+    mutable ssmt_processor::channel_vec_t m_all_by_channel;
 	
 	mutable lengthFromMotion m_scale_space;
     
     uint64_t m_frameCount;
-    uint32_t m_channel_count;
+    mutable uint32_t m_channel_count;
     std::mutex m_mutex;
     std::weak_ptr<ssmt_processor> m_weak_parent;
+	mutable std::atomic<bool> m_images_loaded;
+	std::atomic<bool> m_pci_done;
+
     
 };
 

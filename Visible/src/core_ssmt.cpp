@@ -181,9 +181,9 @@ void ssmt_processor::load_channels_from_ImageBuf(const std::shared_ptr<ImageBuf>
         signal_content_loaded->operator()(m_frameCount);
 	
 	// Dispatch a thread to perform ss on entire -- root -- image
-	input_section_selector_t dummy(-1,0);
-	assert(dummy.isEntire());
-	auto ss_thread = std::thread(&ssmt_processor::run_selfsimilarity_on_selected_input,this, dummy,nullptr);
+	input_section_selector_t entire(-1,0);
+	assert(entire.isEntire());
+	auto ss_thread = std::thread(&ssmt_processor::run_selfsimilarity_on_selected_input,this, entire,nullptr);
 	ss_thread.detach();
 	
 }

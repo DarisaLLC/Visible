@@ -65,7 +65,7 @@ ssmt_result::ssmt_result(const moving_region& mr,const input_section_selector_t&
 	{
 		std::cout << " Throw in Binding Signals " << ex.what() << std::endl;
 	}
-
+	m_images_loaded.store(false, std::memory_order_release);
 }
 
 // When contraction is ready, signal a copy
@@ -86,7 +86,7 @@ void ssmt_result::contraction_ready (contractionLocator::contractionContainer_t&
 
 const input_section_selector_t& ssmt_result::input() const { return m_input; }
 
-const vector<double>& ssmt_result::entropies () const { return m_entropies; }
+const vector<float>& ssmt_result::entropies () const { return m_entropies; }
 
 
 size_t ssmt_result::Id() const { return id(); }
@@ -95,25 +95,48 @@ const std::shared_ptr<contractionLocator> & ssmt_result::locator () const { retu
 const ssmt_processor::channel_vec_t& ssmt_result::content () const { return m_all_by_channel; }
 
 
-void ssmt_result::process (){
-    bool done = get_channels(m_input.section());
-    if(done){
-        auto pci_done = run_selfsimilarity_on_region(m_all_by_channel[m_input.section()]);
-        if(pci_done){
-            m_caRef->locate_contractions();
-        }
-		auto ss_done = run_scale_space(m_all_by_channel[m_input.section()]);
-		if(ss_done){
-			m_scale_space.process_motion_peaks();
-		}
-		if(pci_done && ss_done){
-			m_caRef->profile_contractions(m_scale_space.lengths());
-		}
-    }
+bool  ssmt_result::generateRegionImages () const{
+	if (m_images_loaded == false){
+		bool done = get_channels(m_input.section());
+		m_images_loaded.store(done, std::memory_order_release);
+	}
+	return m_images_loaded;
+}
+
+bool ssmt_result::run_selfsimilarity (){
+	while(!m_images_loaded.load(std::memory_order_acquire)){
+		std::this_thread::yield();
+	}
+	if (m_pci_done == false){
+		auto pci_done = run_selfsimilarity_on_region(m_all_by_channel[m_input.section()]);
+		m_pci_done.store(pci_done, std::memory_order_release);
+	}
+	return m_pci_done;
+		
+}
+
+bool ssmt_result::process (const std::vector<float>& entropies){
+	if (m_images_loaded == false || m_pci_done == false) return false;
+	m_leveled = entropies;
+	const std::vector<float>& use = (m_leveled.empty() || m_leveled.size() != m_entropies.size()) ?
+		m_entropies : m_leveled;
+	
+	m_caRef->load(use, m_smat);
+    m_caRef->locate_contractions();
+
+	auto ss_done = run_scale_space(m_all_by_channel[m_input.section()]);
+	if(ss_done){
+		m_scale_space.process_motion_peaks();
+	}
+	if(m_pci_done && ss_done){
+		m_caRef->profile_contractions(m_scale_space.lengths());
+		return true;
+	}
+	return false;
 }
 
 // Crops the moving body accross the sequence
-bool ssmt_result::get_channels (int channel){
+bool ssmt_result::get_channels (int channel) const {
     
     auto parent = m_weak_parent.lock();
     if (parent.get() == 0) return false;
@@ -166,7 +189,8 @@ bool ssmt_result::get_channels (int channel){
     while (++vitr != rws.end());
     bool check = m_all_by_channel[channel].size() == total;
 	
-    return check && count == total;
+    check = check && count == total;
+	return check;
 }
 
 bool ssmt_result::run_scale_space (const std::vector<roiWindow<P8U>>& images){
@@ -193,21 +217,17 @@ bool ssmt_result::run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>
         const std::deque<deque<double>> sm = sp->similarityMatrix();
         assert(images.size() == entropies.size() && sm.size() == images.size());
         for (auto row : sm) assert(row.size() == images.size());
-        
-        m_entropies.insert(m_entropies.end(), entropies.begin(), entropies.end());
+		m_entropies.resize(entropies.size());
+		std::transform(entropies.begin(), entropies.end(), m_entropies.begin(), [] (const double d){ return float(d); });
         for (auto row : sm){
             vector<double> rowv;
             rowv.insert(rowv.end(), row.begin(), row.end());
             m_smat.push_back(rowv);
         }
-        
-        m_caRef->load(m_entropies, m_smat);
 	
 	    auto parent = m_weak_parent.lock();
 		if (parent.get() != 0 && parent->signal_root_pci_ready){
-			std::vector<float> fent(m_entropies.size());
-			std::transform(m_entropies.begin(), m_entropies.end(), fent.begin(), [] (const double d){ return float(d); });
-			parent->signal_root_pci_ready->operator()(fent, m_input);
+			parent->signal_root_pci_ready->operator()(m_entropies, m_input);
 		}
     
         return true;
