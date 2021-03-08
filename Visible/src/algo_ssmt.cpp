@@ -140,9 +140,9 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
 // Update. Called when cutoff offset has changed
 void ssmt_processor::update ()
 {
-	for (auto & mb : moving_bodies()){
-		mb->locator()->update();
-	}
+//	for (auto & mb : moving_bodies()){
+//		mb->locator()->update();
+//	}
 }
 
 
