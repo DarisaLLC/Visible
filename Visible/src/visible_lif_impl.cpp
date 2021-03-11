@@ -388,8 +388,9 @@ void visibleContext::signal_regions_ready(int count, const input_section_selecto
     for (auto mb : m_ssmtRef->moving_bodies()){
         auto roi = mb->roi();
         vlogger::instance().console()->info(" @ " + svl::toString(roi.tl())+"::"+ svl::toString(roi.size()));
-		mb->generateRegionImages();
-		mb->run_selfsimilarity();
+		if (mb->generateRegionImages()){
+			mb->run_selfsimilarity();
+		}
         mb->process();
     }
 }
@@ -963,7 +964,7 @@ void visibleContext::add_canvas (){
  */
 
 void visibleContext::add_result_sequencer (){
-	if (ImGui::CollapsingHeader(" Adaptive PCI ")) {
+	if (ImGui::CollapsingHeader(" Adaptive PCI ") && ! m_timeFloatDict.empty()) {
 		int count = getNumFrames();
 		float xs1[count], ys1[count];
 		for (int i = 0; i < count; ++i) {

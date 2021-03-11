@@ -183,18 +183,14 @@ bool contractionLocator::locate_contractions (){
 
         svl::boostStatistics bstats;
         for (const auto& val : m_bac) bstats.update(val);
-        ss << std::endl;
-        ss << "(time in ms)" << std::endl
+        ss << std::endl
         << "Count:  " << bstats.get_n() << std::endl
         << "Min:    " << bstats.get_min() << std::endl
         << "Max:    " << bstats.get_max() << std::endl
         << "Med:    " << bstats.get_median() << std::endl
-        << "x75:    " << bstats.get_quantile(0.75) << std::endl
-        << "x85:    " << bstats.get_quantile(0.85) << std::endl
         << "x95:    " << bstats.get_quantile(0.95) << std::endl
-        << "x99:    " << bstats.get_quantile(0.99) << std::endl
-        << "x99.9:  " << bstats.get_quantile(0.999) << std::endl
-        << "x99.99: " << bstats.get_quantile(0.9999) << std::endl;
+		<< "x99:    " << bstats.get_quantile(0.99) << std::endl;
+
         vlogger::instance().console()->info(ss.str());
     }
     
@@ -217,10 +213,14 @@ bool contractionLocator::locate_contractions (){
     }
     {
         stringstream ss;
-        for (auto idx : m_peaks_idx) ss << idx << "," << std::endl;
-        for (auto idx : periods) ss << idx << "," << std::endl;
-        for (auto idx : selected) ss << idx << "," << std::endl;
-        vlogger::instance().console()->info(ss.str());
+		ss << " Half Period " << half_period << std::endl;
+		for (auto idx : m_peaks_idx) ss << idx << ",";
+		ss << std::endl;
+        for (auto idx : periods) ss << idx << ",";
+		ss << std::endl;
+		for (auto idx : selected) ss << idx << ",";
+		ss << std::endl;
+		vlogger::instance().console()->info(ss.str());
     }
     m_peaks_idx = selected;
     

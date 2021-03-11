@@ -104,9 +104,6 @@ bool  ssmt_result::generateRegionImages () const{
 }
 
 bool ssmt_result::run_selfsimilarity (){
-	while(!m_images_loaded.load(std::memory_order_acquire)){
-		std::this_thread::yield();
-	}
 	if (m_pci_done == false){
 		auto pci_done = run_selfsimilarity_on_region(m_all_by_channel[m_input.section()]);
 		m_pci_done.store(pci_done, std::memory_order_release);
@@ -116,6 +113,10 @@ bool ssmt_result::run_selfsimilarity (){
 }
 
 bool ssmt_result::process (const std::vector<float>& entropies){
+
+	while(!m_images_loaded || ! m_pci_done)
+		{std::this_thread::yield(); }
+	
 	if (m_images_loaded == false || m_pci_done == false) return false;
 	m_leveled = entropies;
 	const std::vector<float>& use = (m_leveled.empty() || m_leveled.size() != m_entropies.size()) ?
@@ -204,7 +205,9 @@ bool ssmt_result::run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>
 {
   
     auto sp =  std::shared_ptr<sm_producer> ( new sm_producer () );
-    
+	m_smat.resize(0);
+	m_entropies.resize(0);
+	
     vlogger::instance().console()->info(tostr(images.size()));
     sp->load_images (images);
     std::packaged_task<bool()> task([sp](){ return sp->operator()(0);}); // wrap the function
@@ -225,12 +228,13 @@ bool ssmt_result::run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>
             m_smat.push_back(rowv);
         }
 	
+		bool check = m_smat.size() == m_entropies.size();
 	    auto parent = m_weak_parent.lock();
 		if (parent.get() != 0 && parent->signal_root_pci_ready){
 			parent->signal_root_pci_ready->operator()(m_entropies, m_input);
 		}
     
-        return true;
+        return check;
     }
     return false;
 }
