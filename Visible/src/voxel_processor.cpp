@@ -288,7 +288,7 @@ bool  voxel_processor::m_internal_generate() {
         const deque<double>& entropies = sp->shannonProjection ();
         m_voxel_entropies.insert(m_voxel_entropies.end(), entropies.begin(), entropies.end());
         auto extremes = svl::norm_min_max(m_voxel_entropies.begin(),m_voxel_entropies.end());
-        std::string msg = to_string(extremes.first) + "," + to_string(extremes.second);
+        std::string msg = "range : " + to_string(extremes.first) + "," + to_string(extremes.second);
         vlogger::instance().console()->info(msg);
         return m_voxel_entropies.size() == m_voxels.size();
     }
@@ -305,7 +305,6 @@ bool  voxel_processor::generate_voxel_surface (const std::vector<float>& ven){
     
     cv::Mat ftmp = cv::Mat(height, width, CV_32F);
     std::vector<float>::const_iterator start = ven.begin();
-//    std::memcpy(ftmp.data, ven.data(),ven.size()*sizeof(float));
     
         // Fillup floating image and hist of 8bit values
     for (auto row =0; row < height; row++){
@@ -385,8 +384,8 @@ bool  voxel_processor::m_load(const std::vector<roiWindow<P8U>> &images,
     
     bool ok = count == (expected_width * expected_height);
 
-    vlogger::instance().console()->info(ok ? "finished ok "
-                                        : "finished with error ");
+	if (! ok)
+    	vlogger::instance().console()->error("finished with error ");
     return ok;
 }
 
