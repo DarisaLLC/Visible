@@ -7,6 +7,34 @@
 
 #include "oiio_utils.hpp"
 
+
+// todo: support all types
+bool write_tiff_stackU8 (const bfs::path& output_path, std::vector<cv::Mat>& images){
+	if (images.empty()) return false;
+	
+	int nsubimages = int(images.size()); // assume this is set
+	std::unique_ptr<ImageOutput> out = ImageOutput::create (output_path.c_str());
+	
+		// Be sure we can support subimages
+	if (nsubimages > 1 && ! out->supports ("multiimage")) return false;
+	
+	std::vector<ImageSpec> specs;
+	for (auto i = 0; i < nsubimages;i++)
+		specs.emplace_back(images[i].cols, images[i].rows, 1, TypeDesc::UINT8);
+	out->open(output_path.c_str(), nsubimages, specs.data());
+	
+	ImageOutput::OpenMode appendmode = ImageOutput::Create;
+	
+	for (int s = 0; s < nsubimages; ++s) {
+		out->open (output_path.c_str(), specs[s], appendmode);
+		out->write_image (TypeDesc::UINT8, images.data());
+		appendmode = ImageOutput::AppendSubimage;
+	}
+	
+	out->close ();
+	return false;
+}
+
 std::string describe_image_spec (const ImageSpec& spec){
     std::ostringstream oss;
     oss << spec.nchannels << " Channels \n";

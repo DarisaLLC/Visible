@@ -14,6 +14,8 @@
 #include <OpenImageIO/imageio.h>
 #include "opencv2/opencv.hpp"
 #include "core/pair.hpp"
+#include "boost/filesystem.hpp"
+namespace bfs=boost::filesystem;
 
 using namespace OIIO;
 using namespace cv;
@@ -24,5 +26,7 @@ cv::Mat getRootFrame(const std::shared_ptr<ImageBuf>& ib, const ustring& content
 cv::Mat getRoiFrame(const std::shared_ptr<ImageBuf>& ib, const ustring& contentName, int frame_index, const ROI& roi);
 cv::Mat getRoiFrame(const std::shared_ptr<ImageBuf>& ib, const ustring& contentName, int frame_index,
                     const iPair& tl, int width, int height);
+
+bool write_tiff_stackU8 (const bfs::path& output_path, std::vector<cv::Mat>& images);
 
 #endif /* oiio_utils_hpp */
