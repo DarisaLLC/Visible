@@ -33,7 +33,6 @@
 #include "boost/algorithm/string.hpp"
 #include <boost/range/irange.hpp>
 #include "boost/filesystem.hpp"
-#include "boost/algorithm/string.hpp"
 
 #include "vision/voxel_frequency.h"
 
@@ -232,9 +231,6 @@ cv::waitKey((c));\
 
 
 
-#if 1
-
-
     // First check oiio:BitsPerSample int attribute.  If not set,
     // fall back on the TypeDesc. return 0 for float types
     // or those that exceed the int range (long long, etc)
@@ -270,16 +266,13 @@ get_intsample_maxval(const ImageSpec& spec)
     return 0;
 }
 
+
+
+
 TEST (ut_integral, basic){
 	Mat M = (Mat_<uint8_t>(3,3) << 1, 0, 0, 0, 1, 0, 0, 0, 1);
 	Mat sum = M.clone();
-		// create local variance filter size runner
-	svl::localVAR tv (cv::Size(3,2));
-	cv::Mat var0;
-	cv::Mat std0U8;
-	tv.process(out0, var0);
-	EXPECT_EQ(tv.min_variance() , 0);
-	EXPECT_EQ(tv.max_variance() , 11712);
+
 	
 }
 
@@ -551,6 +544,78 @@ image_progress_callback(void* opaque, float done)
 {
     std::cout << " Progress " << (int)(done * 100) << std::endl;
     return false;
+}
+
+TEST(write_stack, basic){
+	
+	auto res = dgenv_ptr->asset_path("nd122.tif");
+	EXPECT_TRUE(res.second);
+	EXPECT_TRUE(boost::filesystem::exists(res.first));
+	ustring filename (res.first.c_str());
+	std::vector<cv::Mat> src_images;
+	
+	auto build_vector = [&](const ustring& filename, std::vector<cv::Mat>& images, ImageSpec& bspec){
+		images.resize(0);
+		ImageBuf buf(filename);
+		int nsubimages = buf.nsubimages();
+		bspec = buf.spec();
+		int xres = bspec.width;
+		int yres = bspec.height;
+		buf.threads(1);
+		
+			// Now read them from cache and display them
+		for (int ss = 0; ss < nsubimages; ss++){
+			buf.reset(filename, ss, 0);
+			std::string datetime = buf.spec().get_string_attribute("DateTime");
+			ROI roi = buf.roi();
+			if (bspec.format ==  TypeUInt16){
+				cv::Mat cvb (yres,xres, CV_16U);
+				cv::Mat cvb8 (yres,xres, CV_8U);
+				
+				buf.get_pixels(roi, TypeUInt16, cvb.data);
+				cv::normalize(cvb, cvb8, 0, 255, NORM_MINMAX, CV_8UC1);
+				images.push_back(cvb8);
+				
+			}else if (bspec.format ==  TypeUInt8){
+				cv::Mat cvb8 (yres,xres, CV_8U);
+				buf.get_pixels(roi, TypeUInt8, cvb8.data);
+				images.push_back(cvb8);
+			}
+			else{
+				assert(false);
+			}
+		}
+	};
+	
+	auto output_path = dgenv_ptr->output_path();
+	ImageSpec bspec;
+	build_vector(filename, src_images, bspec);
+	
+	// Write these out as subimages
+	output_path = output_path / "foo.tif";
+
+	int nsubimages = src_images.size(); // assume this is set
+	std::unique_ptr<ImageOutput> out = ImageOutput::create (output_path.c_str());
+
+		// Be sure we can support subimages
+	EXPECT_TRUE(nsubimages > 1 && out->supports ("multiimage"));
+	auto u8spec = ImageSpec(bspec.width, bspec.height, 1, TypeDesc::UINT8);
+
+	std::vector<ImageSpec> specs;
+	for (auto i = 0; i < nsubimages;i++) specs.emplace_back(bspec.width, bspec.height, 1, TypeDesc::UINT8);
+	out->open(output_path.c_str(), nsubimages, specs.data());
+	
+	ImageOutput::OpenMode appendmode = ImageOutput::Create;
+	
+	for (int s = 0; s < nsubimages; ++s) {
+		out->open (output_path.c_str(), specs[s], appendmode);
+		cv::Mat pixels (bspec.height, bspec.width, CV_8U);
+		pixels = s % 256;
+		out->write_image (TypeDesc::UINT8, pixels.data);
+		appendmode = ImageOutput::AppendSubimage;
+	}
+
+	out->close ();
 }
 
 
@@ -1939,27 +2004,6 @@ TEST(SimpleGUITest, basic)
     ImGui::DestroyContext();
 }
 
-TEST(tracks, basic){
-    
-    // Generate test data
-    namedTrack_t ntrack;
-    timedVecOfVals_t& data = ntrack.second;
-    data.resize(oneD_example.size());
-    for (int tt = 0; tt < oneD_example.size(); tt++){
-        data[tt].second = oneD_example[tt];
-        data[tt].first.first = tt;
-        data[tt].first.second = time_spec_t(tt / 1000.0);
-    }
-    
-    std::vector<float> X, Y;
-    domainFromPairedTracks_D (ntrack, X, Y);
-    
-    EXPECT_EQ(X.size(), oneD_example.size());
-    EXPECT_EQ(Y.size(), oneD_example.size());
-    for(auto ii = 0; ii < oneD_example.size(); ii++){
-        EXPECT_TRUE(svl::RealEq(Y[ii],(float)oneD_example[ii]));
-    }
-}
 
 
 TEST(units,basic)
@@ -2154,29 +2198,6 @@ TEST(ut_stl_utils, accOverTuple)
     
 }
 
-#if 0
-TEST(UT_smfilter, basic)
-{
-    vector<int> ranks;
-    vector<double> norms;
-    norm_scale(oneD_example,norms);
-    //    stl_utils::Out(norms);
-    
-    vector<double> output;
-    savgol(norms, output);
-    //  stl_utils::Out(norms);
-    //  stl_utils::Out(output);
-    
-    auto median_value = contraction_analyzer::Median_levelsets(norms,ranks);
-    
-    std::cout << median_value << std::endl;
-    for (auto ii = 0; ii < norms.size(); ii++)
-    {
-        //        std::cout << "[" << ii << "] : " << norms[ii] << "     "  << std::abs(norms[ii] - median_value) << "     "  << ranks[ii] << "     " << norms[ranks[ii]] << std::endl;
-        //        std::cout << "[" << ii << "] : " << norms[ii] << "     " << output[ii] << std::endl;
-    }
-}
-#endif
 
 TEST(basicU8, histo)
 {
@@ -2208,7 +2229,6 @@ TEST (UT_make_function, make_function)
     make_function_test::run();
 }
 
-#endif
 
 
 TEST(ut_similarity, short_term)

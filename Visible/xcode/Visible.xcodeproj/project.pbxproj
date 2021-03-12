@@ -560,7 +560,6 @@
 		C237500E24A1BAB700E13081 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		C2398A0821DD8A0A00B180A0 /* file_system.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_system.cpp; sourceTree = "<group>"; };
 		C23B7CC6220553E1005DE02C /* cpp-perf.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = "cpp-perf.hpp"; path = "../include/cpp-perf.hpp"; sourceTree = "<group>"; };
-		C23CFBE321E96D6700C1DF16 /* Resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../test/Resources.h; sourceTree = "<group>"; };
 		C23CFBE521E9785000C1DF16 /* PlayLoop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PlayLoop.png; path = data/PlayLoop.png; sourceTree = "<group>"; };
 		C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PlayNoLoop.png; path = data/PlayNoLoop.png; sourceTree = "<group>"; };
 		C23D0F461E297B3B0049ADDB /* visible_lif_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = visible_lif_impl.cpp; path = ../src/visible_lif_impl.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -576,7 +575,6 @@
 		C241BBAA1FB11B51000DE36E /* lif_content.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lif_content.hpp; path = ../include/lif_content.hpp; sourceTree = "<group>"; };
 		C242CCC4217BD30A004F7867 /* ut_units.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ut_units.hpp; sourceTree = "<group>"; };
 		C242CCC6217E93FC004F7867 /* ut_cardio.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ut_cardio.hpp; sourceTree = "<group>"; };
-		C248D6D92249454900C2C02F /* Visible_Run_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Visible_Run_Prefix.pch; sourceTree = "<group>"; };
 		C24C0953214A1ED5004C8002 /* palette.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = palette.png; path = ../assets/palette.png; sourceTree = "<group>"; };
 		C24C095A214B3291004C8002 /* cinder_opencv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cinder_opencv.h; sourceTree = "<group>"; };
 		C24C6E2F23329D4800A118AC /* correlation1d.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = correlation1d.hpp; sourceTree = "<group>"; };
@@ -1124,7 +1122,6 @@
 				C2820F26217523E200DFA7A6 /* Configuration */,
 				C29C726F216FC7340028AED1 /* imgui */,
 				32CA4F630368D1EE00C91783 /* Visible_Prefix.pch */,
-				C248D6D92249454900C2C02F /* Visible_Run_Prefix.pch */,
 				C2C5CF622299E959004595C5 /* Visible_GTest_Prefix.pch */,
 			);
 			name = "Other Sources";
@@ -1136,7 +1133,6 @@
 				C2819ED42201287900183E44 /* visible_scope.png */,
 				C23CFBE521E9785000C1DF16 /* PlayLoop.png */,
 				C23CFBE621E9785000C1DF16 /* PlayNoLoop.png */,
-				C23CFBE321E96D6700C1DF16 /* Resources.h */,
 				C294B11F2152D22C00C916B1 /* Media.xcassets */,
 				C2820F2D217527EE00DFA7A6 /* Config */,
 				C264F94B215F0B6D00AF3130 /* Visible.icns */,
