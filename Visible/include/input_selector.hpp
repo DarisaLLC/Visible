@@ -28,6 +28,16 @@ public:
     int region () const { return m_region;}
     int section () const { return m_section; }
     
+		// required for STL
+	bool operator<(const region_and_source& other) const
+	{
+		return (m_region < other.m_region);
+	}
+	bool operator==(const region_and_source& other) const
+	{
+		return m_region == other.m_region && m_section == other.m_section;
+	}
+
 	
     friend ostream& operator<<(ostream& out,region_and_source& rs){
          out << (rs.isEntire() ? " Entire " : " ROI ") << std::endl;
@@ -41,6 +51,6 @@ private:
     mutable int m_section;
 };
 
-typedef region_and_source input_section_selector_t;
+typedef region_and_source result_index_channel_t;
 
 #endif /* input_selector_h */

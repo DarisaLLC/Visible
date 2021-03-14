@@ -86,9 +86,9 @@ public:
 		void magnification (const float& mmag) const { m_magnification_x = mmag; }
 		float magnification () const { return m_magnification_x; }
 
-		void channel_to_use(int c){ m_channel_to_use = c; m_channel_root = input_section_selector_t(-1,c); }
+		void channel_to_use(int c){ m_channel_to_use = c; m_channel_root = result_index_channel_t(-1,c); }
 		int channel_to_use() const { return m_channel_to_use; }
-		const input_section_selector_t& channel_to_use_root () const {
+		const result_index_channel_t& channel_to_use_root () const {
 			return m_channel_root;
 		}
 		
@@ -99,7 +99,7 @@ public:
         mutable voxel_params_t m_vparams;
         mutable TypeDesc m_type;
 		mutable int m_channel_to_use;
-		mutable input_section_selector_t m_channel_root;
+		mutable result_index_channel_t m_channel_root;
 		
     };
     
@@ -109,14 +109,14 @@ public:
     typedef void (sig_cb_frame_loaded) (int&, double&); // a frame is loaded
     
     typedef void (sig_intensity_over_time_ready) (); // Fluorescense stats are done
-    typedef void (sig_cb_contraction_ready) (contractionLocator::contractionContainer_t&,const input_section_selector_t& in); // Scene Contraction is ready
+    typedef void (sig_cb_contraction_ready) (contractionLocator::contractionContainer_t&,const result_index_channel_t& in); // Scene Contraction is ready
 
-    typedef void (sig_cb_root_pci_ready) (std::vector<float> &, const input_section_selector_t&); // Scene self_similarity is done
-    typedef void (sig_cb_root_pci_median_regularized_ready) (const input_section_selector_t&);// regularization via median level sets are done -1 or mobj index
+    typedef void (sig_cb_root_pci_ready) (std::vector<float> &, const result_index_channel_t&); // Scene self_similarity is done
+    typedef void (sig_cb_root_pci_median_regularized_ready) (const result_index_channel_t&);// regularization via median level sets are done -1 or mobj index
 
     typedef void (sig_cb_volume_ready) (); // Scene Image Volume stats are done
     typedef void (sig_cb_ss_voxel_ready) (std::vector<float> &); // Voxel Self-Similarity is done
-    typedef void (sig_cb_geometry_ready) (int count, const input_section_selector_t&); // Moving segments are generated
+    typedef void (sig_cb_geometry_ready) (int count, const result_index_channel_t&); // Moving segments are generated
     typedef void (sig_cb_segmented_view_ready) (cv::Mat &, cv::Mat &); // Motion Entropic Space is done
 
 
@@ -142,8 +142,9 @@ public:
     // Update. Called also when cutoff offset has changed
     //void update (const input_section_selector_t&);
 	void update();
-    const vector<vector<double>>& ssMatrix () const { return m_smat[-1]; }
-    const vector<double>& entropies () const { return m_entropies[-1]; }
+    const vector<vector<double>>& ssMatrix () const { return m_smat; }
+	const vector<double>& entropies () const { return m_entropies; }
+	const vector<float>& entropies_F () const { return m_entropies_F; }
     
   
   
@@ -177,7 +178,7 @@ public:
     // args:
     // channel_index which channel of multi-channel input. Usually visible channel is the last one
     // input is -1 for the entire root or index of moving object area in results container
-    void run_selfsimilarity_on_selected_input (const input_section_selector_t&,const progress_fn_t& reporter );
+    void run_selfsimilarity_on_selected_input (const result_index_channel_t&,const progress_fn_t& reporter );
    
     
     std::vector<float> shortterm_pci (const std::vector<uint32_t>& indices);
@@ -215,7 +216,7 @@ private:
     // 2nd interface is lower level interface
        // args:
        // images: vector of roiWindow<P8U>s. roiWindow<P8U> is a single plane image container.
-   void internal_run_selfsimilarity_on_selected_input  (const std::vector<roiWindow<P8U>>& images,  const input_section_selector_t&,const progress_fn_t& reporter);
+   void internal_run_selfsimilarity_on_selected_input  (const std::vector<roiWindow<P8U>>& images,  const result_index_channel_t&,const progress_fn_t& reporter);
 
     // Assumes LIF data -- use multiple window.
     void internal_load_channels_from_lif_buffer2d (const std::shared_ptr<ImageBuf>& frames,  const ustring& contentName, const mediaSpec& sd);
@@ -248,11 +249,11 @@ private:
     
     void compute_shortterm (const uint32_t halfWinSz) const;
     
-	void contraction_ready (contractionLocator::contractionContainer_t&, const input_section_selector_t&);
+	void contraction_ready (contractionLocator::contractionContainer_t&, const result_index_channel_t&);
     void volume_stats_computed ();
     void pci_done ();
     void sm_content_loaded ();
-    void signal_geometry_done (int, const input_section_selector_t&);
+    void signal_geometry_done (int, const result_index_channel_t&);
     
 //    std::shared_ptr<ioImageWriter>& get_image_writer ();
 //    std::shared_ptr<ioImageWriter>& get_csv_writer ();
@@ -290,8 +291,9 @@ private:
     mutable smProducerRef m_sm_producer;
     vector<float> m_voxel_entropies;
 
-    mutable std::unordered_map<int,vector<double>> m_entropies;
-    mutable std::unordered_map<int,vector<vector<double>>> m_smat;
+	mutable vector<double> m_entropies;
+	mutable vector<float> m_entropies_F;
+    mutable vector<vector<double>> m_smat;
     
     channel_images_t m_images;
     channel_vec_t m_all_by_channel;
@@ -316,7 +318,7 @@ private:
     std::vector<cv::Point> m_var_peaks;
     mutable fPair m_length_range;
     mutable std::vector<roiWindow<P8U>> m_voxels;
-    input_section_selector_t m_instant_input;
+    result_index_channel_t m_instant_input;
     std::map<uint32_t, bfs::path> m_result_index_to_cache_path;
 	mediaSpec m_media_spec;
     
@@ -332,11 +334,9 @@ class ssmt_result : public moving_region,std::enable_shared_from_this<ssmt_resul
 public:
     typedef std::shared_ptr<ssmt_result> ref_t;
     typedef std::weak_ptr<ssmt_result> weak_ref_t;
- //   typedef std::shared_ptr<vecOfNamedTrack_t> trackRef_t;
-   // typedef std::unordered_map<std::string, trackRef_t> trackMap_t;
     
     static const ref_t create (std::shared_ptr<ssmt_processor>&, const moving_region&,
-                               const input_section_selector_t& in);
+                               const result_index_channel_t& in);
 
     ssmt_result::ref_t getShared () {
         return shared_from_this();
@@ -351,8 +351,7 @@ public:
 	
 	bool run_selfsimilarity ();
 
-	// entropies is empty, it runs self
-	bool process (const std::vector<float>& entropies = std::vector<float>());
+	bool process ();
     bool segment_at_contraction (const std::vector<roiWindow<P8U>>& images, const std::vector<int> &peak_indices);
     
 //    const trackMap_t& trackBook () const;
@@ -360,26 +359,28 @@ public:
     const uint32_t channelCount () const;
     const ssmt_processor::channel_vec_t& content () const;
     size_t Id() const;
-    const input_section_selector_t& input() const;
+    const result_index_channel_t& input() const;
     const std::shared_ptr<contractionLocator> & locator () const;
 	const vector<float>& entropies () const;
 	const vector<double>& leveled () const;
 	const std::vector<std::vector<double>> ssMatrix () const;
+	const medianLevelSet& leveler () const { return m_leveler; }
 	
 private:
     bool run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>>& images);
 	bool run_scale_space (const std::vector<roiWindow<P8U>>& images);
 	
-    ssmt_result (const moving_region&,const input_section_selector_t& in);
-    void signal_sm1d_ready (vector<float>&, const input_section_selector_t&);
-    void contraction_ready (contractionLocator::contractionContainer_t& contractions, const input_section_selector_t&);
+    ssmt_result (const moving_region&,const result_index_channel_t& in);
+    void signal_sm1d_ready (vector<float>&, const result_index_channel_t&);
+    void contraction_ready (contractionLocator::contractionContainer_t& contractions, const result_index_channel_t&);
     bool get_channels (int channel) const ;
-    input_section_selector_t m_input;
+    result_index_channel_t m_input;
     
 	vector<float> m_entropies, m_leveled;
     std::vector<std::vector<double>> m_smat;
     
     std::shared_ptr<contractionLocator> m_caRef;
+	medianLevelSet m_leveler;
     
     mutable std::vector<cv::Mat> m_affine_windows;
     mutable std::vector<float> m_affine_translations;

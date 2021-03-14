@@ -64,7 +64,7 @@ public:
 
 	// namedTimeSeries_t<float> is std::map<std::string, std::vector<float>> namedTimeSeries_t;
 	template<class T>
-	using timeDataDict_t = std::map<std::string, std::vector<T>>;
+	using timeDataDict_t = std::map<result_index_channel_t, std::vector<T>>;
 	
 	
 	static const std::string& caption () { static std::string cp ("Lif Viewer # "); return cp; }
@@ -185,17 +185,17 @@ private:
     // Callbacks
     void signal_content_loaded (int64_t&);
     void signal_intensity_over_time_ready ();
-    void signal_root_pci_ready (std::vector<float> &, const input_section_selector_t&);
-    void signal_root_mls_ready (std::vector<float> &, const input_section_selector_t&, uint32_t& body_id);
-    void signal_contraction_ready (contractionLocator::contractionContainer_t&,const input_section_selector_t&);
+    void signal_root_pci_ready (std::vector<float> &, const result_index_channel_t&);
+    void signal_root_mls_ready (std::vector<float> &, const result_index_channel_t&, uint32_t& body_id);
+    void signal_contraction_ready (contractionLocator::contractionContainer_t&,const result_index_channel_t&);
     void signal_frame_loaded (int& findex, double& timestamp);
-    void signal_regions_ready (int, const input_section_selector_t&);
+    void signal_regions_ready (int, const result_index_channel_t&);
     void signal_segmented_view_ready (cv::Mat&, cv::Mat&);
     void fraction_reporter(float);
     
     // Availability
     std::atomic<bool> m_voxel_view_available;
-    input_section_selector_t  m_input_selector;
+    result_index_channel_t  m_input_selector;
     mutable std::atomic<int> m_selector_last;
 
     // Clip Processing

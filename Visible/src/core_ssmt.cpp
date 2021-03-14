@@ -70,7 +70,7 @@ mCurrentCachePath(serie_cache_folder), m_params(params), m_media_spec(ms)
     boost::signals2::connection _ss_image_connection = registerCallback(_ss_segmentation_done_cb);
     
     // Support lifProcessor::geometry_ready
-    std::function<void (int, const input_section_selector_t&)> geometry_ready_cb = boost::bind (&ssmt_processor::signal_geometry_done, this, boost::placeholders::_1, boost::placeholders::_2);
+    std::function<void (int, const result_index_channel_t&)> geometry_ready_cb = boost::bind (&ssmt_processor::signal_geometry_done, this, boost::placeholders::_1, boost::placeholders::_2);
     boost::signals2::connection geometry_connection = registerCallback(geometry_ready_cb);
 }
 
@@ -181,7 +181,7 @@ void ssmt_processor::load_channels_from_ImageBuf(const std::shared_ptr<ImageBuf>
         signal_content_loaded->operator()(m_frameCount);
 	
 	// Dispatch a thread to perform ss on entire -- root -- image
-	input_section_selector_t entire(-1,0);
+	result_index_channel_t entire(-1,0);
 	assert(entire.isEntire());
 	auto ss_thread = std::thread(&ssmt_processor::run_selfsimilarity_on_selected_input,this, entire,nullptr);
 	ss_thread.detach();
@@ -311,7 +311,7 @@ void ssmt_processor::volume_stats_computed(){
 // Run to get Entropies and Median Level Set
 // PCI track is being used for initial emtropy and median leveled
 void ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::vector<roiWindow<P8U>>& images,
-                                                                    const input_section_selector_t& in,
+                                                                    const result_index_channel_t& in,
                                                                     const progress_fn_t& reporter)
 {
     bool cache_ok = false;
@@ -327,17 +327,17 @@ void ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::v
     
     // Create a contraction object for entire view processing.
     // @todo: add params
-    std::vector<float> fout;
-    std::vector<double> entmp;
-    std::vector<std::vector<double>> smtmp;
+	m_entropies.clear();
+	m_entropies_F.clear();
+	m_smat.clear();
     
     if(cache_ok){
         vlogger::instance().console()->info(" SS result container cache : Hit ");
-		entmp.insert(entmp.end(), ssref->entropies().begin(), ssref->entropies().end());
+		m_entropies.insert(m_entropies.end(), ssref->entropies().begin(), ssref->entropies().end());
 		for (auto row : ssref->smatrix()){
 			vector<double> rowv;
 			rowv.insert(rowv.end(), row.begin(), row.end());
-			smtmp.push_back(rowv);
+			m_smat.push_back(rowv);
 		}
     }else{
         auto sp =  similarity_producer();
@@ -346,32 +346,30 @@ void ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::v
         vlogger::instance().console()->info(" async ss submitted ");
         if (future_ss.get()){
             vlogger::instance().console()->info(" async ss finished ");
-			entmp.insert(entmp.end(), sp->shannonProjection ().begin(),sp->shannonProjection ().end());
+			m_entropies.insert(m_entropies.end(), sp->shannonProjection ().begin(),sp->shannonProjection ().end());
 			for (auto row : sp->similarityMatrix()){
 				vector<double> rowv;
 				rowv.insert(rowv.end(), row.begin(), row.end());
-				smtmp.push_back(rowv);
+				m_smat.push_back(rowv);
 			}
         }
     }
-    fout.insert(fout.end(), entmp.begin(), entmp.end());
-    m_entropies[in.region()] = entmp;
-    m_smat[in.region()] = smtmp;
-	m_leveler.load(entmp, smtmp);
+    m_entropies_F.insert(m_entropies_F.end(), m_entropies.begin(), m_entropies.end());
+	m_leveler.load(m_entropies, m_smat);
 	
-	bool ok = ssResultContainer::store(cache_path,m_entropies[in.region()] , m_smat[in.region()] );
+	bool ok = ssResultContainer::store(cache_path,m_entropies , m_smat );
 	if(ok)
 		vlogger::instance().console()->info(" SS result container cache : filled ");
 	else
 		vlogger::instance().console()->info(" SS result container cache : failed ");
 	
-    assert(images.size() == entmp.size() && smtmp.size() == images.size());
-    for (auto row : smtmp) assert(row.size() == images.size());
-    assert(images.size() == fout.size());
+    assert(images.size() == m_entropies.size() && m_smat.size() == images.size());
+    for (auto row : m_smat) assert(row.size() == images.size());
+    assert(images.size() == m_entropies_F.size());
     
     // Signal we are done with ACI
     if (signal_root_pci_ready && signal_root_pci_ready->num_slots() > 0){
-        signal_root_pci_ready->operator()(fout, in);
+        signal_root_pci_ready->operator()(m_entropies_F, in);
     }
 }
 
@@ -379,7 +377,7 @@ void ssmt_processor::internal_run_selfsimilarity_on_selected_input (const std::v
 // channel_index which channel of multi-channel input. Usually visible channel is the last one
 // input is -1 for the entire root or index of moving object area in results container
 
-void ssmt_processor::run_selfsimilarity_on_selected_input (const input_section_selector_t& in, const progress_fn_t& reporter){
+void ssmt_processor::run_selfsimilarity_on_selected_input (const result_index_channel_t& in, const progress_fn_t& reporter){
     // protect fetching image data
     std::lock_guard<std::mutex> lock(m_mutex);
     const auto& _content = in.isEntire() ? content()[in.section()] : m_results[in.region()]->content()[in.section()];
@@ -387,7 +385,7 @@ void ssmt_processor::run_selfsimilarity_on_selected_input (const input_section_s
 }
 
 
-void ssmt_processor::signal_geometry_done (int count, const input_section_selector_t& in){
+void ssmt_processor::signal_geometry_done (int count, const result_index_channel_t& in){
     auto msg = "ssmt_processor called geom cb " + toString(count);
     vlogger::instance().console()->info(msg);
 }

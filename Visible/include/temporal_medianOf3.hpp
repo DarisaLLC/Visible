@@ -16,7 +16,7 @@
  ((a) > (b) ? ((a) < (c) ? (a) : ((b) < (c) ? (c) : (b))) :    \
  ((a) > (c) ? (a) : ((b) < (c) ? (b) : (c))))
 */
-
+// @todo can easily made a template function using cv::Mat_
 inline bool temporal_medianOf3 (const cv::Mat& _a, const cv::Mat& _b, const cv::Mat& _c, cv::Mat& dst){
 
     

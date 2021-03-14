@@ -49,7 +49,7 @@ namespace anonymous
 
 
 
-std::shared_ptr<contractionLocator> contractionLocator::create(const input_section_selector_t& in, const uint32_t& body_id, const contractionLocator::params& params){
+std::shared_ptr<contractionLocator> contractionLocator::create(const result_index_channel_t& in, const uint32_t& body_id, const contractionLocator::params& params){
     recursive_lock_guard lock(anonymous::contraction_mutex);
     return std::shared_ptr<contractionLocator>(new contractionLocator(in, body_id, params));
 }
@@ -63,8 +63,8 @@ locatorWeakRef_t contractionLocator::getWeakRef(){
     return weak;
 }
 
-contractionLocator::contractionLocator(const input_section_selector_t& in,  const uint32_t& body_id, const contractionLocator::params& params) :
-m_cached(false),  m_in(in), m_params(params)
+contractionLocator::contractionLocator(const result_index_channel_t& in,  const uint32_t& body_id, const contractionLocator::params& params) :
+ m_in(in), m_params(params)
 {
     m_peaks.resize(0);
     m_id = body_id;
@@ -133,7 +133,7 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
     auto value = (! std::signbit(loc_contraction_quadratic))
         ? std::max(size_t(loc_contraction_quadratic), size_t(loc)) - std::min(size_t(loc_contraction_quadratic), size_t(loc)) / 2
         : loc;
-    m_contraction.contraction_start.first = value;
+    m_contraction.contraction_start.first = left_boundary + value;
     
     auto right_boundary = (src_peak_index == (peak_indices.size() - 1))
         ? m_fder.size() - 1
@@ -244,7 +244,7 @@ bool contractionLocator::profile_contractions (const std::vector<float>& lengths
         ct.m_bid = pp;
         
         // Contraction gets a unique id by contraction profiler
-        if(get_contraction_at_point(pp, m_peaks_idx, ct)){
+		if(m_contractions.size() < m_params.beats() && get_contraction_at_point(pp, m_peaks_idx, ct)){
             auto profile = contractionProfile::create(ct, m_signal, lengths);
 			if ( ! profile->compute_interpolated_geometries_and_force()) continue;
 			

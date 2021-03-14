@@ -24,7 +24,7 @@ void medianLevelSet::set_median_levelset_pct (float frac) const {
 	update(); }
 
 
-void medianLevelSet::initialize(const input_section_selector_t& in,  const uint32_t& body_id , const medianLevelSet::params& params){
+void medianLevelSet::initialize(const result_index_channel_t& in,  const uint32_t& body_id , const medianLevelSet::params& params){
 
 	m_cached= false;
 	mValidInput = false;
@@ -45,11 +45,9 @@ void medianLevelSet::load(const vector<double>& entropies, const vector<vector<d
 	mNoSMatrix = m_SMatrix.empty();
 	
 	m_entsize = m_entropies.size();
-	if (isPreProcessed()) m_signal = m_entropies;
-	else{
-		m_ranks.resize (m_entsize);
-		m_signal.resize (m_entsize);
-	}
+	m_ranks.resize (m_entsize);
+	m_signal.resize (m_entsize);
+
 
 	mValidInput = verify_input ();
 }
@@ -115,11 +113,11 @@ void medianLevelSet::update() const{
 		// If the fraction of entropies values expected is zero, then just find the minimum and call it contraction
 	size_t count = recompute_signal();
 	if (count == 0) m_signal = m_entropies;
-	std::vector<float> fent(m_entropies.size());
-	std::transform(m_signal.begin(), m_signal.end(), fent.begin(), [] (const double d){ return float(d); });
+	m_signal_F.resize(m_entropies.size());
+	std::transform(m_signal.begin(), m_signal.end(), m_signal_F.begin(), [] (const double d){ return float(d); });
 	
 	if (med_levelset_pci_ready && med_levelset_pci_ready->num_slots() > 0)
-		med_levelset_pci_ready->operator()(fent, m_in, m_id);
+		med_levelset_pci_ready->operator()(m_signal_F, m_in, m_id);
 	
 }
 
