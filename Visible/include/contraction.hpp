@@ -135,7 +135,7 @@ public:
     class params{
     public:
         params ():m_minimum_contraction_time (0.32), m_frame_duration(0.020),
-		m_magnification_x(10.0f), m_min_peak_to_relaxation_end(5.0) {
+		m_magnification_x(10.0f), m_min_peak_to_relaxation_end(5.0), m_beats(1) {
             update ();
         }
         float minimum_contraction_time () const { return m_minimum_contraction_time; }
@@ -157,6 +157,9 @@ public:
 		void magnification (const float& mmag) const { m_magnification_x = mmag; }
 		float magnification () const { return m_magnification_x; }
 		
+		void beats (const int& num) { m_beats = num; }
+		int beats () { return m_beats; }
+		
         
     private:
         void update () const {
@@ -167,6 +170,7 @@ public:
         mutable float m_frame_duration;
         mutable uint32_t m_pad_frames;
 		mutable float m_min_peak_to_relaxation_end;
+		mutable int m_beats;
     };
     
     using contraction_t = contractionMesh;
@@ -179,12 +183,12 @@ public:
     // Signals we provide
     // signal_contraction_available
 
-    typedef void (sig_cb_contraction_ready) (contractionContainer_t&, const input_section_selector_t& );
+    typedef void (sig_cb_contraction_ready) (contractionContainer_t&, const result_index_channel_t& );
     typedef void (sig_cb_cell_length_ready) (sigContainer_t&);
     typedef void (sig_cb_force_ready) (sigContainer_t&);
     
     // Factory create method
-    static Ref create(const input_section_selector_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params());
+    static Ref create(const result_index_channel_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params());
     Ref getShared();
     locatorWeakRef_t getWeakRef();
     
@@ -203,7 +207,7 @@ public:
     
     size_t size () const { return m_entsize; }
     const uint32_t id () const { return m_id; }
-    const input_section_selector_t& input () const { return m_in; }
+    const result_index_channel_t& input () const { return m_in; }
     
     // Original
     const vector<float>& entropies () { return m_entropies; }
@@ -218,34 +222,29 @@ public:
     
   
 private:
-    contractionLocator(const input_section_selector_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params ());
+    contractionLocator(const result_index_channel_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params ());
     contractionLocator::params m_params;
-	medianLevelSet m_leveler;
 	
 	bool get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& ) const;
 
 
     mutable double m_median_value;
-    mutable std::pair<double,double> m_leveled_min_max;
-    mutable float m_median_levelset_frac;
     mutable vector<vector<double>>        m_SMatrix;   // Used in eExhaustive and
     vector<float>               m_entropies;
 
     mutable vector<float>              m_signal;
     std::vector<int> m_peaks_idx;
 
-    mutable std::vector<int>            m_ranks;
     size_t m_entsize;
     mutable bool mNoSMatrix;
     mutable std::vector<index_val_t> m_peaks;
     mutable std::vector<float> m_peaks_interpolated;
     mutable contractionContainer_t m_contractions;
     mutable int m_input; // input source
-    mutable std::atomic<bool> m_cached;
     mutable int m_id;
     mutable std::vector<double> m_ac;
     mutable std::vector<double> m_bac;
-    input_section_selector_t m_in;
+    result_index_channel_t m_in;
     
 protected:
     boost::signals2::signal<contractionLocator::sig_cb_cell_length_ready>* cell_length_ready;

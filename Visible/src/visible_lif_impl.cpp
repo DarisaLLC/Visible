@@ -155,7 +155,7 @@ visibleContext::visibleContext(ci::app::WindowRef& ww,
     vlogger::instance().console()->info(msg);
     m_title = mContentFileName;
     m_playback_speed = 1;
-    m_input_selector = input_section_selector_t(-1,0);
+    m_input_selector = result_index_channel_t(-1,0);
     m_selector_last = -1;
     m_selected_cell = -1;
     m_selected_contraction = -1;
@@ -202,23 +202,23 @@ void visibleContext::setup_signals(){
     boost::signals2::connection flu_connection = m_ssmtRef->registerCallback(intensity_over_time_ready_cb);
     
     // Support lifProcessor::initial ss results available
-    std::function<void (std::vector<float> &, const input_section_selector_t&)> root_pci_ready_cb = boost::bind (&visibleContext::signal_root_pci_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
+    std::function<void (std::vector<float> &, const result_index_channel_t&)> root_pci_ready_cb = boost::bind (&visibleContext::signal_root_pci_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
     boost::signals2::connection nl_connection = m_ssmtRef->registerCallback(root_pci_ready_cb);
     
     // Support lifProcessor::median level set ss results available
 
-    std::function<void (std::vector<float>&, const input_section_selector_t&,  uint32_t& body_id )> root_mls_ready_cb =
+    std::function<void (std::vector<float>&, const result_index_channel_t&,  uint32_t& body_id )> root_mls_ready_cb =
 		boost::bind (&visibleContext::signal_root_mls_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3);
 	boost::signals2::connection ol_connection = m_ssmtRef->medianLeveler().registerCallback(root_mls_ready_cb);
     
     // Support contraction results available
-    std::function<void (contractionLocator::contractionContainer_t&,const input_section_selector_t&)> contraction_ready_cb =
+    std::function<void (contractionLocator::contractionContainer_t&,const result_index_channel_t&)> contraction_ready_cb =
     boost::bind (&visibleContext::signal_contraction_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
 	boost::signals2::connection contraction_connection = m_ssmtRef->registerCallback(contraction_ready_cb);
 
 	
     // Support lifProcessor::geometry_ready
-    std::function<void (int,const input_section_selector_t&)> geometry_ready_cb = boost::bind (&visibleContext::signal_regions_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
+    std::function<void (int,const result_index_channel_t&)> geometry_ready_cb = boost::bind (&visibleContext::signal_regions_ready, shared_from_above(), boost::placeholders::_1, boost::placeholders::_2);
     boost::signals2::connection geometry_connection = m_ssmtRef->registerCallback(geometry_ready_cb);
     
     // Support lifProcessor::temporal_image_ready
@@ -313,19 +313,19 @@ void exponential_smoother (const std::vector<double>& src, std::vector<double>& 
 	dst[ii] = (src[ii] - *bot) / scaleBy;
 }
 
-void visibleContext::signal_root_pci_ready (std::vector<float> & signal, const input_section_selector_t& dummy)
+void visibleContext::signal_root_pci_ready (std::vector<float> & signal, const result_index_channel_t& dummy)
 {
 	// Always the last one
 	auto copyy = signal;
 	svl::norm_min_max (copyy.begin(), copyy.end(), true);
-	m_timeFloatDict["root"] = copyy;
+	m_timeFloatDict[dummy] = copyy;
 
     stringstream ss;
     ss << svl::toString(dummy.region()) << " root self-similarity available ";
     vlogger::instance().console()->info(ss.str());
 }
 
-void visibleContext::signal_root_mls_ready (std::vector<float> &signal, const input_section_selector_t& dummy2, uint32_t& body_id){
+void visibleContext::signal_root_mls_ready (std::vector<float> &signal, const result_index_channel_t& dummy2, uint32_t& body_id){
     //@note this is also checked in update. Not sure if this is necessary
 //    auto tracksRef = m_root_pci_trackWeakRef.lock();
 //    if ( tracksRef && !tracksRef->at(0).second.empty()){
@@ -334,7 +334,7 @@ void visibleContext::signal_root_mls_ready (std::vector<float> &signal, const in
 	
 	auto copyy = signal;
 	svl::norm_min_max (copyy.begin(), copyy.end(), true);
-	m_timeFloatDict["root"] = copyy;
+	m_timeFloatDict[dummy2] = copyy;
 	
     stringstream ss;
     ss << svl::toString(dummy2.region()) << " median regularized root self-similarity available ";
@@ -354,7 +354,7 @@ void visibleContext::signal_intensity_over_time_ready ()
     vlogger::instance().console()->info(" Flu Stats Available ");
 }
 
-void visibleContext::signal_contraction_ready (contractionLocator::contractionContainer_t& contras, const input_section_selector_t& in)
+void visibleContext::signal_contraction_ready (contractionLocator::contractionContainer_t& contras, const result_index_channel_t& in)
 {
     assert(isCardiacPipeline());
     
@@ -375,7 +375,7 @@ void visibleContext::signal_contraction_ready (contractionLocator::contractionCo
  * Is called when segmentation is done. The input_selector should have full view (-1) and channel #
  * count is numner
  */
-void visibleContext::signal_regions_ready(int count, const input_section_selector_t& in)
+void visibleContext::signal_regions_ready(int count, const result_index_channel_t& in)
 {
     assert(m_ssmtRef);
     assert(isCardiacPipeline() || isSpatioTemporalPipeline());
@@ -743,15 +743,11 @@ float visibleContext::getMedianCutOff () const
 
 /************************
  *
- *  Load Serie & Setup Widgets
+ *  Load Current Media
  *
  ************************/
 
-// Set window size according to layout
-//  Channel             Data
-//  1
-//  2
-//  3
+
 
 void visibleContext::loadCurrentMedia ()
 {
@@ -835,7 +831,7 @@ void visibleContext::process_async (){
             // note launch mode is std::launch::async
      //       m_intensity_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_intensity_statistics,
        //                                          m_ssmtRef.get(), std::vector<int> ({0,1}) );
-            input_section_selector_t in (-1,2);
+            result_index_channel_t in (-1,2);
             break;
         }
         case 2:
@@ -843,12 +839,12 @@ void visibleContext::process_async (){
             //note launch mode is std::launch::async
      //       m_intensity_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_intensity_statistics,
         //                                         m_ssmtRef.get(), std::vector<int> ({0}) );
-            input_section_selector_t in (-1,1);
+            result_index_channel_t in (-1,1);
             break;
         }
         case 1:
         {
-                input_section_selector_t in (-1,0);
+                result_index_channel_t in (-1,0);
             break;
         }
     }
@@ -964,13 +960,15 @@ void visibleContext::add_canvas (){
  */
 
 void visibleContext::add_result_sequencer (){
-	if (ImGui::CollapsingHeader(" Adaptive PCI ") && ! m_timeFloatDict.empty()) {
+	static result_index_channel_t entire(-1);
+	
+	if (ImGui::CollapsingHeader(" Entire View PCI ") && ! m_timeFloatDict.empty()) {
 		int count = getNumFrames();
 		float xs1[count], ys1[count];
 		for (int i = 0; i < count; ++i) {
 			xs1[i] = i / float(count);
 			auto idx = i % getNumFrames();
-			ys1[i] = m_timeFloatDict["root"][idx];
+			ys1[i] = m_timeFloatDict[entire][idx];
 		}
 
 		static double xs2[11], ys2[11];
@@ -979,10 +977,10 @@ void visibleContext::add_result_sequencer (){
 			ys2[i] = i * 0.1;
 		}
 		
-		static float mf = 0;
 		auto params = m_ssmtRef->medianLeveler().parameters();
 		float f32_low = params.range().first;
 		float f32_high = params.range().second;
+		static float mf = (f32_low + f32_high) / 2.0f;
 		
 		ImGui::Text(" Median LevelSet Adjustment ");
 		ImGui::SameLine(); HelpMarker(" Adjust Influence of Outlier Time Points ");
@@ -991,6 +989,44 @@ void visibleContext::add_result_sequencer (){
 		if (setMedianCutOff(mf)){
 			std::cout << " Median Cutoff Called " << std::endl;
 		}
+		
+		
+		ImGui::BulletText(" Temporal Self-Similarity ");
+		if (ImPlot::BeginPlot(" PCI ", "time/frame", " pci (t) ")) {
+			ImPlot::PlotLine(" Entire ", xs1, ys1, count);
+			ImPlot::SetNextMarkerStyle(ImPlotMarker_Plus);
+			ImPlot::PlotLine(" Instant ", xs2, ys2, 11);
+			ImPlot::EndPlot();
+		}
+	}
+	
+	// todo: refactor to make access clearer
+	static result_index_channel_t first (0,0);
+	if (ImGui::CollapsingHeader(" Cell Area PCI ") && m_timeFloatDict.size() > 1) {
+		int count = getNumFrames();
+		float xs1[count], ys1[count];
+		for (int i = 0; i < count; ++i) {
+			xs1[i] = i / float(count);
+			auto idx = i % getNumFrames();
+			ys1[i] = m_timeFloatDict[first][idx];
+		}
+		
+		static double xs2[11], ys2[11];
+		for (int i = 0; i < 11; ++i) {
+			xs2[i] = m_tic.current_frame() / float(count);
+			ys2[i] = i * 0.1;
+		}
+		
+		auto params = m_ssmtRef->moving_bodies()[0]->leveler().parameters();
+		float f32_low = params.range().first;
+		float f32_high = params.range().second;
+		static float mf = (f32_low + f32_high) / 2.0f;
+		
+		ImGui::Text(" Median LevelSet Adjustment ");
+		ImGui::SameLine(); HelpMarker(" Adjust Influence of Outlier Time Points ");
+		ImGui::SetNextItemWidth(100);
+		ImGui::SliderScalar(" Percent of Frames ",   ImGuiDataType_Float,  &mf, &f32_low, &f32_high);
+		m_ssmtRef->moving_bodies()[0]->leveler().set_median_levelset_pct (mf);
 		
 		
 		ImGui::BulletText(" Temporal Self-Similarity ");

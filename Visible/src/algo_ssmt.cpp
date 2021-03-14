@@ -47,7 +47,7 @@ void ssmt_processor::find_moving_regions (const int channel_index){
 //    m_variance_peak_detection_done = true;
 //    volume_variance_peak_promotion(m_all_by_channel[channel_index]);
 //    while(!m_variance_peak_detection_done){ std::this_thread::yield();}
-    m_instant_input = input_section_selector_t(-1, channel_index);
+    m_instant_input = result_index_channel_t(-1, channel_index);
     return internal_find_moving_regions(m_all_by_channel[channel_index]);
 }
 
@@ -95,7 +95,7 @@ void ssmt_processor::finalize_segmentation (cv::Mat& mono, cv::Mat& bi_level){
         int idx = 0;
         for (const moving_region& mr : m_regions){
             auto dis = shared_from_this();
-            input_section_selector_t inn (idx++,m_instant_input.section());
+            result_index_channel_t inn (idx++,m_instant_input.section());
             auto ref = ssmt_result::create (dis, mr,  inn);
             m_results.push_back(ref);
         }

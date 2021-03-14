@@ -40,13 +40,13 @@ using cc_t = contractionLocator::contractionContainer_t;
 
 ////////// ssmt_result Implementataion //////////////////
 const ssmt_result::ref_t ssmt_result::create (std::shared_ptr<ssmt_processor>& parent, const moving_region& child,
-                                              const input_section_selector_t& in){
+                                              const result_index_channel_t& in){
     ssmt_result::ref_t this_child (new ssmt_result(child, in ));
     this_child->m_weak_parent = parent;
     return this_child;
 }
 
-ssmt_result::ssmt_result(const moving_region& mr,const input_section_selector_t& in):moving_region(mr),  m_input(in) {
+ssmt_result::ssmt_result(const moving_region& mr,const result_index_channel_t& in):moving_region(mr),  m_input(in) {
     // Create a contraction object
 	contractionLocator::params default_params;
 	auto shared_parent = m_weak_parent.lock();
@@ -54,10 +54,11 @@ ssmt_result::ssmt_result(const moving_region& mr,const input_section_selector_t&
 		default_params.magnification(shared_parent->parameters().magnification());
 	}
     m_caRef = contractionLocator::create (in, mr.id(), default_params);
-    
-    // Suport lif_processor::Contraction Analyzed
+	m_leveler.initialize(in, mr.id());
+	
+    // Suport ssmt_processor::Contraction Analyzed
 	try{
-		std::function<void (contractionLocator::contractionContainer_t&,const input_section_selector_t& in)>ca_analyzed_cb =
+		std::function<void (contractionLocator::contractionContainer_t&,const result_index_channel_t& in)>ca_analyzed_cb =
 			boost::bind (&ssmt_result::contraction_ready, this, boost::placeholders::_1, boost::placeholders::_2);
 		boost::signals2::connection ca_connection = m_caRef->registerCallback(ca_analyzed_cb);
 	}
@@ -69,7 +70,7 @@ ssmt_result::ssmt_result(const moving_region& mr,const input_section_selector_t&
 }
 
 // When contraction is ready, signal a copy
-void ssmt_result::contraction_ready (contractionLocator::contractionContainer_t& contractions,const input_section_selector_t& in)
+void ssmt_result::contraction_ready (contractionLocator::contractionContainer_t& contractions,const result_index_channel_t& in)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     
@@ -84,7 +85,7 @@ void ssmt_result::contraction_ready (contractionLocator::contractionContainer_t&
     vlogger::instance().console()->info(" Contractions Analyzed: ");
 }
 
-const input_section_selector_t& ssmt_result::input() const { return m_input; }
+const result_index_channel_t& ssmt_result::input() const { return m_input; }
 
 const vector<float>& ssmt_result::entropies () const { return m_entropies; }
 
@@ -105,24 +106,24 @@ bool  ssmt_result::generateRegionImages () const{
 
 bool ssmt_result::run_selfsimilarity (){
 	if (m_pci_done == false){
-		auto pci_done = run_selfsimilarity_on_region(m_all_by_channel[m_input.section()]);
+		auto pci_done = true; //run_selfsimilarity_on_region(m_all_by_channel[m_input.section()]);
 		m_pci_done.store(pci_done, std::memory_order_release);
 	}
 	return m_pci_done;
 		
 }
 
-bool ssmt_result::process (const std::vector<float>& entropies){
+bool ssmt_result::process (){
 
 	while(!m_images_loaded || ! m_pci_done)
 		{std::this_thread::yield(); }
 	
 	if (m_images_loaded == false || m_pci_done == false) return false;
-	m_leveled = entropies;
-	const std::vector<float>& use = (m_leveled.empty() || m_leveled.size() != m_entropies.size()) ?
-		m_entropies : m_leveled;
+//	m_leveled = m_leveler.leveledF();
+	auto parent = m_weak_parent.lock();
+	if (parent.get() == 0) return false;
 	
-	m_caRef->load(use, m_smat);
+	m_caRef->load(parent->entropies_F(), parent->ssMatrix());
     m_caRef->locate_contractions();
 
 	auto ss_done = run_scale_space(m_all_by_channel[m_input.section()]);
@@ -181,8 +182,8 @@ bool ssmt_result::get_channels (int channel) const {
     do
     {
         auto rr = rotated_roi();
-        rr.size.width += 40;
-        rr.size.height += 20;
+     //   rr.size.width += 40;
+    //    rr.size.height += 20;
         auto affine = affineCrop(vitr, rr);
         m_all_by_channel[channel].emplace_back(affine);
         count++;
@@ -220,8 +221,14 @@ bool ssmt_result::run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>
         const std::deque<deque<double>> sm = sp->similarityMatrix();
         assert(images.size() == entropies.size() && sm.size() == images.size());
         for (auto row : sm) assert(row.size() == images.size());
+	
+		// todo: remove all this nonsense copying.
 		m_entropies.resize(entropies.size());
 		std::transform(entropies.begin(), entropies.end(), m_entropies.begin(), [] (const double d){ return float(d); });
+		std::vector<double> entropies_D(entropies.size());
+		std::transform(entropies.begin(), entropies.end(), entropies_D.begin(), [] (const double d){ return d; });
+	
+	
         for (auto row : sm){
             vector<double> rowv;
             rowv.insert(rowv.end(), row.begin(), row.end());
@@ -229,7 +236,16 @@ bool ssmt_result::run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>
         }
 	
 		bool check = m_smat.size() == m_entropies.size();
+		if (! check ) return check;
+	
+		
+		m_leveler.load(entropies_D, m_smat);
+		m_leveler.set_median_levelset_pct((m_leveler.parameters().range().first+m_leveler.parameters().range().second)/2.0f);
+		
+		
+	
 	    auto parent = m_weak_parent.lock();
+	
 		if (parent.get() != 0 && parent->signal_root_pci_ready){
 			parent->signal_root_pci_ready->operator()(m_entropies, m_input);
 		}

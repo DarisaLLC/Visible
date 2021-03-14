@@ -17,7 +17,7 @@
 #include "core/stl_utils.hpp"
 #include "core/fit.hpp"
 #include "time_series/persistence1d.hpp"
-#include "cvplot/cvplot.h"
+
 
 using namespace svl;
 using namespace stl_utils;

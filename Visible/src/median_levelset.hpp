@@ -48,7 +48,7 @@ public:
 	
 	class params{
 	public:
-		params (float low=0.01, float high=0.20):m_median_levelset_fraction_range(low, high) {
+		params (float low=0.01, float high=0.50):m_median_levelset_fraction_range(low, high) {
 		}
 		const fPair& range ()const {return m_median_levelset_fraction_range; }
 
@@ -62,11 +62,11 @@ public:
 	
 		// Signals we provide
 		// signal pci is median level processed
-	typedef void (sig_cb_mls_pci_ready) (std::vector<float>&, const input_section_selector_t&,  uint32_t& body_id );
+	typedef void (sig_cb_mls_pci_ready) (std::vector<float>&, const result_index_channel_t&,  uint32_t& body_id );
 
 	medianLevelSet() {}
 	
-	void initialize (const input_section_selector_t&,    const uint32_t& body_id = std::numeric_limits<uint32_t>::max() , const medianLevelSet::params& params = medianLevelSet::params ());
+	void initialize (const result_index_channel_t&,    const uint32_t& body_id = std::numeric_limits<uint32_t>::max() , const medianLevelSet::params& params = medianLevelSet::params ());
 
 	const medianLevelSet::params& parameters () const { return m_params; }
 	
@@ -74,6 +74,7 @@ public:
 		// If no self-similarity matrix is given, entropies are assumed to be filtered and used directly
 		// // input selector -1 entire index mobj index
 	void load (const vector<double>& entropies, const vector<vector<double>>& mmatrix = vector<vector<double>>());
+	
 	void update () const;
 	
 	
@@ -82,6 +83,8 @@ public:
 	
 		// LevelSet corresponding to last coverage pct setting
 	const vector<double>& leveled () { return m_signal; }
+	const vector<float>& leveledF () { return m_signal_F; }
+	
 	const std::pair<double,double>& leveled_min_max () { return m_leveled_min_max; };
 	
 		// Adjusting Median Level
@@ -103,7 +106,6 @@ public:
 	
 	bool isValid () const { return mValidInput; }
 	bool isOutputValid () const { return mValidOutput; }
-	bool isPreProcessed () const { return mNoSMatrix; }
 	size_t size () const { return m_entsize; }
 	
 	
@@ -123,9 +125,10 @@ private:
 	mutable vector<vector<double>>        m_SMatrix;   // Used in eExhaustive and
 	vector<double>               m_entropies;
 	mutable vector<double>               m_signal;
+	mutable vector<float>               m_signal_F;
 
 	mutable std::atomic<bool> m_cached;
-	mutable input_section_selector_t m_in;
+	mutable result_index_channel_t m_in;
 	mutable std::vector<int>            m_ranks;
 	size_t m_entsize;
 	mutable bool mValidInput;
