@@ -90,6 +90,8 @@
 #include <OpenImageIO/imagebufalgo.h>
 #include "temporal_medianOf3.hpp"
 #include "vision/ellipse.hpp"
+#include <cmath>
+#include "nr_support.hpp"
 
 
 
@@ -268,6 +270,182 @@ get_intsample_maxval(const ImageSpec& spec)
 
 
 
+
+/*
+ * gasdev : Lifted from Numerical Recipes this routine returns a normally
+ * distributed deviate with zero mean and unit variance using ran0
+ * as the source of uniform deviates.
+ */
+/*
+ * ran0 : lifted from Numerical Recipes in C : Returns a uniform deviate
+ * between 0.0 and 1.0 using the system supplied rand function. Set idum
+ * to any negative value to initialize or reinitialize the system.
+ */
+
+float ran0 (int *idum)
+{
+	static float maxran;
+	static int y, v[97];
+	static int iff=0;
+	int j;
+	
+	if (*idum < 0 || iff == 0) {
+		iff = 1;
+		maxran = RAND_MAX;
+		srand(*idum);
+		*idum = 1;
+		for (j=0; j < 97; ++j) y = rand();
+		for (j=0; j < 97; ++j) v[j] = rand();
+		y = rand();
+	}
+	
+	j = 97.0*(y/maxran);
+	if (j > 96) j = 96;
+	
+	y = v[j];
+	v[j] = rand();
+	return (y/maxran);
+}
+
+float gasdev (int *idum)
+{
+	static int iset=0;
+	static float gset;
+	float fac, r, v1, v2;
+	
+	if (!iset) {
+		do {
+			v1 = 2.0*ran0(idum)-1.0;
+			v2 = 2.0*ran0(idum)-1.0;
+			r = v1*v1 + v2*v2;
+		} while (r >= 1.0);
+		fac = sqrt (-2.0*log(r)/r);
+		gset = v1*fac;
+		iset = 1;
+		return (v2*fac);
+	} else {
+		iset = 0;
+		return (gset);
+	}
+}
+
+
+DP NR::ran1(int &idum)
+{
+	const int IA=16807,IM=2147483647,IQ=127773,IR=2836,NTAB=32;
+	const int NDIV=(1+(IM-1)/NTAB);
+	const DP EPS=3.0e-16,AM=1.0/IM,RNMX=(1.0-EPS);
+	static int iy=0;
+	static Vec_INT iv(NTAB);
+	int j,k;
+	DP temp;
+	
+	if (idum <= 0 || !iy) {
+		if (-idum < 1) idum=1;
+		else idum = -idum;
+		for (j=NTAB+7;j>=0;j--) {
+			k=idum/IQ;
+			idum=IA*(idum-k*IQ)-IR*k;
+			if (idum < 0) idum += IM;
+			if (j < NTAB) iv[j] = idum;
+		}
+		iy=iv[0];
+	}
+	k=idum/IQ;
+	idum=IA*(idum-k*IQ)-IR*k;
+	if (idum < 0) idum += IM;
+	j=iy/NDIV;
+	iy=iv[j];
+	iv[j] = idum;
+	if ((temp=AM*iy) > RNMX) return RNMX;
+	else return temp;
+}
+
+DP NR::gasdev(int &idum)
+{
+	static int iset=0;
+	static DP gset;
+	DP fac,rsq,v1,v2;
+	
+	if (idum < 0) iset=0;
+	if (iset == 0) {
+		do {
+			v1=2.0*ran1(idum)-1.0;
+			v2=2.0*ran1(idum)-1.0;
+			rsq=v1*v1+v2*v2;
+		} while (rsq >= 1.0 || rsq == 0.0);
+		fac=sqrt(-2.0*log(rsq)/rsq);
+		gset=v1*fac;
+		iset=1;
+		return v2*fac;
+	} else {
+		iset=0;
+		return gset;
+	}
+}
+
+TEST (ut_fft, basic){
+
+	const int NP=90,TWONP=NP+NP;
+	int j=0,jmax,n,nout,idum=(-4);
+	DP prob;
+	Vec_DP x(NP),y(NP),px(TWONP),py(TWONP);
+	
+	for (n=0;n<NP+10;n++) {
+		if (n != 2 && n != 3 && n != 5 && n != 20 &&
+			n != 37 && n != 50 && n != 66 && n != 67 &&
+			n != 82 && n != 92) {
+			x[j]=n+1;
+			y[j]=0.75*cos(0.6*x[j])+NR::gasdev(idum);
+			j++;
+		}
+	}
+	NR::period(x,y,4.0,1.0,px,py,nout,jmax,prob);
+	EXPECT_EQ(nout, 180);
+	EXPECT_EQ(jmax, 37);
+//	cout << "period results for test signal (cos(0.6x) + noise):" << endl;
+//	cout << scientific << setprecision(6);
+//	cout << "nout,jmax,prob = " << setw(5) << nout;
+//	cout << setw(5) << jmax << setw(15) << prob << endl << endl;
+//	for (n=MAX(0,int(jmax-NPR/2));n<MIN(nout,int(jmax+NPR/2+1));n++)
+//	cout << n << setw(15) << TWOPI*px[n] << setw(15) << py[n] << endl;
+
+}
+
+TEST (ut_period, basic){
+	std::vector<uint32_t> xx (oneF_example.size());
+	for (auto ii = 0; ii < xx.size(); ii++) xx[ii] = ii;
+	std::vector<float> peakLoc, peakVal;
+	const float hyst(0.10);
+	std::vector<float> peaks(oneF_example.size());
+	std::transform(oneF_example.begin(), oneF_example.end(), peaks.begin(), [](float f)->float { return 39.5f - f; });
+	oneDpeakDetect(peaks, xx, peakLoc, peakVal, hyst);
+	EXPECT_EQ(peakLoc.size(),peakVal.size());
+	auto max_element = std::max_element(peakVal.begin(),peakVal.end());
+	auto n = std::distance (peakVal.begin(), max_element);
+	EXPECT_EQ(n,2);
+	const float gold_loc = 34.9152;
+	const float gold_val = 14.8735;
+	EXPECT_TRUE(std::fabs( peakLoc[n] - gold_loc ) < 0.001);
+	EXPECT_TRUE(std::fabs( peakVal[n] - gold_val ) < 0.001);
+	
+	//std::cout << "[" << n << "]" << peakLoc[n] << " : " << peakVal[n] << std::endl;
+	
+	auto cvDrawPlot = [] (std::vector<float>& tmp){
+		
+		std::string name = svl::toString(std::clock());
+		cvplot::setWindowTitle(name, svl::toString(tmp.size()));
+		cvplot::moveWindow(name, 0, 256);
+		cvplot::resizeWindow(name, 512, 256);
+		cvplot::figure(name).series(name).addValue(tmp).type(cvplot::Line).color(cvplot::Red);
+		cvplot::figure(name).show();
+	};
+	
+	cvDrawPlot(peaks);
+	
+	
+	
+}
 
 TEST (ut_integral, basic){
 	Mat M = (Mat_<uint8_t>(3,3) << 1, 0, 0, 0, 1, 0, 0, 0, 1);
@@ -546,9 +724,41 @@ image_progress_callback(void* opaque, float done)
     return false;
 }
 
+bool temporal_median(const std::vector<cv::Mat>& src, std::vector<cv::Mat>& dst){
+	if (src.size() < 3) return false;
+	dst.clear();
+	size_t cur = 0;
+	// the first out is median of first, first and second
+	// the last out is median of last[-1], last and last
+	cv::Mat out;
+	if (! temporal_medianOf3(src[0],src[0],src[1],out) ) return false;
+	cur++;
+	dst.push_back(out);
+	auto middle_count = src.size() - 2;
+	for(; cur <= middle_count; cur++){
+		auto this_out = out.clone();
+		if (! temporal_medianOf3(src[cur-1], src[cur], src[cur+1], this_out)){
+			dst.clear();
+			return false;
+		}
+		dst.push_back(this_out);
+	}
+	assert(cur == middle_count+1);
+	// the last out is median of last[-1], last and last
+	cv::Mat last_out;
+	if (! temporal_medianOf3(src[cur-1], src[cur], src[cur], last_out)){
+		dst.clear();
+		return false;
+	}
+	dst.push_back(last_out);
+	
+	assert(src.size() ==  dst.size());
+	return src.size() == dst.size();
+}
+
 TEST(write_stack, basic){
 	
-	auto res = dgenv_ptr->asset_path("nd122.tif");
+	auto res = dgenv_ptr->asset_path("C2-nd004_all.tif");
 	EXPECT_TRUE(res.second);
 	EXPECT_TRUE(boost::filesystem::exists(res.first));
 	ustring filename (res.first.c_str());
@@ -591,6 +801,9 @@ TEST(write_stack, basic){
 	ImageSpec bspec;
 	build_vector(filename, src_images, bspec);
 	
+	std::vector<cv::Mat> dst;
+	temporal_median(src_images, dst);
+	
 	// Write these out as subimages
 	output_path = output_path / "foo.tif";
 
@@ -609,9 +822,7 @@ TEST(write_stack, basic){
 	
 	for (int s = 0; s < nsubimages; ++s) {
 		out->open (output_path.c_str(), specs[s], appendmode);
-		cv::Mat pixels (bspec.height, bspec.width, CV_8U);
-		pixels = s % 256;
-		out->write_image (TypeDesc::UINT8, pixels.data);
+		out->write_image (TypeDesc::UINT8, dst[s].data);
 		appendmode = ImageOutput::AppendSubimage;
 	}
 
