@@ -130,5 +130,117 @@ inline float parabolicFit (const float left, const float center, const float rig
 }
 
 
+template<class P>
+float interpolatePeak(const vector<P>& signal, uint32_t index, P* ampP = NULL)
+{
+	float delta, damp(0.0f), *dampPtr (NULL);
+	if (ampP) dampPtr = &damp;
+	
+	if (index == (signal.size()-1))  { // Peak is pegged at end
+		delta = parabolicFit((float) signal[index-1],
+							 (float) signal[index], 0.0f, dampPtr);
+	}
+	else if (index == 0) { // Peak is pegged at start
+		delta = parabolicFit(0.0f, (float) signal[0], (float) signal[1], dampPtr);
+	}
+	else { // Interpolate peak location
+		delta = parabolicFit((float) signal[ index-1], (float) signal[index],
+							 (float) signal[index+1], dampPtr);
+	}
+	
+	if (ampP)
+		{
+		P amp;
+		amp = damp;
+		* ((P *) ampP) = amp;
+		}
+	
+	return index + delta;
+}
+
+
+
+template<class P>
+void oneDpeakDetect(const vector<P>& signal, vector<uint32_t>& peakBin,
+					vector<P>& peakLoc, vector<P>& peakVal,
+					const P hysteresisPct, bool DEBUG_PD = false)
+{
+	peakBin.clear();
+	peakLoc.clear();
+	peakVal.clear();
+	
+	if (signal.empty())
+		return;
+	
+	/* Calculate peaks using hysteresisPct to threshold for true valleys.
+	 */
+	int32_t pPeak = 0, pValley = 0, min = 0, max = 0;
+	P peakThresh = signal[pPeak]*(1 - hysteresisPct);
+	P valleyThresh = signal[pValley]*(1 + hysteresisPct);
+	
+	if (DEBUG_PD) printf("signal[%d] = %f peakThresh %f valleyThresh %f\n",
+						 0, signal[0], peakThresh, valleyThresh);
+	
+	for (int32_t i = 1; i < (int32_t)signal.size(); i++) {
+		if (DEBUG_PD) printf("signal[%d] = %f", i, signal[i]);
+		
+		if ((pPeak >= 0) && signal[i] < peakThresh) {
+				// Found peak
+			peakBin.push_back((uint32_t)pPeak);
+			P peakValue;
+			peakLoc.push_back(interpolatePeak(signal, (uint32_t)pPeak, &peakValue));
+			peakVal.push_back(peakValue);
+			if (DEBUG_PD) printf(" Peak (%f) @ %d.", signal[pPeak], pPeak);
+			pPeak = -1;
+			pValley = i;
+			min = max = i;
+			valleyThresh = signal[pValley]*(1 + hysteresisPct);
+			if (DEBUG_PD)
+				printf(" New pPeak %d pValley %d min %d max %d valleyThresh %f.\n",
+					   pPeak, pValley, min, max, valleyThresh);
+		}
+		else if (signal[i] < signal[min]) {
+			if (pValley >= 0) {
+				pValley = i;
+				valleyThresh = signal[pValley]*(1 + hysteresisPct);
+				if (DEBUG_PD) printf(" New pValley %d valleyThresh %f.",
+									 pValley, valleyThresh);
+			}
+			min = i;
+			if (DEBUG_PD) printf(" New min %d.\n", min);
+		}
+		
+		if ((pValley >= 0) && signal[i] > valleyThresh) {
+				// Found valley
+			if (DEBUG_PD) printf(" Valley (%f) @ %d.", signal[pValley], pValley);
+			pPeak = i;
+			pValley = -1;
+			min = max = i;
+			peakThresh = signal[pPeak]*(1 - hysteresisPct);
+			if (DEBUG_PD)
+				printf(" New pPeak %d pValley %d min %d max %d peakThresh %f.\n",
+					   pPeak, pValley, min, max, peakThresh);
+		}
+		else if (signal[i] > signal[max]) {
+			if (pPeak >= 0) {
+				pPeak = i;
+				peakThresh = signal[pPeak]*(1 - hysteresisPct);
+				if (DEBUG_PD) printf(" New pPeak %d peakThresh %f.",
+									 pPeak, peakThresh);
+			}
+			max = i;
+			if (DEBUG_PD) printf(" New max %d.\n", max);
+		}
+		
+	} // End of: for (int32 i = 1; i < signal.size(); i++) {
+	
+	if (pPeak >= 0) {
+		if (DEBUG_PD) printf("Last Peak (%f) @ %d.\n", signal[pPeak], pPeak);
+		peakBin.push_back((uint32_t)pPeak);
+		P peakValue;
+		peakLoc.push_back(interpolatePeak(signal, (uint32_t)pPeak, &peakValue));
+		peakVal.push_back(peakValue);
+	}
+}
 
 #endif
