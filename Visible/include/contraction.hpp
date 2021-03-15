@@ -225,9 +225,9 @@ private:
     contractionLocator(const result_index_channel_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params ());
     contractionLocator::params m_params;
 	
-	bool previous_contraction(const int peak_index, int& prev, int& next);
+	int lookup_peak_location(const int peak_index) const;
 	
-	bool get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& ) const;
+	bool get_contraction_at_point (int src_peak_index, const std::vector<double>& peaks_locations, contraction_t& ) const;
 
 
     mutable double m_median_value;
