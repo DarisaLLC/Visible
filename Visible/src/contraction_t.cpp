@@ -28,6 +28,7 @@
 #include "core/simple_timing.hpp"
 #include "core/moreMath.h"
 #include "core/stats.hpp"
+#include "core/stl_utils.hpp"
 #include "core/pf.h"
 #include "vision/correlation1d.hpp"
 #include "core/boost_stats.hpp"
@@ -35,9 +36,13 @@
 #include "cpp-perf.hpp"
 #include "boost/filesystem.hpp"
 #include "thread.h"
+#include "nr_support.hpp"
 
 using namespace perf;
 using namespace boost;
+using namespace NR;
+using namespace svl;
+
 
 namespace bfs=boost::filesystem;
 
@@ -199,30 +204,52 @@ bool contractionLocator::locate_contractions (){
     // @to_remove Flip for peak finding
     std::vector<double> valleys(m_signal.size());
     std::transform(m_signal.begin(), m_signal.end(), valleys.begin(), [](double f)->double { return 1.0 - f; });
-    
-    svl::findPeaks(valleys, m_peaks_idx);
-    // Find periods
-    std::vector<int> periods;
-    std::adjacent_difference (m_peaks_idx.begin(), m_peaks_idx.end(), std::back_inserter(periods));
-    auto median_period = svl::Median(periods);
-    auto half_period = median_period / 2;
-    std::vector<int> selected;
-    for (int ii = 0; ii < m_peaks_idx.size(); ii++){
-        if (periods[ii] > half_period)
-            selected.push_back(m_peaks_idx[ii]);
-    }
-    {
-        stringstream ss;
-		ss << " Half Period " << half_period << std::endl;
-		for (auto idx : m_peaks_idx) ss << idx << ",";
-		ss << std::endl;
-        for (auto idx : periods) ss << idx << ",";
-		ss << std::endl;
-		for (auto idx : selected) ss << idx << ",";
-		ss << std::endl;
-		vlogger::instance().console()->info(ss.str());
-    }
-    m_peaks_idx = selected;
+	svl::norm_min_max (valleys.begin(), valleys.end(), true);
+	// Add rolling median of 3 to remove high freq without removing prominant peaks
+	std::vector<double> mvalleys;
+	rolling_median_3(valleys.begin(),valleys.end(), mvalleys);
+
+	// Prepare the time index -- frame indicies for now
+	// todo: use timestamps
+	std::vector<double> xxd (m_signal.size());
+	std::vector<uint32_t> xx (m_signal.size());
+	for (auto ii = 0; ii < xxd.size(); ii++){
+		xxd[ii] = ii;
+		xx[ii] = ii;
+	}
+	
+	// Get an approximate periodicity
+	DP prob;
+	int jmax, nout;
+	Vec_DP x(xxd.data(), int(xx.size())),y(mvalleys.data(), int(mvalleys.size())), px(int(xx.size()*2)),py(int(xx.size()*2));
+	NR::period(x,y,4.0,1.0,px,py,nout,jmax,prob);
+	
+	// Run peak detect -- sort the results based on location
+	m_peaksLoc.clear();
+	m_peaksVal.clear();
+	const double hyst(0.01);
+	oneDpeakDetect(mvalleys, xx, m_peaksLoc, m_peaksVal, hyst);
+	auto loc_idx_sorted = stl_utils::sort_indexes(m_peaksLoc, false);
+	std::vector<float> locs, vals;
+
+	//
+	
+	for (auto vv = 0; vv < loc_idx_sorted.size(); vv++){
+		auto pp = loc_idx_sorted[vv];
+		locs.push_back(m_peaksLoc[pp]);
+		vals.push_back(m_peaksVal[pp]);
+		std::cout << "[" << pp << "]" << m_peaksLoc[pp] << " : " << m_peaksVal[pp] << std::endl;
+	}
+	
+	auto val_idx_sorted = stl_utils::sort_indexes(vals, false);
+	m_peaks_idx.clear ();
+	m_peaks_fidx.clear();
+	
+	for (auto vv = 0; vv < loc_idx_sorted.size(); vv++){
+		auto pp = val_idx_sorted[vv];
+		m_peaks_fidx.push_back(locs[pp]);
+		m_peaks_idx.push_back(int(locs[pp]));
+	}
     
     // @todo check if this and peak indexes are redundant in use
     for (auto pp = 0; pp < m_peaks_idx.size(); pp++){
@@ -230,6 +257,25 @@ bool contractionLocator::locate_contractions (){
     }
     return true;
 }
+
+
+
+bool contractionLocator::previous_contraction(const int peak_index, int& prev, int& next){
+	// Find the index of peak index in
+	prev = next = -1;
+	auto iter = std::find(m_peaks_idx.begin(), m_peaks_idx.end(), peak_index);
+	if (iter == m_peaks_idx.end()) return false;
+	auto n = std::distance(m_peaks_idx.begin(), iter);
+	if ( n < 0 ) return false;
+	auto peak_findex = m_peaks_fidx[n];
+	auto piter = std::find(m_peaksLoc.begin(), m_peaksLoc.end(), peak_findex);
+	if (piter != m_peaksLoc.end() && piter != m_peaksLoc.begin())
+		prev = int(*(piter-1));
+	if (piter < m_peaksLoc.end())
+		next = int(*(piter+1));
+	return true;
+}
+
         // Note: Lengths are in units of microns.
 		// lengthFromMotion is created with Magnification X
 		// And converts accordingly
