@@ -96,7 +96,7 @@ void contractionLocator::load(const vector<float>& entropies, const vector<vecto
 
 
 
-bool contractionLocator::get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& m_contraction) const{
+bool contractionLocator::get_contraction_at_point (int peak_index, const std::vector<double>& peak_indices, contraction_t& m_contraction) const{
     perf::timer timeit;
     timeit.start();
       
@@ -110,7 +110,10 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
         return (-coeffs[1] / (2 * coeffs[2]));
     };
     const std::vector<float>& m_fder = m_signal;
-    
+	
+	int src_peak_index = lookup_peak_location(peak_index);
+
+	if (src_peak_index < 0) return false;
     // Find distance between this peak and its previous and next peak or the begining or the end of the signal
     
     /* Contraction Start
@@ -120,9 +123,6 @@ bool contractionLocator::get_contraction_at_point (int src_peak_index, const std
      *    dy = y(x-1) - y(x). x at minimum dy
      *
      */
-    bool edge_case = peak_indices[src_peak_index] < m_params.minimum_contraction_frames() ||
-        (m_fder.size() - peak_indices[src_peak_index]) < m_params.minimum_contraction_frames() ;
-    if (edge_case) return false;
     
     m_contraction.contraction_peak.first = peak_indices[src_peak_index];
     std::vector<float>::const_iterator cpt = m_fder.begin() + peak_indices[src_peak_index];
@@ -260,20 +260,15 @@ bool contractionLocator::locate_contractions (){
 
 
 
-bool contractionLocator::previous_contraction(const int peak_index, int& prev, int& next){
+int contractionLocator::lookup_peak_location(const int peak_index) const {
 	// Find the index of peak index in
-	prev = next = -1;
-	auto iter = std::find(m_peaks_idx.begin(), m_peaks_idx.end(), peak_index);
-	if (iter == m_peaks_idx.end()) return false;
-	auto n = std::distance(m_peaks_idx.begin(), iter);
-	if ( n < 0 ) return false;
-	auto peak_findex = m_peaks_fidx[n];
-	auto piter = std::find(m_peaksLoc.begin(), m_peaksLoc.end(), peak_findex);
-	if (piter != m_peaksLoc.end() && piter != m_peaksLoc.begin())
-		prev = int(*(piter-1));
-	if (piter < m_peaksLoc.end())
-		next = int(*(piter+1));
-	return true;
+	int ret = -1;
+	float peak = m_peaks_fidx[peak_index];
+	auto iter = std::find(m_peaksLoc.begin(), m_peaksLoc.end(), peak);
+	if (iter == m_peaksLoc.end()) return ret;
+	int n = int(std::distance(m_peaksLoc.begin(), iter));
+	if ( n <= 0 || n == (m_peaksLoc.size()-1)) return ret;
+	return n;
 }
 
         // Note: Lengths are in units of microns.
@@ -290,7 +285,7 @@ bool contractionLocator::profile_contractions (const std::vector<float>& lengths
         ct.m_bid = pp;
         
         // Contraction gets a unique id by contraction profiler
-		if(m_contractions.size() < m_params.beats() && get_contraction_at_point(pp, m_peaks_idx, ct)){
+		if(m_contractions.size() < m_params.beats() && get_contraction_at_point(pp, m_peaksLoc, ct)){
             auto profile = contractionProfile::create(ct, m_signal, lengths);
 			if ( ! profile->compute_interpolated_geometries_and_force()) continue;
 			
