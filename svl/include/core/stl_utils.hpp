@@ -563,6 +563,21 @@ namespace stl_utils
     }
 
 
+	template<class T, template<typename ELEM, typename ALLOC = std::allocator<ELEM>> class CONT = std::vector >
+	static void print (const CONT<T>& data){
+		std::string delim (",");
+		auto cnt = 0;
+		auto size = data.size() - 1;
+		for (const T & dd : data)
+			{
+				std::cout << dd;
+				if (cnt++ < size)
+					std::cout << delim;
+			}
+		std::cout << std::endl;
+	}
+
+	
     struct naturalComparator
     {
         bool operator () (const std::string& a, const std::string& b)

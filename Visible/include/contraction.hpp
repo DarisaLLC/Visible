@@ -225,6 +225,8 @@ private:
     contractionLocator(const result_index_channel_t&,  const uint32_t& body_id, const contractionLocator::params& params = contractionLocator::params ());
     contractionLocator::params m_params;
 	
+	bool previous_contraction(const int peak_index, int& prev, int& next);
+	
 	bool get_contraction_at_point (int src_peak_index, const std::vector<int>& peak_indices, contraction_t& ) const;
 
 
@@ -234,11 +236,15 @@ private:
 
     mutable vector<float>              m_signal;
     std::vector<int> m_peaks_idx;
+	std::vector<float> m_peaks_fidx;
 
     size_t m_entsize;
     mutable bool mNoSMatrix;
     mutable std::vector<index_val_t> m_peaks;
-    mutable std::vector<float> m_peaks_interpolated;
+	mutable std::vector<float> m_peaks_interpolated;
+	mutable std::vector<double> m_peaksLoc;
+	mutable std::vector<double> m_peaksVal;
+	
     mutable contractionContainer_t m_contractions;
     mutable int m_input; // input source
     mutable int m_id;
