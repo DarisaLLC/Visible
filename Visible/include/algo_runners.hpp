@@ -250,7 +250,7 @@ public:
     
     bool generate(const std::vector<roiWindow<P8U>> &images, float start_sigma, float end_sigma, float step, float magX = 10.0f);
     bool generate(const std::vector<cv::Mat> &images,float start_sigma, float end_sigma, float step, float magX = 10.0f);
-	bool process_motion_peaks (int model_frame_index = 0, const iPair& = iPair(3,3), const iPair& = iPair(10,10));
+	bool process_motion_peaks (int model_frame_index = 0,  const cv::Rect& body = cv::Rect());
     
     const std::vector<float> estimated_lengths (int model_frame_index = 0, const iPair& trim = iPair(24,24)) const;
     
@@ -284,7 +284,7 @@ public:
 
     
 private:
-	bool detect_moving_profile(const cv::Mat&, const iPair& = iPair(3,3), const iPair& = iPair(10,10));
+	bool detect_moving_profile(const cv::Mat&);
 	
     bool m_loaded;
     bool m_space_done;

@@ -128,7 +128,8 @@ bool ssmt_result::process (){
 
 	auto ss_done = run_scale_space(m_all_by_channel[m_input.section()]);
 	if(ss_done){
-		m_scale_space.process_motion_peaks();
+		// @todo: this should get a contraction to use
+		m_scale_space.process_motion_peaks(0, motion_surface().boundingRect());
 	}
 	if(m_pci_done && ss_done){
 		m_caRef->profile_contractions(m_scale_space.lengths());

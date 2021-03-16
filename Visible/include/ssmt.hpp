@@ -365,6 +365,8 @@ public:
 	const vector<double>& leveled () const;
 	const std::vector<std::vector<double>> ssMatrix () const;
 	const medianLevelSet& leveler () const { return m_leveler; }
+	const lengthFromMotion& lfm () const { return m_scale_space; }
+	
 	
 private:
     bool run_selfsimilarity_on_region (const std::vector<roiWindow<P8U>>& images);

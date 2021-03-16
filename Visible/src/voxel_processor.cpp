@@ -66,9 +66,11 @@ const std::vector<cv::Rect>& lengthFromMotion::modeled_ends() const {
 	return m_rects;
 }
 
-bool lengthFromMotion::detect_moving_profile(const cv::Mat& mof, const iPair& e_size, const iPair& margin){
+bool lengthFromMotion::detect_moving_profile(const cv::Mat& mof){
 	static iPair zerop (0,0);
-
+	const iPair e_size (3,3);
+	const iPair margin (10,10);
+	
 	// Sanity check: margin and structuring element required to be less than quarter of the input image size
 	iPair isize(mof.cols/4, mof.rows/4);
 	assert(margin > zerop && e_size > zerop);
@@ -113,12 +115,12 @@ bool lengthFromMotion::detect_moving_profile(const cv::Mat& mof, const iPair& e_
   This code needs to  be refactored to support cells at any angle.
 */
 
-bool lengthFromMotion::process_motion_peaks(int model_frame_index, const iPair& e_size, const iPair& margin){
+bool lengthFromMotion::process_motion_peaks(int model_frame_index, const cv::Rect& body){
     if (! isLoaded() || ! spaceDone()  ) return false;
     
     m_all_rects.resize(0);
 	m_segmented_ends.resize(2);
-	auto ok = lengthFromMotion::detect_moving_profile(motion_field(), e_size, margin);
+	auto ok = lengthFromMotion::detect_moving_profile(motion_field());
 	
 	if (! ok) return ok;
 	m_ellipse.wide_ends(m_segmented_ends);
@@ -131,9 +133,18 @@ bool lengthFromMotion::process_motion_peaks(int model_frame_index, const iPair& 
 	iPair halfwidths;
 	halfwidths.first = m_segmented_ends[0].x;
 	halfwidths.second = m_motion_field.cols - m_segmented_ends[1].x;
-	m_rects[0] = cv::Rect(cv::Point2i(m_segmented_ends[0].x,10), cv::Point2i(m_ellipse.x-30, m_motion_field.rows-10));
-	m_rects[1] = cv::Rect(cv::Point2i(m_ellipse.x+30,10), cv::Point2i(m_segmented_ends[1].x+20, m_motion_field.rows-10));
-	iPair origins (0, m_rects[1].size().width);
+
+	int iwidth = m_inputs[0].cols;
+	int iheight = m_inputs[0].rows;
+	cv::Point2i tl(4,4);
+	cv::Point2i br(tl.x + 30, iheight-tl.y);
+	m_rects[0] = cv::Rect(tl,br);
+
+	cv::Point2i rtl(iwidth-34,4);
+	cv::Point2i rbr(rtl.x + 30, iheight-rtl.y);
+	
+	m_rects[1] = cv::Rect(rtl,rbr);
+	iPair origins (m_rects[0].tl().x, m_rects[1].tl().x);
     
     auto model_frame = m_inputs[model_frame_index];
     for (auto rr : m_rects){

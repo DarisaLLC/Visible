@@ -484,7 +484,6 @@
 		C203D2F521714C3C00B6B4A8 /* VideoDecodeAcceleration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoDecodeAcceleration.framework; path = System/Library/Frameworks/VideoDecodeAcceleration.framework; sourceTree = SDKROOT; };
 		C203D2F721714C6100B6B4A8 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		C209012325C9CDAE00F6F2C4 /* nms.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = nms.cpp; path = ../src/nms.cpp; sourceTree = "<group>"; };
-		C209012425C9CDAE00F6F2C4 /* nms.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = nms.hpp; sourceTree = "<group>"; };
 		C209D47C2499503100E2CD17 /* cvCaptureProperties.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = cvCaptureProperties.hpp; path = ../include/cvCaptureProperties.hpp; sourceTree = "<group>"; };
 		C20BBC0A1E4E39E6002C7D68 /* rand_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rand_support.cpp; sourceTree = "<group>"; };
 		C20BBC0D1E4E3BE6002C7D68 /* coreGLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coreGLM.h; sourceTree = "<group>"; };
@@ -1317,7 +1316,6 @@
 				C2820F3621752E5100DFA7A6 /* VisibleApp.h */,
 				C21A50E022AB4D0C00B0AC7D /* eigen_utils.hpp */,
 				C22DAD0323032F1200D171EF /* task_manager.hpp */,
-				C209012425C9CDAE00F6F2C4 /* nms.hpp */,
 			);
 			name = include;
 			sourceTree = "<group>";
@@ -2405,7 +2403,7 @@
 				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.014;
+				MARKETING_VERSION = 1.015;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -2467,7 +2465,7 @@
 				LOCAL_BOOST = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.014;
+				MARKETING_VERSION = 1.015;
 				ON_DEMAND_RESOURCES_PREFETCH_ORDER = "";
 				OTHER_LDFLAGS = (
 					"$(inherited)",

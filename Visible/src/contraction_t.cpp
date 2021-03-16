@@ -138,7 +138,7 @@ bool contractionLocator::get_contraction_at_point (int peak_index, const std::ve
     auto value = (! std::signbit(loc_contraction_quadratic))
         ? std::max(size_t(loc_contraction_quadratic), size_t(loc)) - std::min(size_t(loc_contraction_quadratic), size_t(loc)) / 2
         : loc;
-    m_contraction.contraction_start.first = left_boundary + value;
+    m_contraction.contraction_start.first = left_boundary + value - 2; // make sure you start before contraction. 
     
     auto right_boundary = (src_peak_index == (peak_indices.size() - 1))
         ? m_fder.size() - 1
