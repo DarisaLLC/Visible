@@ -64,7 +64,7 @@ public:
         return ((int)iloc.y) / m_channel_size.second;
     }
     
-    inline ImVec2 image2display (const ivec2& image_pixel_loc, int channel = -1, bool bottom_left_origin = false){
+    inline ImVec2 image2display (const ivec2& image_pixel_loc, int channel = -1){
         assert(channel < m_cc);
         ivec2 all_loc = image_pixel_loc;
         if(channel >= 0){

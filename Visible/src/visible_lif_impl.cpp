@@ -909,7 +909,7 @@ void visibleContext::add_canvas (){
 		const Point2f& pc = mb->motion_surface().center;
 		ivec2 iv(pc.x, pc.y);
 		
-		ImVec2 ic = m_imageDisplayMapper->image2display(iv, d_channel, true);
+		ImVec2 ic = m_imageDisplayMapper->image2display(iv, d_channel);
 		auto roi = mb->roi();
 		auto tl = m_imageDisplayMapper->image2display(ivec2(roi.x, roi.y),  d_channel);
 		auto br = m_imageDisplayMapper->image2display(ivec2(roi.x+roi.width, roi.y+roi.height),  d_channel);
@@ -940,6 +940,17 @@ void visibleContext::add_canvas (){
 		}
 		
 		draw_list->AddRect(tl, br, numbered_half_colors[index], 0.0f, 15, 2.0);
+		
+		if(mb->lfm().isLoaded() && mb->lfm().spaceDone()){
+			const std::vector<cv::Rect>& rects = mb->lfm().modeled_ends();
+			std::vector<std::string> colors = {"PCI", "Green"};
+			for (auto const &rr : rects){
+				auto rtl = m_imageDisplayMapper->image2display(ivec2(rr.tl().x, rr.tl().y), d_channel);
+				auto rbr = m_imageDisplayMapper->image2display(ivec2(rr.tl().x+rr.width, rr.tl().y+rr.height), d_channel);
+				draw_list->AddRect(rtl, rbr, named_colors[colors[0]], 0.0f, 15, 2.0);
+				rotate(colors.begin(), colors.begin()+1, colors.end());
+			}
+		}
 		
 		index++;
 	}
@@ -1091,18 +1102,7 @@ void visibleContext::add_navigation(){
             auto dt = getCurrentTime().secs() - getStartTime().secs();
             ui::SameLine(0,0); ui::Text("% 8d\t%4.4f Seconds", getCurrentFrame(), dt);
             
-//            if(!m_root_pci_trackWeakRef.expired()){
-//                if(m_median_set_at_default){
-//                    int default_median_cover_pct = m_idlab_defaults.median_level_set_cutoff_fraction;
-//                    setMedianCutOff(default_median_cover_pct);
-//                    ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, default_median_cover_pct, default_median_cover_pct);
-//                }
-//                else{
-//                    int default_median_cover_pct = getMedianCutOff();
-//                    ImGui::SliderInt("Median Cover Percent", &default_median_cover_pct, 0, 20);
-//                    setMedianCutOff(default_median_cover_pct);
-//                }
-//            }
+
             ImGui::SameLine();
             if (ImGui::Button(m_median_set_at_default ? "Default" : "Not Set"))
             {
@@ -1161,12 +1161,14 @@ void visibleContext::draw_contraction_plots(const contractionLocator::contractio
     contraction_t::sigContainer_t force = ct.force;
     auto elon = ct.elongation;
     auto elen = ct.normalized_length;
-	auto length = ct.length;
+	std::vector<float> length;
+	for (auto ii = ct.contraction_start.first; ii < ct.relaxation_end.first+1; ii++)
+		length.push_back(ct.length[ii]);
 	
     svl::norm_min_max (force.begin(), force.end(), true);
     svl::norm_min_max (elon.begin(), elon.end(), true);
 	svl::norm_min_max (elen.begin(), elen.end(), true);
-	svl::norm_min_max (length.begin(), length.end(), true);
+	svl::norm_min_max (length.begin(),length.end(), true);
     
     //    static const float* y_data[] = force.data();
     static ImU32 colors[4] = { ImColor(0, 255, 0), ImColor(255, 0, 0), ImColor(0, 0, 255), ImColor(128, 0, 128) };
@@ -1232,7 +1234,10 @@ bool  visibleContext::save_contraction_plots(const contractionLocator::contracti
             fn = basefilename + "elongation.csv";
             stl_utils::save_csv(cp.elongation, fn);
 			fn = basefilename + "length.csv";
-			stl_utils::save_csv(cp.length, fn);
+			std::vector<float> selected;
+			for (auto ii = cp.contraction_start.first; ii < cp.relaxation_end.first+1; ii++)
+				selected.push_back(cp.length[ii]);
+			stl_utils::save_csv(selected, fn);
             return true;
         }
         return false;
