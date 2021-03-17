@@ -333,23 +333,20 @@ m_ctr(ct), m_lengths(lengths)
  */
 
 bool contractionProfile::compute_interpolated_geometries_and_force(){
-    perf::timer timeit;
+	if (m_lengths.empty()) return false;
+	perf::timer timeit;
     timeit.start();
 	
-	
-    double relaxed_length = m_ctr.relaxation_visual_rank;
-	if (!m_lengths.empty()){
-		relaxed_length = Median(m_lengths);
-	}
-	if(m_fder.empty()) return false;
+	m_ctr.contraction_length = m_lengths[m_ctr.contraction_peak.first];
+	m_ctr.relaxed_length =  m_lengths[m_ctr.relaxation_end.first];
 
     /*
      * Compute everything within contraction interval
      */
     auto c_start = m_ctr.contraction_start.first;
-    auto c_end = std::min(m_ctr.relaxation_end.first, m_fder.size()-1);
+	auto c_end = m_ctr.relaxation_end.first;
 
-	bool check = c_start >= 0 && c_start < c_end && c_end < m_fder.size();
+	bool check = c_start >= 0 && c_start < c_end && c_end < m_lengths.size();
 	if (! check) return check;
     
     // Compute force using cardio model
@@ -360,19 +357,16 @@ bool contractionProfile::compute_interpolated_geometries_and_force(){
     cmm.shear_control(1.0f);
     cmm.shear_velocity(200.0_cm_s);
     m_ctr.cardioModel = cmm;
-	if (!m_lengths.empty())
-		m_ctr.contraction_length = m_lengths[m_ctr.contraction_peak.first];
 
-	
+	std::vector<float> this_lenghts;
     for (auto ii = c_start; ii < c_end; ii++)
     {
-        auto linMul = clampValue(m_fder[ii]/relaxed_length, 0.0, 1.0);
-        auto elon = relaxed_length - linMul;
-		if (! m_lengths.empty()){
-			linMul = m_lengths[ii];
-			elon = relaxed_length - linMul;
-		}
-	
+		// With Magnification correctly set. Lengths are in microns.
+		// We convert to centimeters
+		// @note boost unit should have taken care of this
+		// @todo check and make sure
+		auto linMul = m_lengths[ii] / 10000.0 ;
+		auto elon = (m_ctr.relaxed_length - linMul)/10000.;
         cmm.length(linMul * boost::units::cgs::micron);
         cmm.elongation(elon * boost::units::cgs::micron);
         cmm.width((linMul/3.0) * boost::units::cgs::micron);
@@ -381,14 +375,15 @@ bool contractionProfile::compute_interpolated_geometries_and_force(){
         m_force.push_back(cmm.result().total_reactive.value());
         m_interpolated_length.push_back(linMul);
         m_elongation.push_back(elon);
+		this_lenghts.push_back(linMul);
     }
     
     // Copy Results Out.
     m_ctr.force = m_force;
     m_ctr.elongation = m_elongation;
     m_ctr.normalized_length = m_interpolated_length;
-	m_ctr.length = m_lengths;
-	m_ctr.relaxed_length = relaxed_length;
+	m_ctr.length = this_lenghts;
+
 
     
     timeit.stop();
