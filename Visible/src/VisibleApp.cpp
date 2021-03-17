@@ -222,6 +222,9 @@ bool VisibleApp::shouldQuit()
 }
 
 void VisibleApp::setup_ui(){
+	
+
+	
 	WindowRef ww = getWindow ();
 	m_imgui_options = ImGui::Options();
 	ImGui::Initialize(m_imgui_options
@@ -282,7 +285,7 @@ void VisibleApp::setup()
 	
 	std::cout << getDisplay()->getWidth() << " , " << getDisplay()->getHeight() << std::endl;
 	
-	setWindowSize(APP_WIDTH,APP_HEIGHT);
+	setWindowSize(getDisplay()->getWidth(), getDisplay()->getHeight());
 	setWindowPos(getWindowSize()/6);
 	
 	WindowRef ww = getWindow ();

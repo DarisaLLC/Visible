@@ -43,17 +43,13 @@ const ssmt_result::ref_t ssmt_result::create (std::shared_ptr<ssmt_processor>& p
                                               const result_index_channel_t& in){
     ssmt_result::ref_t this_child (new ssmt_result(child, in ));
     this_child->m_weak_parent = parent;
+	this_child->m_magnification_x = parent->parameters().magnification();
     return this_child;
 }
 
 ssmt_result::ssmt_result(const moving_region& mr,const result_index_channel_t& in):moving_region(mr),  m_input(in) {
     // Create a contraction object
-	contractionLocator::params default_params;
-	auto shared_parent = m_weak_parent.lock();
-	if(shared_parent){
-		default_params.magnification(shared_parent->parameters().magnification());
-	}
-    m_caRef = contractionLocator::create (in, mr.id(), default_params);
+	m_caRef = contractionLocator::create (in, mr.id());
 	m_leveler.initialize(in, mr.id());
 	
     // Suport ssmt_processor::Contraction Analyzed
@@ -198,7 +194,7 @@ bool ssmt_result::get_channels (int channel) const {
 
 bool ssmt_result::run_scale_space (const std::vector<roiWindow<P8U>>& images){
 	
-	return m_scale_space.generate(images,  2, 15, 2, m_caRef->parameters().magnification());
+	return m_scale_space.generate(images,  2, 15, 2, m_magnification_x);
 }
 
 // Run to get Entropies and Median Level Set

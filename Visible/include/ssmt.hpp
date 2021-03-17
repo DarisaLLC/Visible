@@ -401,6 +401,7 @@ private:
     std::weak_ptr<ssmt_processor> m_weak_parent;
 	mutable std::atomic<bool> m_images_loaded;
 	std::atomic<bool> m_pci_done;
+	float m_magnification_x;
 
     
 };
