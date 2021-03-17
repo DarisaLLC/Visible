@@ -360,11 +360,9 @@ bool contractionProfile::compute_interpolated_geometries_and_force(){
     cmm.shear_control(1.0f);
     cmm.shear_velocity(200.0_cm_s);
     m_ctr.cardioModel = cmm;
-	if (!m_lengths.empty()){
-		auto minIter = std::min_element(m_lengths.begin(), m_lengths.end());
-		if (minIter != m_lengths.end())
-			m_ctr.contraction_length = *minIter;
-	}
+	if (!m_lengths.empty())
+		m_ctr.contraction_length = m_lengths[m_ctr.contraction_peak.first];
+
 	
     for (auto ii = c_start; ii < c_end; ii++)
     {
