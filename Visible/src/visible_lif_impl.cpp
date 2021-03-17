@@ -1012,6 +1012,7 @@ void visibleContext::add_result_sequencer (){
 	}
 	
 	// todo: refactor to make access clearer
+#if NOTYET
 	static result_index_channel_t first (0,0);
 	if (ImGui::CollapsingHeader(" Cell Area PCI ") && m_timeFloatDict.size() > 1) {
 		int count = getNumFrames();
@@ -1048,6 +1049,7 @@ void visibleContext::add_result_sequencer (){
 			ImPlot::EndPlot();
 		}
 	}
+#endif
 }
 
 
@@ -1290,11 +1292,12 @@ void visibleContext::add_contractions (bool* p_open)
                 
                 for (int cc = 0; cc < contractions.size(); cc++){
                     const auto ct = contractions[cc];
-                    ImGui::Text(" Contraction Start : %d", int(ct.contraction_start.first));
-                    ImGui::Text(" Contraction Peak : %d", int(ct.contraction_peak.first));
-                    ImGui::Text(" Relaxation End : %d", int(ct.relaxation_end.first));
-					ImGui::Text(" Relaxed Length: %d", int(ct.relaxed_length));
-					ImGui::Text(" Contracted Length: %d", int(ct.contraction_length));
+					ImGui::Text(" Magnification     : %3.1f X", m_magnification);
+					ImGui::Text(" Contraction Start : %d frame index", int(ct.contraction_start.first));
+                    ImGui::Text(" Contraction Peak  : %d frame index", int(ct.contraction_peak.first));
+                    ImGui::Text(" Relaxation End    : %d frame index", int(ct.relaxation_end.first));
+					ImGui::Text(" Relaxed Length    : %d microns ", int(ct.relaxed_length));
+					ImGui::Text(" Contracted Length : %d microns", int(ct.contraction_length));
                 }
                 ImGui::TreePop();
             }
@@ -1316,11 +1319,8 @@ void visibleContext::add_contractions (bool* p_open)
 void  visibleContext::DrawGUI(){
     
     add_canvas();
-//    add_result_sequencer();
-//    add_navigation();
     m_show_cells = true;
     add_contractions(&m_show_cells);
-//    add_motion_profile ();
 }
 
 void  visibleContext::update_log (const std::string& msg)
