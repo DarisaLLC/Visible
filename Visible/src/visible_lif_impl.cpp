@@ -1163,9 +1163,8 @@ void visibleContext::draw_contraction_plots(const contractionLocator::contractio
     contraction_t::sigContainer_t force = ct.force;
     auto elon = ct.elongation;
     auto elen = ct.normalized_length;
-	std::vector<float> length;
-	for (auto ii = ct.contraction_start.first; ii < ct.relaxation_end.first+1; ii++)
-		length.push_back(ct.length[ii]);
+	auto length = ct.length;
+
 	
     svl::norm_min_max (force.begin(), force.end(), true);
     svl::norm_min_max (elon.begin(), elon.end(), true);
@@ -1236,10 +1235,7 @@ bool  visibleContext::save_contraction_plots(const contractionLocator::contracti
             fn = basefilename + "elongation.csv";
             stl_utils::save_csv(cp.elongation, fn);
 			fn = basefilename + "length.csv";
-			std::vector<float> selected;
-			for (auto ii = cp.contraction_start.first; ii < cp.relaxation_end.first+1; ii++)
-				selected.push_back(cp.length[ii]);
-			stl_utils::save_csv(selected, fn);
+			stl_utils::save_csv(cp.length, fn);
             return true;
         }
         return false;
