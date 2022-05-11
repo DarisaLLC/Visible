@@ -21,7 +21,7 @@ namespace ImGui {
 bool IsItemActiveLastFrame()    {
     ImGuiContext& g = *GImGui;
     if (g.ActiveIdPreviousFrame)
-	return g.ActiveIdPreviousFrame== GImGui->CurrentWindow->DC.LastItemId;
+		return g.ActiveIdPreviousFrame==ImGui::GetItemID();
     return false;
 }
 bool IsItemJustReleased()   {
