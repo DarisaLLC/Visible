@@ -43,7 +43,7 @@ void VisibleApp::DrawInputPanel() {
 	
 	static bool first_time = true;
 	if (first_time) {
-		ImGui::SetNextTreeNodeOpen(true);
+		ImGui::SetNextItemOpen(true);
 		first_time = false;
 	}
 	if (isOiiOFile()){
@@ -72,9 +72,12 @@ void VisibleApp::DrawInputPanel() {
 	ImGui::BeginGroup();
 	bool changed = false;
 	changed |= ImGui::InputFloat(" Magnification X ", &m_magnification, 0.1, 2.0, "%.3f" );
-	m_magnification = svl::math<float>::clamp(m_magnification, 0.1f, 100.0f);
+	if (changed)
+		m_magnification = svl::math<float>::clamp(m_magnification, 0.1f, 100.0f);
+	changed = false;
 	changed |= ImGui::InputFloat(" Display FPS ", &m_displayFPS, 0.1, 2.0, "%.3f" );
-	m_displayFPS = svl::math<float>::clamp(m_displayFPS, 0.1f, 100.0f);
+	if (changed)
+		m_displayFPS = svl::math<float>::clamp(m_displayFPS, 0.1f, 100.0f);
 	ImGui::EndGroup();
 	
 	
@@ -539,7 +542,7 @@ void VisibleApp::prepareSettings( App::Settings *settings )
 	// settings fn from top of file:
 CINDER_APP( VisibleApp, RendererGl )
 
-#pragma GCC diagnostic pop
+//#pragma GCC diagnostic pop
 
 	//int main( int argc, char* argv[] )
 	//{

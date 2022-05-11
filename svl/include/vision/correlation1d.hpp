@@ -13,6 +13,8 @@
 #include "core/stats.hpp"
 #include "core/core.hpp"
 
+using namespace std;
+
 namespace svl{
 // 1D correlation: Normalized Correlation
 //
@@ -178,7 +180,7 @@ double f1dRegister (Iterator Ib, Iterator Ie, Iterator Mb, Iterator Me, uint32_t
     }
     
     vector<double>::iterator endd = space.end();
-    advance (endd, -1); // The last guy
+    std::advance (endd, -1); // The last guy
     
     vector<double>::iterator maxd = max_element (space.begin(), space.end());
     pose = *maxd;
@@ -228,7 +230,7 @@ double f1dRegister (Iterator Ib, Iterator Ie, Iterator Mb, Iterator Me, uint32_t
     }
     
     vector<double>::iterator endd = space.end();
-    advance (endd, -1); // The last guy
+    std::advance (endd, -1); // The last guy
     
     vector<double>::iterator maxd = max_element (space.begin(), space.end());
     pose = *maxd;
@@ -288,7 +290,7 @@ double f1dRegister (Iterator Ib, Iterator Ie, Iterator Mb, Iterator Me,
     }
     
     vector<double>::iterator endd = space.end();
-    advance (endd, -1); // The last guy
+    std::advance (endd, -1); // The last guy
     
     vector<double>::iterator maxd = max_element (space.begin(), space.end());
     pose = *maxd;

@@ -1003,7 +1003,9 @@ void visibleContext::add_result_sequencer (){
 		
 		
 		ImGui::BulletText(" Temporal Self-Similarity ");
-		if (ImPlot::BeginPlot(" PCI ", "time/frame", " pci (t) ")) {
+		if (ImPlot::BeginPlot(" PCI ")) {
+			ImPlot::SetupAxis(ImAxis_X1, "time/frame");
+			ImPlot::SetupAxis(ImAxis_Y1, " pci (t) ");
 			ImPlot::PlotLine(" Entire ", xs1, ys1, count);
 			ImPlot::SetNextMarkerStyle(ImPlotMarker_Plus);
 			ImPlot::PlotLine(" Instant ", xs2, ys2, 11);

@@ -83,17 +83,8 @@ int32_t histoStats::mode() const
     
     // compute mode, make valid, return mode_
     
-    long startIndex;
-    long lastIndex;
-    if (computedIC_)
-    {
-        startIndex = ic_[0];
-        lastIndex = ic_[100];
-    }
-    else
-    {
-        lastIndex = (long)histogram_.size() - 1;
-    }
+  //  long startIndex;
+    long lastIndex = computedIC_ ? ic_[100] :  (long)histogram_.size() - 1;
     
     long i, indexOfMax;
     uint32_t maxCountSoFar;
