@@ -91,7 +91,7 @@ bool autoCorrelation(const roiWindow<P> & moving, const uint32_t half_size,space
 namespace MutualInfo
 {
 
-    typedef struct
+	typedef struct Parts8U
     {
         typedef Eigen::MatrixXd jointProbs;
         jointProbs joint;

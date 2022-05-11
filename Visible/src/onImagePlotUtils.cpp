@@ -34,7 +34,7 @@ void OnImagePlot::draw( const vector<float> &m_copy )
     
     gl::VertBatch batch( GL_TRIANGLE_STRIP );
     
-    size_t currVertex = 0;
+   // size_t currVertex = 0;
     float m;
     Rectf bin( mBounds.x1, mBounds.y1, mBounds.x1 + binWidth, mBounds.y2 );
     for( size_t i = 0; i < numBins; i++ ) {
@@ -48,7 +48,7 @@ void OnImagePlot::draw( const vector<float> &m_copy )
         batch.vertex( bin.getUpperLeft() );
         
         bin += vec2( binWidth + padding, 0 );
-        currVertex += 2;
+       // currVertex += 2;
     }
     
     batch.color( bottomColor );
