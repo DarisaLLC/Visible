@@ -4,9 +4,6 @@
 [submodule "externals/cinder"]
 	path = externals/cinder
 	url = git://github.com/cinder/Cinder.git
-[submodule "externals/CImg"]
-	path = externals/CImg
-	url = git://github.com/dtschump/CImg
 [submodule "externals/ImGuizmo"]
 	path = externals/ImGuizmo
 	url = git@github.com:DarisaLLC/ImGuizmo.git
@@ -14,9 +11,6 @@
 	path = externals/fmt
 	url = https://github.com/fmtlib/fmt.git
 	branch = master
-[submodule "externals/albatross"]
-	path = externals/albatross
-	url = https://github.com/swift-nav/albatross.git
 [submodule "externals/implot"]
 	path = externals/implot
 	url = git@github.com:epezent/implot.git
