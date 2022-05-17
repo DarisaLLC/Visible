@@ -14,20 +14,20 @@ ALL_ROOT = $(PROJECT_DIR)/../..
 SVL_ROOT = $(PROJECT_DIR)/../../svl
 EXTERNALS = $(PROJECT_DIR)/../../externals
 VISIBLE_ROOT = $(PROJECT_DIR)/../../Visible
-
+LOCAL = /usr/local/opt
 
 TEST_DATA = $(SVL_ROOT)/Assets
 TEST_VISIBLE_DATA = $(VISIBLE_ROOT)/test/assets
 
 LOCAL_CINDER = $(EXTERNALS)/cinder
-LOCAL_OCV = /usr/local/Cellar/opencv/4.5.0_5
+LOCAL_OCV = $(LOCAL)/opencv
 LOCAL_GSL = /usr/local/
-LOCAL_CIMG = $(EXTERNALS)/CImg
-LOCAL_SPDLOG = $(EXTERNALS)/spdlog
-LOCAL_FMT = $(EXTERNALS)/fmt
+LOCAL_SPDLOG = $(LOCAL)/spdlog
+LOCAL_FMT = $(LOCAL)/fmt
 LOCAL_CIIMGUI = $(VISIBLE_ROOT)/local_cinder_imgui
 
 LOCAL_OIIO =  $(EXTERNALS)/oiio-dist
+LOCAL_FFMPEG = $(LOCAL)/ffmpeg
 
 LOCAL_3rdParty = $(SVL_ROOT)/local
 LOCAL_BOOST = /usr/local

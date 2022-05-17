@@ -1,3 +1,8 @@
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 #include <cstdint>
 
 #include <algorithm>
@@ -1056,4 +1061,6 @@ namespace svl
     }
     
 }
+
+#pragma GCC diagnostic pop
 

@@ -6,7 +6,8 @@
 #pragma GCC diagnostic ignored "-Wunused-private-field"
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
 #pragma GCC diagnostic ignored "-Wcomma"
-
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include "VisibleApp.h"
 #include "oiio_utils.hpp"

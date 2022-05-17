@@ -53,7 +53,11 @@ static void AddFilterListToDialog( NSSavePanel *dialog, const char *filterList )
     NSArray *allowedFileTypes = BuildAllowedFileTypes( filterList );
     if ( [allowedFileTypes count] != 0 )
     {
-        [dialog setAllowedFileTypes:allowedFileTypes];
+	if (@available(macOS 11.0, *)) {
+		[dialog setAllowedContentTypes:allowedFileTypes];
+	} else {
+			// Fallback on earlier versions
+	}
     }
 }
 

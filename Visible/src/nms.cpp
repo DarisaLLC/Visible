@@ -4,6 +4,8 @@
 //
 //  Created by Arman Garakani on 2/2/21.
 //
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include "nms.hpp"
 
@@ -162,3 +164,6 @@ void nms2(const std::vector<cv::Rect>& srcRects,
             resRects.push_back(rect1);
         }
 }
+
+
+#pragma GCC diagnostic pop

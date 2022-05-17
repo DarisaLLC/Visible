@@ -9,6 +9,7 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 #pragma GCC diagnostic ignored "-Wunused-private-field"
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include <stdio.h>
 #include <algorithm>

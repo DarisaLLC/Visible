@@ -7,6 +7,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomma"
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include "vision/ellipse_fit.hpp"
 #include <math.h>

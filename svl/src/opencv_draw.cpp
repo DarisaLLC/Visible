@@ -1,3 +1,5 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include "opencv2/highgui/highgui.hpp"
 #include "vision/opencv_utils.hpp"
@@ -263,4 +265,6 @@ void svl::drawLine(cv::Mat& dst, const cv::Point& p1, const cv::Point& p2,
 {
     cv::line ( dst, p1, p2, color, thickness);
 }
+
+#pragma GCC diagnostic pop
 

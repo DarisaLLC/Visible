@@ -6,7 +6,8 @@
     //  Copyright (c) 2014 Arman Garakani. All rights reserved.
     //
 
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #include "vision/localvariance.h"
 #include <opencv2/imgproc/imgproc.hpp>  // cvtColor
 using namespace cv;
@@ -152,3 +153,4 @@ namespace svl
 
 
 
+#pragma GCC diagnostic pop

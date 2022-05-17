@@ -4,6 +4,8 @@
 //
 //  Created by Arman Garakani on 8/10/19.
 //
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include "core/GLMmath.h"
 #include "core/lineseg.hpp"
@@ -125,3 +127,5 @@ void pointsToRotatedRect (std::vector<cv::Point2f>& imagePoints, cv::RotatedRect
     }
     rotated_rect.angle = angle.Double();
 }
+#pragma GCC diagnostic pop
+

@@ -21,10 +21,14 @@ public:
     
     region_and_source ():m_region(ni()),m_section(ni()) {}
     region_and_source (int r, int section=0):m_region(r), m_section(section) {}
-    inline int entire () { return -1; }
-    inline int ni () { return -2; }
+	region_and_source (const region_and_source& other){
+		m_region = other.m_region;
+		m_section = other.m_section;
+	}
+    static inline int entire () { return -1; }
+    static inline int ni () { return -2; }
     bool isSection() const {return m_section >= 0;}
-    bool isEntire() const {return m_region == -1; }
+    bool isEntire() const {return m_region == region_and_source::entire(); }
     int region () const { return m_region;}
     int section () const { return m_section; }
     

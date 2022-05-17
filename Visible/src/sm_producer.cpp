@@ -1,7 +1,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomma"
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
-
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include "sm_producer.h"
 #include "sm_producer_impl.h"

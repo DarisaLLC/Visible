@@ -5,6 +5,9 @@
 //  Created by Arman Garakani on 1/26/21.
 //
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 #include "imGui_utils.h"
 #include <vision/opencv_utils.hpp>
 
@@ -47,3 +50,5 @@ ImVec2 ImGui_Image_Constrain(const ImVec2& content, const ImVec2& available)
 		return available;
 	}
 }
+
+#pragma GCC diagnostic pop

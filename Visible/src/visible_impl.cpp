@@ -5,6 +5,8 @@
 #pragma GCC diagnostic ignored "-Wunused-private-field"
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
 #pragma GCC diagnostic ignored "-Wcomma"
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include "opencv2/stitching.hpp"
 #include "core/stl_utils.hpp"
@@ -13,6 +15,11 @@
 using namespace boost;
 namespace bfs=boost::filesystem;
 
+namespace anonymous{
+	bool fileExists(const boost::filesystem::path &rFile){
+		return (bf::exists(rFile) && bf::is_regular_file(rFile));
+	}
+}
 //
 //std::ostream& operator<<(std::ostream& std_stream, const tiny_media_info& t)
 //{
@@ -51,7 +58,7 @@ bool VisibleAppControl::check_input (const string &filename){
     if(! check_file_and_size.first) return check_file_and_size.first;
     
     boost::filesystem::path bpath(filename);
-    auto boost_file_and_size = svl::io::existsFile(bpath);
+	auto boost_file_and_size = anonymous::fileExists(bpath);
     if(! boost_file_and_size) return boost_file_and_size;
     
     auto bsize = boost::filesystem::file_size(bpath);

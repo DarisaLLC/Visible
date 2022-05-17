@@ -4,6 +4,8 @@
 //
 //  Created by Arman Garakani on 9/3/18.
 //
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include "vision/labelBlob.hpp"
 #include "core/stl_utils.hpp"
@@ -470,6 +472,8 @@ void labelBlob::drawOutput() const {
     if (signal_graphics_ready && signal_graphics_ready->num_slots() > 0)
         signal_graphics_ready->operator()();
 }
+
+#pragma GCC diagnostic pop
 
 
 #if 0

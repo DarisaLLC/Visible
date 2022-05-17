@@ -5,6 +5,10 @@
 //  Created by Arman Garakani on 10/18/20.
 //
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmacro-redefined"
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #include "oiio_utils.hpp"
 
 
@@ -116,3 +120,4 @@ cv::Mat getRoiFrame(const std::shared_ptr<ImageBuf>& ib, const ustring& contentN
     return getRoiFrame(ib, contentName, frame_index, roi);
 }
 
+#pragma GCC diagnostic pop

@@ -12,6 +12,7 @@
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wcomma"
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include "opencv2/stitching.hpp"
 #include <strstream>
@@ -255,29 +256,7 @@ void visibleContext::setup()
 
 }
 
-//// Called at startup and resize
-//bool visibleContext::setup_panels (int image_width, int image_height, int vp_width, int vp_height){
-//    int left_width = vp_width / 4;
-//    int right_width = vp_width / 4;
-//    int center_width = vp_width - left_width - right_width;
-//    int left_top_x = 0;
-//    int left_top_y = 0;
-//    int left_height = vp_height;
-//    int center_top_x = left_width;
-//    int center_top_y = 0;
-//    int center_height = vp_height;
-//    int right_top_x = center_top_x + center_width;
-//    int right_top_y = 0;
-//    int right_height = vp_height;
-//    ImVec4 left (left_top_x, left_top_y, left_top_x + left_width, left_top_y + left_height);
-//    ImVec4 center (center_top_x, center_top_y, center_top_x + center_width, center_top_y + center_height);
-//    ImVec4 right (right_top_x, right_top_y, right_top_x + right_width, right_top_y + right_height);
-//    m_panels_map["left"].rectangle = left;
-//    m_panels_map["right"].rectangle = right;
-//    m_panels_map["center"].rectangle = center;
-//    return true;
-//    
-//}
+
 
 
 /************************
@@ -825,29 +804,7 @@ void visibleContext::process_async (){
     }
     
     progress_fn_t pf = std::bind(&visibleContext::fraction_reporter, this, std::placeholders::_1);
-    switch(channel_count()){
-        case 3:
-        {
-            // note launch mode is std::launch::async
-     //       m_intensity_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_intensity_statistics,
-       //                                          m_ssmtRef.get(), std::vector<int> ({0,1}) );
-            result_index_channel_t in (-1,2);
-            break;
-        }
-        case 2:
-        {
-            //note launch mode is std::launch::async
-     //       m_intensity_tracks_aync = std::async(std::launch::async,&ssmt_processor::run_intensity_statistics,
-        //                                         m_ssmtRef.get(), std::vector<int> ({0}) );
-            result_index_channel_t in (-1,1);
-            break;
-        }
-        case 1:
-        {
-                result_index_channel_t in (-1,0);
-            break;
-        }
-    }
+	m_input_selector = result_index_channel_t (-1,int(channel_count()-1));
 }
 
 
