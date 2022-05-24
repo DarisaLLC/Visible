@@ -3,7 +3,7 @@
 	url = https://github.com/gabime/spdlog.git
 [submodule "externals/cinder"]
 	path = externals/cinder
-	url = git://github.com/cinder/Cinder.git
+	url = git@github.com:cinder/Cinder.git
 	branch = release_v0.9.2
 [submodule "externals/ImGuizmo"]
 	path = externals/ImGuizmo
@@ -11,6 +11,3 @@
 [submodule "externals/implot"]
 	path = externals/implot
 	url = git@github.com:epezent/implot.git
-[submodule "externals/externals/cinder"]
-	path = externals/externals/cinder
-	url = git@github.com:cinder/Cinder.git
