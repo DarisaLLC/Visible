@@ -4,13 +4,13 @@
 [submodule "externals/cinder"]
 	path = externals/cinder
 	url = git://github.com/cinder/Cinder.git
+	branch = release_v0.9.2
 [submodule "externals/ImGuizmo"]
 	path = externals/ImGuizmo
 	url = git@github.com:DarisaLLC/ImGuizmo.git
-[submodule "externals/fmt"]
-	path = externals/fmt
-	url = https://github.com/fmtlib/fmt.git
-	branch = master
 [submodule "externals/implot"]
 	path = externals/implot
 	url = git@github.com:epezent/implot.git
+[submodule "externals/externals/cinder"]
+	path = externals/externals/cinder
+	url = git@github.com:cinder/Cinder.git
