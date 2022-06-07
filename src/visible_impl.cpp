@@ -114,7 +114,7 @@ bool VisibleAppControl::setup_text_loggers (const bfs::path app_support_dir, std
                                                                  logging::create_timestamped_template(id_name));
         
         // Setup APP LOG
-        auto daily_file_sink = std::make_shared<logging::sinks::daily_file_sink_mt>(logname, 23, 59);
+        auto daily_file_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(logname, 23, 59);
         auto console_sink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
         console_sink->set_level(spdlog::level::warn);
         console_sink->set_pattern("[%H:%M:%S:%e:%f %z] [%n] [%^---%L---%$] [thread %t] %v");

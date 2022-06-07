@@ -11,7 +11,7 @@
 
 #include "VisibleApp.h"
 #include "oiio_utils.hpp"
-#include "imgui_panel.hpp"
+#include "imGuiCustom/imgui_panel.hpp"
 #include "imgui.h"
 
 
@@ -523,7 +523,7 @@ void VisibleApp::resize ()
 	
 }
 
-
+#if CHECK
 void VisibleApp::prepareSettings( App::Settings *settings )
 {
 	const auto &args = settings->getCommandLineArgs();
@@ -536,7 +536,7 @@ void VisibleApp::prepareSettings( App::Settings *settings )
 		//        settings->setWindowSize(lifContext::startup_display_size().x, lifContext::startup_display_size().y);
 	settings->setResizable( true );
 }
-
+#endif
 
 
 

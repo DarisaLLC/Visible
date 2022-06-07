@@ -1,29 +1,46 @@
-cmake_minimum_required( VERSION 3.0 FATAL_ERROR )
+cmake_minimum_required (VERSION 3.1.3...3.5.1 FATAL_ERROR)
+
 set( CMAKE_VERBOSE_MAKEFILE ON )
 
-project( Visible )
+project( Visible C CXX)
+include(ExternalProject)
 set( APP_NAME "${PROJECT_NAME}App" )
-set(CMAKE_CXX_STANDARD 14)
 
-get_filename_component( CINDER_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cinder" ABSOLUTE )
+# Set 'ON' to enable 'TRACE' macro.
+option(LSPDLOG_ENABLE_TRACE_LOGGING "Enable trace logging." ON)
+  
+# Set 'ON' to enable 'LOG' macro.
+option(LSPDLOG_ENABLE_DATA_LOGGING  "Enable data logging."  ON)
 
-get_filename_component( APP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../" ABSOLUTE )
-get_filename_component( BLOCK_DIR "${APP_DIR}/blocks" ABSOLUTE )
+
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../../externals/lspdlog" lspdlog)
+include_directories(${LSPDLOG_INCLUDE_DIRS}) #<-- necessary
+
+message(" lspdlog  include: ${LSPDLOG_INCLUDE_DIRS}")
+
+get_filename_component( CINDER_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../externals/cinder" ABSOLUTE )
+
+get_filename_component( APP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE )
+
 
 file(GLOB SOURCE_LIST CONFIGURE_DEPENDS
         "${APP_DIR}/src/*.h"
         "${APP_DIR}/src/*.hpp"
         "${APP_DIR}/src/*.cpp")
 
-if(NOT TARGET spdlog)
-    # Stand-alone build
-    find_package(spdlog REQUIRED)
-endif()
+find_package(Boost REQUIRED REQUIRED COMPONENTS filesystem system  program_options)
+
+message(STATUS "    config: ${Boost_DIR}")
+message(STATUS "    version: ${Boost_VERSION}")
+message(STATUS " boost  include: ${Boost_INCLUDE_DIR}")
+message(STATUS " boost   lib path: ${Boost_LIBRARY_DIR}")
+message(STATUS " boost   libraries: ${Boost_LIBRARIES}")
+
 
 # Find OpenCV, you may need to set OpenCV_DIR variable
 # to the absolute path to the directory containing OpenCVConfig.cmake file
 # via the command line or GUI
-set(OpenCV_DIR /usr/local/Cellar/opencv/4.5.5_2)
+set(OpenCV_DIR /usr/local/Cellar/opencv/4.5.5_2/lib/cmake/opencv4)
 find_package(OpenCV REQUIRED)
 
 # If the package has been found, several variables will
@@ -44,6 +61,8 @@ ci_make_app(
 	SOURCES ${SOURCE_LIST} 
 	CINDER_PATH ${CINDER_PATH}
 	INCLUDES ${OpenCV_INCLUDE_DIRS} ${APP_DIR}/include
+	${LSPDLOG_INCLUDE_DIRS}
+	/usr/local/opt/ilmbase/include/
 	${APP_DIR}/externals/oiio-dist/include
 	${APP_DIR}/externals/Eigen
 	${APP_DIR}/externals/implot	
@@ -51,10 +70,14 @@ ci_make_app(
 	${APP_DIR}/local_cinder_imgui/include
 	${APP_DIR}/local_cinder_imgui/lib/imgui
 	/usr/local/include	
-	LIBRARIES ${OpenCV_LIBS}
-	BLOCKS ${BLOCK_DIR}/Cinder-Boost
+	LIBRARIES ${OpenCV_LIBS} 
+	${Boost_LIBRARIES}
+	${APP_DIR}/externals/oiio-dist/lib/libOpenImageIO.a
+	${APP_DIR}/externals/oiio-dist/lib/libOpenImageIO_Util.a	
 	
 )
+
+target_compile_features(${APP_NAME} PRIVATE cxx_std_14)
 
 get_target_property( OUTPUT_DIR ${APP_NAME} RUNTIME_OUTPUT_DIRECTORY )
 

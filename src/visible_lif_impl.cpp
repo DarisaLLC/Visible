@@ -29,10 +29,10 @@
 #include "cinder/ip/Blend.h"
 #include "opencv2/highgui.hpp"
 #include "cinder/ip/Flip.h"
-#include "otherIO/lifFile.hpp"
+//#include "otherIO/lifFile.hpp"
 
 #include "timed_types.h"
-#include "cinder_xchg.hpp"
+#include "cinder_cv/cinder_xchg.hpp"
 #include "visible_layout.hpp"
 #include "vision/opencv_utils.hpp"
 #include "core/stl_utils.hpp"
@@ -42,16 +42,16 @@
 #include "logger/logger.hpp"
 #include "cinder/Log.h"
 #include "CinderImGui.h"
-#include "ImGuiExtensions.h" // for 64bit count support
+#include "imGuiCustom/ImGuiExtensions.h" // for 64bit count support
 #include "Resources.h"
 #include "cinder_opencv.h"
 #include "imguivariouscontrols.h"
 #include <boost/range/irange.hpp>
 #include "core/stl_utils.hpp"
-#include "imgui_visible_widgets.hpp"
+#include "imGuiCustom/imgui_visible_widgets.hpp"
 #include "nfd.h"
-#include "imGui_utils.h"
-#include "imgui_panel.hpp"
+#include "imGuiCustom/imGui_utils.h"
+#include "imGuiCustom/imgui_panel.hpp"
 #include "implot.h"
 using namespace ci;
 using namespace ci::app;
