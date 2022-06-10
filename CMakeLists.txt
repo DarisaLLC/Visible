@@ -2,9 +2,19 @@ cmake_minimum_required (VERSION 3.1.3...3.5.1 FATAL_ERROR)
 
 set( CMAKE_VERBOSE_MAKEFILE ON )
 
-project( Visible C CXX)
+project( Visible OBJC C CXX)
 include(ExternalProject)
 set( APP_NAME "${PROJECT_NAME}App" )
+
+# set the C++ standard
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+#-----------------------------------------------------------------------------
+# Load some macros.
+include(proj/cmake/macros.cmake)
+#-----------------------------------------------------------------------------
 
 # Set 'ON' to enable 'TRACE' macro.
 option(LSPDLOG_ENABLE_TRACE_LOGGING "Enable trace logging." ON)
@@ -12,21 +22,29 @@ option(LSPDLOG_ENABLE_TRACE_LOGGING "Enable trace logging." ON)
 # Set 'ON' to enable 'LOG' macro.
 option(LSPDLOG_ENABLE_DATA_LOGGING  "Enable data logging."  ON)
 
+get_filename_component( APP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/" ABSOLUTE )
+get_filename_component( CINDER_PATH "${APP_DIR}/externals/cinder" ABSOLUTE )
+get_filename_component( DEPS_PATH "${APP_DIR}/build/_deps" ABSOLUTE )
 
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../../externals/lspdlog" lspdlog)
+add_subdirectory("${APP_DIR}/externals/lspdlog" lspdlog)
 include_directories(${LSPDLOG_INCLUDE_DIRS}) #<-- necessary
-
 message(" lspdlog  include: ${LSPDLOG_INCLUDE_DIRS}")
 
-get_filename_component( CINDER_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../externals/cinder" ABSOLUTE )
+add_subdirectory("${APP_DIR}/dependencies") 
 
-get_filename_component( APP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE )
+set( IMGUI_DIR "${DEPS_PATH}/imgui-src")
+set( NFD_DIR "${APP_DIR}/src/nfd")
+set( IMGUI_CUSTOM_DIR "${APP_DIR}/include/imGuiCustom")
+
 
 
 file(GLOB SOURCE_LIST CONFIGURE_DEPENDS
         "${APP_DIR}/src/*.h"
         "${APP_DIR}/src/*.hpp"
-        "${APP_DIR}/src/*.cpp")
+        "${APP_DIR}/src/*.cpp"
+		"${APP_DIR}/src/*.c"
+        "${APP_DIR}/src/*.m")
+
 
 find_package(Boost REQUIRED REQUIRED COMPONENTS filesystem system  program_options)
 
@@ -36,6 +54,37 @@ message(STATUS " boost  include: ${Boost_INCLUDE_DIR}")
 message(STATUS " boost   lib path: ${Boost_LIBRARY_DIR}")
 message(STATUS " boost   libraries: ${Boost_LIBRARIES}")
 
+
+set(NFD
+${NFD_DIR}/nfd_cocoa.m
+${NFD_DIR}/nfd_common.c
+)
+
+set_source_files_properties("${NFD_DIR}/nfd_cocoa.m" PROPERTIES COMPILE_FLAGS "-x objective-c")
+set_source_files_properties("${NFD_DIR}/nfd_common.c" PROPERTIES LANGUAGE CXX)
+
+
+set(IMPLOT
+${APP_DIR}/externals/implot/implot.cpp
+${APP_DIR}/externals/implot/implot_items.cpp
+)
+
+set(IMGUI
+${IMGUI_DIR}/imgui.cpp
+${IMGUI_DIR}/imgui_draw.cpp
+${IMGUI_DIR}/imgui_demo.cpp
+${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+${IMGUI_DIR}/imgui_tables.cpp
+${IMGUI_DIR}/imgui_widgets.cpp
+)
+
+set(IMGUI_CUSTOM
+${IMGUI_CUSTOM_DIR}/imgui_panel.cpp
+${IMGUI_CUSTOM_DIR}/imgui_utils.cpp
+${IMGUI_CUSTOM_DIR}/imguivariouscontrols.cpp
+${IMGUI_CUSTOM_DIR}/imgui_visible_widgets.cpp
+${IMGUI_CUSTOM_DIR}/imgui_plot.cpp
+)
 
 # Find OpenCV, you may need to set OpenCV_DIR variable
 # to the absolute path to the directory containing OpenCVConfig.cmake file
@@ -55,10 +104,16 @@ message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
 
 include( "${CINDER_PATH}/proj/cmake/modules/cinderMakeApp.cmake" )
 
+
+
 ci_make_app(
 	APP_NAME ${APP_NAME}
 	INCLUDES ${APP_DIR}/include
 	SOURCES ${SOURCE_LIST} 
+	${NFD}
+	${IMPLOT}
+	${IMGUI}
+	${IMGUI_CUSTOM}
 	CINDER_PATH ${CINDER_PATH}
 	INCLUDES ${OpenCV_INCLUDE_DIRS} ${APP_DIR}/include
 	${LSPDLOG_INCLUDE_DIRS}
@@ -74,17 +129,30 @@ ci_make_app(
 	${Boost_LIBRARIES}
 	${APP_DIR}/externals/oiio-dist/lib/libOpenImageIO.a
 	${APP_DIR}/externals/oiio-dist/lib/libOpenImageIO_Util.a	
-	
+	/usr/local/lib/libtiff.a
+	/usr/local/lib/libpng.a
+	/usr/local/lib/libIlmImf-2_5.a	
+	/usr/local/lib/libIlmImfUtil-2_5.a
+	/usr/local/lib/libIlmThread-2_5.a
+	/usr/local/lib/libImath-2_5.a
+	/usr/local/lib/libheif.a
+	/usr/local/lib/libIex-2_5.a	
+	/usr/local/lib/libIexMath-2_5.a
+	/usr/local/lib/libjpeg.a
+	/usr/local/lib/libde265.a
+	/usr/local/lib/libopenjp2.a
+	/usr/local/lib/libHalf-2_5.a
+	/usr/local/lib/libgif.a
 )
 
-target_compile_features(${APP_NAME} PRIVATE cxx_std_14)
+
 
 get_target_property( OUTPUT_DIR ${APP_NAME} RUNTIME_OUTPUT_DIRECTORY )
 
 if( APPLE )
 	set_target_properties( ${APP_NAME} PROPERTIES
 		MACOSX_BUNDLE TRUE
-		MACOSX_BUNDLE_INFO_PLIST ${APP_DIR}/proj/cmake/Info.plist
+		MACOSX_BUNDLE_INFO_PLIST ${APP_DIR}/proj/Info.plist
 	)
 
     add_custom_target( run

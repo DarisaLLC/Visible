@@ -8,13 +8,12 @@
 #ifndef logger_h
 #define logger_h
 
+#include "core/singleton.hpp"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
+#include "lspdlog/logging.h"
 
-#include "core/singleton.hpp"
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/daily_file_sink.h"
-#include "spdlog/sinks/stdout_sinks.h"
+
 
 class vlogger : public svl::SingletonLight<vlogger>
 {
@@ -39,6 +38,8 @@ public:
     }
     
 };
+
+
 
 namespace logging
 {
