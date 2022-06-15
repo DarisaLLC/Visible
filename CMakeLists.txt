@@ -28,7 +28,8 @@ get_filename_component( DEPS_PATH "${APP_DIR}/build/_deps" ABSOLUTE )
 
 add_subdirectory("${APP_DIR}/externals/lspdlog" lspdlog)
 include_directories(${LSPDLOG_INCLUDE_DIRS}) #<-- necessary
-message(" lspdlog  include: ${LSPDLOG_INCLUDE_DIRS}")
+
+message(" lspdlog  include: ${LSPDLOG_INCLUDE_DIRS} lib: ${LSPDLOG_LIBRARY_PATH}")
 
 add_subdirectory("${APP_DIR}/dependencies") 
 
@@ -159,10 +160,11 @@ ci_make_app(
 	/usr/local/lib/libHalf-2_5.a
 	/usr/local/lib/libgif.a
 	/Volumes/medvedev/Users/arman/cmakevisible/aom/build/libaom.a
-	/Volumes/medvedev/Users/arman/cmakevisible/Visible/build/lspdlog/internal/spdlog/src/spdlog-build/libspdlog.a
+	${LSPDLOG_LIBRARY_PATH}	
 )
 
 add_dependencies(${APP_NAME} spdlog)
+
 
 get_target_property( OUTPUT_DIR ${APP_NAME} RUNTIME_OUTPUT_DIRECTORY )
 
