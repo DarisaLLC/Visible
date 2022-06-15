@@ -281,8 +281,8 @@ void VisibleApp::setup()
 		mBuildn =  boost::any_cast<const string&>(mPlist.find("CFBundleVersion")->second);
 	}
 	
-		//        VisibleAppControl::setup_text_loggers(mRootOutputDir, "Visible Log " );
-	VisibleAppControl::setup_loggers(mRootOutputDir, visual_log, " Visible Log ");
+	VisibleAppControl::setup_text_loggers(mRootOutputDir, "Visible Log " );
+	//VisibleAppControl::setup_loggers(mRootOutputDir, visual_log, " Visible Log ");
 	
 		//   if(mVisibleScope== nullptr){
 	mVisibleScope = gl::Texture::create( loadImage( loadResource(VISIBLE_SCOPE  )));

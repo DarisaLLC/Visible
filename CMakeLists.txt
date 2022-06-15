@@ -32,9 +32,13 @@ message(" lspdlog  include: ${LSPDLOG_INCLUDE_DIRS}")
 
 add_subdirectory("${APP_DIR}/dependencies") 
 
-set( IMGUI_DIR "${DEPS_PATH}/imgui-src")
+#set( IMGUI_DIR "${DEPS_PATH}/imgui-src")
+set( IMGUI_DIR "${APP_DIR}/local_cinder_imgui/lib/imgui" )
+set( IMGUI_CINDER_DIR "${APP_DIR}/local_cinder_imgui" )
 set( NFD_DIR "${APP_DIR}/src/nfd")
 set( IMGUI_CUSTOM_DIR "${APP_DIR}/include/imGuiCustom")
+#set( OIIO_DIST "${APP_DIR}/externals/oiio-dist")
+set( OIIO_DIST "/usr/local")
 
 
 
@@ -46,7 +50,7 @@ file(GLOB SOURCE_LIST CONFIGURE_DEPENDS
         "${APP_DIR}/src/*.m")
 
 
-find_package(Boost REQUIRED REQUIRED COMPONENTS filesystem system  program_options)
+find_package(Boost REQUIRED REQUIRED COMPONENTS filesystem system thread program_options)
 
 message(STATUS "    config: ${Boost_DIR}")
 message(STATUS "    version: ${Boost_VERSION}")
@@ -60,8 +64,15 @@ ${NFD_DIR}/nfd_cocoa.m
 ${NFD_DIR}/nfd_common.c
 )
 
-set_source_files_properties("${NFD_DIR}/nfd_cocoa.m" PROPERTIES COMPILE_FLAGS "-x objective-c")
+set_source_files_properties("${NFD_DIR}/nfd_cocoa.m" PROPERTIES LANGUAGE OBJC)
 set_source_files_properties("${NFD_DIR}/nfd_common.c" PROPERTIES LANGUAGE CXX)
+
+set(CINDER_IMGUI
+${IMGUI_CINDER_DIR}/src/CinderImGui.cpp
+${IMGUI_CINDER_DIR}/include/CinderImGui.h
+${IMGUI_CINDER_DIR}/include/CinderImGuiConfig.h
+${IMGUI_CINDER_DIR}/include/CinderImGuiExports.h
+)
 
 
 set(IMPLOT
@@ -73,7 +84,8 @@ set(IMGUI
 ${IMGUI_DIR}/imgui.cpp
 ${IMGUI_DIR}/imgui_draw.cpp
 ${IMGUI_DIR}/imgui_demo.cpp
-${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+#${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+${IMGUI_DIR}/imgui_impl_opengl3.cpp
 ${IMGUI_DIR}/imgui_tables.cpp
 ${IMGUI_DIR}/imgui_widgets.cpp
 )
@@ -104,7 +116,7 @@ message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
 
 include( "${CINDER_PATH}/proj/cmake/modules/cinderMakeApp.cmake" )
 
-
+ string(APPEND CMAKE_CXX_FLAGS " -DSPDLOG_FMT_EXTERNAL ")
 
 ci_make_app(
 	APP_NAME ${APP_NAME}
@@ -114,28 +126,31 @@ ci_make_app(
 	${IMPLOT}
 	${IMGUI}
 	${IMGUI_CUSTOM}
+	${CINDER_IMGUI}	
 	CINDER_PATH ${CINDER_PATH}
 	INCLUDES ${OpenCV_INCLUDE_DIRS} ${APP_DIR}/include
-	${LSPDLOG_INCLUDE_DIRS}
+	/usr/local/opt/fmt
+#	${LSPDLOG_INCLUDE_DIRS}
 	/usr/local/opt/ilmbase/include/
-	${APP_DIR}/externals/oiio-dist/include
+	${OIIO_DIST}/include/OpenImageIO
 	${APP_DIR}/externals/Eigen
 	${APP_DIR}/externals/implot	
 	${APP_DIR}/externals/cereal-1.1.1/include
 	${APP_DIR}/local_cinder_imgui/include
 	${APP_DIR}/local_cinder_imgui/lib/imgui
-	/usr/local/include	
+
 	LIBRARIES ${OpenCV_LIBS} 
 	${Boost_LIBRARIES}
-	${APP_DIR}/externals/oiio-dist/lib/libOpenImageIO.a
-	${APP_DIR}/externals/oiio-dist/lib/libOpenImageIO_Util.a	
+	${OIIO_DIST}/lib/libOpenImageIO.dylib
+	${OIIO_DIST}/lib/libOpenImageIO_Util.dylib
+	/usr/local/lib/libfmt.a
 	/usr/local/lib/libtiff.a
 	/usr/local/lib/libpng.a
 	/usr/local/lib/libIlmImf-2_5.a	
 	/usr/local/lib/libIlmImfUtil-2_5.a
 	/usr/local/lib/libIlmThread-2_5.a
 	/usr/local/lib/libImath-2_5.a
-	/usr/local/lib/libheif.a
+#	/usr/local/lib/libheif.a
 	/usr/local/lib/libIex-2_5.a	
 	/usr/local/lib/libIexMath-2_5.a
 	/usr/local/lib/libjpeg.a
@@ -143,9 +158,11 @@ ci_make_app(
 	/usr/local/lib/libopenjp2.a
 	/usr/local/lib/libHalf-2_5.a
 	/usr/local/lib/libgif.a
+	/Volumes/medvedev/Users/arman/cmakevisible/aom/build/libaom.a
+	/Volumes/medvedev/Users/arman/cmakevisible/Visible/build/lspdlog/internal/spdlog/src/spdlog-build/libspdlog.a
 )
 
-
+add_dependencies(${APP_NAME} spdlog)
 
 get_target_property( OUTPUT_DIR ${APP_NAME} RUNTIME_OUTPUT_DIRECTORY )
 

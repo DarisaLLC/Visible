@@ -8,11 +8,12 @@
 #ifndef logger_h
 #define logger_h
 
+
 #include "core/singleton.hpp"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
-#include "lspdlog/logging.h"
-
+#include <spdlog/spdlog.h>
+#include "imGuiLogger.hpp"
 
 
 class vlogger : public svl::SingletonLight<vlogger>
@@ -68,6 +69,9 @@ namespace logging
         alg::trim_fill_if(input, "_", virtual_spaces);
         return input;
     }
+	
+	bool setup_text_loggers (const std::string& app_support_dir, std::string id_name);
+//	bool setup_imgui_loggers (const std::string& app_support_dir,  imGuiLog& visualLog, std::string id_name)
 
 }
 

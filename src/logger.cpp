@@ -3,6 +3,10 @@
 #include "core/stl_utils.hpp"
 #include <string>
 #include  <iomanip>
+#include <spdlog/sinks/stdout_sinks.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/daily_file_sink.h>
 
 namespace logging {
 std::string file_path_by_appending_component(const std::string& path, const std::string& component, bool is_directory)
@@ -76,6 +80,33 @@ std::string reserve_unique_file_name(const std::string& path, const std::string&
     return path_buffer;
 }
 
+bool setup_text_loggers (const std::string& app_support_dir, std::string id_name){
+	
+	try{
+	    // get a temporary file name
+	    std::string logname =  logging::reserve_unique_file_name(app_support_dir,
+	                                                             logging::create_timestamped_template(id_name));
+    
+	    // Setup APP LOG
+	    auto daily_file_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(logname, 23, 59);
+		auto console_sink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
+		console_sink->set_level(spdlog::level::warn);
+		console_sink->set_pattern("[%H:%M:%S:%e:%f %z] [%n][%^---%L---%$] [thread %t] %v"); 
+		std::vector<spdlog::sink_ptr> sinks; 
+		sinks.push_back(daily_file_sink); sinks.push_back(console_sink);
+    
+	    auto combined_logger = std::make_shared<spdlog::logger>("VLog", sinks.begin(),sinks.end());
+	    combined_logger->info("Daily Log File: " + logname);
+	    //register it if you need to access it globally
+	    spdlog::register_logger(combined_logger);
+		return true;
+	}
+	catch (const spdlog::spdlog_ex& ex)
+	{
+	    std::cout << "Log initialization failed: " << ex.what() << std::endl;
+	    return false;
+	}
+}
 
 }
 

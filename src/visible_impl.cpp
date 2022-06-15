@@ -8,9 +8,15 @@
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
+#include <cstdio>
+#include <chrono>
+
 #include "opencv2/stitching.hpp"
 #include "core/stl_utils.hpp"
 #include "VisibleApp.h"
+
+
+
 
 using namespace boost;
 namespace bfs=boost::filesystem;
@@ -108,34 +114,10 @@ bool VisibleAppControl::setup_text_loggers (const bfs::path app_support_dir, std
     bool app_support_ok = exists(app_support_dir);
     if (! app_support_ok ) return app_support_ok;
     
-    try{
-        // get a temporary file name
-        std::string logname =  logging::reserve_unique_file_name(app_support_dir.string(),
-                                                                 logging::create_timestamped_template(id_name));
-        
-        // Setup APP LOG
-        auto daily_file_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(logname, 23, 59);
-        auto console_sink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
-        console_sink->set_level(spdlog::level::warn);
-        console_sink->set_pattern("[%H:%M:%S:%e:%f %z] [%n] [%^---%L---%$] [thread %t] %v");
-        std::vector<spdlog::sink_ptr> sinks;
-        sinks.push_back(daily_file_sink);
-        sinks.push_back(console_sink);
-        
-        auto combined_logger = std::make_shared<spdlog::logger>("VLog", sinks.begin(),sinks.end());
-        combined_logger->info("Daily Log File: " + logname);
-        //register it if you need to access it globally
-        spdlog::register_logger(combined_logger);
-    }
-    catch (const spdlog::spdlog_ex& ex)
-    {
-        std::cout << "Log initialization failed: " << ex.what() << std::endl;
-        return false;
-    }
-    return app_support_ok;
+	return logging::setup_text_loggers (app_support_dir.string(), id_name);
 }
 
-
+#if 0
 bool VisibleAppControl::setup_loggers (const bfs::path app_support_dir,  imGuiLog& visualLog, std::string id_name){
     using imgui_sink_mt = spdlog::sinks::imGuiLogSink<std::mutex> ;
     
@@ -172,7 +154,7 @@ bool VisibleAppControl::setup_loggers (const bfs::path app_support_dir,  imGuiLo
     return app_support_ok;
 }
 
-
+#endif
 
 
 guiContext::guiContext (ci::app::WindowRef& ww)
