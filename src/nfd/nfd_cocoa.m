@@ -56,7 +56,7 @@ static void AddFilterListToDialog( NSSavePanel *dialog, const char *filterList )
 	if (@available(macOS 11.0, *)) {
 		[dialog setAllowedContentTypes:allowedFileTypes];
 	} else {
-			// Fallback on earlier versions
+			[dialog setAllowedFileTypes:allowedFileTypes]; // Fallback on earlier versions
 	}
     }
 }

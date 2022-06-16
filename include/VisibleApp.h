@@ -37,10 +37,10 @@
 #include "Plist.hpp"
 #include "imgui.h"
 #include "imgui_internal.h"
-
+#include "CinderImGui.h"
 #include "mediaInfo.h"
 #include "LifContext.h"
-#include "imGuiLogger.hpp"
+//#include "imGuiLogger.hpp"
 #include "visible_logger_macro.h"
 #include "imGuiCustom/imgui_wrapper.h"
 #include "Resources.h"
@@ -67,7 +67,7 @@ namespace VisibleAppControl{
     bfs::path get_visible_app_support_directory ();
     bfs::path get_visible_cache_directory ();
 
-    bool setup_loggers (const bfs::path app_support_dir,  imGuiLog& visualLog, std::string id_name);
+  //  bool setup_loggers (const bfs::path app_support_dir,  imGuiLog& visualLog, std::string id_name);
     bool setup_text_loggers (const bfs::path app_support_dir,  std::string id_name);
 
     bfs::path make_result_cache_entry_for_content_file (const boost::filesystem::path& path);
@@ -161,7 +161,7 @@ private:
     mutable std::shared_ptr<sequencedImageContext> mContext;
     app::WindowRef mViewerWindow;
     
-    bool show_logs_{true};
+    bool show_logs_{false};
     bool show_settings_{true};
     bool show_help_{true};
     bool show_about_{true};
@@ -176,7 +176,7 @@ private:
     bool m_isIdLabLif = false;
     void setup_ui ();
     
-    imGuiLog visual_log;
+    //imGuiLog visual_log;
     ImGui::Options m_imgui_options;
     
     // Threading Lock etc
@@ -184,4 +184,6 @@ private:
     
 };
 
+
+	
 #endif /* VisibleApp_h */

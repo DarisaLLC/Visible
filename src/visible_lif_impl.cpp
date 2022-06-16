@@ -45,11 +45,11 @@
 #include "imGuiCustom/ImGuiExtensions.h" // for 64bit count support
 #include "Resources.h"
 #include "cinder_opencv.h"
-#include "imguivariouscontrols.h"
+//#include "imguivariouscontrols.h"
 #include <boost/range/irange.hpp>
 #include "core/stl_utils.hpp"
 #include "imGuiCustom/imgui_visible_widgets.hpp"
-#include "nfd.h"
+#include "imgui_internal.h"
 #include "imGuiCustom/imGui_utils.h"
 #include "imGuiCustom/imgui_panel.hpp"
 #include "implot.h"
@@ -87,7 +87,7 @@ namespace prt {
     {
         ImGui::End();
     }
-
+#if 0
     bool getPosSizeFromWindow(const char* last_window, ImVec2& pos, ImVec2& size){
         ImGuiWindow* window = ImGui::FindWindowByName(last_window);
         if (window == nullptr) return false;
@@ -95,7 +95,7 @@ namespace prt {
         size.x = window->Size.x; size.y = window->Size.y;
         return true;
     }
-    
+#endif    
     recursive_mutex visible_mutex;
     
 }
@@ -1200,6 +1200,7 @@ bool  visibleContext::save_contraction_plots(const contractionLocator::contracti
         return false;
     };
     
+#if 0
     nfdchar_t* outPath = NULL;
     nfdresult_t result = NFD_PickFolder(NULL,  &outPath);
     bool rtn = false;
@@ -1215,7 +1216,8 @@ bool  visibleContext::save_contraction_plots(const contractionLocator::contracti
             break;
     }
     return rtn;
-    
+#endif
+	return false;    
 }
 
 void visibleContext::add_contractions (bool* p_open)

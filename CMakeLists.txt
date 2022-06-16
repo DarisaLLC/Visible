@@ -33,14 +33,13 @@ message(" lspdlog  include: ${LSPDLOG_INCLUDE_DIRS} lib: ${LSPDLOG_LIBRARY_PATH}
 
 add_subdirectory("${APP_DIR}/dependencies") 
 
-#set( IMGUI_DIR "${DEPS_PATH}/imgui-src")
-set( IMGUI_DIR "${APP_DIR}/local_cinder_imgui/lib/imgui" )
+set( IMGUI_DIR "${DEPS_PATH}/imgui-src")
+set( IMGUI_FILE_DIR "${DEPS_PATH}/imgui_filebrowser-src")
 set( IMGUI_CINDER_DIR "${APP_DIR}/local_cinder_imgui" )
 set( NFD_DIR "${APP_DIR}/src/nfd")
 set( IMGUI_CUSTOM_DIR "${APP_DIR}/include/imGuiCustom")
 #set( OIIO_DIST "${APP_DIR}/externals/oiio-dist")
 set( OIIO_DIST "/usr/local")
-
 
 
 file(GLOB SOURCE_LIST CONFIGURE_DEPENDS
@@ -60,21 +59,19 @@ message(STATUS " boost   lib path: ${Boost_LIBRARY_DIR}")
 message(STATUS " boost   libraries: ${Boost_LIBRARIES}")
 
 
-set(NFD
-${NFD_DIR}/nfd_cocoa.m
-${NFD_DIR}/nfd_common.c
-)
-
-set_source_files_properties("${NFD_DIR}/nfd_cocoa.m" PROPERTIES LANGUAGE OBJC)
-set_source_files_properties("${NFD_DIR}/nfd_common.c" PROPERTIES LANGUAGE CXX)
-
 set(CINDER_IMGUI
 ${IMGUI_CINDER_DIR}/src/CinderImGui.cpp
 ${IMGUI_CINDER_DIR}/include/CinderImGui.h
-${IMGUI_CINDER_DIR}/include/CinderImGuiConfig.h
 ${IMGUI_CINDER_DIR}/include/CinderImGuiExports.h
 )
 
+message(" ----> ${CINDER_IMGUI}")
+
+set(IMGUI_FILEBROWSER
+${IMGUI_FILE_DIR}/ImGuiFileDialog.cpp
+${IMGUI_FILE_DIR}/ImGuiFileDialog.h
+${IMGUI_FILE_DIR}/ImGuiFileDialogConfig.h
+)
 
 set(IMPLOT
 ${APP_DIR}/externals/implot/implot.cpp
@@ -85,8 +82,8 @@ set(IMGUI
 ${IMGUI_DIR}/imgui.cpp
 ${IMGUI_DIR}/imgui_draw.cpp
 ${IMGUI_DIR}/imgui_demo.cpp
-#${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
-${IMGUI_DIR}/imgui_impl_opengl3.cpp
+${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+#${IMGUI_DIR}/imgui_impl_opengl3.cpp
 ${IMGUI_DIR}/imgui_tables.cpp
 ${IMGUI_DIR}/imgui_widgets.cpp
 )
@@ -123,14 +120,16 @@ ci_make_app(
 	APP_NAME ${APP_NAME}
 	INCLUDES ${APP_DIR}/include
 	SOURCES ${SOURCE_LIST} 
-	${NFD}
+	${IMGUI_FILEBROWSER}
 	${IMPLOT}
 	${IMGUI}
 	${IMGUI_CUSTOM}
 	${CINDER_IMGUI}	
 	CINDER_PATH ${CINDER_PATH}
 	INCLUDES ${OpenCV_INCLUDE_DIRS} ${APP_DIR}/include
+	${IMGUI_DIR}
 	/usr/local/opt/fmt
+	${IMGUI_FILE_DIR}
 #	${LSPDLOG_INCLUDE_DIRS}
 	/usr/local/opt/ilmbase/include/
 	${OIIO_DIST}/include/OpenImageIO
@@ -138,7 +137,7 @@ ci_make_app(
 	${APP_DIR}/externals/implot	
 	${APP_DIR}/externals/cereal-1.1.1/include
 	${APP_DIR}/local_cinder_imgui/include
-	${APP_DIR}/local_cinder_imgui/lib/imgui
+#	${APP_DIR}/local_cinder_imgui/lib/imgui
 
 	LIBRARIES ${OpenCV_LIBS} 
 	${Boost_LIBRARIES}

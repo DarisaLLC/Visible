@@ -13,7 +13,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
 #include <spdlog/spdlog.h>
-#include "imGuiLogger.hpp"
+//#include "imGuiLogger.hpp"
 
 
 class vlogger : public svl::SingletonLight<vlogger>

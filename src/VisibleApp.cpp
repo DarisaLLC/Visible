@@ -13,7 +13,7 @@
 #include "oiio_utils.hpp"
 #include "imGuiCustom/imgui_panel.hpp"
 #include "imgui.h"
-
+#include "ImGuiFileDialog.h"
 
 
 	//static ImGuiDockNodeFlags opt_flags = ImGuiDockNodeFlags_None;
@@ -31,6 +31,7 @@ namespace bfs=boost::filesystem;
 using pipeline = visibleContext::pipeline;
 
 
+	
 void VisibleApp::QuitApp(){
 	quit();
 }
@@ -67,7 +68,7 @@ void VisibleApp::DrawInputPanel() {
 		ImGui::BulletText("Data Format: %s", mInputSpec.format.c_str());
 		ImGui::BulletText("Number of Channels: %d", mInputSpec.nchannels);
 		for (auto nn = 0; nn < mInputSpec.nchannels; nn++)
-		ImGui::BulletText("Channel(%d) %s", nn, mInputSpec.channelnames[nn].c_str());
+			ImGui::BulletText("Channel(%d) %s", nn, mInputSpec.channelnames[nn].c_str());
 	}
 	
 	ImGui::BeginGroup();
@@ -120,32 +121,34 @@ void VisibleApp::DrawMainMenu(){
 		//    ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove
 	if (ImGui::BeginMainMenuBar()){
 		
-		if (ImGui::BeginMenu("File")){
-			if(ImGui::MenuItem("Open", "CTRL+O")){
-				nfdchar_t *outPath = NULL;
-				nfdresult_t result = NFD_OpenDialog("tif,mov,mp4", NULL, &outPath);
-				if (result == NFD_OKAY) {
-					bfs::path fout(outPath);
-					auto msg = "Selected " + fout.string();
-					vlogger::instance().console()->info(msg);
-					auto dotext = identify_file(fout, "");
-					if(isOiiOFile()){
-						vlogger::instance().console()->info(fout.string() + " Ok " );
-						m_sections.clear();
-						auto num = list_oiio_channels(m_sections);
-						assert(num == m_sections.size());
+		if (ImGui::BeginMenu("File", "CTRL+O")){
+			if (ImGui::Button("Open "))
+				ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".tif,mov,mp4", ".");
+			
+			if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")){
+					// action if OK
+					if (ImGuiFileDialog::Instance()->IsOk()) {
+						bfs::path fout(ImGuiFileDialog::Instance()->GetFilePathName());
+						auto msg = "Selected " + fout.string();
+						vlogger::instance().console()->info(msg);
+						auto dotext = identify_file(fout, "");
+						if(isOiiOFile()){
+							vlogger::instance().console()->info(fout.string() + " Ok " );
+							m_sections.clear();
+							auto num = list_oiio_channels(m_sections);
+							assert(num == m_sections.size());
+						}
+						else{
+							vlogger::instance().console()->error("%s wrong file type", fout.string());
+						}
 					}
-					else{
-						vlogger::instance().console()->error("%s wrong file type", fout.string());
-					}
-					free(outPath);
+					ImGuiFileDialog::Instance()->Close();
 				}
-			}
 			if(ImGui::MenuItem("Process", "CTRL+P")){
 				if (mContext && mContext->is_valid()) mContext->process_async(); //std::dynamic_pointer_cast<lifContext>(mContext)->process_async();
 			}
 			if(ImGui::MenuItem("Quit", "CTRL+P")){
-
+				
 				quit();
 			}
 			ImGui::EndMenu();
@@ -162,7 +165,7 @@ void VisibleApp::DrawMainMenu(){
 	ImGui::EndMainMenuBar();
 		//Draw the log if desired
 	if(show_logs_){
-		visual_log.Draw("Log", &show_logs_);
+		//visual_log.Draw("Log", &show_logs_);
 	}
 	
 	if(show_about_){
@@ -174,7 +177,7 @@ void VisibleApp::DrawMainMenu(){
 		ImGui::Text("This App is Built With OpenImageIO, OpenCv, Boost, Cinder and ImGui Libraries ");
 	}
 	DrawInputPanel();
-//	DrawImGuiDemos();
+		//	DrawImGuiDemos();
 }
 
 
@@ -227,11 +230,11 @@ bool VisibleApp::shouldQuit()
 
 void VisibleApp::setup_ui(){
 	
-
+	
 	
 	WindowRef ww = getWindow ();
 	m_imgui_options = ImGui::Options();
-	ImGui::Initialize(m_imgui_options
+	ImGui::initialize(m_imgui_options
 					  .window(ww)
 					  );
 	
@@ -274,7 +277,7 @@ void VisibleApp::setup()
 	
 	mRootOutputDir = VisibleAppControl::get_visible_app_support_directory();
 	mRunAppPath = ci::app::getAppPath();
-	const bfs::path plist = mRunAppPath / "Visible.app/Contents/Info.plist";
+	const bfs::path plist = mRunAppPath / "VisibleApp.app/Contents/Info.plist";
 	if (exists (mRunAppPath)){
 		std::ifstream stream(plist.c_str(), std::ios::binary);
 		Plist::readPlist(stream, mPlist);
@@ -282,7 +285,7 @@ void VisibleApp::setup()
 	}
 	
 	VisibleAppControl::setup_text_loggers(mRootOutputDir, "Visible Log " );
-	//VisibleAppControl::setup_loggers(mRootOutputDir, visual_log, " Visible Log ");
+		//VisibleAppControl::setup_loggers(mRootOutputDir, visual_log, " Visible Log ");
 	
 		//   if(mVisibleScope== nullptr){
 	mVisibleScope = gl::Texture::create( loadImage( loadResource(VISIBLE_SCOPE  )));
@@ -543,7 +546,7 @@ void VisibleApp::prepareSettings( App::Settings *settings )
 	// settings fn from top of file:
 CINDER_APP( VisibleApp, RendererGl )
 
-//#pragma GCC diagnostic pop
+	//#pragma GCC diagnostic pop
 
 	//int main( int argc, char* argv[] )
 	//{
