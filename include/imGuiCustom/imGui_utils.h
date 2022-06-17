@@ -44,6 +44,7 @@ void HelpMarker(const char* desc);
 
 void rotatedRect2ImGui(const cv::RotatedRect& rr, std::vector<ImVec2> impts);
 ImVec2 ImGui_Image_Constrain(const ImVec2&, const ImVec2& available);
+bool getPosSizeFromWindow(const char* last_window, ImVec2& pos, ImVec2& size);
 
 template <typename T>
 inline T RandomRange(T min, T max) {

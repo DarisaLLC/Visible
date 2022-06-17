@@ -8,9 +8,9 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomma"
 
-#include "imgui_visible_widgets.hpp"
+#include "imGuiCustom/imgui_visible_widgets.hpp"
 #include <imgui.h>
-#include "imgui_plot.h"
+#include "imGuiCustom/imgui_plot.h"
 #include "core/core.hpp"
 
 using namespace ImGui;

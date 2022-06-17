@@ -41,15 +41,14 @@
 #include "contraction.hpp"
 #include "logger/logger.hpp"
 #include "cinder/Log.h"
-#include "CinderImGui.h"
+#include "imGuiCustom/CinderImGui.h"
 #include "imGuiCustom/ImGuiExtensions.h" // for 64bit count support
 #include "Resources.h"
 #include "cinder_opencv.h"
-//#include "imguivariouscontrols.h"
 #include <boost/range/irange.hpp>
 #include "core/stl_utils.hpp"
 #include "imGuiCustom/imgui_visible_widgets.hpp"
-#include "imgui_internal.h"
+
 #include "imGuiCustom/imGui_utils.h"
 #include "imGuiCustom/imgui_panel.hpp"
 #include "implot.h"
@@ -87,15 +86,7 @@ namespace prt {
     {
         ImGui::End();
     }
-#if 0
-    bool getPosSizeFromWindow(const char* last_window, ImVec2& pos, ImVec2& size){
-        ImGuiWindow* window = ImGui::FindWindowByName(last_window);
-        if (window == nullptr) return false;
-        pos.x = window->Pos.x + window->Size.x; pos.y = window->Pos.y + window->Size.y;
-        size.x = window->Size.x; size.y = window->Size.y;
-        return true;
-    }
-#endif    
+
     recursive_mutex visible_mutex;
     
 }
@@ -856,7 +847,7 @@ void visibleContext::add_canvas (){
 	ImDrawList *draw_list = ImGui::GetWindowDrawList();
 	draw_list->AddImage( reinterpret_cast<ImTextureID> (texture->getId()), start, end, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 	
-	ImRect regionRect(start, end);
+//	ImGui::ImRect regionRect(start, end);
 		// Update image/display coordinate transformer
 	m_imageDisplayMapper->update_display_rect(start, end);
 	
@@ -1088,9 +1079,11 @@ void visibleContext::add_motion_profile (){
         m_segmented_texture = gl::Texture::create(*m_segmented_surface, texFormat);
     }
     
-    ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
-    ImVec2 pos (window->Pos.x+window->Size.x, window->Pos.y + window->Size.y );
-    assert(window != nullptr);
+//    ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
+//    ImVec2 pos (window->Pos.x+window->Size.x, window->Pos.y + window->Size.y );
+//    assert(window != nullptr);
+	ImVec2 pos, size;
+	getPosSizeFromWindow(wDisplay, pos, size);
     auto ww = get_windowRef();
     ImVec2  sz (m_segmented_texture->getWidth(),m_segmented_texture->getHeight());
     ImVec2  frame (m_oiio_spec.width, m_oiio_spec.height);
@@ -1222,9 +1215,8 @@ bool  visibleContext::save_contraction_plots(const contractionLocator::contracti
 
 void visibleContext::add_contractions (bool* p_open)
 {
-    ImGuiWindow* window = ImGui::FindWindowByName(wDisplay);
-    assert(window != nullptr);
-    ImVec2 pos (window->Pos.x + window->Size.x, window->Pos.y );
+	ImVec2 pos, size;
+	getPosSizeFromWindow(wDisplay, pos, size);
     ImGui::SetNextWindowPos(pos);
     auto ww = get_windowRef();
     ImGui::SetNextWindowSize(ImVec2(ww->getSize().x/2,ww->getSize().y/4), ImGuiCond_FirstUseEver);

@@ -81,7 +81,7 @@ void self_similarity_producer<P>::norm_scale (const std::deque<double>& src, std
 
 template<typename P>
 self_similarity_producer<P>::self_similarity_producer() : _matrixSz (0), _maskValid(false), _cacheSz (0),
-_depth (P::depth()),  _notify(NULL), _finished(true), _tiny(1e-10)
+_depth (P::depth()),  _notify(false), _finished(true), _tiny(1e-10)
 {
     _corr_fn = std::bind(&defaultMatchers::norm_correlate, std::placeholders::_1, std::placeholders::_2);
     

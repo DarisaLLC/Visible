@@ -8,11 +8,22 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
-#include "imGui_utils.h"
+#include "imgui_internal.h"
+#include "imGuiCustom/imGui_utils.h"
 #include <vision/opencv_utils.hpp>
 
 using namespace cv;
 using namespace std;
+
+
+bool getPosSizeFromWindow(const char* last_window, ImVec2& pos, ImVec2& size){
+    ImGuiWindow* window = ImGui::FindWindowByName(last_window);
+    if (window == nullptr) return false;
+    pos.x = window->Pos.x + window->Size.x; pos.y = window->Pos.y + window->Size.y;
+    size.x = window->Size.x; size.y = window->Size.y;
+    return true;
+}
+
 
 void HelpMarker(const char* desc)
 {

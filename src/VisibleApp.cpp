@@ -116,7 +116,6 @@ void VisibleApp::ShowStyleEditor(ImGuiStyle* ref)
 
 void VisibleApp::DrawMainMenu(){
 	
-	
 	ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
 		//    ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove
 	if (ImGui::BeginMainMenuBar()){
@@ -487,6 +486,7 @@ void VisibleApp::keyDown( KeyEvent event )
 
 void VisibleApp::update()
 {
+	std::cout << " u ";
 		// ImGuiIO &io = ImGui::GetIO();
 	
 	if (mContext && mContext->is_valid()) mContext->update ();
@@ -495,6 +495,7 @@ void VisibleApp::update()
 
 void VisibleApp::draw ()
 {
+	std::cout << " d ";
 	gl::clear( Color::gray( 0.67f ) );
 	if (mContext && mContext->is_valid()){
 		if (GImGui != nullptr && GImGui->CurrentWindow != nullptr)
