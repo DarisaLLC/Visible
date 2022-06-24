@@ -1,43 +1,100 @@
-cmake_minimum_required (VERSION 3.1.3...3.5.1 FATAL_ERROR)
+
+cmake_minimum_required (VERSION 3.2.1)
+project (Visible VERSION 2.0
+         LANGUAGES CXX C)
+
+cmake_policy(SET CMP0057 NEW)
+cmake_policy(SET CMP0074 NEW)
 
 set( CMAKE_VERBOSE_MAKEFILE ON )
+set (PROJ_NAME VISI)    # short name, caps
+set (APP_NAME Visible)
 
-project( Visible OBJC C CXX)
-include(ExternalProject)
-set( APP_NAME "${PROJECT_NAME}App" )
 
-# set the C++ standard
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+string (TOLOWER ${PROJ_NAME} PROJ_NAME_LOWER)  # short name lower case
+string (TOUPPER ${PROJ_NAME} PROJ_NAME_UPPER)  # short name upper case
+set (PROJECT_VERSION_RELEASE_TYPE "" CACHE STRING
+    "Build type, for example: dev, beta2, RC1 (empty string for normal release)")
+set (${PROJECT_NAME}_VERSION_RELEASE_TYPE ${PROJECT_VERSION_RELEASE_TYPE})
+set (PROJECT_AUTHORS "Contributors to the OpenImageIO project")
+option (${PROJECT_NAME}_SUPPORTED_RELEASE
+       "Set ON for supported release branch, OFF for master" ON)
+if (${PROJECT_NAME}_SUPPORTED_RELEASE)
+    set (${PROJECT_NAME}_DEV_RELEASE OFF)
+else ()
+    set (${PROJECT_NAME}_DEV_RELEASE ON)
+endif ()
+
+if (NOT CMAKE_BUILD_TYPE)
+    set (CMAKE_BUILD_TYPE "Release")
+endif ()
+
+# If the user hasn't configured cmake with an explicit
+# -DCMAKE_INSTALL_PREFIX=..., then set it to safely install into ./dist, to
+# help prevent the user from accidentally writing over /usr/local or whatever.
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT
+      AND PROJECT_IS_TOP_LEVEL)
+    set (CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/dist" CACHE PATH
+         "Installation location" FORCE)
+endif()
+
+
+if ("${PROJECT_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+    message (FATAL_ERROR "Not allowed to run in-source build!")
+endif ()
+
+
+message (STATUS "Configuring ${PROJECT_NAME} ${PROJECT_VERSION}")
+message (STATUS "CMake ${CMAKE_VERSION}")
+message (STATUS "CMake system           = ${CMAKE_SYSTEM}")
+message (STATUS "CMake system name      = ${CMAKE_SYSTEM_NAME}")
+message (STATUS "Project source dir     = ${PROJECT_SOURCE_DIR}")
+message (STATUS "Project build dir      = ${CMAKE_BINARY_DIR}")
+message (STATUS "Project install prefix = ${CMAKE_INSTALL_PREFIX}")
+message (STATUS "Configuration types    = ${CMAKE_CONFIGURATION_TYPES}")
+message (STATUS "Build type             = ${CMAKE_BUILD_TYPE}")
+
+option (VERBOSE "Print lots of messages while compiling" ON)
+set(OpenCV_ROOT /usr/local/Cellar/opencv/4.5.5_2)
+
+list (APPEND CMAKE_MODULE_PATH
+      "${PROJECT_SOURCE_DIR}/cmake/modules"
+      "${PROJECT_SOURCE_DIR}/cmake")
+	  
+include (GNUInstallDirs)
+	  
+# Utilities
+include (colors)
+include (check_is_enabled)
+include (checked_find_package)
+	  
+# All the C++ and compiler related options and adjustments
+include (compiler)
+
+# Dependency finding utilities and all dependency-related options
+include (externalpackages)
+
 
 #-----------------------------------------------------------------------------
 # Load some macros.
-include(proj/cmake/macros.cmake)
+include("${PROJECT_SOURCE_DIR}/cmake/macros.cmake")
 #-----------------------------------------------------------------------------
-
-# Set 'ON' to enable 'TRACE' macro.
-option(LSPDLOG_ENABLE_TRACE_LOGGING "Enable trace logging." ON)
-  
-# Set 'ON' to enable 'LOG' macro.
-option(LSPDLOG_ENABLE_DATA_LOGGING  "Enable data logging."  ON)
 
 get_filename_component( APP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/" ABSOLUTE )
 get_filename_component( CINDER_PATH "${APP_DIR}/externals/cinder" ABSOLUTE )
 get_filename_component( DEPS_PATH "${APP_DIR}/build/_deps" ABSOLUTE )
 
-add_subdirectory("${APP_DIR}/externals/lspdlog" lspdlog)
-include_directories(${LSPDLOG_INCLUDE_DIRS}) #<-- necessary
 
-message(" lspdlog  include: ${LSPDLOG_INCLUDE_DIRS} lib: ${LSPDLOG_LIBRARY_PATH}")
+add_subdirectory("${PROJECT_SOURCE_DIR}/externals/spdlog" spdlog)
+
+
+message(" lspdlog  include: ${SPDLOG_INCLUDE_DIR} lib: ${SPDLOG_LIBRARY_PATH}")
 
 add_subdirectory("${APP_DIR}/dependencies") 
 
 set( IMGUI_DIR "${DEPS_PATH}/imgui-src")
 set( IMGUI_FILE_DIR "${DEPS_PATH}/imgui_filebrowser-src")
-set( IMGUI_CINDER_DIR "${APP_DIR}/local_cinder_imgui" )
-set( NFD_DIR "${APP_DIR}/src/nfd")
-set( IMGUI_CUSTOM_DIR "${APP_DIR}/include/imGuiCustom")
+set( IMGUI_CUSTOM_DIR "${APP_DIR}/src/imGuiCustom")
 #set( OIIO_DIST "${APP_DIR}/externals/oiio-dist")
 set( OIIO_DIST "/usr/local")
 
@@ -49,23 +106,6 @@ file(GLOB SOURCE_LIST CONFIGURE_DEPENDS
 		"${APP_DIR}/src/*.c"
         "${APP_DIR}/src/*.m")
 
-
-find_package(Boost REQUIRED REQUIRED COMPONENTS filesystem system thread program_options)
-
-message(STATUS "    config: ${Boost_DIR}")
-message(STATUS "    version: ${Boost_VERSION}")
-message(STATUS " boost  include: ${Boost_INCLUDE_DIR}")
-message(STATUS " boost   lib path: ${Boost_LIBRARY_DIR}")
-message(STATUS " boost   libraries: ${Boost_LIBRARIES}")
-
-
-set(CINDER_IMGUI
-${IMGUI_CINDER_DIR}/src/CinderImGui.cpp
-${IMGUI_CINDER_DIR}/include/CinderImGui.h
-${IMGUI_CINDER_DIR}/include/CinderImGuiExports.h
-)
-
-message(" ----> ${CINDER_IMGUI}")
 
 set(IMGUI_FILEBROWSER
 ${IMGUI_FILE_DIR}/ImGuiFileDialog.cpp
@@ -94,23 +134,10 @@ ${IMGUI_CUSTOM_DIR}/imgui_utils.cpp
 ${IMGUI_CUSTOM_DIR}/imguivariouscontrols.cpp
 ${IMGUI_CUSTOM_DIR}/imgui_visible_widgets.cpp
 ${IMGUI_CUSTOM_DIR}/imgui_plot.cpp
+${IMGUI_CUSTOM_DIR}/CinderImGui.cpp
 )
 
-# Find OpenCV, you may need to set OpenCV_DIR variable
-# to the absolute path to the directory containing OpenCVConfig.cmake file
-# via the command line or GUI
-set(OpenCV_DIR /usr/local/Cellar/opencv/4.5.5_2/lib/cmake/opencv4)
-find_package(OpenCV REQUIRED)
 
-# If the package has been found, several variables will
-# be set, you can find the full list with descriptions
-# in the OpenCVConfig.cmake file.
-# Print some message showing some of them
-message(STATUS "OpenCV library status:")
-message(STATUS "    config: ${OpenCV_DIR}")
-message(STATUS "    version: ${OpenCV_VERSION}")
-message(STATUS "    libraries: ${OpenCV_LIBS}")
-message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
 
 include( "${CINDER_PATH}/proj/cmake/modules/cinderMakeApp.cmake" )
 
@@ -118,7 +145,17 @@ include( "${CINDER_PATH}/proj/cmake/modules/cinderMakeApp.cmake" )
 
 ci_make_app(
 	APP_NAME ${APP_NAME}
-	INCLUDES ${APP_DIR}/include
+
+	INCLUDES ${APP_DIR}/include ${OpenCV_INCLUDE_DIR} ${APP_DIR}/include
+	${IMGUI_DIR}
+	/usr/local/opt/fmt
+	${IMGUI_FILE_DIR}
+	/usr/local/opt/ilmbase/include/
+	${OIIO_DIST}/include/OpenImageIO
+	${APP_DIR}/externals/Eigen
+	${APP_DIR}/externals/implot	
+	${APP_DIR}/externals/cereal-1.1.1/include
+		
 	SOURCES ${SOURCE_LIST} 
 	${IMGUI_FILEBROWSER}
 	${IMPLOT}
@@ -126,18 +163,8 @@ ci_make_app(
 	${IMGUI_CUSTOM}
 	${CINDER_IMGUI}	
 	CINDER_PATH ${CINDER_PATH}
-	INCLUDES ${OpenCV_INCLUDE_DIRS} ${APP_DIR}/include
-	${IMGUI_DIR}
-	/usr/local/opt/fmt
-	${IMGUI_FILE_DIR}
-#	${LSPDLOG_INCLUDE_DIRS}
-	/usr/local/opt/ilmbase/include/
-	${OIIO_DIST}/include/OpenImageIO
-	${APP_DIR}/externals/Eigen
-	${APP_DIR}/externals/implot	
-	${APP_DIR}/externals/cereal-1.1.1/include
-	${APP_DIR}/local_cinder_imgui/include
-#	${APP_DIR}/local_cinder_imgui/lib/imgui
+
+
 
 	LIBRARIES ${OpenCV_LIBS} 
 	${Boost_LIBRARIES}
@@ -160,6 +187,7 @@ ci_make_app(
 	/usr/local/lib/libgif.a
 	/Volumes/medvedev/Users/arman/cmakevisible/aom/build/libaom.a
 	${LSPDLOG_LIBRARY_PATH}	
+
 )
 
 add_dependencies(${APP_NAME} spdlog)
@@ -168,10 +196,29 @@ add_dependencies(${APP_NAME} spdlog)
 get_target_property( OUTPUT_DIR ${APP_NAME} RUNTIME_OUTPUT_DIRECTORY )
 
 if( APPLE )
+	set(CMAKE_OSX_ARCHITECTURES "x86_64")
+	message(" ========. ${CMAKE_OSX_ARCHITECTURES} ============= ")
+	set(
+        MACOSX_BUNDLE_GUI_IDENTIFIER
+        "net.darisallc.Visible" )
+		
+ 	set(
+        MACOSX_BUNDLE_ICON_FILE
+        "Visible.icns" )
+
+ 	set(
+        MACOSX_BUNDLE_BUNDLE_NAME
+        "VisibleApp" )
+		
 	set_target_properties( ${APP_NAME} PROPERTIES
 		MACOSX_BUNDLE TRUE
 		MACOSX_BUNDLE_INFO_PLIST ${APP_DIR}/proj/Info.plist
 	)
+
+	file(COPY ${APP_DIR}/resources DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/)	
+	add_custom_command(TARGET ${APP_NAME} POST_BUILD COMMAND cp ${APP_DIR}/Resources/${MACOSX_BUNDLE_ICON_FILE} ${OUTPUT_DIR}/${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/${MACOSX_BUNDLE_ICON_FILE})
+	add_custom_command(TARGET ${APP_NAME} PRE_BUILD COMMAND cp ${APP_DIR}/Resources/imgui.ini ${OUTPUT_DIR}/${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/imgui.ini)	
+add_custom_command(TARGET ${APP_NAME} PRE_BUILD COMMAND cp ${APP_DIR}/Resources/visible_scope.png ${OUTPUT_DIR}/${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/visible_scope.png)	
 
     add_custom_target( run
         COMMAND open ${OUTPUT_DIR}/${APP_NAME}.app
