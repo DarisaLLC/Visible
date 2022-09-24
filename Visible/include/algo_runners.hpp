@@ -3,17 +3,23 @@
 
 #include <iostream>
 #include <string>
+#include <Eigen/StdVector>
 #include "timed_types.h"
 #include "core/core.hpp"
+#define float16_t opencv_broken_float16_t
 #include "vision/histo.h"
-#include "vision/pixel_traits.h"
 #include "vision/opencv_utils.hpp"
+#undef float16_t
+#include "vision/pixel_traits.h"
 #include "core/stl_utils.hpp"
 #include "core/stats.hpp"
 #include "vision/localvariance.h"
 #include <boost/range/irange.hpp>
 #include "core/moreMath.h"
-#include "etw_utils.hpp"
+//#include <Eigen/Eigen>
+//#include <Eigen/Sparse>
+
+//#include "etw_utils.hpp"
 #include "vision/ellipse.hpp"
 
 using namespace std;
@@ -124,8 +130,8 @@ struct SequenceAccumulator
         for (const roiWindow<P8U>& ir : channel_images){
             cv::Mat im (ir.height(), ir.width(), CV_8UC(1), ir.pelPointer(0,0), size_t(ir.rowUpdate()));
             if( image_count == 0 ) {
-                m_sum = cv::Mat::zeros( im.size(), CV_32FC(im.channels()) );
-                m_sqsum = cv::Mat::zeros( im.size(), CV_32FC(im.channels()) );
+                m_sum = cv::Mat::zeros( im.size().height, im.size().width, CV_32FC(im.channels()) );
+                m_sqsum = cv::Mat::zeros( im.size().height, im.size().width, CV_32FC(im.channels()) );
             }
             if (spatial_x > 0 && spatial_y > 0){
                 cv::Mat result;
@@ -159,6 +165,7 @@ struct SequenceAccumulator
     }
 
 };
+
 
 /*
 struct IntensityStatisticsPartialRunner

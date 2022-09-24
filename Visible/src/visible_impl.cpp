@@ -7,8 +7,12 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 
+#define float16_t opencv_broken_float16_t
 #include "opencv2/stitching.hpp"
+#undef float16_t
+
 #include "core/stl_utils.hpp"
 #include "VisibleApp.h"
 
@@ -37,7 +41,7 @@ namespace anonymous{
 
 
 // Utils for both apps
-namespace {
+
     
     bfs::path get_app_directory_exists (const bfs::path&& user_app_support){
         auto platform = ci::app::Platform::get();
@@ -51,7 +55,6 @@ namespace {
         return bfs::path ();
     }
     
-}
 bool VisibleAppControl::check_input (const string &filename){
     
     auto check_file_and_size = svl::io::check_file(filename);

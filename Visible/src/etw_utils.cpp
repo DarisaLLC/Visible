@@ -73,8 +73,8 @@ int cv::rectshow(const std::string &name, const cv::Mat &img) {
 }
 
 int cv::rectshow(const cv::Mat &img) { return cv::rectshow("Preview", img); };
-
-void etw_utils::parse_folder(const fs::path &p, std::vector<fs::path> &out) {
+#ifndef FILESYSTEM_ISSUE_FIXED
+void etw_utils::parse_folder(const bfs::path &p, std::vector<bfs::path> &out) {
     for (auto &file : folder_to_iterator(p)) {
         out.push_back(file);
     }
@@ -83,25 +83,25 @@ void etw_utils::parse_folder(const fs::path &p, std::vector<fs::path> &out) {
         return astr < bstr;
     });
 }
-void etw_utils::parse_folder(const std::string &name, std::vector<fs::path> &out) {
-    parse_folder(fs::path(name), out);
+void etw_utils::parse_folder(const std::string &name, std::vector<bfs::path> &out) {
+    parse_folder(bfs::path(name), out);
 }
 
-std::vector<fs::path> etw_utils::parse_folder(const fs::path &p) {
-    std::vector<fs::path> out;
+std::vector<bfs::path> etw_utils::parse_folder(const bfs::path &p) {
+    std::vector<bfs::path> out;
     etw_utils::parse_folder(p, out);
     return out;
 }
-std::vector<fs::path> etw_utils::parse_folder(const std::string &name) {
-    return etw_utils::parse_folder(fs::path(name));
+std::vector<bfs::path> etw_utils::parse_folder(const std::string &name) {
+    return etw_utils::parse_folder(bfs::path(name));
 }
 
-fs::directory_iterator etw_utils::folder_to_iterator(const fs::path &p) {
-    assert(fs::exists(p) && fs::is_directory(p));
+bfs::directory_iterator etw_utils::folder_to_iterator(const bfs::path &p) {
+    assert(bfs::exists(p) && bfs::is_directory(p));
 //    << "Path is not a directory!\t" << p;
-    return fs::directory_iterator(p);
+    return bfs::directory_iterator(p);
 }
-
+#endif
 etw_utils::progress_display::progress_display(
                                           unsigned long expected_count_, std::ostream &os,
                                           const std::string &s1, // leading strings

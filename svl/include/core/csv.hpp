@@ -56,7 +56,7 @@ namespace spiritcsv
         inline unsigned verbosity() const { return m_verbosity; }
         
         inline char getNewline() const { return m_newline; }
-        inline std::ios::streampos getFileLength() const { return m_fileLength; }
+        inline std::streampos getFileLength() const { return m_fileLength; }
         
         inline std::string const& getSeparator() const { return m_separator; }
         inline std::string const& getQuote() const { return m_quote; }
@@ -85,7 +85,7 @@ namespace spiritcsv
         unsigned m_verbosity;
         std::ostream* m_logstream;
         char m_newline;
-        std::ios::streampos m_fileLength;
+        std::streampos m_fileLength;
         std::vector<std::string> m_headers;
         std::vector<std::vector<std::string>> m_rows;
         boost::escaped_list_separator<char> m_grammer;

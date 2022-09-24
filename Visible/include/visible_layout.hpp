@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <sstream>
 #include "imgui.h"
-#include "CinderImGui.h"
+#include "cinder/CinderImGui.h"
 #include "mediaInfo.h"
 using namespace std;
 using namespace ci;

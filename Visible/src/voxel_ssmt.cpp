@@ -10,6 +10,7 @@
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 
 #include <stdio.h>
 #include <iostream>
@@ -21,38 +22,38 @@
 #include "timed_types.h"
 #include "core/signaler.h"
 #include "sm_producer.h"
-#include "vision/histo.h"
-#include "vision/opencv_utils.hpp"
+//#include "vision/opencv_utils.hpp"
 #include "ssmt.hpp"
 #include "logger/logger.hpp"
 #include "result_serialization.h"
 #include "segmentation_parameters.hpp"
 #include <OpenImageIO/imageio.h>
 #include "algo_runners.hpp"
-#include "etw_utils.hpp"
+//#include "etw_utils.hpp"
+
 
 using namespace stl_utils;
 using namespace boost;
 namespace bfs=boost::filesystem;
 using namespace OIIO;
 
-namespace anonymous{
-
-    void ransac_non_maximal_suppression(const std::vector<Eigen::Vector3d> &N,
-                          Eigen::Vector3d &M) {
-        M = etw_utils::ransac(
-                              N, []() -> Eigen::Vector3d { return Eigen::Vector3d::Zero(); },
-                              [](auto &n, auto &nest) {
-            return std::fabs(nest.z() - n.z()) > 3;
-        },
-                              [](const auto &ave, const auto &n, const auto &est) -> Eigen::Vector3d {
-            if (std::fabs(est.z() - n.z()) < 2)
-                return ave - n;
-            else
-                return ave + n;
-        });
-    }
-}
+//namespace anonymous{
+//
+//    void ransac_non_maximal_suppression(const std::vector<Eigen::Vector3d> &N,
+//                          Eigen::Vector3d &M) {
+//        M = etw_utils::ransac(
+//                              N, []() -> Eigen::Vector3d { return Eigen::Vector3d::Zero(); },
+//                              [](auto &n, auto &nest) {
+//            return std::fabs(nest.z() - n.z()) > 3;
+//        },
+//                              [](const auto &ave, const auto &n, const auto &est) -> Eigen::Vector3d {
+//            if (std::fabs(est.z() - n.z()) < 2)
+//                return ave - n;
+//            else
+//                return ave + n;
+//        });
+//    }
+//}
 
 // Return 2D latice of pixels over time
 void ssmt_processor::generateVoxels_on_channel (const int channel_index){
@@ -132,14 +133,14 @@ void ssmt_processor::create_voxel_surface (std::vector<float>& env){
                                             Point( erosion_size, erosion_size ) );
         
         // Get threshold using ransac for doing non_maximal_suppression
-        std::vector<Eigen::Vector3d> M(3);
-        anonymous::ransac_non_maximal_suppression(vp.cloud(), M[0]);
-        auto rthreshold = (int) M[0][2];
+        //std::vector<Eigen::Vector3d> M(3);
+        //anonymous::ransac_non_maximal_suppression(vp.cloud(), M[0]);
+        //auto rthreshold = (int) M[0][2];
         
         auto othreshold = threshold(m_temporal_ss, bi_level, 0, 255, THRESH_OTSU | THRESH_BINARY);
-        threshold(m_temporal_ss, bi_level, (rthreshold+othreshold)/2, 255, THRESH_BINARY);
+        threshold(m_temporal_ss, bi_level, othreshold, 255, THRESH_BINARY);
         
-        std::string msg = " Otsu Threshold  @ (" + to_string(othreshold) +  " RANSAC Threshold    " + to_string(rthreshold) + ")";
+        std::string msg = " Otsu Threshold  @ (" + to_string(othreshold) + ")";
         vlogger::instance().console()->info("starting " + msg);
         
         

@@ -9,6 +9,8 @@
 #pragma GCC diagnostic ignored "-Wmacro-redefined"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+
 #include "oiio_utils.hpp"
 
 

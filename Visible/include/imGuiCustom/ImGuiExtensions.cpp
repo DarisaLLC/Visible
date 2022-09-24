@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include "ImGuiExtensions.h"
-
+//#include "imgui_internal.h"
 using namespace ImGui;
 
 bool ImGui::InputInt64 (const char* label, int64_t* v, int64_t step, int64_t step_fast, ImGuiInputTextFlags flags)

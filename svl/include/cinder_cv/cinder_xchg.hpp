@@ -1,7 +1,7 @@
 #ifndef __CINDER_XCHG__
 #define __CINDER_XCHG__
 
-#include <boost/filesystem.hpp>
+//#include <boost/filesystem.hpp>
 #include <cinder/Channel.h>
 #include <cinder/Area.h>
 #include <cinder/Rect.h>
@@ -10,7 +10,7 @@
 #include "vision/roiVariant.hpp"
 #include "core/vector2d.hpp"
 #include <fstream>
-#include "cinder/ImageSourcePng.h"
+//#include "cinder/ImageSourcePng.h"
 #include "cinder/ip/Grayscale.h"
 
 
@@ -20,7 +20,7 @@ using namespace std;
 using namespace svl;
 namespace ip=ci::ip;
 
-namespace fs = boost::filesystem;
+//namespace bfs = boost::filesystem;
 
 namespace svl
 {
@@ -58,11 +58,11 @@ namespace svl
     template<typename P, class pixel_t = typename PixelType<P>::pixel_t>
     std::shared_ptr<ChannelT<pixel_t> >  newCiChannel (const roiWindow<P>& w);
     
-    std::pair<Surface8uRef, Channel8uRef> image_io_read_surface (const boost::filesystem::path & pp);
+    std::pair<Surface8uRef, Channel8uRef> image_io_read_surface (const std::string & pp_string);
     /*
      * Returns a channel if the color order indicates monochrome, then a channel is returned, otherwise a surface
      */
-    svl::roiVP8UC image_io_read_varoi (const boost::filesystem::path & pp, const std::string& = "red", uint32_t dst_channels = 1);
+   // svl::roiVP8UC image_io_read_varoi (const boost::filesystem::path & pp, const std::string& = "red", uint32_t dst_channels = 1);
     
     
     //! Converts Surface \a srcSurface to grayscale and stores the result in Surface \a dstSurface. Uses primary weights dictated by the Rec. 709 Video Standard

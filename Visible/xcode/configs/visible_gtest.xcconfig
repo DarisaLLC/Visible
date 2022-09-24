@@ -12,9 +12,9 @@
 #include "include/main_linker.xcconfig"
 #include "include/main_header_paths.xcconfig"
 
-LOCAL_GTEST = $(LOCAL_3rdParty)/gtest
+LOCAL_GTEST = $(HOMEBREW_CELLAR)/googletest/1.12.1/
 HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) $(LOCAL_GTEST)/include
 
-LIBRARY_SEARCH_PATHS = $(LIBRARY_SEARCH_PATHS) $(LOCAL_GTEST)/lib/$(CONFIGURATION)
+LIBRARY_SEARCH_PATHS = $(LIBRARY_SEARCH_PATHS) $(LOCAL_GTEST)/lib/
 
-OTHER_LDFLAGS = $(OTHER_LDFLAGS) $(LOCAL_GTEST)/lib/$(CONFIGURATION)/libgtest.a $(LOCAL_GTEST)/lib/$(CONFIGURATION)/libgtest_main.a 
+//OTHER_LDFLAGS = $(OTHER_LDFLAGS) $(LOCAL_GTEST)/lib/$(CONFIGURATION)/libgtest.a $(LOCAL_GTEST)/lib/$(CONFIGURATION)/libgtest_main.a 

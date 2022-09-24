@@ -195,7 +195,7 @@ void sm_producer::spImpl::asset_reader_done_cb ()
  */
 int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_producer::sizeMappingOption szmap, const std::vector<std::string>& supported_extensions)
 {
-    
+#ifdef CINDER_GHC_ISSUE_FIXED
     m_source_type = imageFileDirectory;
     
     paths_vector_t tmp_framePaths;
@@ -247,7 +247,7 @@ int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_pr
     {
         std::unique_lock<std::mutex> lock( m_mutex, std::try_to_lock );
         
-        auto ipair = svl::image_io_read_surface (pp);
+        auto ipair = svl::image_io_read_surface (pp.string());
         roiWindow<P8U> rw;
         if (ipair.first)
         {
@@ -325,6 +325,8 @@ int sm_producer::spImpl::loadImageDirectory( const std::string& imageDir,  sm_pr
     
     
     return (int) m_frameCount;
+#endif
+    return -1;
 }
 
 #if OIIO_INTEGRATED

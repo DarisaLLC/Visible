@@ -283,6 +283,7 @@ namespace stl_utils
         }
     };
 
+#if 0
     // Accumulate over std::tuple  https://stackoverflow.com/a/18562596
     //    int main(int /*argc*/, const char* /*argv*/[])
     //    {
@@ -359,7 +360,8 @@ namespace stl_utils
         }
     };
     
- 
+#endif
+
     /**************
      *  Map       *
      *            *

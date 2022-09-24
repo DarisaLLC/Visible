@@ -13,6 +13,7 @@
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 
 #include <OpenImageIO/imagebuf.h>
 
@@ -67,7 +68,7 @@
 #include "cvplot/cvplot.h"
 #include "time_series/persistence1d.hpp"
 #include "timed_types.h"
-#include "CinderImGui.h"
+#include "cinder/CinderImGui.h"
 #include "logger/logger.hpp"
 #include "vision/opencv_utils.hpp"
 #include "vision/gauss.hpp"
@@ -104,10 +105,13 @@ using namespace cgeom;
 #include "ut_units.hpp"
 #include "ut_cardio.hpp"
 //#include "ut_sm.hpp" @todo refactor
+#ifdef HAS_CIMG
 #define cimg_plugin1 "plugins/cvMat.h"
 #define cimg_display 0
 #include "CImg.h"
 using namespace cimg_library;
+#endif
+
 
 
 //#define INTERACTIVE
@@ -122,7 +126,7 @@ using namespace stl_utils;
 using namespace std;
 using namespace svl;
 
-namespace fs = boost::filesystem;
+namespace bfs = boost::filesystem;
 
 static const auto CVCOLOR_RED = cv::Vec3b(0, 0, 255);
 static const auto CVCOLOR_YELLOW = cv::Vec3b(0, 255, 255);
@@ -200,8 +204,8 @@ void output_array (const std::vector<std::vector<float>>& data, const std::strin
 
 cv::Mat generateVoxelSelfSimilarities (std::vector<std::vector<roiWindow<P8U>>>& voxels,
                                        std::vector<std::vector<float>>& ss);
-bool setup_text_loggers (const fs::path app_support_dir, std::string id_name);
-SurfaceRef get_surface(const std::string & path);
+bool setup_text_loggers (const bfs::path app_support_dir, std::string id_name);
+//SurfaceRef get_surface(const std::string & path);
 void norm_scale (const std::vector<double>& src, std::vector<double>& dst);
 
 std::shared_ptr<test_utils::genv> dgenv_ptr;
@@ -430,7 +434,7 @@ TEST (ut_period, basic){
 	EXPECT_TRUE(std::fabs( peakVal[n] - gold_val ) < 0.001);
 	
 	//std::cout << "[" << n << "]" << peakLoc[n] << " : " << peakVal[n] << std::endl;
-	
+//#ifdef FIXED
 	auto cvDrawPlot = [] (std::vector<float>& tmp){
 		
 		std::string name = svl::toString(std::clock());
@@ -442,18 +446,17 @@ TEST (ut_period, basic){
 	};
 	
 	cvDrawPlot(peaks);
-	
+//#endif
 	
 	
 }
 
+#ifdef CVMAT_COMMA_INITIALIZER_ISSUE_FIXED
 TEST (ut_integral, basic){
-	Mat M = (Mat_<uint8_t>(3,3) << 1, 0, 0, 0, 1, 0, 0, 0, 1);
-	Mat sum = M.clone();
-
+	Mat M = (Mat_<double>(3,3) << 1, 0, 0, 0, 1, 0, 0, 0, 1);
 	
 }
-
+#endif
 TEST (ut_dm, block){
     
     iPair dims (9,9);
@@ -670,6 +673,7 @@ TEST(syn, basic){
 
 		std::sort(ends.begin(), ends.end(), [](Point2f& a, Point2f&b){ return a.x < b.x; });
 		
+#ifdef INTERACTIVE
 		std::vector<cv::Rect> m_rects;
 		m_rects.resize(2);
 		iPair halfwidths;
@@ -700,13 +704,13 @@ TEST(syn, basic){
 			auto color = rr.x < boxDirect.center.x ? Scalar(0,255,0) : Scalar(255,0,0);
 			cv::rectangle(display, rr, color);
 		}
-		
-		
+	
 		
 		std::string title = name + " Peaks ";
 		SHOW(title, lm, 100);
 		title = name + " Ellipse Fit  ";
-		SHOW(title, display, 0);
+		SHOW(title, display, 100);
+#endif
 	};
 	
 	fit_ellipse(img2, " motion field 2" );
@@ -950,7 +954,7 @@ TEST(scale_space, basic){
 		auto image = output.mul(mask);
 		svl::momento mom(image, true);
 		Point2i cm (mom.com().x, mom.com().y);
-		SHOW(" Mask ", image, 0);
+		SHOW(" Mask ", image, 100);
 
 	
 	}
@@ -966,7 +970,7 @@ TEST(scale_space, basic){
     
     cvplot::figure(name).series(" L(t) ").addValue(dst);
     cvplot::figure(name).show();
-    cv::waitKey();
+    cv::waitKey(100);
     }
 }
 
@@ -1056,12 +1060,9 @@ TEST(oiio, inmemory){
                                    true /* COPY THE PIXELS! */);
     EXPECT_TRUE(ok);
     
-    std::shared_ptr<uint8_t> img1 = test_utils::create_trig(20,10);
-    std::shared_ptr<uint8_t> img2 = test_utils::create_trig(20,10);
-    cv::Mat mat1(10, 20, CV_8UC(1), img1.get(), 20);
-    cv::Mat mat2(10, 20, CV_8UC(1), img2.get(), 20);
-        
-    ImageBuf dst = ImageBufAlgo::from_OpenCV(mat1);
+    cv::Mat test (cv::Size(32,32), CV_8UC1);
+    
+    ImageBuf dst = ImageBufAlgo::from_OpenCV(test);
     EXPECT_TRUE(!dst.has_error());
     
 }
@@ -1300,7 +1301,7 @@ TEST(ut_labelBlob, mult_level)
 #if PRINT_OUT
         std::cout << "["<< tt << "]: " << blobs.size() << std::endl;
 #endif
-        
+#ifdef INTERACTIVE
         try{
             lbr->drawOutput();
             while(! s_graphics_ready){ std::this_thread::yield(); }
@@ -1313,6 +1314,7 @@ TEST(ut_labelBlob, mult_level)
         {
             std::cout <<  ex.what() << std::endl;
         }
+#endif
     }
 }
 
@@ -1644,12 +1646,12 @@ TEST (ut_algo_lif, segment){
     cv::Size iSize(image.cols,image.rows);
     cv::Size plusOne(iSize.width+1,iSize.height+1);
     
-    cv::Mat  sMat (plusOne, CV_32SC1);
-    cv::Mat  ssMat (plusOne, CV_64FC1);
+    cv::Mat  sMat (plusOne.height, plusOne.width, CV_32SC1);
+    cv::Mat  ssMat (plusOne.height, plusOne.width, CV_64FC1);
     cv::integral (image, sMat, ssMat);
     
     auto indexMat = [](cv::Size& dims){
-        cv::Mat indexmat (dims, CV_32FC1);
+        cv::Mat indexmat (dims.height, dims.width, CV_32FC1);
         auto generate = [](int start, std::vector<float>& vf){
             static float step = 1.0f;
             step = 1.0f;
@@ -1677,7 +1679,7 @@ TEST (ut_algo_lif, segment){
     sMat.convertTo(snorm, CV_32F);
     cv::log(snorm, slog);
     cv::log(test, tlog);
-    cv::Mat dlog(plusOne, CV_8U);
+    cv::Mat dlog(plusOne.height, plusOne.width, CV_8U);
     cv::subtract(slog, tlog, dlog, noArray(), CV_8U);
     cv::normalize(dlog, dlog,0.0,255.0, cv::NORM_MINMAX);
     cv::divide(snorm,test,test);
@@ -1943,7 +1945,8 @@ TEST (ut_fit_ellipse, local_maxima){
     EXPECT_TRUE(same_point(box0.center, ellipse_gold, 0.05));
     
     std::vector<Point2f> gold = {{5.5f,2.5f},{7.5f,2.5f},{9.5f,2.5f},{12.5f,4.5f},{13.5f,6.5f}};
-    Point2f center_gold (11.5,2.5);
+    Point2f center_gold (8.84, 5.36);
+    float angle_gold = 109.23;
     
     const char * frame[] =
     {
@@ -1958,24 +1961,25 @@ TEST (ut_fit_ellipse, local_maxima){
         "00000000000000000000",
         0};
     
-    roiWindow<P8U> pels(20, 5);
+    roiWindow<P8U> pels(20, 9);
     DrawShape(pels, frame);
     cv::Mat im (pels.height(), pels.width(), CV_8UC(1), pels.pelPointer(0,0), size_t(pels.rowUpdate()));
     
     std::vector<cv::Point> peaks;
     PeakDetect(im, peaks);
     EXPECT_EQ(peaks.size(),gold.size());
-    for (auto cc = 0; cc < peaks.size(); cc++)
-        EXPECT_TRUE(same_point(peaks[cc], gold[cc],0.05));
-    
+  
     std::vector<cv::Point2f> fpeaks;
     for (auto& peak : peaks){
         fpeaks.emplace_back(peak.x+0.5,peak.y+0.5);
     }
+
+    for (auto cc = 0; cc < fpeaks.size(); cc++)
+        EXPECT_TRUE(same_point(fpeaks[cc], gold[cc],0.05));
     
     RotatedRect box = fitEllipse(fpeaks);
     EXPECT_TRUE(same_point(box.center, center_gold, 0.05));
-    EXPECT_TRUE(svl::equal(box.angle, 60.85f, 1.0f));
+    EXPECT_TRUE(svl::equal(box.angle, angle_gold, 1.0f));
     
 }
 
@@ -1999,7 +2003,7 @@ cv::Mat show_cv_angle (const cv::Mat& src, const std::string& name){
     cv::Mat mag, ang;
     svl::sobel_opencv(src, mag, ang, 7);
     
-    SHOW(name.c_str(), ang, 0);
+    SHOW(name.c_str(), ang, 100);
     cv::waitKey();
 
     return ang;
@@ -2008,7 +2012,7 @@ cv::Mat show_cv_angle (const cv::Mat& src, const std::string& name){
 
 
 void show_gradient (const cv::Mat& src, const std::string& name){
-    cv::Mat disp3c(src.size(), CV_8UC3, Scalar(255,255,255));
+    cv::Mat disp3c(src.size().height, src.size().width, CV_8UC3, Scalar(255,255,255));
     
     roiWindow<P8U> r8(src.cols, src.rows);
     cpCvMatToRoiWindow8U (src, r8);
@@ -2034,11 +2038,12 @@ void show_gradient (const cv::Mat& src, const std::string& name){
         svl::drawCross(disp3c, pt,cv::Scalar(CVCOLOR_RED), 3, 1);
     }
     
-    SHOW(name.c_str(), disp3c, 0);
+    SHOW(name.c_str(), disp3c, 100);
     cv::waitKey();
     
 }
 
+#ifdef HAS_CIMG
 TEST (ut_opencvutils, difference){
     auto res = dgenv_ptr->asset_path("image230.png");
     EXPECT_TRUE(res.second);
@@ -2080,6 +2085,7 @@ TEST (ut_opencvutils, difference){
     
 }
 
+#endif
 
 
 TEST (ut_3d_per_element, standard_dev)
@@ -2261,7 +2267,7 @@ TEST(timing8, corr_ocv)
     int l;
     
     int num_loops = 10;
-    Mat space(cv::Size(1,1), CV_32F);
+    Mat space(1,1, CV_32F);
     // Time setting and resetting
     start = std::clock();
     for (l = 0; l < num_loops; ++l)
@@ -2390,6 +2396,7 @@ TEST(ut_labelBlob, basic)
     
 }
 
+#if 0
 TEST(ut_stl_utils, accOverTuple)
 {
     float val = tuple_accumulate(std::make_tuple(5, 3.2, 7U, 6.4f), 0L, functor());
@@ -2409,6 +2416,7 @@ TEST(ut_stl_utils, accOverTuple)
     
 }
 
+#endif
 
 TEST(basicU8, histo)
 {
@@ -2454,18 +2462,19 @@ TEST(ut_similarity, short_term)
     EXPECT_EQ(sm.aborted() , false);
     
     vector<roiWindow<P8U>> fill_images(3);
+
     
-    
-    
-    //     cv::Mat gaussianTemplate(const std::pair<uint32_t,uint32_t>& dims, const vec2& sigma = vec2(1.0, 1.0), const vec2& center = vec2(0.5,0.5));
     std::pair<uint32_t,uint32_t> dims (32,32);
     
     for (uint32_t i = 0; i < fill_images.size(); i++) {
         float sigma = 0.5 + i * 0.5;
+
         cv::Mat fgm = getGaussianKernel(dims.first, dims.second, sigma, sigma);
+        cv::normalize(fgm, fgm, 0, 1, cv::NORM_MINMAX);
         cv::Mat gm(fgm.rows, fgm.cols, CV_8U);
         fgm.convertTo(gm, CV_8U);
         cpCvMatToRoiWindow8U(gm,fill_images[i]);
+        SHOW(to_string(sigma), gm,100)
     }
     roiWindow<P8U> tmp (dims.first, dims.second);
     tmp.randomFill(1066);
@@ -2490,10 +2499,12 @@ TEST(ut_similarity, short_term)
      1.1948e-05
      
      */
+    auto entropy_switch = [](deque<double>& _ent) { for(auto& elem : _ent) elem = 1.0 - elem; };
     deque<double> ent;
     bool fRet = sm.fill(fill_images);
     EXPECT_EQ(fRet, true);
     bool eRet = sm.entropies(ent);
+    entropy_switch(ent);
     EXPECT_EQ(eRet, true);
     EXPECT_EQ(ent.size() , fill_images.size());
     EXPECT_EQ(std::distance(ent.begin(), std::max_element(ent.begin(), ent.end())), 2);
@@ -2505,6 +2516,7 @@ TEST(ut_similarity, short_term)
         
         bool eRet = sm.entropies(ent);
         EXPECT_EQ(eRet, true);
+        entropy_switch(ent);
         EXPECT_EQ(ent.size() , fill_images.size());
         EXPECT_EQ(svl::equal(ent[0], ent[1] , 1.e-3), true);
         EXPECT_EQ(std::distance(ent.begin(), std::max_element(ent.begin(), ent.end())), 2);
@@ -2517,6 +2529,7 @@ TEST(ut_similarity, short_term)
         
         bool eRet = sm.entropies(ent);
         EXPECT_EQ(eRet, true);
+        entropy_switch(ent);
         EXPECT_EQ(ent.size() , fill_images.size());
         EXPECT_EQ(svl::equal(ent[0], ent[2] , 1.e-3), true);
         EXPECT_EQ(std::distance(ent.begin(), std::max_element(ent.begin(), ent.end())), 1);
@@ -2528,6 +2541,7 @@ TEST(ut_similarity, short_term)
         
         bool eRet = sm.entropies(ent);
         EXPECT_EQ(eRet, true);
+        entropy_switch(ent);
         EXPECT_EQ(ent.size() , fill_images.size());
         EXPECT_EQ(svl::equal(ent[1], ent[2] , 1.e-3), true);
         EXPECT_EQ(std::distance(ent.begin(), std::max_element(ent.begin(), ent.end())), 0);
@@ -2539,6 +2553,7 @@ TEST(ut_similarity, short_term)
         
         bool eRet = sm.entropies(ent);
         EXPECT_EQ(eRet, true);
+        entropy_switch(ent);
         EXPECT_EQ(ent.size() , fill_images.size());
         EXPECT_EQ(std::distance(ent.begin(), std::max_element(ent.begin(), ent.end())), 2);
     }
@@ -2555,6 +2570,8 @@ TEST(ut_similarity, short_term)
 
 TEST(ut_similarity, long_term)
 {
+    auto entropy_switch = [](deque<double>& _ent) { for(auto& elem : _ent) elem = 1.0 - elem; };
+    
     vector<roiWindow<P8U>> images(4);
     
     self_similarity_producer<P8U> sm((uint32_t) images.size(),0);
@@ -2578,7 +2595,7 @@ TEST(ut_similarity, long_term)
     
     bool eRet = sm.entropies(ent);
     EXPECT_EQ(eRet, true);
-    
+    entropy_switch(ent);
     EXPECT_EQ(ent.size() , images.size());
     
     for (uint32_t i = 0; i < ent.size(); i++)
@@ -2598,7 +2615,7 @@ TEST(ut_similarity, long_term)
     
     eRet = sm.entropies(ent);
     EXPECT_EQ(eRet, true);
-    
+    entropy_switch(ent);
     EXPECT_EQ(ent.size() , images.size());
     EXPECT_EQ(fRet, true);
     
@@ -2668,7 +2685,7 @@ int main(int argc, char ** argv)
     
     static std::string id("VGtest");
     static std::string specifier ("--assets");
-    fs::path pp(argv[0]);
+    bfs::path pp(argv[0]);
     setup_loggers(pp.parent_path().string(), id);
     testing::InitGoogleTest(&argc, argv);
 
@@ -2735,9 +2752,9 @@ bool setup_loggers (const std::string& log_path,  std::string id_name){
 
 void output_array (const std::vector<std::vector<float>>& data, const std::string& output_file){
     std::string delim (",");
-    fs::path opath (output_file);
+    bfs::path opath (output_file);
     auto papa = opath.parent_path ();
-    if (fs::exists(papa))
+    if (bfs::exists(papa))
     {
         std::shared_ptr<std::ofstream> myfile = stl_utils::make_shared_ofstream(output_file);
         for (const vector<float>& row : data)
@@ -2755,6 +2772,7 @@ void output_array (const std::vector<std::vector<float>>& data, const std::strin
     }
 }
 
+#ifdef CINDER_GHC_ISSUE_FIXED
 SurfaceRef get_surface(const std::string & path){
     static std::map<std::string, SurfaceWeakRef> cache;
     static std::mutex m;
@@ -2769,6 +2787,7 @@ SurfaceRef get_surface(const std::string & path){
     return sp;
 }
 
+#endif
 
 void norm_scale (const std::vector<double>& src, std::vector<double>& dst)
 {

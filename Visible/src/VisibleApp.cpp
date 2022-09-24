@@ -8,12 +8,13 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 
 #include "VisibleApp.h"
 #include "oiio_utils.hpp"
 #include "imgui_panel.hpp"
 #include "imgui.h"
-
+#include "imGuiCustom/imfilebrowser.h"
 
 
 	//static ImGuiDockNodeFlags opt_flags = ImGuiDockNodeFlags_None;
@@ -40,7 +41,7 @@ void VisibleApp::DrawInputPanel() {
 	ImGui::ScopedWindow window( " Input ");
 	if(! isValid()) return;
 	
-	ImGui::BeginGroupPanel(" Input ", {0, 0});
+    ImGui::BeginGroupPanel(" Input ", {0,0});
 	
 	static bool first_time = true;
 	if (first_time) {
@@ -117,29 +118,15 @@ void VisibleApp::DrawMainMenu(){
 	
 	
 	ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
-		//    ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove
+    //ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
+    //float height = ImGui::GetFrameHeight();
+    
+//		    ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove
 	if (ImGui::BeginMainMenuBar()){
 		
 		if (ImGui::BeginMenu("File")){
 			if(ImGui::MenuItem("Open", "CTRL+O")){
-				nfdchar_t *outPath = NULL;
-				nfdresult_t result = NFD_OpenDialog("tif,mov,mp4", NULL, &outPath);
-				if (result == NFD_OKAY) {
-					bfs::path fout(outPath);
-					auto msg = "Selected " + fout.string();
-					vlogger::instance().console()->info(msg);
-					auto dotext = identify_file(fout, "");
-					if(isOiiOFile()){
-						vlogger::instance().console()->info(fout.string() + " Ok " );
-						m_sections.clear();
-						auto num = list_oiio_channels(m_sections);
-						assert(num == m_sections.size());
-					}
-					else{
-						vlogger::instance().console()->error("%s wrong file type", fout.string());
-					}
-					free(outPath);
-				}
+                m_fileDialog.Open();
 			}
 			if(ImGui::MenuItem("Process", "CTRL+P")){
 				if (mContext && mContext->is_valid()) mContext->process_async(); //std::dynamic_pointer_cast<lifContext>(mContext)->process_async();
@@ -149,6 +136,8 @@ void VisibleApp::DrawMainMenu(){
 				quit();
 			}
 			ImGui::EndMenu();
+        
+            
 		}
 		
 		if (ImGui::BeginMenu("Views")){
@@ -158,8 +147,27 @@ void VisibleApp::DrawMainMenu(){
 			ShowStyleEditor();
 			ImGui::EndMenu();
 		}
-	}
-	ImGui::EndMainMenuBar();
+        ImGui::EndMainMenuBar();
+    }
+    
+    m_fileDialog.Display();
+    if (m_fileDialog.HasSelected()) {
+        bfs::path fout(m_fileDialog.GetSelected().string());
+        auto msg = "Selected " + fout.string();
+        vlogger::instance().console()->info(msg);
+        auto dotext = identify_file(fout, "");
+        if(isOiiOFile()){
+            vlogger::instance().console()->info(fout.string() + " Ok " );
+            m_sections.clear();
+            auto num = list_oiio_channels(m_sections);
+            assert(num == m_sections.size());
+        }
+        else{
+            vlogger::instance().console()->error("%s wrong file type", fout.string());
+        }
+        m_fileDialog.ClearSelected();
+        m_fileDialog.Close();
+    }
 		//Draw the log if desired
 	if(show_logs_){
 		visual_log.Draw("Log", &show_logs_);
@@ -174,7 +182,7 @@ void VisibleApp::DrawMainMenu(){
 		ImGui::Text("This App is Built With OpenImageIO, OpenCv, Boost, Cinder and ImGui Libraries ");
 	}
 	DrawInputPanel();
-//	DrawImGuiDemos();
+	DrawImGuiDemos();
 }
 
 
@@ -209,7 +217,7 @@ void VisibleApp::DrawStatusBar(float width, float height, float pos_x,
 		// Call the derived class to add stuff to the status bar
 		// DrawInsideStatusBar(width - 45.0f, height);
 	
-		// ImGui::SameLine(ui::GetWindowWidth() - 60); ui::Text("%4.1f FPS", getAverageFps());
+		ImGui::SameLine(ImGui::GetWindowWidth() - 60); ImGui::Text("%4.1f FPS", getAverageFps());
 		// Draw the common stuff
 	ImGui::SameLine(width - 45.0f);
 		// Font = Font( "Menlo", 18 ); //font(Font::FAMILY_PROPORTIONAL);
@@ -256,10 +264,12 @@ void VisibleApp::setup_ui(){
 	
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.ConfigFlags |= ImGuiDockNodeFlags_PassthruCentralNode;
-		//    io.ConfigDockingWithShift = true;
+    io.ConfigDockingWithShift = true;
 	io.ConfigDockingTransparentPayload = true;
 	io.ConfigViewportsNoAutoMerge = true;
 	
+    m_fileDialog.SetTitle("File Browser");
+    m_fileDialog.SetTypeFilters({ ".tif", ".mp4", ".mov" });
 	
 }
 
@@ -270,10 +280,10 @@ return false;
 
 void VisibleApp::setup()
 {
-	setup_ui();
+    ImGui::Initialize(); //setup_ui();
 	
 	mRootOutputDir = VisibleAppControl::get_visible_app_support_directory();
-	mRunAppPath = ci::app::getAppPath();
+    mRunAppPath = bfs::path(ci::app::getAppPath().string());
 	const bfs::path plist = mRunAppPath / "Visible.app/Contents/Info.plist";
 	if (exists (mRunAppPath)){
 		std::ifstream stream(plist.c_str(), std::ios::binary);
@@ -289,11 +299,13 @@ void VisibleApp::setup()
 	
 	std::cout << getDisplay()->getWidth() << " , " << getDisplay()->getHeight() << std::endl;
 	
-	setWindowSize(getDisplay()->getWidth(), getDisplay()->getHeight());
-	setWindowPos(getWindowSize()/6);
+	setWindowSize(getWindowWidth(), getWindowHeight()); //getDisplay()->getWidth(), getDisplay()->getHeight());
+    setWindowPos(0, -getWindowWidth());
 	
 	WindowRef ww = getWindow ();
 	if( mVisibleScope ){
+        std::cout << mVisibleScope->getSize() << std::endl;
+        std::cout << getWindowBounds() << std::endl;
 		gl::draw( mVisibleScope, getWindowBounds() );
 	}
 	
@@ -507,18 +519,17 @@ void VisibleApp::draw ()
 
 void VisibleApp::resize ()
 {
-		//    ImGuiViewport*  imvp = GetMainViewport();
-		//    std::cout << imvp->Pos.x << "," << imvp->Pos.y << imvp->Size.x  << "," << imvp->Size.y << std::endl;
-		//    std::cout << getWindowSize().x << "," << getWindowSize().y << std::endl;
+		    ImGuiViewport*  imvp = GetMainViewport();
+		    std::cout << imvp->Pos.x << "," << imvp->Pos.y << imvp->Size.x  << "," << imvp->Size.y << std::endl;
+		    std::cout << getWindowSize().x << "," << getWindowSize().y << std::endl;
 	
 	assert(GImGui != nullptr && GImGui->CurrentWindow != nullptr);
 	ImGui::SetCurrentContext(GImGui);
 	
-	ImGuiIO& io    = ImGui::GetIO();
-	auto ws = getWindowSize();
-	io.DisplaySize    = ImVec2(ws.x, ws.y);
-	
-		//  mSize = vec2( getWindowWidth(), getWindowHeight() / 12);
+//	ImGuiIO& io    = ImGui::GetIO();
+//	auto ws = getWindowSize();
+//	io.DisplaySize    = ImVec2(ws.x, ws.y);
+
 	if (mContext && mContext->is_valid()) mContext->resize ();
 	
 }
@@ -526,15 +537,12 @@ void VisibleApp::resize ()
 
 void VisibleApp::prepareSettings( App::Settings *settings )
 {
-	const auto &args = settings->getCommandLineArgs();
-	if(args.size() > 1){
-		auto ok = VisibleAppControl::check_input(args[1]);
-		std::cout << "File is " << std::boolalpha << ok << std::endl;
-	}
+//	const auto &args = settings->getCommandLineArgs();
+//	if(args.size() > 1){
+//		auto ok = VisibleAppControl::check_input(args[1]);
+//		std::cout << "File is " << std::boolalpha << ok << std::endl;
+//	}
 	
-	settings->setHighDensityDisplayEnabled();
-		//        settings->setWindowSize(lifContext::startup_display_size().x, lifContext::startup_display_size().y);
-	settings->setResizable( true );
 }
 
 

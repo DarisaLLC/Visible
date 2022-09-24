@@ -64,13 +64,13 @@ bool denseMotion::allocate_buffers ()
     cv::Size iSize(m_isize.first,m_isize.second);
     cv::Size plusOne(m_isize.first+1,m_isize.second+1);
     
-    m_data[0][0] = cv::Mat(iSize,CV_8UC1);
-    m_data[0][1] = cv::Mat(plusOne, CV_32SC1);
-    m_data[0][2] = cv::Mat(plusOne, CV_64FC1);
+    m_data[0][0] = cv::Mat(iSize.height, iSize.width,CV_8UC1);
+    m_data[0][1] = cv::Mat(plusOne.height, plusOne.width, CV_32SC1);
+    m_data[0][2] = cv::Mat(plusOne.height, plusOne.width, CV_64FC1);
     
-    m_data[1][0] = cv::Mat(iSize,CV_8UC1);
-    m_data[1][1] = cv::Mat(plusOne, CV_32SC1);
-    m_data[1][2] = cv::Mat(plusOne, CV_64FC1);
+    m_data[1][0] = cv::Mat(iSize.height, iSize.width,CV_8UC1);
+    m_data[1][1] = cv::Mat(plusOne.height, plusOne.width, CV_32SC1);
+    m_data[1][2] = cv::Mat(plusOne.height, plusOne.width, CV_64FC1);
     
     m_links[0].m_i = cvMatRef(&m_data[0][0], stl_utils::null_deleter());
     m_links[0].m_s = cvMatRef(&m_data[0][1], stl_utils::null_deleter());

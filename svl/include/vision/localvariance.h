@@ -46,6 +46,7 @@ namespace svl
         mutable cv::Mat m_mask; // Original image
         mutable float m_minVar, m_maxVar;
         mutable cv::Size m_isize;
+        mutable cv::Size m_expanded;
 
     private:
         bool internal_process (const cv::Mat& image, cv::Mat& results ) const;

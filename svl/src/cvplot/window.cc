@@ -217,7 +217,7 @@ Window &Window::resize(Rect rect) {
 }
 
 Window &Window::size(Size size) {
-  auto &buffer = *(new cv::Mat(cv::Size(size.width, size.height), CV_8UC3,
+  auto &buffer = *(new cv::Mat(size.height, size.width, CV_8UC3,
                                color2scalar(Gray)));
   if (buffer_ != NULL) {
     auto &current = *(cv::Mat *)buffer_;

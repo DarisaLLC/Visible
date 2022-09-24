@@ -18,7 +18,7 @@ using boost::apply_visitor;
 namespace svl
 {
     
-    typedef variant<roiWindow_P8U_t,roiWindow_P8UC3_t,roiWindow_P8UC4_t> roiVP8UC;
+    typedef boost::variant<roiWindow_P8U_t,roiWindow_P8UC3_t,roiWindow_P8UC4_t> roiVP8UC;
     
     template<typename P> static uint32_t vroIndex ();
 #if defined(USED)

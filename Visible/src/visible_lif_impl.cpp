@@ -13,8 +13,12 @@
 #pragma GCC diagnostic ignored "-Wcomma"
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 
+#define float16_t opencv_broken_float16_t
 #include "opencv2/stitching.hpp"
+#undef float16_t
+
 #include <strstream>
 #include <algorithm>
 #include <future>
@@ -41,18 +45,20 @@
 #include "contraction.hpp"
 #include "logger/logger.hpp"
 #include "cinder/Log.h"
-#include "CinderImGui.h"
+#include "cinder/CinderImGui.h"
 #include "ImGuiExtensions.h" // for 64bit count support
 #include "Resources.h"
 #include "cinder_opencv.h"
-#include "imguivariouscontrols.h"
+
 #include <boost/range/irange.hpp>
 #include "core/stl_utils.hpp"
 #include "imgui_visible_widgets.hpp"
 #include "nfd.h"
-#include "imGui_utils.h"
+#include "imGuiCustom/imGui_utils.h"
 #include "imgui_panel.hpp"
 #include "implot.h"
+#include "imgui_internal.h"
+#include "imguivariouscontrols.h"
 using namespace ci;
 using namespace ci::app;
 using namespace std;
@@ -61,6 +67,7 @@ using namespace boost;
 namespace bfs=boost::filesystem;
 namespace ui=ImGui;
 
+// @todo replace  nfd with imfilebrowser
 
 // #define SHORTTERM_ON
 

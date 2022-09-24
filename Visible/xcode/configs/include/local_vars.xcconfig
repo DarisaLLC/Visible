@@ -14,25 +14,29 @@ ALL_ROOT = $(PROJECT_DIR)/../..
 SVL_ROOT = $(PROJECT_DIR)/../../svl
 EXTERNALS = $(PROJECT_DIR)/../../externals
 VISIBLE_ROOT = $(PROJECT_DIR)/../../Visible
-LOCAL = /usr/local/opt
+
+HOMEBREW_PREFIX = /opt/homebrew
+HOMEBREW_CELLAR = /opt/homebrew/Cellar
+LOCAL = $(HOMEBREW_PREFIX)/opt
 
 TEST_DATA = $(SVL_ROOT)/Assets
 TEST_VISIBLE_DATA = $(VISIBLE_ROOT)/test/assets
 
-LOCAL_CINDER = $(EXTERNALS)/cinder
+LOCAL_CINDER =$(EXTERNALS)/cinder
 LOCAL_OCV = $(LOCAL)/opencv
-LOCAL_GSL = /usr/local/
+LOCAL_GSL = $(LOCAL)/gsl
 LOCAL_SPDLOG = $(LOCAL)/spdlog
 LOCAL_FMT = $(LOCAL)/fmt
-LOCAL_CIIMGUI = $(VISIBLE_ROOT)/local_cinder_imgui
+LOCAL_CIIMGUI = $(LOCAL_CINDER)
 
-LOCAL_OIIO =  $(EXTERNALS)/oiio-dist
+LOCAL_OIIO =  $(LOCAL)/openimageio
 LOCAL_FFMPEG = $(LOCAL)/ffmpeg
 
 LOCAL_3rdParty = $(SVL_ROOT)/local
-LOCAL_BOOST = /usr/local
+LOCAL_BOOST = $(LOCAL)/boost
 LOCAL_PNG = $(LOCAL_3rdParty)/png/
 LOCAL_EIGEN = $(LOCAL_3rdParty)/Eigen
 LOCAL_CEREAL = $(LOCAL_3rdParty)/cereal-1.1.1/include
 LOCAL_TINYXML = $(LOCAL_3rdParty)/tinyxml
+//LOCAL_GHC = $(EXTERNALS)/filesystem/include
 

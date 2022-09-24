@@ -11,8 +11,11 @@
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 
+#define float16_t opencv_broken_float16_t
 #include "opencv2/stitching.hpp"
+#undef float16_t
 
 #include <stdio.h>
 #include <iostream>

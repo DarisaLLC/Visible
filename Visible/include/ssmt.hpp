@@ -20,7 +20,9 @@
 #include "core/signaler.h"
 #include "sm_producer.h"
 #include "cinder_xchg.hpp"
+#define float16_t opencv_broken_float16_t
 #include "vision/histo.h"
+#undef float16_t
 #include "vision/labelBlob.hpp"
 #include "vision/opencv_utils.hpp"
 #include "opencv2/video/tracking.hpp"

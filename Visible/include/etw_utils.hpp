@@ -19,12 +19,12 @@
 #include <unordered_map>
 #include "core/core.hpp"
 
-#include <omp.h>
+//#include <omp.h>
 
 #include <boost/filesystem.hpp>
 
 
-namespace fs = boost::filesystem;
+namespace bfs = boost::filesystem;
 
 //using namespace fmt::literals;
 
@@ -276,11 +276,11 @@ namespace etw_utils {
         return ave_and_stdev(i.begin(), i.end(), 0.0);
     }
     
-    fs::directory_iterator folder_to_iterator(const fs::path &p);
-    void parse_folder(const std::string &name, std::vector<fs::path> &out);
-    void parse_folder(const fs::path &p, std::vector<fs::path> &out);
+    bfs::directory_iterator folder_to_iterator(const bfs::path &p);
+    void parse_folder(const std::string &name, std::vector<bfs::path> &out);
+    void parse_folder(const bfs::path &p, std::vector<bfs::path> &out);
     template <class UrnaryPredicate>
-    void parse_folder(const fs::path &p, std::vector<fs::path> &out,
+    void parse_folder(const bfs::path &p, std::vector<bfs::path> &out,
                       UrnaryPredicate filter) {
         for (auto &file : folder_to_iterator(p)) {
             if (filter(file))
@@ -289,23 +289,23 @@ namespace etw_utils {
         std::sort(out);
     }
     template <class UrnaryPredicate>
-    void parse_folder(const std::string &name, std::vector<fs::path> &out,
+    void parse_folder(const std::string &name, std::vector<bfs::path> &out,
                       UrnaryPredicate filter) {
-        parse_folder(fs::path(name), out, filter);
+        parse_folder(bfs::path(name), out, filter);
     }
     
-    std::vector<fs::path> parse_folder(const std::string &name);
-    std::vector<fs::path> parse_folder(const fs::path &p);
+    std::vector<bfs::path> parse_folder(const std::string &name);
+    std::vector<bfs::path> parse_folder(const bfs::path &p);
     template <class UrnaryPredicate>
-    std::vector<fs::path> parse_folder(const fs::path &p, UrnaryPredicate filter) {
-        std::vector<fs::path> out;
+    std::vector<bfs::path> parse_folder(const bfs::path &p, UrnaryPredicate filter) {
+        std::vector<bfs::path> out;
         parse_folder(p, out, filter);
         return out;
     }
     template <class UrnaryPredicate>
-    std::vector<fs::path> parse_folder(const std::string &name,
+    std::vector<bfs::path> parse_folder(const std::string &name,
                                        UrnaryPredicate filter) {
-        return parse_folder(fs::path(name), filter);
+        return parse_folder(bfs::path(name), filter);
     }
     
     double sigmoidWeight(double seen, double expected);
@@ -405,9 +405,9 @@ namespace etw_utils {
         void display_tic();
     };
     
-    inline std::ifstream open(const fs::path &n,
+    inline std::ifstream open(const bfs::path &n,
                               std::ios_base::openmode mode = std::ios_base::in) {
-        assert(fs::exists(n));// << "Could not open: " << n;
+        assert(bfs::exists(n));// << "Could not open: " << n;
         return std::ifstream(n.string(), mode);
     }
 } // etw_utils

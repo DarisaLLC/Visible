@@ -11,6 +11,7 @@
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 
 #include <stdio.h>
 #include <iostream>
@@ -23,8 +24,10 @@
 #include "core/signaler.h"
 #include "sm_producer.h"
 #include "cinder_cv/cinder_xchg.hpp"
+#define float16_t opencv_broken_float16_t
 #include "cinder_cv/cinder_opencv.h"
 #include "vision/histo.h"
+#undef float16_t
 #include "vision/opencv_utils.hpp"
 #include "ssmt.hpp"
 #include "logger/logger.hpp"

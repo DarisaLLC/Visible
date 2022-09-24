@@ -8,8 +8,7 @@
 #include "core/pair.hpp"
 #include "logger/logger.hpp"
 #include "sm_producer.h"
-#include "vision/histo.h"
-#include "vision/opencv_utils.hpp"
+//#include "vision/opencv_utils.hpp"
 #include "cinder_xchg.hpp"  // For Rectf @todo remove dependency on cinder
 #include <future>
 #include <memory>
@@ -29,7 +28,7 @@ bool lengthFromMotion::generate(const std::vector<roiWindow<P8U>> &images, float
     std::vector<cv::Mat> mats;
     for (auto& rw : images){
         cvMatRefroiP8U(rw,cvmat,CV_8U);
-        mats.push_back(cvmat.clone());
+        mats.push_back(cvmat);
     }
     return generate(mats, start_sigma, end_sigma, step, magX);
 }
@@ -44,11 +43,12 @@ const cv::Mat& lengthFromMotion::motion_field() const {
     // Calculate Difference of Gaussians
     m_dogs.resize(0);
     for (auto ss = 1; ss < m_scale_space.size() - 1; ss++){
-        const cv::Mat& current = m_scale_space[ss];
-        const cv::Mat& prev = m_scale_space[ss-1];
+      //  const cv::Mat& current = m_scale_space[ss];
+      //  const cv::Mat& prev = m_scale_space[ss-1];
         cv::Mat dog = cv::Mat(space()[0].rows, space()[0].cols, CV_64F);
         cv::Mat dog_8 = cv::Mat(space()[0].rows, space()[0].cols, CV_8U);
-        dog = current - prev;
+//        dog = current - prev;
+        dog = m_scale_space[ss] - m_scale_space[ss-1];
         cv::normalize(dog,dog_8,0,255, NORM_MINMAX, CV_8U);
         cv::min(dog_8, m_motion_field, m_motion_field);
         m_dogs.push_back(dog_8);
@@ -336,7 +336,7 @@ bool  voxel_processor::generate_voxel_surface (const std::vector<float>& ven){
     
         // Straight resize. Add pads afterwards
     cv::Size bot(ftmp.cols * m_voxel_sample.first,ftmp.rows * m_voxel_sample.second);
-    cv::Mat f_temporal (bot, CV_32F);
+    cv::Mat f_temporal (bot.height, bot.width, CV_32F);
     cv::resize(ftmp, f_temporal, bot, 0, 0, INTER_NEAREST);
     ftmp = getPadded(f_temporal, m_half_offset, 0.0);
     ftmp = ftmp * 255.0f;

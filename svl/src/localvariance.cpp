@@ -62,11 +62,12 @@ namespace svl
         if (! use_cached_images (_image))
         {
                 // Allocate intergral image: 1 bigger in each dimension
-            m_ss = cv::Mat(cv::Size(_image.size().width + 1, _image.size().height + 1), CV_64FC1);
-            m_s = cv::Mat(cv::Size(_image.size().width + 1, _image.size().height + 1), CV_32SC1);
-            m_var = cv::Mat(cv::Size(_image.size().width + 1, _image.size().height + 1), CV_32FC1);
-            m_single = cv::Mat(_image.size(),CV_8UC1);
             m_isize = _image.size ();
+            m_expanded = m_isize + cv::Size(1,1);
+            m_ss = cv::Mat(m_expanded.height, m_expanded.width, CV_64FC1);
+            m_s = cv::Mat(m_expanded.height, m_expanded.width, CV_32SC1);
+            m_var = cv::Mat(m_expanded.height, m_expanded.width, CV_32FC1);
+            m_single = cv::Mat(m_isize.height, m_isize.width,CV_8UC1);
         }
         reset ();
 
@@ -78,9 +79,9 @@ namespace svl
         // Allocate intergral image: 1 bigger in each dimension
         m_ss = sumsq_buffer;
         m_s = sum_buffer;
-        m_var = cv::Mat(cv::Size(_image.size().width + 1, _image.size().height + 1), CV_32FC1);
+        m_var = cv::Mat(m_expanded.height, m_expanded.width, CV_32FC1);
         m_var.setTo(0.0f);
-        m_single = cv::Mat(_image.size(),CV_8UC1);
+        m_single = cv::Mat(m_isize.height, m_isize.width,CV_8UC1);
         m_isize = _image.size ();
         return internal_process(_image, results);
         

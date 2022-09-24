@@ -8,6 +8,6 @@
 // Configuration settings file format documentation can be found at:
 // https://help.apple.com/xcode/#/dev745c5c974
 
-LIBRARY_SEARCH_PATHS = $(LOCAL_CINDER)/lib/macosx/$(CONFIGURATION) $(LOCAL_BOOST)/lib $(PROJECT_DIR) $(LOCAL_OCV)/lib/opencv4/3rdparty $(LOCAL_OCV)/lib /usr/local/opt/libffi/lib $(LOCAL_OIIO)/lib  /usr/local/lib $(LOCAL_FFMPEG)/lib
+LIBRARY_SEARCH_PATHS = $(HOMEBREW_PREFIX)/lib $(LOCAL_CINDER)/lib/macosx/Debug $(LOCAL)/openimageio/lib $(LOCAL)/opencv/lib $(LOCAL)/boost/lib $(LOCAL)/gsl/lib
 
-OTHER_LDFLAGS = $(LOCAL_CINDER)/lib/macosx/Release/libcinder.a $(LOCAL_BOOST)/lib/libboost_system-mt.a $(LOCAL_BOOST)/lib/libboost_filesystem.a $(LOCAL_BOOST)/lib/libboost_thread-mt.a  $(LOCAL_BOOST)/lib/libboost_date_time-mt.a $(LOCAL_BOOST)/lib/libboost_regex-mt.a  $(LOCAL_OCV)/lib/libopencv_core.a  $(LOCAL_OCV)/lib/libopencv_imgproc.a $(LOCAL_OCV)/lib/libopencv_highgui.a $(LOCAL_OCV)/lib/libopencv_features2d.a  $(LOCAL_OCV)/lib/libopencv_objdetect.a  $(LOCAL_OCV)/lib/libippiw.a $(LOCAL_OCV)/lib/libippicv.a /usr/local/lib/libopenjp2.a $(LOCAL_GSL)/lib/libgsl.a  $(LOCAL_GSL)/lib/libgslcblas.a  /usr/local/lib/libjpeg.a /usr/local/lib/libtbb.a /usr/local/lib/libpng.a /usr/local/lib/libtiff.a  $(LOCAL_OIIO)/lib/libOpenImageIO.a $(LOCAL_OIIO)/lib/libOpenImageIO_Util.a  $(LOCAL_OCV)/lib/libopencv_imgcodecs.a /usr/local/lib/libwebp.a
+OTHER_LDFLAGS = $(LOCAL_CINDER)/lib/macosx/Debug/libcinder.a $(LOCAL)/boost/lib/libboost_filesystem.a $(LOCAL)/gsl/lib/libgsl.a

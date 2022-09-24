@@ -15,7 +15,11 @@
 #include <OpenImageIO/imagecache.h>
 #include <OpenImageIO/imageio.h>
 
+#define float16_t opencv_broken_float16_t
 #include "cinder_cv/cinder_opencv.h"
+#undef float16_t
+
+
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
@@ -42,13 +46,16 @@
 #include "LifContext.h"
 #include "imGuiLogger.hpp"
 #include "visible_logger_macro.h"
-#include "imGuiCustom/imgui_wrapper.h"
+#include "imgui_wrapper.h"
 #include "Resources.h"
-#include "nfd.h"
+#include "imGuiCustom/imfilebrowser.h"
 #include "implot.h"
 
-#define APP_WIDTH 1536
-#define APP_HEIGHT 896
+//#define APP_WIDTH 1536
+//#define APP_HEIGHT 896
+
+using namespace boost;
+namespace bfs=boost::filesystem;
 
 using namespace ci;
 using namespace ci::app;
@@ -82,7 +89,7 @@ public:
     
     virtual void QuitApp();
     
-    void prepareSettings( Settings *settings );
+    static void prepareSettings( Settings *settings );
     void setup()override;
     void mouseMove( MouseEvent event ) override;
     void mouseDrag( MouseEvent event ) override;
@@ -112,7 +119,7 @@ public:
     void launchViewer ();
     
 private:
-    
+    ImGui::FileBrowser m_fileDialog;
     std::shared_ptr<ImageBuf> mInput;
     ImageCache* mCachePtr = nullptr;
     ImageSpec mInputSpec;

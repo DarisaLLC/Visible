@@ -1,6 +1,6 @@
 
 
-#include <boost/filesystem.hpp>
+//#include <boost/filesystem.hpp>
 #include <cinder/Channel.h>
 #include <cinder/Area.h>
 #include <limits>
@@ -11,7 +11,7 @@
 #include <fstream>
 #include "core/singleton.hpp"
 #include "cinder_cv/cinder_xchg.hpp"
-#include "cinder/ImageSourceFileQuartz.h"
+//#include "cinder/ImageSourceFileQuartz.h"
 
 
 
@@ -25,7 +25,7 @@ namespace anonymous
         cinder_startup ()
         {
             //  ci::ImageSourcePng::registerSelf();
-            ci::ImageSourceFileQuartz::registerSelf();
+            //ci::ImageSourceFileQuartz::registerSelf();
         }
     };
 }
@@ -84,13 +84,15 @@ namespace svl
     
 
     
-    std::pair<Surface8uRef, Channel8uRef> image_io_read_surface (const boost::filesystem::path & pp)
+    std::pair<Surface8uRef, Channel8uRef> image_io_read_surface (const std::string & pp_string)
     {
-        anonymous::cinder_startup::instance();
-        const std::string extension = pp.extension().string();
-        ImageSource::Options opt;
-        auto ir = loadImage (ci::fs::path(pp.string()), opt, extension );
+//        anonymous::cinder_startup::instance();
+       // const std::string extension = pp.extension().string();
         std::pair<Surface8uRef, Channel8uRef> wp;
+#ifdef CINDER_GHC_ISSUE_FIXED
+        ImageSource::Options opt;
+        auto ir = loadImage (pp_string); //, opt, extension );
+
         
         
         if ( (ir->getDataType() != PixelType<P8U>::ct() || ir->getColorModel() != PixelType<P8U>::cm()) &&
@@ -112,6 +114,7 @@ namespace svl
             default:
             assert(false);
         }
+#endif
         
         return wp;
         
